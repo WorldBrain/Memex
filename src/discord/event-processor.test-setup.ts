@@ -2,7 +2,7 @@ import flatten from 'lodash/flatten'
 import expect from 'expect'
 import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
 import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/channel-manager'
-import { createLazyMemoryServerStorage } from 'src/storage/server'
+import { createMemoryServerStorage } from 'src/storage/server'
 import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
 import { extractListShareUrlParts } from 'src/content-sharing/utils'
 
@@ -22,8 +22,7 @@ export async function setupDiscordTestContext(options: {
     let defaultChannelId: string
     let defaultChannelName: string
 
-    const getServerStorage = createLazyMemoryServerStorage()
-    const serverStorage = await getServerStorage()
+    const serverStorage = await createMemoryServerStorage()
 
     const eventProcessor = createDiscordEventProcessor({
         storage: serverStorage,

@@ -37,7 +37,8 @@ import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtu
 import type { Storage, Runtime } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -70,7 +71,7 @@ export interface SidebarContainerDependencies {
     pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
     subscription: SubscriptionsService
-    theme?: MemexTheme & Partial<SidebarTheme>
+    theme: MemexTheme & Partial<SidebarTheme>
 
     getCurrentUser: () => UserReference | null
     // search: SearchInterface
@@ -101,12 +102,14 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     cacheLoadState: TaskState
     noteCreateState: TaskState
     pageLinkCreateState: TaskState
+    firstTimeSharingPageLink: boolean
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
     foreignSelectedListLoadState: TaskState
     selectedTextAIPreview: string
     queryMode: string
-
+    isTrial: boolean
+    signupDate: number
     showState: 'visible' | 'hidden'
     isLocked: boolean
     isWidthLocked: boolean
@@ -116,6 +119,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     activeTab: SidebarTab
     pillVisibility: string
+    renameListErrorMessage: string | null
 
     sidebarWidth?: string
     spaceTitleEditValue?: string
@@ -141,6 +145,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     pageSummary: string
     prompt: string
 
+    /** TODO: Properly set up logic to use this state instead of querying for user each time. */
+    currentUserReference: UserReference | null
     users: {
         [userId: string]: {
             name: string
@@ -178,6 +184,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     annotCount?: number
     showLengthError?: boolean
+    youtubeTranscriptSummary?: string
+    youtubeTranscriptSummaryloadState: TaskState
 
     // Search result props
     shouldShowCount: boolean
@@ -199,12 +207,15 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     immediatelyShareNotes: boolean
     pageHasNetworkAnnotations: boolean
     hasFeedActivity?: boolean
+    showSharePageTooltip: boolean
+    selectedListForShareMenu: UnifiedList['unifiedId'] | null
     /**
      * In the case of a page being opened from the web UI for a page link, data
      * may need to be manually pulled as sync might not have finished by the time the
      * sidebar loads. This state signifies that condition.
      */
     hasListDataBeenManuallyPulled?: boolean
+    annotationCreateEditorRef?: any
 }
 
 export type AnnotationEvent<T> = {
@@ -228,6 +239,13 @@ interface SidebarEvents {
     removeAISuggestion: { suggestion: string }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
+    setSharingTutorialVisibility: null
+    getAnnotationEditorIntoState: { ref: any }
+    createYoutubeTimestampWithAISummary: {
+        timeStampANDSummaryJSON: string[]
+    }
+
+    createNewNoteFromAISummary: { comment: string }
 
     setActiveSidebarTab: {
         tab: SidebarTab
@@ -322,9 +340,19 @@ interface SidebarEvents {
     }
 
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
-    editListName: { unifiedListId: UnifiedList['unifiedId']; newName: string }
+    openPageListMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
+    editListName: {
+        unifiedListId: UnifiedList['unifiedId']
+        localId: number
+        newName: string
+        oldName: string
+    }
     deleteList: { unifiedListId: UnifiedList['unifiedId'] }
-    shareList: { unifiedListId: UnifiedList['unifiedId']; remoteListId: string }
+    shareList: {
+        unifiedListId: UnifiedList['unifiedId']
+        remoteListId: AutoPk
+        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
+    }
 
     goToAnnotationInNewTab: {
         unifiedAnnotationId: UnifiedAnnotation['unifiedId']
@@ -360,7 +388,7 @@ interface SidebarEvents {
     setAllNotesCopyPasterShown: { shown: boolean }
     setAllNotesShareMenuShown: { shown: boolean }
 
-    createPageLink: null
+    createPageLink: { forceCreate?: boolean }
 }
 
 export type SidebarContainerEvents = UIEvent<

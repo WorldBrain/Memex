@@ -6,6 +6,7 @@ import {
     FREE_PLAN_LIMIT,
     AI_SUMMARY_URLS,
 } from './constants'
+import { trackHitPaywall } from '@worldbrain/memex-common/lib/analytics/events'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -87,20 +88,25 @@ export async function upgradePlan(pageLimit, AILimit) {
     return
 }
 
-async function enforceTrialPeriod30Days() {
-    const installTimeData = await browser.storage.local.get(
-        'localSettings.installTimestamp',
-    )
-    const installTimestamp = installTimeData['localSettings.installTimestamp']
+export async function enforceTrialPeriod30Days(signupDate) {
+    let installTime
 
-    if (!installTimestamp) {
-        console.error('Install timestamp not found!')
-        return
+    if (signupDate) {
+        installTime = signupDate
+    } else {
+        const installTimeData = await browser.storage.local.get(
+            'localSettings.installTimestamp',
+        )
+        const installTime = installTimeData['localSettings.installTimestamp']
+
+        if (!installTime) {
+            console.error('Install timestamp not found!')
+            return
+        }
     }
-
     const currentTime = new Date().getTime()
-    const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000 // 30 days in milliseconds
-    if (currentTime - installTimestamp < thirtyDaysInMillis) {
+    const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000 * 1000 // 30 days in seconds
+    if (currentTime - installTime < thirtyDaysInMillis) {
         return true // Return the function if the install time is less than 30 days ago
     } else {
         return false // Return the function if the install time is more than 30 days ago
@@ -108,12 +114,6 @@ async function enforceTrialPeriod30Days() {
 }
 
 export async function updatePageCounter() {
-    const isTrial = await enforceTrialPeriod30Days()
-
-    if (isTrial) {
-        return
-    }
-
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
 
     if (currentCount[COUNTER_STORAGE_KEY] === undefined) {
@@ -136,12 +136,6 @@ export async function updatePageCounter() {
     return
 }
 export async function updateAICounter() {
-    const isTrial = await enforceTrialPeriod30Days()
-
-    if (isTrial) {
-        return
-    }
-
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
 
     if (
@@ -168,19 +162,8 @@ export async function updateAICounter() {
 }
 
 export async function checkStatus() {
-    const isTrial = await enforceTrialPeriod30Days()
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
-
-    if (isTrial) {
-        return {
-            pageLimit: 20000,
-            AIlimit: 20000,
-            pageCounter: 0,
-            AIcounter: 0,
-            m: currentMonth,
-        }
-    }
 
     const currentStatus = await browser.storage.local.get(COUNTER_STORAGE_KEY)
 
@@ -233,7 +216,7 @@ export async function checkStatus() {
     }
 }
 
-export async function pageActionAllowed() {
+export async function pageActionAllowed(analyticsBG) {
     const isStaging =
         process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
         process.env.NODE_ENV === 'development'
@@ -245,11 +228,21 @@ export async function pageActionAllowed() {
     if (status.pageLimit > 10000 || status.pageLimit > status.pageCounter) {
         return true
     } else {
+        if (analyticsBG) {
+            try {
+                trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+            } catch (error) {
+                console.error(
+                    `Error tracking space Entry create event', ${error}`,
+                )
+            }
+        }
+
         window.open(urlToOpen, '_blank')
         return false
     }
 }
-export async function AIActionAllowed() {
+export async function AIActionAllowed(analyticsBG) {
     const isStaging =
         process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
         process.env.NODE_ENV === 'development'
@@ -258,9 +251,21 @@ export async function AIActionAllowed() {
         : 'https://memex.garden/upgradeNotification'
 
     const status = await checkStatus()
-    if (status.AIlimit > 10000 || status.AIlimit > status.AIcounter) {
+
+    if (status.AIlimit > 10000) {
+        return true
+    } else if (status.AIlimit > status.AIcounter) {
         return true
     } else {
+        if (analyticsBG) {
+            try {
+                trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+            } catch (error) {
+                console.error(
+                    `Error tracking space Entry create event', ${error}`,
+                )
+            }
+        }
         window.open(urlToOpen, '_blank')
         return false
     }

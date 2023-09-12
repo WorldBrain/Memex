@@ -37,10 +37,16 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { UnifiedList } from 'src/annotations/cache/types'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
     isExpanded: boolean
+    theme: MemexThemeVariant
     isRibbonEnabled: boolean
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     shortcutsData: ShortcutElData[]
@@ -62,6 +68,9 @@ export interface Props extends RibbonSubcomponentProps {
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
     analyticsBG: AnalyticsCoreInterface
+    isTrial: boolean
+    signupDate?: number
+    toggleTheme: () => void
 }
 
 interface State {
@@ -267,7 +276,13 @@ export default class Ribbon extends Component<Props, State> {
                     topRight ||
                     (bottomRight && !this.props.sidebar.isSidebarOpen)
                         ? 10
-                        : 10
+                        : 40
+                }
+                offsetY={
+                    topRight ||
+                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                        ? 0
+                        : 0
                 }
                 closeComponent={this.hideListPicker}
             >
@@ -286,6 +301,9 @@ export default class Ribbon extends Component<Props, State> {
                     }
                     closePicker={this.hideListPicker}
                     onListShare={this.props.onListShare}
+                    onListFocus={(listId: UnifiedList['localId']) => {
+                        this.props.sidebar.handleSidebarOpenInFocusMode(listId)
+                    }}
                 />
             </PopoutBox>
         )
@@ -677,7 +695,9 @@ export default class Ribbon extends Component<Props, State> {
                     <TitleContainer>
                         <Icon heightAndWidth="22px" filePath="feed" hoverOff />
                         <TitleContent>
-                            <SectionTitle>Notifications</SectionTitle>
+                            <NotificationsTitle>
+                                Notifications
+                            </NotificationsTitle>
                             <SectionDescription>
                                 Updates from Spaces and conversation you follow
                                 or contributed to.
@@ -1084,7 +1104,7 @@ export default class Ribbon extends Component<Props, State> {
                                 'Save'
                             )
                         }
-                        fontColor={'greyScale7'}
+                        fontColor={'greyScale8'}
                         onClick={() => this.props.bookmark.toggleBookmark()}
                         icon={
                             this.props.bookmark.isBookmarked
@@ -1148,7 +1168,7 @@ export default class Ribbon extends Component<Props, State> {
                             size={'medium'}
                             type="tertiary"
                             label={'Spaces'}
-                            fontColor={'greyScale7'}
+                            fontColor={'greyScale8'}
                             onClick={() =>
                                 this.props.lists.setShowListsPicker(
                                     !this.props.lists.showListsPicker,
@@ -1216,7 +1236,7 @@ export default class Ribbon extends Component<Props, State> {
                             size={'medium'}
                             type="tertiary"
                             label={'Notes'}
-                            fontColor={'greyScale7'}
+                            fontColor={'greyScale8'}
                             onClick={null}
                             icon={
                                 this.props.commentBox.isCommentSaved
@@ -1280,7 +1300,7 @@ export default class Ribbon extends Component<Props, State> {
                             size={'medium'}
                             type="tertiary"
                             label={'Share Page'}
-                            fontColor={'greyScale7'}
+                            fontColor={'greyScale8'}
                             onClick={null}
                             icon={'invite'}
                         />
@@ -1323,7 +1343,7 @@ export default class Ribbon extends Component<Props, State> {
                         size={'medium'}
                         type="tertiary"
                         label={'Search'}
-                        fontColor={'greyScale7'}
+                        fontColor={'greyScale8'}
                         onClick={() => this.props.bgScriptBG.openOverviewTab()}
                         icon={'searchIcon'}
                     />
@@ -1362,7 +1382,7 @@ export default class Ribbon extends Component<Props, State> {
                         size={'medium'}
                         type="tertiary"
                         label={'Summarize'}
-                        fontColor={'greyScale7'}
+                        fontColor={'greyScale8'}
                         onClick={() => this.props.toggleAskAI()}
                         icon={'stars'}
                     />
@@ -1417,7 +1437,7 @@ export default class Ribbon extends Component<Props, State> {
                             size={'medium'}
                             type="tertiary"
                             label={'Open PDF Reader'}
-                            fontColor={'greyScale7'}
+                            fontColor={'greyScale8'}
                             onClick={() => this.props.openPDFinViewer()}
                             icon={'filePDF'}
                             innerRef={this.spacePickerRef}
@@ -1441,7 +1461,7 @@ export default class Ribbon extends Component<Props, State> {
                             size={'medium'}
                             type="tertiary"
                             label={'Close PDF Reader'}
-                            fontColor={'greyScale7'}
+                            fontColor={'greyScale8'}
                             onClick={() => this.props.openPDFinViewer()}
                             icon={'filePDF'}
                             innerRef={this.spacePickerRef}
@@ -1566,6 +1586,19 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    renderDarkLightModeToggle() {
+        return (
+            <Icon
+                heightAndWidth="20px"
+                color={
+                    this.props.theme === 'dark' ? 'greyScale5' : 'greyScale4'
+                }
+                filePath={this.props.theme === 'dark' ? 'moon' : 'sun'}
+                onClick={() => this.props.toggleTheme()}
+            />
+        )
+    }
+
     renderHorizontalRibbon() {
         if (!this.props.isExpanded) {
             return (
@@ -1593,13 +1626,21 @@ export default class Ribbon extends Component<Props, State> {
                         <Icon
                             icon={icons.heartFull}
                             heightAndWidth="18px"
-                            color="prime1"
+                            color={
+                                this.props.theme !== 'light'
+                                    ? 'prime1'
+                                    : 'greyScale5'
+                            }
                         />
                     ) : (
                         <Icon
                             icon={logoNoText}
                             heightAndWidth="18px"
-                            color="prime2"
+                            color={
+                                this.props.theme !== 'light'
+                                    ? 'greyScale7'
+                                    : 'greyScale5'
+                            }
                         />
                     )}
                 </IconContainer>
@@ -1647,6 +1688,10 @@ export default class Ribbon extends Component<Props, State> {
                                                 isSidebarOpen={
                                                     this.props.sidebar
                                                         .isSidebarOpen
+                                                }
+                                                isTrial={this.props.isTrial}
+                                                signupDate={
+                                                    this.props.signupDate
                                                 }
                                             />
                                             {this.renderTutorialButton()}
@@ -1804,6 +1849,8 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                     ribbonPosition={this.props.ribbonPosition}
                                 >
+                                    {this.renderDarkLightModeToggle()}
+                                    {this.renderTutorialButton()}
                                     <BlockCounterIndicator
                                         ribbonPosition={
                                             this.props.ribbonPosition
@@ -1811,8 +1858,9 @@ export default class Ribbon extends Component<Props, State> {
                                         isSidebarOpen={
                                             this.props.sidebar.isSidebarOpen
                                         }
+                                        isTrial={this.props.isTrial}
+                                        signupDate={this.props.signupDate}
                                     />
-                                    {this.renderTutorialButton()}
                                     {this.renderCloseRibbonButton()}
                                 </BottomSection>
                             </>
@@ -1989,7 +2037,10 @@ const UpdateAvailablePill = styled.div`
     align-items: center;
     justify-content: center;
     padding: 2px 8px;
-    color: ${(props) => props.theme.colors.black};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyscale5
+            : props.theme.colors.black};
     background-color: ${(props) => props.theme.colors.prime2};
     border-radius: 30px;
     font-size: 12px;
@@ -2065,7 +2116,7 @@ const SavedButtonBox = styled.span`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) => props.theme.colors.greyScale8};
 
     & > ${DateText} {
         font-size: 12px;
@@ -2547,6 +2598,14 @@ const SectionTitle = styled.div`
     justify-content: space-between;
     align-items: center;
     margin-top: 20px;
+`
+const NotificationsTitle = styled.div`
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
+    font-weight: bold;
+    justify-content: space-between;
+    align-items: center;
 `
 const SectionDescription = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};

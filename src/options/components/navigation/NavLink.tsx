@@ -120,6 +120,13 @@ const RouteItem = styled.li<{ name: string; isActive: boolean }>`
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         cursor: pointer;
+
+        ${(props) =>
+            props.theme.variant === 'light' &&
+            css`
+                background-color: ${(props) => props.theme.colors.greyScale3};
+                outline: none;
+            `};
     }
 
     ${(props) =>

@@ -30,7 +30,7 @@ const TEST_BUNDLES_ARR = TEST_BUNDLES_STR.split(' ')
 async function setupTest(opts: {}) {
     let capturedError: Error | null = null
     const setup = await setupBackgroundIntegrationTest()
-    const serverStorage = await setup.getServerStorage()
+    const serverStorage = setup.serverStorage
     const htmlRenderer = new SocialPreviewHTMLRenderer({
         fetch: setup.fetch as any,
         storage: serverStorage.modules,

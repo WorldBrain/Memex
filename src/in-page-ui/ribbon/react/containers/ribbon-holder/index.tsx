@@ -17,11 +17,16 @@ import styled, { css } from 'styled-components'
 import { TOOLTIP_HEIGHT, TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 const RIBBON_HIDE_TIMEOUT = 400
 
 export interface RibbonHolderProps extends RibbonHolderDependencies {
     analyticsBG: AnalyticsCoreInterface
+    theme: MemexThemeVariant
 }
 
 export default class RibbonHolder extends StatefulUIElement<
@@ -198,6 +203,7 @@ export default class RibbonHolder extends StatefulUIElement<
                         <RibbonContainer
                             {...this.props.containerDependencies}
                             setRef={this.handleRibbonRef}
+                            theme={this.props.theme}
                             state={this.state.state}
                             inPageUI={this.props.inPageUI}
                             isSidebarOpen={this.state.isSidebarOpen}

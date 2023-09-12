@@ -11,6 +11,8 @@ import { COUNTER_STORAGE_KEY } from './constants'
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     isSidebarOpen: boolean
+    isTrial?: boolean
+    signupDate?: number
 }
 
 export class BlockCounterIndicator extends React.Component<Props> {
@@ -68,6 +70,49 @@ export class BlockCounterIndicator extends React.Component<Props> {
         return undefined
     }
 
+    daysUntilNextMonth() {
+        const currentDate: any = new Date()
+
+        // Get the next month (or advance to January of the next year if current month is December)
+        let nextMonth: any = currentDate.getMonth() + 1
+        let nextYear: any = currentDate.getFullYear()
+        if (nextMonth === 12) {
+            nextMonth = 0 // January is month 0 in JavaScript's Date
+            nextYear += 1
+        }
+
+        const nextMonthFirstDay: any = new Date(nextYear, nextMonth, 1)
+
+        // Calculate the difference in milliseconds
+        const differenceInMilliseconds: any = nextMonthFirstDay - currentDate
+
+        // Convert the difference from milliseconds to days
+        const differenceInDays =
+            differenceInMilliseconds / (24 * 60 * 60 * 1000)
+
+        // Return the rounded number of days
+        return Math.ceil(differenceInDays)
+    }
+
+    daysRemainingToComplete30() {
+        const MILLISECONDS_IN_A_DAY = 24 * 60 * 60 * 1000
+
+        const currentDate = Date.now()
+
+        // Calculate the difference in milliseconds between the current date and the initial timestamp
+        const elapsedMilliseconds = currentDate - this.props.signupDate
+
+        // Convert the elapsed time to days
+        const elapsedDays = Math.floor(
+            elapsedMilliseconds / MILLISECONDS_IN_A_DAY,
+        )
+
+        // Calculate the days remaining to complete 30 days
+        const remainingDays = 30 - elapsedDays
+
+        return remainingDays
+    }
+
     renderTooltip = (leftOverBlocks) => {
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
@@ -79,134 +124,72 @@ export class BlockCounterIndicator extends React.Component<Props> {
                 }
                 targetElementRef={this.tooltipButtonRef.current}
                 closeComponent={() => this.setState({ showTooltip: false })}
-                offsetX={10}
+                offsetX={20}
             >
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>
-                        <InfoTooltipTitleBox>
-                            <InfoTooltipTitle>
-                                You have <strong>{leftOverBlocks}</strong> pages
-                                left this month
-                            </InfoTooltipTitle>
-                            <InfoTooltipSubTitle>
-                                Resets on the 1st of every month
-                            </InfoTooltipSubTitle>
-                        </InfoTooltipTitleBox>
-                        <PrimaryAction
-                            label="Upgrade"
-                            icon={'longArrowRight'}
-                            padding="0px 5px 0 10px"
-                            onClick={() => {
-                                window.open(this.whichCheckOutURL(), '_blank')
-                            }}
-                            size="medium"
-                            type="primary"
-                            iconPosition="right"
-                        />
+                        <TitleAreaContainer>
+                            {this.props.isTrial ? (
+                                <InfoTooltipTitle>
+                                    <strong>Trial</strong> ends in{' '}
+                                    {this.daysRemainingToComplete30()} days.
+                                </InfoTooltipTitle>
+                            ) : (
+                                <InfoTooltipTitle>
+                                    <strong>{leftOverBlocks}</strong> pages left
+                                    this month
+                                </InfoTooltipTitle>
+                            )}
+                            <PrimaryAction
+                                label="Upgrade"
+                                icon={'longArrowRight'}
+                                padding="0px 5px 0 10px"
+                                onClick={() => {
+                                    window.open(
+                                        this.whichCheckOutURL(),
+                                        '_blank',
+                                    )
+                                }}
+                                size="medium"
+                                type="primary"
+                                iconPosition="right"
+                            />
+                        </TitleAreaContainer>
+                        <InfoTooltipSubTitleBox>
+                            {leftOverBlocks === 0 && (
+                                <InfoTooltipSubTitle>
+                                    You can't save, annotate or organise any NEW
+                                    pages.
+                                    <br /> You can still annotate and organise
+                                    pages you have already saved.
+                                    <br />
+                                    <br />
+                                    Resets in {this.daysUntilNextMonth()} days.
+                                </InfoTooltipSubTitle>
+                            )}
+                            {leftOverBlocks > 0 && !this.props.isTrial && (
+                                <InfoTooltipSubTitle>
+                                    Pages you save, annotate or add to Spaces.{' '}
+                                    <br />
+                                    Counts only once per page - forever!
+                                    <br /> <br /> Resets in{' '}
+                                    {this.daysUntilNextMonth()} days.
+                                </InfoTooltipSubTitle>
+                            )}
+                            {this.props.isTrial && (
+                                <InfoTooltipSubTitle>
+                                    Use everything as much as you want.
+                                    <br />
+                                    <br />
+                                    After the trial: 60 days
+                                    money-back-guarantee and a free tier with 25
+                                    saved pages per month.
+                                    <br />
+                                    Each saved page counts only once - forever.
+                                </InfoTooltipSubTitle>
+                            )}
+                        </InfoTooltipSubTitleBox>
                     </InfoTooltipTitleArea>
-                    <InfoTooltipContentArea>
-                        {leftOverBlocks === 0 && (
-                            <>
-                                <InfoTooltipContentSubArea>
-                                    <InfoTooltipContentSubAreaTitle>
-                                        What can and cannot do anymore before
-                                        you upgrade:
-                                    </InfoTooltipContentSubAreaTitle>
-                                    <InfoTooltipContentSubAreaBulletPoint
-                                        orientation={'flex-start'}
-                                    >
-                                        <Icon
-                                            icon="block"
-                                            heightAndWidth="20px"
-                                            hoverOff
-                                            color="prime1"
-                                        />
-                                        Bookmark, annotate, summarise, organise
-                                        & Twitter references.
-                                    </InfoTooltipContentSubAreaBulletPoint>
-                                    <InfoTooltipContentSubAreaBulletPoint
-                                        orientation={'flex-start'}
-                                    >
-                                        <Icon
-                                            icon="checkRound"
-                                            heightAndWidth="20px"
-                                            hoverOff
-                                            color="prime1"
-                                        />
-                                        Search, export, view & reply to other
-                                        peoples highlights & add more
-                                        annotations to previously saved pages.
-                                    </InfoTooltipContentSubAreaBulletPoint>
-                                </InfoTooltipContentSubArea>
-                            </>
-                        )}
-                        <InfoTooltipContentSubArea>
-                            <InfoTooltipContentSubAreaTitle>
-                                What counts towards the page quota?{' '}
-                            </InfoTooltipContentSubAreaTitle>
-                            <InfoTooltipContentSubAreaBulletPoint>
-                                <Icon
-                                    icon="bulletPoint"
-                                    heightAndWidth="16px"
-                                    hoverOff
-                                    color="prime1"
-                                />
-                                Bookmark, annotate or add a page to a Space
-                            </InfoTooltipContentSubAreaBulletPoint>
-                            {/* <InfoTooltipContentSubAreaBulletPoint>
-                                <Icon
-                                    icon="bulletPoint"
-                                    heightAndWidth="16px"
-                                    hoverOff
-                                    color="prime1"
-                                />
-                                Summarise a page or a piece of text
-                            </InfoTooltipContentSubAreaBulletPoint> */}
-                            {/* <InfoTooltipContentSubAreaBulletPoint>
-                                <Icon
-                                    icon="bulletPoint"
-                                    heightAndWidth="16px"
-                                    hoverOff
-                                    color="prime1"
-                                />
-                                Open the Twitter references of a page
-                            </InfoTooltipContentSubAreaBulletPoint> */}
-                        </InfoTooltipContentSubArea>
-                        <InfoTooltipContentSubArea>
-                            <InfoTooltipContentSubAreaTitle>
-                                What does not count?
-                            </InfoTooltipContentSubAreaTitle>
-                            <InfoTooltipContentSubAreaBulletPoint>
-                                <Icon
-                                    icon="bulletPoint"
-                                    heightAndWidth="16px"
-                                    hoverOff
-                                    color="prime1"
-                                />
-                                Generally, every interacted page counts{' '}
-                                <strong>just once. Forever</strong>
-                            </InfoTooltipContentSubAreaBulletPoint>
-                            <InfoTooltipContentSubAreaBulletPoint>
-                                <Icon
-                                    icon="bulletPoint"
-                                    heightAndWidth="16px"
-                                    hoverOff
-                                    color="prime1"
-                                />
-                                If you add more than one highlight, text summary
-                                or Space
-                            </InfoTooltipContentSubAreaBulletPoint>
-                            <InfoTooltipContentSubAreaBulletPoint>
-                                <Icon
-                                    icon="bulletPoint"
-                                    heightAndWidth="16px"
-                                    hoverOff
-                                    color="prime1"
-                                />
-                                Read & Reply to annotations by others
-                            </InfoTooltipContentSubAreaBulletPoint>
-                        </InfoTooltipContentSubArea>
-                    </InfoTooltipContentArea>
                 </InfoTooltipContainer>
             </PopoutBox>
         )
@@ -227,39 +210,55 @@ export class BlockCounterIndicator extends React.Component<Props> {
             return null
         } else {
             return (
-                <TooltipBox
-                    placement={
-                        this.props.isSidebarOpen
-                            ? 'left'
-                            : topRight
-                            ? 'bottom'
-                            : bottomRight
-                            ? 'top'
-                            : 'left'
-                    }
-                    offsetX={15}
-                    tooltipText={
-                        <TooltipTextContainer>
-                            <TooltipTextTop>
-                                You have <strong>{leftOverBlocks}</strong> pages
-                                left this month
-                            </TooltipTextTop>
-                            <TooltipTextBottom>
-                                Click for more info
-                            </TooltipTextBottom>
-                        </TooltipTextContainer>
-                    }
-                >
-                    <CounterContainer
-                        progress={progressPercentNumber}
-                        ref={this.tooltipButtonRef}
-                        onClick={() => this.setState({ showTooltip: true })}
-                    >
-                        <InnerContainer> {leftOverBlocks}</InnerContainer>
-                    </CounterContainer>
+                <>
                     {this.state.showTooltip &&
                         this.renderTooltip(leftOverBlocks)}
-                </TooltipBox>
+                    <TooltipBox
+                        placement={
+                            this.props.isSidebarOpen
+                                ? 'left'
+                                : topRight
+                                ? 'bottom'
+                                : bottomRight
+                                ? 'top'
+                                : 'left'
+                        }
+                        offsetX={15}
+                        tooltipText={
+                            <TooltipTextContainer>
+                                {this.props.isTrial ? (
+                                    <TooltipTextTop>
+                                        <strong>Trial</strong> ends in{' '}
+                                        {this.daysRemainingToComplete30()} days.
+                                    </TooltipTextTop>
+                                ) : (
+                                    <TooltipTextTop>
+                                        You have{' '}
+                                        <strong>{leftOverBlocks}</strong> pages
+                                        left this month
+                                    </TooltipTextTop>
+                                )}
+
+                                <TooltipTextBottom>
+                                    Click for more info
+                                </TooltipTextBottom>
+                            </TooltipTextContainer>
+                        }
+                    >
+                        <CounterContainer
+                            progress={progressPercentNumber}
+                            ref={this.tooltipButtonRef}
+                            onClick={() => this.setState({ showTooltip: true })}
+                        >
+                            <InnerContainer>
+                                {' '}
+                                {this.props.isTrial
+                                    ? this.daysRemainingToComplete30()
+                                    : leftOverBlocks}
+                            </InnerContainer>
+                        </CounterContainer>
+                    </TooltipBox>
+                </>
             )
         }
     }
@@ -284,17 +283,27 @@ const TooltipTextContainer = styled.div`
     width: fit-content;
 `
 
-const InfoTooltipTitleBox = styled.div`
+const TitleAreaContainer = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    width: 90%;
+    justify-content: space-between;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+`
+
+const InfoTooltipSubTitleBox = styled.div`
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     justify-content: flex-start;
     grid-gap: 5px;
+    padding: 20px;
 `
 const InfoTooltipSubTitle = styled.div`
-    display: flex;
     color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 12px;
+    font-size: 16px;
+    line-height: 24px;
 `
 
 const CounterContainer = styled.div<{
@@ -311,8 +320,8 @@ const CounterContainer = styled.div<{
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 24px;
-    width: 24px;
+    height: 28px;
+    width: 28px;
 
     ${(props) =>
         props.progress === 0 &&
@@ -330,22 +339,22 @@ const CounterContainer = styled.div<{
 const InnerContainer = styled.div`
     border-radius: 50px;
     background-color: ${(props) => props.theme.colors.black};
-    color: ${(props) => props.theme.colors.greyScale6};
-    height: 20px;
-    width: 20px;
+    color: ${(props) => props.theme.colors.white};
+    height: 24px;
+    width: 24px;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 10px;
+    font-size: 12px;
+    font-weight: 400;
 `
 
 const InfoTooltipContainer = styled.div`
-    padding: 20px;
     flex-direction: column;
     display: flex;
     align-items: center;
     justify-content: flex-start;
-    width: 400px;
+    width: 420px;
     height: fit-content;
     grid-gap: 20px;
 `
@@ -355,6 +364,7 @@ const InfoTooltipTitleArea = styled.div`
     align-items: flex-start;
     width: 100%;
     justify-content: space-between;
+    flex-direction: column;
 `
 
 const InfoTooltipTitle = styled.div`
@@ -363,46 +373,4 @@ const InfoTooltipTitle = styled.div`
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-`
-
-const InfoTooltipContentArea = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    width: 100%;
-    grid-gap: 15px;
-`
-
-const InfoTooltipContentSubArea = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    width: 100%;
-    grid-gap: 8px;
-`
-
-const InfoTooltipContentSubAreaTitle = styled.div`
-    font-size: 14px;
-    font-weight: bold;
-    color: ${(props) => props.theme.colors.greyScale7};
-`
-
-const InfoTooltipContentSubAreaBulletPoint = styled.div<{
-    orientation: string
-}>`
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.greyScale5};
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    grid-gap: 5px;
-
-    ${(props) =>
-        props.orientation === 'flex-start' &&
-        css`
-            align-items: flex-start;
-            margin-left: -4px;
-        `}
 `

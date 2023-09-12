@@ -163,10 +163,13 @@ export async function setupTest(
     }
     const annotationsCache = new PageAnnotationsCache({})
 
+    const themeVariant = await this.initThemeVariant()
+
     const logic = new DashboardLogic({
         location,
         history,
         analytics,
+        theme: themeVariant,
         annotationsCache,
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,

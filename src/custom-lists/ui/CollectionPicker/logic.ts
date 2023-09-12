@@ -366,7 +366,10 @@ export default class SpacePickerLogic extends UILogic<
             if (previousState.newEntryName !== '') {
                 await this.newEntryPress({
                     previousState,
-                    event: { entry: previousState.newEntryName },
+                    event: {
+                        entry: previousState.newEntryName,
+                        analyticsBG: this.dependencies.analyticsBG,
+                    },
                 })
             }
             this.currentKeysPressed = []
@@ -388,6 +391,7 @@ export default class SpacePickerLogic extends UILogic<
                             previousState.listEntries.byId[
                                 previousState.focusedListId
                             ],
+                        analyticsBG: this.dependencies.analyticsBG,
                     },
                     previousState,
                 })
@@ -473,11 +477,27 @@ export default class SpacePickerLogic extends UILogic<
             { source: 'setListRemoteId', mustBeLocal: true },
         )
 
-        this.dependencies.onListShare(event)
+        this.dependencies.onListShare?.(event)
         this.dependencies.annotationsCache.updateList({
             unifiedId: listData.unifiedId,
-            remoteId: event.remoteListId,
+            remoteId: event.remoteListId.toString(),
         })
+
+        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
+            const annotData = this.dependencies.annotationsCache.getAnnotationByLocalId(
+                localAnnotId,
+            )
+            if (!annotData) {
+                continue
+            }
+            this.dependencies.annotationsCache.updateAnnotation({
+                unifiedId: annotData.unifiedId,
+                ...annotData,
+                remoteId: event.annotationLocalToRemoteIdsDict[
+                    localAnnotId
+                ].toString(),
+            })
+        }
     }
 
     validateSpaceName(name: string, listIdToSkip?: number) {
@@ -708,10 +728,10 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
-        event: { entry, shouldRerender },
+        event: { entry, analyticsBG, shouldRerender },
         previousState,
     }) => {
-        if (!(await pageActionAllowed())) {
+        if (!(await pageActionAllowed(analyticsBG))) {
             return
         }
 
@@ -781,10 +801,10 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     resultEntryAllPress: EventHandler<'resultEntryAllPress'> = async ({
-        event: { entry },
+        event: { entry, analyticsBG },
         previousState,
     }) => {
-        if (!(await pageActionAllowed())) {
+        if (!(await pageActionAllowed(analyticsBG))) {
             return
         }
         this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
@@ -865,10 +885,10 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     newEntryPress: EventHandler<'newEntryPress'> = async ({
-        event: { entry },
+        event: { entry, analyticsBG },
         previousState,
     }) => {
-        if (!(await pageActionAllowed())) {
+        if (!(await pageActionAllowed(analyticsBG))) {
             return
         }
 
@@ -888,10 +908,10 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
-        event: { entry },
+        event: { entry, analyticsBG },
         previousState,
     }) => {
-        if (!(await pageActionAllowed())) {
+        if (!(await pageActionAllowed(analyticsBG))) {
             return
         }
 

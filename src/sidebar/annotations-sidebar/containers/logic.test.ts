@@ -28,6 +28,7 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
+import { theme } from 'src/common-ui/components/design-library/theme'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -99,6 +100,7 @@ const setupLogicHelper = async ({
 
     const analytics = new FakeAnalytics()
     const sidebarLogic = new SidebarContainerLogic({
+        theme: theme({ variant: 'dark' }),
         fullPageUrl,
         sidebarContext: 'in-page',
         shouldHydrateCacheOnInit: true,
@@ -154,9 +156,9 @@ const setupLogicHelper = async ({
 
 async function setupTestData({
     storageManager,
-    getServerStorage,
+    serverStorage,
 }: UILogicTestDevice) {
-    const { manager: serverStorageManager } = await getServerStorage()
+    const { manager: serverStorageManager } = serverStorage
     for (const entry of DATA.SHARED_ANNOTATION_LIST_ENTRIES) {
         await serverStorageManager
             .collection('sharedAnnotationListEntry')
@@ -2492,9 +2494,7 @@ describe('SidebarContainerLogic', () => {
             })
 
             // Let's add a new sharedList + entries to test with
-            const {
-                manager: serverStorageManager,
-            } = await device.getServerStorage()
+            const { manager: serverStorageManager } = device.serverStorage
             const sharedListId = 'my-test-list-111'
             await serverStorageManager.collection('sharedList').createObject({
                 id: sharedListId,

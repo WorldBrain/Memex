@@ -17,7 +17,7 @@ const defaultDiscordUser: DiscordUser = {
 
 async function setupTest(ops: { withDefaultList: boolean }) {
     const setup = await setupBackgroundIntegrationTest()
-    const serverStorage = await setup.getServerStorage()
+    const serverStorage = setup.serverStorage
     const eventProcessor = createDiscordEventProcessor({
         getNow: () => Date.now(),
         storage: serverStorage,

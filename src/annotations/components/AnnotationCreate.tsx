@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { createRef } from 'react'
 
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
@@ -20,6 +20,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import delay from 'src/util/delay'
+import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 
 interface State {
     isTagPickerShown: boolean
@@ -52,6 +53,7 @@ export interface AnnotationCreateGeneralProps {
     isRibbonCommentBox?: boolean
     getYoutubePlayer?(): YoutubePlayer
     renderSpacePicker(): JSX.Element
+    sidebarEvents?: AnnotationsSidebarInPageEventEmitter
 }
 
 export interface Props
@@ -92,6 +94,45 @@ export class AnnotationCreate extends React.Component<Props, State>
             this.focus()
         }
         await this.setYoutubeKeyboardShortcut()
+
+        if (this.props.sidebarEvents) {
+            const youtubeSummariseEvents = this.props.sidebarEvents
+            youtubeSummariseEvents.on(
+                'triggerYoutubeTimestampSummary',
+                ({ text, showLoadingSpinner }, callback) => {
+                    if (!this.editor) {
+                        callback(false) // signal that listener isn't ready
+                        return
+                    }
+
+                    if (text) {
+                        this.editor?.addYoutubeTimestampWithText(
+                            text,
+                            showLoadingSpinner,
+                        )
+                        callback(true) // signal successful processing
+                    } else {
+                        callback(false) // signal failure or "not ready" due to missing data
+                    }
+                },
+            )
+        }
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.autoFocus !== this.props.autoFocus) {
+            this.focus()
+        }
+    }
+
+    componentWillUnmount(): void {
+        if (this.props.sidebarEvents) {
+            const youtubeSummariseEvents = this.props.sidebarEvents
+
+            youtubeSummariseEvents.removeAllListeners(
+                'triggerYoutubeTimestampSummary',
+            )
+        }
     }
 
     private get displayLists(): Array<{
@@ -110,17 +151,25 @@ export class AnnotationCreate extends React.Component<Props, State>
         return this.displayLists.some((list) => list.isShared)
     }
 
-    addYoutubeTimestampToEditor() {
+    addYoutubeTimestampToEditor(commentText) {
         // This is a hack to patch over a race condition between the state update and the rendering of the Editor which is dependent on that state.
         //  Ideally we avoid this race condition by making the editor's state controlled (vs uncontrolled) then we can
         //  add the timestamp to the state at a higher level rather than needing to do this call chain going down deeper into the comp tree.
         if (!this.state.onEditClick) {
             this.setState({ onEditClick: true }, async () => {
                 await delay(300)
-                this.editor?.addYoutubeTimestamp()
+                if (commentText) {
+                    this.editor?.addYoutubeTimestampWithText(commentText)
+                } else {
+                    this.editor?.addYoutubeTimestamp()
+                }
             })
         } else {
-            this.editor?.addYoutubeTimestamp()
+            if (commentText) {
+                this.editor?.addYoutubeTimestampWithText(commentText)
+            } else {
+                this.editor?.addYoutubeTimestamp()
+            }
         }
     }
 
@@ -142,7 +191,11 @@ export class AnnotationCreate extends React.Component<Props, State>
 
     private hideTagPicker = () => this.setState({ isTagPickerShown: false })
     // private toggleMarkdownHelp = () => this.props.toggleMarkdownHelp
-    private handleCancel = () => this.props.onCancel()
+    private handleCancel = () => {
+        this.setState({ onEditClick: false })
+        this.editor?.resetState()
+        this.props.onCancel()
+    }
     private handleSave = async (
         shouldShare: boolean,
         isProtected?: boolean,
@@ -301,6 +354,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 }
                                 youtubeShortcut={this.state.youtubeShortcut}
                                 getYoutubePlayer={this.props.getYoutubePlayer}
+                                sidebarEvents={this.props.sidebarEvents}
                             />
                         ) : (
                             <EditorDummy
@@ -314,25 +368,30 @@ export class AnnotationCreate extends React.Component<Props, State>
                             </EditorDummy>
                         )}
                     </EditorContainer>
-                    {this.props.comment === '' ? null : (
-                        <FooterContainer>
-                            <ListsSegment
-                                newLineOrientation={true}
-                                lists={this.displayLists}
-                                onMouseEnter={this.props.onListsHover}
-                                onListClick={undefined}
-                                onEditBtnClick={() =>
-                                    this.setState({ isListPickerShown: true })
-                                }
-                                spacePickerButtonRef={this.spacePickerButtonRef}
-                                renderSpacePicker={this.renderSpacePicker}
-                            />
-                            {this.renderSpacePicker()}
-                            <SaveActionBar>
-                                {this.renderActionButtons()}
-                            </SaveActionBar>
-                        </FooterContainer>
-                    )}
+                    {this.props.comment.length > 0 &&
+                        (this.state.onEditClick || this.props.autoFocus) && (
+                            <FooterContainer>
+                                <ListsSegment
+                                    newLineOrientation={true}
+                                    lists={this.displayLists}
+                                    onMouseEnter={this.props.onListsHover}
+                                    onListClick={undefined}
+                                    onEditBtnClick={() =>
+                                        this.setState({
+                                            isListPickerShown: true,
+                                        })
+                                    }
+                                    spacePickerButtonRef={
+                                        this.spacePickerButtonRef
+                                    }
+                                    renderSpacePicker={this.renderSpacePicker}
+                                />
+                                {this.renderSpacePicker()}
+                                <SaveActionBar>
+                                    {this.renderActionButtons()}
+                                </SaveActionBar>
+                            </FooterContainer>
+                        )}
                 </TextBoxContainerStyled>
             </>
         )
@@ -343,7 +402,7 @@ export default AnnotationCreate
 
 const EditorContainer = styled(Margin)`
     z-index: 1000;
-    border-radius: 5px;
+    border-radius: 8px;
 
     &:focus-within {
         background-color: ${(props) => props.theme.colors.greyScale2};
@@ -353,6 +412,19 @@ const EditorContainer = styled(Margin)`
         background-color: ${(props) => props.theme.colors.greyScale2};
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            &:focus-within {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+            }
+            &:hover {
+                background-color: ${(props) => props.theme.colors.greyScale2};
+                outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+            }
+            caret-color: ${(props) => props.theme.colors.greyScale5};
+        `};
 `
 
 const EditorDummy = styled.div`

@@ -463,7 +463,7 @@ export default class SearchResultsContainer extends React.Component<
                     )}
                 />
                 <NoteResultContainer>
-                    {noteIds[notesType].length > 0 && (
+                    {/* {noteIds[notesType].length > 0 && (
                         <SortButtonContainer>
                             <TooltipBox
                                 tooltipText="Sort Annotations"
@@ -482,7 +482,7 @@ export default class SearchResultsContainer extends React.Component<
                             </TooltipBox>
                             {this.renderSortingMenuDropDown(normalizedUrl, day)}
                         </SortButtonContainer>
-                    )}
+                    )} */}
                     {noteIds[notesType].map((noteId, index) => {
                         const zIndex = noteIds[notesType].length - index
                         return this.renderNoteResult(
@@ -1285,7 +1285,7 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     max-width: calc(${sizeConstants.searchResults.widthPx}px);
     z-index: 3000;
     position: sticky;
-    top: 0px;
+    top: -1px;
     background: ${(props) => props.theme.colors.black};
     width: fill-available;
 `

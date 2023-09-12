@@ -40,6 +40,10 @@ import type { ContentScriptsInterface } from 'src/content-scripts/background/typ
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface RootState {
     loadState: TaskState
@@ -49,6 +53,7 @@ export interface RootState {
     searchResults: SearchResultsState
     searchFilters: SearchFiltersState
     listsSidebar: ListsSidebarState
+    themeVariant: MemexThemeVariant
     modals: DashboardModalsState
     showDropArea: boolean
     activePageID?: string
@@ -72,6 +77,7 @@ export interface DashboardDependencies {
     location: Location
     history: History
     analytics: Analytics
+    theme: MemexTheme
     analyticsBG: AnalyticsCoreInterface
     tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface

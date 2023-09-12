@@ -7,6 +7,7 @@ export type KeyEvent =
     | 'Backspace'
     | 'Escape'
     | 'Meta'
+    | 'Shift'
 
 export interface DisplayEntry {
     name: string

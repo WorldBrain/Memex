@@ -1,4 +1,5 @@
 import fromPairs from 'lodash/fromPairs'
+import clone from 'lodash/cloneDeep'
 import browser from 'webextension-polyfill'
 import {
     UILogic,
@@ -86,6 +87,13 @@ import {
     convertMemexURLintoTelegramURL,
     getTelegramUserDisplayName,
 } from '@worldbrain/memex-common/lib/telegram/utils'
+import { enforceTrialPeriod30Days } from 'src/util/subscriptions/storage'
+import {
+    SpacePickerDependencies,
+    SpacePickerEvent,
+} from 'src/custom-lists/ui/CollectionPicker/types'
+import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
+import { sleepPromise } from 'src/util/promises'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -141,6 +149,8 @@ export class SidebarContainerLogic extends UILogic<
     AIpromptSuggestions: { prompt: string; focused: boolean | null }[]
     // NOTE: this mirrors the state key of the same name. Only really exists as the cache's `updatedPageData` event listener can't access state :/
     private fullPageUrl: string
+    private youtubeTranscriptSummary: string = ''
+    private editor = null
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -157,6 +167,8 @@ export class SidebarContainerLogic extends UILogic<
                     buildConversationId: this.buildConversationId,
                     loadUserByReference: options.authBG?.getUserByReference,
                     submitNewReply: options.contentConversationsBG.submitReply,
+                    deleteReply: options.contentConversationsBG.deleteReply,
+                    editReply: options.contentConversationsBG.editReply,
                     isAuthorizedToConverse: async () => true,
                     getCurrentUser: async () => {
                         const user = await options.authBG.getCurrentUser()
@@ -222,6 +234,7 @@ export class SidebarContainerLogic extends UILogic<
             selectedTextAIPreview: undefined,
 
             users: {},
+            currentUserReference: null,
             pillVisibility: 'unhover',
 
             isWidthLocked: false,
@@ -286,10 +299,17 @@ export class SidebarContainerLogic extends UILogic<
             showAISuggestionsDropDown: false,
             showAICounter: false,
             AIsuggestions: [],
+            isTrial: false,
+            signupDate: null,
+            showSharePageTooltip: false,
+            firstTimeSharingPageLink: false,
+            selectedListForShareMenu: null,
+            renameListErrorMessage: null,
+            youtubeTranscriptSummaryloadState: 'pristine',
         }
     }
 
-    private buildConversationId: ConversationIdBuilder = (
+    buildConversationId: ConversationIdBuilder = (
         remoteAnnotId,
         { id: remoteListId },
     ) => {
@@ -385,7 +405,34 @@ export class SidebarContainerLogic extends UILogic<
             })
         })
         this.summarisePageEvents.on('startSummaryStream', () => {
-            this.emitMutation({ pageSummary: { $set: '' } })
+            this.emitMutation({
+                pageSummary: { $set: '' },
+            })
+        })
+
+        this.summarisePageEvents.on('newSummaryTokenEditor', ({ token }) => {
+            let newToken = token
+            if (isPageSummaryEmpty) {
+                newToken = newToken.trimStart() // Remove the first two characters
+            }
+            isPageSummaryEmpty = false
+            this.youtubeTranscriptSummary =
+                this.youtubeTranscriptSummary + newToken
+            this.emitMutation({
+                youtubeTranscriptSummaryloadState: { $set: 'success' },
+                youtubeTranscriptSummary: { $apply: (prev) => prev + newToken },
+            })
+            let handledSuccessfully = false
+
+            this.options.events.emit(
+                'triggerYoutubeTimestampSummary',
+                {
+                    text: newToken,
+                },
+                (success) => {
+                    handledSuccessfully = success
+                },
+            )
         })
     }
 
@@ -452,6 +499,11 @@ export class SidebarContainerLogic extends UILogic<
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
 
+        const userReference = this.options.getCurrentUser()
+        this.emitMutation({
+            currentUserReference: { $set: userReference ?? null },
+        })
+
         this.sidebar = document
             .getElementById('memex-sidebar-container')
             ?.shadowRoot.getElementById('annotationSidebarContainer')
@@ -498,6 +550,15 @@ export class SidebarContainerLogic extends UILogic<
                 })
             }, 1000)
         }
+
+        const signupDate = new Date(
+            await (await this.options.authBG.getCurrentUser()).creationTime,
+        ).getTime()
+
+        this.emitMutation({
+            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+            signupDate: { $set: signupDate },
+        })
     }
 
     cleanup = () => {
@@ -528,6 +589,41 @@ export class SidebarContainerLogic extends UILogic<
                             prev[list.unifiedId] ?? initListInstance(list),
                         ]),
                     ),
+            },
+            // Ensure conversation states exist for any shared annotation in any shared list
+            conversations: {
+                $apply: (prev: SidebarContainerState['conversations']) => {
+                    return fromPairs(
+                        normalizedStateToArray(nextLists)
+                            .map((list) => {
+                                if (list.remoteId == null) {
+                                    return null
+                                }
+                                return list.unifiedAnnotationIds
+                                    .map((annotId) => {
+                                        const annotData = this.options
+                                            .annotationsCache.annotations.byId[
+                                            annotId
+                                        ]
+                                        if (annotData.remoteId == null) {
+                                            return null
+                                        }
+                                        const conversationId = generateAnnotationCardInstanceId(
+                                            list,
+                                            annotId,
+                                        )
+                                        return [
+                                            conversationId,
+                                            prev[conversationId] ??
+                                                getInitialAnnotationConversationState(),
+                                        ]
+                                    })
+                                    .filter((a) => a != null)
+                            })
+                            .filter((a) => a != null)
+                            .flat(),
+                    )
+                },
             },
         })
     }
@@ -594,6 +690,7 @@ export class SidebarContainerLogic extends UILogic<
                             .flat(),
                     ),
             },
+            // Ensure conversation states exist for any shared annotation in any shared list
             conversations: {
                 $apply: (prev: SidebarContainerState['conversations']) => {
                     return fromPairs(
@@ -632,26 +729,30 @@ export class SidebarContainerLogic extends UILogic<
     private readingViewStorageListener = async (enable: boolean) => {
         this.resizeObserver = new ResizeObserver(this.debounceReadingWidth)
 
-        if (this.readingViewState['@Sidebar-reading_view']) {
-            this.emitMutation({
-                readingView: { $set: true },
-            })
-            this.resizeObserver.observe(this.sidebar)
-            window.addEventListener('resize', this.debounceReadingWidth)
-            this.setReadingWidth()
-        }
-        if (!this.readingViewState['@Sidebar-reading_view']) {
-            this.emitMutation({
-                readingView: { $set: false },
-            })
-        }
+        try {
+            if (this.readingViewState['@Sidebar-reading_view']) {
+                this.emitMutation({
+                    readingView: { $set: true },
+                })
+                this.resizeObserver.observe(this.sidebar)
+                window.addEventListener('resize', this.debounceReadingWidth)
+                this.setReadingWidth()
+            }
+            if (!this.readingViewState['@Sidebar-reading_view']) {
+                this.emitMutation({
+                    readingView: { $set: false },
+                })
+            }
 
-        const { storageAPI } = this.options
-        if (enable) {
-            storageAPI.onChanged.addListener(this.toggleReadingView)
-        } else {
-            storageAPI.onChanged.removeListener(this.toggleReadingView)
-            this.resizeObserver.disconnect()
+            const { storageAPI } = this.options
+            if (enable) {
+                storageAPI.onChanged.addListener(this.toggleReadingView)
+            } else {
+                storageAPI.onChanged.removeListener(this.toggleReadingView)
+                this.resizeObserver.disconnect()
+            }
+        } catch (e) {
+            console.error(e)
         }
     }
 
@@ -700,7 +801,7 @@ export class SidebarContainerLogic extends UILogic<
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 50 + 'px'
+                currentWindowWidth - currentsidebarWidth - 30 + 'px'
 
             document.body.style.width = readingWidth
         }
@@ -836,6 +937,16 @@ export class SidebarContainerLogic extends UILogic<
         await this.options.copyToClipboard(link)
     }
 
+    getAnnotationEditorIntoState: EventHandler<
+        'getAnnotationEditorIntoState'
+    > = (event) => {
+        const editorRef = event
+
+        this.emitMutation({
+            annotationCreateEditorRef: { $set: editorRef },
+        })
+    }
+
     openWebUIPageForSpace: EventHandler<'openWebUIPageForSpace'> = async ({
         event,
     }) => {
@@ -890,18 +1001,114 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ activeListContextMenuId: { $set: nextActiveId } })
     }
 
+    openPageListMenuForList: EventHandler<'openPageListMenuForList'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            showSharePageTooltip: { $set: !previousState.showSharePageTooltip },
+        })
+    }
+
+    validateSpaceName(name: string, listIdToSkip?: number) {
+        const validationResult = validateSpaceName(
+            name,
+            normalizedStateToArray(this.options.annotationsCache.lists).map(
+                (entry) => ({
+                    id: entry.localId,
+                    name: entry.name,
+                }),
+            ),
+            { listIdToSkip },
+        )
+
+        this.emitMutation({
+            renameListErrorMessage: {
+                $set:
+                    validationResult.valid === false
+                        ? validationResult.reason
+                        : null,
+            },
+        })
+
+        return validationResult
+    }
+
+    __getListDataByLocalId = (
+        localId: number,
+        { annotationsCache }: Pick<SpacePickerDependencies, 'annotationsCache'>,
+        opts?: {
+            source?: keyof SpacePickerEvent
+            mustBeLocal?: boolean
+        },
+    ): UnifiedList => {
+        const listData = annotationsCache.getListByLocalId(localId)
+        const source = opts?.source ? `for ${opts.source} ` : ''
+
+        if (!listData) {
+            throw new Error(`Specified list data ${source}could not be found`)
+        }
+        if (opts?.mustBeLocal && listData.localId == null) {
+            throw new Error(
+                `Specified list data ${source}could not be found locally`,
+            )
+        }
+        return listData
+    }
+
     editListName: EventHandler<'editListName'> = async ({ event }) => {
+        const newName = event.newName.trim()
+        const listData = this.__getListDataByLocalId(
+            event.localId,
+            this.options,
+            { source: 'renameList', mustBeLocal: true },
+        )
+        if (listData.name === newName) {
+            return
+        }
+        const validationResult = this.validateSpaceName(newName)
+        if (validationResult.valid === false) {
+            this.emitMutation({
+                renameListErrorMessage: {
+                    $set: validationResult.reason,
+                },
+            })
+            return
+        }
+
         this.options.annotationsCache.updateList({
             unifiedId: event.unifiedListId,
-            name: event.newName,
+            name: newName,
+        })
+
+        await this.options.customListsBG.updateListName({
+            id: event.localId,
+            oldName: event.oldName,
+            newName,
         })
     }
 
     shareList: EventHandler<'shareList'> = async ({ event }) => {
         this.options.annotationsCache.updateList({
             unifiedId: event.unifiedListId,
-            remoteId: event.remoteListId,
+            remoteId: event.remoteListId.toString(),
         })
+
+        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
+            const annotData = this.options.annotationsCache.getAnnotationByLocalId(
+                localAnnotId,
+            )
+            if (!annotData) {
+                continue
+            }
+            this.options.annotationsCache.updateAnnotation({
+                unifiedId: annotData.unifiedId,
+                ...annotData,
+                remoteId: event.annotationLocalToRemoteIdsDict[
+                    localAnnotId
+                ].toString(),
+            })
+        }
     }
 
     deleteList: EventHandler<'deleteList'> = async ({ event }) => {
@@ -1193,17 +1400,27 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    createNewNoteFromAISummary: EventHandler<
+        'createNewNoteFromAISummary'
+    > = async ({ event }) => {
+        this.emitMutation({
+            activeTab: { $set: 'annotations' },
+            commentBox: {
+                commentText: { $set: event.comment },
+            },
+        })
+        this.options.focusCreateForm()
+    }
+
     setNewPageNoteText: EventHandler<'setNewPageNoteText'> = async ({
         event,
     }) => {
-        if (event.comment.length) {
-            this.emitMutation({
-                showCommentBox: { $set: true },
-                commentBox: {
-                    commentText: { $set: event.comment },
-                },
-            })
-        }
+        this.emitMutation({
+            showCommentBox: { $set: true },
+            commentBox: {
+                commentText: { $set: event.comment },
+            },
+        })
 
         this.options.focusCreateForm()
     }
@@ -1639,6 +1856,7 @@ export class SidebarContainerLogic extends UILogic<
         shortSummary?: boolean,
         previousState?: SidebarContainerState,
         textAsAlternative?: string,
+        outputLocation?: 'editor' | 'summaryContainer' | null,
     ) {
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
@@ -1651,9 +1869,13 @@ export class SidebarContainerLogic extends UILogic<
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
-        let canQueryAI = false
         if (!hasAPIKey) {
-            canQueryAI = await AIActionAllowed()
+            let canQueryAI = false
+            if (previousState.isTrial) {
+                canQueryAI = true
+            } else if (await AIActionAllowed(this.options.analyticsBG)) {
+                canQueryAI = true
+            }
             if (!canQueryAI) {
                 this.emitMutation({
                     showUpgradeModal: { $set: true },
@@ -1663,12 +1885,17 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         let queryPrompt = prompt ? prompt : undefined
-        await updateAICounter()
+
+        if (!previousState.isTrial) {
+            await updateAICounter()
+        }
         this.emitMutation({
             selectedTextAIPreview: {
                 $set: highlightedText ? highlightedText : '',
             },
-            loadState: { $set: 'running' },
+            loadState: {
+                $set: outputLocation != 'editor' ? 'running' : 'pristine',
+            },
             prompt: { $set: queryPrompt },
             showAICounter: { $set: true },
         })
@@ -1694,7 +1921,7 @@ export class SidebarContainerLogic extends UILogic<
             ? highlightedText
             : undefined
 
-        await this.options.summarizeBG.startPageSummaryStream({
+        const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl: isPagePDF
                 ? undefined
                 : fullPageUrl && fullPageUrl
@@ -1704,8 +1931,13 @@ export class SidebarContainerLogic extends UILogic<
             queryPrompt: queryPrompt,
             apiKey: openAIKey ? openAIKey : undefined,
             shortSummary: shortSummary,
+            outputLocation: outputLocation ?? null,
         })
+
+        return response
     }
+
+    async executeAIquery() {}
 
     removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
         event,
@@ -2005,7 +2237,8 @@ export class SidebarContainerLogic extends UILogic<
             )
         } else if (
             event.tab === 'summary' &&
-            (event.prompt.length > 0 || event.textToProcess.length > 0)
+            ((event.prompt && event.prompt.length > 0) ||
+                event.textToProcess.length > 0)
         ) {
             if (previousState.pageSummary.length === 0) {
                 let isPagePDF = window.location.href.includes(
@@ -2295,6 +2528,70 @@ export class SidebarContainerLogic extends UILogic<
         return nextState
     }
 
+    createYoutubeTimestampWithAISummary: EventHandler<
+        'createYoutubeTimestampWithAISummary'
+    > = async ({ previousState, event }) => {
+        this.emitMutation({
+            loadState: { $set: 'success' },
+            activeTab: { $set: 'annotations' },
+        })
+        this.options.focusCreateForm()
+        this.emitMutation({
+            commentBox: {
+                commentText: { $set: '' },
+            },
+            pageSummary: { $set: '' },
+            prompt: { $set: null },
+        })
+        const timestampToInsert = event.timeStampANDSummaryJSON[0]
+
+        const maxRetries = 30
+        let handledSuccessfully = false
+
+        for (let i = 0; i < maxRetries; i++) {
+            if (
+                this.options.events.emit(
+                    'triggerYoutubeTimestampSummary',
+                    {
+                        text: timestampToInsert + ' ',
+                        showLoadingSpinner: true,
+                    },
+                    (success) => {
+                        handledSuccessfully = success
+                    },
+                )
+            ) {
+                break
+            }
+            await sleepPromise(50) // wait for half a second before trying again
+        }
+
+        const filteredSegments = JSON.parse(event.timeStampANDSummaryJSON[1])
+
+        const combinedText = filteredSegments.map((item) => item.text).join(' ')
+
+        let prompt =
+            'The following text an excerpt of an auto-generated video transcript. Please refer to it as "video sections" or "video" and not as text when talking about it. Also, the transcript will contain transcription errors. Please correct and output it as much as possible and keep it in its original meaning. Try to be short and conscise as the purpose of this summary is to help people to mark a video section and what it was saying. Do not use any lists as outputs: '
+
+        await this.queryAI(
+            undefined,
+            combinedText,
+            prompt,
+            undefined,
+            previousState,
+            null,
+            'editor',
+        )
+
+        this.emitMutation({
+            pageSummary: { $set: '' },
+            prompt: { $set: null },
+            selectedTextAIPreview: {
+                $set: '',
+            },
+        })
+    }
+
     setSelectedList: EventHandler<'setSelectedList'> = async ({
         event,
         previousState,
@@ -2317,6 +2614,8 @@ export class SidebarContainerLogic extends UILogic<
             previousState,
             event.unifiedListId,
         )
+
+        this.emitMutation({})
     }
 
     setSelectedListFromWebUI: EventHandler<
@@ -2555,6 +2854,32 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: event } })
     }
 
+    setSharingTutorialVisibility: EventHandler<
+        'setSharingTutorialVisibility'
+    > = async ({ previousState, event }) => {
+        const hasEverSharedPageLink = await browser.storage.local.get(
+            'hasEverSharedPageLink',
+        )
+
+        if (!hasEverSharedPageLink.hasEverSharedPageLink) {
+            await browser.storage.local.set({ hasEverSharedPageLink: true })
+            this.emitMutation({
+                firstTimeSharingPageLink: { $set: true },
+            })
+            this.emitMutation({
+                firstTimeSharingPageLink: {
+                    $set: true,
+                },
+            })
+        } else {
+            this.emitMutation({
+                firstTimeSharingPageLink: {
+                    $set: false,
+                },
+            })
+        }
+    }
+
     updateAllAnnotationsShareInfo: EventHandler<
         'updateAllAnnotationsShareInfo'
     > = ({ event }) => {
@@ -2611,6 +2936,7 @@ export class SidebarContainerLogic extends UILogic<
 
     createPageLink: EventHandler<'createPageLink'> = async ({
         previousState,
+        event,
     }) => {
         const fullPageUrl = previousState.fullPageUrl
 
@@ -2628,6 +2954,28 @@ export class SidebarContainerLogic extends UILogic<
 
         if (window.location.href.includes('web.telegram.org')) {
             title = getTelegramUserDisplayName(document, window.location.href)
+        }
+
+        this.emitMutation({
+            showSharePageTooltip: { $set: true },
+        })
+
+        const existingPageLink = this.options.annotationsCache.getSharedPageListIds(
+            normalizeUrl(fullPageUrl),
+        )
+
+        if (existingPageLink.length > 0) {
+            this.emitMutation({
+                showSharePageTooltip: { $set: true },
+            })
+            this.emitMutation({
+                selectedListForShareMenu: {
+                    $set: existingPageLink[existingPageLink.length - 1],
+                },
+            })
+            if (!event.forceCreate) {
+                return
+            }
         }
 
         await executeUITask(this, 'pageLinkCreateState', async () => {
@@ -2659,6 +3007,10 @@ export class SidebarContainerLogic extends UILogic<
             const { unifiedId } = this.options.annotationsCache.addList(
                 cacheListData,
             )
+
+            this.emitMutation({
+                selectedListForShareMenu: { $set: unifiedId },
+            })
 
             await Promise.all([
                 this.options.contentSharingByTabsBG.waitForPageLinkCreation({

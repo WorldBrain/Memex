@@ -1,4 +1,8 @@
-import React, { PureComponent, MouseEventHandler } from 'react'
+import React, {
+    PureComponent,
+    MouseEventHandler,
+    KeyboardEventHandler,
+} from 'react'
 import styled from 'styled-components'
 
 import Overlay, { Props as OverlayProps } from './Overlay'
@@ -7,17 +11,14 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends Omit<OverlayProps, 'onClick'> {
     ignoreClickOutside?: boolean
-    onClose?: MouseEventHandler
+    onClose?: any
 }
 
 class Modal extends PureComponent<Props> {
     render() {
         const { onClose, ignoreClickOutside, ...props } = this.props
         return (
-            <Overlay
-                onClick={ignoreClickOutside ? undefined : onClose}
-                {...props}
-            >
+            <Overlay onClick={onClose} {...props}>
                 {onClose && (
                     <CloseContainer>
                         <Icon

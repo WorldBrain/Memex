@@ -15,6 +15,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { GUIDED_ONBOARDING_URL } from '../../constants'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 
 const styles = require('../../components/onboarding-box.css')
 
@@ -32,6 +33,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         | 'personalCloudBG'
         | 'navToGuidedTutorial'
         | 'contentScriptsBG'
+        | 'analyticsBG'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
@@ -43,6 +45,7 @@ export default class OnboardingScreen extends StatefulUIElement<
         navToGuidedTutorial: () => {
             window.open(GUIDED_ONBOARDING_URL)
         },
+        analyticsBG: runInBackground(),
     }
 
     constructor(props: Props) {
@@ -178,7 +181,24 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <>
                         <OnboardingContainer>
                             <OnboardingOptionBox
-                                onClick={() => this.props.navToGuidedTutorial()}
+                                onClick={() => {
+                                    this.props.navToGuidedTutorial()
+
+                                    if (this.props.analyticsBG) {
+                                        try {
+                                            trackOnboardingPath(
+                                                this.props.analyticsBG,
+                                                {
+                                                    type: 'interactive',
+                                                },
+                                            )
+                                        } catch (error) {
+                                            console.error(
+                                                `Error tracking onboarding tutorial', ${error}`,
+                                            )
+                                        }
+                                    }
+                                }}
                             >
                                 <RecommendedPill>Recommended</RecommendedPill>
                                 <OnboardingTitle>
@@ -192,12 +212,26 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() =>
+                                onClick={() => {
                                     this.processEvent(
                                         'showOnboardingVideo',
                                         null,
                                     )
-                                }
+                                    if (this.props.analyticsBG) {
+                                        try {
+                                            trackOnboardingPath(
+                                                this.props.analyticsBG,
+                                                {
+                                                    type: 'video',
+                                                },
+                                            )
+                                        } catch (error) {
+                                            console.error(
+                                                `Error tracking onboarding tutorial', ${error}`,
+                                            )
+                                        }
+                                    }
+                                }}
                             >
                                 <OnboardingTitle>Watch a Video</OnboardingTitle>
                                 <Icon
@@ -208,12 +242,26 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() =>
+                                onClick={() => {
                                     window.open(
                                         'https://tutorials.memex.garden/tutorials',
                                         '_blank',
                                     )
-                                }
+                                    if (this.props.analyticsBG) {
+                                        try {
+                                            trackOnboardingPath(
+                                                this.props.analyticsBG,
+                                                {
+                                                    type: 'docs',
+                                                },
+                                            )
+                                        } catch (error) {
+                                            console.error(
+                                                `Error tracking onboarding tutorial', ${error}`,
+                                            )
+                                        }
+                                    }
+                                }}
                             >
                                 <OnboardingTitle>Read Docs</OnboardingTitle>
                                 <Icon
@@ -224,12 +272,26 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() =>
+                                onClick={() => {
                                     window.open(
                                         'https://calendly.com/worldbrain/memex-onboarding-call',
                                         '_blank',
                                     )
-                                }
+                                    if (this.props.analyticsBG) {
+                                        try {
+                                            trackOnboardingPath(
+                                                this.props.analyticsBG,
+                                                {
+                                                    type: 'onboardingCall',
+                                                },
+                                            )
+                                        } catch (error) {
+                                            console.error(
+                                                `Error tracking onboarding tutorial', ${error}`,
+                                            )
+                                        }
+                                    }
+                                }}
                             >
                                 <OnboardingTitle>15min Call</OnboardingTitle>
                                 <Icon
@@ -243,7 +305,23 @@ export default class OnboardingScreen extends StatefulUIElement<
                         <PrimaryAction
                             type="tertiary"
                             label="I'll just start by playing around"
-                            onClick={() => this.props.navToDashboard()}
+                            onClick={() => {
+                                this.props.navToDashboard()
+                                if (this.props.analyticsBG) {
+                                    try {
+                                        trackOnboardingPath(
+                                            this.props.analyticsBG,
+                                            {
+                                                type: 'skip',
+                                            },
+                                        )
+                                    } catch (error) {
+                                        console.error(
+                                            `Error tracking onboarding tutorial', ${error}`,
+                                        )
+                                    }
+                                }
+                            }}
                             size="large"
                             icon={'arrowRight'}
                             iconPosition="right"

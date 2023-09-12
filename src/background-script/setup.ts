@@ -102,10 +102,13 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { remoteFunctions } from 'src/util/remote-functions-background'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
     auth: AuthBackground
+    authBG: AuthRemoteFunctionsInterface
     analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
@@ -146,9 +149,9 @@ export function createBackgroundModules(options: {
     storageManager: StorageManager
     persistentStorageManager: StorageManager
     authServices: AuthServices
-    servicesPromise: Promise<Services>
+    services: Services
     browserAPIs: Browser
-    getServerStorage: () => Promise<ServerStorage>
+    serverStorage: ServerStorage
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
         name: string,
@@ -188,10 +191,6 @@ export function createBackgroundModules(options: {
             getFirebase().firestore().collection(collectionName).doc().id)
 
     const { storageManager } = options
-    const getServerStorage = async () =>
-        (await options.getServerStorage()).modules
-    const getServerStorageManager = async () =>
-        (await options.getServerStorage()).manager
 
     const syncSettings = new SyncSettingsBackground({
         storageManager,
@@ -226,6 +225,35 @@ export function createBackgroundModules(options: {
 
     const analyticsBG = analytics
 
+    const notifications = new NotificationBackground({ storageManager })
+
+    const jobScheduler = new JobSchedulerBackground({
+        storagePrefix: JobScheduler.STORAGE_PREFIX,
+        storageAPI: options.browserAPIs.storage,
+        alarmsAPI: options.browserAPIs.alarms,
+        notifications,
+        jobs,
+    })
+
+    const auth =
+        options.auth ||
+        new AuthBackground({
+            runtimeAPI: options.browserAPIs.runtime,
+            authServices: options.authServices,
+            jobScheduler: jobScheduler.scheduler,
+            remoteEmitter: createRemoteEventEmitter('auth'),
+            localStorageArea: options.browserAPIs.storage.local,
+            getFCMRegistrationToken: options.getFCMRegistrationToken,
+            backendFunctions: {
+                registerBetaUser: async (params) =>
+                    callFirebaseFunction('registerBetaUser', params),
+            },
+            userManagement: options.serverStorage.modules.users,
+        })
+
+    const getCurrentUserId = async (): Promise<AutoPk | null> =>
+        (await auth.authService.getCurrentUser())?.id ?? null
+
     const pages = new PageIndexingBackground({
         persistentStorageManager: options.persistentStorageManager,
         pageIndexingSettingsStore: new BrowserSettingsStore(
@@ -238,6 +266,7 @@ export function createBackgroundModules(options: {
         storageManager,
         tabManagement,
         getNow,
+        authBG: auth.remoteFunctions,
     })
     tabManagement.events.on('tabRemoved', async (event) => {
         await pages.handleTabClose(event)
@@ -282,24 +311,13 @@ export function createBackgroundModules(options: {
         syncSettings: syncSettingsStore,
     })
 
-    const notifications = new NotificationBackground({ storageManager })
-
-    const jobScheduler = new JobSchedulerBackground({
-        storagePrefix: JobScheduler.STORAGE_PREFIX,
-        storageAPI: options.browserAPIs.storage,
-        alarmsAPI: options.browserAPIs.alarms,
-        notifications,
-        jobs,
-    })
-
     const social = new SocialBackground({ storageManager })
 
     const activityIndicator = new ActivityIndicatorBackground({
-        authServices: options.authServices,
-        servicesPromise: options.servicesPromise,
+        services: options.services,
         syncSettings: syncSettingsStore,
-        getActivityStreamsStorage: async () =>
-            (await options.getServerStorage()).modules.activityStreams,
+        authServices: options.authServices,
+        activityStreamsStorage: options.serverStorage.modules.activityStreams,
     })
 
     const directLinking = new DirectLinkingBackground({
@@ -309,31 +327,11 @@ export function createBackgroundModules(options: {
         pages,
         analytics,
         analyticsBG,
-        getServerStorage,
+        serverStorage: options.serverStorage.modules,
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
         },
     })
-
-    const auth =
-        options.auth ||
-        new AuthBackground({
-            runtimeAPI: options.browserAPIs.runtime,
-            authServices: options.authServices,
-            jobScheduler: jobScheduler.scheduler,
-            remoteEmitter: createRemoteEventEmitter('auth'),
-            localStorageArea: options.browserAPIs.storage.local,
-            getFCMRegistrationToken: options.getFCMRegistrationToken,
-            backendFunctions: {
-                registerBetaUser: async (params) =>
-                    callFirebaseFunction('registerBetaUser', params),
-            },
-            getUserManagement: async () =>
-                (await options.getServerStorage()).modules.users,
-        })
-
-    const getCurrentUserId = async (): Promise<AutoPk | null> =>
-        (await auth.authService.getCurrentUser())?.id ?? null
 
     const activityStreams = new ActivityStreamsBackground({
         storageManager,
@@ -383,9 +381,9 @@ export function createBackgroundModules(options: {
             { prefix: 'contentSharing.' },
         ),
         analytics: options.analyticsManager,
-        servicesPromise: options.servicesPromise,
+        services: options.services,
         captureException: options.captureException,
-        getServerStorage,
+        serverStorage: options.serverStorage.modules,
         generateServerId,
         getBgModules: () => ({
             auth,
@@ -407,7 +405,7 @@ export function createBackgroundModules(options: {
         searchIndex: search.searchIndex,
         pages,
         localBrowserStorage: options.browserAPIs.storage.local,
-        getServerStorage,
+        serverStorage: options.serverStorage.modules,
         authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
             directLinking,
@@ -463,7 +461,7 @@ export function createBackgroundModules(options: {
         fetch,
         storageManager,
         getCurrentUserId,
-        getServerStorage,
+        serverStorage: options.serverStorage.modules,
         jobScheduler: jobScheduler.scheduler,
     })
     const summarizeBG = new SummarizeBackground({
@@ -473,7 +471,7 @@ export function createBackgroundModules(options: {
 
     const uaParser = new UAParser(options.userAgentString)
     const createDeviceId = deviceIdCreatorFactory({
-        getServerStorage,
+        serverStorage: options.serverStorage.modules,
         personalDeviceInfo: {
             type: PersonalDeviceType.DesktopBrowser,
             product: PersonalDeviceProduct.Extension,
@@ -502,7 +500,7 @@ export function createBackgroundModules(options: {
     const personalCloud: PersonalCloudBackground = new PersonalCloudBackground({
         storageManager,
         syncSettingsStore,
-        getServerStorageManager,
+        serverStorageManager: options.serverStorage.manager,
         runtimeAPI: options.browserAPIs.runtime,
         jobScheduler: jobScheduler.scheduler,
         persistentStorageManager: options.persistentStorageManager,
@@ -510,13 +508,13 @@ export function createBackgroundModules(options: {
             options.personalCloudMediaBackend ??
             new FirebasePersonalCloudMediaBackend({
                 firebase,
-                getServerStorageManager,
+                serverStorageManager: options.serverStorage.manager,
             }),
         backend:
             options.personalCloudBackend ??
             new FirebasePersonalCloudBackend({
                 firebase,
-                getServerStorageManager,
+                serverStorageManager: options.serverStorage.manager,
                 personalCloudService: firebaseService<PersonalCloudService>(
                     'personalCloud',
                     callFirebaseFunction,
@@ -560,6 +558,7 @@ export function createBackgroundModules(options: {
         localExtSettingStore,
         syncSettingsStore,
         storageManager,
+        analyticsBG,
         bgModules: {
             readwise,
             copyPaster,
@@ -576,6 +575,7 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
+        authBG: remoteFunctions.auth,
         social,
         analytics,
         jobScheduler,
@@ -687,8 +687,8 @@ export function createBackgroundModules(options: {
         personalCloud,
         contentSharing,
         contentConversations: new ContentConversationsBackground({
-            getServerStorage,
-            servicesPromise: options.servicesPromise,
+            serverStorage: options.serverStorage.modules,
+            services: options.services,
         }),
     }
 }

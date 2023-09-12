@@ -23,28 +23,24 @@ export default class ActivityIndicatorBackground {
 
     constructor(
         private options: {
-            getActivityStreamsStorage: () => Promise<ActivityStreamsStorage>
+            activityStreamsStorage: ActivityStreamsStorage
             authServices: Pick<AuthServices, 'auth'>
-            servicesPromise: Promise<Pick<Services, 'activityStreams'>>
+            services: Pick<Services, 'activityStreams'>
             syncSettings: SyncSettingsStore<'activityIndicator'>
         },
     ) {
-        options.servicesPromise.then((services) => {
-            this.service = new ActivityIndicatorService({
-                authService: options.authServices.auth,
-                activityStreamsService: services.activityStreams,
-                getActivityStreamsStorage: options.getActivityStreamsStorage,
-                getStatusCacheFlag: () =>
-                    options.syncSettings.activityIndicator.get(
-                        'feedHasActivity',
-                    ),
-                setStatusCacheFlag: (hasActivity) =>
-                    options.syncSettings.activityIndicator.set(
-                        'feedHasActivity',
-                        hasActivity,
-                    ),
-                captureError: (error) => Raven.captureException(error),
-            })
+        this.service = new ActivityIndicatorService({
+            authService: options.authServices.auth,
+            activityStreamsService: options.services.activityStreams,
+            activityStreamsStorage: options.activityStreamsStorage,
+            getStatusCacheFlag: () =>
+                options.syncSettings.activityIndicator.get('feedHasActivity'),
+            setStatusCacheFlag: (hasActivity) =>
+                options.syncSettings.activityIndicator.set(
+                    'feedHasActivity',
+                    hasActivity,
+                ),
+            captureError: (error) => Raven.captureException(error),
         })
 
         this.remoteFunctions = {
@@ -58,13 +54,10 @@ export default class ActivityIndicatorBackground {
     }
 
     checkActivityStatus: ActivityIndicatorInterface['checkActivityStatus'] = async () => {
-        await this.options.servicesPromise
-
         return this.service.checkActivityStatus()
     }
 
     markActivitiesAsSeen = async () => {
-        await this.options.servicesPromise
         await this.service.markActivitiesAsSeen()
         return
 

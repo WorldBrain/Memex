@@ -45,7 +45,10 @@ import {
     SELECT_SPACE_NEGATIVE_LABEL,
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
-import type { UnifiedAnnotation } from 'src/annotations/cache/types'
+import type {
+    UnifiedAnnotation,
+    UnifiedList,
+} from 'src/annotations/cache/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import * as cacheUtils from 'src/annotations/cache/utils'
@@ -56,6 +59,7 @@ import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/com
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
+import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -100,6 +104,7 @@ export class AnnotationsSidebarContainer<
             }),
         )
 
+        window['_getState'] = () => ({ ...this.state })
         this.listenToWindowChanges()
     }
 
@@ -356,6 +361,13 @@ export class AnnotationsSidebarContainer<
                     normalizedPageUrlToFilterPageLinksBy={normalizeUrl(
                         this.state.fullPageUrl,
                     )}
+                    onListFocus={(listId: UnifiedList['localId']) => {
+                        const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
+                            listId,
+                        ).unifiedId
+
+                        this.processEvent('setSelectedList', { unifiedListId })
+                    }}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -425,12 +437,6 @@ export class AnnotationsSidebarContainer<
                     deleted: listId,
                     unifiedAnnotationId: params.annotation.unifiedId,
                 }),
-            onListShare: ({ localListId, remoteListId }) =>
-                annotationsCache.updateList({
-                    remoteId: remoteListId,
-                    unifiedId: annotationsCache.getListByLocalId(localListId)
-                        ?.unifiedId,
-                }),
             normalizedPageUrlToFilterPageLinksBy: normalizeUrl(
                 this.state.fullPageUrl,
             ),
@@ -471,6 +477,14 @@ export class AnnotationsSidebarContainer<
                     showExternalConfirmations: true,
                 })}
                 closePicker={closePicker}
+                onListFocus={(listId: UnifiedList['localId']) => {
+                    const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
+                        listId,
+                    ).unifiedId
+
+                    this.processEvent('setSelectedList', { unifiedListId })
+                    closePicker()
+                }}
             />
         )
     }
@@ -535,6 +549,7 @@ export class AnnotationsSidebarContainer<
         const {
             confirmPrivatizeNoteArgs,
             confirmSelectNoteSpaceArgs,
+            firstTimeSharingPageLink,
         } = this.state
 
         return (
@@ -590,6 +605,29 @@ export class AnnotationsSidebarContainer<
                         />
                     </ConfirmModal>
                 )}
+                {firstTimeSharingPageLink && (
+                    <ConfirmModal
+                        isShown
+                        ignoreReactPortal={
+                            this.props.sidebarContext !== 'dashboard'
+                        }
+                        onClose={() =>
+                            this.processEvent(
+                                'setSharingTutorialVisibility',
+                                null,
+                            )
+                        }
+                        message={' 🎉 Your first time sharing something!'}
+                        submessage="Learn the basics of sharing & collaborating"
+                    >
+                        <OnboardingVideo
+                            src="https://share.descript.com/embed/6OLjZqSa4JK"
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                        />
+                    </ConfirmModal>
+                )}
             </>
         )
     }
@@ -598,6 +636,8 @@ export class AnnotationsSidebarContainer<
         <AICounterIndicator
             position={position}
             syncSettingsBG={this.props.syncSettingsBG}
+            isTrial={this.state.isTrial}
+            signupDate={this.state.signupDate}
         />
     )
 
@@ -774,11 +814,109 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            initGetReplyEditProps={(sharedListReference) => (
+                                replyReference,
+                                annotationReference,
+                            ) => ({
+                                isDeleting: this.state.replyDeleteStates[
+                                    replyReference.id
+                                ]?.isDeleting,
+                                isEditing: this.state.replyEditStates[
+                                    replyReference.id
+                                ]?.isEditing,
+                                isHovering: this.state.replyHoverStates[
+                                    replyReference.id
+                                ]?.isHovering,
+                                isOwner:
+                                    this.state.conversations[
+                                        (this
+                                            .logic as SidebarContainerLogic).buildConversationId(
+                                            annotationReference.id,
+                                            sharedListReference,
+                                        )
+                                    ].replies.find(
+                                        (reply) =>
+                                            reply.reference.id ===
+                                            replyReference.id,
+                                    )?.userReference?.id ===
+                                    this.state.currentUserReference?.id,
+                                comment:
+                                    this.state.replyEditStates[
+                                        replyReference.id
+                                    ]?.text ?? '',
+                                setAnnotationDeleting: (isDeleting) => (
+                                    event,
+                                ) =>
+                                    this.processEvent(
+                                        'setReplyToAnnotationDeleting',
+                                        {
+                                            isDeleting,
+                                            replyReference,
+                                        },
+                                    ),
+                                setAnnotationEditing: (isEditing) => (event) =>
+                                    this.processEvent(
+                                        'setReplyToAnnotationEditing',
+                                        {
+                                            isEditing,
+                                            replyReference,
+                                        },
+                                    ),
+                                setAnnotationHovering: (isHovering) => (
+                                    event,
+                                ) => {
+                                    this.processEvent(
+                                        'setReplyToAnnotationHovering',
+                                        {
+                                            isHovering,
+                                            replyReference,
+                                        },
+                                    )
+                                },
+                                onCommentChange: (comment) =>
+                                    this.processEvent('editReplyToAnnotation', {
+                                        replyText: comment,
+                                        replyReference,
+                                    }),
+                                onDeleteConfim: () =>
+                                    this.processEvent(
+                                        'confirmDeleteReplyToAnnotation',
+                                        {
+                                            replyReference,
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onEditConfirm: () => () =>
+                                    this.processEvent(
+                                        'confirmEditReplyToAnnotation',
+                                        {
+                                            replyReference,
+                                            annotationReference,
+                                            sharedListReference,
+                                        },
+                                    ),
+                                onEditCancel: () =>
+                                    this.processEvent(
+                                        'setReplyToAnnotationEditing',
+                                        {
+                                            isEditing: false,
+                                            replyReference,
+                                        },
+                                    ),
+                            })}
+                            events={this.props.events}
+                            youtubeTranscriptSummary={
+                                this.state.youtubeTranscriptSummary
+                            }
                             setSpacePickerAnnotationInstance={(state) =>
                                 this.processEvent(
                                     'setSpacePickerAnnotationInstance',
                                     { state },
                                 )
+                            }
+                            selectedListForShareMenu={
+                                this.state.selectedListForShareMenu
                             }
                             setShareMenuAnnotationInstance={(instanceId) =>
                                 this.processEvent(
@@ -796,9 +934,17 @@ export class AnnotationsSidebarContainer<
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('markFeedAsRead', null)
                             }
-                            clickCreatePageLinkBtn={() =>
+                            clickCreatePageLinkBtn={() => {
                                 this.processEvent('createPageLink', null)
+                                this.processEvent(
+                                    'setSharingTutorialVisibility',
+                                    null,
+                                )
+                            }}
+                            showSharePageTooltip={
+                                this.state.showSharePageTooltip
                             }
+                            selectedListId={this.state.selectedListId}
                             currentUser={this.props.getCurrentUser()}
                             annotationsCache={this.props.annotationsCache}
                             onUnifiedListSelect={(unifiedListId) =>
@@ -834,6 +980,12 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('openContextMenuForList', {
                                     unifiedListId,
                                 })
+                            }
+                            openPageListMenuForList={() =>
+                                this.processEvent(
+                                    'openPageListMenuForList',
+                                    null,
+                                )
                             }
                             openWebUIPage={(unifiedListId) =>
                                 this.processEvent('openWebUIPageForSpace', {
@@ -910,7 +1062,9 @@ export class AnnotationsSidebarContainer<
                             ) => {
                                 this.processEvent('editListName', {
                                     unifiedListId: unifiedListId,
+                                    localId: localId,
                                     newName,
+                                    oldName: oldName,
                                 })
                                 await this.props.customListsBG.updateListName({
                                     id: localId,
@@ -933,6 +1087,12 @@ export class AnnotationsSidebarContainer<
                             onShareAllNotesClick={() =>
                                 this.handleCopyAllNotesClick
                             }
+                            createNewNoteFromAISummary={(summary) => {
+                                this.processEvent(
+                                    'createNewNoteFromAISummary',
+                                    { comment: summary },
+                                )
+                            }}
                             sharingAccess={this.state.annotationSharingAccess}
                             needsWaypoint={!this.state.noResults}
                             appendLoader={
@@ -979,6 +1139,10 @@ export class AnnotationsSidebarContainer<
                             }
                             renderContextMenuForList={(listData) => (
                                 <SpaceContextMenu
+                                    isCreator={
+                                        listData.creator.id ===
+                                        this.state.currentUserReference.id
+                                    }
                                     contentSharingBG={
                                         this.props.contentSharingBG
                                     }
@@ -990,20 +1154,68 @@ export class AnnotationsSidebarContainer<
                                     onConfirmSpaceNameEdit={(newName) => {
                                         this.processEvent('editListName', {
                                             unifiedListId: listData.unifiedId,
+                                            localId: listData.localId,
                                             newName,
+                                            oldName: listData.name,
                                         })
                                     }}
-                                    onSpaceShare={(remoteListId) =>
+                                    onSpaceShare={(
+                                        remoteListId,
+                                        annotationLocalToRemoteIdsDict,
+                                    ) => {
                                         this.processEvent('shareList', {
-                                            unifiedListId: listData.unifiedId,
                                             remoteListId,
+                                            annotationLocalToRemoteIdsDict,
+                                            unifiedListId: listData.unifiedId,
                                         })
-                                    }
+                                        this.processEvent(
+                                            'setSharingTutorialVisibility',
+                                            null,
+                                        )
+                                    }}
                                     onDeleteSpaceConfirm={() =>
                                         this.processEvent('deleteList', {
                                             unifiedListId: listData.unifiedId,
                                         })
                                     }
+                                    analyticsBG={this.props.analyticsBG}
+                                />
+                            )}
+                            renderPageLinkMenuForList={(listData) => (
+                                <PageLinkMenu
+                                    contentSharingBG={
+                                        this.props.contentSharingBG
+                                    }
+                                    spacesBG={this.props.customListsBG}
+                                    listData={listData}
+                                    disableWriteOps={
+                                        this.state.hasListDataBeenManuallyPulled
+                                    }
+                                    onSpaceShare={() => {
+                                        this.processEvent('createPageLink', {
+                                            forceCreate: true,
+                                        })
+                                        this.processEvent(
+                                            'setSharingTutorialVisibility',
+                                            null,
+                                        )
+                                    }}
+                                    pageLinkCreateState={
+                                        this.state.pageLinkCreateState
+                                    }
+                                    showSpacesTab={() => {
+                                        this.processEvent(
+                                            'openPageListMenuForList',
+                                            null,
+                                        )
+                                        this.processEvent(
+                                            'setActiveSidebarTab',
+                                            { tab: 'spaces' },
+                                        )
+                                        this.processEvent('setSelectedList', {
+                                            unifiedListId: null,
+                                        })
+                                    }}
                                     analyticsBG={this.props.analyticsBG}
                                 />
                             )}
@@ -1116,6 +1328,13 @@ const GlobalStyle = createGlobalStyle<{
     }
 `
 
+const OnboardingVideo = styled.iframe`
+    width: 800px;
+    height: 450px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale1};
+    border-radius: 20px;
+`
+
 const TooltipContent = styled.div`
     display: flex;
     align-items: center;
@@ -1134,7 +1353,11 @@ const PickerWrapper = styled.div`
     z-index: 5;
 `
 
-const ContainerStyled = styled.div<{ sidebarContext: string; isShown: string }>`
+const ContainerStyled = styled.div<{
+    sidebarContext: string
+    isShown: string
+    theme
+}>`
     height: 100vh;
     overflow-x: visible;
     position: ${(props) =>
@@ -1178,6 +1401,15 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
             right: 0px;
         `}
 
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            box-shadow: ${(props) => props.theme.borderStyles.boxShadowLeft};
+            border-left: 1px solid
+                ${(props) =>
+                    props.theme.borderStyles.borderLineColorBigElements};
+        `};
 
 
     scrollbar-width: none;

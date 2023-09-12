@@ -1,5 +1,5 @@
 import React, { PureComponent, ReactElement } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import Margin from 'src/dashboard-refactor/components/Margin'
 
@@ -155,6 +155,14 @@ const SearchBarContainer = styled.div<{ isClosed: boolean }>`
     &:focus-within {
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            &:focus-within {
+                outline: 1px solid ${(props) => props.theme.colors.prime1};
+            }
+        `};
 `
 
 const Input = styled.input`

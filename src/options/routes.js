@@ -18,7 +18,7 @@ export default [
     {
         name: 'Back to Dashboard',
         pathname: '/overview',
-        component: DashboardResultsContainer,
+        component: (props) => <DashboardResultsContainer {...props} />,
         icon: 'searchIcon',
         useOwnLayout: true,
     },
@@ -65,8 +65,8 @@ export default [
     //     isExternal: true,
     // },
     {
-        name: 'Forum',
-        pathname: 'https://worldbrain.io/help',
+        name: 'Feedback',
+        pathname: 'https://feedback.memex.garden',
         icon: 'helpIcon',
         isExternal: true,
     },

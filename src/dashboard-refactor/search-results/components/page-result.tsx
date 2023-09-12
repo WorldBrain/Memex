@@ -1,5 +1,5 @@
 import React, { PureComponent, createRef } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
@@ -403,6 +403,14 @@ const StyledPageResult = styled.div`
     flex-direction: column;
     position: relative;
     border-radius: 12px;
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            box-shadow: ${props.theme.borderStyles
+                .boxShadowHoverElementsLighter};
+            border: 1px solid ${props.theme.colors.greyScale2};
+        `};
 `
 
 const PageContentBox = styled.div<{ hasSpaces: boolean }>`

@@ -62,8 +62,14 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
+import {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-export interface Props extends DashboardDependencies {}
+export interface Props extends DashboardDependencies {
+    theme: MemexTheme
+}
 
 export class DashboardContainer extends StatefulUIElement<
     Props,
@@ -543,10 +549,14 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
-                    onSpaceShare: (remoteListId) =>
+                    onSpaceShare: (
+                        remoteListId,
+                        annotationLocalToRemoteIdsDict,
+                    ) =>
                         this.processEvent('handleListShare', {
                             listId,
                             remoteListId,
+                            annotationLocalToRemoteIdsDict,
                         }),
                     analyticsBG: this.props.analyticsBG,
                 })}
@@ -1293,6 +1303,7 @@ export class DashboardContainer extends StatefulUIElement<
                 <Onboarding
                     contentScriptsBG={this.props.contentScriptsBG}
                     authBG={this.props.authBG}
+                    analyticsBG={this.props.analyticsBG}
                 />
             )
         }
@@ -1310,6 +1321,7 @@ export class DashboardContainer extends StatefulUIElement<
         const isPeeking = this.state.listsSidebar.isSidebarPeeking
             ? this.state.listsSidebar.isSidebarPeeking
             : undefined
+
         return (
             <Container
                 onDragEnter={(event) => this.processEvent('dragFile', event)}
@@ -1447,6 +1459,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
+                            theme={this.props.theme}
                             hasFeedActivity={listsSidebar.hasFeedActivity}
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('switchToFeed', null)
@@ -1511,7 +1524,16 @@ export class DashboardContainer extends StatefulUIElement<
                         />
                     </MainFrame>
                     {this.renderModals()}
-                    <HelpBtn />
+                    <HelpBtn
+                        theme={this.props.theme.variant}
+                        toggleTheme={() =>
+                            this.processEvent('toggleTheme', {
+                                themeVariant:
+                                    this.state.themeVariant ||
+                                    this.props.theme.variant,
+                            })
+                        }
+                    />
                     <DragElement
                         isHoveringOverListItem={
                             listsSidebar.dragOverListId != null
@@ -1697,6 +1719,13 @@ const ListSidebarContent = styled(Rnd)<{
                 opacity: 100%;
             }
         }
+
+        ${(props) =>
+            props.theme.variant === 'light' &&
+            css`
+                border-color: ${(props) => props.theme.colors.greyScale2};
+                box-shadow: ${() => props.theme.borderStyles.boxShadowRight};
+            `};
 `
 
 // const ListSidebarContent = styled.div`

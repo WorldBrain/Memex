@@ -25,7 +25,11 @@ export interface ContentSharingInterface
         > {
     scheduleListShare(params: {
         localListId: number
-    }): Promise<Omit<SharedListData, 'annotationSharingStatesPromise'>>
+    }): Promise<
+        Omit<SharedListData, 'annotationSharingStatesPromise'> & {
+            annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
+        }
+    >
     waitForListShare(params: { localListId: number }): Promise<void>
     shareAnnotations(options: {
         annotationUrls: string[]

@@ -36,6 +36,7 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
+    onListFocus?: (listId: UnifiedList['localId']) => void
 }
 
 class SpacePicker extends StatefulUIElement<
@@ -123,6 +124,7 @@ class SpacePicker extends StatefulUIElement<
         e.stopPropagation()
         this.processEvent('newEntryAllPress', {
             entry: this.state.newEntryName,
+            analyticsBG: this.props.analyticsBG,
         })
     }
 
@@ -138,6 +140,7 @@ class SpacePicker extends StatefulUIElement<
     handleNewListPress = () => {
         this.processEvent('newEntryPress', {
             entry: this.state.newEntryName,
+            analyticsBG: this.props.analyticsBG,
         })
     }
 
@@ -225,8 +228,10 @@ class SpacePicker extends StatefulUIElement<
                 onPress={() => {
                     this.processEvent('resultEntryPress', {
                         entry,
+                        analyticsBG: this.props.analyticsBG,
                     })
                 }}
+                onListFocus={() => this.props.onListFocus(entry.localId)}
                 addedToAllIds={this.state.addedToAllIds}
                 keepScrollPosition={this.keepScrollPosition}
                 onPressActOnAll={
@@ -234,6 +239,7 @@ class SpacePicker extends StatefulUIElement<
                         ? () =>
                               this.processEvent('resultEntryAllPress', {
                                   entry,
+                                  analyticsBG: this.props.analyticsBG,
                               })
                         : undefined
                 }
@@ -373,6 +379,9 @@ class SpacePicker extends StatefulUIElement<
                     </PrimaryActionBox>
                     <SpaceContextMenu
                         loadOwnershipData
+                        isCreator={
+                            list.creator?.id === this.state.currentUser?.id
+                        }
                         listData={list}
                         ref={this.contextMenuRef}
                         contentSharingBG={this.props.contentSharingBG}
@@ -393,8 +402,12 @@ class SpacePicker extends StatefulUIElement<
                         onCancelEdit={this.handleSpaceContextMenuClose(
                             list.localId,
                         )}
-                        onSpaceShare={(remoteListId) =>
+                        onSpaceShare={(
+                            remoteListId,
+                            annotationLocalToRemoteIdsDict,
+                        ) =>
                             this.processEvent('setListRemoteId', {
+                                annotationLocalToRemoteIdsDict,
                                 localListId: list.localId,
                                 remoteListId,
                             })
@@ -501,7 +514,10 @@ const OutputSwitcher = styled.div<{
     active: boolean
 }>`
     display: flex;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
     padding: 5px 10px;
     font-size: 12px;
     cursor: pointer;
@@ -576,6 +592,12 @@ const SectionCircle = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css<any>`
+            border-color: ${props.theme.colors.greyScale3};
+        `};
 `
 
 const InfoText = styled.div`
