@@ -549,10 +549,14 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
-                    onSpaceShare: (remoteListId) =>
+                    onSpaceShare: (
+                        remoteListId,
+                        annotationLocalToRemoteIdsDict,
+                    ) =>
                         this.processEvent('handleListShare', {
                             listId,
                             remoteListId,
+                            annotationLocalToRemoteIdsDict,
                         }),
                     analyticsBG: this.props.analyticsBG,
                 })}

@@ -38,6 +38,7 @@ import type { Storage, Runtime } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -347,7 +348,11 @@ interface SidebarEvents {
         oldName: string
     }
     deleteList: { unifiedListId: UnifiedList['unifiedId'] }
-    shareList: { unifiedListId: UnifiedList['unifiedId']; remoteListId: string }
+    shareList: {
+        unifiedListId: UnifiedList['unifiedId']
+        remoteListId: AutoPk
+        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
+    }
 
     goToAnnotationInNewTab: {
         unifiedAnnotationId: UnifiedAnnotation['unifiedId']
