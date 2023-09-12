@@ -91,14 +91,18 @@ export class SharingTestHelper {
         setup: BackgroundIntegrationTestSetup,
         options: { id: number },
     ) {
-        await setup.backgroundModules.contentSharing.options.services
+        const localListId = this.lists[options.id].localId
+        const annotationLocalToRemoteIdsDict = await setup.backgroundModules.contentSharing[
+            'listSharingService'
+        ].ensureRemoteAnnotationIdsExistForList(localListId)
         const {
             remoteListId,
             annotationSharingStatesPromise,
         } = await setup.backgroundModules.contentSharing[
             'listSharingService'
         ].shareList({
-            localListId: this.lists[options.id].localId,
+            localListId,
+            annotationLocalToRemoteIdsDict,
         })
         expect(remoteListId).toBeDefined()
         this.lists[options.id].remoteId = remoteListId

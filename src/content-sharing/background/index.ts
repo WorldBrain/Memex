@@ -33,13 +33,13 @@ import type { BackgroundModules } from 'src/background-script/setup'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
-    trackAddPageToSharedSpace,
     trackPageLinkCreate,
     trackSharedAnnotation,
     trackSpaceCreate,
     trackUnSharedAnnotation,
 } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -369,14 +369,20 @@ export default class ContentSharingBackground {
             .generateServerId('sharedListKey')
             .toString()
 
+        const annotationLocalToRemoteIdsDict = await this.listSharingService.ensureRemoteAnnotationIdsExistForList(
+            localListId,
+        )
+
         this.listSharePromises[localListId] = this.performListShare({
+            collabKey,
             localListId,
             remoteListId,
-            collabKey,
+            annotationLocalToRemoteIdsDict,
         })
 
         return {
             remoteListId,
+            annotationLocalToRemoteIdsDict,
             links: [
                 {
                     roleID: SharedListRoleID.Commenter,
@@ -409,6 +415,7 @@ export default class ContentSharingBackground {
         localListId: number
         collabKey: string
         dontTrack?: boolean
+        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
     }): Promise<void> {
         const {
             annotationSharingStatesPromise,
@@ -1001,6 +1008,9 @@ export default class ContentSharingBackground {
             createdAt: new Date(now),
             dontTrack: true,
         })
+        const annotationLocalToRemoteIdsDict = await this.listSharingService.ensureRemoteAnnotationIdsExistForList(
+            localListId,
+        )
         await Promise.all([
             bgModules.customLists.insertPageToList({
                 id: localListId,
@@ -1013,8 +1023,9 @@ export default class ContentSharingBackground {
                 dontTrack: true,
             }),
             this.performListShare({
-                localListId,
+                annotationLocalToRemoteIdsDict,
                 remoteListId,
+                localListId,
                 collabKey,
                 dontTrack: true,
             }),
