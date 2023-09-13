@@ -45,7 +45,10 @@ export class ImageSupportBackground {
     >['uploadImage']['function'] = async (params) => {
         console.log('params2', params)
 
-        const blob = dataURLToBlob(params.image)
+        const blob =
+            params.image instanceof Blob
+                ? params.image
+                : dataURLToBlob(params.image)
 
         await this.options.backend.uploadImage({ image: blob, id: params.id })
         await this.storage.storeImage({

@@ -1,7 +1,7 @@
 import {
+    FrontendUploadImageParams,
     GetImageUrlParams,
     GetImageUrlResult,
-    UploadImageParams,
     UploadImageResult,
 } from '@worldbrain/memex-common/lib/image-support/types'
 import {
@@ -13,10 +13,7 @@ export interface ImageSupportInterface<Role extends RemoteFunctionRole> {
     generateImageId: RemoteFunctionWithoutExtraArgs<Role, void, string>
     uploadImage: RemoteFunctionWithoutExtraArgs<
         Role,
-        UploadImageParams & {
-            normalizedPageUrl: string
-            annotationUrl?: string
-        },
+        FrontendUploadImageParams,
         UploadImageResult
     >
     getImageUrl: RemoteFunctionWithoutExtraArgs<
