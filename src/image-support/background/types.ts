@@ -13,7 +13,10 @@ export interface ImageSupportInterface<Role extends RemoteFunctionRole> {
     generateImageId: RemoteFunctionWithoutExtraArgs<Role, void, string>
     uploadImage: RemoteFunctionWithoutExtraArgs<
         Role,
-        UploadImageParams,
+        UploadImageParams & {
+            normalizedPageUrl: string
+            annotationUrl?: string
+        },
         UploadImageResult
     >
     getImageUrl: RemoteFunctionWithoutExtraArgs<

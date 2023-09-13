@@ -697,6 +697,7 @@ export function createBackgroundModules(options: {
         }),
         imageSupport: new ImageSupportBackground({
             backend: options.imageSupportBackend,
+            storageManager: options.storageManager,
             generateImageId() {
                 return generateServerId('UPLOADED_IMAGES') as string
             },
@@ -786,6 +787,7 @@ export function getBackgroundStorageModules(
         syncSettings: backgroundModules.syncSettings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
+        imageSupport: backgroundModules.imageSupport.storage,
     }
 }
 

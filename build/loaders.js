@@ -7,7 +7,10 @@ export const threadLoader = {
     loader: 'thread-loader',
     options: {
         poolTimeout: Infinity, // Threads won't timeout/need to be restarted on inc. builds
-        workers: require('os').cpus().length - 1,
+
+        // Too many threads seem to make the "Cannot invoke constructor without new" problem.
+        // Might also be related to performance vs. efficiency cores.
+        workers: Math.min(require('os').cpus().length - 1, 3),
     },
 }
 
@@ -123,7 +126,7 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         use: 'null-loader',
     }
 
-    if (mode !== 'production' && !isCI) {
+    if (mode !== 'production' && !isCI && process.env.NO_THREADS !== 'true') {
         main.use = [threadLoader, ...main.use]
     }
 

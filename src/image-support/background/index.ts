@@ -1,4 +1,6 @@
+import type StorageManager from '@worldbrain/storex'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
+import { ImageSupportClientStorage } from '@worldbrain/memex-common/lib/image-support/client-storage'
 import {
     registerRemoteFunctions,
     remoteFunctionWithoutExtraArgs,
@@ -7,9 +9,11 @@ import { ImageSupportInterface } from './types'
 
 export class ImageSupportBackground {
     remoteFunctions: ImageSupportInterface<'provider'>
+    storage: ImageSupportClientStorage
 
     constructor(
         public options: {
+            storageManager: StorageManager
             backend: ImageSupportBackend
             generateImageId(): string
         },
@@ -21,6 +25,9 @@ export class ImageSupportBackground {
             uploadImage: remoteFunctionWithoutExtraArgs(this.uploadImage),
             getImageUrl: remoteFunctionWithoutExtraArgs(this.getImageUrl),
         }
+        this.storage = new ImageSupportClientStorage({
+            storageManager: options.storageManager,
+        })
     }
 
     setupRemoteFunctions() {
@@ -40,7 +47,13 @@ export class ImageSupportBackground {
 
         const blob = dataURLToBlob(params.image)
 
-        return this.options.backend.uploadImage({ image: blob, id: params.id })
+        await this.options.backend.uploadImage({ image: blob, id: params.id })
+        await this.storage.storeImage({
+            id: params.id,
+            createdWhen: Date.now(),
+            normalizedPageUrl: params.normalizedPageUrl,
+            annotation: params.annotationUrl,
+        })
     }
 
     getImageUrl: ImageSupportInterface<
