@@ -40,6 +40,7 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -67,7 +68,7 @@ export interface SidebarContainerDependencies {
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
-    imageSupport: ImageSupportBackend
+    imageSupport: ImageSupportInterface<'provider'>
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>

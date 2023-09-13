@@ -330,10 +330,7 @@ async function hydrateCacheLists(
                 Partial<Pick<FollowedListEntry, 'hasAnnotationsFromOthers'>>
         }
     } & CacheHydratorDeps<
-        | 'contentSharing'
-        | 'customLists'
-        | 'pageActivityIndicator'
-        | 'imageSupport'
+        'contentSharing' | 'customLists' | 'pageActivityIndicator'
     >,
 ): Promise<void> {
     // Get all the IDs of page link lists

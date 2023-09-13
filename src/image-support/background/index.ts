@@ -18,6 +18,14 @@ export class ImageSupportBackground {
             generateImageId(): string
         },
     ) {
+        try {
+            this.storage = new ImageSupportClientStorage({
+                storageManager: options.storageManager,
+            })
+        } catch (e) {
+            console.error(e)
+            throw new Error(`Failed to initialize image support storage`)
+        }
         this.remoteFunctions = {
             generateImageId: remoteFunctionWithoutExtraArgs(
                 this.generateImageId,
@@ -25,9 +33,6 @@ export class ImageSupportBackground {
             uploadImage: remoteFunctionWithoutExtraArgs(this.uploadImage),
             getImageUrl: remoteFunctionWithoutExtraArgs(this.getImageUrl),
         }
-        this.storage = new ImageSupportClientStorage({
-            storageManager: options.storageManager,
-        })
     }
 
     setupRemoteFunctions() {
@@ -49,12 +54,12 @@ export class ImageSupportBackground {
                 : dataURLToBlob(params.image)
 
         await this.options.backend.uploadImage({ image: blob, id: params.id })
-        await this.storage.storeImage({
-            id: params.id,
-            createdWhen: Date.now(),
-            normalizedPageUrl: params.normalizedPageUrl,
-            annotation: params.annotationUrl,
-        })
+        // await this.storage.storeImage({
+        //     id: params.id,
+        //     createdWhen: Date.now(),
+        //     normalizedPageUrl: params.normalizedPageUrl,
+        //     annotation: params.annotationUrl,
+        // })
     }
 
     getImageUrl: ImageSupportInterface<
