@@ -11,7 +11,7 @@ type Props = SidebarContainerOptions & {
     setDisplayNameModalShown: (isShown: boolean) => void
     onNotesSidebarClose?: () => void
     theme: MemexTheme
-    imageSupport?: ImageSupportInterface<'provider'>
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 export class AnnotationsSidebarInDashboardResults extends React.Component<

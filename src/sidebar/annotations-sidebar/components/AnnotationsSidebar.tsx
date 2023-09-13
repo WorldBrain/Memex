@@ -215,7 +215,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     initGetReplyEditProps: (
         sharedListReference: SharedListReference,
     ) => RepliesProps['getReplyEditProps']
-    imageSupport: ImageSupportInterface<'provider'>
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 interface AnnotationsSidebarState {

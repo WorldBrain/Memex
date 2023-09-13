@@ -56,7 +56,7 @@ export interface AnnotationCreateGeneralProps {
     getYoutubePlayer?(): YoutubePlayer
     renderSpacePicker(): JSX.Element
     sidebarEvents?: AnnotationsSidebarInPageEventEmitter
-    imageSupport: ImageSupportInterface<'provider'>
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface Props

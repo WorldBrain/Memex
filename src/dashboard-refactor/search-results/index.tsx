@@ -125,7 +125,7 @@ export type Props = RootState &
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
         clearInbox: () => void
         filterByList: (localListId: number) => void
-        imageSupport: ImageSupportInterface<'provider'>
+        imageSupport: ImageSupportInterface<'caller'>
     }
 
 export interface State {

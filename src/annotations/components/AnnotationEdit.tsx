@@ -28,7 +28,7 @@ export interface AnnotationEditEventProps {
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
     onListsBarPickerBtnClick: React.MouseEventHandler
-    imageSupport: ImageSupportInterface<'provider'>
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface AnnotationEditGeneralProps {

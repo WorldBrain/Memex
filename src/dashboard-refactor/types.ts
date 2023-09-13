@@ -107,7 +107,7 @@ export interface DashboardDependencies {
         UIServices,
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
-    imageSupport: ImageSupportInterface<'provider'>
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface DropReceivingState {

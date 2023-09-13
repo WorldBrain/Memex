@@ -104,7 +104,7 @@ export interface AnnotationProps {
     copyPasterAnnotationInstanceId: string
     spacePickerAnnotationInstance: string
     shareMenuAnnotationInstanceId: string
-    imageSupport: ImageSupportInterface<'provider'>
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface AnnotationEditableEventProps {
