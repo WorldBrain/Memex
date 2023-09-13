@@ -7,6 +7,7 @@ import MemexEditor, {
 } from '@worldbrain/memex-common/lib/editor'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 interface State {
     editorHeight: string
@@ -27,6 +28,7 @@ export interface AnnotationEditEventProps {
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
     onListsBarPickerBtnClick: React.MouseEventHandler
+    imageSupport: ImageSupportInterface<'provider'>
 }
 
 export interface AnnotationEditGeneralProps {
@@ -134,6 +136,7 @@ class AnnotationEdit extends React.Component<Props> {
                     setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                     autoFocus
                     youtubeShortcut={this.state.youtubeShortcut}
+                    imageSupport={this.props.imageSupport}
                 />
             </EditorContainer>
         )

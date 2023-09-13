@@ -31,6 +31,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import type { UnifiedAnnotation } from '../cache/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -103,6 +104,7 @@ export interface AnnotationProps {
     copyPasterAnnotationInstanceId: string
     spacePickerAnnotationInstance: string
     shareMenuAnnotationInstanceId: string
+    imageSupport: ImageSupportInterface<'provider'>
 }
 
 export interface AnnotationEditableEventProps {
@@ -449,6 +451,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         isShared={this.props.isShared}
                         isBulkShareProtected={this.props.isBulkShareProtected}
                         getYoutubePlayer={this.props.getYoutubePlayer}
+                        imageSupport={this.props.imageSupport}
                     />
                 </AnnotationEditContainer>
             )

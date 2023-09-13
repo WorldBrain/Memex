@@ -78,6 +78,7 @@ import {
 } from 'src/content-sharing/utils'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -214,6 +215,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     initGetReplyEditProps: (
         sharedListReference: SharedListReference,
     ) => RepliesProps['getReplyEditProps']
+    imageSupport: ImageSupportInterface<'provider'>
 }
 
 interface AnnotationsSidebarState {
@@ -502,6 +504,7 @@ export class AnnotationsSidebar extends React.Component<
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
                     sidebarEvents={this.props.events && this.props.events}
+                    imageSupport={this.props.imageSupport}
                 />
             </NewAnnotationSection>
         )
@@ -711,6 +714,7 @@ export class AnnotationsSidebar extends React.Component<
                         order={i}
                     >
                         <AnnotationEditable
+                            imageSupport={this.props.imageSupport}
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}

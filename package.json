@@ -99,6 +99,7 @@
         "firebase-functions": "4.4.1",
         "hex-to-rgb": "^1.0.1",
         "history": "^3.2.1",
+        "html2canvas": "^1.4.1",
         "immutability-helper": "^3.0.1",
         "jsdom": "^20.0.0",
         "json-date-parser": "^1.0.1",

@@ -96,9 +96,7 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
+import html2canvas from 'html2canvas'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -524,6 +522,9 @@ export async function main(
                 includeLastFewSecs,
             )
 
+            const targetContainer = document.getElementById('movie_player')
+            console.log('test', targetContainer)
+
             if (timestampToPass === null) {
                 const aIbutton = document.getElementById(
                     'AItimeStampButtonInner',
@@ -538,6 +539,31 @@ export async function main(
             })
             inPageUI.hideTooltip()
         },
+        createTimestampWithScreenshot: async () => {
+            const targetContainer = document.getElementById('movie_player')
+
+            const screenshotTarget = targetContainer.getElementsByClassName(
+                'html5-main-video',
+            )[0] as HTMLElement
+
+            console.log('test', screenshotTarget)
+
+            let base64image = await captureScreenshot(screenshotTarget)
+
+            inPageUI.showSidebar({
+                action: 'create_youtube_timestamp_with_screenshot',
+                imageData: base64image.toString(),
+            })
+            inPageUI.hideTooltip()
+        },
+    }
+
+    async function captureScreenshot(screenshotTarget) {
+        const canvas = await html2canvas(screenshotTarget, {
+            allowTaint: true,
+        })
+        const base64image = canvas.toDataURL('image/png')
+        return base64image
     }
 
     // if (window.location.hostname === 'www.youtube.com') {
@@ -675,6 +701,7 @@ export async function main(
                 subscription,
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
+                imageSupport: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -1681,6 +1708,19 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     document.head.appendChild(style)
 
+    // Add screenshot Button
+    const screenshotButton = document.createElement('div')
+    screenshotButton.setAttribute('class', 'ytp-menuitem')
+    screenshotButton.onclick = () => {
+        annotationsFunctions.createTimestampWithScreenshot()(false, false)
+    }
+    screenshotButton.style.display = 'flex'
+    screenshotButton.style.alignItems = 'center'
+    screenshotButton.style.cursor = 'pointer'
+    screenshotButton.style.borderLeft = '1px solid #24252C'
+
+    screenshotButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Snapshot</div>`
+
     // Add Note Button
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
@@ -1962,6 +2002,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.appendChild(annotateButton)
     memexButtons.appendChild(AItimeStampButton)
     memexButtons.appendChild(summarizeButton)
+    memexButtons.appendChild(screenshotButton)
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'
     const aboveFold = document.getElementById('below')

@@ -36,7 +36,11 @@ export class ImageSupportBackground {
     uploadImage: ImageSupportInterface<
         'provider'
     >['uploadImage']['function'] = async (params) => {
-        return this.options.backend.uploadImage(params)
+        console.log('params2', params)
+
+        const blob = dataURLToBlob(params.image)
+
+        return this.options.backend.uploadImage({ image: blob, id: params.id })
     }
 
     getImageUrl: ImageSupportInterface<
@@ -44,4 +48,17 @@ export class ImageSupportBackground {
     >['getImageUrl']['function'] = async (params) => {
         return this.options.backend.getImageUrl(params)
     }
+}
+
+function dataURLToBlob(dataurl) {
+    const parts = dataurl.split(',')
+    const byteString = atob(parts[1])
+    const mime = parts[0].split(':')[1].split(';')[0]
+    const buffer = new Uint8Array(byteString.length)
+
+    for (let i = 0; i < byteString.length; i++) {
+        buffer[i] = byteString.charCodeAt(i)
+    }
+
+    return new Blob([buffer], { type: mime })
 }

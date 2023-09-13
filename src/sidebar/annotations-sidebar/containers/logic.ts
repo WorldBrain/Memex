@@ -1702,7 +1702,6 @@ export class SidebarContainerLogic extends UILogic<
         if (fullPageURL.includes('web.telegram.org')) {
             fullPageURL = convertMemexURLintoTelegramURL(fullPageURL)
         }
-
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
                 fullPageUrl: fullPageURL,
@@ -2526,6 +2525,36 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         return nextState
+    }
+
+    createYoutubeTimestampWithScreenshot: EventHandler<
+        'createYoutubeTimestampWithScreenshot'
+    > = async ({ previousState, event }) => {
+        this.emitMutation({
+            loadState: { $set: 'success' },
+            activeTab: { $set: 'annotations' },
+        })
+        this.options.focusCreateForm()
+
+        const maxRetries = 30
+        let handledSuccessfully = false
+
+        for (let i = 0; i < maxRetries; i++) {
+            if (
+                this.options.events.emit(
+                    'addImageToEditor',
+                    {
+                        imageData: event.imageData,
+                    },
+                    (success) => {
+                        handledSuccessfully = success
+                    },
+                )
+            ) {
+                break
+            }
+            await sleepPromise(50) // wait for half a second before trying again
+        }
     }
 
     createYoutubeTimestampWithAISummary: EventHandler<

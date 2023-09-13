@@ -39,6 +39,7 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -66,6 +67,7 @@ export interface SidebarContainerDependencies {
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
+    imageSupport: ImageSupportBackend
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -243,6 +245,9 @@ interface SidebarEvents {
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
         timeStampANDSummaryJSON: string[]
+    }
+    createYoutubeTimestampWithScreenshot: {
+        imageData: string
     }
 
     createNewNoteFromAISummary: { comment: string }
