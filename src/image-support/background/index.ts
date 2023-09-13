@@ -43,8 +43,6 @@ export class ImageSupportBackground {
     uploadImage: ImageSupportInterface<
         'provider'
     >['uploadImage']['function'] = async (params) => {
-        console.log('params2', params)
-
         const blob =
             params.image instanceof Blob
                 ? params.image

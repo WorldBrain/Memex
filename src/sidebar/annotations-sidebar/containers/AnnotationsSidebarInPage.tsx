@@ -348,8 +348,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tab: 'annotations',
             })
 
-            console.log('imageData', event.imageData)
-
             this.processEvent('createYoutubeTimestampWithScreenshot', {
                 imageData: event.imageData,
             })

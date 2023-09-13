@@ -522,9 +522,6 @@ export async function main(
                 includeLastFewSecs,
             )
 
-            const targetContainer = document.getElementById('movie_player')
-            console.log('test', targetContainer)
-
             if (timestampToPass === null) {
                 const aIbutton = document.getElementById(
                     'AItimeStampButtonInner',
@@ -540,20 +537,25 @@ export async function main(
             inPageUI.hideTooltip()
         },
         createTimestampWithScreenshot: async () => {
+            const screenshotButton = document.getElementById(
+                'screenshotButtonInner',
+            )
+            screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Loading Screenshot</div>`
             const targetContainer = document.getElementById('movie_player')
-
             const screenshotTarget = targetContainer.getElementsByClassName(
                 'html5-main-video',
             )[0] as HTMLElement
 
-            console.log('test', screenshotTarget)
+            await sleepPromise(50)
+            if (screenshotTarget) {
+                inPageUI.showSidebar({
+                    action: 'create_youtube_timestamp_with_screenshot',
+                    imageData: await captureScreenshot(screenshotTarget),
+                })
+            }
 
-            let base64image = await captureScreenshot(screenshotTarget)
+            screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Screenshot</div>`
 
-            inPageUI.showSidebar({
-                action: 'create_youtube_timestamp_with_screenshot',
-                imageData: base64image.toString(),
-            })
             inPageUI.hideTooltip()
         },
     }
@@ -1711,15 +1713,15 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     // Add screenshot Button
     const screenshotButton = document.createElement('div')
     screenshotButton.setAttribute('class', 'ytp-menuitem')
-    screenshotButton.onclick = () => {
-        annotationsFunctions.createTimestampWithScreenshot()(false, false)
+    screenshotButton.onclick = async () => {
+        await annotationsFunctions.createTimestampWithScreenshot()
     }
     screenshotButton.style.display = 'flex'
     screenshotButton.style.alignItems = 'center'
     screenshotButton.style.cursor = 'pointer'
     screenshotButton.style.borderLeft = '1px solid #24252C'
 
-    screenshotButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Snapshot</div>`
+    screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner"  style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Screenshot</div>`
 
     // Add Note Button
     const annotateButton = document.createElement('div')
@@ -1976,6 +1978,13 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     timeStampEl.style.height = '20px'
     timeStampEl.style.margin = '0 10px 0 10px'
     annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
+    // TimestampIcon
+    const cameraIcon = runtime.getURL('/img/cameraIcon.svg')
+    const cameraIconEl = document.createElement('img')
+    cameraIconEl.src = cameraIcon
+    cameraIconEl.style.height = '20px'
+    cameraIconEl.style.margin = '0 10px 0 10px'
+    screenshotButton.insertBefore(cameraIconEl, screenshotButton.firstChild)
 
     // AI timestamp icon
     const AItimestampIcon = runtime.getURL('/img/starsYoutube.svg')
