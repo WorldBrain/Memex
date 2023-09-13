@@ -139,7 +139,6 @@ export async function main(): Promise<void> {
                     ? 'production'
                     : 'staging',
         }),
-        getServerStorage: async () => serverStorage,
     })
 
     __debugCounter++

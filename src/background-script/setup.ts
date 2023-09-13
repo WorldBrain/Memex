@@ -156,7 +156,6 @@ export function createBackgroundModules(options: {
     browserAPIs: Browser
     serverStorage: ServerStorage
     imageSupportBackend: ImageSupportBackend
-    getServerStorage: () => Promise<ServerStorage>
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
         name: string,
@@ -804,16 +803,20 @@ export function registerBackgroundModuleCollections(options: {
     persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
 }) {
-    const deprecatedModules = new DeprecatedStorageModules(options)
-    registerModuleMapCollections(
-        options.storageManager.registry,
-        getBackgroundStorageModules(
-            options.backgroundModules,
-            deprecatedModules,
-        ),
-    )
-    registerModuleMapCollections(
-        options.persistentStorageManager.registry,
-        getPersistentBackgroundStorageModules(options.backgroundModules),
-    )
+    try {
+        const deprecatedModules = new DeprecatedStorageModules(options)
+        registerModuleMapCollections(
+            options.storageManager.registry,
+            getBackgroundStorageModules(
+                options.backgroundModules,
+                deprecatedModules,
+            ),
+        )
+        registerModuleMapCollections(
+            options.persistentStorageManager.registry,
+            getPersistentBackgroundStorageModules(options.backgroundModules),
+        )
+    } catch (e) {
+        console.log(e)
+    }
 }

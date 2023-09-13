@@ -7,10 +7,7 @@ export const threadLoader = {
     loader: 'thread-loader',
     options: {
         poolTimeout: Infinity, // Threads won't timeout/need to be restarted on inc. builds
-
-        // Too many threads seem to make the "Cannot invoke constructor without new" problem.
-        // Might also be related to performance vs. efficiency cores.
-        workers: Math.min(require('os').cpus().length - 1, 3),
+        workers: require('os').cpus().length - 1,
     },
 }
 
