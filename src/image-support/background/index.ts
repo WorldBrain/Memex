@@ -48,21 +48,19 @@ export class ImageSupportBackground {
     uploadImage: ImageSupportInterface<
         'provider'
     >['uploadImage']['function'] = async (params) => {
+        await this.storage.storeImage({
+            id: params.id,
+            createdWhen: Date.now(),
+            normalizedPageUrl: params.normalizedPageUrl,
+            annotationUrl: params.annotationUrl,
+        })
+
         const blob =
             params.image instanceof Blob
                 ? params.image
                 : dataURLToBlob(params.image)
 
         await this.options.backend.uploadImage({ image: blob, id: params.id })
-
-        console.log('beforestore')
-        await this.storage.storeImage({
-            id: params.id,
-            createdWhen: Date.now(),
-            normalizedPageUrl: params.normalizedPageUrl,
-            annotation: params.annotationUrl,
-        })
-        console.log('aferstore')
     }
 
     getImageUrl: ImageSupportInterface<
