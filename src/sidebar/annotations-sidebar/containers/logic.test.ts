@@ -144,7 +144,7 @@ const setupLogicHelper = async ({
         focusEditNoteForm,
         focusCreateForm,
         copyToClipboard,
-        imageSupport: backgroundModules.imageSupport.remoteFunctions,
+        imageSupport: backgroundModules.imageSupport,
     })
 
     const sidebar = device.createElement(sidebarLogic)

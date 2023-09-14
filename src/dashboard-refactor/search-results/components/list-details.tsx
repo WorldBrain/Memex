@@ -28,7 +28,7 @@ export interface Props {
     saveTitle: (title: string, listId: string) => void
     onAddContributorsClick?: React.MouseEventHandler
     clearInbox?: () => void
-    imageSupport: ImageSupportInterface<'provider'>
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 interface State {

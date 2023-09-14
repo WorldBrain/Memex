@@ -109,7 +109,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     setDisplayNameModalShown?: (isShown: boolean) => void
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
-    imageSupport?: ImageSupportInterface<'provider'>
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 type EventHandler<

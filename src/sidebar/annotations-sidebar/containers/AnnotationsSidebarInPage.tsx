@@ -36,7 +36,7 @@ export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
-    imageSupport?: ImageSupportInterface<'provider'>
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
