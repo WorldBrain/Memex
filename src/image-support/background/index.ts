@@ -8,7 +8,7 @@ import {
 import { ImageSupportInterface } from './types'
 
 export class ImageSupportBackground {
-    remoteFunctions: ImageSupportInterface<'caller'>
+    remoteFunctions: ImageSupportInterface<'provider'>
     storage: ImageSupportClientStorage
 
     constructor(
