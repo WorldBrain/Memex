@@ -69,7 +69,7 @@ export interface SidebarContainerDependencies {
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
-    imageSupport: ImageSupportInterface<'caller'>
+    imageSupport?: ImageSupportInterface<'caller'>
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>

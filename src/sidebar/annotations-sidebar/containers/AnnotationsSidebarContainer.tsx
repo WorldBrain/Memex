@@ -69,6 +69,7 @@ export interface Props extends SidebarContainerOptions {
     onNotesSidebarClose?: () => void
     youtubeService?: YoutubeService
     getYoutubePlayer?(): YoutubePlayer
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 export class AnnotationsSidebarContainer<
