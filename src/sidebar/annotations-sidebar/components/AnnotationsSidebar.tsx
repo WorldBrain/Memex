@@ -1538,7 +1538,7 @@ export class AnnotationsSidebar extends React.Component<
                             icon="feed"
                             element={null}
                             iconSize="18px"
-                            padding={'10px 10px'}
+                            height="40px"
                             onChange={async (event) => {
                                 await this.props.updatePromptState(
                                     (event.target as HTMLInputElement).value,
@@ -2929,8 +2929,8 @@ const SummaryFooter = styled.div`
     grid-gap: 10px;
     padding: 10px 20px 10px 20px;
     margin-right: 1px;
-    background: ${(props) => props.theme.colors.black}20;
-    backdrop-filter: blur(8px);
+    background: ${(props) => props.theme.colors.greyScale1}50;
+    backdrop-filter: blur(20px);
     position: fixed;
     bottom: -1px;
 `
@@ -3214,8 +3214,8 @@ const TopAreaContainer = styled.div`
     width: fill-available;
     z-index: 20;
     padding-top: 5px;
-    background: ${(props) => props.theme.colors.black}80;
-    backdrop-filter: blur(8px);
+    /* background: ${(props) => props.theme.colors.black}80;
+    backdrop-filter: blur(8px); */
 `
 
 const AnnotationActions = styled.div`
@@ -3285,8 +3285,7 @@ const TopBar = styled.div`
         props.sidebarContext === 'dashboard' ? '40px' : '32px'};
     z-index: 11300;
     padding: 10px 10px 10px 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
-    background: ${(props) => props.theme.colors.black};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     ${(props) =>
         props.theme.variant === 'light' &&
@@ -3416,11 +3415,9 @@ const AnnotationContainer = styled(Margin)`
     overflow: scroll;
     padding-bottom: 100px;
     flex: 1;
+    grid-gap: 5px;
     z-index: 10;
     position: relative;
-    top: -34px;
-    padding-top: 30px;
-    margin-bottom: -34px;
 
     scrollbar-width: none;
 

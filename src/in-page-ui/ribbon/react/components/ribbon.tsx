@@ -42,6 +42,7 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { TOOLTIP_WIDTH } from '../../constants'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -1648,141 +1649,6 @@ export default class Ribbon extends Component<Props, State> {
         } else {
             return (
                 <>
-                    <OuterRibbon
-                        isPeeking={this.props.isExpanded}
-                        isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                        ribbonPosition={this.props.ribbonPosition}
-                    >
-                        <InnerRibbon
-                            ref={this.props.setRef}
-                            isPeeking={this.props.isExpanded}
-                            isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                            ribbonPosition={this.props.ribbonPosition}
-                        >
-                            {(this.props.isExpanded ||
-                                this.props.sidebar.isSidebarOpen) && (
-                                <>
-                                    <UpperPart
-                                        ribbonPosition={
-                                            this.props.ribbonPosition
-                                        }
-                                        isSidebarOpen={
-                                            this.props.sidebar.isSidebarOpen
-                                        }
-                                    >
-                                        <BottomSection
-                                            sidebarOpen={
-                                                this.props.sidebar.isSidebarOpen
-                                            }
-                                            ribbonPosition={
-                                                this.props.ribbonPosition
-                                            }
-                                        >
-                                            {!this.props.sidebar
-                                                .isSidebarOpen &&
-                                                this.renderFeedButton()}
-                                            <BlockCounterIndicator
-                                                ribbonPosition={
-                                                    this.props.ribbonPosition
-                                                }
-                                                isSidebarOpen={
-                                                    this.props.sidebar
-                                                        .isSidebarOpen
-                                                }
-                                                isTrial={this.props.isTrial}
-                                                signupDate={
-                                                    this.props.signupDate
-                                                }
-                                            />
-                                            {this.renderTutorialButton()}
-                                        </BottomSection>
-
-                                        <VerticalLine
-                                            sidebaropen={
-                                                this.props.sidebar.isSidebarOpen
-                                            }
-                                        />
-                                        {window.location.href.includes(
-                                            '.pdf',
-                                        ) &&
-                                        !window.location.href.includes(
-                                            'pdfjs/viewer.html?',
-                                        ) ? (
-                                            <PageAction
-                                                ribbonPosition={
-                                                    this.props.ribbonPosition
-                                                }
-                                                isSidebarOpen={
-                                                    this.props.sidebar
-                                                        .isSidebarOpen
-                                                }
-                                            >
-                                                {this.renderSearchButton()}
-                                                {this.renderPDFReaderButton()}
-                                                {this.renderCloseRibbonButton()}
-                                            </PageAction>
-                                        ) : (
-                                            <PageAction
-                                                ribbonPosition={
-                                                    this.props.ribbonPosition
-                                                }
-                                                isSidebarOpen={
-                                                    this.props.sidebar
-                                                        .isSidebarOpen
-                                                }
-                                            >
-                                                {this.props.sidebar
-                                                    .isSidebarOpen && (
-                                                    <UpperArea>
-                                                        {this.props.sidebar
-                                                            .isSidebarOpen ? (
-                                                            <>
-                                                                {this.renderCloseButton()}
-                                                                {this.renderReadingViewToggleButton()}
-                                                            </>
-                                                        ) : undefined}
-                                                    </UpperArea>
-                                                )}
-                                                {this.renderPDFReaderButton()}
-                                                {this.renderSearchButton()}
-                                                {!this.props.sidebar
-                                                    .isSidebarOpen &&
-                                                    this.renderAItriggerButton()}
-                                                {!this.props.sidebar
-                                                    .isSidebarOpen &&
-                                                    this.renderSharePageButton()}
-
-                                                {!this.props.sidebar
-                                                    .isSidebarOpen &&
-                                                    this.renderSidebarToggle()}
-
-                                                {this.renderSpacesButton()}
-                                                {this.renderBookmarkButton()}
-                                                {this.renderCloseRibbonButton()}
-                                            </PageAction>
-                                        )}
-                                    </UpperPart>
-                                </>
-                            )}
-                        </InnerRibbon>
-                    </OuterRibbon>
-                    {this.renderSpacePicker()}
-                    {this.renderTutorial()}
-                    {this.renderFeedInfo()}
-                    {this.renderRemoveMenu()}
-                </>
-            )
-        }
-    }
-
-    renderVerticalRibbon() {
-        return (
-            <>
-                <OuterRibbon
-                    isPeeking={this.props.isExpanded}
-                    isSidebarOpen={this.props.sidebar.isSidebarOpen}
-                    ribbonPosition={this.props.ribbonPosition}
-                >
                     <InnerRibbon
                         ref={this.props.setRef}
                         isPeeking={this.props.isExpanded}
@@ -1798,75 +1664,180 @@ export default class Ribbon extends Component<Props, State> {
                                         this.props.sidebar.isSidebarOpen
                                     }
                                 >
-                                    {!this.props.sidebar.isSidebarOpen &&
-                                        this.renderFeedButton()}
-                                    <PageAction
+                                    <BottomSection
+                                        sidebarOpen={
+                                            this.props.sidebar.isSidebarOpen
+                                        }
                                         ribbonPosition={
                                             this.props.ribbonPosition
                                         }
-                                        isSidebarOpen={
-                                            this.props.sidebar.isSidebarOpen
-                                        }
                                     >
-                                        {this.props.sidebar.isSidebarOpen && (
-                                            <UpperArea>
-                                                {this.props.sidebar
-                                                    .isSidebarOpen ? (
-                                                    <>
-                                                        {this.renderCloseButton()}
-                                                        {this.renderReadingViewToggleButton()}
-                                                    </>
-                                                ) : undefined}
-                                                <HorizontalLine
-                                                    sidebaropen={
-                                                        this.props.sidebar
-                                                            .isSidebarOpen
-                                                    }
-                                                />
-                                            </UpperArea>
-                                        )}
+                                        {!this.props.sidebar.isSidebarOpen &&
+                                            this.renderFeedButton()}
+                                        <BlockCounterIndicator
+                                            ribbonPosition={
+                                                this.props.ribbonPosition
+                                            }
+                                            isSidebarOpen={
+                                                this.props.sidebar.isSidebarOpen
+                                            }
+                                            isTrial={this.props.isTrial}
+                                            signupDate={this.props.signupDate}
+                                        />
+                                        {this.renderTutorialButton()}
+                                    </BottomSection>
 
-                                        {this.renderBookmarkButton()}
-                                        {this.renderSpacesButton()}
-                                        {!this.props.sidebar.isSidebarOpen &&
-                                            this.renderSidebarToggle()}
-                                        {this.renderSearchButton()}
-                                        {!this.props.sidebar.isSidebarOpen &&
-                                            this.renderAItriggerButton()}
-                                        {this.renderPDFReaderButton()}
-                                    </PageAction>
-                                </UpperPart>
-                                {!this.props.sidebar.isSidebarOpen && (
-                                    <HorizontalLine
+                                    <VerticalLine
                                         sidebaropen={
                                             this.props.sidebar.isSidebarOpen
                                         }
                                     />
-                                )}
-                                <BottomSection
-                                    sidebarOpen={
-                                        this.props.sidebar.isSidebarOpen
-                                    }
-                                    ribbonPosition={this.props.ribbonPosition}
-                                >
-                                    {this.renderDarkLightModeToggle()}
-                                    {this.renderTutorialButton()}
-                                    <BlockCounterIndicator
-                                        ribbonPosition={
-                                            this.props.ribbonPosition
-                                        }
-                                        isSidebarOpen={
-                                            this.props.sidebar.isSidebarOpen
-                                        }
-                                        isTrial={this.props.isTrial}
-                                        signupDate={this.props.signupDate}
-                                    />
-                                    {this.renderCloseRibbonButton()}
-                                </BottomSection>
+                                    {window.location.href.includes('.pdf') &&
+                                    !window.location.href.includes(
+                                        'pdfjs/viewer.html?',
+                                    ) ? (
+                                        <PageAction
+                                            ribbonPosition={
+                                                this.props.ribbonPosition
+                                            }
+                                            isSidebarOpen={
+                                                this.props.sidebar.isSidebarOpen
+                                            }
+                                        >
+                                            {this.renderSearchButton()}
+                                            {this.renderPDFReaderButton()}
+                                            {this.renderCloseRibbonButton()}
+                                        </PageAction>
+                                    ) : (
+                                        <PageAction
+                                            ribbonPosition={
+                                                this.props.ribbonPosition
+                                            }
+                                            isSidebarOpen={
+                                                this.props.sidebar.isSidebarOpen
+                                            }
+                                        >
+                                            {this.props.sidebar
+                                                .isSidebarOpen && (
+                                                <UpperArea>
+                                                    {this.props.sidebar
+                                                        .isSidebarOpen ? (
+                                                        <>
+                                                            {this.renderCloseButton()}
+                                                            {this.renderReadingViewToggleButton()}
+                                                        </>
+                                                    ) : undefined}
+                                                </UpperArea>
+                                            )}
+                                            {this.renderPDFReaderButton()}
+                                            {this.renderSearchButton()}
+                                            {!this.props.sidebar
+                                                .isSidebarOpen &&
+                                                this.renderAItriggerButton()}
+                                            {!this.props.sidebar
+                                                .isSidebarOpen &&
+                                                this.renderSharePageButton()}
+
+                                            {!this.props.sidebar
+                                                .isSidebarOpen &&
+                                                this.renderSidebarToggle()}
+
+                                            {this.renderSpacesButton()}
+                                            {this.renderBookmarkButton()}
+                                            {this.renderCloseRibbonButton()}
+                                        </PageAction>
+                                    )}
+                                </UpperPart>
                             </>
                         )}
                     </InnerRibbon>
-                </OuterRibbon>
+                    {this.renderSpacePicker()}
+                    {this.renderTutorial()}
+                    {this.renderFeedInfo()}
+                    {this.renderRemoveMenu()}
+                </>
+            )
+        }
+    }
+
+    renderVerticalRibbon() {
+        return (
+            <>
+                <InnerRibbon
+                    ref={this.props.setRef}
+                    isPeeking={this.props.isExpanded}
+                    isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                    ribbonPosition={this.props.ribbonPosition}
+                >
+                    {(this.props.isExpanded ||
+                        this.props.sidebar.isSidebarOpen) && (
+                        <>
+                            <UpperPart
+                                ribbonPosition={this.props.ribbonPosition}
+                                isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                            >
+                                {!this.props.sidebar.isSidebarOpen &&
+                                    this.renderFeedButton()}
+                                <PageAction
+                                    ribbonPosition={this.props.ribbonPosition}
+                                    isSidebarOpen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
+                                >
+                                    {this.props.sidebar.isSidebarOpen && (
+                                        <UpperArea>
+                                            {this.props.sidebar
+                                                .isSidebarOpen ? (
+                                                <>
+                                                    {this.renderCloseButton()}
+                                                    {this.renderReadingViewToggleButton()}
+                                                </>
+                                            ) : undefined}
+                                            <HorizontalLine
+                                                sidebaropen={
+                                                    this.props.sidebar
+                                                        .isSidebarOpen
+                                                }
+                                            />
+                                        </UpperArea>
+                                    )}
+
+                                    {this.renderBookmarkButton()}
+                                    {this.renderSpacesButton()}
+                                    {!this.props.sidebar.isSidebarOpen &&
+                                        this.renderSidebarToggle()}
+                                    {this.renderSearchButton()}
+                                    {!this.props.sidebar.isSidebarOpen &&
+                                        this.renderAItriggerButton()}
+                                    {this.renderPDFReaderButton()}
+                                </PageAction>
+                            </UpperPart>
+                            {!this.props.sidebar.isSidebarOpen && (
+                                <HorizontalLine
+                                    sidebaropen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
+                                />
+                            )}
+                            <BottomSection
+                                sidebarOpen={this.props.sidebar.isSidebarOpen}
+                                ribbonPosition={this.props.ribbonPosition}
+                            >
+                                {this.renderDarkLightModeToggle()}
+                                {this.renderTutorialButton()}
+                                <BlockCounterIndicator
+                                    ribbonPosition={this.props.ribbonPosition}
+                                    isSidebarOpen={
+                                        this.props.sidebar.isSidebarOpen
+                                    }
+                                    isTrial={this.props.isTrial}
+                                    signupDate={this.props.signupDate}
+                                />
+                                {this.renderCloseRibbonButton()}
+                            </BottomSection>
+                        </>
+                    )}
+                </InnerRibbon>
                 {this.renderSpacePicker()}
                 {this.renderTutorial()}
                 {this.renderFeedInfo()}
@@ -2305,7 +2276,6 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             display: flex;
             align-items: flex-end;
             width: 44px;
-            padding-right: 25px;
             right: 0px;
             transition: all 0.1s cubic-bezier(0.4, 0, 0.16, 0.87);
         `}
@@ -2354,7 +2324,11 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     padding: 0px 7px 0px 5px;
                     right: 0px;
                     transition: unset;
-                    background: ${(props) => props.theme.colors.black};
+                    background: ${(props) =>
+                        props.theme.variant === 'dark'
+                            ? props.theme.colors.black + 'ec'
+                            : props.theme.colors.black + 'c9'};
+                    backdrop-filter: blur(30px);
                     border-radius: 0px;
 
                     & .removeSidebar {
@@ -2374,23 +2348,36 @@ const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
 `
 
 const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
-    position: absolute;
-    top: 20px;
-    width: 44px;
+    /* right: -40px; */
+    position: sticky;
+    display: flex;
+    line-height: normal;
+    text-align: start;
+    align-items: center;
+    z-index: 2147483644;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     display: none;
-    background: ${(props) => props.theme.colors.greyScale1};
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.black + 'ec'
+            : props.theme.colors.black + 'c9'};
+                    backdrop-filter: blur(30px);
     border: 1px solid ${(props) => props.theme.colors.greyScale3};
 
+
+
+    // Peeking State
     ${(props) =>
         props.isPeeking &&
         css`
-            border-radius: 8px;
             display: flex;
-            box-shadow: 0px 22px 26px 18px rgba(0, 0, 0, 0.03);
-            background: ${(props) => props.theme.colors.greyScale1};
+            align-items: flex-end;
+            width: 44px;
+            right: 0px;
+            height: fit-content;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.16, 0.87);
         }
     `}
 
@@ -2401,15 +2388,15 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             display: flex;
             box-shadow: none;
             justify-content: center;
-            height: ${(props) => (props.isPeeking ? '42px' : '50px')};
-            width: ${(props) => (props.isPeeking ? 'fit-content' : '50px')};
+            height: 44px;
+            width: fit-content;
             align-items: flex-start;
             padding: ${(props) => (!props.isPeeking ? '0px' : '0 5px 0 5px;')};
             right: 0px;
-            top: 0px;
             transition: unset;
             flex-direction: row;
             align-items: center;
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.16, 0.87);
 
             & .removeSidebar {
                 visibility: hidden;
@@ -2422,12 +2409,21 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             props.isPeeking &&
             css`
                 border-radius: 0 0 0 8px;
+                top: 0px;
             `}
         ${(props) =>
             props.ribbonPosition === 'bottomRight' &&
             props.isPeeking &&
             css`
                 border-radius: 8px 0 0 0;
+                bottom: 0px;
+            `}
+        ${(props) =>
+            props.ribbonPosition === 'centerRight' &&
+            props.isPeeking &&
+            css`
+                border-radius: 8px;
+                width: ${TOOLTIP_WIDTH};
             `}
 
             ${(props) =>
@@ -2435,20 +2431,22 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                 css`
                     display: flex;
                     box-shadow: none;
-                    height: 100%;
-                    top: 0px;
-                    width: 28px;
-                    justify-content: space-between;
-                    padding: px 0px;
-                    background: transparent;
-                    border: none;
-                    align-items: center;
-                    width: 100%;
-                    padding: 10px 0px;
-                    flex-direction: column;
-                    justify-content: space-between;
+                    justify-content: center;
                     height: fill-available;
-                    min-height: 96%;
+                    height: -moz-available;
+                    flex-direction: column;
+                    padding: 20px 0px;
+                    width: ${TOOLTIP_WIDTH};
+                    align-items: flex-start;
+                    right: 0px;
+                    transition: unset;
+                    border-radius: 0px;
+                    justify-content: space-between;
+
+                    & .removeSidebar {
+                        visibility: hidden;
+                        display: none;
+                    }
                 `}
 
 `

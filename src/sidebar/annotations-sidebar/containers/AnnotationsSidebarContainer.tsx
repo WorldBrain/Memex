@@ -61,6 +61,7 @@ import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -1380,12 +1381,16 @@ const ContainerStyled = styled.div<{
         props.sidebarContext === 'dashboard'
             ? '3500'
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
-    background: ${(props) => props.theme.colors.black};
+                    background: ${(props) =>
+                        props.theme.variant === 'dark'
+                            ? props.theme.colors.black + 'ec'
+                            : props.theme.colors.black + 'c9'};
+    backdrop-filter: blur(30px);
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
     box-sizing: content-box;
-    right: 40px;
+    right: ${TOOLTIP_WIDTH};
 
     &:: -webkit-scrollbar {
         display: none;

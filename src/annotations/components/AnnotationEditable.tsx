@@ -1096,7 +1096,7 @@ const AnnotationStyled = styled.div`
         props.theme.variant === 'light' &&
         css`
             box-shadow: ${props.theme.borderStyles.boxShadowHoverElements};
-            border: 1px solid ${props.theme.colors.greyScale2};
+            border: 1px solid ${props.theme.colors.greyScale1};
         `};
 `
 
