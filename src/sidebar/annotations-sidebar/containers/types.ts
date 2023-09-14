@@ -311,6 +311,7 @@ interface SidebarEvents {
         mode: AnnotationCardMode
     }>
     setAnnotationEditMode: AnnotationCardInstanceEvent<{ isEditing: boolean }>
+    cancelAnnotationEdit: AnnotationCardInstanceEvent<{ isEditing: boolean }>
     setAnnotationCommentMode: AnnotationCardInstanceEvent<{
         isTruncated: boolean
     }>

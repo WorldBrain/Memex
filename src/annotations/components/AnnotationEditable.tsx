@@ -411,7 +411,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             >
                 <ActionBox>{actionsBox}</ActionBox>
                 <Highlightbar />
-                <Markdown isHighlight pageUrl={this.props.pageUrl}>
+                <Markdown
+                    imageSupport={this.props.imageSupport}
+                    isHighlight
+                    pageUrl={this.props.pageUrl}
+                >
                     {this.state.isTruncatedHighlight
                         ? this.state.truncatedTextHighlight
                         : this.props.body}
@@ -493,6 +497,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     <NoteText
                         contextLocation={this.props.contextLocation}
                         getYoutubePlayer={this.props.getYoutubePlayer}
+                        imageSupport={this.props.imageSupport}
                     >
                         {comment}
                         {/* {this.state.isTruncatedNote
@@ -1055,7 +1060,7 @@ const CommentBox = styled.div`
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&
         `
-        padding: 5px 20px 5px;
+        padding: 5px 15px 5px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;

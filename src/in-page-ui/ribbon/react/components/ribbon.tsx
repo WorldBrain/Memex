@@ -273,15 +273,15 @@ export default class Ribbon extends Component<Props, State> {
                         : 'left-start'
                 }
                 offsetX={
-                    topRight ||
-                    (bottomRight && !this.props.sidebar.isSidebarOpen)
+                    (topRight || bottomRight) &&
+                    !this.props.sidebar.isSidebarOpen
                         ? 10
-                        : 40
+                        : 10
                 }
                 offsetY={
-                    topRight ||
-                    (bottomRight && !this.props.sidebar.isSidebarOpen)
-                        ? 0
+                    (topRight || bottomRight) &&
+                    !this.props.sidebar.isSidebarOpen
+                        ? 20
                         : 0
                 }
                 closeComponent={this.hideListPicker}

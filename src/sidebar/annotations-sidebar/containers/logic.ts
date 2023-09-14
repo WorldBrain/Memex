@@ -96,7 +96,6 @@ import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name
 import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
-
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -1246,6 +1245,23 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    cancelAnnotationEdit: EventHandler<'cancelAnnotationEdit'> = ({
+        previousState,
+        event,
+    }) => {
+        const previousAnnotationComment = this.options.annotationsCache
+            .annotations.byId[event.unifiedAnnotationId].comment
+
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    isCommentEditing: { $set: false },
+                    comment: { $set: previousAnnotationComment },
+                },
+            },
+        })
+    }
+
     setAnnotationEditCommentText: EventHandler<
         'setAnnotationEditCommentText'
     > = async ({ event }) => {
@@ -1341,17 +1357,6 @@ export class SidebarContainerLogic extends UILogic<
         //           },
         //       })
 
-        this.emitMutation({
-            annotationCardInstances: {
-                [cardId]: {
-                    isCommentEditing: { $set: false },
-                },
-            },
-            confirmPrivatizeNoteArgs: {
-                $set: null,
-            },
-        })
-
         const { remoteAnnotationId, savePromise } = await updateAnnotation({
             annotationsBG: this.options.annotationsBG,
             contentSharingBG: this.options.contentSharingBG,
@@ -1375,7 +1380,7 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.updateAnnotation(
             {
                 ...annotationData,
-                comment,
+                comment: comment,
                 remoteId: remoteAnnotationId ?? undefined,
                 privacyLevel: shareOptsToPrivacyLvl({
                     shouldShare: event.shouldShare,
@@ -1385,6 +1390,17 @@ export class SidebarContainerLogic extends UILogic<
             },
             { updateLastEditedTimestamp: hasCoreAnnotChanged, now },
         )
+
+        this.emitMutation({
+            annotationCardInstances: {
+                [cardId]: {
+                    isCommentEditing: { $set: false },
+                },
+            },
+            confirmPrivatizeNoteArgs: {
+                $set: null,
+            },
+        })
 
         await savePromise
     }

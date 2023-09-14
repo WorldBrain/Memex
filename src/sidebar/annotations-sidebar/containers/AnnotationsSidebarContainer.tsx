@@ -325,7 +325,7 @@ export class AnnotationsSidebarContainer<
                 )
             },
             onEditCancel: () =>
-                this.processEvent('setAnnotationEditMode', {
+                this.processEvent('cancelAnnotationEdit', {
                     instanceLocation,
                     unifiedAnnotationId,
                     isEditing: false,

@@ -511,7 +511,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderLoader = (key?: string, size?: number) => (
-        <LoadingIndicatorContainer width={'100%'} height={'200px'} key={key}>
+        <LoadingIndicatorContainer width={'100%'} height={'300px'} key={key}>
             <LoadingIndicatorStyled size={size ? size : undefined} />
         </LoadingIndicatorContainer>
     )
@@ -2334,7 +2334,9 @@ export class AnnotationsSidebar extends React.Component<
                     }}
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
-                <SpaceDescription>{selectedList.description}</SpaceDescription>
+                <SpaceDescription imageSupport={this.props.imageSupport}>
+                    {selectedList.description}
+                </SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
             </IsolatedViewHeaderContainer>
@@ -3493,7 +3495,7 @@ const FollowedListRow = styled(Margin)<{
     cursor: pointer;
     border-radius: 8px;
     height: 44px;
-    padding: 5px 15px 5px 10px;
+    padding: 0px 15px 0px 10px;
     z-index: ${(props) => 1000 - props.zIndex};
 
     &:first-child {
