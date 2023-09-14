@@ -43,6 +43,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     joinedListsGroup: ListGroup
     followedListsGroup: ListGroup
     onConfirmListEdit: (listId: string, value: string) => void
+    currentUser: any
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -164,6 +165,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 newName,
                                             )
                                         }}
+                                        currentUser={this.props.currentUser?.id}
                                     />
                                 )}
                             />

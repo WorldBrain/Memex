@@ -539,6 +539,7 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     listData: joinedListsData,
                 }}
+                currentUser={this.state.currentUser}
                 initContextMenuBtnProps={(listId) => ({
                     loadOwnershipData: true,
                     spacesBG: this.props.listsBG,
@@ -565,6 +566,7 @@ export class DashboardContainer extends StatefulUIElement<
                             annotationLocalToRemoteIdsDict,
                         }),
                     analyticsBG: this.props.analyticsBG,
+                    currentUser: this.state.currentUser,
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {

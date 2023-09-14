@@ -46,7 +46,10 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                     ref={this.contextMenuRef}
                     {...this.props}
                     {...this.state}
-                    isCreator={this.props.isCreator}
+                    isCreator={
+                        this.props.listData.creator.id ===
+                        this.props.currentUser
+                    }
                 />
             </PopoutBox>
         )
