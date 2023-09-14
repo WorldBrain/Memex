@@ -110,7 +110,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         )
 
         if (sidebarContainer && this.state.showState === 'visible') {
-            console.log('ssssss')
             if (
                 event.target.classList.contains('hypothesis-highlight') ||
                 this.state.readingView

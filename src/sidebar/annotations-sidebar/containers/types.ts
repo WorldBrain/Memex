@@ -41,6 +41,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { Annotation } from 'src/annotations/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -301,6 +302,10 @@ interface SidebarEvents {
     // Annotation card instance events
     setAnnotationEditCommentText: AnnotationCardInstanceEvent<{
         comment: string
+        annotation: Pick<
+            UnifiedAnnotation,
+            'unifiedId' | 'privacyLevel' | 'normalizedPageUrl' | 'localId'
+        >
     }>
     setAnnotationCardMode: AnnotationCardInstanceEvent<{
         mode: AnnotationCardMode

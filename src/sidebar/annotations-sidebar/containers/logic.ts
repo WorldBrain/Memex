@@ -95,6 +95,7 @@ import {
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 
@@ -1236,6 +1237,7 @@ export class SidebarContainerLogic extends UILogic<
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
         event,
     }) => {
+        console.log('settt')
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
@@ -1247,11 +1249,23 @@ export class SidebarContainerLogic extends UILogic<
 
     setAnnotationEditCommentText: EventHandler<
         'setAnnotationEditCommentText'
-    > = ({ event }) => {
+    > = async ({ event }) => {
+        let annotation = event.annotation
+
+        let newComment = (
+            await processCommentForImageUpload(
+                event.comment,
+                annotation.normalizedPageUrl,
+                annotation.localId,
+                this.options.imageSupport,
+                true,
+            )
+        ).toString()
+
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
-                    comment: { $set: event.comment },
+                    comment: { $set: newComment },
                 },
             },
         })
@@ -1302,8 +1316,15 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const now = event.now ?? Date.now()
-        const comment = formData.comment.trim()
+        const comment = sanitizeHTMLhelper(formData.comment.trim())
         const hasCoreAnnotChanged = comment !== annotationData.comment
+
+        let commentForSaving = await processCommentForImageUpload(
+            comment,
+            annotationData.normalizedPageUrl,
+            annotationData.localId,
+            this.options.imageSupport,
+        )
 
         // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
         // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
@@ -1337,7 +1358,10 @@ export class SidebarContainerLogic extends UILogic<
             contentSharingBG: this.options.contentSharingBG,
             keepListsIfUnsharing: event.keepListsIfUnsharing,
             annotationData: {
-                comment: comment !== annotationData.comment ? comment : null,
+                comment:
+                    commentForSaving !== annotationData.comment
+                        ? commentForSaving
+                        : null,
                 localId: annotationData.localId,
             },
             shareOpts: {
@@ -1440,10 +1464,14 @@ export class SidebarContainerLogic extends UILogic<
             selectedListId,
             activeTab,
         } = previousState
+
+        console.log('comment', commentBox.commentText.trim())
         let OriginalCommentForCache = commentBox.commentText.trim()
+        OriginalCommentForCache = sanitizeHTMLhelper(OriginalCommentForCache)
         if (OriginalCommentForCache.length === 0) {
             return
         }
+
         const now = event.now ?? Date.now()
         const annotationId =
             event.annotationId ??
@@ -1452,6 +1480,7 @@ export class SidebarContainerLogic extends UILogic<
                 now: () => now,
             })
 
+        console.log('OriginalCommentForCache', OriginalCommentForCache)
         // this checks for all images in the comment that have not been uploaded yet, uploads them and gives back an updated version of the html code.
         // however the original comment is put in cache
         let commentForSaving = await processCommentForImageUpload(
@@ -1460,6 +1489,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationId,
             this.options.imageSupport,
         )
+        console.log('commentForSavingnew', commentForSaving)
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },

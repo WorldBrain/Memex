@@ -270,7 +270,10 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationEditProps = (
-        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'privacyLevel'>,
+        annotation: Pick<
+            UnifiedAnnotation,
+            'unifiedId' | 'privacyLevel' | 'normalizedPageUrl' | 'localId'
+        >,
         instanceLocation: AnnotationCardInstanceLocation,
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const cardId = generateAnnotationCardInstanceId(
@@ -281,6 +284,8 @@ export class AnnotationsSidebarContainer<
             cardId
         ]
         const unifiedAnnotationId = annotation.unifiedId
+
+        console.log('instance', annotationCardInstance?.comment)
         return {
             comment: annotationCardInstance?.comment,
             onListsBarPickerBtnClick: () =>
@@ -294,6 +299,7 @@ export class AnnotationsSidebarContainer<
                     instanceLocation,
                     unifiedAnnotationId,
                     comment,
+                    annotation,
                 }),
             onEditConfirm: (showExternalConfirmations) => (
                 shouldShare,

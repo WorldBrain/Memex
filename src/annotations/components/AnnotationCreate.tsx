@@ -350,7 +350,6 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     render() {
-        console.log('comment', this.props.comment)
         return (
             <>
                 <TextBoxContainerStyled>
