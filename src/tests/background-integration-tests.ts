@@ -50,6 +50,7 @@ import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from './push-messaging'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import type { ExtractedPDFData } from 'src/search'
+import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
 
 export const DEF_PAGE = {
     url: 'test.com',
@@ -291,6 +292,12 @@ export async function setupBackgroundIntegrationTest(
         generateServerId: () => nextServerId++,
         fetchPageData,
         fetchPDFData,
+        imageSupportBackend: new CloudflareImageSupportBackend({
+            env:
+                process.env.NODE_ENV === 'production'
+                    ? 'production'
+                    : 'staging',
+        }),
     })
 
     registerBackgroundModuleCollections({

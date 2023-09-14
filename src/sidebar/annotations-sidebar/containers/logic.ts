@@ -94,6 +94,9 @@ import {
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { sleepPromise } from 'src/util/promises'
+import { ImageSupportInterface } from 'src/image-support/background/types'
+
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -106,6 +109,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     setDisplayNameModalShown?: (isShown: boolean) => void
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
+    imageSupport?: ImageSupportInterface<'provider'>
 }
 
 type EventHandler<
@@ -1436,8 +1440,8 @@ export class SidebarContainerLogic extends UILogic<
             selectedListId,
             activeTab,
         } = previousState
-        const comment = commentBox.commentText.trim()
-        if (comment.length === 0) {
+        let OriginalCommentForCache = commentBox.commentText.trim()
+        if (OriginalCommentForCache.length === 0) {
             return
         }
         const now = event.now ?? Date.now()
@@ -1448,6 +1452,15 @@ export class SidebarContainerLogic extends UILogic<
                 now: () => now,
             })
 
+        // this checks for all images in the comment that have not been uploaded yet, uploads them and gives back an updated version of the html code.
+        // however the original comment is put in cache
+        let commentForSaving = await processCommentForImageUpload(
+            OriginalCommentForCache,
+            normalizeUrl(fullPageUrl),
+            annotationId,
+            this.options.imageSupport,
+        )
+
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
             showCommentBox: { $set: false },
@@ -1457,7 +1470,6 @@ export class SidebarContainerLogic extends UILogic<
             if (event.shouldShare && !(await this.ensureLoggedIn())) {
                 return
             }
-
             // A bunch of side-effects occur based on the types of lists this annotation will be a part of, and there's
             //  a bunch of different IDs for lists, thus we gotta group these here to decide things further on in this logic
             const remoteListIds: string[] = []
@@ -1514,7 +1526,7 @@ export class SidebarContainerLogic extends UILogic<
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
                 annotationData: {
-                    comment,
+                    comment: commentForSaving,
                     fullPageUrl,
                     localListIds,
                     localId: annotationId,
@@ -1544,7 +1556,7 @@ export class SidebarContainerLogic extends UILogic<
                 // These only contain lists added in the UI dropdown (to be checked in case any are shared, which should influence the annot privacy level)
                 localListIds: [...commentBox.lists],
                 unifiedListIds, // These contain the context list (selected list or list instance)
-                comment,
+                comment: OriginalCommentForCache,
             })
 
             if (remoteAnnotationId != null && remoteListIds.length > 0) {

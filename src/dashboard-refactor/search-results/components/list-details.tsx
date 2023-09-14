@@ -15,6 +15,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { sizeConstants } from '../../constants'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface Props {
     remoteLink?: string
@@ -27,6 +28,7 @@ export interface Props {
     saveTitle: (title: string, listId: string) => void
     onAddContributorsClick?: React.MouseEventHandler
     clearInbox?: () => void
+    imageSupport: ImageSupportInterface<'provider'>
 }
 
 interface State {
@@ -102,6 +104,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                         onContentUpdate={(description) =>
                             this.setState({ description })
                         }
+                        imageSupport={this.props.imageSupport}
                     />
                 </DescriptionEditorContainer>
             )

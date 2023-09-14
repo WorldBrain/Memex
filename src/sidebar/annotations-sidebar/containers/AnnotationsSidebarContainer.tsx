@@ -60,6 +60,7 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -101,6 +102,7 @@ export class AnnotationsSidebarContainer<
                         annotationId,
                     )
                 },
+                imageSupport: props.imageSupport,
             }),
         )
 
@@ -322,6 +324,7 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     isEditing: false,
                 }),
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -374,6 +377,7 @@ export class AnnotationsSidebarContainer<
             comment: this.state.commentBox.commentText,
             lists: this.state.commentBox.lists,
             hoverState: null,
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -819,6 +823,7 @@ export class AnnotationsSidebarContainer<
                                 replyReference,
                                 annotationReference,
                             ) => ({
+                                imageSupport: this.props.imageSupport,
                                 isDeleting: this.state.replyDeleteStates[
                                     replyReference.id
                                 ]?.isDeleting,

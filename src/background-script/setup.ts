@@ -817,6 +817,6 @@ export function registerBackgroundModuleCollections(options: {
             getPersistentBackgroundStorageModules(options.backgroundModules),
         )
     } catch (e) {
-        console.log(e)
+        console.error(e)
     }
 }

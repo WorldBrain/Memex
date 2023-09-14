@@ -96,7 +96,8 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import html2canvas from 'html2canvas'
+import * as htmlToImage from 'html-to-image'
+import { toPng } from 'html-to-image'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -540,6 +541,7 @@ export async function main(
             const screenshotButton = document.getElementById(
                 'screenshotButtonInner',
             )
+
             screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Loading Screenshot</div>`
             const targetContainer = document.getElementById('movie_player')
             const screenshotTarget = targetContainer.getElementsByClassName(
@@ -548,9 +550,10 @@ export async function main(
 
             await sleepPromise(50)
             if (screenshotTarget) {
+                const dataURL = await captureScreenshot(screenshotTarget)
                 inPageUI.showSidebar({
                     action: 'create_youtube_timestamp_with_screenshot',
-                    imageData: await captureScreenshot(screenshotTarget),
+                    imageData: dataURL,
                 })
             }
 
@@ -561,11 +564,7 @@ export async function main(
     }
 
     async function captureScreenshot(screenshotTarget) {
-        const canvas = await html2canvas(screenshotTarget, {
-            allowTaint: true,
-        })
-        const base64image = canvas.toDataURL('image/png')
-        return base64image
+        return await htmlToImage.toPng(screenshotTarget)
     }
 
     // if (window.location.hostname === 'www.youtube.com') {

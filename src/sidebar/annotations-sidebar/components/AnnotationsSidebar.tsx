@@ -818,6 +818,7 @@ export class AnnotationsSidebar extends React.Component<
                                             id: listData.remoteId,
                                         },
                                     )}
+                                    imageSupport={this.props.imageSupport}
                                 />
                             )}
                     </AnnotationBox>

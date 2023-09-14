@@ -201,6 +201,7 @@ export class DashboardContainer extends StatefulUIElement<
                           listId: listData.unifiedId,
                       })
                 : undefined,
+            imageSupport: this.props.imageSupport,
         }
     }
 

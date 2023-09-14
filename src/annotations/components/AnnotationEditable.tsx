@@ -468,8 +468,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.currentUserId === this.props.creatorId && (
                         <ActionBox>
                             <TooltipBox
-                                tooltipText="Edit Note"
-                                placement="bottom"
+                                tooltipText={
+                                    <span>
+                                        Edit Note <br />
+                                        <strong>Pro Tip:</strong> Double Click
+                                        Card
+                                    </span>
+                                }
+                                placement="bottom-end"
                             >
                                 <Icon
                                     onClick={

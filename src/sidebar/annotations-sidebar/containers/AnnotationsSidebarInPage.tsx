@@ -30,11 +30,13 @@ import type {
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
+    imageSupport?: ImageSupportInterface<'provider'>
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
@@ -71,7 +73,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     async componentDidMount() {
         document.addEventListener('keydown', this.listenToEsc)
-        document.addEventListener('mousedown', this.listenToOutsideClick)
+        document.addEventListener('click', this.listenToOutsideClick)
         this.setupEventForwarding()
 
         if (
@@ -88,7 +90,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     async componentWillUnmount() {
         document.removeEventListener('keydown', this.listenToEsc)
-        document.removeEventListener('mousedown', this.listenToOutsideClick)
+        document.removeEventListener('click', this.listenToOutsideClick)
         this.cleanupEventForwarding()
         await super.componentWillUnmount()
     }
@@ -108,6 +110,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         )
 
         if (sidebarContainer && this.state.showState === 'visible') {
+            console.log('ssssss')
             if (
                 event.target.classList.contains('hypothesis-highlight') ||
                 this.state.readingView

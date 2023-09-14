@@ -350,6 +350,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     render() {
+        console.log('comment', this.props.comment)
         return (
             <>
                 <TextBoxContainerStyled>
@@ -368,7 +369,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={`Write a note...`}
+                                placeholder={
+                                    this.props.comment.length === 0 &&
+                                    `Write a note...`
+                                }
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }
@@ -384,6 +388,34 @@ export class AnnotationCreate extends React.Component<Props, State>
                                         onEditClick: true,
                                     })
                                 }
+                                onDragOver={(event) => {
+                                    event.preventDefault() // Always call this for onDragOver when you want to allow a drop.
+
+                                    const isFile = event.dataTransfer.types.includes(
+                                        'Files',
+                                    )
+
+                                    if (isFile) {
+                                        this.setState({
+                                            onEditClick: true,
+                                        })
+                                        // Here you can initiate some action, like showing a UI hint that images can be dropped here.
+                                    }
+                                }}
+                                // onDrop={(event) => {
+                                //     event.preventDefault()
+
+                                //     if (
+                                //         event.dataTransfer.files.length > 0 &&
+                                //         event.dataTransfer.files[0].type.includes(
+                                //             'image',
+                                //         )
+                                //     ) {
+                                //         this.setState({
+                                //             onEditClick: true,
+                                //         })
+                                //     }
+                                // }}
                             >
                                 Write a note...
                             </EditorDummy>
