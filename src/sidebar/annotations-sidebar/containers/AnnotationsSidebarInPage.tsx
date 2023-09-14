@@ -154,7 +154,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         //     highlighter.removeAnnotationHighlights(urls),
         // )
         sidebarEvents.on('highlightAndScroll', async ({ highlight }) => {
-            console.log('highlightAndScroll')
             await highlighter.highlightAndScroll({
                 id: highlight.unifiedId,
                 selector: highlight.selector,
@@ -255,9 +254,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
         } else if (event.action === 'show_annotation') {
-            console.log('before')
             await sleepPromise(500)
-            console.log('show_annotation')
             await this.processEvent('setActiveSidebarTab', {
                 tab:
                     this.state.selectedListId &&

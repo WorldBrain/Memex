@@ -1095,11 +1095,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             day,
                         }),
-                    onCommentChange: (noteId) => (e) =>
+                    onCommentChange: (noteId) => (event) => {
                         this.processEvent('setNoteEditCommentValue', {
                             noteId,
-                            value: (e.target as HTMLTextAreaElement).value,
-                        }),
+                            value: event,
+                        })
+                    },
                     onShareBtnClick: (noteId) => (mouseEvent) =>
                         this.processEvent('setNoteShareMenuShown', {
                             mouseEvent,
@@ -1366,19 +1367,21 @@ export class DashboardContainer extends StatefulUIElement<
                                 hasActivities={listsSidebar.hasFeedActivity}
                             />
                         </SidebarToggleBox>
-                        <MemexLogoContainer>
-                            <Icon
-                                icon={
-                                    this.props.theme.variant === 'dark'
-                                        ? memexIconDarkMode
-                                        : memexIconLightMode
-                                }
-                                height={'26px'}
-                                width={'180px'}
-                                hoverOff
-                                originalImage
-                            />
-                        </MemexLogoContainer>
+                        {!this.state.activePageID && (
+                            <MemexLogoContainer>
+                                <Icon
+                                    icon={
+                                        this.props.theme.variant === 'dark'
+                                            ? memexIconDarkMode
+                                            : memexIconLightMode
+                                    }
+                                    height={'26px'}
+                                    width={'180px'}
+                                    hoverOff
+                                    originalImage
+                                />
+                            </MemexLogoContainer>
+                        )}
                     </SidebarHeaderContainer>
                     <PeekTrigger
                         onMouseEnter={(isPeeking) => {

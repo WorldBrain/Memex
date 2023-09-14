@@ -398,10 +398,8 @@ export default class SearchResultsContainer extends React.Component<
                     comment: noteData.editNoteForm.inputValue,
                     onListsBarPickerBtnClick:
                         interactionProps.onListPickerBarBtnClick,
-                    onCommentChange: (value) =>
-                        interactionProps.onCommentChange({
-                            target: { value },
-                        } as any),
+                    onCommentChange: (content) =>
+                        interactionProps.onCommentChange(content),
                     onEditCancel: () =>
                         interactionProps.onEditCancel(dummyEvent),
                     onEditConfirm: interactionProps.onEditConfirm,
