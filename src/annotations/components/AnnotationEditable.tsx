@@ -242,15 +242,15 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     private updateSpacePickerState(showState: ListPickerShowState) {
         this.props.onSpacePickerToggle?.(showState)
-        // if (this.state.showSpacePicker === 'hide') {
-        //     this.setState({
-        //         showSpacePicker: showState,
-        //     })
-        // } else {
-        //     this.setState({
-        //         showSpacePicker: 'hide',
-        //     })
-        // }
+        if (this.state.showSpacePicker === 'hide') {
+            this.setState({
+                showSpacePicker: showState,
+            })
+        } else {
+            this.setState({
+                showSpacePicker: 'hide',
+            })
+        }
     }
 
     private get displayLists(): Array<{
