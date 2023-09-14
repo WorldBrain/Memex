@@ -1257,7 +1257,7 @@ const ContentTypeSwitchContainer = styled.div`
     align-items: flex-start;
     grid-gap: 10px;
     width: fill-available;
-    padding: 10px 0px 9px 0px;
+    padding: 10px;
 
     /* overflow-x: scroll;
 
@@ -1285,12 +1285,15 @@ const InfoText = styled.div`
 const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
-    max-width: calc(${sizeConstants.searchResults.widthPx}px);
+    max-width: calc(${sizeConstants.searchResults.widthPx}px + 20px);
     z-index: 3000;
     position: sticky;
-    top: -1px;
-    background: ${(props) => props.theme.colors.black};
+    top: 0px;
+    margin-top: -1px;
+    background: ${(props) => props.theme.colors.black}80;
+    backdrop-filter: blur(8px);
     width: fill-available;
+    width: -moz-available;
 `
 
 const ReferencesContainer = styled.div`
