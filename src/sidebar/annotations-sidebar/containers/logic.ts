@@ -1237,7 +1237,6 @@ export class SidebarContainerLogic extends UILogic<
     setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
         event,
     }) => {
-        console.log('settt')
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
@@ -1465,7 +1464,6 @@ export class SidebarContainerLogic extends UILogic<
             activeTab,
         } = previousState
 
-        console.log('comment', commentBox.commentText.trim())
         let OriginalCommentForCache = commentBox.commentText.trim()
         OriginalCommentForCache = sanitizeHTMLhelper(OriginalCommentForCache)
         if (OriginalCommentForCache.length === 0) {
@@ -1480,7 +1478,6 @@ export class SidebarContainerLogic extends UILogic<
                 now: () => now,
             })
 
-        console.log('OriginalCommentForCache', OriginalCommentForCache)
         // this checks for all images in the comment that have not been uploaded yet, uploads them and gives back an updated version of the html code.
         // however the original comment is put in cache
         let commentForSaving = await processCommentForImageUpload(
@@ -1489,7 +1486,6 @@ export class SidebarContainerLogic extends UILogic<
             annotationId,
             this.options.imageSupport,
         )
-        console.log('commentForSavingnew', commentForSaving)
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -2578,7 +2574,7 @@ export class SidebarContainerLogic extends UILogic<
         })
         this.options.focusCreateForm()
 
-        const maxRetries = 30
+        const maxRetries = 50
         let handledSuccessfully = false
 
         for (let i = 0; i < maxRetries; i++) {

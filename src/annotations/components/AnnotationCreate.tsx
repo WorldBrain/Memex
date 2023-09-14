@@ -128,7 +128,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     }
 
                     if (imageData) {
-                        await sleepPromise(1000)
+                        await sleepPromise(50)
                         this.editor?.addImageToEditor(imageData)
                         callback(true) // signal successful processing
                     } else {

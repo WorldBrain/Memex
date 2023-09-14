@@ -286,7 +286,6 @@ export class AnnotationsSidebarContainer<
         ]
         const unifiedAnnotationId = annotation.unifiedId
 
-        console.log('instance', annotationCardInstance?.comment)
         return {
             comment: annotationCardInstance?.comment,
             onListsBarPickerBtnClick: () =>

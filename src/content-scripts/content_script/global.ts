@@ -548,7 +548,6 @@ export async function main(
                 'html5-main-video',
             )[0] as HTMLElement
 
-            await sleepPromise(50)
             if (screenshotTarget) {
                 const dataURL = await captureScreenshot(screenshotTarget)
                 inPageUI.showSidebar({
