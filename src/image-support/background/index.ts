@@ -54,12 +54,15 @@ export class ImageSupportBackground {
                 : dataURLToBlob(params.image)
 
         await this.options.backend.uploadImage({ image: blob, id: params.id })
-        // await this.storage.storeImage({
-        //     id: params.id,
-        //     createdWhen: Date.now(),
-        //     normalizedPageUrl: params.normalizedPageUrl,
-        //     annotation: params.annotationUrl,
-        // })
+
+        console.log('beforestore')
+        await this.storage.storeImage({
+            id: params.id,
+            createdWhen: Date.now(),
+            normalizedPageUrl: params.normalizedPageUrl,
+            annotation: params.annotationUrl,
+        })
+        console.log('aferstore')
     }
 
     getImageUrl: ImageSupportInterface<
