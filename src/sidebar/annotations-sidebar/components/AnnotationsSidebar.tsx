@@ -2081,7 +2081,8 @@ export class AnnotationsSidebar extends React.Component<
                         active={this.props.activeTab === 'annotations'}
                         type={'tertiary'}
                         size={'medium'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                     />
                     <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
@@ -2090,7 +2091,8 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         size={'medium'}
                         iconPosition={'right'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                         icon={
                             this.props.cacheLoadState === 'running' ||
                             this.props.cacheLoadState === 'pristine' ? (
@@ -2120,7 +2122,8 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         size={'medium'}
                         iconPosition={'right'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                     />
                     <PrimaryAction
                         onClick={(event) => {
@@ -2132,7 +2135,8 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         size={'medium'}
                         iconPosition={'right'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                         icon={
                             this.props.hasFeedActivity ? (
                                 <TooltipBox
@@ -2171,6 +2175,7 @@ export class AnnotationsSidebar extends React.Component<
                             )
                         }
                         padding={'0px 12px 0 6px'}
+                        height={'30px'}
                     />
                     {this.props.showSharePageTooltip &&
                         this.renderPageLinkMenu(listData ?? null)}
@@ -2821,6 +2826,8 @@ const AISidebarContainer = styled.div`
     /* overflow: scroll; */
     display: flex;
     flex-direction: column;
+    height: 400px;
+    flex: 1;
 
     &::-webkit-scrollbar {
         display: none;
