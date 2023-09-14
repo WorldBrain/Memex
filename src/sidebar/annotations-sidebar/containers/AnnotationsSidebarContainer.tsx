@@ -60,6 +60,7 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -68,6 +69,7 @@ export interface Props extends SidebarContainerOptions {
     onNotesSidebarClose?: () => void
     youtubeService?: YoutubeService
     getYoutubePlayer?(): YoutubePlayer
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 export class AnnotationsSidebarContainer<
@@ -101,6 +103,7 @@ export class AnnotationsSidebarContainer<
                         annotationId,
                     )
                 },
+                imageSupport: props.imageSupport,
             }),
         )
 
@@ -268,7 +271,10 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationEditProps = (
-        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'privacyLevel'>,
+        annotation: Pick<
+            UnifiedAnnotation,
+            'unifiedId' | 'privacyLevel' | 'normalizedPageUrl' | 'localId'
+        >,
         instanceLocation: AnnotationCardInstanceLocation,
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const cardId = generateAnnotationCardInstanceId(
@@ -279,6 +285,7 @@ export class AnnotationsSidebarContainer<
             cardId
         ]
         const unifiedAnnotationId = annotation.unifiedId
+
         return {
             comment: annotationCardInstance?.comment,
             onListsBarPickerBtnClick: () =>
@@ -292,6 +299,7 @@ export class AnnotationsSidebarContainer<
                     instanceLocation,
                     unifiedAnnotationId,
                     comment,
+                    annotation,
                 }),
             onEditConfirm: (showExternalConfirmations) => (
                 shouldShare,
@@ -322,6 +330,7 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     isEditing: false,
                 }),
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -374,6 +383,7 @@ export class AnnotationsSidebarContainer<
             comment: this.state.commentBox.commentText,
             lists: this.state.commentBox.lists,
             hoverState: null,
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -814,10 +824,12 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            imageSupport={this.props.imageSupport}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,
                                 annotationReference,
                             ) => ({
+                                imageSupport: this.props.imageSupport,
                                 isDeleting: this.state.replyDeleteStates[
                                     replyReference.id
                                 ]?.isDeleting,

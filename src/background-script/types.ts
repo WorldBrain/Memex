@@ -1,6 +1,7 @@
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { RemoteFunctionRole } from 'src/util/webextensionRPC'
 
@@ -33,4 +34,5 @@ export interface BackgroundModuleRemoteInterfaces<
     contentSharing: ContentSharingInterface
     customLists: RemoteCollectionsInterface
     pageActivityIndicator: RemotePageActivityIndicatorInterface
+    imageSupport: ImageSupportInterface<Role>
 }

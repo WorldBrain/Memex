@@ -56,6 +56,7 @@ import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -124,6 +125,7 @@ export type Props = RootState &
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
         clearInbox: () => void
         filterByList: (localListId: number) => void
+        imageSupport: ImageSupportInterface<'caller'>
     }
 
 export interface State {
@@ -294,6 +296,7 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <AnnotationEditable
+                imageSupport={this.props.imageSupport}
                 zIndex={zIndex}
                 key={noteId}
                 unifiedId={noteId}
@@ -402,6 +405,7 @@ export default class SearchResultsContainer extends React.Component<
                     onEditCancel: () =>
                         interactionProps.onEditCancel(dummyEvent),
                     onEditConfirm: interactionProps.onEditConfirm,
+                    imageSupport: this.props.imageSupport,
                 }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
@@ -461,6 +465,7 @@ export default class SearchResultsContainer extends React.Component<
                             analyticsBG={this.props.analyticsBG}
                         />
                     )}
+                    imageSupport={this.props.imageSupport}
                 />
                 <NoteResultContainer>
                     {/* {noteIds[notesType].length > 0 && (

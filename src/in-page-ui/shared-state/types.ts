@@ -23,6 +23,7 @@ export type InPageUISidebarAction =
     | 'set_focus_mode'
     | 'show_transcript'
     | 'create_youtube_timestamp_with_AI_summary'
+    | 'create_youtube_timestamp_with_screenshot'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
@@ -52,6 +53,7 @@ export interface SidebarActionOptions {
     commentText?: string
     listId?: number
     timeStampANDSummaryJSON?: string[]
+    imageData?: string
 }
 
 export type InPageErrorType = 'annotation' // Add more specific error types here

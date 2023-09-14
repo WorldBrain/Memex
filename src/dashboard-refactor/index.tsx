@@ -111,6 +111,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'authBG'
         | 'openCollectionPage'
         | 'summarizeBG'
+        | 'imageSupport'
     > = {
         analytics,
         copyToClipboard,
@@ -139,6 +140,7 @@ export class DashboardContainer extends StatefulUIElement<
         annotationsCache: new PageAnnotationsCache({}),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
+        imageSupport: runInBackground(),
     }
 
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
@@ -199,6 +201,7 @@ export class DashboardContainer extends StatefulUIElement<
                           listId: listData.unifiedId,
                       })
                 : undefined,
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -627,6 +630,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                imageSupport={this.props.imageSupport}
                 annotationsCache={this.props.annotationsCache}
                 filterByList={(localListId) => {
                     const listData = this.props.annotationsCache.getListByLocalId(
@@ -1459,6 +1463,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
+                            imageSupport={this.props.imageSupport}
                             theme={this.props.theme}
                             hasFeedActivity={listsSidebar.hasFeedActivity}
                             clickFeedActivityIndicator={() =>

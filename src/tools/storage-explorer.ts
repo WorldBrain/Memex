@@ -12,6 +12,7 @@ import { createPersistentStorageManager } from 'src/storage/persistent-storage'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import DeprecatedStorageModules from 'src/background-script/deprecated-storage-modules'
 import { createAuthServices } from 'src/services/local-services'
+import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
 
 type CommandLineArguments =
     | { command: 'list-collections' }
@@ -90,6 +91,12 @@ async function main() {
         // TODO: Implement these
         fetchPDFData: null,
         fetchPageData: null,
+        imageSupportBackend: new CloudflareImageSupportBackend({
+            env:
+                process.env.NODE_ENV === 'production'
+                    ? 'production'
+                    : 'staging',
+        }),
     })
     const storageModules = getBackgroundStorageModules(
         backgroundModules,

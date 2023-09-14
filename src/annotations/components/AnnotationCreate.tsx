@@ -21,6 +21,8 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import delay from 'src/util/delay'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
+import { sleepPromise } from 'src/util/promises'
 
 interface State {
     isTagPickerShown: boolean
@@ -54,6 +56,7 @@ export interface AnnotationCreateGeneralProps {
     getYoutubePlayer?(): YoutubePlayer
     renderSpacePicker(): JSX.Element
     sidebarEvents?: AnnotationsSidebarInPageEventEmitter
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface Props
@@ -110,6 +113,23 @@ export class AnnotationCreate extends React.Component<Props, State>
                             text,
                             showLoadingSpinner,
                         )
+                        callback(true) // signal successful processing
+                    } else {
+                        callback(false) // signal failure or "not ready" due to missing data
+                    }
+                },
+            )
+            youtubeSummariseEvents.on(
+                'addImageToEditor',
+                async ({ imageData }, callback) => {
+                    if (!this.editor) {
+                        callback(false) // signal that listener isn't ready
+                        return
+                    }
+
+                    if (imageData) {
+                        await sleepPromise(50)
+                        this.editor?.addImageToEditor(imageData)
                         callback(true) // signal successful processing
                     } else {
                         callback(false) // signal failure or "not ready" due to missing data
@@ -348,13 +368,17 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={`Write a note...`}
+                                placeholder={
+                                    this.props.comment.length === 0 &&
+                                    `Write a note...`
+                                }
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }
                                 youtubeShortcut={this.state.youtubeShortcut}
                                 getYoutubePlayer={this.props.getYoutubePlayer}
                                 sidebarEvents={this.props.sidebarEvents}
+                                imageSupport={this.props.imageSupport}
                             />
                         ) : (
                             <EditorDummy
@@ -363,6 +387,34 @@ export class AnnotationCreate extends React.Component<Props, State>
                                         onEditClick: true,
                                     })
                                 }
+                                onDragOver={(event) => {
+                                    event.preventDefault() // Always call this for onDragOver when you want to allow a drop.
+
+                                    const isFile = event.dataTransfer.types.includes(
+                                        'Files',
+                                    )
+
+                                    if (isFile) {
+                                        this.setState({
+                                            onEditClick: true,
+                                        })
+                                        // Here you can initiate some action, like showing a UI hint that images can be dropped here.
+                                    }
+                                }}
+                                // onDrop={(event) => {
+                                //     event.preventDefault()
+
+                                //     if (
+                                //         event.dataTransfer.files.length > 0 &&
+                                //         event.dataTransfer.files[0].type.includes(
+                                //             'image',
+                                //         )
+                                //     ) {
+                                //         this.setState({
+                                //             onEditClick: true,
+                                //         })
+                                //     }
+                                // }}
                             >
                                 Write a note...
                             </EditorDummy>

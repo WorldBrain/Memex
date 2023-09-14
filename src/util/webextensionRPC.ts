@@ -244,9 +244,6 @@ export function makeRemotelyCallable<T>(
     }
     // Add the functions to our global repetoir.
     Object.assign(remotelyCallableFunctions, functions)
-    // console.log('assigned to remotelyCallableFunctions this new functions', {
-    //     functions,
-    // })
 }
 
 export function clearRemotelyCallableFunctions() {

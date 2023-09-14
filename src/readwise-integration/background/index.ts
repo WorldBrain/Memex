@@ -182,10 +182,10 @@ function annotationToReadwise(
         highlighted_at: annotation.createdWhen,
         location_type: 'order',
         location: formatReadwiseHighlightLocation(annotation?.selector),
-        note: formatReadwiseHighlightNote(annotation?.comment, [
-            ...annotation.tags,
-            ...annotation.listNames,
-        ]),
+        note: formatReadwiseHighlightNote(
+            convertHTMLintoMarkdown(annotation?.comment),
+            [...annotation.tags, ...annotation.listNames],
+        ),
         text: annotation?.body?.length
             ? convertHTMLintoMarkdown(annotation.body)
             : formatReadwiseHighlightTime(annotation?.createdWhen),
