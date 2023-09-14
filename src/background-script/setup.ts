@@ -803,20 +803,16 @@ export function registerBackgroundModuleCollections(options: {
     persistentStorageManager: StorageManager
     backgroundModules: BackgroundModules
 }) {
-    try {
-        const deprecatedModules = new DeprecatedStorageModules(options)
-        registerModuleMapCollections(
-            options.storageManager.registry,
-            getBackgroundStorageModules(
-                options.backgroundModules,
-                deprecatedModules,
-            ),
-        )
-        registerModuleMapCollections(
-            options.persistentStorageManager.registry,
-            getPersistentBackgroundStorageModules(options.backgroundModules),
-        )
-    } catch (e) {
-        console.error(e)
-    }
+    const deprecatedModules = new DeprecatedStorageModules(options)
+    registerModuleMapCollections(
+        options.storageManager.registry,
+        getBackgroundStorageModules(
+            options.backgroundModules,
+            deprecatedModules,
+        ),
+    )
+    registerModuleMapCollections(
+        options.persistentStorageManager.registry,
+        getPersistentBackgroundStorageModules(options.backgroundModules),
+    )
 }
