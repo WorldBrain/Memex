@@ -3213,9 +3213,9 @@ const TopAreaContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     z-index: 20;
-    padding: 5px 0px;
-    grid-gap: 7px;
-    background: ${(props) => props.theme.colors.black};
+    padding-top: 5px;
+    background: ${(props) => props.theme.colors.black}80;
+    backdrop-filter: blur(8px);
 `
 
 const AnnotationActions = styled.div`
@@ -3223,7 +3223,8 @@ const AnnotationActions = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: fill-available;
-    height: 24px;
+    height: 30px;
+    padding-bottom: 5px;
 `
 
 const ActionButtons = styled.div`
@@ -3411,11 +3412,15 @@ const AnnotationContainer = styled(Margin)`
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */
-    height: 100%;
+    height: calc(100% + 30px);
     overflow: scroll;
     padding-bottom: 100px;
     flex: 1;
     z-index: 10;
+    position: relative;
+    top: -34px;
+    padding-top: 30px;
+    margin-bottom: -34px;
 
     scrollbar-width: none;
 

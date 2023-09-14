@@ -1191,6 +1191,7 @@ export class AnnotationsSidebarContainer<
                                         })
                                     }
                                     analyticsBG={this.props.analyticsBG}
+                                    currentUser={this.props.getCurrentUser().id}
                                 />
                             )}
                             renderPageLinkMenuForList={(listData) => (
