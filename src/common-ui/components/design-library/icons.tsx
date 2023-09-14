@@ -162,3 +162,9 @@ export const bulletPoint = browser.runtime.getURL('/img/bulletPoint.svg')
 export const sun = browser.runtime.getURL('/img/sun.svg')
 export const moon = browser.runtime.getURL('/img/moon.svg')
 export const cameraIcon = browser.runtime.getURL('/img/cameraIcon.svg')
+export const memexIconDarkMode = browser.runtime.getURL(
+    '/img/memexIconDarkMode.svg',
+)
+export const memexIconLightMode = browser.runtime.getURL(
+    '/img/memexIcoLightkMode.svg',
+)

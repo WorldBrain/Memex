@@ -67,6 +67,9 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
+const memexIconDarkMode = browser.runtime.getURL('img/memexIconDarkMode.svg')
+const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
+
 export interface Props extends DashboardDependencies {
     theme: MemexTheme
 }
@@ -1363,6 +1366,19 @@ export class DashboardContainer extends StatefulUIElement<
                                 hasActivities={listsSidebar.hasFeedActivity}
                             />
                         </SidebarToggleBox>
+                        <MemexLogoContainer>
+                            <Icon
+                                icon={
+                                    this.props.theme.variant === 'dark'
+                                        ? memexIconDarkMode
+                                        : memexIconLightMode
+                                }
+                                height={'26px'}
+                                width={'180px'}
+                                hoverOff
+                                originalImage
+                            />
+                        </MemexLogoContainer>
                     </SidebarHeaderContainer>
                     <PeekTrigger
                         onMouseEnter={(isPeeking) => {
@@ -1563,6 +1579,16 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
         font-family: 'Satoshi', sans-serif;
 font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
         letter-spacing: 0.8px;
+    }
+`
+
+const MemexLogoContainer = styled.div`
+    position: absolute;
+    top: 16px;
+    left: 28px;
+
+    @media (max-width: 1200px) {
+        display: none;
     }
 `
 

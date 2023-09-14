@@ -2110,7 +2110,10 @@ const ChatFrame = styled.iframe`
 `
 
 const DateText = styled.span`
-    color: ${(props) => props.theme.colors.greyScale6};
+    color: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale6
+            : props.theme.colors.greyScale2};
 `
 const SavedButtonBox = styled.span`
     display: flex;
