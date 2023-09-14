@@ -1724,7 +1724,8 @@ const ListSidebarContent = styled(Rnd)<{
         css`
             position: absolute
             height: max-content;
-            background-color: ${(props) => props.theme.colors.greyScale1};
+            background-color: ${(props) => props.theme.colors.greyScale1}98;
+            backdrop-filter: blur(30px);
             //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
             margin-top: 50px;
             margin-bottom: 9px;

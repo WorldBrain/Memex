@@ -1324,7 +1324,7 @@ const ResultBox = styled(Margin)<{ zIndex: number; order }>`
     justify-content: space-between;
     width: 100%;
     z-index: ${(props) => props.zIndex};
-
+    grid-gap: 1px;
     animation-name: ${openAnimation};
     animation-delay: ${(props) => props.order * 30}ms;
     animation-duration: 0.4s;
