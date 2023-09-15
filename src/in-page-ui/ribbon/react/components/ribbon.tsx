@@ -2257,97 +2257,6 @@ const openAnimation = keyframes`
  100% { padding-bottom: 0px; opacity: 1 }
 `
 
-const OuterRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
-    flex-direction: column;
-    justify-content: center;
-    align-self: center;
-    width: 24px;
-    height: 400px;
-    right: -40px;
-    position: sticky;
-    display: flex;
-    line-height: normal;
-    text-align: start;
-    align-items: center;
-    z-index: 2147483644;
-
-    ${(props) =>
-        props.isPeeking &&
-        css`
-            display: flex;
-            align-items: flex-end;
-            width: 44px;
-            right: 0px;
-            transition: all 0.1s cubic-bezier(0.4, 0, 0.16, 0.87);
-        `}
-
-    ${(props) =>
-        (props.ribbonPosition === 'topRight' ||
-            props.ribbonPosition === 'bottomRight') &&
-        css`
-            display: flex;
-            box-shadow: none;
-            justify-content: center;
-            width: fit-content;
-            align-items: flex-start;
-            right: 0px;
-            top: 0px;
-            transition: unset;
-
-            & .removeSidebar {
-                visibility: hidden;
-                display: none;
-            }
-        `}
-
-        ${(props) =>
-            props.ribbonPosition === 'topRight' &&
-            css`
-                border-radius: 0 0 0 8px;
-                height: 28px;
-            `}
-        ${(props) =>
-            props.ribbonPosition === 'bottomRight' &&
-            css`
-                border-radius: 8px 0 0 0;
-                height: 58px;
-            `}
-
-            ${(props) =>
-                props.isSidebarOpen &&
-                css<{ ribbonPosition }>`
-                    display: flex;
-                    box-shadow: none;
-                    justify-content: center;
-                    height: 100%;
-                    width: 28px;
-                    align-items: flex-start;
-                    padding: 0px 7px 0px 5px;
-                    right: 0px;
-                    transition: unset;
-                    background: ${(props) =>
-                        props.theme.variant === 'dark'
-                            ? props.theme.colors.black + 'ec'
-                            : props.theme.colors.black + 'c9'};
-                    backdrop-filter: blur(30px);
-                    border-radius: 0px;
-
-                    & .removeSidebar {
-                        visibility: hidden;
-                        display: none;
-                    }
-                `}
-
-
-                ${(props) =>
-                    props.isSidebarOpen &&
-                    css`
-                        align-items: center;
-                    `}
-
-    
-`
-
 const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
     /* right: -40px; */
     position: sticky;
@@ -2443,6 +2352,9 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     transition: unset;
                     border-radius: 0px;
                     justify-content: space-between;
+                    border: none;
+                    border-left: 1px solid
+                        ${(props) => props.theme.colors.greyScale3};
 
                     & .removeSidebar {
                         visibility: hidden;

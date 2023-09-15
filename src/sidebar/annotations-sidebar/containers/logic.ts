@@ -309,6 +309,7 @@ export class SidebarContainerLogic extends UILogic<
             firstTimeSharingPageLink: false,
             selectedListForShareMenu: null,
             renameListErrorMessage: null,
+            sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
         }
     }
@@ -850,6 +851,22 @@ export class SidebarContainerLogic extends UILogic<
 
     adjustSidebarWidth: EventHandler<'adjustSidebarWidth'> = ({ event }) => {
         this.emitMutation({ sidebarWidth: { $set: event.newWidth } })
+
+        // if (event.isWidthLocked) {
+        //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
+        //     let windowWidth = window.innerWidth
+        //     let width = (windowWidth - sidebarWidth).toString()
+        //     width = width + 'px'
+        //     document.body.style.width = width
+        // }
+    }
+
+    adjustRighPositionBasedOnRibbonPosition: EventHandler<
+        'adjustRighPositionBasedOnRibbonPosition'
+    > = ({ event }) => {
+        this.emitMutation({
+            sidebarRightBorderPosition: { $set: event.position },
+        })
 
         // if (event.isWidthLocked) {
         //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)

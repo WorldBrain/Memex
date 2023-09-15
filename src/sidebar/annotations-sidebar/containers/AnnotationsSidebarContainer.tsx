@@ -122,6 +122,58 @@ export class AnnotationsSidebarContainer<
             }
         })
     }
+    listenToRibbonPosition() {
+        let hostElement = document.getElementById('memex-ribbon-container')
+        // let shadowRoot = hostElement.querySelector('#shadow-root') // Change the selector as appropriate
+        if (!hostElement) {
+            console.error('Shadow host not found!')
+            return
+        }
+
+        let shadowRoot = hostElement.shadowRoot
+        let ribbonContainer = shadowRoot.getElementById('memex-ribbon-holder')
+
+        if (!ribbonContainer) {
+            console.error(
+                "Element with ID 'memex-ribbon' not found inside Shadow DOM!",
+            )
+            return
+        }
+
+        let lastYpos = ribbonContainer.getClientRects()[0].y
+
+        let checkCount = 0
+        const maxChecks = 100 // 3 seconds divided by 10ms = 300 checks
+
+        const intervalId = setInterval(() => {
+            const newYpos = ribbonContainer.getClientRects()[0].y
+
+            if (lastYpos !== newYpos) {
+                const newWidth = ribbonContainer.getClientRects()[0].width
+
+                const ribbonLeftPosFromRight = newYpos + newWidth
+
+                console.log('ribbonLeftPosFromRight', ribbonLeftPosFromRight)
+
+                // Process the change in position
+                this.processEvent('adjustRighPositionBasedOnRibbonPosition', {
+                    position: ribbonLeftPosFromRight,
+                })
+
+                if (
+                    ribbonLeftPosFromRight > 30 &&
+                    ribbonLeftPosFromRight < 60
+                ) {
+                    clearInterval(intervalId)
+                }
+            }
+
+            checkCount++
+            if (checkCount >= maxChecks) {
+                clearInterval(intervalId)
+            }
+        }, 20) // Check every 10ms
+    }
 
     private createNewList = (
         annotationId?: UnifiedAnnotation['unifiedId'],
@@ -175,6 +227,7 @@ export class AnnotationsSidebarContainer<
         if (this.props.sidebarContext === 'dashboard') {
             document.addEventListener('keydown', this.listenToEsc)
         }
+        this.listenToRibbonPosition()
     }
 
     hideSidebar() {
@@ -778,6 +831,7 @@ export class AnnotationsSidebarContainer<
             zIndex: 3,
         } as const
 
+        console.log('sidebarWidth', this.state.sidebarRightBorderPosition)
         return (
             <ThemeProvider theme={this.props.theme}>
                 <GlobalStyle
@@ -788,6 +842,10 @@ export class AnnotationsSidebarContainer<
                     id={'annotationSidebarContainer'}
                     sidebarContext={this.props.sidebarContext}
                     isShown={this.state.showState}
+                    rightPosition={
+                        this.state.sidebarRightBorderPosition != null &&
+                        this.state.sidebarRightBorderPosition
+                    }
                 >
                     <Rnd
                         style={style}
@@ -1327,7 +1385,7 @@ const GlobalStyle = createGlobalStyle<{
     width: 4px;
     height: 100vh;
     position: absolute;
-    top:  ${(props) => (props.sidebarContext === 'dashboard' ? '40px' : '0px')};
+    top: ${(props) => (props.sidebarContext === 'dashboard' ? '40px' : '0px')};
 
         &:hover {
         background: #5671cf30;
@@ -1371,6 +1429,7 @@ const ContainerStyled = styled.div<{
     sidebarContext: string
     isShown: string
     theme
+    rightPosition?: number
 }>`
     height: 100vh;
     overflow-x: visible;
@@ -1390,7 +1449,8 @@ const ContainerStyled = styled.div<{
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
     box-sizing: content-box;
-    right: ${TOOLTIP_WIDTH};
+    right: ${(props) =>
+        props.rightPosition ? props.rightPosition + 'px' : TOOLTIP_WIDTH};
 
     &:: -webkit-scrollbar {
         display: none;
