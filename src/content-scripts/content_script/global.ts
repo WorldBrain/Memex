@@ -835,8 +835,10 @@ export async function main(
 
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
             if (isPageBlacklisted || !isSidebarEnabled) {
+                await inPageUI.removeTooltip()
                 await inPageUI.removeRibbon()
             } else {
+                await inPageUI.reloadComponent('tooltip')
                 await inPageUI.reloadRibbon()
             }
 
@@ -881,12 +883,6 @@ export async function main(
         )
     }
 
-    // 7. Load components and associated content scripts if they are set to autoload
-    // on each page.
-    if (await tooltipUtils.getTooltipState()) {
-        await inPageUI.setupTooltip()
-    }
-
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
     if (areHighlightsEnabled) {
         inPageUI.showHighlights()
@@ -909,6 +905,9 @@ export async function main(
             keepRibbonHidden: !isSidebarEnabled,
             showPageActivityIndicator: hasActivity,
         })
+        if (await tooltipUtils.getTooltipState()) {
+            await inPageUI.setupTooltip()
+        }
     }
 
     setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
