@@ -368,10 +368,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                     this.props.autoFocus ||
                                     this.state.onEditClick
                                 }
-                                placeholder={
-                                    this.props.comment.length === 0 &&
-                                    `Write a note...`
-                                }
+                                placeholder={`Write a note...`}
                                 isRibbonCommentBox={
                                     this.props.isRibbonCommentBox
                                 }

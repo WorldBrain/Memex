@@ -4,6 +4,8 @@ import styled, { css } from 'styled-components'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
 
 const styles = require('./TemplateEditorStyles.css')
 
@@ -18,6 +20,7 @@ const TextInputBox = styled.div`
     display: flex;
     flex-direction: column;
     padding: 10px 10px;
+    grid-gap: 5px;
 `
 
 const HeaderText = styled.div`
@@ -80,13 +83,14 @@ const SectionTitle = styled.div`
     font-weight: 400;
 `
 
-const TextInput = styled.input`
+const TextInput = styled(TextField)`
     outline: none;
     height: fill-available;
     width: fill-available;
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     border: none;
+    margin-bottom: 10px;
     background: ${(props) => props.theme.colors.greyScale2};
 
     &:focus-within {
@@ -99,7 +103,7 @@ const TextInput = styled.input`
     }
 `
 
-const TextArea = styled.textarea`
+const TextAreaContainer = styled(TextArea)`
     outline: none;
     height: fill-available;
     width: fill-available;
@@ -138,7 +142,6 @@ const OutputSwitcherContainer = styled.div`
     border-radius: 6px;
     border: 1px solid ${(props) => props.theme.colors.greyScale2};
     width: fit-content;
-    margin-bottom: 5px;
 `
 
 const OutputSwitcher = styled.div<{
@@ -227,6 +230,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         onChange={(e) =>
                             this.props.onTitleChange(e.target.value)
                         }
+                        height="30px"
                     />
                     <OutputSwitcherContainer>
                         <OutputSwitcher
@@ -253,7 +257,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                             Rich Text
                         </OutputSwitcher>
                     </OutputSwitcherContainer>
-                    <TextArea
+                    <TextAreaContainer
                         placeholder="Code"
                         className={styles.textArea}
                         value={template?.code ?? ''}

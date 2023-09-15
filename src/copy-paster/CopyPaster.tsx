@@ -139,12 +139,12 @@ export default class CopyPasterContainer extends React.PureComponent<
 
             if (item) {
                 if (
-                    item.outputFormat === 'rich-text' ||
+                    item.outputFormat === 'markdown' ||
                     item.outputFormat == null
                 ) {
                     await copyToClipboard(rendered)
                 }
-                if (item.outputFormat === 'markdown') {
+                if (item.outputFormat === 'rich-text') {
                     const htmlString = md.render(rendered)
                     await this.copyRichTextToClipboard(htmlString)
                 }
