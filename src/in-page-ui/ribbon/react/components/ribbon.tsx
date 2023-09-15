@@ -2274,7 +2274,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
             ? props.theme.colors.black + 'ec'
             : props.theme.colors.black + 'c9'};
                     backdrop-filter: blur(30px);
-    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    outline: 1px solid ${(props) => props.theme.colors.greyScale3};
 
 
 
@@ -2352,8 +2352,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     transition: unset;
                     border-radius: 0px;
                     justify-content: space-between;
-                    border: none;
-                    border-left: 1px solid
+                    outline: 1px solid
                         ${(props) => props.theme.colors.greyScale3};
 
                     & .removeSidebar {
