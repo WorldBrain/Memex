@@ -94,6 +94,9 @@ import {
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { sleepPromise } from 'src/util/promises'
+import { ImageSupportInterface } from 'src/image-support/background/types'
+import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -106,6 +109,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     setDisplayNameModalShown?: (isShown: boolean) => void
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 type EventHandler<
@@ -1241,13 +1245,42 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    setAnnotationEditCommentText: EventHandler<
-        'setAnnotationEditCommentText'
-    > = ({ event }) => {
+    cancelAnnotationEdit: EventHandler<'cancelAnnotationEdit'> = ({
+        previousState,
+        event,
+    }) => {
+        const previousAnnotationComment = this.options.annotationsCache
+            .annotations.byId[event.unifiedAnnotationId].comment
+
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
-                    comment: { $set: event.comment },
+                    isCommentEditing: { $set: false },
+                    comment: { $set: previousAnnotationComment },
+                },
+            },
+        })
+    }
+
+    setAnnotationEditCommentText: EventHandler<
+        'setAnnotationEditCommentText'
+    > = async ({ event }) => {
+        let annotation = event.annotation
+
+        let newComment = (
+            await processCommentForImageUpload(
+                event.comment,
+                annotation.normalizedPageUrl,
+                annotation.localId,
+                this.options.imageSupport,
+                true,
+            )
+        ).toString()
+
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    comment: { $set: newComment },
                 },
             },
         })
@@ -1298,8 +1331,15 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const now = event.now ?? Date.now()
-        const comment = formData.comment.trim()
+        const comment = sanitizeHTMLhelper(formData.comment.trim())
         const hasCoreAnnotChanged = comment !== annotationData.comment
+
+        let commentForSaving = await processCommentForImageUpload(
+            comment,
+            annotationData.normalizedPageUrl,
+            annotationData.localId,
+            this.options.imageSupport,
+        )
 
         // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
         // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
@@ -1317,23 +1357,15 @@ export class SidebarContainerLogic extends UILogic<
         //           },
         //       })
 
-        this.emitMutation({
-            annotationCardInstances: {
-                [cardId]: {
-                    isCommentEditing: { $set: false },
-                },
-            },
-            confirmPrivatizeNoteArgs: {
-                $set: null,
-            },
-        })
-
         const { remoteAnnotationId, savePromise } = await updateAnnotation({
             annotationsBG: this.options.annotationsBG,
             contentSharingBG: this.options.contentSharingBG,
             keepListsIfUnsharing: event.keepListsIfUnsharing,
             annotationData: {
-                comment: comment !== annotationData.comment ? comment : null,
+                comment:
+                    commentForSaving !== annotationData.comment
+                        ? commentForSaving
+                        : null,
                 localId: annotationData.localId,
             },
             shareOpts: {
@@ -1348,7 +1380,7 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.updateAnnotation(
             {
                 ...annotationData,
-                comment,
+                comment: comment,
                 remoteId: remoteAnnotationId ?? undefined,
                 privacyLevel: shareOptsToPrivacyLvl({
                     shouldShare: event.shouldShare,
@@ -1358,6 +1390,17 @@ export class SidebarContainerLogic extends UILogic<
             },
             { updateLastEditedTimestamp: hasCoreAnnotChanged, now },
         )
+
+        this.emitMutation({
+            annotationCardInstances: {
+                [cardId]: {
+                    isCommentEditing: { $set: false },
+                },
+            },
+            confirmPrivatizeNoteArgs: {
+                $set: null,
+            },
+        })
 
         await savePromise
     }
@@ -1436,10 +1479,13 @@ export class SidebarContainerLogic extends UILogic<
             selectedListId,
             activeTab,
         } = previousState
-        const comment = commentBox.commentText.trim()
-        if (comment.length === 0) {
+
+        let OriginalCommentForCache = commentBox.commentText.trim()
+        OriginalCommentForCache = sanitizeHTMLhelper(OriginalCommentForCache)
+        if (OriginalCommentForCache.length === 0) {
             return
         }
+
         const now = event.now ?? Date.now()
         const annotationId =
             event.annotationId ??
@@ -1447,6 +1493,15 @@ export class SidebarContainerLogic extends UILogic<
                 pageUrl: fullPageUrl,
                 now: () => now,
             })
+
+        // this checks for all images in the comment that have not been uploaded yet, uploads them and gives back an updated version of the html code.
+        // however the original comment is put in cache
+        let commentForSaving = await processCommentForImageUpload(
+            OriginalCommentForCache,
+            normalizeUrl(fullPageUrl),
+            annotationId,
+            this.options.imageSupport,
+        )
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -1457,7 +1512,6 @@ export class SidebarContainerLogic extends UILogic<
             if (event.shouldShare && !(await this.ensureLoggedIn())) {
                 return
             }
-
             // A bunch of side-effects occur based on the types of lists this annotation will be a part of, and there's
             //  a bunch of different IDs for lists, thus we gotta group these here to decide things further on in this logic
             const remoteListIds: string[] = []
@@ -1514,7 +1568,7 @@ export class SidebarContainerLogic extends UILogic<
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
                 annotationData: {
-                    comment,
+                    comment: commentForSaving,
                     fullPageUrl,
                     localListIds,
                     localId: annotationId,
@@ -1544,7 +1598,7 @@ export class SidebarContainerLogic extends UILogic<
                 // These only contain lists added in the UI dropdown (to be checked in case any are shared, which should influence the annot privacy level)
                 localListIds: [...commentBox.lists],
                 unifiedListIds, // These contain the context list (selected list or list instance)
-                comment,
+                comment: OriginalCommentForCache,
             })
 
             if (remoteAnnotationId != null && remoteListIds.length > 0) {
@@ -1702,7 +1756,6 @@ export class SidebarContainerLogic extends UILogic<
         if (fullPageURL.includes('web.telegram.org')) {
             fullPageURL = convertMemexURLintoTelegramURL(fullPageURL)
         }
-
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
                 fullPageUrl: fullPageURL,
@@ -2122,39 +2175,41 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
-        let fullTextToProcess
-        if (isPagePDF) {
-            fullTextToProcess = document.body.innerText
-        }
+        if (event.prompt?.length > 0 || previousState.prompt?.length > 0) {
+            let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
+            let fullTextToProcess
+            if (isPagePDF) {
+                fullTextToProcess = document.body.innerText
+            }
 
-        if (previousState.queryMode === 'question') {
-            this.queryAI(
-                undefined,
-                undefined,
-                event.prompt ? event.prompt : previousState.prompt,
-                false,
-                previousState,
-                undefined,
-            )
-        } else if (previousState.queryMode === 'summarize') {
-            this.queryAI(
-                isPagePDF ? undefined : previousState.fullPageUrl,
-                previousState.selectedTextAIPreview ?? '',
-                event.prompt ? event.prompt : previousState.prompt,
-                false,
-                previousState,
-                isPagePDF ? fullTextToProcess : undefined,
-            )
-        } else if (previousState.queryMode === 'glanceSummary') {
-            this.queryAI(
-                isPagePDF ? undefined : previousState.fullPageUrl,
-                previousState.selectedTextAIPreview ?? '',
-                event.prompt ? event.prompt : previousState.prompt,
-                true,
-                previousState,
-                isPagePDF ? fullTextToProcess : undefined,
-            )
+            if (previousState.queryMode === 'question') {
+                this.queryAI(
+                    undefined,
+                    undefined,
+                    event.prompt ? event.prompt : previousState.prompt,
+                    false,
+                    previousState,
+                    undefined,
+                )
+            } else if (previousState.queryMode === 'summarize') {
+                this.queryAI(
+                    isPagePDF ? undefined : previousState.fullPageUrl,
+                    previousState.selectedTextAIPreview ?? '',
+                    event.prompt ? event.prompt : previousState.prompt,
+                    false,
+                    previousState,
+                    isPagePDF ? fullTextToProcess : undefined,
+                )
+            } else if (previousState.queryMode === 'glanceSummary') {
+                this.queryAI(
+                    isPagePDF ? undefined : previousState.fullPageUrl,
+                    previousState.selectedTextAIPreview ?? '',
+                    event.prompt ? event.prompt : previousState.prompt,
+                    true,
+                    previousState,
+                    isPagePDF ? fullTextToProcess : undefined,
+                )
+            }
         }
     }
 
@@ -2526,6 +2581,36 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         return nextState
+    }
+
+    createYoutubeTimestampWithScreenshot: EventHandler<
+        'createYoutubeTimestampWithScreenshot'
+    > = async ({ previousState, event }) => {
+        this.emitMutation({
+            loadState: { $set: 'success' },
+            activeTab: { $set: 'annotations' },
+        })
+        this.options.focusCreateForm()
+
+        const maxRetries = 50
+        let handledSuccessfully = false
+
+        for (let i = 0; i < maxRetries; i++) {
+            if (
+                this.options.events.emit(
+                    'addImageToEditor',
+                    {
+                        imageData: event.imageData,
+                    },
+                    (success) => {
+                        handledSuccessfully = success
+                    },
+                )
+            ) {
+                break
+            }
+            await sleepPromise(50) // wait for half a second before trying again
+        }
     }
 
     createYoutubeTimestampWithAISummary: EventHandler<

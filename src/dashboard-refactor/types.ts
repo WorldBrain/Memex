@@ -44,6 +44,7 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -106,6 +107,7 @@ export interface DashboardDependencies {
         UIServices,
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface DropReceivingState {

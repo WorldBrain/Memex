@@ -56,6 +56,7 @@ import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -124,6 +125,7 @@ export type Props = RootState &
         updateAllResultNotesShareInfo: (state: AnnotationSharingStates) => void
         clearInbox: () => void
         filterByList: (localListId: number) => void
+        imageSupport: ImageSupportInterface<'caller'>
     }
 
 export interface State {
@@ -294,6 +296,7 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <AnnotationEditable
+                imageSupport={this.props.imageSupport}
                 zIndex={zIndex}
                 key={noteId}
                 unifiedId={noteId}
@@ -395,13 +398,12 @@ export default class SearchResultsContainer extends React.Component<
                     comment: noteData.editNoteForm.inputValue,
                     onListsBarPickerBtnClick:
                         interactionProps.onListPickerBarBtnClick,
-                    onCommentChange: (value) =>
-                        interactionProps.onCommentChange({
-                            target: { value },
-                        } as any),
+                    onCommentChange: (content) =>
+                        interactionProps.onCommentChange(content),
                     onEditCancel: () =>
                         interactionProps.onEditCancel(dummyEvent),
                     onEditConfirm: interactionProps.onEditConfirm,
+                    imageSupport: this.props.imageSupport,
                 }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
@@ -461,6 +463,7 @@ export default class SearchResultsContainer extends React.Component<
                             analyticsBG={this.props.analyticsBG}
                         />
                     )}
+                    imageSupport={this.props.imageSupport}
                 />
                 <NoteResultContainer>
                     {/* {noteIds[notesType].length > 0 && (
@@ -1254,7 +1257,7 @@ const ContentTypeSwitchContainer = styled.div`
     align-items: flex-start;
     grid-gap: 10px;
     width: fill-available;
-    padding: 10px 0px 9px 0px;
+    padding: 10px;
 
     /* overflow-x: scroll;
 
@@ -1282,12 +1285,15 @@ const InfoText = styled.div`
 const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     /* padding: 0px 15px; */
     height: fit-content;
-    max-width: calc(${sizeConstants.searchResults.widthPx}px);
+    max-width: calc(${sizeConstants.searchResults.widthPx}px + 20px);
     z-index: 3000;
     position: sticky;
-    top: -1px;
-    background: ${(props) => props.theme.colors.black};
+    top: 0px;
+    margin-top: -1px;
+    background: ${(props) => props.theme.colors.black}80;
+    backdrop-filter: blur(8px);
     width: fill-available;
+    width: -moz-available;
 `
 
 const ReferencesContainer = styled.div`
@@ -1318,7 +1324,6 @@ const ResultBox = styled(Margin)<{ zIndex: number; order }>`
     justify-content: space-between;
     width: 100%;
     z-index: ${(props) => props.zIndex};
-
     animation-name: ${openAnimation};
     animation-delay: ${(props) => props.order * 30}ms;
     animation-duration: 0.4s;
@@ -1358,6 +1363,7 @@ const ResultsBox = styled.div<{ zIndex: number }>`
     flex-direction: column;
     width: fill-available;
     height: 100vh;
+    grid-gap: 1px;
     overflow: scroll;
     padding-bottom: 100px;
     align-items: center;

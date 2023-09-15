@@ -81,32 +81,39 @@ export default class PopupLogic extends UILogic<State, Event> {
         } = this.dependencies
 
         await loadInitial(this, async () => {
-            const [areTagsMigrated, isPDFReaderEnabled] = await Promise.all([
-                syncSettings.extension.get('areTagsMigratedToSpaces'),
-                syncSettings.pdfIntegration.get('shouldAutoOpen'),
-            ])
-
             const currentTab = await getCurrentTab({ runtimeAPI, tabsAPI })
-            const identifier = await pageIndexingBG.waitForContentIdentifier({
-                tabId: currentTab.id,
-                fullUrl: currentTab.url,
-            })
+            if (
+                currentTab.url === 'about:blank' ||
+                currentTab.url.startsWith('chrome') ||
+                currentTab.url.startsWith('moz-extension') ||
+                currentTab.url.startsWith('about:')
+            ) {
+            } else {
+                const identifier = await pageIndexingBG.waitForContentIdentifier(
+                    {
+                        tabId: currentTab.id,
+                        fullUrl: currentTab.url,
+                    },
+                )
+                const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
 
-            const pageListIds = await customListsBG.fetchPageLists({
-                url: identifier.fullUrl,
-            })
+                const pageListIds = await customListsBG.fetchPageLists({
+                    url: identifier.fullUrl,
+                })
 
-            const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
-            this.emitMutation({
-                analyticsBG: { $set: analyticsBG },
-                pageListIds: { $set: pageListIds },
-                currentTabFullUrl: { $set: currentTab.originalUrl },
-                identifierFullUrl: { $set: identifier.fullUrl },
-                underlyingResourceUrl: { $set: currentTab.url },
-                shouldShowTagsUIs: { $set: !areTagsMigrated },
-                isPDFReaderEnabled: { $set: isPDFReaderEnabled },
-                isFileAccessAllowed: { $set: isFileAccessAllowed },
-            })
+                const [isPDFReaderEnabled] = await Promise.all([
+                    syncSettings.pdfIntegration.get('shouldAutoOpen'),
+                ])
+                this.emitMutation({
+                    analyticsBG: { $set: analyticsBG },
+                    pageListIds: { $set: pageListIds },
+                    currentTabFullUrl: { $set: currentTab.originalUrl },
+                    identifierFullUrl: { $set: identifier.fullUrl },
+                    underlyingResourceUrl: { $set: currentTab.url },
+                    isPDFReaderEnabled: { $set: isPDFReaderEnabled },
+                    isFileAccessAllowed: { $set: isFileAccessAllowed },
+                })
+            }
         })
     }
 

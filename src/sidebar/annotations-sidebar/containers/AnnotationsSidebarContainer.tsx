@@ -60,6 +60,8 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
+import { ImageSupportInterface } from 'src/image-support/background/types'
+import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -68,6 +70,7 @@ export interface Props extends SidebarContainerOptions {
     onNotesSidebarClose?: () => void
     youtubeService?: YoutubeService
     getYoutubePlayer?(): YoutubePlayer
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 export class AnnotationsSidebarContainer<
@@ -101,6 +104,7 @@ export class AnnotationsSidebarContainer<
                         annotationId,
                     )
                 },
+                imageSupport: props.imageSupport,
             }),
         )
 
@@ -268,7 +272,10 @@ export class AnnotationsSidebarContainer<
     }
 
     protected bindAnnotationEditProps = (
-        annotation: Pick<UnifiedAnnotation, 'unifiedId' | 'privacyLevel'>,
+        annotation: Pick<
+            UnifiedAnnotation,
+            'unifiedId' | 'privacyLevel' | 'normalizedPageUrl' | 'localId'
+        >,
         instanceLocation: AnnotationCardInstanceLocation,
     ): AnnotationEditEventProps & AnnotationEditGeneralProps => {
         const cardId = generateAnnotationCardInstanceId(
@@ -279,6 +286,7 @@ export class AnnotationsSidebarContainer<
             cardId
         ]
         const unifiedAnnotationId = annotation.unifiedId
+
         return {
             comment: annotationCardInstance?.comment,
             onListsBarPickerBtnClick: () =>
@@ -292,6 +300,7 @@ export class AnnotationsSidebarContainer<
                     instanceLocation,
                     unifiedAnnotationId,
                     comment,
+                    annotation,
                 }),
             onEditConfirm: (showExternalConfirmations) => (
                 shouldShare,
@@ -317,11 +326,12 @@ export class AnnotationsSidebarContainer<
                 )
             },
             onEditCancel: () =>
-                this.processEvent('setAnnotationEditMode', {
+                this.processEvent('cancelAnnotationEdit', {
                     instanceLocation,
                     unifiedAnnotationId,
                     isEditing: false,
                 }),
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -374,6 +384,7 @@ export class AnnotationsSidebarContainer<
             comment: this.state.commentBox.commentText,
             lists: this.state.commentBox.lists,
             hoverState: null,
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -814,10 +825,12 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            imageSupport={this.props.imageSupport}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,
                                 annotationReference,
                             ) => ({
+                                imageSupport: this.props.imageSupport,
                                 isDeleting: this.state.replyDeleteStates[
                                     replyReference.id
                                 ]?.isDeleting,
@@ -1179,6 +1192,7 @@ export class AnnotationsSidebarContainer<
                                         })
                                     }
                                     analyticsBG={this.props.analyticsBG}
+                                    currentUser={this.props.getCurrentUser().id}
                                 />
                             )}
                             renderPageLinkMenuForList={(listData) => (
@@ -1367,12 +1381,16 @@ const ContainerStyled = styled.div<{
         props.sidebarContext === 'dashboard'
             ? '3500'
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
-    background: ${(props) => props.theme.colors.black};
+                    background: ${(props) =>
+                        props.theme.variant === 'dark'
+                            ? props.theme.colors.black + 'ec'
+                            : props.theme.colors.black + 'c9'};
+    backdrop-filter: blur(30px);
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
     box-sizing: content-box;
-    right: 40px;
+    right: ${TOOLTIP_WIDTH};
 
     &:: -webkit-scrollbar {
         display: none;

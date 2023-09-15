@@ -30,11 +30,13 @@ import type {
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
@@ -71,7 +73,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     async componentDidMount() {
         document.addEventListener('keydown', this.listenToEsc)
-        document.addEventListener('mousedown', this.listenToOutsideClick)
+        document.addEventListener('click', this.listenToOutsideClick)
         this.setupEventForwarding()
 
         if (
@@ -88,7 +90,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
     async componentWillUnmount() {
         document.removeEventListener('keydown', this.listenToEsc)
-        document.removeEventListener('mousedown', this.listenToOutsideClick)
+        document.removeEventListener('click', this.listenToOutsideClick)
         this.cleanupEventForwarding()
         await super.componentWillUnmount()
     }
@@ -252,6 +254,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
         } else if (event.action === 'show_annotation') {
+            await sleepPromise(500)
             await this.processEvent('setActiveSidebarTab', {
                 tab:
                     this.state.selectedListId &&
@@ -339,6 +342,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
             this.processEvent('createYoutubeTimestampWithAISummary', {
                 timeStampANDSummaryJSON: event.timeStampANDSummaryJSON,
+            })
+            return true
+        } else if (
+            event.action === 'create_youtube_timestamp_with_screenshot'
+        ) {
+            // await this.processEvent('setActiveSidebarTab', {
+            //     tab: 'annotations',
+            // })
+
+            this.processEvent('createYoutubeTimestampWithScreenshot', {
+                imageData: event.imageData,
             })
             return true
         }

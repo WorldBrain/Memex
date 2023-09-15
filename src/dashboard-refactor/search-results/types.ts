@@ -79,7 +79,7 @@ export type NoteInteractionProps = Omit<
     onEditBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
-    onCommentChange: React.KeyboardEventHandler<HTMLTextAreaElement>
+    onCommentChange: (content: string) => void
 }
 
 // NOTE: Derived type - edit the original

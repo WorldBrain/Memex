@@ -67,6 +67,9 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
+const memexIconDarkMode = browser.runtime.getURL('img/memexIconDarkMode.svg')
+const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
+
 export interface Props extends DashboardDependencies {
     theme: MemexTheme
 }
@@ -111,6 +114,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'authBG'
         | 'openCollectionPage'
         | 'summarizeBG'
+        | 'imageSupport'
     > = {
         analytics,
         copyToClipboard,
@@ -139,6 +143,7 @@ export class DashboardContainer extends StatefulUIElement<
         annotationsCache: new PageAnnotationsCache({}),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
+        imageSupport: runInBackground(),
     }
 
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
@@ -199,6 +204,7 @@ export class DashboardContainer extends StatefulUIElement<
                           listId: listData.unifiedId,
                       })
                 : undefined,
+            imageSupport: this.props.imageSupport,
         }
     }
 
@@ -533,6 +539,7 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     listData: joinedListsData,
                 }}
+                currentUser={this.state.currentUser}
                 initContextMenuBtnProps={(listId) => ({
                     loadOwnershipData: true,
                     spacesBG: this.props.listsBG,
@@ -559,6 +566,7 @@ export class DashboardContainer extends StatefulUIElement<
                             annotationLocalToRemoteIdsDict,
                         }),
                     analyticsBG: this.props.analyticsBG,
+                    currentUser: this.state.currentUser,
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
@@ -627,6 +635,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                imageSupport={this.props.imageSupport}
                 annotationsCache={this.props.annotationsCache}
                 filterByList={(localListId) => {
                     const listData = this.props.annotationsCache.getListByLocalId(
@@ -1088,11 +1097,12 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             day,
                         }),
-                    onCommentChange: (noteId) => (e) =>
+                    onCommentChange: (noteId) => (event) => {
                         this.processEvent('setNoteEditCommentValue', {
                             noteId,
-                            value: (e.target as HTMLTextAreaElement).value,
-                        }),
+                            value: event,
+                        })
+                    },
                     onShareBtnClick: (noteId) => (mouseEvent) =>
                         this.processEvent('setNoteShareMenuShown', {
                             mouseEvent,
@@ -1359,6 +1369,21 @@ export class DashboardContainer extends StatefulUIElement<
                                 hasActivities={listsSidebar.hasFeedActivity}
                             />
                         </SidebarToggleBox>
+                        {!this.state.activePageID && (
+                            <MemexLogoContainer>
+                                <Icon
+                                    icon={
+                                        this.props.theme.variant === 'dark'
+                                            ? memexIconDarkMode
+                                            : memexIconLightMode
+                                    }
+                                    height={'26px'}
+                                    width={'180px'}
+                                    hoverOff
+                                    originalImage
+                                />
+                            </MemexLogoContainer>
+                        )}
                     </SidebarHeaderContainer>
                     <PeekTrigger
                         onMouseEnter={(isPeeking) => {
@@ -1459,6 +1484,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
+                            imageSupport={this.props.imageSupport}
                             theme={this.props.theme}
                             hasFeedActivity={listsSidebar.hasFeedActivity}
                             clickFeedActivityIndicator={() =>
@@ -1558,6 +1584,16 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
         font-family: 'Satoshi', sans-serif;
 font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
         letter-spacing: 0.8px;
+    }
+`
+
+const MemexLogoContainer = styled.div`
+    position: absolute;
+    top: 16px;
+    left: 28px;
+
+    @media (max-width: 1200px) {
+        display: none;
     }
 `
 
@@ -1688,7 +1724,8 @@ const ListSidebarContent = styled(Rnd)<{
         css`
             position: absolute
             height: max-content;
-            background-color: ${(props) => props.theme.colors.greyScale1};
+            background-color: ${(props) => props.theme.colors.greyScale1}98;
+            backdrop-filter: blur(30px);
             //box-shadow: rgb(16 30 115 / 3%) 4px 0px 16px;
             margin-top: 50px;
             margin-bottom: 9px;

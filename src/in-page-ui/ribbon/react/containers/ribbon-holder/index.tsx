@@ -199,6 +199,7 @@ export default class RibbonHolder extends StatefulUIElement<
                         ref={this.handleHolderRef}
                         isSidebarOpen={this.state.isSidebarOpen}
                         ribbonPosition={this.state.ribbonPosition}
+                        isPeeking={this.state.state === 'visible'}
                     >
                         <RibbonContainer
                             {...this.props.containerDependencies}
@@ -287,6 +288,7 @@ const InPageError = styled.div`
 
 const RibbonHolderBox = styled.div<{
     isSidebarOpen: boolean
+    isPeeking: boolean
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
 }>`
     position: fixed;
@@ -316,6 +318,7 @@ const RibbonHolderBox = styled.div<{
         css<{ isSidebarOpen }>`
             right: 0px;
             top: 0px;
+            height: 44px;
             align-items: flex-end;
             height: ${TOOLTIP_HEIGHT};
         `}
@@ -324,15 +327,32 @@ const RibbonHolderBox = styled.div<{
         css<{ isSidebarOpen }>`
             right: 0px;
             bottom: 0px;
+            height: 44px;
             top: unset;
             align-items: flex-end;
             height: ${TOOLTIP_HEIGHT};
         `}
-
+        ${(props) =>
+            props.ribbonPosition === 'centerRight' &&
+            css<{ isSidebarOpen }>`
+                right: 0px;
+                height: 300px;
+                width: 10px;
+            `}
+        ${(props) =>
+            props.ribbonPosition === 'centerRight' &&
+            props.isPeeking &&
+            css<{ isSidebarOpen }>`
+                right: 0px;
+                height: fit-content;
+                width: 60px;
+            `}
+        
     ${(props) =>
         props.isSidebarOpen &&
         css`
             top: 0px;
             height: 100%;
+            width: 44px;
         `}
 `

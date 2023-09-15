@@ -123,7 +123,7 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
         use: 'null-loader',
     }
 
-    if (mode !== 'production' && !isCI) {
+    if (mode !== 'production' && !isCI && process.env.NO_THREADS !== 'true') {
         main.use = [threadLoader, ...main.use]
     }
 

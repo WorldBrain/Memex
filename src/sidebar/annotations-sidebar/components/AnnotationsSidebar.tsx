@@ -78,6 +78,7 @@ import {
 } from 'src/content-sharing/utils'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -214,6 +215,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     initGetReplyEditProps: (
         sharedListReference: SharedListReference,
     ) => RepliesProps['getReplyEditProps']
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 interface AnnotationsSidebarState {
@@ -502,13 +504,14 @@ export class AnnotationsSidebar extends React.Component<
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     autoFocus={this.state.autoFocusCreateForm}
                     sidebarEvents={this.props.events && this.props.events}
+                    imageSupport={this.props.imageSupport}
                 />
             </NewAnnotationSection>
         )
     }
 
     private renderLoader = (key?: string, size?: number) => (
-        <LoadingIndicatorContainer width={'100%'} height={'200px'} key={key}>
+        <LoadingIndicatorContainer width={'100%'} height={'300px'} key={key}>
             <LoadingIndicatorStyled size={size ? size : undefined} />
         </LoadingIndicatorContainer>
     )
@@ -711,6 +714,7 @@ export class AnnotationsSidebar extends React.Component<
                         order={i}
                     >
                         <AnnotationEditable
+                            imageSupport={this.props.imageSupport}
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
@@ -814,6 +818,7 @@ export class AnnotationsSidebar extends React.Component<
                                             id: listData.remoteId,
                                         },
                                     )}
+                                    imageSupport={this.props.imageSupport}
                                 />
                             )}
                     </AnnotationBox>
@@ -1533,7 +1538,7 @@ export class AnnotationsSidebar extends React.Component<
                             icon="feed"
                             element={null}
                             iconSize="18px"
-                            padding={'10px 10px'}
+                            height="40px"
                             onChange={async (event) => {
                                 await this.props.updatePromptState(
                                     (event.target as HTMLInputElement).value,
@@ -1565,7 +1570,6 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 event.stopPropagation()
                             }}
-                            height="40px"
                             onClick={() =>
                                 this.props.toggleAISuggestionsDropDown()
                             }
@@ -2076,7 +2080,8 @@ export class AnnotationsSidebar extends React.Component<
                         active={this.props.activeTab === 'annotations'}
                         type={'tertiary'}
                         size={'medium'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                     />
                     <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
@@ -2085,7 +2090,8 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         size={'medium'}
                         iconPosition={'right'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                         icon={
                             this.props.cacheLoadState === 'running' ||
                             this.props.cacheLoadState === 'pristine' ? (
@@ -2115,7 +2121,8 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         size={'medium'}
                         iconPosition={'right'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                     />
                     <PrimaryAction
                         onClick={(event) => {
@@ -2127,7 +2134,8 @@ export class AnnotationsSidebar extends React.Component<
                         type={'tertiary'}
                         size={'medium'}
                         iconPosition={'right'}
-                        padding={'0px 6px'}
+                        padding={'3px 6px'}
+                        height={'30px'}
                         icon={
                             this.props.hasFeedActivity ? (
                                 <TooltipBox
@@ -2166,6 +2174,7 @@ export class AnnotationsSidebar extends React.Component<
                             )
                         }
                         padding={'0px 12px 0 6px'}
+                        height={'30px'}
                     />
                     {this.props.showSharePageTooltip &&
                         this.renderPageLinkMenu(listData ?? null)}
@@ -2329,7 +2338,9 @@ export class AnnotationsSidebar extends React.Component<
                     }}
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
-                <SpaceDescription>{selectedList.description}</SpaceDescription>
+                <SpaceDescription imageSupport={this.props.imageSupport}>
+                    {selectedList.description}
+                </SpaceDescription>
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
             </IsolatedViewHeaderContainer>
@@ -2814,6 +2825,8 @@ const AISidebarContainer = styled.div`
     /* overflow: scroll; */
     display: flex;
     flex-direction: column;
+    height: 400px;
+    flex: 1;
 
     &::-webkit-scrollbar {
         display: none;
@@ -2915,8 +2928,11 @@ const SummaryFooter = styled.div`
     grid-gap: 10px;
     padding: 10px 20px 10px 20px;
     margin-right: 1px;
-    background: ${(props) => props.theme.colors.black}20;
-    backdrop-filter: blur(8px);
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale2 + '90'
+            : props.theme.colors.greyScale1 + '50'};
+    backdrop-filter: blur(20px);
     position: fixed;
     bottom: -1px;
 `
@@ -3199,9 +3215,9 @@ const TopAreaContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     z-index: 20;
-    padding: 5px 0px;
-    grid-gap: 7px;
-    background: ${(props) => props.theme.colors.black};
+    padding-top: 5px;
+    /* background: ${(props) => props.theme.colors.black}80;
+    backdrop-filter: blur(8px); */
 `
 
 const AnnotationActions = styled.div`
@@ -3209,7 +3225,8 @@ const AnnotationActions = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: fill-available;
-    height: 24px;
+    height: 30px;
+    padding-bottom: 5px;
 `
 
 const ActionButtons = styled.div`
@@ -3270,8 +3287,7 @@ const TopBar = styled.div`
         props.sidebarContext === 'dashboard' ? '40px' : '32px'};
     z-index: 11300;
     padding: 10px 10px 10px 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
-    background: ${(props) => props.theme.colors.black};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     ${(props) =>
         props.theme.variant === 'light' &&
@@ -3397,11 +3413,13 @@ const AnnotationContainer = styled(Margin)`
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */
-    height: 100%;
+    height: calc(100% + 30px);
     overflow: scroll;
     padding-bottom: 100px;
     flex: 1;
+    grid-gap: 5px;
     z-index: 10;
+    position: relative;
 
     scrollbar-width: none;
 
@@ -3488,7 +3506,7 @@ const FollowedListRow = styled(Margin)<{
     cursor: pointer;
     border-radius: 8px;
     height: 44px;
-    padding: 5px 15px 5px 10px;
+    padding: 0px 15px 0px 10px;
     z-index: ${(props) => 1000 - props.zIndex};
 
     &:first-child {

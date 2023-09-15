@@ -39,6 +39,9 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
+import { Annotation } from 'src/annotations/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -66,6 +69,7 @@ export interface SidebarContainerDependencies {
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
+    imageSupport?: ImageSupportInterface<'caller'>
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -244,6 +248,9 @@ interface SidebarEvents {
     createYoutubeTimestampWithAISummary: {
         timeStampANDSummaryJSON: string[]
     }
+    createYoutubeTimestampWithScreenshot: {
+        imageData: string
+    }
 
     createNewNoteFromAISummary: { comment: string }
 
@@ -295,11 +302,16 @@ interface SidebarEvents {
     // Annotation card instance events
     setAnnotationEditCommentText: AnnotationCardInstanceEvent<{
         comment: string
+        annotation: Pick<
+            UnifiedAnnotation,
+            'unifiedId' | 'privacyLevel' | 'normalizedPageUrl' | 'localId'
+        >
     }>
     setAnnotationCardMode: AnnotationCardInstanceEvent<{
         mode: AnnotationCardMode
     }>
     setAnnotationEditMode: AnnotationCardInstanceEvent<{ isEditing: boolean }>
+    cancelAnnotationEdit: AnnotationCardInstanceEvent<{ isEditing: boolean }>
     setAnnotationCommentMode: AnnotationCardInstanceEvent<{
         isTruncated: boolean
     }>

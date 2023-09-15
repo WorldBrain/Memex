@@ -29,6 +29,7 @@ import type {
 } from 'src/content-sharing/background/types'
 import { createPageLinkListTitle } from 'src/content-sharing/utils'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import { UnifiedAnnotation } from 'src/annotations/cache/types'
 
 const mapLocalListIdsToUnified = (
     localListIds: number[],
@@ -144,6 +145,7 @@ const setupLogicHelper = async ({
         focusEditNoteForm,
         focusCreateForm,
         copyToClipboard,
+        imageSupport: backgroundModules.imageSupport,
     })
 
     const sidebar = device.createElement(sidebarLogic)
@@ -1401,6 +1403,7 @@ describe('SidebarContainerLogic', () => {
                 unifiedAnnotationId,
                 instanceLocation: 'annotations-tab',
                 comment: 'test comment',
+                annotation: DATA.LOCAL_ANNOTATIONS[0] as any,
             })
 
             expect(sidebar.state.annotationCardInstances[cardId]).toEqual({
@@ -1543,6 +1546,7 @@ describe('SidebarContainerLogic', () => {
                 unifiedAnnotationId,
                 instanceLocation: 'annotations-tab',
                 comment: updatedComment,
+                annotation: DATA.LOCAL_ANNOTATIONS[0] as any,
             })
 
             expect(
@@ -1688,6 +1692,7 @@ describe('SidebarContainerLogic', () => {
                 unifiedAnnotationId: unifiedAnnotationId,
                 instanceLocation: 'annotations-tab',
                 comment: updatedComment,
+                annotation: DATA.LOCAL_ANNOTATIONS[0] as any,
             })
 
             expect(
@@ -1776,6 +1781,7 @@ describe('SidebarContainerLogic', () => {
                 unifiedAnnotationId: unifiedAnnotationId,
                 instanceLocation: 'annotations-tab',
                 comment: "updated comment that won't be written",
+                annotation: DATA.LOCAL_ANNOTATIONS[0] as any,
             })
 
             await sidebar.processEvent('editAnnotation', {

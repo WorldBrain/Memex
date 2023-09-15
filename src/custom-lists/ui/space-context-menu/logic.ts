@@ -32,6 +32,7 @@ export interface Dependencies {
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
     analyticsBG: AnalyticsCoreInterface
+    currentUser: any
 }
 
 export type Event = UIEvent<{

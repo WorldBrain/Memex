@@ -412,6 +412,7 @@ class SpacePicker extends StatefulUIElement<
                                 remoteListId,
                             })
                         }
+                        currentUser={this.state.currentUser}
                     />
                 </>
             )

@@ -72,7 +72,7 @@ export class ContentScriptsBackground {
         openIsolatedView: (tabId: number) => Promise<true>,
         checkIfSidebarWorks: (tabId: number) => Promise<boolean>,
         retryDelay = 150,
-        delayBeforeExecution = 1,
+        delayBeforeExecution = 1000,
     ) {
         let activeTab: Tabs.Tab
         if (fullPageUrl.endsWith('.pdf')) {

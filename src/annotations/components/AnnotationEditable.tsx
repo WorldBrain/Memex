@@ -31,6 +31,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import type { UnifiedAnnotation } from '../cache/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -103,6 +104,7 @@ export interface AnnotationProps {
     copyPasterAnnotationInstanceId: string
     spacePickerAnnotationInstance: string
     shareMenuAnnotationInstanceId: string
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface AnnotationEditableEventProps {
@@ -240,15 +242,15 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     private updateSpacePickerState(showState: ListPickerShowState) {
         this.props.onSpacePickerToggle?.(showState)
-        // if (this.state.showSpacePicker === 'hide') {
-        //     this.setState({
-        //         showSpacePicker: showState,
-        //     })
-        // } else {
-        //     this.setState({
-        //         showSpacePicker: 'hide',
-        //     })
-        // }
+        if (this.state.showSpacePicker === 'hide') {
+            this.setState({
+                showSpacePicker: showState,
+            })
+        } else {
+            this.setState({
+                showSpacePicker: 'hide',
+            })
+        }
     }
 
     private get displayLists(): Array<{
@@ -400,16 +402,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             ) : null
         return (
             <HighlightStyled
-                onClick={
-                    this.props.isClickable
-                        ? this.props.onHighlightClick
-                        : undefined
-                }
+                onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
             >
                 <ActionBox>{actionsBox}</ActionBox>
                 <Highlightbar />
-                <Markdown isHighlight pageUrl={this.props.pageUrl}>
+                <Markdown
+                    imageSupport={this.props.imageSupport}
+                    isHighlight
+                    pageUrl={this.props.pageUrl}
+                >
                     {this.state.isTruncatedHighlight
                         ? this.state.truncatedTextHighlight
                         : this.props.body}
@@ -449,6 +451,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         isShared={this.props.isShared}
                         isBulkShareProtected={this.props.isBulkShareProtected}
                         getYoutubePlayer={this.props.getYoutubePlayer}
+                        imageSupport={this.props.imageSupport}
                     />
                 </AnnotationEditContainer>
             )
@@ -465,8 +468,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.currentUserId === this.props.creatorId && (
                         <ActionBox>
                             <TooltipBox
-                                tooltipText="Edit Note"
-                                placement="bottom"
+                                tooltipText={
+                                    <span>
+                                        Edit Note <br />
+                                        <strong>Pro Tip:</strong> Double Click
+                                        Card
+                                    </span>
+                                }
+                                placement="bottom-end"
                             >
                                 <Icon
                                     onClick={
@@ -484,6 +493,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     <NoteText
                         contextLocation={this.props.contextLocation}
                         getYoutubePlayer={this.props.getYoutubePlayer}
+                        imageSupport={this.props.imageSupport}
                     >
                         {comment}
                         {/* {this.state.isTruncatedNote
@@ -1046,7 +1056,7 @@ const CommentBox = styled.div`
     ${({ theme }: { theme: SidebarAnnotationTheme }) =>
         !theme.hasHighlight &&
         `
-        padding: 5px 20px 5px;
+        padding: 5px 15px 5px;
         border-top: none;
         border-top-left-radius: 5px;
         border-top-right-radius: 5px;
@@ -1086,7 +1096,7 @@ const AnnotationStyled = styled.div`
         props.theme.variant === 'light' &&
         css`
             box-shadow: ${props.theme.borderStyles.boxShadowHoverElements};
-            border: 1px solid ${props.theme.colors.greyScale2};
+            border: 1px solid ${props.theme.colors.greyScale1};
         `};
 `
 
