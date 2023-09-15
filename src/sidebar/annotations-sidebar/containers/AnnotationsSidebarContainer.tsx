@@ -153,8 +153,6 @@ export class AnnotationsSidebarContainer<
 
                 const ribbonLeftPosFromRight = newYpos + newWidth
 
-                console.log('ribbonLeftPosFromRight', ribbonLeftPosFromRight)
-
                 // Process the change in position
                 this.processEvent('adjustRighPositionBasedOnRibbonPosition', {
                     position: ribbonLeftPosFromRight,
@@ -831,7 +829,6 @@ export class AnnotationsSidebarContainer<
             zIndex: 3,
         } as const
 
-        console.log('sidebarWidth', this.state.sidebarRightBorderPosition)
         return (
             <ThemeProvider theme={this.props.theme}>
                 <GlobalStyle
