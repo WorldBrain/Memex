@@ -1934,7 +1934,7 @@ const IconContainer = styled.div<{ ribbonPosition }>`
     cursor: pointer;
     padding: 0 8px;
     grid-gap: 5px;
-    height: 100%;
+    height: 30px;
     width: fit-content;
     background: ${(props) => props.theme.colors.greyScale1}95;
     backdrop-filter: blur(4px);
@@ -1948,7 +1948,8 @@ const IconContainer = styled.div<{ ribbonPosition }>`
         props.ribbonPosition === 'topRight' &&
         css`
             border-radius: 0 0 0 8px;
-            margin-top: -4px;
+            position: absolute;
+            top: 0px;
         `}
 `
 
