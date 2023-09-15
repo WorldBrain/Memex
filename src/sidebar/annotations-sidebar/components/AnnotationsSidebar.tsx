@@ -1570,7 +1570,6 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 event.stopPropagation()
                             }}
-                            height="40px"
                             onClick={() =>
                                 this.props.toggleAISuggestionsDropDown()
                             }
@@ -2929,7 +2928,10 @@ const SummaryFooter = styled.div`
     grid-gap: 10px;
     padding: 10px 20px 10px 20px;
     margin-right: 1px;
-    background: ${(props) => props.theme.colors.greyScale1}50;
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale2 + '90'
+            : props.theme.colors.greyScale1 + '50'};
     backdrop-filter: blur(20px);
     position: fixed;
     bottom: -1px;

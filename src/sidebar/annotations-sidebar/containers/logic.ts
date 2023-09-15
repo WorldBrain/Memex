@@ -2175,39 +2175,41 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
-        let fullTextToProcess
-        if (isPagePDF) {
-            fullTextToProcess = document.body.innerText
-        }
+        if (event.prompt?.length > 0 || previousState.prompt?.length > 0) {
+            let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
+            let fullTextToProcess
+            if (isPagePDF) {
+                fullTextToProcess = document.body.innerText
+            }
 
-        if (previousState.queryMode === 'question') {
-            this.queryAI(
-                undefined,
-                undefined,
-                event.prompt ? event.prompt : previousState.prompt,
-                false,
-                previousState,
-                undefined,
-            )
-        } else if (previousState.queryMode === 'summarize') {
-            this.queryAI(
-                isPagePDF ? undefined : previousState.fullPageUrl,
-                previousState.selectedTextAIPreview ?? '',
-                event.prompt ? event.prompt : previousState.prompt,
-                false,
-                previousState,
-                isPagePDF ? fullTextToProcess : undefined,
-            )
-        } else if (previousState.queryMode === 'glanceSummary') {
-            this.queryAI(
-                isPagePDF ? undefined : previousState.fullPageUrl,
-                previousState.selectedTextAIPreview ?? '',
-                event.prompt ? event.prompt : previousState.prompt,
-                true,
-                previousState,
-                isPagePDF ? fullTextToProcess : undefined,
-            )
+            if (previousState.queryMode === 'question') {
+                this.queryAI(
+                    undefined,
+                    undefined,
+                    event.prompt ? event.prompt : previousState.prompt,
+                    false,
+                    previousState,
+                    undefined,
+                )
+            } else if (previousState.queryMode === 'summarize') {
+                this.queryAI(
+                    isPagePDF ? undefined : previousState.fullPageUrl,
+                    previousState.selectedTextAIPreview ?? '',
+                    event.prompt ? event.prompt : previousState.prompt,
+                    false,
+                    previousState,
+                    isPagePDF ? fullTextToProcess : undefined,
+                )
+            } else if (previousState.queryMode === 'glanceSummary') {
+                this.queryAI(
+                    isPagePDF ? undefined : previousState.fullPageUrl,
+                    previousState.selectedTextAIPreview ?? '',
+                    event.prompt ? event.prompt : previousState.prompt,
+                    true,
+                    previousState,
+                    isPagePDF ? fullTextToProcess : undefined,
+                )
+            }
         }
     }
 
