@@ -216,6 +216,7 @@ export async function setupTest(
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),
         analyticsBG: device.backgroundModules.analyticsBG,
+        imageSupport: device.backgroundModules.imageSupport,
     })
 
     if (args.overrideSearchTrigger) {

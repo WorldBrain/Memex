@@ -4,6 +4,7 @@ import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown
 
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface MainInputProps<T = HTMLInputElement | HTMLTextAreaElement> {
     onKeyDown: React.KeyboardEventHandler
@@ -21,6 +22,7 @@ export interface Props {
     renderInput: (props: MainInputProps) => JSX.Element
     renderSecondaryBtn?: () => JSX.Element
     isToggleKBShortcutKeyed?: (e: React.KeyboardEvent) => boolean
+    imageSupport: ImageSupportInterface<'caller'>
 }
 
 interface State {
@@ -101,7 +103,11 @@ export class MarkdownPreview extends React.Component<Props, State> {
 
     private renderEditor() {
         if (this.state.showPreview) {
-            return <Markdown>{this.props.value}</Markdown>
+            return (
+                <Markdown imageSupport={this.props.imageSupport}>
+                    {this.props.value}
+                </Markdown>
+            )
         }
 
         return this.props.renderInput({

@@ -43,6 +43,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     joinedListsGroup: ListGroup
     followedListsGroup: ListGroup
     onConfirmListEdit: (listId: string, value: string) => void
+    currentUser: any
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -164,6 +165,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 newName,
                                             )
                                         }}
+                                        currentUser={this.props.currentUser?.id}
                                     />
                                 )}
                             />
@@ -282,8 +284,12 @@ const GlobalStyle = createGlobalStyle`
 
     .sidebarResizeHandleSidebar {
         width: 6px !important;
-        height: 100% !important;
+        height: 99% !important;
+        margin-top: 5px !important;
+        top: 1px !important;
+        position: relative;
         right: -3px !important;
+        border-radius: 0 3px 3px 0;
 
         &:hover {
             background: #5671cf30 !important;

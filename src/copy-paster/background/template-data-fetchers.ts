@@ -130,7 +130,10 @@ export function getTemplateDataFetchers({
                             note.body != null
                                 ? convertHTMLintoMarkdown(note.body)
                                 : '',
-                        comment: note.comment,
+                        comment:
+                            note.comment != null
+                                ? convertHTMLintoMarkdown(note.comment)
+                                : '',
                         pageUrl: note.pageUrl,
                         createdAt: note.createdWhen,
                     },

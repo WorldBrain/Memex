@@ -96,8 +96,8 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
+import * as htmlToImage from 'html-to-image'
+import { toPng } from 'html-to-image'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -537,6 +537,33 @@ export async function main(
             })
             inPageUI.hideTooltip()
         },
+        createTimestampWithScreenshot: async () => {
+            const screenshotButton = document.getElementById(
+                'screenshotButtonInner',
+            )
+
+            screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Loading Screenshot</div>`
+            const targetContainer = document.getElementById('movie_player')
+            const screenshotTarget = targetContainer.getElementsByClassName(
+                'html5-main-video',
+            )[0] as HTMLElement
+
+            if (screenshotTarget) {
+                const dataURL = await captureScreenshot(screenshotTarget)
+                inPageUI.showSidebar({
+                    action: 'create_youtube_timestamp_with_screenshot',
+                    imageData: dataURL,
+                })
+            }
+
+            screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Screenshot</div>`
+
+            inPageUI.hideTooltip()
+        },
+    }
+
+    async function captureScreenshot(screenshotTarget) {
+        return await htmlToImage.toPng(screenshotTarget)
     }
 
     // if (window.location.hostname === 'www.youtube.com') {
@@ -674,6 +701,7 @@ export async function main(
                 subscription,
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
+                imageSupport: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -1680,6 +1708,19 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
 
     document.head.appendChild(style)
 
+    // Add screenshot Button
+    const screenshotButton = document.createElement('div')
+    screenshotButton.setAttribute('class', 'ytp-menuitem')
+    screenshotButton.onclick = async () => {
+        await annotationsFunctions.createTimestampWithScreenshot()
+    }
+    screenshotButton.style.display = 'flex'
+    screenshotButton.style.alignItems = 'center'
+    screenshotButton.style.cursor = 'pointer'
+    screenshotButton.style.borderLeft = '1px solid #24252C'
+
+    screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner"  style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Screenshot</div>`
+
     // Add Note Button
     const annotateButton = document.createElement('div')
     annotateButton.setAttribute('class', 'ytp-menuitem')
@@ -1935,6 +1976,13 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     timeStampEl.style.height = '20px'
     timeStampEl.style.margin = '0 10px 0 10px'
     annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
+    // TimestampIcon
+    const cameraIcon = runtime.getURL('/img/cameraIcon.svg')
+    const cameraIconEl = document.createElement('img')
+    cameraIconEl.src = cameraIcon
+    cameraIconEl.style.height = '20px'
+    cameraIconEl.style.margin = '0 10px 0 10px'
+    screenshotButton.insertBefore(cameraIconEl, screenshotButton.firstChild)
 
     // AI timestamp icon
     const AItimestampIcon = runtime.getURL('/img/starsYoutube.svg')
@@ -1961,6 +2009,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     memexButtons.appendChild(annotateButton)
     memexButtons.appendChild(AItimeStampButton)
     memexButtons.appendChild(summarizeButton)
+    memexButtons.appendChild(screenshotButton)
     memexButtons.style.color = '#f4f4f4'
     memexButtons.style.width = 'fit-content'
     const aboveFold = document.getElementById('below')

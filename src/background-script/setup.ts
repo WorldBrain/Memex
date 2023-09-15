@@ -104,6 +104,8 @@ import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { remoteFunctions } from 'src/util/remote-functions-background'
+import { ImageSupportBackground } from 'src/image-support/background'
+import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -142,6 +144,7 @@ export interface BackgroundModules {
     activityStreams: ActivityStreamsBackground
     userMessages: UserMessageService
     personalCloud: PersonalCloudBackground
+    imageSupport: ImageSupportBackground
 }
 
 export function createBackgroundModules(options: {
@@ -152,6 +155,7 @@ export function createBackgroundModules(options: {
     services: Services
     browserAPIs: Browser
     serverStorage: ServerStorage
+    imageSupportBackend: ImageSupportBackend
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
         name: string,
@@ -690,6 +694,13 @@ export function createBackgroundModules(options: {
             serverStorage: options.serverStorage.modules,
             services: options.services,
         }),
+        imageSupport: new ImageSupportBackground({
+            backend: options.imageSupportBackend,
+            storageManager: options.storageManager,
+            generateImageId() {
+                return generateServerId('UPLOADED_IMAGES') as string
+            },
+        }),
     }
 }
 
@@ -735,6 +746,7 @@ export async function setupBackgroundModules(
     backgroundModules.pages.setupRemoteFunctions()
     backgroundModules.syncSettings.setupRemoteFunctions()
     backgroundModules.backupModule.storage.setupChangeTracking()
+    backgroundModules.imageSupport.setupRemoteFunctions()
     setupNotificationClickListener()
 
     // TODO mv3: migrate web req APIs
@@ -774,6 +786,7 @@ export function getBackgroundStorageModules(
         syncSettings: backgroundModules.syncSettings.storage,
         personalCloudActionQueue:
             backgroundModules.personalCloud.actionQueue.storage,
+        imageSupport: backgroundModules.imageSupport.storage,
     }
 }
 

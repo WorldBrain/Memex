@@ -3,6 +3,7 @@ import * as React from 'react'
 import { AnnotationsSidebarContainer } from './AnnotationsSidebarContainer'
 import { SidebarContainerOptions } from 'src/sidebar/annotations-sidebar/containers/logic'
 import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 type Props = SidebarContainerOptions & {
     refSidebar?: React.Ref<AnnotationsSidebarContainer>
@@ -10,6 +11,7 @@ type Props = SidebarContainerOptions & {
     setDisplayNameModalShown: (isShown: boolean) => void
     onNotesSidebarClose?: () => void
     theme: MemexTheme
+    imageSupport?: ImageSupportInterface<'caller'>
 }
 
 export class AnnotationsSidebarInDashboardResults extends React.Component<
