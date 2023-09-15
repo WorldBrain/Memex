@@ -1439,7 +1439,7 @@ const ContainerStyled = styled.div<{
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
                     background: ${(props) =>
                         props.theme.variant === 'dark'
-                            ? props.theme.colors.black + 'ec'
+                            ? props.theme.colors.black + 'eb'
                             : props.theme.colors.black + 'c9'};
     backdrop-filter: blur(30px);
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
