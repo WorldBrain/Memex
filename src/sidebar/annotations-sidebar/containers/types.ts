@@ -126,6 +126,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     renameListErrorMessage: string | null
 
     sidebarWidth?: string
+    sidebarRightBorderPosition?: number
     spaceTitleEditValue?: string
 
     // Indicates what is the currently selected space in the leaf screen
@@ -238,6 +239,7 @@ interface SidebarEvents {
     lockWidth: null
     unlockWidth: null
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
+    adjustRighPositionBasedOnRibbonPosition: { position: number }
     setPopoutsActive: boolean
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
