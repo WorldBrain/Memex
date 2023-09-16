@@ -510,15 +510,16 @@ export default class Ribbon extends Component<Props, State> {
                                         </InfoText>
                                         <SelectionContainer>
                                             <SelectionDropDown
-                                                onChange={(event) =>
+                                                onChange={(event) => {
+                                                    this.props.toggleShowTutorial()
+
                                                     this.props.selectRibbonPositionOption(
                                                         event.target.value,
                                                     )
-                                                }
+                                                }}
                                             >
                                                 <SelectionItem
                                                     onClick={() => {
-                                                        this.props.toggleShowTutorial()
                                                         this.props.selectRibbonPositionOption(
                                                             'topRight',
                                                         )
