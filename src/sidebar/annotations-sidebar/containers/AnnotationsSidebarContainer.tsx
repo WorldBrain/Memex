@@ -122,56 +122,6 @@ export class AnnotationsSidebarContainer<
             }
         })
     }
-    listenToRibbonPosition() {
-        let hostElement = document.getElementById('memex-ribbon-container')
-        // let shadowRoot = hostElement.querySelector('#shadow-root') // Change the selector as appropriate
-        if (!hostElement) {
-            console.error('Shadow host not found!')
-            return
-        }
-
-        let shadowRoot = hostElement.shadowRoot
-        let ribbonContainer = shadowRoot.getElementById('memex-ribbon-holder')
-
-        if (!ribbonContainer) {
-            console.error(
-                "Element with ID 'memex-ribbon' not found inside Shadow DOM!",
-            )
-            return
-        }
-
-        let lastYpos = ribbonContainer.getClientRects()[0].y
-
-        let checkCount = 0
-        const maxChecks = 100 // 3 seconds divided by 10ms = 300 checks
-
-        const intervalId = setInterval(() => {
-            const newYpos = ribbonContainer.getClientRects()[0].y
-
-            if (lastYpos !== newYpos) {
-                const newWidth = ribbonContainer.getClientRects()[0].width
-
-                const ribbonLeftPosFromRight = newYpos + newWidth
-
-                // Process the change in position
-                this.processEvent('adjustRighPositionBasedOnRibbonPosition', {
-                    position: ribbonLeftPosFromRight,
-                })
-
-                if (
-                    ribbonLeftPosFromRight > 30 &&
-                    ribbonLeftPosFromRight < 60
-                ) {
-                    clearInterval(intervalId)
-                }
-            }
-
-            checkCount++
-            if (checkCount >= maxChecks) {
-                clearInterval(intervalId)
-            }
-        }, 20) // Check every 10ms
-    }
 
     private createNewList = (
         annotationId?: UnifiedAnnotation['unifiedId'],
@@ -225,7 +175,6 @@ export class AnnotationsSidebarContainer<
         if (this.props.sidebarContext === 'dashboard') {
             document.addEventListener('keydown', this.listenToEsc)
         }
-        this.listenToRibbonPosition()
     }
 
     hideSidebar() {
