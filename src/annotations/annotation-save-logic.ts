@@ -44,7 +44,7 @@ export interface SaveAnnotationParams<
     keepListsIfUnsharing?: boolean
     skipListExistenceCheck?: boolean
     privacyLevelOverride?: AnnotationPrivacyLevels
-    syncSettingsBG: RemoteSyncSettingsInterface
+    syncSettingsBG?: RemoteSyncSettingsInterface
 }
 
 export interface SaveAnnotationReturnValue {
