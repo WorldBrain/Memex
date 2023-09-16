@@ -57,12 +57,12 @@ export async function createAnnotation({
     SaveAnnotationReturnValue
 > {
     let remoteAnnotationId: string = null
-    if (shareOpts?.shouldShare) {
-        remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
+    remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
 
+    await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+    if (shareOpts?.shouldShare) {
         if (shareOpts.shouldCopyShareLink) {
             try {
-                await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
             } catch (e) {
                 console.error(e)
             }
@@ -111,6 +111,13 @@ export async function createAnnotation({
                     localListIds: annotationData.localListIds,
                 })
             }
+
+            const { remoteId } = await contentSharingBG.shareAnnotation({
+                annotationUrl: annotationUrl,
+                remoteAnnotationId: remoteAnnotationId,
+                shareToParentPageLists: false,
+                skipPrivacyLevelUpdate: true,
+            })
 
             return annotationUrl
         })(),
