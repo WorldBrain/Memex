@@ -23,6 +23,11 @@ import type { AnnotationSharingState } from 'src/content-sharing/background/type
 import { TaskState } from 'ui-logic-core/lib/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackSharedAnnotation } from '@worldbrain/memex-common/lib/analytics/events'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
 
 type SelectType = 'select' | 'unselect'
 
@@ -37,6 +42,8 @@ interface State extends ShareMenuCommonState {
               selectType: SelectType
           }
     autoShareState: TaskState
+    autoCreateLinkState: TaskState
+    autoCreateLinkSetting: boolean
 }
 
 export interface Props extends ShareMenuCommonProps {
@@ -46,6 +53,7 @@ export interface Props extends ShareMenuCommonProps {
     analyticsBG?: AnalyticsCoreInterface
     shareImmediately?: boolean
     annotationData?: any
+    syncSettingsBG?: RemoteSyncSettingsInterface
     getRemoteListIdForLocalId: (localListId: number) => string | null
     postShareHook?: (
         state: AnnotationSharingState,
@@ -85,6 +93,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         annotationsBG: runInBackground(),
         customListsBG: runInBackground(),
     }
+    private syncSettings: SyncSettingsStore<'extension'>
 
     state: State = {
         link: '',
@@ -93,9 +102,35 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         shareState: 'pristine',
         autoShareState: 'pristine',
         confirmationMode: null,
+        autoCreateLinkState: 'pristine',
+        autoCreateLinkSetting: null,
     }
 
     async componentDidMount() {
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.props.syncSettingsBG,
+        })
+        this.setState({
+            autoCreateLinkState: 'running',
+        })
+
+        let existingSetting = await this.syncSettings.extension.get(
+            'shouldAutoCreateNoteLink',
+        )
+
+        if (existingSetting == null) {
+            await this.syncSettings.extension.set(
+                'shouldAutoCreateNoteLink',
+                true,
+            )
+            existingSetting = true
+        }
+
+        this.setState({
+            autoCreateLinkState: 'success',
+            autoCreateLinkSetting: existingSetting,
+        })
+
         const linkExists = await this.setRemoteLinkIfExists()
 
         if (!linkExists && this.props.shareImmediately) {
@@ -196,6 +231,18 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         )
 
         await p
+    }
+
+    toggleAutoCreateLinkSetting = async () => {
+        const existingSetting = this.state.autoCreateLinkSetting
+
+        await this.syncSettings.extension.set(
+            'shouldAutoCreateNoteLink',
+            !existingSetting,
+        )
+        this.setState({
+            autoCreateLinkSetting: !existingSetting,
+        })
     }
 
     private handleCreateLink = async (isBulkShareProtected?: boolean) => {
@@ -384,6 +431,11 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             this.state.shareState === 'running' ||
                             this.state.loadState === 'running'
                         }
+                        autoCreateLinkSetting={this.state.autoCreateLinkSetting}
+                        autoCreateLinkState={this.state.autoCreateLinkState}
+                        toggleAutoCreateLinkSetting={async () => {
+                            await this.toggleAutoCreateLinkSetting()
+                        }}
                         autoShareState={this.state.autoShareState}
                         handleCreateLink={this.handleCreateLink}
                         privacyOptions={[

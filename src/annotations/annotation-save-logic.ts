@@ -5,6 +5,12 @@ import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
 import { shareOptsToPrivacyLvl } from './utils'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { SyncSettingsBackground } from 'src/sync-settings/background'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -38,6 +44,7 @@ export interface SaveAnnotationParams<
     keepListsIfUnsharing?: boolean
     skipListExistenceCheck?: boolean
     privacyLevelOverride?: AnnotationPrivacyLevels
+    syncSettingsBG: RemoteSyncSettingsInterface
 }
 
 export interface SaveAnnotationReturnValue {
@@ -45,10 +52,32 @@ export interface SaveAnnotationReturnValue {
     savePromise: Promise<string>
 }
 
+async function checkIfAutoCreateLink(
+    syncSettingsBG: RemoteSyncSettingsInterface,
+) {
+    let syncSettings: SyncSettingsStore<'extension'>
+
+    syncSettings = createSyncSettingsStore({
+        syncSettingsBG: syncSettingsBG,
+    })
+
+    let existingSetting = await syncSettings.extension.get(
+        'shouldAutoCreateNoteLink',
+    )
+
+    if (existingSetting == null) {
+        await syncSettings.extension.set('shouldAutoCreateNoteLink', true)
+        existingSetting = true
+    }
+
+    return existingSetting
+}
+
 export async function createAnnotation({
     annotationData,
     annotationsBG,
     contentSharingBG,
+    syncSettingsBG,
     skipPageIndexing,
     skipListExistenceCheck,
     privacyLevelOverride,
@@ -57,17 +86,6 @@ export async function createAnnotation({
     SaveAnnotationReturnValue
 > {
     let remoteAnnotationId: string = null
-    remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
-
-    await copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
-    if (shareOpts?.shouldShare) {
-        if (shareOpts.shouldCopyShareLink) {
-            try {
-            } catch (e) {
-                console.error(e)
-            }
-        }
-    }
 
     return {
         remoteAnnotationId,
@@ -112,16 +130,37 @@ export async function createAnnotation({
                 })
             }
 
-            const { remoteId } = await contentSharingBG.shareAnnotation({
-                annotationUrl: annotationUrl,
-                remoteAnnotationId: remoteAnnotationId,
-                shareToParentPageLists: false,
-                skipPrivacyLevelUpdate: true,
-            })
+            createAndCopyShareLink(
+                remoteAnnotationId,
+                annotationUrl,
+                contentSharingBG,
+                syncSettingsBG,
+            )
 
             return annotationUrl
         })(),
     }
+}
+
+async function createAndCopyShareLink(
+    remoteAnnotationId,
+    annotationUrl,
+    contentSharingBG,
+    syncSettingsBG,
+) {
+    let shouldShareLink = await checkIfAutoCreateLink(syncSettingsBG)
+
+    if (shouldShareLink) {
+        remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
+        copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
+    }
+
+    await contentSharingBG.shareAnnotation({
+        annotationUrl: annotationUrl,
+        remoteAnnotationId: remoteAnnotationId,
+        shareToParentPageLists: false,
+        skipPrivacyLevelUpdate: true,
+    })
 }
 
 export async function updateAnnotation({

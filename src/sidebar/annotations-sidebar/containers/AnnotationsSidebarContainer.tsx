@@ -592,6 +592,7 @@ export class AnnotationsSidebarContainer<
                         keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                     })
                 }
+                syncSettingsBG={this.props.syncSettingsBG}
                 spacePickerProps={this.getSpacePickerProps({
                     annotation,
                 })}

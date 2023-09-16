@@ -709,6 +709,7 @@ export class RibbonContainerLogic extends UILogic<
                 localId: localAnnotationId,
                 createdWhen: new Date(now),
             },
+            syncSettingsBG: this.dependencies.syncSettingsBG,
         })
         this.dependencies.annotationsCache.addAnnotation({
             localId: localAnnotationId,

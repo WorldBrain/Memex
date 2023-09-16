@@ -336,6 +336,7 @@ export async function main(
                     annotationsBG,
                     contentSharingBG,
                     skipPageIndexing: false,
+                    syncSettingsBG: syncSettingsBG,
                     privacyLevelOverride: privacyLevel,
                     annotationData: {
                         localId,
@@ -645,6 +646,7 @@ export async function main(
                 activityIndicatorBG: runInBackground(),
                 contentSharing: contentSharingBG,
                 bookmarks,
+                syncSettingsBG: syncSettingsBG,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 tooltip: {
                     getState: tooltipUtils.getTooltipState,

@@ -1592,6 +1592,7 @@ export class SidebarContainerLogic extends UILogic<
                     createdWhen: new Date(now),
                     pageTitle: title,
                 },
+                syncSettingsBG: this.options.syncSettingsBG,
                 annotationsBG: this.options.annotationsBG,
                 contentSharingBG: this.options.contentSharingBG,
                 skipListExistenceCheck:

@@ -3417,7 +3417,6 @@ const AnnotationContainer = styled(Margin)`
     overflow: scroll;
     padding-bottom: 100px;
     flex: 1;
-    grid-gap: 5px;
     z-index: 10;
     position: relative;
 
@@ -3452,6 +3451,7 @@ const AnnotationBox = styled.div<{
     animation-timing-function: cubic-bezier(0.3, 0.35, 0.14, 0.8);
     animation-fill-mode: both;
     position: relative;
+    margin-bottom: 5px;
 `
 
 const FollowedNotesContainer = styled.div<{ zIndex: number }>`

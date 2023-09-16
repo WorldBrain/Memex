@@ -383,7 +383,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 <>
                     <TooltipBox
                         placement={
-                            this.props.position === 'top' ? 'bottom' : 'top'
+                            this.props.position === 'top' ? 'bottom-end' : 'top'
                         }
                         tooltipText={
                             <TooltipTextContainer>
