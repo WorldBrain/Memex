@@ -100,11 +100,13 @@ function getShortcutHandlers({
         openDashboard: () =>
             runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),
-        askAI: () =>
+        askAI: async () => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText: window.getSelection().toString(),
-            }),
+            })
+            inPageUI.hideTooltip()
+        },
         // window.getSelection().toString().length === 0
         //     ?
         //     : inPageUI.showTooltip('AImode'),

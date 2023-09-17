@@ -37,6 +37,8 @@ export const SETTING_NAMES: SyncSettingNames = {
             FEATURE_PREFIX.EXTENSION + 'are_tags_migrated_to_spaces',
         shouldTrackAnalytics:
             FEATURE_PREFIX.EXTENSION + 'should_track_analytics',
+        shouldAutoCreateNoteLink:
+            FEATURE_PREFIX.EXTENSION + 'shouldAutoCreateNoteLink',
     },
     pdfIntegration: {
         shouldAutoOpen: FEATURE_PREFIX.PDF_INTEGRATION + 'should_auto_open',

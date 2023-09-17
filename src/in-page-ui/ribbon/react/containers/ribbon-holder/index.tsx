@@ -200,6 +200,7 @@ export default class RibbonHolder extends StatefulUIElement<
                         isSidebarOpen={this.state.isSidebarOpen}
                         ribbonPosition={this.state.ribbonPosition}
                         isPeeking={this.state.state === 'visible'}
+                        id="memex-ribbon-holder"
                     >
                         <RibbonContainer
                             {...this.props.containerDependencies}

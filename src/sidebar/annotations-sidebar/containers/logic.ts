@@ -309,6 +309,7 @@ export class SidebarContainerLogic extends UILogic<
             firstTimeSharingPageLink: false,
             selectedListForShareMenu: null,
             renameListErrorMessage: null,
+            sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
         }
     }
@@ -850,6 +851,22 @@ export class SidebarContainerLogic extends UILogic<
 
     adjustSidebarWidth: EventHandler<'adjustSidebarWidth'> = ({ event }) => {
         this.emitMutation({ sidebarWidth: { $set: event.newWidth } })
+
+        // if (event.isWidthLocked) {
+        //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
+        //     let windowWidth = window.innerWidth
+        //     let width = (windowWidth - sidebarWidth).toString()
+        //     width = width + 'px'
+        //     document.body.style.width = width
+        // }
+    }
+
+    adjustRighPositionBasedOnRibbonPosition: EventHandler<
+        'adjustRighPositionBasedOnRibbonPosition'
+    > = ({ event }) => {
+        this.emitMutation({
+            sidebarRightBorderPosition: { $set: event.position },
+        })
 
         // if (event.isWidthLocked) {
         //     let sidebarWidth = toInteger(event.newWidth?.replace('px', '') ?? 0)
@@ -1575,6 +1592,7 @@ export class SidebarContainerLogic extends UILogic<
                     createdWhen: new Date(now),
                     pageTitle: title,
                 },
+                syncSettingsBG: this.options.syncSettingsBG,
                 annotationsBG: this.options.annotationsBG,
                 contentSharingBG: this.options.contentSharingBG,
                 skipListExistenceCheck:
@@ -2185,7 +2203,8 @@ export class SidebarContainerLogic extends UILogic<
             if (previousState.queryMode === 'question') {
                 this.queryAI(
                     undefined,
-                    undefined,
+                    event.highlightedText ||
+                        previousState.selectedTextAIPreview,
                     event.prompt ? event.prompt : previousState.prompt,
                     false,
                     previousState,
@@ -2194,7 +2213,8 @@ export class SidebarContainerLogic extends UILogic<
             } else if (previousState.queryMode === 'summarize') {
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
-                    previousState.selectedTextAIPreview ?? '',
+                    event.highlightedText ||
+                        previousState.selectedTextAIPreview,
                     event.prompt ? event.prompt : previousState.prompt,
                     false,
                     previousState,
@@ -2203,7 +2223,8 @@ export class SidebarContainerLogic extends UILogic<
             } else if (previousState.queryMode === 'glanceSummary') {
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
-                    previousState.selectedTextAIPreview ?? '',
+                    event.highlightedText ||
+                        previousState.selectedTextAIPreview,
                     event.prompt ? event.prompt : previousState.prompt,
                     true,
                     previousState,
@@ -2256,10 +2277,19 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
+        let prompt = 'Summarise this in 2-3 paragraphs'
+
+        await this.processUIEvent('queryAIwithPrompt', {
+            event: { prompt: prompt, highlightedText: event.textToProcess },
+            previousState,
+        })
+
         this.emitMutation({
             pageSummary: { $set: '' },
             selectedTextAIPreview: { $set: event.textToProcess },
-            prompt: { $set: undefined },
+            prompt: {
+                $set: 'Summarise this in 2-3 paragraphs',
+            },
         })
     }
 

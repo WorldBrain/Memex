@@ -1939,6 +1939,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     annotationsBG,
                     contentSharingBG: contentShareBG,
                     skipPageIndexing: true,
+                    syncSettingsBG: this.options.syncSettingsBG,
                 })
 
                 const newNoteId = await savePromise

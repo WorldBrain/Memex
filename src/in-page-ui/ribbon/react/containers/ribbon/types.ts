@@ -13,6 +13,7 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -38,6 +39,7 @@ export interface RibbonContainerDependencies {
     bgScriptBG: RemoteBGScriptInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
+    syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<
         'extension' | 'inPageUI' | 'activityIndicator'
     >

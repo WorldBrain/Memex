@@ -84,6 +84,7 @@ describe('Ribbon logic', () => {
             contentSharing: backgroundModules.contentSharing.remoteFunctions,
             customLists: backgroundModules.customLists.remoteFunctions,
             authBG: backgroundModules.auth.remoteFunctions,
+            syncSettingsBG: backgroundModules.syncSettings.remoteFunctions,
             annotations,
             ...(options?.dependencies ?? {}),
             tooltip: {
