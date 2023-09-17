@@ -2345,9 +2345,11 @@ export class AnnotationsSidebar extends React.Component<
                     }}
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
-                <SpaceDescription imageSupport={this.props.imageSupport}>
-                    {selectedList.description}
-                </SpaceDescription>
+                {selectedList.description?.length > 0 && (
+                    <SpaceDescription imageSupport={this.props.imageSupport}>
+                        {selectedList.description}
+                    </SpaceDescription>
+                )}
                 {/* {totalAnnotsCountJSX}
                 {othersAnnotsCountJSX} */}
             </IsolatedViewHeaderContainer>
@@ -3342,9 +3344,8 @@ const IsolatedViewHeaderContainer = styled.div`
     justify-content: flex-start;
     grid-gap: 10px;
     flex-direction: column;
-    padding: 0px 15px 0 15px;
+    padding: 0px 15px 10px 15px;
     z-index: 20;
-    background: ${(props) => props.theme.colors.black};
 `
 
 const IsolatedViewHeaderTopBar = styled.div`
