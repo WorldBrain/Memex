@@ -270,6 +270,7 @@ interface SidebarEvents {
     selectAISuggestion: { suggestion: string }
     queryAIwithPrompt: {
         prompt: string
+        highlightedText?: string
     }
     setQueryMode: {
         mode: string

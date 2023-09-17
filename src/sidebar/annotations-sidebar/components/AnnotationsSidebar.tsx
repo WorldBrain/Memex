@@ -1480,12 +1480,26 @@ export class AnnotationsSidebar extends React.Component<
                     {this.props.selectedTextAIPreview && (
                         <SelectedAITextBox>
                             <SelectedAITextHeader>
+                                <SelectedHeaderButtonBox>
+                                    Selected Text
+                                    <PrimaryAction
+                                        icon={'removeX'}
+                                        onClick={() =>
+                                            this.props.removeSelectedTextAIPreview()
+                                        }
+                                        type="tertiary"
+                                        size="small"
+                                        label={'Reset'}
+                                        padding={'0px 5px 0px 2px'}
+                                    />
+                                </SelectedHeaderButtonBox>
                                 <PrimaryAction
                                     icon={
                                         this.state.showAIhighlight
                                             ? 'compress'
                                             : 'expand'
                                     }
+                                    padding={'0px 5px 0px 2px'}
                                     onClick={() =>
                                         this.setState({
                                             showAIhighlight: !this.state
@@ -1500,21 +1514,14 @@ export class AnnotationsSidebar extends React.Component<
                                             : 'Show All'
                                     }
                                 />
-                                <PrimaryAction
-                                    icon={'removeX'}
-                                    onClick={() =>
-                                        this.props.removeSelectedTextAIPreview()
-                                    }
-                                    type="tertiary"
-                                    size="small"
-                                    label={'Reset'}
-                                />
                             </SelectedAITextHeader>
                             <SelectedAITextContainer
                                 fullHeight={this.state.showAIhighlight}
                             >
                                 <SelectedTextBoxBar />
-                                <SelectedAIText>
+                                <SelectedAIText
+                                    fullHeight={this.state.showAIhighlight}
+                                >
                                     {this.props.selectedTextAIPreview}
                                 </SelectedAIText>
                                 {!this.state.showAIhighlight && (
@@ -2716,9 +2723,21 @@ const SelectionPill = styled.div<{ selected: boolean }>`
 const SelectedAITextHeader = styled.div`
     display: flex;
     align-items: center;
-    justify-content: flex-end;
+    justify-content: space-between;
     width: 100%;
-    margin-right: -30px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    margin-bottom: 10px;
+    margin-top: 10px;
+`
+
+const SelectedHeaderButtonBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    width: 100%;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-weight: 300;
+    grid-gap: 8px;
 `
 
 const SelectedAITextContainer = styled.div<{
@@ -2794,10 +2813,6 @@ const BlurContainer = styled.div`
     bottom: 0px;
     width: 100%;
     height: 100%;
-    background: linear-gradient(
-        ${(props) => props.theme.colors.black}00 0%,
-        ${(props) => props.theme.colors.black} 100%
-    );
 `
 
 const QueryContainer = styled.div<{
@@ -2825,7 +2840,7 @@ const AISidebarContainer = styled.div`
     /* overflow: scroll; */
     display: flex;
     flex-direction: column;
-    height: 400px;
+    height: 450px;
     flex: 1;
 
     &::-webkit-scrollbar {
@@ -2841,6 +2856,7 @@ const SelectedAITextBox = styled.div`
     justify-content: flex-start;
     flex-direction: column;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    max-height: 80%;
 `
 
 const SelectedTextBoxBar = styled.div`
@@ -2850,11 +2866,32 @@ const SelectedTextBoxBar = styled.div`
     height: 100%;
 `
 
-const SelectedAIText = styled.div`
+const SelectedAIText = styled.div<{ fullHeight: boolean }>`
     color: ${(props) => props.theme.colors.white};
     flex: 1;
-    white-space: break-spaces;
     font-size: 16px;
+    flex-wrap: wrap;
+    display: flex;
+    overflow: scroll
+        ${(props) =>
+            !props.fullHeight &&
+            css`
+                overflow: hidden;
+                -webkit-mask-image: -webkit-gradient(
+                    linear,
+                    left top,
+                    left bottom,
+                    from(rgba(0, 0, 0, 1)),
+                    to(rgba(0, 0, 0, 0))
+                );
+                -moz-mask-image: -moz-gradient(
+                    linear,
+                    left top,
+                    left bottom,
+                    from(rgba(0, 0, 0, 1)),
+                    to(rgba(0, 0, 0, 0))
+                );
+            `};
 `
 
 const RightSideButtons = styled.div`
@@ -2964,7 +3001,6 @@ const SummaryText = styled.div`
     line-height: 22px;
     white-space: break-spaces;
     flex-direction: column-reverse;
-    margin-bottom: 200px;
 
     ${(props) =>
         props.theme.variant === 'light' &&

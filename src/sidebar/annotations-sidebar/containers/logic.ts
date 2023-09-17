@@ -2203,7 +2203,8 @@ export class SidebarContainerLogic extends UILogic<
             if (previousState.queryMode === 'question') {
                 this.queryAI(
                     undefined,
-                    undefined,
+                    event.highlightedText ||
+                        previousState.selectedTextAIPreview,
                     event.prompt ? event.prompt : previousState.prompt,
                     false,
                     previousState,
@@ -2212,7 +2213,8 @@ export class SidebarContainerLogic extends UILogic<
             } else if (previousState.queryMode === 'summarize') {
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
-                    previousState.selectedTextAIPreview ?? '',
+                    event.highlightedText ||
+                        previousState.selectedTextAIPreview,
                     event.prompt ? event.prompt : previousState.prompt,
                     false,
                     previousState,
@@ -2221,7 +2223,8 @@ export class SidebarContainerLogic extends UILogic<
             } else if (previousState.queryMode === 'glanceSummary') {
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
-                    previousState.selectedTextAIPreview ?? '',
+                    event.highlightedText ||
+                        previousState.selectedTextAIPreview,
                     event.prompt ? event.prompt : previousState.prompt,
                     true,
                     previousState,
@@ -2277,7 +2280,7 @@ export class SidebarContainerLogic extends UILogic<
         let prompt = 'Summarise this in 2-3 paragraphs'
 
         await this.processUIEvent('queryAIwithPrompt', {
-            event: { prompt: prompt },
+            event: { prompt: prompt, highlightedText: event.textToProcess },
             previousState,
         })
 
