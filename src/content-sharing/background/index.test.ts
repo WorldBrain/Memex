@@ -3806,6 +3806,112 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
+            'should be able to accept invites to a private space',
+            {
+                skipConflictTests: true,
+                skipSyncTests: true,
+            },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const { contentSharing } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const nowA = Date.now()
+                                const sharedListIdA = 'test-list-a'
+                                const sharedListNameA = 'test list a'
+                                const emailA = 'a@test.com'
+
+                                const { manager } = setup.serverStorage
+
+                                await manager
+                                    .collection('sharedList')
+                                    .createObject({
+                                        id: sharedListIdA,
+                                        title: sharedListNameA,
+                                        creator: TEST_USER.id,
+                                        createdWhen: nowA,
+                                        updatedWhen: nowA,
+                                        private: true,
+                                    })
+
+                                await contentSharing.options.backend.createListEmailInvite(
+                                    {
+                                        now: nowA,
+                                        email: emailA,
+                                        listId: sharedListIdA,
+                                        roleID: SharedListRoleID.Commenter,
+                                    },
+                                )
+
+                                // TODO: Accept invite, expecting success
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should NOT be able to accept invites to a private space on behalf of other users',
+            {
+                skipConflictTests: true,
+                skipSyncTests: true,
+            },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const { contentSharing } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const nowA = Date.now()
+                                const sharedListIdA = 'test-list-a'
+                                const sharedListNameA = 'test list a'
+                                const emailA = 'a@test.com'
+
+                                const { manager } = setup.serverStorage
+
+                                await manager
+                                    .collection('sharedList')
+                                    .createObject({
+                                        id: sharedListIdA,
+                                        title: sharedListNameA,
+                                        creator: 'some-other-user-id',
+                                        createdWhen: nowA,
+                                        updatedWhen: nowA,
+                                        private: true,
+                                    })
+
+                                await contentSharing.options.backend.createListEmailInvite(
+                                    {
+                                        now: nowA,
+                                        email: emailA,
+                                        listId: sharedListIdA,
+                                        roleID: SharedListRoleID.Commenter,
+                                    },
+                                )
+
+                                // TODO: Accept invite, expecting failure
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             'should created shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for a PDF - via extension',
             {
                 skipConflictTests: true,
