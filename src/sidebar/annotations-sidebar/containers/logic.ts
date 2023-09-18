@@ -1250,9 +1250,22 @@ export class SidebarContainerLogic extends UILogic<
     })
 
     /* -- START: Annotation card instance events -- */
-    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
+    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = async ({
+        previousState,
         event,
     }) => {
+        if (event.instanceLocation === 'annotations-tab') {
+            if (previousState.activeTab !== 'annotations') {
+                this.emitMutation({
+                    activeTab: { $set: 'annotations' },
+                })
+            }
+        } else {
+            this.emitMutation({
+                activeTab: { $set: 'spaces' },
+            })
+        }
+
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
