@@ -44,7 +44,8 @@
         "webNavigation",
         "notifications",
         "unlimitedStorage",
-        "storage"
+        "storage",
+        "clipboardWrite"
     ],
     "web_accessible_resources": [
         "/lib/pdf.worker.min.js",

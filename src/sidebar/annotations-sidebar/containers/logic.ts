@@ -2671,6 +2671,8 @@ export class SidebarContainerLogic extends UILogic<
             pageSummary: { $set: '' },
             prompt: { $set: null },
         })
+        // is here bc for some reason else the timestamps will not be pushed, seems like a race condition
+
         await sleepPromise(0)
         const timestampToInsert = event.timeStampANDSummaryJSON[0]
 
