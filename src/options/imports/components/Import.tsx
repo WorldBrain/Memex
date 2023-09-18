@@ -13,6 +13,8 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import styled from 'styled-components'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { browser } from 'webextension-polyfill-ts'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -42,37 +44,215 @@ class Import extends React.PureComponent<Props> {
     //     return <AdvSettings />
     // }
 
-    state = {
-        showDiscordDemo: false,
+    componentDidMount(): void {
+        // Check local storage for saved paths when the component mounts
+        this.getPathsFromLocalStorage()
     }
 
-    private renderReadwise() {
-        if (!this.props.shouldRenderEsts) {
-            return
+    state = {
+        showDiscordDemo: false,
+        logSeqFolder: null,
+        obsidianFolder: null,
+    }
+
+    private async getPathsFromLocalStorage() {
+        const data = await browser.storage.local.get('pkmFolders')
+        if (data.pkmFolders) {
+            this.setState({
+                logSeqFolder: data.pkmFolders.logSeqFolder || null,
+                obsidianFolder: data.pkmFolders.obsidianFolder || null,
+            })
+        }
+    }
+
+    private getFolder = async (pkmToSync: string) => {
+        // Mocked functionToGetFolder for now
+        const functionToGetFolder = (pkmToSync) => {
+            return new Promise<string>((resolve) => {
+                setTimeout(() => resolve('/mocked/path/for/demo'), 500)
+            })
         }
 
+        const folderPath = await functionToGetFolder(pkmToSync)
+
+        if (pkmToSync === 'logseq') {
+            this.setState({ logSeqFolder: folderPath })
+        } else if (pkmToSync === 'obsidian') {
+            this.setState({ obsidianFolder: folderPath })
+        }
+
+        // Save to local storage
+        await browser.storage.local.set({
+            pkmFolders: {
+                logSeqFolder: this.state.logSeqFolder,
+                obsidianFolder: this.state.obsidianFolder,
+            },
+        })
+    }
+
+    private removeFolder = async (pkmToUnsync: string) => {
+        // Set state to empty based on which folder you want to remove
+        if (pkmToUnsync === 'logseq') {
+            this.setState({ logSeqFolder: null })
+        } else if (pkmToUnsync === 'obsidian') {
+            this.setState({ obsidianFolder: null })
+        }
+
+        // Update local storage by getting the current folders first, then updating them
+        const data = await browser.storage.local.get('pkmFolders')
+        const currentFolders = data.pkmFolders || {}
+
+        if (pkmToUnsync === 'logseq') {
+            currentFolders.logSeqFolder = null
+        } else if (pkmToUnsync === 'obsidian') {
+            currentFolders.obsidianFolder = null
+        }
+
+        await browser.storage.local.set({ pkmFolders: currentFolders })
+    }
+
+    private renderLogSeqIntegration() {
         return (
             <div>
                 <SettingSection
-                    icon={'readwise'}
-                    title={'ReadWise.io integration'}
+                    icon={'logseq'}
+                    title={'Logseq integration'}
                     description={
                         <div>
                             <span>
-                                Automatically push all your highlights to
-                                Readwise. Here you can get the{' '}
-                                <a
-                                    target="_blank"
-                                    href="https://readwise.io/access_token"
-                                >
-                                    API key
-                                </a>
-                                .
+                                Automatically sync pages and annotations to
+                                LogSeq.
                             </span>
                         </div>
                     }
                 >
-                    <ReadwiseSettings />
+                    {this.state.logSeqFolder !== null ? (
+                        <SelectFolderArea
+                            onClick={async () => await this.getFolder('logseq')}
+                        >
+                            <TextField
+                                icon={'folder'}
+                                value={
+                                    this.state.logSeqFolder &&
+                                    this.state.logSeqFolder.length
+                                        ? this.state.logSeqFolder
+                                        : 'Click to select folder'
+                                }
+                            />
+                            <PrimaryAction
+                                label={'Change Folder'}
+                                onClick={async (event) => {
+                                    event.stopPropagation()
+                                    await this.getFolder('logseq')
+                                }}
+                                icon={'folder'}
+                                size={'medium'}
+                                height={'44px'}
+                                type={'secondary'}
+                                padding={'0 8px 0 4px'}
+                            />
+                            <PrimaryAction
+                                label={'Remove Folder'}
+                                onClick={async (event) => {
+                                    event.stopPropagation()
+                                    await this.removeFolder('logseq')
+                                }}
+                                icon={'removeX'}
+                                size={'medium'}
+                                height={'44px'}
+                                type={'forth'}
+                                padding={'0 8px 0 4px'}
+                            />
+                        </SelectFolderArea>
+                    ) : (
+                        <PrimaryAction
+                            label={'Select LogSeq Folder'}
+                            onClick={async (event) => {
+                                event.stopPropagation()
+                                await this.getFolder('logseq')
+                            }}
+                            icon={'folder'}
+                            size={'medium'}
+                            height={'44px'}
+                            type={'secondary'}
+                            padding={'0 8px 0 4px'}
+                        />
+                    )}
+                </SettingSection>
+            </div>
+        )
+    }
+
+    private renderObsidianIntegration() {
+        return (
+            <div>
+                <SettingSection
+                    icon={'obsidian'}
+                    title={'Obsidian integration'}
+                    description={
+                        <div>
+                            <span>
+                                Automatically sync pages and annotations to
+                                Obsidian.
+                            </span>
+                        </div>
+                    }
+                >
+                    {this.state.obsidianFolder !== null ? (
+                        <SelectFolderArea
+                            onClick={async () =>
+                                await this.getFolder('obsidian')
+                            }
+                        >
+                            <TextField
+                                icon={'folder'}
+                                value={
+                                    this.state.obsidianFolder &&
+                                    this.state.obsidianFolder.length
+                                        ? this.state.obsidianFolder
+                                        : 'Click to select folder'
+                                }
+                                disabled
+                            />
+                            <PrimaryAction
+                                label={'Change Folder'}
+                                onClick={async (event) => {
+                                    event.stopPropagation()
+                                    await this.getFolder('obsidian')
+                                }}
+                                icon={'folder'}
+                                size={'medium'}
+                                type={'secondary'}
+                                height={'44px'}
+                                padding={'0 8px 0 4px'}
+                            />
+                            <PrimaryAction
+                                label={'Remove Folder'}
+                                onClick={async (event) => {
+                                    event.stopPropagation()
+                                    await this.removeFolder('obsidian')
+                                }}
+                                icon={'removeX'}
+                                size={'medium'}
+                                height={'44px'}
+                                type={'forth'}
+                                padding={'0 8px 0 4px'}
+                            />
+                        </SelectFolderArea>
+                    ) : (
+                        <PrimaryAction
+                            label={'Select Obsidian Folder'}
+                            onClick={async (event) => {
+                                event.stopPropagation()
+                                await this.getFolder('obsidian')
+                            }}
+                            icon={'folder'}
+                            size={'medium'}
+                            type={'secondary'}
+                            height={'44px'}
+                            padding={'0 8px 0 4px'}
+                        />
+                    )}
                 </SettingSection>
             </div>
         )
@@ -130,6 +310,38 @@ class Import extends React.PureComponent<Props> {
                             </InstructionsText>
                         </InstructionsEntry>
                     </InstructionsSection>
+                </SettingSection>
+            </div>
+        )
+    }
+
+    private renderReadwise() {
+        if (!this.props.shouldRenderEsts) {
+            return
+        }
+
+        return (
+            <div>
+                <SettingSection
+                    icon={'readwise'}
+                    title={'ReadWise.io integration'}
+                    description={
+                        <div>
+                            <span>
+                                Automatically push all your highlights to
+                                Readwise. Here you can get the{' '}
+                                <a
+                                    target="_blank"
+                                    href="https://readwise.io/access_token"
+                                >
+                                    API key
+                                </a>
+                                .
+                            </span>
+                        </div>
+                    }
+                >
+                    <ReadwiseSettings />
                 </SettingSection>
             </div>
         )
@@ -217,6 +429,8 @@ class Import extends React.PureComponent<Props> {
                         )}
                     </div>
                 </SettingSection>
+                {this.renderObsidianIntegration()}
+                {this.renderLogSeqIntegration()}
                 {this.renderReadwise()}
                 {/* {this.renderDiscord()} */}
             </div>
@@ -300,4 +514,22 @@ const LoadingBlocker = styled.div`
     text-align: center;
     z-index: 25000000;
     background: ${(props) => props.theme.colors.greyScale1};
+`
+
+const SelectFolderArea = styled.div`
+    border-radius: 12px;
+    display: grid;
+    align-items: center;
+    cursor: pointer;
+    margin-bottom: 20px;
+    display: flex;
+    grid-gap: 10px;
+
+    & * {
+        cursor: pointer;
+    }
+
+    &:hover {
+        opacity: 0.8;
+    }
 `

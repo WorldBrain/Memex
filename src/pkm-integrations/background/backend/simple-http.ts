@@ -1,3 +1,4 @@
+import { browser } from 'webextension-polyfill-ts'
 import { BackupObject } from './types'
 
 export class MemexLocalBackend {
@@ -25,8 +26,52 @@ export class MemexLocalBackend {
         return this.isConnected()
     }
 
+    async bufferPKMSyncItems(itemToBuffer) {
+        // Get the current buffer from browser.storage.local
+        const data = await browser.storage.local.get('bufferedItems')
+        const currentBuffer = data.bufferedItems || []
+
+        // Append the new item to the buffer
+        currentBuffer.push(itemToBuffer)
+
+        // Save the updated buffer back to browser.storage.local
+        await browser.storage.local.set({ bufferedItems: currentBuffer })
+    }
+
+    async processBufferedItems() {
+        // Check for buffered items in browser.storage.local
+        const data = await browser.storage.local.get('bufferedItems')
+        const bufferedItems = data.bufferedItems || []
+
+        // If there are buffered items, send each one
+        while (bufferedItems.length > 0) {
+            const item = bufferedItems.shift()
+            console.log('Processing buffered item', item.fileName)
+            await this._writeToPath(
+                `Saved Pages/${item.fileName.toString()}.md`,
+                JSON.stringify(item.fileContent),
+            )
+        }
+
+        // Save the emptied buffer back to browser.storage.local
+        await browser.storage.local.set({ bufferedItems: bufferedItems })
+    }
+
     async storeObject(fileName: string, fileContent: string): Promise<any> {
-        console.log('storeObject', fileName, fileContent)
+        const serverReachable = await this.isConnected()
+
+        if (!serverReachable) {
+            const itemToBuffer = {
+                fileName: fileName,
+                fileContent: fileContent,
+            }
+
+            await this.bufferPKMSyncItems(itemToBuffer)
+        } else {
+            // If the server is reachable, process buffered items first
+            await this.processBufferedItems()
+        }
+
         await this._writeToPath(
             `Saved Pages/${fileName.toString()}.md`,
             JSON.stringify(fileContent),

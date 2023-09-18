@@ -30,7 +30,6 @@ export class PKMSyncBackgroundModule {
     }
 
     async processChanges(item) {
-        console.log('item is', item)
         let page
 
         try {
@@ -81,7 +80,6 @@ export class PKMSyncBackgroundModule {
                 item.data.HighlightSpaces,
                 item.data.createdWhen,
             )
-            console.log('newAnnotationContent is', newAnnotationContent)
             const searchFor = `> ${convertHTMLintoMarkdown(item.data.body)}\n\n`
             annotationsSection = this.replaceOrAppendAnnotation(
                 annotationsSection,
@@ -93,7 +91,7 @@ export class PKMSyncBackgroundModule {
         fileContent =
             pageHeader + '#### Annotations\n\n' + (annotationsSection || '')
 
-        console.log('fileContent is', fileContent)
+        // console.log('fileContent is', fileContent)
         await this.backendNew.storeObject(pageIDbyTitle, fileContent)
     }
 

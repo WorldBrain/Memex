@@ -71,8 +71,6 @@ export async function _prepareBackupChangeForStorage(change: ObjectChange) {
 }
 
 export async function shareAnnotationWithPKM(annotationData, pkmSyncBG) {
-    console.log('arrives')
-
     let item = {
         type: 'annotation',
         data: annotationData,
@@ -81,8 +79,6 @@ export async function shareAnnotationWithPKM(annotationData, pkmSyncBG) {
     await pkmSyncBG.pushPKMSyncUpdate(item)
 }
 export async function sharePageWithPKM(pageData, pkmSyncBG) {
-    console.log('arrives')
-
     let item = {
         type: 'page',
         data: pageData,

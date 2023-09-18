@@ -170,6 +170,8 @@ class ReadwiseSettings extends StatefulUIElement<
                                 icon={'check'}
                                 size={'medium'}
                                 type={'secondary'}
+                                padding={'0 8px 0 4px'}
+                                height="44px"
                             />
                         </div>
                     )}
@@ -180,6 +182,8 @@ class ReadwiseSettings extends StatefulUIElement<
                             icon={'check'}
                             size={'medium'}
                             type={'secondary'}
+                            padding={'0 8px 0 4px'}
+                            height="44px"
                         />
                     )}
                 </MainBox>

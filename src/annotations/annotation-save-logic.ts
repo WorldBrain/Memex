@@ -223,13 +223,9 @@ export async function updateAnnotation({
                     }),
             ])
 
-            console.log('annotationData is', annotationData)
-
             let newAnnotationData = this.options.annotationsCache.getAnnotation(
                 annotationData.localId,
             )
-
-            console.log('newAnnotationData is', newAnnotationData)
 
             shareAnnotationWithPKM(annotationData, pkmSyncBG)
 
