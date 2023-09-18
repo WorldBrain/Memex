@@ -4,6 +4,7 @@ import { MemexLocalBackend } from '../background/backend'
 import { PkmSyncInterface } from './types'
 import { marked } from 'marked'
 import TurndownService from 'turndown'
+import { browser } from 'webextension-polyfill-ts'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -29,7 +30,35 @@ export class PKMSyncBackgroundModule {
         })
     }
 
+    private async getValidFolders() {
+        const data = await browser.storage.local.get('pkmFolders')
+        const folders = data.pkmFolders || {}
+
+        const validFolders = {
+            logSeq: !!folders.logSeqFolder,
+            obsidian: !!folders.obsidianFolder,
+        }
+
+        return validFolders
+    }
+
     async processChanges(item) {
+        const validFolders = await this.getValidFolders()
+
+        // Process for LogSeq if valid
+        if (validFolders.logSeq) {
+            await this.createPageUpdate(item, 'logseq')
+            // Logic to process changes for LogSeq
+            // For example: await this.processForLogSeq(page);
+        }
+
+        // Process for Obsidian if valid
+        if (validFolders.obsidian) {
+            await this.createPageUpdate(item, 'obsidian')
+        }
+    }
+
+    async createPageUpdate(item, pkmType) {
         let page
 
         try {
@@ -43,19 +72,21 @@ export class PKMSyncBackgroundModule {
         let fileContent = ''
 
         if (page) {
-            ;[pageHeader, annotationsSection] = page.split('#### Annotations')
+            ;[pageHeader, annotationsSection] = page.split('### Annotations')
         } else {
             pageHeader = this.pageObjectDefault(
                 item.data.pageTitle,
                 item.data.fullPageUrl,
                 (item.type === 'page' && item.data.spaces) || null,
                 item.data.createdWhen,
+                pkmType,
             )
             annotationsSection = this.annotationObjectDefault(
                 convertHTMLintoMarkdown(item.data.body),
                 item.data.comment,
                 (item === 'annotation' && item.data.HighlightSpaces) || null,
                 item.data.createdWhen,
+                pkmType,
             )
         }
 
@@ -67,11 +98,13 @@ export class PKMSyncBackgroundModule {
                         item.data.fullPageUrl,
                         item.data.spaces || null,
                         item.data.createdWhen,
+                        pkmType,
                     ),
                 item.data.pageTitle || null,
                 item.data.pageURL || null,
                 item.data.pageSpaces || null,
                 item.data.creationDate || null,
+                pkmType,
             )
         } else if (item.type === 'annotation') {
             const newAnnotationContent = this.annotationObjectDefault(
@@ -79,6 +112,7 @@ export class PKMSyncBackgroundModule {
                 item.data.comment,
                 item.data.HighlightSpaces,
                 item.data.createdWhen,
+                pkmType,
             )
             const searchFor = `> ${convertHTMLintoMarkdown(item.data.body)}\n\n`
             annotationsSection = this.replaceOrAppendAnnotation(
@@ -89,10 +123,10 @@ export class PKMSyncBackgroundModule {
         }
 
         fileContent =
-            pageHeader + '#### Annotations\n\n' + (annotationsSection || '')
+            pageHeader + '### Annotations\n\n' + (annotationsSection || '')
 
         // console.log('fileContent is', fileContent)
-        await this.backendNew.storeObject(pageIDbyTitle, fileContent)
+        return await this.backendNew.storeObject(pageIDbyTitle, fileContent)
     }
 
     replaceOrAppendAnnotation(
@@ -123,6 +157,7 @@ export class PKMSyncBackgroundModule {
         HighlightNote,
         HighlightSpaces,
         creationDate,
+        pkmType,
     ) {
         // Extract data from the annotation
         const highlightTextMatch = annotation.match(/>\s*(.+)\n\n/)
@@ -146,6 +181,7 @@ export class PKMSyncBackgroundModule {
             newHighlightNote,
             newSpaces,
             newCreationDate,
+            pkmType,
         )
 
         return updatedAnnotation
@@ -157,6 +193,7 @@ export class PKMSyncBackgroundModule {
         pageURL,
         pageSpaces,
         creationDate,
+        pkmType,
     ) {
         // Extract data from pageHeader
         const titleMatch = pageHeader.match(/Title: (.+)/)
@@ -175,12 +212,13 @@ export class PKMSyncBackgroundModule {
             newURL,
             newSpaces,
             newCreationDate,
+            pkmType,
         )
 
         return updatedPageHeader
     }
 
-    pageObjectDefault(pageTitle, pageURL, pageSpaces, creationDate) {
+    pageObjectDefault(pageTitle, pageURL, pageSpaces, creationDate, pkmType) {
         const titleLine = `Title: ${pageTitle}\n`
         const urlLine = `Url: ${pageURL}\n`
         const creationDateLine = `Created at: ${creationDate}\n`
@@ -206,6 +244,7 @@ export class PKMSyncBackgroundModule {
         HighlightNote,
         HighlightSpaces,
         creationDate,
+        pkmType,
     ) {
         const highlightTextLine = HighlightText ? `> ${HighlightText}\n\n` : ''
         const highlightNoteLine = HighlightNote
