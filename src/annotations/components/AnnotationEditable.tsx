@@ -652,6 +652,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 icon={shareIconData.icon}
                                 size={'small'}
                                 type={'tertiary'}
+                                padding="0px 4px 0px 2px"
                                 innerRef={this.shareMenuButtonRef}
                                 active={
                                     this.props.shareMenuAnnotationInstanceId ===
@@ -1068,6 +1069,7 @@ const DefaultFooterStyled = styled.div`
     align-items: center;
     justify-content: space-between;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    padding-left: 4px;
 `
 
 const AnnotationStyled = styled.div`

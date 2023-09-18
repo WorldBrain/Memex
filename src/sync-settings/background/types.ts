@@ -66,6 +66,7 @@ export interface SyncSettingsByFeature {
             askAIShortcut: string
             sharePageShortcut: string
         }
+        shouldAutoCreateNoteLink: boolean
     }
     readwise: {
         apiKey: string

@@ -10,7 +10,6 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/reader/constants'
-// import DOMPurify from 'dompurify'
 
 export default class ReaderStorage extends StorageModule {
     static READER_COLL = COLLECTION_NAMES.readablePage
@@ -67,47 +66,6 @@ export default class ReaderStorage extends StorageModule {
         doc?: Document
     }): Promise<ReadableData> => {
         return null
-        // const normalizedUrl = normalizeUrl(fullUrl, {})
-
-        // let document = doc
-        // if (!document) {
-        //     console.log(`Reader::Parser Document fetching from URL ${fullUrl}`)
-
-        //     document = await fetchDOMFromUrl(fullUrl, 5000).run()
-        // } else {
-        //     console.log(`Reader::Parser Document given`)
-        // }
-
-        // console.log(
-        //     `Reader::Parser Original Doc Size - ${
-        //         document.body.outerHTML.length / 1000
-        //     }k`,
-        // )
-        // console.time('Reader::Parser::ParseTime')
-
-        // const article = new Readability(document).parse()
-        // article.content = DOMPurify.sanitize(article.content)
-        // console.timeEnd('Reader::Parser::ParseTime')
-        // console.log(
-        //     `Reader::Parser Readable Doc Size - ${
-        //         document.body.outerHTML.length / 1000
-        //     }k`,
-        // )
-
-        // const readableData = {
-        //     title: article.title,
-        //     content: article.content,
-        //     textContent: article.textContent,
-        //     url: normalizedUrl,
-        //     length: article.length,
-        //     fullUrl,
-        //     strategy: 'mozilla/readability',
-        //     created: Date.now(),
-        // }
-
-        // await this.operation('createReadable', readableData)
-
-        // return readableData as ReadableData
     }
 
     getReadable = (url: string): Promise<ReadableData | null> => {

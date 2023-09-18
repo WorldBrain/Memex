@@ -36,6 +36,9 @@ export interface Props {
     context?: string
     handleCreateLink?: () => Promise<void>
     autoShareState?: TaskState
+    autoCreateLinkState?: TaskState
+    autoCreateLinkSetting?: boolean
+    toggleAutoCreateLinkSetting?: () => void
 }
 
 interface State {
@@ -165,6 +168,25 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                 <LinkCopierBox>
                                     {this.renderLinkContent()}
                                 </LinkCopierBox>
+                                <Checkbox
+                                    key={1}
+                                    id={'1'}
+                                    isChecked={
+                                        this.props.autoCreateLinkSetting ===
+                                        true
+                                    }
+                                    handleChange={() =>
+                                        this.props.toggleAutoCreateLinkSetting()
+                                    }
+                                    // isDisabled={!this.state.shortcutsEnabled}
+                                    name={'Copy link when creating highlight'}
+                                    label={'Copy link when creating highlight'}
+                                    size={14}
+                                    isLoading={
+                                        this.props.autoCreateLinkState ===
+                                        'running'
+                                    }
+                                />
                             </TopArea>
                         )}
                         <PrivacyContainer isLinkShown={this.props.showLink}>
@@ -294,6 +316,9 @@ const TopArea = styled.div<{ context: string }>`
     padding: 10px 15px 10px 15px;
     height: fit-content;
     margin-bottom: 20px;
+    grid-gap: 5px;
+    display: flex;
+    flex-direction: column;
 
     &:first-child {
         padding: 0px 15px 0px 15px;

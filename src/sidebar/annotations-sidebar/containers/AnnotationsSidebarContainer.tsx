@@ -541,6 +541,7 @@ export class AnnotationsSidebarContainer<
                         keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                     })
                 }
+                syncSettingsBG={this.props.syncSettingsBG}
                 spacePickerProps={this.getSpacePickerProps({
                     annotation,
                 })}
@@ -788,6 +789,10 @@ export class AnnotationsSidebarContainer<
                     id={'annotationSidebarContainer'}
                     sidebarContext={this.props.sidebarContext}
                     isShown={this.state.showState}
+                    rightPosition={
+                        this.state.sidebarRightBorderPosition != null &&
+                        this.state.sidebarRightBorderPosition
+                    }
                 >
                     <Rnd
                         style={style}
@@ -1327,7 +1332,7 @@ const GlobalStyle = createGlobalStyle<{
     width: 4px;
     height: 100vh;
     position: absolute;
-    top:  ${(props) => (props.sidebarContext === 'dashboard' ? '40px' : '0px')};
+    top: ${(props) => (props.sidebarContext === 'dashboard' ? '40px' : '0px')};
 
         &:hover {
         background: #5671cf30;
@@ -1371,6 +1376,7 @@ const ContainerStyled = styled.div<{
     sidebarContext: string
     isShown: string
     theme
+    rightPosition?: number
 }>`
     height: 100vh;
     overflow-x: visible;
@@ -1383,14 +1389,15 @@ const ContainerStyled = styled.div<{
             : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
                     background: ${(props) =>
                         props.theme.variant === 'dark'
-                            ? props.theme.colors.black + 'ec'
+                            ? props.theme.colors.black + 'eb'
                             : props.theme.colors.black + 'c9'};
     backdrop-filter: blur(30px);
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
     box-sizing: content-box;
-    right: ${TOOLTIP_WIDTH};
+    right: ${(props) =>
+        props.rightPosition ? props.rightPosition + 'px' : TOOLTIP_WIDTH};
 
     &:: -webkit-scrollbar {
         display: none;

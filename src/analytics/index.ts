@@ -1,5 +1,3 @@
-// import Countly from 'countly-sdk-web'
-
 // import AnalyticsManager from './analytics'
 // import CountlyAnalyticsBackend from './backend/countly'
 import { FakeAnalytics } from './mock'
