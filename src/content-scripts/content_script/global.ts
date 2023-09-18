@@ -97,7 +97,7 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import * as htmlToImage from 'html-to-image'
-import { toPng } from 'html-to-image'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -206,6 +206,7 @@ export async function main(
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+    const pkmSyncBG = runInBackground<PkmSyncInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
@@ -335,6 +336,7 @@ export async function main(
                     },
                     annotationsBG,
                     contentSharingBG,
+                    pkmSyncBG: pkmSyncBG,
                     skipPageIndexing: false,
                     syncSettingsBG: syncSettingsBG,
                     privacyLevelOverride: privacyLevel,
@@ -704,6 +706,7 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
+                pkmSyncBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },

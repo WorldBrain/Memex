@@ -97,6 +97,8 @@ import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { shareAnnotationWithPKM } from 'src/pkm-integrations/background/backend/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -110,6 +112,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
     imageSupport?: ImageSupportInterface<'caller'>
+    pkmSyncBG?: PkmSyncInterface
 }
 
 type EventHandler<
@@ -1392,6 +1395,7 @@ export class SidebarContainerLogic extends UILogic<
                     event.isProtected || !!event.keepListsIfUnsharing,
                 skipPrivacyLevelUpdate: event.mainBtnPressed,
             },
+            pkmSyncBG: this.options.pkmSyncBG,
         })
 
         this.options.annotationsCache.updateAnnotation(
@@ -1418,6 +1422,15 @@ export class SidebarContainerLogic extends UILogic<
                 $set: null,
             },
         })
+
+        const newAnnotationData = {
+            comment: commentForSaving,
+            body: annotationData.body,
+            fullPageURL: 'https://' + annotationData.normalizedPageUrl,
+            createdWhen: annotationData.createdWhen,
+        }
+
+        shareAnnotationWithPKM(newAnnotationData, this.options.pkmSyncBG)
 
         await savePromise
     }
@@ -1603,6 +1616,7 @@ export class SidebarContainerLogic extends UILogic<
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
+                pkmSyncBG: this.options.pkmSyncBG,
             })
 
             this.options.annotationsCache.addAnnotation({
@@ -1634,6 +1648,15 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 })
             }
+
+            const annotationData = {
+                comment: commentForSaving,
+                fullPageUrl: fullPageUrl,
+                createdWhen: new Date(now),
+                pageTitle: title,
+            }
+
+            shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
 
             await savePromise
         })

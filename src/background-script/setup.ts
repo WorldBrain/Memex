@@ -13,6 +13,7 @@ import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
+import * as pkmSync from '../pkm-integrations/background'
 import { getAuth } from 'firebase/auth'
 import {
     getStorage,
@@ -128,6 +129,7 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
+    pkmSyncModule: pkmSync.PKMSyncBackgroundModule
     syncSettings: SyncSettingsBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
@@ -612,6 +614,7 @@ export function createBackgroundModules(options: {
             checkAuthorizedForAutoBackup: async () =>
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),
         }),
+        pkmSyncModule: new pkmSync.PKMSyncBackgroundModule(),
         storexHub: new StorexHubBackground({
             storageManager,
             localBrowserStorage: options.browserAPIs.storage.local,
@@ -735,6 +738,7 @@ export async function setupBackgroundModules(
     backgroundModules.eventLog.setupRemoteFunctions()
     backgroundModules.backupModule.setBackendFromStorage()
     backgroundModules.backupModule.setupRemoteFunctions()
+    backgroundModules.pkmSyncModule.setupRemoteFunctions()
     backgroundModules.backupModule.startRecordingChangesIfNeeded()
     backgroundModules.bgScript.setupRemoteFunctions()
     backgroundModules.contentScripts.setupRemoteFunctions()

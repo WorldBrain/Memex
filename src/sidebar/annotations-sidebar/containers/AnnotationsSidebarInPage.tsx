@@ -31,12 +31,14 @@ import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
     imageSupport?: ImageSupportInterface<'caller'>
+    pkmSyncBG: PkmSyncInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
