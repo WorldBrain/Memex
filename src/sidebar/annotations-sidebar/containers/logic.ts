@@ -2671,7 +2671,10 @@ export class SidebarContainerLogic extends UILogic<
             pageSummary: { $set: '' },
             prompt: { $set: null },
         })
+        await sleepPromise(0)
         const timestampToInsert = event.timeStampANDSummaryJSON[0]
+
+        console.log('timestampToInsert', timestampToInsert)
 
         const maxRetries = 30
         let handledSuccessfully = false
