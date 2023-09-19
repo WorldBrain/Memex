@@ -18,7 +18,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     isOpen?: boolean
     toggleOpen?: () => void
     menuItems: T[]
-    btnChildren: React.ReactNode
+    btnChildren?: React.ReactNode
     onMenuItemClick?: (itemProps: T) => void
     theme?: ThemeProps
     keepSelectedState?: boolean

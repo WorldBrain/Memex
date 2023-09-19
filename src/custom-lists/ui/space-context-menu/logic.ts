@@ -14,6 +14,8 @@ import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/even
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
+export type SpacePrivacyState = 'private' | 'public'
+
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
     spacesBG: RemoteCollectionsInterface
@@ -40,6 +42,12 @@ export type Event = UIEvent<{
     cancelSpaceNameEdit: null
     confirmSpaceNameEdit: null
     updateSpaceName: { name: string }
+    updateEmailInviteInputValue: { value: string }
+    updateEmailInviteInputRole: {
+        role: SharedListRoleID.Commenter | SharedListRoleID.ReadWrite
+    }
+    inviteViaEmail: void
+    updateSpacePrivacy: { state: SpacePrivacyState }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
@@ -51,6 +59,16 @@ export interface State {
     ownershipLoadState: TaskState
     listShareLoadState: TaskState
     inviteLinksLoadState: TaskState
+    emailInvitesLoadState: TaskState
+    emailInviteInputRole:
+        | SharedListRoleID.Commenter
+        | SharedListRoleID.ReadWrite
+    spacePrivacy: SpacePrivacyState
+    emailInviteInputValue: string
+    emailInvites: Array<{
+        email: string
+        role: SharedListRoleID.Commenter | SharedListRoleID.ReadWrite
+    }>
     inviteLinks: InviteLink[]
     showSuccessMsg: boolean
     mode: 'confirm-space-delete' | 'followed-space' | null
@@ -72,10 +90,15 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     }
 
     getInitialState = (): State => ({
+        spacePrivacy: 'private',
         loadState: 'pristine',
         ownershipLoadState: 'pristine',
         listShareLoadState: 'pristine',
         inviteLinksLoadState: 'pristine',
+        emailInvitesLoadState: 'pristine',
+        emailInviteInputRole: SharedListRoleID.Commenter,
+        emailInviteInputValue: '',
+        emailInvites: [],
         inviteLinks: [],
         nameValue: this.dependencies.listData.name,
         showSuccessMsg: false,
@@ -267,6 +290,24 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             nameValue: { $set: event.name },
             showSaveButton: { $set: true },
         })
+    }
+
+    updateSpacePrivacy: EventHandler<'updateSpacePrivacy'> = async ({
+        event,
+    }) => {
+        this.emitMutation({ spacePrivacy: { $set: event.state } })
+    }
+
+    updateEmailInviteInputValue: EventHandler<
+        'updateEmailInviteInputValue'
+    > = async ({ event }) => {
+        this.emitMutation({ emailInviteInputValue: { $set: event.value } })
+    }
+
+    updateEmailInviteInputRole: EventHandler<
+        'updateEmailInviteInputRole'
+    > = async ({ event }) => {
+        this.emitMutation({ emailInviteInputRole: { $set: event.role } })
     }
 
     cancelSpaceNameEdit: EventHandler<'cancelSpaceNameEdit'> = async ({}) => {

@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import Logic, { Dependencies, State, Event } from './logic'
+import Logic, { Dependencies, State, Event, SpacePrivacyState } from './logic'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -12,7 +12,14 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import {
+    DropdownMenuBtn,
+    MenuItemProps,
+} from 'src/common-ui/components/dropdown-menu-btn'
 
+interface SpacePrivacyChoice extends MenuItemProps {
+    value: SpacePrivacyState
+}
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
 }
@@ -260,9 +267,35 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         }
 
         const isPageLink = this.props.listData.type === 'page-link'
-
         return (
             <ContextMenuContainer>
+                <DropdownMenuBtn
+                    menuItems={
+                        [
+                            {
+                                id: 'private-space-selection-state',
+                                name: 'Private',
+                                value: 'private',
+                                info: 'Only visible to you and people invited',
+                            },
+                            {
+                                id: 'public-space-selection-state',
+                                name: 'Shared',
+                                value: 'public',
+                                info: 'Viewable to anyone with the link',
+                            },
+                        ] as SpacePrivacyChoice[]
+                    }
+                    onMenuItemClick={(item: SpacePrivacyChoice) =>
+                        this.processEvent('updateSpacePrivacy', {
+                            state: item.value,
+                        })
+                    }
+                    initSelectedIndex={
+                        this.state.spacePrivacy === 'private' ? 0 : 1
+                    }
+                    keepSelectedState
+                />
                 {this.props.listData.remoteId != null && (
                     <SectionTitle>Invite Links</SectionTitle>
                 )}
@@ -283,7 +316,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                                         e.stopPropagation()
                                     }}
                                 >
-                                    <EditableListTitle
+                                    <EditableTextField
                                         onClick={(e) => {
                                             e.preventDefault()
                                             e.stopPropagation()
@@ -338,6 +371,33 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                             )}
                     </>
                 </ButtonBox>
+                <SectionTitle>Invite via Email</SectionTitle>
+                <Container
+                    onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }}
+                >
+                    <EditableTextField
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                        }}
+                        value={this.state.emailInviteInputValue}
+                        onChange={(value) =>
+                            this.processEvent('updateEmailInviteInputValue', {
+                                value,
+                            })
+                        }
+                        disabled={this.props.disableWriteOps}
+                        placeholder="Add email address"
+                        icon="mail"
+                        // onKeyDown={this.handleNameEditInputKeyDown}
+                    />
+                    {/* {this.state.emailInviteInputValue.trim().length > 0 && (
+
+                                    )} */}
+                </Container>
             </ContextMenuContainer>
         )
     }
@@ -553,7 +613,7 @@ const PermissionText = styled.span<{
         `}
 `
 
-const EditableListTitle = styled(TextField)`
+const EditableTextField = styled(TextField)`
     padding: 2px 10px;
     border-radius: 5px;
     outline: none;
