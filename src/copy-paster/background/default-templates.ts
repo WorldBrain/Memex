@@ -29,29 +29,29 @@ export const ROAM_MD_TEMPLATE: Template = {
     isFavourite: false,
     outputFormat: 'markdown',
     code: `[[{{{PageTitle}}}]]
-{{#PageUrl}}
-  - url:: {{{PageUrl}}}
-{{/PageUrl}}
-{{#HasNotes}}
-  - Annotations
-{{/HasNotes}}
+    {{#PageUrl}}
+      - url:: {{{PageUrl}}}
+    {{/PageUrl}}
+    {{#HasNotes}}
+      - Annotations
+    {{/HasNotes}}
     {{#Notes}}
-{{#NoteHighlight}}
-    - ^^{{{NoteHighlight}}}^^
-{{#NoteText}}
-        - {{{NoteText}}}
-{{/NoteText}}
-{{#NoteTags}}
-        - {{{NoteTags}}}
-{{/NoteTags}}
-{{/NoteHighlight}} 
-    - {{^NoteHighlight}}
-    - {{{NoteText}}}
-{{/NoteHighlight}} 
-{{#NoteTags}}
-    - {{{NoteTags}}}
-{{/NoteTags}}
-    {{/Notes}}
+    {{#NoteHighlight}}  
+        - ^^{{{NoteHighlight}}}^^
+    {{#NoteText}}
+           - {{{NoteText}}}
+    {{/NoteText}}
+    {{#NoteTags}}
+          Spaces: {{{NoteTags}}}
+    {{/NoteTags}}
+    {{/NoteHighlight}}
+        {{^NoteHighlight}}
+          {{{NoteText}}}
+    {{/NoteHighlight}}
+    {{#NoteTags}}
+          {{{NoteTags}}}
+    {{/NoteTags}}
+          {{/Notes}}
 `,
 }
 
