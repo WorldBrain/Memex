@@ -193,14 +193,28 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
     }
 
     componentDidMount(): void {
-        const textarea = document.getElementById('CopyPasterTextArea')
-        textarea.style.height = 'auto'
-        textarea.style.height = textarea.scrollHeight + 'px'
+        let textarea
 
-        textarea.addEventListener('input', function () {
-            this.style.height = 'auto'
-            this.style.height = this.scrollHeight + 'px'
-        })
+        const sidebarContainer = document.getElementById(
+            'memex-sidebar-container',
+        )
+        const sidebar = sidebarContainer?.shadowRoot.getElementById(
+            'annotationSidebarContainer',
+        )
+        const test = sidebarContainer?.shadowRoot.getElementById(
+            'CopyPasterTextArea',
+        )
+
+        if (sidebar != null) {
+            textarea = sidebar.querySelector('#CopyPasterTextArea')
+        } else {
+            textarea = document.getElementById('CopyPasterTextArea')
+        }
+
+        if (textarea != null) {
+            textarea.style.height = 'auto'
+            textarea.style.height = textarea.scrollHeight + 'px'
+        }
     }
 
     render() {
@@ -278,6 +292,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         }
                         markedUpEditor={true}
                         rows={5}
+                        editorRef={this.editorRef}
                     />
                 </TextInputBox>
 

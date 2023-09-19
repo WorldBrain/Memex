@@ -19,7 +19,7 @@ export function renderTemplate(
                 `@startvalue%${value
                     .trim()
                     .replace(/<br\s*\/?>/g, '\n')
-                    .replace(/\r?\n/g, ' ')}@endvalue%`,
+                    .replace(/\r?\n/g, '  \n')}@endvalue%`,
             )
         }
     })
