@@ -207,6 +207,7 @@ async function setupTest() {
         dataFetchers: getTemplateDataFetchers({
             storageManager,
             contentSharing: backgroundModules.contentSharing,
+            imageSupport: backgroundModules.imageSupport,
         }),
     }
 }
