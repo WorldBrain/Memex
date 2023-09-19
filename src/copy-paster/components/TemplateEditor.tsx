@@ -292,7 +292,6 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         }
                         markedUpEditor={true}
                         rows={5}
-                        editorRef={this.editorRef}
                     />
                 </TextInputBox>
 
