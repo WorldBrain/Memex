@@ -3825,6 +3825,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 })
 
                                 const nowA = Date.now()
+                                const nowB = Date.now() + 3000
                                 const sharedListIdA = 'test-list-a'
                                 const sharedListNameA = 'test list a'
                                 const emailA = 'a@test.com'
@@ -3842,7 +3843,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         private: true,
                                     })
 
-                                await contentSharing.options.backend.createListEmailInvite(
+                                const createInviteResult = await contentSharing.options.backend.createListEmailInvite(
                                     {
                                         now: nowA,
                                         email: emailA,
@@ -3851,7 +3852,59 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
+                                const expectedInvite = {
+                                    id: expect.anything(),
+                                    email: emailA,
+                                    createdWhen: nowA,
+                                    sharedList: sharedListIdA,
+                                }
+                                expect(
+                                    await manager
+                                        .collection('sharedListRole')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                                expect(
+                                    await manager
+                                        .collection('sharedListRoleByUser')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedInvite])
+
                                 // TODO: Accept invite, expecting success
+                                // const acceptResult = await contentSharing.options.backend.acceptListEmailInvite({ })
+                                // expect(acceptResult.status).toBe('success')
+
+                                const expectedUserRole = {
+                                    id: expect.anything(),
+                                    roleID: SharedListRoleID.Commenter,
+                                    sharedList: sharedListIdA,
+                                    createdWhen: nowB,
+                                    updatedWhen: nowB,
+                                }
+                                expect(
+                                    await manager
+                                        .collection('sharedListRole')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedUserRole])
+                                expect(
+                                    await manager
+                                        .collection('sharedListRoleByUser')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedUserRole])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([
+                                    {
+                                        ...expectedInvite,
+                                        acceptedWhen: nowB,
+                                    },
+                                ])
                             },
                         },
                     ],
@@ -3889,7 +3942,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     .createObject({
                                         id: sharedListIdA,
                                         title: sharedListNameA,
-                                        creator: 'some-other-user-id',
+                                        creator: TEST_USER.id,
                                         createdWhen: nowA,
                                         updatedWhen: nowA,
                                         private: true,
@@ -3904,7 +3957,48 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     },
                                 )
 
+                                const expectedInvite = {
+                                    id: expect.anything(),
+                                    email: emailA,
+                                    createdWhen: nowA,
+                                    sharedList: sharedListIdA,
+                                }
+                                expect(
+                                    await manager
+                                        .collection('sharedListRole')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                                expect(
+                                    await manager
+                                        .collection('sharedListRoleByUser')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedInvite])
+
                                 // TODO: Accept invite, expecting failure
+                                // const acceptResult = await contentSharing.options.backend.acceptListEmailInvite({ })
+                                // expect(acceptResult.status).toBe('permission-denied')
+                                expect(1).toBe(2)
+
+                                expect(
+                                    await manager
+                                        .collection('sharedListRole')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                                expect(
+                                    await manager
+                                        .collection('sharedListRoleByUser')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedInvite])
                             },
                         },
                     ],
