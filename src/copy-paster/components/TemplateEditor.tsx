@@ -265,6 +265,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         onChange={(e) =>
                             this.props.onCodeChange(e.target.value)
                         }
+                        markedUpEditor={true}
                         rows={5}
                     />
                 </TextInputBox>

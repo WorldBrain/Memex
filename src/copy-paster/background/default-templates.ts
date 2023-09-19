@@ -2,6 +2,7 @@ import { Storage } from 'webextension-polyfill'
 
 import { Template } from '../types'
 import CopyPasterBackground from '.'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export const PERFORMED_STORAGE_FLAG = '@TextExport-default_templates_inserted_1'
 
@@ -28,11 +29,29 @@ export const ROAM_MD_TEMPLATE: Template = {
     isFavourite: false,
     outputFormat: 'markdown',
     code: `[[{{{PageTitle}}}]]
-  url:: {{{PageUrl}}}
-{{#Notes}}
-  ^^{{{NoteHighlight}}}^^ {{{NoteTags}}}
-    {{{NoteText}}}
-{{/Notes}}
+{{#PageUrl}}
+  - url:: {{{PageUrl}}}
+{{/PageUrl}}
+{{#HasNotes}}
+  - Annotations
+{{/HasNotes}}
+    {{#Notes}}
+{{#NoteHighlight}}
+    - ^^{{{NoteHighlight}}}^^
+{{#NoteText}}
+        - {{{NoteText}}}
+{{/NoteText}}
+{{#NoteTags}}
+        - {{{NoteTags}}}
+{{/NoteTags}}
+{{/NoteHighlight}} 
+    - {{^NoteHighlight}}
+    - {{{NoteText}}}
+{{/NoteHighlight}} 
+{{#NoteTags}}
+    - {{{NoteTags}}}
+{{/NoteTags}}
+    {{/Notes}}
 `,
 }
 
@@ -87,6 +106,7 @@ export default async function insertDefaultTemplates({
     copyPaster: CopyPasterBackground
     localStorage: Storage.LocalStorageArea
     templates?: Template[]
+    imageSupport?: ImageSupportInterface<'caller'>
 }) {
     const alreadyPerformed = (await localStorage.get(PERFORMED_STORAGE_FLAG))[
         PERFORMED_STORAGE_FLAG
