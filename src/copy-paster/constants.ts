@@ -15,6 +15,7 @@ export const KEYS_TO_REQUIREMENTS: {
     PageSpacesList: 'pageSpaces',
     PageCreatedAt: 'pageCreatedAt',
     PageLink: 'pageLink',
+    HasNotes: 'hasNotes',
     NoteHighlight: 'note',
     NoteText: 'note',
     NoteTags: 'noteTags',
