@@ -353,7 +353,8 @@ const RibbonHolderBox = styled.div<{
         props.isSidebarOpen &&
         css`
             top: 0px;
-            height: 100%;
+            height: fill-available;
+            height: -moz-available;
             width: 44px;
         `}
 `

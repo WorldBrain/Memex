@@ -159,7 +159,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
     }
 
     private get isCurrentPagePDF(): boolean {
-        return this.props.url?.endsWith('.pdf')
+        return this.state.currentTabFullUrl?.endsWith('.pdf')
     }
 
     getPDFMode = () => {

@@ -1253,9 +1253,22 @@ export class SidebarContainerLogic extends UILogic<
     })
 
     /* -- START: Annotation card instance events -- */
-    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
+    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = async ({
+        previousState,
         event,
     }) => {
+        if (event.instanceLocation === 'annotations-tab') {
+            if (previousState.activeTab !== 'annotations') {
+                this.emitMutation({
+                    activeTab: { $set: 'annotations' },
+                })
+            }
+        } else {
+            this.emitMutation({
+                activeTab: { $set: 'spaces' },
+            })
+        }
+
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
@@ -2681,6 +2694,9 @@ export class SidebarContainerLogic extends UILogic<
             pageSummary: { $set: '' },
             prompt: { $set: null },
         })
+        // is here bc for some reason else the timestamps will not be pushed, seems like a race condition
+
+        await sleepPromise(0)
         const timestampToInsert = event.timeStampANDSummaryJSON[0]
 
         const maxRetries = 30

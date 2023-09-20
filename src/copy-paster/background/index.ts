@@ -13,10 +13,12 @@ import {
     AnnotsByPageUrl,
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
     remoteFunctions: RemoteCopyPasterInterface
+    imageSupport: ImageSupportInterface<'caller'>
 
     constructor(
         private options: {
@@ -26,6 +28,7 @@ export default class CopyPasterBackground {
                 ContentSharingBackground,
                 'shareAnnotations' | 'storage' | 'ensureRemotePageId'
             >
+            imageSupport: ImageSupportInterface<'caller'>
         },
     ) {
         // makes the custom copy paster table in indexed DB
