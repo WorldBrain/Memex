@@ -20,16 +20,20 @@ import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import TurndownService from 'turndown'
+import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
+import { ImageSupportInterface } from 'src/image-support/background/types'
 
 export function getTemplateDataFetchers({
     storageManager,
     contentSharing,
+    imageSupport,
 }: {
     storageManager: Storex
     contentSharing: Pick<
         ContentSharingBackground,
         'shareAnnotations' | 'storage' | 'ensureRemotePageId'
     >
+    imageSupport: ImageSupportInterface<'caller'>
 }): TemplateDataFetchers {
     const getTagsForUrls = async (
         urls: string[],
@@ -121,26 +125,35 @@ export function getTemplateDataFetchers({
                 .collection('annotations')
                 .findObjects({ url: { $in: annotationUrls } })
 
-            return notes.sort(sortByPagePosition).reduce(
-                (acc, note) => ({
-                    ...acc,
-                    [note.url]: {
-                        url: note.url,
-                        body:
-                            note.body != null
-                                ? convertHTMLintoMarkdown(note.body)
-                                : '',
-                        comment:
-                            note.comment != null
-                                ? convertHTMLintoMarkdown(note.comment)
-                                : '',
-                        pageUrl: note.pageUrl,
-                        createdAt: note.createdWhen,
-                    },
-                }),
-                {},
-            )
+            const sortedNotes = notes.sort(sortByPagePosition)
+
+            const result = {}
+
+            for (const note of sortedNotes) {
+                result[note.url] = {
+                    url: note.url,
+                    body:
+                        note.body != null
+                            ? await convertHTMLintoMarkdown(
+                                  note.body,
+                                  imageSupport,
+                              )
+                            : '',
+                    comment:
+                        note.comment != null
+                            ? await convertHTMLintoMarkdown(
+                                  note.comment,
+                                  imageSupport,
+                              )
+                            : '',
+                    pageUrl: note.pageUrl,
+                    createdAt: note.createdWhen,
+                }
+            }
+
+            return result
         },
+
         getNoteIdsForPages: async (normalizedPageUrls) => {
             const notes: Annotation[] = await storageManager
                 .collection('annotations')
@@ -294,7 +307,8 @@ export function getTemplateDataFetchers({
     }
 }
 
-function convertHTMLintoMarkdown(html) {
+async function convertHTMLintoMarkdown(inputHtml, imageSupport) {
+    const html = await replaceImgSrcWithFunctionOutput(inputHtml, imageSupport)
     if (html) {
         let turndownService = new TurndownService({
             headingStyle: 'atx',
@@ -302,6 +316,7 @@ function convertHTMLintoMarkdown(html) {
             codeBlockStyle: 'fenced',
         })
         const markdown = turndownService.turndown(html)
+        console.log('markdown', markdown)
         return markdown
     } else {
         return

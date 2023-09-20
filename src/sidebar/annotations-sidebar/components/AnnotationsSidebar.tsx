@@ -3724,7 +3724,7 @@ const NewAnnotationSection = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    width: fill-available;
+    width: 100%;
     z-index: 11200;
     margin-top: 5px;
 `

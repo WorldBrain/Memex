@@ -452,6 +452,8 @@ export default AnnotationCreate
 const EditorContainer = styled(Margin)`
     z-index: 1000;
     border-radius: 8px;
+    width: fill-available;
+    width: -moz-available;
 
     &:focus-within {
         background-color: ${(props) => props.theme.colors.greyScale2};

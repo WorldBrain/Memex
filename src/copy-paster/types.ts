@@ -23,6 +23,7 @@ export interface TemplateDocPage {
     PageSpaces?: string
     PageSpacesList?: string[]
     PageCreatedAt?: string
+    HasNotes?: boolean
     PageLink?: string
     Notes?: TemplateDocNote[]
 
@@ -54,6 +55,7 @@ export interface TemplateRequirements {
     pageTags?: boolean
     pageSpaces?: boolean
     pageCreatedAt?: boolean
+    hasNotes?: boolean
     pageLink?: boolean
     note?: boolean
     noteTags?: boolean

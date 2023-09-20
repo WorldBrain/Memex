@@ -18,7 +18,8 @@ export function renderTemplate(
             this.update(
                 `@startvalue%${value
                     .trim()
-                    .replace(/<br\s*\/?>/g, '\n')}@endvalue%`,
+                    .replace(/<br\s*\/?>/g, '\n')
+                    .replace(/\r?\n/g, '  \n')}@endvalue%`,
             )
         }
     })

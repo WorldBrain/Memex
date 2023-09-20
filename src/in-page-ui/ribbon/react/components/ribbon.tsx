@@ -2344,7 +2344,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     box-shadow: none;
                     justify-content: center;
                     height: fill-available;
-                    height: -moz-available;
+                    height: 100%;
                     flex-direction: column;
                     padding: 20px 0px;
                     width: ${TOOLTIP_WIDTH};
