@@ -3514,6 +3514,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     email: emailA,
                                     createdWhen: nowA,
                                     sharedList: sharedListIdA,
+                                    sharedListKey: resultA.keyString,
                                 }
 
                                 expect(resultA.status).toEqual('success')
@@ -3560,20 +3561,21 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             singleUse: true,
                                         },
                                     ])
+                                    expect(
+                                        await manager
+                                            .collection('sharedListEmailInvite')
+                                            .findAllObjects({}),
+                                    ).toEqual([
+                                        expectedInviteA,
+                                        {
+                                            id: expect.anything(),
+                                            email: emailB,
+                                            createdWhen: nowB,
+                                            sharedList: sharedListIdA,
+                                            sharedListKey: resultB.keyString,
+                                        },
+                                    ])
                                 }
-                                expect(
-                                    await manager
-                                        .collection('sharedListEmailInvite')
-                                        .findAllObjects({}),
-                                ).toEqual([
-                                    expectedInviteA,
-                                    {
-                                        id: expect.anything(),
-                                        email: emailB,
-                                        createdWhen: nowB,
-                                        sharedList: sharedListIdA,
-                                    },
-                                ])
                             },
                         },
                     ],
@@ -3843,7 +3845,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         private: true,
                                     })
 
-                                const createInviteResult = await contentSharing.options.backend.createListEmailInvite(
+                                const createInviteResult: any = await contentSharing.options.backend.createListEmailInvite(
                                     {
                                         now: nowA,
                                         email: emailA,
@@ -3857,6 +3859,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     email: emailA,
                                     createdWhen: nowA,
                                     sharedList: sharedListIdA,
+                                    sharedListKey: createInviteResult.keyString,
                                 }
                                 expect(
                                     await manager
@@ -3948,7 +3951,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         private: true,
                                     })
 
-                                await contentSharing.options.backend.createListEmailInvite(
+                                const createdInviteResult: any = await contentSharing.options.backend.createListEmailInvite(
                                     {
                                         now: nowA,
                                         email: emailA,
@@ -3962,6 +3965,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     email: emailA,
                                     createdWhen: nowA,
                                     sharedList: sharedListIdA,
+                                    sharedListKey:
+                                        createdInviteResult.keyString,
                                 }
                                 expect(
                                     await manager
