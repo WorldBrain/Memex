@@ -4136,6 +4136,113 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
+            'should NOT be able to accept invites to your own private spaces',
+            {
+                skipConflictTests: true,
+                skipSyncTests: true,
+            },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    contentSharing,
+                                    authService,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const nowA = Date.now()
+                                const sharedListIdA = 'test-list-a'
+                                const sharedListNameA = 'test list a'
+                                const emailA = 'a@test.com'
+
+                                const { manager } = setup.serverStorage
+
+                                await manager
+                                    .collection('sharedList')
+                                    .createObject({
+                                        id: sharedListIdA,
+                                        title: sharedListNameA,
+                                        creator: TEST_USER.id,
+                                        createdWhen: nowA,
+                                        updatedWhen: nowA,
+                                        private: true,
+                                    })
+
+                                const createInviteResult: any = await contentSharing.options.backend.createListEmailInvite(
+                                    {
+                                        now: nowA,
+                                        email: emailA,
+                                        listId: sharedListIdA,
+                                        roleID: SharedListRoleID.Commenter,
+                                    },
+                                )
+
+                                const expectedInvite = {
+                                    id: expect.anything(),
+                                    email: emailA,
+                                    createdWhen: nowA,
+                                    sharedList: sharedListIdA,
+                                    sharedListKey: createInviteResult.keyString,
+                                }
+                                const expectedKey = expect.objectContaining({
+                                    id: createInviteResult.keyString,
+                                    sharedList: sharedListIdA,
+                                    createdWhen: nowA,
+                                    updatedWhen: nowA,
+                                    expiresWhen:
+                                        nowA + LIST_EMAIL_INVITE_VALIDITY_MS,
+                                    roleID: SharedListRoleID.Commenter,
+                                })
+
+                                const assertDataExists = async () => {
+                                    expect(
+                                        await manager
+                                            .collection('sharedListRole')
+                                            .findAllObjects({}),
+                                    ).toEqual([])
+                                    expect(
+                                        await manager
+                                            .collection('sharedListRoleByUser')
+                                            .findAllObjects({}),
+                                    ).toEqual([])
+                                    expect(
+                                        await manager
+                                            .collection('sharedListEmailInvite')
+                                            .findAllObjects({}),
+                                    ).toEqual([expectedInvite])
+                                    expect(
+                                        await manager
+                                            .collection('sharedListKey')
+                                            .findAllObjects({}),
+                                    ).toEqual([expectedKey])
+                                }
+
+                                // Accept invite as same user
+                                await assertDataExists()
+                                const acceptResult = await contentSharing.options.backend.acceptListEmailInvite(
+                                    {
+                                        keyString: createInviteResult.keyString,
+                                        now: nowA,
+                                    },
+                                )
+                                expect(acceptResult.status).toBe(
+                                    'permission-denied',
+                                )
+                                await assertDataExists() // No data should have changed
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             'should created shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for a PDF - via extension',
             {
                 skipConflictTests: true,
