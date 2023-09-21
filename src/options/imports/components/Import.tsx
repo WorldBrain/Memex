@@ -126,8 +126,9 @@ class Import extends React.PureComponent<Props> {
         return (
             <div>
                 <SettingSection
-                    icon={'logseq'}
-                    title={'Logseq integration'}
+                    icon={'logseqLogo'}
+                    title={'Logseq'}
+                    originalImage
                     description={
                         <div>
                             <span>
@@ -198,8 +199,9 @@ class Import extends React.PureComponent<Props> {
         return (
             <div>
                 <SettingSection
-                    icon={'obsidian'}
-                    title={'Obsidian integration'}
+                    icon={'obsidianLogo'}
+                    title={'Obsidian'}
+                    originalImage
                     description={
                         <div>
                             <span>
@@ -335,7 +337,8 @@ class Import extends React.PureComponent<Props> {
             <div>
                 <SettingSection
                     icon={'readwise'}
-                    title={'ReadWise.io integration'}
+                    title={'Readwise'}
+                    originalImage
                     description={
                         <div>
                             <span>
@@ -538,9 +541,5 @@ const SelectFolderArea = styled.div`
 
     & * {
         cursor: pointer;
-    }
-
-    &:hover {
-        opacity: 0.8;
     }
 `

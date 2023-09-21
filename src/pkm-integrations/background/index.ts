@@ -47,14 +47,22 @@ export class PKMSyncBackgroundModule {
 
         // Process for LogSeq if valid
         if (validFolders.logSeq) {
-            await this.createPageUpdate(item, 'logseq')
+            try {
+                await this.createPageUpdate(item, 'logseq')
+            } catch (e) {
+                console.error('error', e)
+            }
             // Logic to process changes for LogSeq
             // For example: await this.processForLogSeq(page);
         }
 
         // Process for Obsidian if valid
         if (validFolders.obsidian) {
-            await this.createPageUpdate(item, 'obsidian')
+            try {
+                await this.createPageUpdate(item, 'obsidian')
+            } catch (e) {
+                console.error('error', e)
+            }
         }
     }
 
@@ -85,12 +93,14 @@ export class PKMSyncBackgroundModule {
                             item.data.pageUrl,
                             item.data.pageSpaces || null,
                             item.data.createdWhen,
+                            item.data.type,
                             pkmType,
                         ),
                     item.data.pageTitle || null,
                     item.data.pageURL || null,
                     item.data.pageSpaces || null,
                     item.data.creationDate || null,
+                    item.data.type || null,
                     pkmType,
                 )
             } else if (item.type === 'annotation') {
@@ -106,20 +116,23 @@ export class PKMSyncBackgroundModule {
                 item.data.pageUrl,
                 (item.type === 'page' && item.data.spaces) || null,
                 item.data.createdWhen,
+                item.data.type,
                 pkmType,
             )
 
-            if (item.type === 'annotation') {
-                annotationsSection = this.annotationObjectDefault(
-                    item.data.annotationId,
-                    convertHTMLintoMarkdown(item.data.body),
-                    item.data.comment,
-                    (item === 'annotation' && item.data.annotationSpaces) ||
-                        null,
-                    item.data.createdWhen,
-                    pkmType,
-                )
-            }
+            // if (item.type === 'annotation' || item.type === 'note') {
+            //     annotationsSection = this.annotationObjectDefault(
+            //         item.data.annotationId,
+            //         item.data.body
+            //             ? convertHTMLintoMarkdown(item.data.body)
+            //             : '',
+            //         item.data.comment,
+            //         (item === 'annotation' && item.data.annotationSpaces) ||
+            //             null,
+            //         item.data.createdWhen,
+            //         pkmType,
+            //     )
+            // }
         }
 
         fileContent =
@@ -137,7 +150,7 @@ export class PKMSyncBackgroundModule {
         let annotationEndIndex
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${item.data.annotationId}"></span>\n`
-            const annotationEndLine = `<span class="annotationEndLine" id="${item.data.annotationId}"> --- </span>\n\n`
+            const annotationEndLine = `<span class="annotationEndLine" id="${item.data.annotationId}"> --- </span>\n`
             annotationStartIndex = annotationsSection.indexOf(
                 annotationStartLine,
             )
@@ -155,10 +168,11 @@ export class PKMSyncBackgroundModule {
                 const newAnnotationContent = this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
-                    item.data.HighlightText,
+                    item.data.body,
                     item.data.comment,
                     item.data.annotationSpaces,
                     item.data.createdWhen,
+                    item.data.type,
                     pkmType,
                 )
 
@@ -172,10 +186,8 @@ export class PKMSyncBackgroundModule {
             }
         }
         if (pkmType === 'logseq') {
-            const annotationStartLine = ` - > ${convertHTMLintoMarkdown(
-                item.data.body,
-            )}\n`
-            const annotationEndLine = `- <span id="${item.data.annotationId}">---</span>\n`
+            let annotationStartLine = `- <span annotationstart id="${item.data.annotationId}">---</span>\n`
+            const annotationEndLine = `<span id="${item.data.annotationId}"/>\n\n`
             annotationStartIndex = annotationsSection.indexOf(
                 annotationStartLine,
             )
@@ -190,10 +202,11 @@ export class PKMSyncBackgroundModule {
                 const newAnnotationContent = this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
-                    item.data.HighlightText,
+                    item.data.body,
                     item.data.comment,
                     item.data.annotationSpaces,
                     item.data.createdWhen,
+                    item.data.type,
                     pkmType,
                 )
 
@@ -210,10 +223,11 @@ export class PKMSyncBackgroundModule {
         if (annotationStartIndex === -1) {
             const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
-                convertHTMLintoMarkdown(item.data.body),
+                item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
                 item.data.comment,
                 item.data.annotationSpaces,
                 item.data.createdWhen,
+                item.data.type,
                 pkmType,
             )
             return annotationsSection + newAnnotationContent
@@ -223,10 +237,11 @@ export class PKMSyncBackgroundModule {
     extractAndUpdateAnnotationData(
         annotationContent,
         annotationId,
-        HighlightText,
-        HighlightNote,
+        body,
+        comment,
         annotationSpaces,
         creationDate,
+        type,
         pkmType,
     ) {
         let annotation = annotationContent
@@ -236,14 +251,15 @@ export class PKMSyncBackgroundModule {
         if (pkmType === 'obsidian') {
             // Find and remove the annotation start and end lines from the annotation string
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
-            const annotationEndLine = `<span class="annotationEndLine" id="${annotationId}"> --- </span>\n\n`
+            const annotationEndLine = `<span class="annotationEndLine" id="${annotationId}"> --- </span>\n`
             annotation = annotation.replace(annotationStartLine, '')
             annotation = annotation.replace(annotationEndLine, '')
 
             // Extract data from the annotation
-            const highlightTextMatch = annotation.match(/> \s*(.+)\n\n/)
+            let highlightTextMatch
+            highlightTextMatch = annotation.match(/> \s*(.+)\n\n/)
 
-            const noteStartString = `<span class="annotationNoteStart"><strong>Note:</strong></span>`
+            const noteStartString = `<span class="annotationNoteStart"><strong>Note:</strong></span>\n`
             const annotationNoteStartIndex = annotation.indexOf(noteStartString)
             const annotationNoteEndIndex = annotation.indexOf(
                 '<span class="annotationNoteEnd"/>',
@@ -259,17 +275,17 @@ export class PKMSyncBackgroundModule {
             }
 
             const creationDateMatch = annotation.match(
-                /<strong>Created at: <\/strong><\/span> (.+)\n\n/,
+                /<strong>Created at:<\/strong><\/span> (.+)\n/,
             )
+
             const spacesMatch = annotation.match(
                 /<strong>Spaces:<\/strong><\/span> (.+)\n/,
             )
 
             const newHighlightText =
-                (highlightTextMatch ? highlightTextMatch[1] : null) ||
-                HighlightText
+                (highlightTextMatch ? highlightTextMatch[1] : null) || body
             const newHighlightNote =
-                HighlightNote ||
+                comment ||
                 (annotationNoteContent ? annotationNoteContent : null)
 
             const newCreationDate =
@@ -299,28 +315,25 @@ export class PKMSyncBackgroundModule {
                 newHighlightNote,
                 formattedSpaces,
                 newCreationDate,
+                type,
                 pkmType,
             )
         }
 
         if (pkmType === 'logseq') {
             // find content inside annotation string
-            const highlightTextMatch = annotation.match(/ - >\s*(.+)\n/)
+            let highlightTextMatch = annotation.match(/ - >\s*(.+)\n/)
 
             const HighlightNoteMatch = annotation.match(
-                /  - \*\*Note:\*\*\n    - (.+)/,
+                /<span id=".*"><strong>Note:<\/strong><\/span>\n    - (.+)\n/,
             )
-            const creationDateMatch = annotation.match(
-                /Created at:\*\* (.+)\n\n/,
-            )
+            const creationDateMatch = annotation.match(/Created at:\*\* (.+)\r/)
             const spacesMatch = annotation.match(/Spaces:\*\* (.+)\n/)
 
             const newHighlightText =
-                (highlightTextMatch ? highlightTextMatch[1] : null) ||
-                HighlightText
+                (highlightTextMatch ? highlightTextMatch[1] : null) || body
             const newHighlightNote =
-                HighlightNote ||
-                (HighlightNoteMatch ? HighlightNoteMatch[1] : null)
+                comment || (HighlightNoteMatch ? HighlightNoteMatch[1] : null)
             const newCreationDate =
                 (creationDateMatch ? creationDateMatch[1] : null) ||
                 creationDate
@@ -349,6 +362,7 @@ export class PKMSyncBackgroundModule {
                 newHighlightNote,
                 formattedSpaces,
                 newCreationDate,
+                type,
                 pkmType,
             )
         }
@@ -362,6 +376,7 @@ export class PKMSyncBackgroundModule {
         pageURL,
         pageSpaces,
         creationDate,
+        type,
         pkmType,
     ) {
         let createdWhen = creationDate
@@ -419,6 +434,7 @@ export class PKMSyncBackgroundModule {
                 newURL,
                 formattedSpaces,
                 newCreationDate,
+                type,
                 pkmType,
             )
         }
@@ -471,6 +487,7 @@ export class PKMSyncBackgroundModule {
                 newURL,
                 formattedSpaces,
                 newCreationDate,
+                type,
                 pkmType,
             )
         }
@@ -478,7 +495,14 @@ export class PKMSyncBackgroundModule {
         return updatedPageHeader
     }
 
-    pageObjectDefault(pageTitle, pageURL, pageSpaces, creationDate, pkmType) {
+    pageObjectDefault(
+        pageTitle,
+        pageURL,
+        pageSpaces,
+        creationDate,
+        type,
+        pkmType,
+    ) {
         let createdWhen = creationDate
         let titleLine
         let urlLine
@@ -526,28 +550,26 @@ export class PKMSyncBackgroundModule {
 
     annotationObjectDefault(
         annotationId,
-        HighlightText,
-        HighlightNote,
+        body,
+        comment,
         annotationSpaces,
         creationDate,
+        type,
         pkmType,
     ) {
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
-
-            const highlightTextLine = HighlightText
-                ? `> ${HighlightText}\n\n`
-                : ''
-            const highlightNoteLine = HighlightNote
+            let highlightTextLine = body ? `> ${body}\n\n` : ''
+            const highlightNoteLine = comment
                 ? `<span class="annotationNoteStart"><strong>Note:</strong></span>\n${convertHTMLintoMarkdown(
-                      HighlightNote,
+                      comment,
                   )}\n<span class="annotationNoteEnd"/>\n`
                 : ''
-            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"> <strong>Created at: </strong></span> ${creationDate}\n\n`
             const highlightSpacesLine = annotationSpaces
-                ? `<span class="annotationSpaces" id="${annotationId}"> <strong>Spaces:</strong></span> ${annotationSpaces}\n`
+                ? `<span class="annotationSpaces" id="${annotationId}"><strong>Spaces:</strong></span> ${annotationSpaces}\n`
                 : ''
-            const annotationEndLine = `<span class="annotationEndLine" id="${annotationId}"> --- </span>\n\n`
+            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"><strong>Created at:</strong></span> ${creationDate}\n`
+            const annotationEndLine = `\r<span class="annotationEndLine" id="${annotationId}"> --- </span>\n`
 
             return (
                 annotationStartLine +
@@ -559,25 +581,27 @@ export class PKMSyncBackgroundModule {
             )
         }
         if (pkmType === 'logseq') {
-            const highlightTextLine = HighlightText
-                ? ` - > ${HighlightText}\n`
-                : ''
-            const highlightNoteLine = HighlightNote
-                ? `  - **Note:**\n    - ${convertHTMLintoMarkdown(
-                      HighlightNote,
+            let highlightTextLine = ''
+            const separatedLine = `- <span annotationstart id="${annotationId}">---</span>\n`
+            highlightTextLine = body ? ` - > ${body}\n` : ''
+
+            const highlightNoteLine = comment
+                ? `  - <span id="${annotationId}"><strong>Note:</strong></span>\n    - ${convertHTMLintoMarkdown(
+                      comment,
                   )}\n`
                 : ''
-            const creationDateLine = `  - **Created at:** ${creationDate}\n\n`
             const highlightSpacesLine = annotationSpaces
                 ? `  - **Spaces:** ${annotationSpaces}\n`
                 : ''
-            const separatedLine = `- <span id="${annotationId}">---</span>\n`
+            const creationDateLine = `  - **Created at:** ${creationDate}\r`
+            const annotationEndLine = `<span id="${annotationId}"/>\n\n`
             return (
+                separatedLine +
                 highlightTextLine +
                 highlightNoteLine +
                 highlightSpacesLine +
                 creationDateLine +
-                separatedLine
+                annotationEndLine
             )
         }
     }

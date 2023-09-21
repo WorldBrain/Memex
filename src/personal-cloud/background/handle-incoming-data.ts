@@ -6,6 +6,12 @@ import { StoredContentType } from 'src/page-indexing/background/types'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
 import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import {
+    shareAnnotationWithPKM,
+    sharePageWithPKM,
+} from 'src/pkm-integrations/background/backend/utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -19,6 +25,7 @@ export const handleIncomingData = (deps: {
     pageActivityIndicatorBG: PageActivityIndicatorBackground
     persistentStorageManager: StorageManager
     storageManager: StorageManager
+    pkmSyncBG: PkmSyncInterface
 }) => async ({
     storageType,
     collection,
@@ -87,5 +94,80 @@ export const handleIncomingData = (deps: {
             },
             { text: processed },
         )
+    }
+    handleSyncedDataForPKMSync(
+        deps.pkmSyncBG,
+        collection,
+        updates,
+        where,
+        deps.storageManager,
+    )
+}
+
+async function handleSyncedDataForPKMSync(
+    pkmSyncBG: PkmSyncInterface,
+    collection,
+    updates,
+    where,
+    storageManager: StorageManager,
+) {
+    if (collection === 'annotations') {
+        const annotationData = {
+            annotationId: updates.url,
+            pageTitle: updates.pageTitle,
+            body: updates.body,
+            comment: updates.comment,
+            createdWhen: updates.createdWhen,
+        }
+
+        await shareAnnotationWithPKM(annotationData, pkmSyncBG)
+    }
+
+    if (collection === 'annotListEntries') {
+        const listData = await storageManager
+            .collection('customLists')
+            .findOneObject<{ id: number; name: string }>({ id: updates.listId })
+        const pageDataStorage = await storageManager
+            .collection('pages')
+            .findOneObject<{ fullTitle: string; fullUrl: string }>({
+                url: updates.url.split('/#')[0],
+            })
+
+        const annotationData = {
+            pageTitle: pageDataStorage.fullTitle,
+            annotationId: updates.url,
+            pageUrl: pageDataStorage.fullUrl,
+            annotationSpaces: listData.name,
+        }
+
+        await shareAnnotationWithPKM(annotationData, pkmSyncBG)
+    }
+    if (collection === 'pages') {
+        const pageData = {
+            pageTitle: updates.fullTitle,
+            pageUrl: updates.fullUrl,
+            createdWhen: Date.now(),
+        }
+
+        await sharePageWithPKM(pageData, pkmSyncBG)
+    }
+    if (collection === 'pageListEntries') {
+        const listData = await storageManager
+            .collection('customLists')
+            .findOneObject<{ id: number; name: string }>({ id: updates.listId })
+        const pageDataStorage = await storageManager
+            .collection('pages')
+            .findOneObject<{ fullTitle: string }>({
+                url: normalizeUrl(updates.fullUrl),
+            })
+
+        const pageData = {
+            pageTitle: pageDataStorage.fullTitle,
+            createdWhen: updates.createdAt,
+            pageUrl: updates.fullUrl,
+            pageSpaces: listData.name,
+        }
+
+        await sharePageWithPKM(pageData, pkmSyncBG)
     }
 }

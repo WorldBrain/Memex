@@ -549,6 +549,7 @@ export function createBackgroundModules(options: {
             pageActivityIndicatorBG: pageActivityIndicator,
             persistentStorageManager: options.persistentStorageManager,
             storageManager: options.storageManager,
+            pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
         }),
     })
 

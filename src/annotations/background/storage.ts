@@ -334,7 +334,6 @@ export default class AnnotationStorage extends StorageModule {
                 annotationId: annotationDataForPKMSyncUpdate.url,
                 pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                 pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
-                body: annotationDataForPKMSyncUpdate.body,
                 annotationSpaces: listName,
             }
 
@@ -368,7 +367,7 @@ export default class AnnotationStorage extends StorageModule {
             const annotationData = {
                 annotationId: annotationDataForPKMSyncUpdate.url,
                 pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
-                body: annotationDataForPKMSyncUpdate.body,
+                pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
                 annotationSpaces: listName,
             }
 
