@@ -20,6 +20,7 @@ import {
     SharedList,
     SharedListEntry,
     SharedListKey,
+    SharedListReference,
     SharedListRoleID,
     SharedPageInfo,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
@@ -3716,12 +3717,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         updatedWhen: nowA,
                                         private: true,
                                     })
+                                const listReference: SharedListReference = {
+                                    id: sharedListIdA,
+                                    type: 'shared-list-reference',
+                                }
 
                                 expect(
                                     await contentSharing.options.backend.loadListEmailInvites(
-                                        {
-                                            listId: sharedListIdA,
-                                        },
+                                        { listReference },
                                     ),
                                 ).toEqual({
                                     status: 'success',
@@ -3747,9 +3750,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(
                                     await contentSharing.options.backend.loadListEmailInvites(
-                                        {
-                                            listId: sharedListIdA,
-                                        },
+                                        { listReference },
                                     ),
                                 ).toEqual({
                                     status: 'success',
@@ -3813,12 +3814,283 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(
                                     await contentSharing.options.backend.loadListEmailInvites(
                                         {
-                                            listId: sharedListIdA,
+                                            listReference: {
+                                                type: 'shared-list-reference',
+                                                id: sharedListIdA,
+                                            },
                                         },
                                     ),
                                 ).toEqual({
                                     status: 'permission-denied',
                                 })
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            'should be able to delete invites to a private space as the owner',
+            {
+                skipConflictTests: true,
+                skipSyncTests: true,
+            },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const { contentSharing } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const nowA = Date.now()
+                                const nowB = Date.now() + 10
+                                const sharedListIdA = 'test-list-a'
+                                const sharedListNameA = 'test list a'
+                                const emailA = 'a@test.com'
+                                const emailB = 'b@test.com'
+
+                                const { manager } = setup.serverStorage
+
+                                await manager
+                                    .collection('sharedList')
+                                    .createObject({
+                                        id: sharedListIdA,
+                                        title: sharedListNameA,
+                                        creator: TEST_USER.id,
+                                        createdWhen: nowA,
+                                        updatedWhen: nowA,
+                                        private: true,
+                                    })
+
+                                const resultA: any = await contentSharing.options.backend.createListEmailInvite(
+                                    {
+                                        now: nowA,
+                                        email: emailA,
+                                        listId: sharedListIdA,
+                                        roleID: SharedListRoleID.Commenter,
+                                    },
+                                )
+                                const resultB: any = await contentSharing.options.backend.createListEmailInvite(
+                                    {
+                                        now: nowB,
+                                        email: emailB,
+                                        listId: sharedListIdA,
+                                        roleID: SharedListRoleID.ReadWrite,
+                                    },
+                                )
+
+                                const expectedKeyA = {
+                                    id: resultA.keyString,
+                                    sharedList: sharedListIdA,
+                                    createdWhen: nowA,
+                                    updatedWhen: nowA,
+                                    expiresWhen:
+                                        nowA + LIST_EMAIL_INVITE_VALIDITY_MS,
+                                    roleID: SharedListRoleID.Commenter,
+                                    disabled: false,
+                                    singleUse: true,
+                                }
+                                const expectedInviteA = {
+                                    id: expect.anything(),
+                                    email: emailA,
+                                    createdWhen: nowA,
+                                    sharedList: sharedListIdA,
+                                    sharedListKey: resultA.keyString,
+                                }
+
+                                expect(resultA.status).toEqual('success')
+                                expect(resultA.keyString).toBeDefined()
+                                expect(
+                                    await manager
+                                        .collection('sharedListKey')
+                                        .findAllObjects({}),
+                                ).toEqual([
+                                    expectedKeyA,
+                                    {
+                                        id: resultB.keyString,
+                                        sharedList: sharedListIdA,
+                                        createdWhen: nowB,
+                                        updatedWhen: nowB,
+                                        expiresWhen:
+                                            nowB +
+                                            LIST_EMAIL_INVITE_VALIDITY_MS,
+                                        roleID: SharedListRoleID.ReadWrite,
+                                        disabled: false,
+                                        singleUse: true,
+                                    },
+                                ])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([
+                                    expectedInviteA,
+                                    {
+                                        id: expect.anything(),
+                                        email: emailB,
+                                        createdWhen: nowB,
+                                        sharedList: sharedListIdA,
+                                        sharedListKey: resultB.keyString,
+                                    },
+                                ])
+
+                                expect(
+                                    await contentSharing.options.backend.deleteListEmailInvite(
+                                        {
+                                            keyString: resultB.keyString,
+                                        },
+                                    ),
+                                ).toEqual({ status: 'success' })
+
+                                expect(
+                                    await manager
+                                        .collection('sharedListKey')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedKeyA])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedInviteA])
+
+                                expect(
+                                    await contentSharing.options.backend.deleteListEmailInvite(
+                                        {
+                                            keyString: resultA.keyString,
+                                        },
+                                    ),
+                                ).toEqual({ status: 'success' })
+
+                                expect(
+                                    await manager
+                                        .collection('sharedListKey')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([])
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
+            "should NOT be able to delete invites to a private space that you don't own",
+            {
+                skipConflictTests: true,
+                skipSyncTests: true,
+            },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    contentSharing,
+                                    authService,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                const nowA = Date.now()
+                                const sharedListIdA = 'test-list-a'
+                                const sharedListNameA = 'test list a'
+                                const emailA = 'a@test.com'
+
+                                const { manager } = setup.serverStorage
+
+                                await manager
+                                    .collection('sharedList')
+                                    .createObject({
+                                        id: sharedListIdA,
+                                        title: sharedListNameA,
+                                        creator: TEST_USER.id,
+                                        createdWhen: nowA,
+                                        updatedWhen: nowA,
+                                        private: true,
+                                    })
+
+                                const resultA: any = await contentSharing.options.backend.createListEmailInvite(
+                                    {
+                                        now: nowA,
+                                        email: emailA,
+                                        listId: sharedListIdA,
+                                        roleID: SharedListRoleID.Commenter,
+                                    },
+                                )
+
+                                const expectedKeyA = {
+                                    id: resultA.keyString,
+                                    sharedList: sharedListIdA,
+                                    createdWhen: nowA,
+                                    updatedWhen: nowA,
+                                    expiresWhen:
+                                        nowA + LIST_EMAIL_INVITE_VALIDITY_MS,
+                                    roleID: SharedListRoleID.Commenter,
+                                    disabled: false,
+                                    singleUse: true,
+                                }
+                                const expectedInviteA = {
+                                    id: expect.anything(),
+                                    email: emailA,
+                                    createdWhen: nowA,
+                                    sharedList: sharedListIdA,
+                                    sharedListKey: resultA.keyString,
+                                }
+
+                                expect(resultA.status).toEqual('success')
+                                expect(resultA.keyString).toBeDefined()
+                                expect(
+                                    await manager
+                                        .collection('sharedListKey')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedKeyA])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedInviteA])
+
+                                // Attempt to delete invite as another user
+                                const acceptingUserId = 'test-accepting-user-1'
+                                await authService.setUser({
+                                    id: acceptingUserId,
+                                    email: emailA,
+                                    emailVerified: true,
+                                    displayName: acceptingUserId,
+                                })
+
+                                expect(
+                                    await contentSharing.options.backend.deleteListEmailInvite(
+                                        {
+                                            keyString: resultA.keyString,
+                                        },
+                                    ),
+                                ).toEqual({ status: 'permission-denied' })
+
+                                expect(
+                                    await manager
+                                        .collection('sharedListKey')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedKeyA])
+                                expect(
+                                    await manager
+                                        .collection('sharedListEmailInvite')
+                                        .findAllObjects({}),
+                                ).toEqual([expectedInviteA])
                             },
                         },
                     ],
