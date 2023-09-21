@@ -9,6 +9,7 @@ import type { GetContentFingerprints } from './types'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import { getPDFTitle } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/get-title'
+import { promptPdfScreenshot } from 'src/pdf/screenshots/selection'
 
 const waitForDocument = async () => {
     while (true) {
@@ -56,6 +57,11 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
     async (inPageUI) => {
+        // ;(window as any)['test'] = promptPdfScreenshot
+        // setTimeout(() => {
+        //     promptPdfScreenshot()
+        // }, 0)
+
         makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
             extractPDFContents: async () => {
                 const searchParams = new URLSearchParams(location.search)
