@@ -276,6 +276,7 @@ export async function setupBackgroundIntegrationTest(
             fetchPDFData,
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
+            sendPrivateListEmailInvite: async (emailAddress, details) => {},
             fbAuth: () => ({
                 getUser: async () => null,
                 getUsers: async () => ({ users: [], notFound: [] }),

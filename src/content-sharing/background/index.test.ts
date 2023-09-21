@@ -19,6 +19,7 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import {
     SharedList,
     SharedListEntry,
+    SharedListKey,
     SharedListRoleID,
     SharedPageInfo,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
@@ -72,6 +73,23 @@ async function setupTest(options: {
         personalCloud,
         directLinking,
     } = setup.backgroundModules
+
+    let sentPrivateListEmailInvite: Pick<
+        SharedListKey,
+        'expiresWhen' | 'roleID'
+    > & {
+        email: string
+        keyString: string
+        spaceName: string
+    } = null
+
+    contentSharing.options.backend[
+        'dependencies'
+    ].sendPrivateListEmailInvite = async (email, details) => {
+        sentPrivateListEmailInvite = { email, ...details }
+        return { status: 'success' }
+    }
+
     await setup.authService.setUser(TEST_USER)
     await personalCloud.options.settingStore.set('deviceId', data.DEVICE_ID_A)
     personalCloud.actionQueue.forceQueueSkip = true
@@ -112,6 +130,7 @@ async function setupTest(options: {
 
     return {
         authService: setup.authService,
+        getSentPrivateListEmailInvite: () => sentPrivateListEmailInvite,
         directLinking,
         contentSharing,
         personalCloud,
@@ -3821,6 +3840,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                         {
                             execute: async ({ setup }) => {
                                 const {
+                                    getSentPrivateListEmailInvite,
                                     contentSharing,
                                     authService,
                                 } = await setupTest({
@@ -3946,6 +3966,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         roleID: SharedListRoleID.ReadWrite,
                                     }),
                                 ])
+                                expect(getSentPrivateListEmailInvite()).toBe(
+                                    null,
+                                )
 
                                 // Accept invite as another user
                                 const acceptingUserId = 'test-accepting-user-1'
@@ -4008,6 +4031,17 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         roleID: SharedListRoleID.ReadWrite,
                                     }),
                                 ])
+                                expect(getSentPrivateListEmailInvite()).toEqual(
+                                    {
+                                        email: emailA,
+                                        spaceName: sharedListNameA,
+                                        roleID: SharedListRoleID.Commenter,
+                                        keyString: createInviteResultA.keyString.toString(),
+                                        expiresWhen:
+                                            nowA +
+                                            LIST_EMAIL_INVITE_VALIDITY_MS,
+                                    },
+                                )
                             },
                         },
                     ],
