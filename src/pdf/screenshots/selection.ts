@@ -1,9 +1,10 @@
-export interface PdfScreenshotArea {
+import { toCanvas as htmlToCanvas } from 'html-to-image'
+
+export interface PdfScreenshot {
     pageNumber: number
-    x: number
-    y: number
-    width: number
-    heigth: number
+    position: [number, number]
+    dimensions: [number, number]
+    screenshot: HTMLCanvasElement
 }
 
 export async function promptPdfScreenshot() {
@@ -50,12 +51,44 @@ export async function promptPdfScreenshot() {
             y <= rect.bottom
         )
     }
-
-    type Vec2 = [number, number]
-    const translateRect = (
+    function cropCanvas(
+        originalCanvas: HTMLCanvasElement,
         position: Vec2,
         dimensions: Vec2,
-    ): PdfScreenshotArea | null => {
+    ): HTMLCanvasElement {
+        // Create a new canvas element to hold the cropped image
+        const croppedCanvas = document.createElement('canvas')
+        const ctx = croppedCanvas.getContext('2d')
+
+        // Set the dimensions of the new canvas to match the cropped area
+        croppedCanvas.width = dimensions[0]
+        croppedCanvas.height = dimensions[1]
+
+        // Use the drawImage method to copy the cropped region from the original canvas to the new canvas
+        if (ctx) {
+            ctx.drawImage(
+                originalCanvas,
+                position[0],
+                position[1],
+                dimensions[0],
+                dimensions[1],
+                0,
+                0,
+                dimensions[0],
+                dimensions[1],
+            )
+        } else {
+            throw new Error('Could not get 2D context for canvas.')
+        }
+
+        return croppedCanvas
+    }
+
+    type Vec2 = [number, number]
+    const translateRect = async (
+        absolutePos: Vec2,
+        dimensions: Vec2,
+    ): Promise<PdfScreenshot | null> => {
         const pdfApplication = (globalThis as any)['PDFViewerApplication']
         const activePageNumber = pdfApplication.page as number
         const pageNumbers = [activePageNumber]
@@ -71,21 +104,34 @@ export async function promptPdfScreenshot() {
         for (const pageNumber of pageNumbers) {
             const pageEl = viewerEl.querySelector(
                 `.page[data-page-number='${pageNumber}']`,
-            )
+            ) as HTMLDivElement
             if (!pageEl) {
                 return null
             }
             const boundingRect = pageEl.getBoundingClientRect()
-            if (!isPointInClientRect(boundingRect, position[0], position[1])) {
+            if (
+                !isPointInClientRect(
+                    boundingRect,
+                    absolutePos[0],
+                    absolutePos[1],
+                )
+            ) {
                 continue
             }
+            const position: Vec2 = [
+                absolutePos[0] - boundingRect.left,
+                absolutePos[1] - boundingRect.top,
+            ]
 
-            const result: PdfScreenshotArea = {
+            const pageElCanvas = await htmlToCanvas(pageEl)
+            const cropped = cropCanvas(pageElCanvas, position, dimensions)
+            ;(window as any)['out'] = cropped.toDataURL()
+
+            const result: PdfScreenshot = {
                 pageNumber,
-                x: position[0] - boundingRect.left,
-                y: position[1] - boundingRect.top,
-                width: dimensions[0],
-                heigth: dimensions[1],
+                position,
+                dimensions,
+                screenshot: cropped,
             }
             return result
         }
@@ -126,7 +172,7 @@ export async function promptPdfScreenshot() {
         }
         messageIsCentered = !messageIsCentered
     })
-    return new Promise<PdfScreenshotArea>((resolve) => {
+    return new Promise<PdfScreenshot>((resolve) => {
         overlayEl.addEventListener('mouseup', () => {
             const result = translateRect(rectPosition, rectDimensions)
             // console.log(result)
