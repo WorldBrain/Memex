@@ -159,7 +159,7 @@ export class PKMSyncBackgroundModule {
                     item.data.comment,
                     item.data.annotationSpaces,
                     item.data.createdWhen,
-                    null,
+                    pkmType,
                 )
 
                 return (
@@ -240,8 +240,12 @@ export class PKMSyncBackgroundModule {
             annotation = annotation.replace(annotationStartLine, '')
             annotation = annotation.replace(annotationEndLine, '')
 
+            console.log('ceoms ad')
+
             // Extract data from the annotation
-            const highlightTextMatch = annotation.match(/>\s*(.+)\n\n/)
+            const highlightTextMatch = annotation.match(/> \s*(.+)\n\n/)
+
+            console.log('highlight text match', highlightTextMatch)
 
             const annotationNoteStartIndex = annotation.indexOf(
                 '<span class="annotationNoteStart">',
