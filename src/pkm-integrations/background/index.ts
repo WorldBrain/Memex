@@ -5,7 +5,7 @@ import { PkmSyncInterface } from './types'
 import { marked } from 'marked'
 import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
-
+import moment from 'moment'
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
     remoteFunctions: PkmSyncInterface
@@ -62,127 +62,297 @@ export class PKMSyncBackgroundModule {
         let page
 
         try {
-            page = await this.backendNew.retrievePage(item.data.pageTitle)
-        } catch (e) {
-            console.log('error is', e)
-        }
+            page = await this.backendNew.retrievePage(
+                item.data.pageTitle,
+                pkmType,
+            )
+        } catch (e) {}
 
         let [pageHeader, annotationsSection] = [null, null]
         let pageIDbyTitle = item.data.pageTitle
         let fileContent = ''
 
         if (page) {
-            ;[pageHeader, annotationsSection] = page.split('### Annotations')
+            ;[pageHeader, annotationsSection] = page.split(
+                '### Annotations\n\n',
+            )
+
+            if (item.type === 'page') {
+                pageHeader = this.extractAndUpdatePageData(
+                    pageHeader ||
+                        this.pageObjectDefault(
+                            item.data.pageTitle,
+                            item.data.pageUrl,
+                            item.data.pageSpaces || null,
+                            item.data.createdWhen,
+                            pkmType,
+                        ),
+                    item.data.pageTitle || null,
+                    item.data.pageURL || null,
+                    item.data.pageSpaces || null,
+                    item.data.creationDate || null,
+                    pkmType,
+                )
+            } else if (item.type === 'annotation') {
+                annotationsSection = this.replaceOrAppendAnnotation(
+                    annotationsSection,
+                    item,
+                    pkmType,
+                )
+            }
         } else {
             pageHeader = this.pageObjectDefault(
                 item.data.pageTitle,
-                item.data.fullPageUrl,
+                item.data.pageUrl,
                 (item.type === 'page' && item.data.spaces) || null,
                 item.data.createdWhen,
                 pkmType,
             )
-            annotationsSection = this.annotationObjectDefault(
-                convertHTMLintoMarkdown(item.data.body),
-                item.data.comment,
-                (item === 'annotation' && item.data.HighlightSpaces) || null,
-                item.data.createdWhen,
-                pkmType,
-            )
-        }
 
-        if (item.type === 'page') {
-            pageHeader = this.extractAndUpdatePageData(
-                pageHeader ||
-                    this.pageObjectDefault(
-                        item.data.pageTitle,
-                        item.data.fullPageUrl,
-                        item.data.spaces || null,
-                        item.data.createdWhen,
-                        pkmType,
-                    ),
-                item.data.pageTitle || null,
-                item.data.pageURL || null,
-                item.data.pageSpaces || null,
-                item.data.creationDate || null,
-                pkmType,
-            )
-        } else if (item.type === 'annotation') {
-            const newAnnotationContent = this.annotationObjectDefault(
-                convertHTMLintoMarkdown(item.data.body),
-                item.data.comment,
-                item.data.HighlightSpaces,
-                item.data.createdWhen,
-                pkmType,
-            )
-            const searchFor = `> ${convertHTMLintoMarkdown(item.data.body)}\n\n`
-            annotationsSection = this.replaceOrAppendAnnotation(
-                annotationsSection,
-                searchFor,
-                newAnnotationContent,
-            )
+            if (item.type === 'annotation') {
+                annotationsSection = this.annotationObjectDefault(
+                    item.data.annotationId,
+                    convertHTMLintoMarkdown(item.data.body),
+                    item.data.comment,
+                    (item === 'annotation' && item.data.annotationSpaces) ||
+                        null,
+                    item.data.createdWhen,
+                    pkmType,
+                )
+            }
         }
 
         fileContent =
             pageHeader + '### Annotations\n\n' + (annotationsSection || '')
 
-        // console.log('fileContent is', fileContent)
-        return await this.backendNew.storeObject(pageIDbyTitle, fileContent)
+        return await this.backendNew.storeObject(
+            pageIDbyTitle,
+            fileContent,
+            pkmType,
+        )
     }
 
-    replaceOrAppendAnnotation(
-        annotationsSection,
-        searchFor,
-        newAnnotationContent,
-    ) {
-        const highlightIndex = annotationsSection.indexOf(searchFor)
+    replaceOrAppendAnnotation(annotationsSection, item, pkmType) {
+        let annotationStartIndex
+        let annotationEndIndex
+        if (pkmType === 'obsidian') {
+            const annotationStartLine = `<span class="annotationStartLine" id="${item.data.annotationId}"></span>\n`
+            const annotationEndLine = `<span class="annotationEndLine" id="${item.data.annotationId}"> --- </span>\n\n`
+            annotationStartIndex = annotationsSection.indexOf(
+                annotationStartLine,
+            )
+            if (annotationStartIndex !== -1) {
+                const annotationEndIndex = annotationsSection.indexOf(
+                    annotationEndLine,
+                    annotationStartIndex,
+                )
 
-        if (highlightIndex !== -1) {
-            const annotationEndIndex = annotationsSection.indexOf(
-                '---',
-                highlightIndex,
+                const annotationContent = annotationsSection.slice(
+                    annotationStartIndex,
+                    annotationEndIndex,
+                )
+
+                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                    annotationContent,
+                    item.data.annotationId,
+                    item.data.HighlightText,
+                    item.data.comment,
+                    item.data.annotationSpaces,
+                    item.data.createdWhen,
+                    null,
+                )
+
+                return (
+                    annotationsSection.slice(0, annotationStartIndex) +
+                    newAnnotationContent +
+                    annotationsSection.slice(
+                        annotationEndIndex + annotationEndLine.length,
+                    )
+                )
+            }
+        }
+        if (pkmType === 'logseq') {
+            const annotationStartLine = ` - > ${convertHTMLintoMarkdown(
+                item.data.body,
+            )}\n`
+            const annotationEndLine = `- <span id="${item.data.annotationId}">---</span>\n`
+            annotationStartIndex = annotationsSection.indexOf(
+                annotationStartLine,
             )
-            return (
-                annotationsSection.slice(0, highlightIndex) +
-                newAnnotationContent +
-                annotationsSection.slice(annotationEndIndex + 4)
+            annotationEndIndex = annotationsSection.indexOf(annotationEndLine)
+
+            if (annotationEndIndex !== -1 && annotationStartIndex !== -1) {
+                const annotationContent = annotationsSection.slice(
+                    annotationStartIndex,
+                    annotationEndIndex,
+                )
+
+                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                    annotationContent,
+                    item.data.annotationId,
+                    item.data.HighlightText,
+                    item.data.comment,
+                    item.data.annotationSpaces,
+                    item.data.createdWhen,
+                    pkmType,
+                )
+
+                return (
+                    annotationsSection.slice(0, annotationStartIndex) +
+                    newAnnotationContent +
+                    annotationsSection.slice(
+                        annotationEndIndex + annotationEndLine.length,
+                    )
+                )
+            }
+        }
+
+        if (annotationStartIndex === -1) {
+            const newAnnotationContent = this.annotationObjectDefault(
+                item.data.annotationId,
+                convertHTMLintoMarkdown(item.data.body),
+                item.data.comment,
+                item.data.annotationSpaces,
+                item.data.createdWhen,
+                pkmType,
             )
-        } else {
             return annotationsSection + newAnnotationContent
         }
     }
 
     extractAndUpdateAnnotationData(
-        annotation,
+        annotationContent,
+        annotationId,
         HighlightText,
         HighlightNote,
-        HighlightSpaces,
+        annotationSpaces,
         creationDate,
         pkmType,
     ) {
-        // Extract data from the annotation
-        const highlightTextMatch = annotation.match(/>\s*(.+)\n\n/)
-        const highlightNoteMatch = annotation.match(/\*\*Note:\*\*\s*(.+)\n\n/)
-        const creationDateMatch = annotation.match(
-            /\*\*Created at:\*\*\s*(.+)\n/,
-        )
-        const spacesMatch = annotation.match(/\*\*Spaces: \*\*\s*(.+)\n\n/)
+        let annotation = annotationContent
+        let updatedAnnotation
+        let annotationNoteContent = null
 
-        const newHighlightText =
-            HighlightText || (highlightTextMatch ? highlightTextMatch[1] : null)
-        const newHighlightNote =
-            HighlightNote || (highlightNoteMatch ? highlightNoteMatch[1] : null)
-        const newCreationDate =
-            creationDate || (creationDateMatch ? creationDateMatch[1] : null)
-        const newSpaces =
-            HighlightSpaces || (spacesMatch ? spacesMatch[1] : null)
+        if (pkmType === 'obsidian') {
+            // Find and remove the annotation start and end lines from the annotation string
+            const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
+            const annotationEndLine = `<span class="annotationEndLine" id="${annotationId}"> --- </span>\n\n`
+            annotation = annotation.replace(annotationStartLine, '')
+            annotation = annotation.replace(annotationEndLine, '')
 
-        const updatedAnnotation = this.annotationObjectDefault(
-            newHighlightText,
-            newHighlightNote,
-            newSpaces,
-            newCreationDate,
-            pkmType,
-        )
+            // Extract data from the annotation
+            const highlightTextMatch = annotation.match(/>\s*(.+)\n\n/)
+
+            const annotationNoteStartIndex = annotation.indexOf(
+                '<span class="annotationNoteStart">',
+            )
+            const annotationNoteEndIndex = annotation.indexOf(
+                '<span class="annotationNoteEnd"/>',
+            )
+            const noteStartString = `<span class="annotationNoteStart"><strong>Note:</strong></span>`
+            if (
+                annotationNoteStartIndex !== -1 &&
+                annotationNoteEndIndex !== -1
+            ) {
+                annotationNoteContent = annotation.slice(
+                    annotationNoteStartIndex + noteStartString.length,
+                    annotationNoteEndIndex,
+                )
+            }
+
+            const creationDateMatch = annotation.match(
+                /<strong>Created at: <\/strong><\/span> (.+)\n\n/,
+            )
+            const spacesMatch = annotation.match(
+                /<strong>Spaces:<\/strong><\/span> (.+)\n/,
+            )
+
+            const newHighlightText =
+                (highlightTextMatch ? highlightTextMatch[1] : null) ||
+                HighlightText
+            const newHighlightNote =
+                (annotationNoteContent ? annotationNoteContent : null) ||
+                HighlightNote
+            const newCreationDate =
+                (creationDateMatch ? creationDateMatch[1] : null) ||
+                creationDate
+
+            const existingSpaces = spacesMatch
+                ? spacesMatch[1]
+                      .split(', ')
+                      .map((space) => space.replace(/\[\[(.+)\]\]/, '$1'))
+                : []
+            if (annotationSpaces) {
+                const index = existingSpaces.indexOf(annotationSpaces)
+                if (index !== -1) {
+                    existingSpaces.splice(index, 1)
+                } else {
+                    existingSpaces.push(annotationSpaces)
+                }
+            }
+            const formattedSpaces = existingSpaces
+                .map((space) => `[[${space}]]`)
+                .join(', ')
+
+            updatedAnnotation = this.annotationObjectDefault(
+                annotationId,
+                newHighlightText,
+                newHighlightNote,
+                formattedSpaces,
+                newCreationDate,
+                pkmType,
+            )
+        }
+
+        if (pkmType === 'logseq') {
+            // find content inside annotation string
+            const highlightTextMatch = annotation.match(/ - >\s*(.+)\n/)
+
+            const HighlightNoteMatch = annotation.match(
+                /  - \*\*Note:\*\*\n    - (.+)/,
+            )
+            const creationDateMatch = annotation.match(
+                /Created at:\*\* (.+)\n\n/,
+            )
+            const spacesMatch = annotation.match(/Spaces:\*\* (.+)\n/)
+
+            const newHighlightText =
+                (highlightTextMatch ? highlightTextMatch[1] : null) ||
+                HighlightText
+            const newHighlightNote =
+                HighlightNote ||
+                (HighlightNoteMatch ? HighlightNoteMatch[1] : null)
+            const newCreationDate =
+                (creationDateMatch ? creationDateMatch[1] : null) ||
+                creationDate
+            const existingSpaces = spacesMatch
+                ? spacesMatch[1]
+                      .split(', ')
+                      .map((space) => space.replace(/\[\[(.+)\]\]/, '$1'))
+                : []
+
+            // replace content
+            if (annotationSpaces) {
+                const index = existingSpaces.indexOf(annotationSpaces)
+                if (index !== -1) {
+                    existingSpaces.splice(index, 1)
+                } else {
+                    existingSpaces.push(annotationSpaces)
+                }
+            }
+            const formattedSpaces = existingSpaces
+                .map((space) => `[[${space}]]`)
+                .join(' ')
+
+            updatedAnnotation = this.annotationObjectDefault(
+                annotationId,
+                newHighlightText,
+                newHighlightNote,
+                formattedSpaces,
+                newCreationDate,
+                pkmType,
+            )
+        }
 
         return updatedAnnotation
     }
@@ -195,75 +365,222 @@ export class PKMSyncBackgroundModule {
         creationDate,
         pkmType,
     ) {
-        // Extract data from pageHeader
-        const titleMatch = pageHeader.match(/Title: (.+)/)
-        const urlMatch = pageHeader.match(/Url: (.+)/)
-        const creationDateMatch = pageHeader.match(/Created at: (.+)/)
-        const spacesMatch = pageHeader.match(/Spaces: (.+)/)
+        let createdWhen = creationDate
+        let updatedPageHeader
 
-        const newTitle = pageTitle || (titleMatch ? titleMatch[1] : null)
-        const newURL = pageURL || (urlMatch ? urlMatch[1] : null)
-        const newCreationDate =
-            creationDate || (creationDateMatch ? creationDateMatch[1] : null)
-        const newSpaces = pageSpaces || (spacesMatch ? spacesMatch[1] : null)
+        if (pkmType === 'obsidian') {
+            if (pkmType === 'obsidian' && typeof createdWhen === 'number') {
+                createdWhen = moment
+                    .unix(createdWhen / 1000)
+                    .format('YYYY-MM-DD')
+            }
 
-        const updatedPageHeader = this.pageObjectDefault(
-            newTitle,
-            newURL,
-            newSpaces,
-            newCreationDate,
-            pkmType,
-        )
+            // Extract data from pageHeader
+            const titleMatch = pageHeader.match(/Title: (.+)/)
+            const urlMatch = pageHeader.match(/Url: (.+)/)
+            const creationDateMatch = pageHeader.match(/Created at: (.+)/)
+            const newTitle = (titleMatch ? titleMatch[1] : null) || pageTitle
+            const newURL = (urlMatch ? urlMatch[1] : null) || pageURL
+            const newCreationDate =
+                (creationDateMatch ? creationDateMatch[1] : null) || createdWhen
+
+            let lines = pageHeader.split('\n')
+            let spacesStartIndex = lines.findIndex((line) =>
+                line.startsWith('Spaces:'),
+            )
+            let spaces = []
+
+            if (spacesStartIndex !== -1) {
+                for (let i = spacesStartIndex + 1; i < lines.length; i++) {
+                    let line = lines[i]
+                    let match = line.match(/^ - "\[\[(.+)\]\]"$/)
+                    if (match) {
+                        let content = match[1]
+                        spaces.push(content)
+                    } else {
+                        break // Stop when we reach a line that doesn't match the pattern
+                    }
+                }
+            }
+
+            if (pageSpaces) {
+                const index = spaces.indexOf(pageSpaces)
+                if (index !== -1) {
+                    spaces.splice(index, 1)
+                } else {
+                    spaces.push(pageSpaces)
+                }
+            }
+            const formattedSpaces = spaces
+                .map((space) => ` - "[[${space}]]"\n`)
+                .join('')
+
+            updatedPageHeader = this.pageObjectDefault(
+                newTitle,
+                newURL,
+                formattedSpaces,
+                newCreationDate,
+                pkmType,
+            )
+        }
+        if (pkmType === 'logseq') {
+            if (pkmType === 'logseq' && typeof createdWhen === 'number') {
+                createdWhen = moment
+                    .unix(createdWhen / 1000)
+                    .format('MMM Do, YYYY')
+            }
+
+            // Extract data from pageHeader
+            const titleMatch = pageHeader.match(/pagetitle:: (.+)/)
+            const urlMatch = pageHeader.match(/pageurl:: (.+)/)
+            const creationDateMatch = pageHeader.match(/createdat:: (.+)/)
+
+            // set new values or keep old ones
+            const newTitle = (titleMatch ? titleMatch[1] : null) || pageTitle
+            const newURL = (urlMatch ? urlMatch[1] : null) || pageURL
+            const newCreationDate =
+                (creationDateMatch ? creationDateMatch[1] : null) || createdWhen
+            // Step 1: Extract content inside [[]] from the line starting with "spaces::" and put them into an array
+            let spaces = []
+            let spacesLine = pageHeader
+                .split('\n')
+                .find((line) => line.startsWith('spaces::'))
+            if (spacesLine) {
+                let spacesMatch = spacesLine.match(/\[\[(.+?)\]\]/g)
+                if (spacesMatch) {
+                    spaces = spacesMatch.map((space) => space.slice(2, -2))
+                }
+            }
+
+            // Step 2: Check if "pageSpaces" value is inside this array
+            const index = spaces.indexOf(pageSpaces)
+            if (index !== -1) {
+                // a) If yes, remove it from the spaces array
+                spaces.splice(index, 1)
+            } else {
+                // b) If not, add it to the array
+                spaces.push(pageSpaces)
+            }
+
+            // Step 3: Create a string with all the items of the spaces array and add back the [[]] around them
+            const formattedSpaces = spaces
+                .map((space) => `[[${space}]]`)
+                .join(' ')
+
+            updatedPageHeader = this.pageObjectDefault(
+                newTitle,
+                newURL,
+                formattedSpaces,
+                newCreationDate,
+                pkmType,
+            )
+        }
 
         return updatedPageHeader
     }
 
     pageObjectDefault(pageTitle, pageURL, pageSpaces, creationDate, pkmType) {
-        const titleLine = `Title: ${pageTitle}\n`
-        const urlLine = `Url: ${pageURL}\n`
-        const creationDateLine = `Created at: ${creationDate}\n`
-        const spacesLine = pageSpaces ? `Spaces: ${pageSpaces}\n` : ''
-        const pageSeparator = '---\n\n'
+        let createdWhen = creationDate
+        let titleLine
+        let urlLine
+        let creationDateLine
+        let spacesLine
+        let pageSeparator
+        let warning = ''
+        if (pkmType === 'obsidian' && typeof createdWhen === 'number') {
+            createdWhen = moment.unix(createdWhen / 1000).format('YYYY-MM-DD')
+        } else if (pkmType === 'logseq' && typeof createdWhen === 'number') {
+            createdWhen = moment.unix(createdWhen / 1000).format('MMM Do, YYYY')
+        } else {
+            createdWhen = createdWhen.replace(/\[\[(.+)\]\]/, '$1')
+        }
 
-        const warning =
-            '```\n❗️Do not edit this file or it will create duplicates or override your changes. For feedback, go to memex.garden/chatSupport.\n```\n'
+        if (pkmType === 'obsidian') {
+            titleLine = `Title: ${pageTitle}\n`
+            urlLine = `Url: ${pageURL}\n`
+            creationDateLine = `Created at: [[${createdWhen}]]\n`
+            spacesLine = pageSpaces ? `Spaces: \n${pageSpaces}` : ''
+            pageSeparator = '---\n'
+            warning =
+                '```\n❗️Do not edit this file or it will create duplicates or override your changes. For feedback, go to memex.garden/chatSupport.\n```\n'
+            return (
+                pageSeparator +
+                titleLine +
+                urlLine +
+                creationDateLine +
+                spacesLine +
+                pageSeparator +
+                warning
+            )
+        }
+        if (pkmType === 'logseq') {
+            urlLine = `pageurl:: ${pageURL}\n`
+            titleLine = `pagetitle:: ${pageTitle}\n`
+            creationDateLine = `createdat:: [[${createdWhen}]]\n`
+            spacesLine = pageSpaces ? `spaces:: ${pageSpaces}\n` : ''
+            warning =
+                '- ```\n❗️Do not edit this file or it will create duplicates or override your changes. For feedback, go to memex.garden/chatSupport.\n```\n'
 
-        return (
-            pageSeparator +
-            titleLine +
-            urlLine +
-            creationDateLine +
-            spacesLine +
-            pageSeparator +
-            warning
-        )
+            return titleLine + urlLine + creationDateLine + spacesLine + warning
+        }
     }
 
     annotationObjectDefault(
+        annotationId,
         HighlightText,
         HighlightNote,
-        HighlightSpaces,
+        annotationSpaces,
         creationDate,
         pkmType,
     ) {
-        const highlightTextLine = HighlightText ? `> ${HighlightText}\n\n` : ''
-        const highlightNoteLine = HighlightNote
-            ? `**Note:** ${HighlightNote}\n\n`
-            : ''
-        const creationDateLine = `**Created at:** ${creationDate}\n`
-        const highlightSpacesLine = HighlightSpaces
-            ? `**Spaces: **${HighlightSpaces}\n\n`
-            : ''
+        if (pkmType === 'obsidian') {
+            const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
 
-        const highlightSeparator = '---\n\n'
+            const highlightTextLine = HighlightText
+                ? `> ${HighlightText}\n\n`
+                : ''
+            const highlightNoteLine = HighlightNote
+                ? `<span class="annotationNoteStart"><strong>Note:</strong></span>\n${convertHTMLintoMarkdown(
+                      HighlightNote,
+                  )}\n<span class="annotationNoteEnd"/>\n`
+                : ''
+            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"> <strong>Created at: </strong></span> ${creationDate}\n\n`
+            const highlightSpacesLine = annotationSpaces
+                ? `<span class="annotationSpaces" id="${annotationId}"> <strong>Spaces:</strong></span> ${annotationSpaces}\n`
+                : ''
+            const annotationEndLine = `<span class="annotationEndLine" id="${annotationId}"> --- </span>\n\n`
 
-        return (
-            highlightTextLine +
-            highlightNoteLine +
-            highlightSpacesLine +
-            creationDateLine +
-            highlightSeparator
-        )
+            return (
+                annotationStartLine +
+                highlightTextLine +
+                highlightNoteLine +
+                highlightSpacesLine +
+                creationDateLine +
+                annotationEndLine
+            )
+        }
+        if (pkmType === 'logseq') {
+            const highlightTextLine = HighlightText
+                ? ` - > ${HighlightText}\n`
+                : ''
+            const highlightNoteLine = HighlightNote
+                ? `  - **Note:**\n    - ${convertHTMLintoMarkdown(
+                      HighlightNote,
+                  )}\n`
+                : ''
+            const creationDateLine = `  - **Created at:** ${creationDate}\n\n`
+            const highlightSpacesLine = annotationSpaces
+                ? `  - **Spaces:** ${annotationSpaces}\n`
+                : ''
+            const separatedLine = `- <span id="${annotationId}">---</span>\n`
+            return (
+                highlightTextLine +
+                highlightNoteLine +
+                highlightSpacesLine +
+                creationDateLine +
+                separatedLine
+            )
+        }
     }
 }
 

@@ -66,14 +66,25 @@ class Import extends React.PureComponent<Props> {
     }
 
     private getFolder = async (pkmToSync: string) => {
-        // Mocked functionToGetFolder for now
-        const functionToGetFolder = (pkmToSync) => {
-            return new Promise<string>((resolve) => {
-                setTimeout(() => resolve('/mocked/path/for/demo'), 500)
-            })
+        const getFolderPath = async (pkmToSync: string) => {
+            const response = await fetch(
+                'http://localhost:11922/set-directory',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ pkmSyncType: pkmToSync }),
+                },
+            )
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+            const directoryPath = await response.text()
+            return directoryPath
         }
 
-        const folderPath = await functionToGetFolder(pkmToSync)
+        const folderPath = await getFolderPath(pkmToSync)
 
         if (pkmToSync === 'logseq') {
             this.setState({ logSeqFolder: folderPath })

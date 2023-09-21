@@ -20,6 +20,7 @@ import {
 import decodeBlob from 'src/util/decode-blob'
 import { pageIsStub } from 'src/page-indexing/utils'
 import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { sharePageWithPKM } from 'src/pkm-integrations/background/backend/utils'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -156,6 +157,15 @@ export default class PageStorage extends StorageModule {
             ...pageData,
             url: normalizedUrl,
         })
+
+        const dataToSave = {
+            pageUrl: pageData.fullUrl,
+            pageTitle: pageData.fullTitle,
+            createdWhen: Date.now(),
+            pkmSyncType: 'page',
+        }
+
+        sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
     }
 
     async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {

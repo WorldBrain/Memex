@@ -54,6 +54,9 @@ export class MemexLocalBackend extends BackupBackend {
     async _writeToPath(url: string, body: string) {
         await fetch(`${this.url}/${url}`, {
             method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
             body,
         })
     }
@@ -85,6 +88,8 @@ export class MemexLocalBackend extends BackupBackend {
         )
 
         const timestamp = Date.now()
+
+        console.log('Writing changes to', timestamp)
         await this._writeToPath(
             `backup/change-sets/${timestamp}`,
             stringify({ version: currentSchemaVersion, changes }),

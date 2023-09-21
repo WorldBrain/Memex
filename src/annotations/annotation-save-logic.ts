@@ -141,7 +141,7 @@ export async function createAnnotation({
                 syncSettingsBG,
             )
 
-            shareAnnotationWithPKM(annotationData, pkmSyncBG)
+            // shareAnnotationWithPKM(annotationData, pkmSyncBG)
 
             return annotationUrl
         })(),
@@ -223,11 +223,11 @@ export async function updateAnnotation({
                     }),
             ])
 
-            let newAnnotationData = this.options.annotationsCache.getAnnotation(
-                annotationData.localId,
-            )
+            // let newAnnotationData = this.options.annotationsCache.getAnnotation(
+            //     annotationData.localId,
+            // )
 
-            shareAnnotationWithPKM(annotationData, pkmSyncBG)
+            // shareAnnotationWithPKM(newAnnotationData, pkmSyncBG)
 
             return annotationData.localId
         })(),

@@ -38,47 +38,57 @@ export class MemexLocalBackend {
         await browser.storage.local.set({ bufferedItems: currentBuffer })
     }
 
-    async processBufferedItems() {
+    async getBufferedItems() {
         // Check for buffered items in browser.storage.local
         const data = await browser.storage.local.get('bufferedItems')
         const bufferedItems = data.bufferedItems || []
 
-        // If there are buffered items, send each one
-        while (bufferedItems.length > 0) {
-            const item = bufferedItems.shift()
-            console.log('Processing buffered item', item.fileName)
-            await this._writeToPath(
-                `Saved Pages/${item.fileName.toString()}.md`,
-                JSON.stringify(item.fileContent),
-            )
-        }
+        // After retrieving the buffered items, delete them from local storage
+        await browser.storage.local.remove('bufferedItems')
 
-        // Save the emptied buffer back to browser.storage.local
-        await browser.storage.local.set({ bufferedItems: bufferedItems })
+        return bufferedItems
     }
 
-    async storeObject(fileName: string, fileContent: string): Promise<any> {
+    async storeObject(
+        fileName: string,
+        fileContent: string,
+        pkmType: string,
+    ): Promise<any> {
         const serverReachable = await this.isConnected()
 
+        const body = JSON.stringify({
+            pageTitle: fileName,
+            fileContent: fileContent,
+            pkmSyncType: pkmType,
+        })
+
         if (!serverReachable) {
-            const itemToBuffer = {
-                fileName: fileName,
-                fileContent: fileContent,
-            }
-
-            await this.bufferPKMSyncItems(itemToBuffer)
+            await this.bufferPKMSyncItems(body)
         } else {
-            // If the server is reachable, process buffered items first
-            await this.processBufferedItems()
-        }
+            const bufferedItems = await this.getBufferedItems()
 
-        await this._writeToPath(
-            `Saved Pages/${fileName.toString()}.md`,
-            JSON.stringify(fileContent),
-        )
+            // Add the current "body" item to the end of the buffered items array
+            bufferedItems.push(body)
+
+            // Work off the buffered items one-by-one
+
+            for (const item of bufferedItems) {
+                const response = await fetch(`${this.url}/update-file`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: item,
+                })
+                if (!response.ok) {
+                    await this.bufferPKMSyncItems(body)
+                    throw new Error(`HTTP error! status: ${response.status}`)
+                }
+            }
+        }
     }
 
-    async _writeToPath(url: string, body: string) {
+    async _writeToPath(url: string, body: string, pkmType) {
         await fetch(`${this.url}/${url}`, {
             method: 'PUT',
             body,
@@ -103,8 +113,25 @@ export class MemexLocalBackend {
         }
     }
 
-    async retrievePage(object: string) {
-        return (await fetch(`${this.url}/Memex Sync/${object}`)).json()
+    async retrievePage(fileName: string, pkmType: string) {
+        let body = {
+            pageTitle: fileName,
+            pkmSyncType: pkmType,
+        }
+
+        const response = await fetch(`${this.url}/get-file-content`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+        }
+
+        const pageContent = await response.text() // or response.text() if the data is plain text
+        return pageContent
     }
 
     async retrieveIndexFile(object: string) {

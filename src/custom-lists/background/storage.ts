@@ -2,6 +2,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import {
     StorageModule,
     StorageModuleConfig,
+    StorageModuleConstructorArgs,
 } from '@worldbrain/storex-pattern-modules'
 import {
     COLLECTION_DEFINITIONS,
@@ -20,6 +21,8 @@ import {
     trackSpaceEntryCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { sharePageWithPKM } from 'src/pkm-integrations/background/backend/utils'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -30,6 +33,10 @@ export default class CustomListStorage extends StorageModule {
         !Object.values<number>(SPECIAL_LIST_IDS).includes(entry.listId)
     static filterOutSpecialLists = (list: { name: string }) =>
         !Object.values<string>(SPECIAL_LIST_NAMES).includes(list.name)
+
+    constructor(private options: StorageModuleConstructorArgs) {
+        super(options)
+    }
 
     getConfig(): StorageModuleConfig {
         const collections = cloneDeep(
@@ -112,6 +119,13 @@ export default class CustomListStorage extends StorageModule {
                     args: {
                         listId: { $in: '$listIds:array' },
                         pageUrl: '$url:string',
+                    },
+                },
+                findPageByUrl: {
+                    operation: 'findObject',
+                    collection: 'pages',
+                    args: {
+                        url: '$url:string',
                     },
                 },
                 findListEntry: {
@@ -507,7 +521,8 @@ export default class CustomListStorage extends StorageModule {
         isShared?: boolean
         dontTrack?: boolean
     }) {
-        const idExists = Boolean(await this.fetchListById(listId))
+        const list = await this.fetchListById(listId)
+        const idExists = Boolean(list)
 
         if (
             idExists &&
@@ -527,6 +542,23 @@ export default class CustomListStorage extends StorageModule {
                     )
                 }
             }
+
+            try {
+                const pageToSave = await this.operation('findPageByUrl', {
+                    url: normalizeUrl(fullUrl),
+                })
+
+                const dataToSave = {
+                    pageUrl: fullUrl,
+                    pageTitle: pageToSave.fullTitle,
+                    pkmSyncType: 'page',
+                    pageSpaces: list.name,
+                    createdAt: pageToSave.createdAt,
+                }
+
+                sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
+            } catch (error) {}
+
             return this.operation('createListEntry', {
                 listId,
                 pageUrl,

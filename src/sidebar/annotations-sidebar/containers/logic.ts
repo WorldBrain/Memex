@@ -98,7 +98,6 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { shareAnnotationWithPKM } from 'src/pkm-integrations/background/backend/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1436,15 +1435,6 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        const newAnnotationData = {
-            comment: commentForSaving,
-            body: annotationData.body,
-            fullPageURL: 'https://' + annotationData.normalizedPageUrl,
-            createdWhen: annotationData.createdWhen,
-        }
-
-        shareAnnotationWithPKM(newAnnotationData, this.options.pkmSyncBG)
-
         await savePromise
     }
 
@@ -1661,15 +1651,6 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 })
             }
-
-            const annotationData = {
-                comment: commentForSaving,
-                fullPageUrl: fullPageUrl,
-                createdWhen: new Date(now),
-                pageTitle: title,
-            }
-
-            shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
 
             await savePromise
         })

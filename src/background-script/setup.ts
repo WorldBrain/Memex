@@ -273,6 +273,7 @@ export function createBackgroundModules(options: {
         tabManagement,
         getNow,
         authBG: auth.remoteFunctions,
+        pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
     })
     tabManagement.events.on('tabRemoved', async (event) => {
         await pages.handleTabClose(event)
@@ -333,6 +334,7 @@ export function createBackgroundModules(options: {
         pages,
         analytics,
         analyticsBG,
+        pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
         serverStorage: options.serverStorage.modules,
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
@@ -417,6 +419,7 @@ export function createBackgroundModules(options: {
             directLinking,
         ),
         analyticsBG,
+        pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
     })
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
         syncSettings,
