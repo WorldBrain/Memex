@@ -240,20 +240,14 @@ export class PKMSyncBackgroundModule {
             annotation = annotation.replace(annotationStartLine, '')
             annotation = annotation.replace(annotationEndLine, '')
 
-            console.log('ceoms ad')
-
             // Extract data from the annotation
             const highlightTextMatch = annotation.match(/> \s*(.+)\n\n/)
 
-            console.log('highlight text match', highlightTextMatch)
-
-            const annotationNoteStartIndex = annotation.indexOf(
-                '<span class="annotationNoteStart">',
-            )
+            const noteStartString = `<span class="annotationNoteStart"><strong>Note:</strong></span>`
+            const annotationNoteStartIndex = annotation.indexOf(noteStartString)
             const annotationNoteEndIndex = annotation.indexOf(
                 '<span class="annotationNoteEnd"/>',
             )
-            const noteStartString = `<span class="annotationNoteStart"><strong>Note:</strong></span>`
             if (
                 annotationNoteStartIndex !== -1 &&
                 annotationNoteEndIndex !== -1
@@ -275,8 +269,9 @@ export class PKMSyncBackgroundModule {
                 (highlightTextMatch ? highlightTextMatch[1] : null) ||
                 HighlightText
             const newHighlightNote =
-                (annotationNoteContent ? annotationNoteContent : null) ||
-                HighlightNote
+                HighlightNote ||
+                (annotationNoteContent ? annotationNoteContent : null)
+
             const newCreationDate =
                 (creationDateMatch ? creationDateMatch[1] : null) ||
                 creationDate
@@ -502,7 +497,7 @@ export class PKMSyncBackgroundModule {
         if (pkmType === 'obsidian') {
             titleLine = `Title: ${pageTitle}\n`
             urlLine = `Url: ${pageURL}\n`
-            creationDateLine = `Created at: [[${createdWhen}]]\n`
+            creationDateLine = `Created at: "[[${createdWhen}]]"\n`
             spacesLine = pageSpaces ? `Spaces: \n${pageSpaces}` : ''
             pageSeparator = '---\n'
             warning =
