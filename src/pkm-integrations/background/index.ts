@@ -31,8 +31,8 @@ export class PKMSyncBackgroundModule {
     }
 
     private async getValidFolders() {
-        const data = await browser.storage.local.get('pkmFolders')
-        const folders = data.pkmFolders || {}
+        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const folders = data.PKMSYNCpkmFolders || {}
 
         const validFolders = {
             logSeq: !!folders.logSeqFolder,

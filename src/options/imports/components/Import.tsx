@@ -15,6 +15,9 @@ import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/se
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { browser } from 'webextension-polyfill-ts'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
+import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -44,20 +47,75 @@ class Import extends React.PureComponent<Props> {
     //     return <AdvSettings />
     // }
 
-    componentDidMount(): void {
+    serverOnline: any
+
+    async componentDidMount(): void {
         // Check local storage for saved paths when the component mounts
         this.getPathsFromLocalStorage()
+
+        this.setState({
+            serverLoadingState: 'loading',
+        })
+
+        this.serverOnline = await new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        }).isReachable()
+
+        console.log('this.server', this.serverOnline)
+
+        this.setState({
+            serverLoadingState: 'success',
+            serverOnline: this.serverOnline,
+        })
+
+        // Check every 3 seconds if the server is running and update the state accordingly
+        setInterval(async () => {
+            const serverOnline = await new MemexLocalBackend({
+                url: 'http://localhost:11922',
+            }).isReachable()
+
+            this.setState({
+                serverOnline: serverOnline,
+            })
+        }, 3000)
+
+        const bufferMaxReached = await browser.storage.local.get(
+            'PKMSYNCbufferMaxReached',
+        )
+        if (bufferMaxReached.PKMSYNCbufferMaxReached) {
+            this.setState({
+                bufferLimitReached: true,
+            })
+        }
+        const syncWasSetupBefore = await browser.storage.local.get(
+            'PKMSYNCsyncWasSetupBefore',
+        )
+        const syncExists = syncWasSetupBefore.PKMSYNCsyncWasSetupBefore
+            ? true
+            : false
+
+        console.log('syncExist', syncExists)
+
+        if (syncExists) {
+            this.setState({
+                hasSyncEverBeenRunning: true,
+            })
+        }
     }
 
     state = {
         showDiscordDemo: false,
         logSeqFolder: null,
         obsidianFolder: null,
+        serverOnline: false,
+        serverLoadingState: 'pristine',
+        bufferLimitReached: false,
+        hasSyncEverBeenRunning: false,
     }
 
     private async getPathsFromLocalStorage() {
-        const data = await browser.storage.local.get('pkmFolders')
-        if (data.pkmFolders) {
+        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        if (data.PKMSYNCpkmFolders) {
             this.setState({
                 logSeqFolder: data.pkmFolders.logSeqFolder || null,
                 obsidianFolder: data.pkmFolders.obsidianFolder || null,
@@ -66,6 +124,10 @@ class Import extends React.PureComponent<Props> {
     }
 
     private getFolder = async (pkmToSync: string) => {
+        const pkmSyncKey = await getPkmSyncKey()
+
+        console.log('syncKey:', pkmSyncKey)
+
         const getFolderPath = async (pkmToSync: string) => {
             const response = await fetch(
                 'http://localhost:11922/set-directory',
@@ -74,7 +136,10 @@ class Import extends React.PureComponent<Props> {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ pkmSyncType: pkmToSync }),
+                    body: JSON.stringify({
+                        pkmSyncType: pkmToSync,
+                        syncKey: pkmSyncKey,
+                    }),
                 },
             )
             if (!response.ok) {
@@ -94,7 +159,7 @@ class Import extends React.PureComponent<Props> {
 
         // Save to local storage
         await browser.storage.local.set({
-            pkmFolders: {
+            PKMSYNCpkmFolders: {
                 logSeqFolder: this.state.logSeqFolder,
                 obsidianFolder: this.state.obsidianFolder,
             },
@@ -110,8 +175,8 @@ class Import extends React.PureComponent<Props> {
         }
 
         // Update local storage by getting the current folders first, then updating them
-        const data = await browser.storage.local.get('pkmFolders')
-        const currentFolders = data.pkmFolders || {}
+        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const currentFolders = data.PKMSYNCpkmFolders || {}
 
         if (pkmToUnsync === 'logseq') {
             currentFolders.logSeqFolder = null
@@ -119,7 +184,7 @@ class Import extends React.PureComponent<Props> {
             currentFolders.obsidianFolder = null
         }
 
-        await browser.storage.local.set({ pkmFolders: currentFolders })
+        await browser.storage.local.set({ PKMSYNCpkmFolders: currentFolders })
     }
 
     private renderLogSeqIntegration() {
@@ -138,57 +203,137 @@ class Import extends React.PureComponent<Props> {
                         </div>
                     }
                 >
-                    {this.state.logSeqFolder !== null ? (
-                        <SelectFolderArea
-                            onClick={async () => await this.getFolder('logseq')}
-                        >
-                            <TextField
-                                icon={'folder'}
-                                value={
-                                    this.state.logSeqFolder &&
-                                    this.state.logSeqFolder.length
-                                        ? this.state.logSeqFolder
-                                        : 'Click to select folder'
-                                }
-                            />
-                            <PrimaryAction
-                                label={'Change Folder'}
-                                onClick={async (event) => {
-                                    event.stopPropagation()
-                                    await this.getFolder('logseq')
-                                }}
-                                icon={'folder'}
-                                size={'medium'}
-                                height={'44px'}
-                                type={'secondary'}
-                                padding={'0 8px 0 4px'}
-                            />
-                            <PrimaryAction
-                                label={'Remove Folder'}
-                                onClick={async (event) => {
-                                    event.stopPropagation()
-                                    await this.removeFolder('logseq')
-                                }}
-                                icon={'removeX'}
-                                size={'medium'}
-                                height={'44px'}
-                                type={'forth'}
-                                padding={'0 8px 0 4px'}
-                            />
-                        </SelectFolderArea>
+                    {this.state.hasSyncEverBeenRunning && (
+                        <>
+                            {this.state.serverOnline ? (
+                                <ServerOnline>
+                                    <Icon
+                                        icon={'check'}
+                                        heightAndWidth="24px"
+                                        color="prime1"
+                                        hoverOff
+                                    />
+                                    Sync Helper is Online
+                                </ServerOnline>
+                            ) : (
+                                <ServerOnline>
+                                    {this.state.bufferLimitReached ? (
+                                        <TooltipBox
+                                            tooltipText={
+                                                'Sync was not running in a while, so we stopped buffering updates'
+                                            }
+                                            placement={'bottom'}
+                                        >
+                                            <SyncStatusContent>
+                                                <Icon
+                                                    icon={'removeX'}
+                                                    heightAndWidth="24px"
+                                                    color="warning"
+                                                    hoverOff
+                                                />
+                                                Buffer Limit Reached
+                                            </SyncStatusContent>
+                                        </TooltipBox>
+                                    ) : (
+                                        <TooltipBox
+                                            tooltipText={
+                                                'Sync is not running but we have been buffering your last updates (up to 2000)'
+                                            }
+                                            placement={'bottom'}
+                                        >
+                                            <SyncStatusContent>
+                                                <Icon
+                                                    icon={'removeX'}
+                                                    heightAndWidth="24px"
+                                                    color="warning"
+                                                    hoverOff
+                                                />
+                                                Sync Helper is Offline
+                                            </SyncStatusContent>
+                                        </TooltipBox>
+                                    )}
+                                </ServerOnline>
+                            )}{' '}
+                        </>
+                    )}
+                    {this.state.serverLoadingState === 'running' ? (
+                        <>
+                            <LoadingIndicator size={30} />
+                        </>
                     ) : (
-                        <PrimaryAction
-                            label={'Select LogSeq Folder'}
-                            onClick={async (event) => {
-                                event.stopPropagation()
-                                await this.getFolder('logseq')
-                            }}
-                            icon={'folder'}
-                            size={'medium'}
-                            height={'44px'}
-                            type={'secondary'}
-                            padding={'0 8px 0 4px'}
-                        />
+                        <>
+                            {this.state.logSeqFolder !== null ? (
+                                <SelectFolderArea
+                                    onClick={async () =>
+                                        await this.getFolder('logseq')
+                                    }
+                                >
+                                    <TextField
+                                        icon={'folder'}
+                                        value={
+                                            this.state.logSeqFolder &&
+                                            this.state.logSeqFolder.length
+                                                ? this.state.logSeqFolder
+                                                : 'Click to select folder'
+                                        }
+                                    />
+                                    <PrimaryAction
+                                        label={'Change Folder'}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            await this.getFolder('logseq')
+                                        }}
+                                        icon={'folder'}
+                                        size={'medium'}
+                                        height={'44px'}
+                                        type={'secondary'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                    <PrimaryAction
+                                        label={'Remove Folder'}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            await this.removeFolder('logseq')
+                                        }}
+                                        icon={'removeX'}
+                                        size={'medium'}
+                                        height={'44px'}
+                                        type={'forth'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                </SelectFolderArea>
+                            ) : this.state.serverOnline ? (
+                                <PrimaryAction
+                                    label={'Select LogSeq Folder'}
+                                    onClick={async (event) => {
+                                        event.stopPropagation()
+                                        await this.getFolder('logseq')
+                                    }}
+                                    icon={'folder'}
+                                    size={'medium'}
+                                    height={'44px'}
+                                    type={'secondary'}
+                                    padding={'0 8px 0 4px'}
+                                />
+                            ) : (
+                                <>
+                                    <PrimaryAction
+                                        label={'Download Sync Helper'}
+                                        onClick={async (event) => {
+                                            window.open(
+                                                'https://github.com/WorldBrain/memex-local-sync/releases/latest',
+                                                '_blank',
+                                            )
+                                        }}
+                                        icon={'inbox'}
+                                        size={'medium'}
+                                        height={'44px'}
+                                        type={'secondary'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                </>
+                            )}
+                        </>
                     )}
                 </SettingSection>
             </div>
@@ -211,60 +356,138 @@ class Import extends React.PureComponent<Props> {
                         </div>
                     }
                 >
-                    {this.state.obsidianFolder !== null ? (
-                        <SelectFolderArea
-                            onClick={async () =>
-                                await this.getFolder('obsidian')
-                            }
-                        >
-                            <TextField
-                                icon={'folder'}
-                                value={
-                                    this.state.obsidianFolder &&
-                                    this.state.obsidianFolder.length
-                                        ? this.state.obsidianFolder
-                                        : 'Click to select folder'
-                                }
-                                disabled
-                            />
-                            <PrimaryAction
-                                label={'Change Folder'}
-                                onClick={async (event) => {
-                                    event.stopPropagation()
-                                    await this.getFolder('obsidian')
-                                }}
-                                icon={'folder'}
-                                size={'medium'}
-                                type={'secondary'}
-                                height={'44px'}
-                                padding={'0 8px 0 4px'}
-                            />
-                            <PrimaryAction
-                                label={'Remove Folder'}
-                                onClick={async (event) => {
-                                    event.stopPropagation()
-                                    await this.removeFolder('obsidian')
-                                }}
-                                icon={'removeX'}
-                                size={'medium'}
-                                height={'44px'}
-                                type={'forth'}
-                                padding={'0 8px 0 4px'}
-                            />
-                        </SelectFolderArea>
+                    {this.state.hasSyncEverBeenRunning && (
+                        <>
+                            {this.state.serverOnline ? (
+                                <ServerOnline>
+                                    <Icon
+                                        icon={'check'}
+                                        heightAndWidth="24px"
+                                        color="prime1"
+                                        hoverOff
+                                    />
+                                    Sync Helper is Online
+                                </ServerOnline>
+                            ) : (
+                                <ServerOnline>
+                                    {this.state.bufferLimitReached ? (
+                                        <TooltipBox
+                                            tooltipText={
+                                                'Sync was not running in a while, so we stopped buffering updates'
+                                            }
+                                            placement={'bottom'}
+                                        >
+                                            <SyncStatusContent>
+                                                <Icon
+                                                    icon={'removeX'}
+                                                    heightAndWidth="24px"
+                                                    color="warning"
+                                                    hoverOff
+                                                />
+                                                Buffer Limit Reached
+                                            </SyncStatusContent>
+                                        </TooltipBox>
+                                    ) : (
+                                        <TooltipBox
+                                            tooltipText={
+                                                'Sync is not running but we have been buffering your last updates (up to 2000)'
+                                            }
+                                            placement={'bottom'}
+                                        >
+                                            <SyncStatusContent>
+                                                <Icon
+                                                    icon={'removeX'}
+                                                    heightAndWidth="24px"
+                                                    color="warning"
+                                                    hoverOff
+                                                />
+                                                Sync Helper is Offline
+                                            </SyncStatusContent>
+                                        </TooltipBox>
+                                    )}
+                                </ServerOnline>
+                            )}
+                        </>
+                    )}
+                    {this.state.serverLoadingState === 'running' ? (
+                        <>
+                            <LoadingIndicator size={30} />
+                        </>
                     ) : (
-                        <PrimaryAction
-                            label={'Select Obsidian Folder'}
-                            onClick={async (event) => {
-                                event.stopPropagation()
-                                await this.getFolder('obsidian')
-                            }}
-                            icon={'folder'}
-                            size={'medium'}
-                            type={'secondary'}
-                            height={'44px'}
-                            padding={'0 8px 0 4px'}
-                        />
+                        <>
+                            {this.state.obsidianFolder !== null ? (
+                                <SelectFolderArea
+                                    onClick={async () =>
+                                        await this.getFolder('obsidian')
+                                    }
+                                >
+                                    <TextField
+                                        icon={'folder'}
+                                        value={
+                                            this.state.obsidianFolder &&
+                                            this.state.obsidianFolder.length
+                                                ? this.state.obsidianFolder
+                                                : 'Click to select folder'
+                                        }
+                                        disabled
+                                    />
+                                    <PrimaryAction
+                                        label={'Change Folder'}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            await this.getFolder('obsidian')
+                                        }}
+                                        icon={'folder'}
+                                        size={'medium'}
+                                        type={'secondary'}
+                                        height={'44px'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                    <PrimaryAction
+                                        label={'Remove Folder'}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            await this.removeFolder('obsidian')
+                                        }}
+                                        icon={'removeX'}
+                                        size={'medium'}
+                                        height={'44px'}
+                                        type={'forth'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                </SelectFolderArea>
+                            ) : this.state.serverOnline ? (
+                                <PrimaryAction
+                                    label={'Select Obsidian Folder'}
+                                    onClick={async (event) => {
+                                        event.stopPropagation()
+                                        await this.getFolder('obsidian')
+                                    }}
+                                    icon={'folder'}
+                                    size={'medium'}
+                                    type={'secondary'}
+                                    height={'44px'}
+                                    padding={'0 8px 0 4px'}
+                                />
+                            ) : (
+                                <>
+                                    <PrimaryAction
+                                        label={'Download Sync Helper'}
+                                        onClick={async (event) => {
+                                            window.open(
+                                                'https://github.com/WorldBrain/memex-local-sync/releases/latest',
+                                                '_blank',
+                                            )
+                                        }}
+                                        icon={'inbox'}
+                                        size={'medium'}
+                                        height={'44px'}
+                                        type={'secondary'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                </>
+                            )}
+                        </>
                     )}
                 </SettingSection>
             </div>
@@ -453,6 +676,31 @@ class Import extends React.PureComponent<Props> {
 }
 
 export default Import
+
+const ServerOnline = styled.div`
+    position: absolute;
+    top: 30px;
+    right: 30px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+    border-radius: 5px;
+    /* border: 1px solid ${(props) => props.theme.colors.greyScale3}; */
+    font-size: 14px;
+
+`
+const SyncStatusContent = styled.div`
+
+    color: ${(props) => props.theme.colors.greyScale6};
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+    border-radius: 5px;
+    /* border: 1px solid ${(props) => props.theme.colors.greyScale3}; */
+    font-size: 14px;
+
+`
 
 const WatchVideoButton = styled.div`
     display: flex;
