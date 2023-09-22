@@ -57,7 +57,9 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
     async (inPageUI) => {
-        // ;(window as any)['test'] = promptPdfScreenshot
+        // DEBUG: Use this in console to debug screenshot UX
+        ;(window as any)['promptPdfScreenshot'] = promptPdfScreenshot
+        // DEBUG: Uncomment to trigger screenshot as soon as PDF is loaded
         // setTimeout(() => {
         //     promptPdfScreenshot()
         // }, 0)

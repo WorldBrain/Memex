@@ -125,7 +125,16 @@ export async function promptPdfScreenshot() {
 
             const pageElCanvas = await htmlToCanvas(pageEl)
             const cropped = cropCanvas(pageElCanvas, position, dimensions)
-            ;(window as any)['out'] = cropped.toDataURL()
+
+            // DEBUG: Uncomment to show whole captured page directly after taking screenshot
+            // ;(globalThis as any).chrome.tabs.create({
+            //     url: cropped.toDataURL(),
+            // })
+
+            // DEBUG: Uncomment to show image directly after taking it
+            // ;(globalThis as any).chrome.tabs.create({
+            //     url: cropped.toDataURL(),
+            // })
 
             const result: PdfScreenshot = {
                 pageNumber,
@@ -172,11 +181,19 @@ export async function promptPdfScreenshot() {
         }
         messageIsCentered = !messageIsCentered
     })
+    // DEBUG: Uncomment to directly take screenshot without manual input
+    // setTimeout(() => {
+    //     // overlayEl.remove()
+    //     translateRect([574, 215], [96, 75])
+    // }, 500)
     return new Promise<PdfScreenshot>((resolve) => {
         overlayEl.addEventListener('mouseup', () => {
-            const result = translateRect(rectPosition, rectDimensions)
-            // console.log(result)
+            // DEBUG: Uncomment to log position to copy into lines above to take screenshot without user input
+            // ;(window as any)[
+            //     'input'
+            // ] = `[${rectPosition[0]}, ${rectPosition[1]}], [${rectDimensions[0]}, ${rectDimensions[1]}]`
             overlayEl.remove()
+            const result = translateRect(rectPosition, rectDimensions)
             resolve(result)
         })
     })
