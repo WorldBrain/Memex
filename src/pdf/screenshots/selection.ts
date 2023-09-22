@@ -1,9 +1,8 @@
 import { toCanvas as htmlToCanvas } from 'html-to-image'
+import { PdfScreenshotAnchor } from './types'
 
 export interface PdfScreenshot {
-    pageNumber: number
-    position: [number, number]
-    dimensions: [number, number]
+    anchor: PdfScreenshotAnchor
     screenshot: HTMLCanvasElement
 }
 
@@ -137,9 +136,11 @@ export async function promptPdfScreenshot() {
             // })
 
             const result: PdfScreenshot = {
-                pageNumber,
-                position,
-                dimensions,
+                anchor: {
+                    pageNumber,
+                    position,
+                    dimensions,
+                },
                 screenshot: cropped,
             }
             return result
