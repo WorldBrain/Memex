@@ -1010,17 +1010,13 @@ export function createContentScriptLoader(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     loadRemotely: boolean
 }) {
-    const remoteLoader: ContentScriptLoader = async (
-        component: ContentScriptComponent,
-    ) => {
+    const remoteLoader: ContentScriptLoader = async (component) => {
         await args.contentScriptsBG.injectContentScriptComponent({
             component,
         })
     }
 
-    const localLoader: ContentScriptLoader = async (
-        component: ContentScriptComponent,
-    ) => {
+    const localLoader: ContentScriptLoader = async (component) => {
         const script = document.createElement('script')
         script.src = `../content_script_${component}.js`
         document.body.appendChild(script)

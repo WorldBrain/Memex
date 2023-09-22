@@ -1,5 +1,5 @@
+import { PdfScreenshotAnchor } from '@worldbrain/memex-common/lib/annotations/types'
 import { toCanvas as htmlToCanvas } from 'html-to-image'
-import { PdfScreenshotAnchor } from './types'
 
 export interface PdfScreenshot {
     anchor: PdfScreenshotAnchor
