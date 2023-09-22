@@ -78,8 +78,6 @@ export class MemexLocalBackend {
             ? true
             : false
 
-        console.log('syncExists:', syncExists)
-
         if (!serverReachable && syncExists) {
             await this.bufferPKMSyncItems(body)
         } else {
@@ -100,7 +98,6 @@ export class MemexLocalBackend {
                 })
 
                 if (response.ok) {
-                    console.log('response.ok:', response.ok)
                     await browser.storage.local.set({
                         PKMSYNCsyncWasSetupBefore: true,
                     })

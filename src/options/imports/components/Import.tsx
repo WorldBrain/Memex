@@ -49,7 +49,19 @@ class Import extends React.PureComponent<Props> {
 
     serverOnline: any
 
-    async componentDidMount(): void {
+    state = {
+        showDiscordDemo: false,
+        logSeqFolder: null,
+        obsidianFolder: null,
+        serverOnline: false,
+        serverLoadingState: 'pristine',
+        bufferLimitReached: false,
+        hasSyncEverBeenRunning: false,
+        dateformatLogseq: 'MMM Do, YYYY',
+        dateformatObsidian: 'YYYY-DD-MM',
+    }
+
+    async componentDidMount(): Promise<void> {
         // Check local storage for saved paths when the component mounts
         this.getPathsFromLocalStorage()
 
@@ -62,11 +74,6 @@ class Import extends React.PureComponent<Props> {
         }).isReachable()
 
         console.log('this.server', this.serverOnline)
-
-        this.setState({
-            serverLoadingState: 'success',
-            serverOnline: this.serverOnline,
-        })
 
         // Check every 3 seconds if the server is running and update the state accordingly
         setInterval(async () => {
@@ -90,43 +97,46 @@ class Import extends React.PureComponent<Props> {
         const syncWasSetupBefore = await browser.storage.local.get(
             'PKMSYNCsyncWasSetupBefore',
         )
+
         const syncExists = syncWasSetupBefore.PKMSYNCsyncWasSetupBefore
             ? true
             : false
-
-        console.log('syncExist', syncExists)
 
         if (syncExists) {
             this.setState({
                 hasSyncEverBeenRunning: true,
             })
         }
-    }
 
-    state = {
-        showDiscordDemo: false,
-        logSeqFolder: null,
-        obsidianFolder: null,
-        serverOnline: false,
-        serverLoadingState: 'pristine',
-        bufferLimitReached: false,
-        hasSyncEverBeenRunning: false,
+        const PKMSYNCdateformatLogseq = await browser.storage.local.get(
+            'PKMSYNCdateformatLogseq',
+        )
+        const PKMSYNCdateformatObsidian = await browser.storage.local.get(
+            'PKMSYNCdateformatObsidian',
+        )
+
+        this.setState({
+            dateformatLogseq: PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
+            dateformatObsidian:
+                PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
+            serverLoadingState: 'success',
+            serverOnline: this.serverOnline,
+        })
     }
 
     private async getPathsFromLocalStorage() {
         const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+
         if (data.PKMSYNCpkmFolders) {
             this.setState({
-                logSeqFolder: data.pkmFolders.logSeqFolder || null,
-                obsidianFolder: data.pkmFolders.obsidianFolder || null,
+                logSeqFolder: data.PKMSYNCpkmFolders.logSeqFolder || null,
+                obsidianFolder: data.PKMSYNCpkmFolders.obsidianFolder || null,
             })
         }
     }
 
     private getFolder = async (pkmToSync: string) => {
         const pkmSyncKey = await getPkmSyncKey()
-
-        console.log('syncKey:', pkmSyncKey)
 
         const getFolderPath = async (pkmToSync: string) => {
             const response = await fetch(
@@ -151,6 +161,7 @@ class Import extends React.PureComponent<Props> {
 
         const folderPath = await getFolderPath(pkmToSync)
 
+        console.log('folderPath', folderPath)
         if (pkmToSync === 'logseq') {
             this.setState({ logSeqFolder: folderPath })
         } else if (pkmToSync === 'obsidian') {
@@ -263,45 +274,84 @@ class Import extends React.PureComponent<Props> {
                     ) : (
                         <>
                             {this.state.logSeqFolder !== null ? (
-                                <SelectFolderArea
-                                    onClick={async () =>
-                                        await this.getFolder('logseq')
-                                    }
-                                >
-                                    <TextField
-                                        icon={'folder'}
-                                        value={
-                                            this.state.logSeqFolder &&
-                                            this.state.logSeqFolder.length
-                                                ? this.state.logSeqFolder
-                                                : 'Click to select folder'
-                                        }
-                                    />
-                                    <PrimaryAction
-                                        label={'Change Folder'}
-                                        onClick={async (event) => {
-                                            event.stopPropagation()
+                                <>
+                                    <SelectFolderArea
+                                        onClick={async () =>
                                             await this.getFolder('logseq')
-                                        }}
-                                        icon={'folder'}
-                                        size={'medium'}
-                                        height={'44px'}
-                                        type={'secondary'}
-                                        padding={'0 8px 0 4px'}
-                                    />
-                                    <PrimaryAction
-                                        label={'Remove Folder'}
-                                        onClick={async (event) => {
-                                            event.stopPropagation()
-                                            await this.removeFolder('logseq')
-                                        }}
-                                        icon={'removeX'}
-                                        size={'medium'}
-                                        height={'44px'}
-                                        type={'forth'}
-                                        padding={'0 8px 0 4px'}
-                                    />
-                                </SelectFolderArea>
+                                        }
+                                    >
+                                        <TextField
+                                            icon={'folder'}
+                                            value={
+                                                this.state.logSeqFolder &&
+                                                this.state.logSeqFolder.length
+                                                    ? this.state.logSeqFolder
+                                                    : 'Click to select folder'
+                                            }
+                                        />
+                                        <PrimaryAction
+                                            label={'Change Folder'}
+                                            onClick={async (event) => {
+                                                event.stopPropagation()
+                                                await this.getFolder('logseq')
+                                            }}
+                                            icon={'folder'}
+                                            size={'medium'}
+                                            height={'44px'}
+                                            type={'secondary'}
+                                            padding={'0 8px 0 4px'}
+                                        />
+                                        <PrimaryAction
+                                            label={'Remove Folder'}
+                                            onClick={async (event) => {
+                                                event.stopPropagation()
+                                                await this.removeFolder(
+                                                    'logseq',
+                                                )
+                                            }}
+                                            icon={'removeX'}
+                                            size={'medium'}
+                                            height={'44px'}
+                                            type={'tertiary'}
+                                            padding={'0 8px 0 4px'}
+                                        />
+                                    </SelectFolderArea>
+                                    <SettingsContainer>
+                                        <SettingsTitle>Settings</SettingsTitle>
+                                        <SettingsEntry>
+                                            <SettingsLabel>
+                                                Date format for page entries{' '}
+                                            </SettingsLabel>
+                                            <SettingsValueBox>
+                                                <SettingsLink
+                                                    href="https://devhints.io/moment"
+                                                    target="_blank"
+                                                >
+                                                    Formatting Help
+                                                </SettingsLink>
+                                                <TextField
+                                                    value={
+                                                        this.state
+                                                            .dateformatLogseq
+                                                    }
+                                                    onChange={(event) => {
+                                                        this.setState({
+                                                            dateformatLogseq: (event.target as HTMLInputElement)
+                                                                .value,
+                                                        })
+                                                        browser.storage.local.set(
+                                                            {
+                                                                PKMSYNCdateformatLogseq: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            },
+                                                        )
+                                                    }}
+                                                    width={'300px'}
+                                                />
+                                            </SettingsValueBox>
+                                        </SettingsEntry>
+                                    </SettingsContainer>
+                                </>
                             ) : this.state.serverOnline ? (
                                 <PrimaryAction
                                     label={'Select LogSeq Folder'}
@@ -416,46 +466,85 @@ class Import extends React.PureComponent<Props> {
                     ) : (
                         <>
                             {this.state.obsidianFolder !== null ? (
-                                <SelectFolderArea
-                                    onClick={async () =>
-                                        await this.getFolder('obsidian')
-                                    }
-                                >
-                                    <TextField
-                                        icon={'folder'}
-                                        value={
-                                            this.state.obsidianFolder &&
-                                            this.state.obsidianFolder.length
-                                                ? this.state.obsidianFolder
-                                                : 'Click to select folder'
-                                        }
-                                        disabled
-                                    />
-                                    <PrimaryAction
-                                        label={'Change Folder'}
-                                        onClick={async (event) => {
-                                            event.stopPropagation()
+                                <>
+                                    <SelectFolderArea
+                                        onClick={async () =>
                                             await this.getFolder('obsidian')
-                                        }}
-                                        icon={'folder'}
-                                        size={'medium'}
-                                        type={'secondary'}
-                                        height={'44px'}
-                                        padding={'0 8px 0 4px'}
-                                    />
-                                    <PrimaryAction
-                                        label={'Remove Folder'}
-                                        onClick={async (event) => {
-                                            event.stopPropagation()
-                                            await this.removeFolder('obsidian')
-                                        }}
-                                        icon={'removeX'}
-                                        size={'medium'}
-                                        height={'44px'}
-                                        type={'forth'}
-                                        padding={'0 8px 0 4px'}
-                                    />
-                                </SelectFolderArea>
+                                        }
+                                    >
+                                        <TextField
+                                            icon={'folder'}
+                                            value={
+                                                this.state.obsidianFolder &&
+                                                this.state.obsidianFolder.length
+                                                    ? this.state.obsidianFolder
+                                                    : 'Click to select folder'
+                                            }
+                                            disabled
+                                        />
+                                        <PrimaryAction
+                                            label={'Change Folder'}
+                                            onClick={async (event) => {
+                                                event.stopPropagation()
+                                                await this.getFolder('obsidian')
+                                            }}
+                                            icon={'folder'}
+                                            size={'medium'}
+                                            type={'secondary'}
+                                            height={'44px'}
+                                            padding={'0 8px 0 4px'}
+                                        />
+                                        <PrimaryAction
+                                            label={'Remove Folder'}
+                                            onClick={async (event) => {
+                                                event.stopPropagation()
+                                                await this.removeFolder(
+                                                    'obsidian',
+                                                )
+                                            }}
+                                            icon={'removeX'}
+                                            size={'medium'}
+                                            height={'44px'}
+                                            type={'tertiary'}
+                                            padding={'0 8px 0 4px'}
+                                        />
+                                    </SelectFolderArea>
+                                    <SettingsContainer>
+                                        <SettingsTitle>Settings</SettingsTitle>
+                                        <SettingsEntry>
+                                            <SettingsLabel>
+                                                Date format for page entries{' '}
+                                            </SettingsLabel>
+                                            <SettingsValueBox>
+                                                <SettingsLink
+                                                    href="https://devhints.io/moment"
+                                                    target="_blank"
+                                                >
+                                                    Formatting Help
+                                                </SettingsLink>
+                                                <TextField
+                                                    value={
+                                                        this.state
+                                                            .dateformatObsidian
+                                                    }
+                                                    onChange={(event) => {
+                                                        this.setState({
+                                                            dateformatObsidian: (event.target as HTMLInputElement)
+                                                                .value,
+                                                        })
+                                                        browser.storage.local.set(
+                                                            {
+                                                                PKMSYNCdateformatObsidian: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            },
+                                                        )
+                                                    }}
+                                                    width={'300px'}
+                                                />
+                                            </SettingsValueBox>
+                                        </SettingsEntry>
+                                    </SettingsContainer>
+                                </>
                             ) : this.state.serverOnline ? (
                                 <PrimaryAction
                                     label={'Select Obsidian Folder'}
@@ -676,6 +765,46 @@ class Import extends React.PureComponent<Props> {
 }
 
 export default Import
+
+const SettingsContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 20px;
+    margin-bottom: 20px;
+    margin-top: 30px;
+`
+
+const SettingsTitle = styled.div`
+    font-size: 18px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.greyScale6};
+`
+
+const SettingsEntry = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    grid-gap: 20px;
+    justify-content: space-between;
+`
+const SettingsValueBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    grid-gap: 20px;
+    justify-content: flex-end;
+`
+
+const SettingsLabel = styled.div`
+    font-size: 14px;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.greyScale5};
+`
+const SettingsLink = styled.a`
+    font-size: 14px;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.prime2};
+`
 
 const ServerOnline = styled.div`
     position: absolute;

@@ -47,8 +47,15 @@ export class PKMSyncBackgroundModule {
 
         // Process for LogSeq if valid
         if (validFolders.logSeq) {
+            const PKMSYNCdateformatLogseq = await browser.storage.local.get(
+                'PKMSYNCdateformatLogseq',
+            )
             try {
-                await this.createPageUpdate(item, 'logseq')
+                await this.createPageUpdate(
+                    item,
+                    'logseq',
+                    PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
+                )
             } catch (e) {
                 console.error('error', e)
             }
@@ -58,15 +65,22 @@ export class PKMSyncBackgroundModule {
 
         // Process for Obsidian if valid
         if (validFolders.obsidian) {
+            const PKMSYNCdateformatObsidian = await browser.storage.local.get(
+                'PKMSYNCdateformatObsidian',
+            )
             try {
-                await this.createPageUpdate(item, 'obsidian')
+                await this.createPageUpdate(
+                    item,
+                    'obsidian',
+                    PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
+                )
             } catch (e) {
                 console.error('error', e)
             }
         }
     }
 
-    async createPageUpdate(item, pkmType) {
+    async createPageUpdate(item, pkmType, syncDateFormat) {
         let page
 
         try {
@@ -95,6 +109,7 @@ export class PKMSyncBackgroundModule {
                             item.data.createdWhen,
                             item.data.type,
                             pkmType,
+                            syncDateFormat,
                         ),
                     item.data.pageTitle || null,
                     item.data.pageURL || null,
@@ -102,12 +117,14 @@ export class PKMSyncBackgroundModule {
                     item.data.creationDate || null,
                     item.data.type || null,
                     pkmType,
+                    syncDateFormat,
                 )
             } else if (item.type === 'annotation') {
                 annotationsSection = this.replaceOrAppendAnnotation(
                     annotationsSection,
                     item,
                     pkmType,
+                    syncDateFormat,
                 )
             }
         } else {
@@ -118,6 +135,7 @@ export class PKMSyncBackgroundModule {
                 item.data.createdWhen,
                 item.data.type,
                 pkmType,
+                syncDateFormat,
             )
 
             // if (item.type === 'annotation' || item.type === 'note') {
@@ -145,7 +163,12 @@ export class PKMSyncBackgroundModule {
         )
     }
 
-    replaceOrAppendAnnotation(annotationsSection, item, pkmType) {
+    replaceOrAppendAnnotation(
+        annotationsSection,
+        item,
+        pkmType,
+        syncDateFormat,
+    ) {
         let annotationStartIndex
         let annotationEndIndex
         if (pkmType === 'obsidian') {
@@ -174,6 +197,7 @@ export class PKMSyncBackgroundModule {
                     item.data.createdWhen,
                     item.data.type,
                     pkmType,
+                    syncDateFormat,
                 )
 
                 return (
@@ -208,6 +232,7 @@ export class PKMSyncBackgroundModule {
                     item.data.createdWhen,
                     item.data.type,
                     pkmType,
+                    syncDateFormat,
                 )
 
                 return (
@@ -229,6 +254,7 @@ export class PKMSyncBackgroundModule {
                 item.data.createdWhen,
                 item.data.type,
                 pkmType,
+                syncDateFormat,
             )
             return annotationsSection + newAnnotationContent
         }
@@ -243,6 +269,7 @@ export class PKMSyncBackgroundModule {
         creationDate,
         type,
         pkmType,
+        syncDateFormat,
     ) {
         let annotation = annotationContent
         let updatedAnnotation
@@ -317,6 +344,7 @@ export class PKMSyncBackgroundModule {
                 newCreationDate,
                 type,
                 pkmType,
+                syncDateFormat,
             )
         }
 
@@ -364,6 +392,7 @@ export class PKMSyncBackgroundModule {
                 newCreationDate,
                 type,
                 pkmType,
+                syncDateFormat,
             )
         }
 
@@ -378,17 +407,12 @@ export class PKMSyncBackgroundModule {
         creationDate,
         type,
         pkmType,
+        syncDateFormat,
     ) {
         let createdWhen = creationDate
         let updatedPageHeader
 
         if (pkmType === 'obsidian') {
-            if (pkmType === 'obsidian' && typeof createdWhen === 'number') {
-                createdWhen = moment
-                    .unix(createdWhen / 1000)
-                    .format('YYYY-MM-DD')
-            }
-
             // Extract data from pageHeader
             const titleMatch = pageHeader.match(/Title: (.+)/)
             const urlMatch = pageHeader.match(/Url: (.+)/)
@@ -436,15 +460,10 @@ export class PKMSyncBackgroundModule {
                 newCreationDate,
                 type,
                 pkmType,
+                syncDateFormat,
             )
         }
         if (pkmType === 'logseq') {
-            if (pkmType === 'logseq' && typeof createdWhen === 'number') {
-                createdWhen = moment
-                    .unix(createdWhen / 1000)
-                    .format('MMM Do, YYYY')
-            }
-
             // Extract data from pageHeader
             const titleMatch = pageHeader.match(/pagetitle:: (.+)/)
             const urlMatch = pageHeader.match(/pageurl:: (.+)/)
@@ -489,6 +508,7 @@ export class PKMSyncBackgroundModule {
                 newCreationDate,
                 type,
                 pkmType,
+                syncDateFormat,
             )
         }
 
@@ -502,6 +522,7 @@ export class PKMSyncBackgroundModule {
         creationDate,
         type,
         pkmType,
+        syncDateFormat,
     ) {
         let createdWhen = creationDate
         let titleLine
@@ -511,17 +532,19 @@ export class PKMSyncBackgroundModule {
         let pageSeparator
         let warning = ''
         if (pkmType === 'obsidian' && typeof createdWhen === 'number') {
-            createdWhen = moment.unix(createdWhen / 1000).format('YYYY-MM-DD')
+            createdWhen = `"[[${moment
+                .unix(createdWhen / 1000)
+                .format(syncDateFormat)}]]"`
         } else if (pkmType === 'logseq' && typeof createdWhen === 'number') {
-            createdWhen = moment.unix(createdWhen / 1000).format('MMM Do, YYYY')
-        } else {
-            createdWhen = createdWhen.replace(/\[\[(.+)\]\]/, '$1')
+            createdWhen = `[[${moment
+                .unix(createdWhen / 1000)
+                .format(syncDateFormat)}]]`
         }
 
         if (pkmType === 'obsidian') {
             titleLine = `Title: ${pageTitle}\n`
             urlLine = `Url: ${pageURL}\n`
-            creationDateLine = `Created at: "[[${createdWhen}]]"\n`
+            creationDateLine = `Created at: ${createdWhen}\n`
             spacesLine = pageSpaces ? `Spaces: \n${pageSpaces}` : ''
             pageSeparator = '---\n'
             warning =
@@ -539,7 +562,7 @@ export class PKMSyncBackgroundModule {
         if (pkmType === 'logseq') {
             urlLine = `pageurl:: ${pageURL}\n`
             titleLine = `pagetitle:: ${pageTitle}\n`
-            creationDateLine = `createdat:: [[${createdWhen}]]\n`
+            creationDateLine = `createdat:: ${createdWhen}\n`
             spacesLine = pageSpaces ? `spaces:: ${pageSpaces}\n` : ''
             warning =
                 '- ```\n❗️Do not edit this file or it will create duplicates or override your changes. For feedback, go to memex.garden/chatSupport.\n```\n'
@@ -556,7 +579,19 @@ export class PKMSyncBackgroundModule {
         creationDate,
         type,
         pkmType,
+        syncDateFormat,
     ) {
+        let createdWhen = creationDate
+        if (pkmType === 'obsidian' && typeof createdWhen === 'number') {
+            createdWhen = `"[[${moment
+                .unix(createdWhen / 1000)
+                .format(syncDateFormat)}]]"`
+        } else if (pkmType === 'logseq' && typeof createdWhen === 'number') {
+            createdWhen = `[[${moment
+                .unix(createdWhen / 1000)
+                .format(syncDateFormat)}]]`
+        }
+
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = body ? `> ${body}\n\n` : ''
@@ -568,7 +603,9 @@ export class PKMSyncBackgroundModule {
             const highlightSpacesLine = annotationSpaces
                 ? `<span class="annotationSpaces" id="${annotationId}"><strong>Spaces:</strong></span> ${annotationSpaces}\n`
                 : ''
-            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"><strong>Created at:</strong></span> ${creationDate}\n`
+            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"><strong>Created at:</strong></span> ${moment(
+                createdWhen,
+            ).format(`${syncDateFormat} hh:mm a`)}\n`
             const annotationEndLine = `\r<span class="annotationEndLine" id="${annotationId}"> --- </span>\n`
 
             return (
@@ -593,7 +630,9 @@ export class PKMSyncBackgroundModule {
             const highlightSpacesLine = annotationSpaces
                 ? `  - **Spaces:** ${annotationSpaces}\n`
                 : ''
-            const creationDateLine = `  - **Created at:** ${creationDate}\r`
+            const creationDateLine = `  - **Created at:** ${moment(
+                createdWhen,
+            ).format(`${syncDateFormat} hh:mm a`)}\r`
             const annotationEndLine = `<span id="${annotationId}"/>\n\n`
             return (
                 separatedLine +
