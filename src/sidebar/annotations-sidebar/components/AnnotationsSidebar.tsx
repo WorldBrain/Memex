@@ -2304,7 +2304,7 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTitleEditField
                     ref={this.spaceTitleEditFieldRef}
                     value={
-                        this.props.spaceTitleEditValue
+                        this.props.spaceTitleEditValue != null
                             ? this.props.spaceTitleEditValue
                             : selectedList.name
                     }
