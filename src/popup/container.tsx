@@ -194,7 +194,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             return (
                 <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
-                        Annotating local PDFs is not possible on Firefox
+                        Annotating local PDFs <br />
+                        is not possible on Firefox
                     </NoticeTitle>
                     <NoticeSubTitle>
                         Use Chromium-based browsers to use this feature
@@ -480,12 +481,16 @@ const BlurredNotice = styled.div<{
     position: absolute;
     height: 100%;
     width: 100%;
+    width: fill-available;
+    width: -moz-available;
+    height: 100%;
     z-index: 30;
     overflow-y: ${(props) =>
         props.browser === 'firefox' && props.location === 'local'
             ? 'hidden'
             : 'scroll'};
-    background: ${(props) => (props.browser === 'firefox' ? 'white' : 'none')};
+    background: ${(props) =>
+        props.browser === 'firefox' ? props.theme.colors.black + 90 : 'none'};
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;

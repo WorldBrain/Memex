@@ -12,6 +12,7 @@ import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -82,19 +83,34 @@ export default class PopupLogic extends UILogic<State, Event> {
 
         await loadInitial(this, async () => {
             const currentTab = await getCurrentTab({ runtimeAPI, tabsAPI })
+            console.log('currentTab')
+            console.log('currentTab', currentTab)
             if (
                 currentTab.url === 'about:blank' ||
                 currentTab.url.startsWith('chrome') ||
                 currentTab.url.startsWith('moz-extension') ||
                 currentTab.url.startsWith('about:')
             ) {
+                console.log('not valid page for popup')
             } else {
-                const identifier = await pageIndexingBG.waitForContentIdentifier(
-                    {
+                let identifier
+                if (
+                    currentTab.url.startsWith('file://') ||
+                    (currentTab.url.endsWith('.pdf') &&
+                        (!currentTab.url.startsWith('chrome-extension') ||
+                            !currentTab.url.startsWith('moz-extension')))
+                ) {
+                    identifier = {
+                        fullUrl: currentTab.url,
+                        normalizedUrl: normalizeUrl(currentTab.url),
+                    }
+                } else {
+                    identifier = await pageIndexingBG.waitForContentIdentifier({
                         tabId: currentTab.id,
                         fullUrl: currentTab.url,
-                    },
-                )
+                    })
+                }
+                console.log('identifier', identifier)
                 const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
 
                 const pageListIds = await customListsBG.fetchPageLists({
