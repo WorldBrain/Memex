@@ -34,3 +34,21 @@ export async function getPkmSyncKey() {
 
     return pkmSyncKey
 }
+
+export async function isPkmSyncEnabled() {
+    try {
+        let data = await browser.storage.local.get('PKMSYNCpkmFolders')
+
+        if (
+            !data.PKMSYNCpkmFolders ||
+            (data.PKMSYNCpkmFolders.obsidian?.length > 0 &&
+                data.PKMSYNCpkmFolders.logseq.length > 0)
+        ) {
+            return false
+        }
+
+        return true
+    } catch (e) {
+        console.error(e)
+    }
+}
