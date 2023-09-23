@@ -347,9 +347,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (
             event.action === 'create_youtube_timestamp_with_screenshot'
         ) {
-            // await this.processEvent('setActiveSidebarTab', {
-            //     tab: 'annotations',
-            // })
+            if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+                await sleepPromise(100)
+            }
 
             this.processEvent('createYoutubeTimestampWithScreenshot', {
                 imageData: event.imageData,
