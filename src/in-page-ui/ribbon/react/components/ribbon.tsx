@@ -2220,7 +2220,7 @@ const UpperPart = styled.div<{ ribbonPosition; isSidebarOpen }>`
             align-items: center;
             flex-direction: column;
             justify-content: space-between;
-            padding: 0px 10px;
+            padding: 10px 10px;
         `}
 `
 
@@ -2252,7 +2252,7 @@ const BottomSection = styled.div<{ ribbonPosition; sidebarOpen }>`
             align-items: center;
             flex-direction: column;
             justify-content: space-between;
-            padding: 0px 10px;
+            padding: 10px 10px;
         `}
 `
 
@@ -2346,10 +2346,9 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     display: flex;
                     box-shadow: none;
                     justify-content: center;
-                    height: fill-available;
                     height: 100%;
                     flex-direction: column;
-                    padding: 20px 0px;
+                    padding: 0px 0px;
                     width: ${TOOLTIP_WIDTH};
                     align-items: flex-start;
                     right: 0px;

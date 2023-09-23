@@ -2201,7 +2201,7 @@ export class AnnotationsSidebar extends React.Component<
 
         event.stopPropagation()
         if (
-            (event.target as HTMLInputElement).value.length > 0 &&
+            (event.target as HTMLInputElement).value.length != null &&
             event.key === 'Enter'
         ) {
             // this blurring is tracked and will automatically save it
