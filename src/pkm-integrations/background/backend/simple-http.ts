@@ -111,13 +111,6 @@ export class MemexLocalBackend {
         }
     }
 
-    async _writeToPath(url: string, body: string, pkmType) {
-        await fetch(`${this.url}/${url}`, {
-            method: 'PUT',
-            body,
-        })
-    }
-
     async listObjects(): Promise<string[]> {
         const response = await fetch(`${this.url}/backup/change-sets`)
         if (response.status === 404) {

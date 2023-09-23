@@ -15,7 +15,11 @@ import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/se
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { browser } from 'webextension-polyfill-ts'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
+import {
+    getFolder,
+    getPathsFromLocalStorage,
+    getPkmSyncKey,
+} from 'src/pkm-integrations/background/backend/utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { Checkbox } from 'src/common-ui/components'
@@ -34,7 +38,12 @@ interface Props {
 
 const Warning = ({ children }) => (
     <div className={localStyles.warning}>
-        <img src="/img/caution.png" className={localStyles.icon} />{' '}
+        <Icon
+            icon={'warning'}
+            heightAndWidth="24px"
+            color="greyScale1"
+            hoverOff
+        />
         <p className={localStyles.warningText}>{children}</p>
     </div>
 )
@@ -67,16 +76,27 @@ class Import extends React.PureComponent<Props> {
     }
 
     async componentDidMount(): Promise<void> {
-        // Check local storage for saved paths when the component mounts
-        this.getPathsFromLocalStorage()
-
         this.setState({
             serverLoadingState: 'loading',
         })
+        // Check local storage for saved paths when the component mounts
+
+        const folders = await getPathsFromLocalStorage()
+
+        if (folders) {
+            this.setState({
+                logSeqFolder: folders.logSeqFolder || null,
+                obsidianFolder: folders.obsidianFolder || null,
+            })
+        }
 
         this.serverOnline = await new MemexLocalBackend({
             url: 'http://localhost:11922',
         }).isReachable()
+
+        this.setState({
+            serverOnline: this.serverOnline,
+        })
 
         // Check every 3 seconds if the server is running and update the state accordingly
         setInterval(async () => {
@@ -160,44 +180,12 @@ class Import extends React.PureComponent<Props> {
         }
     }
 
-    private getFolder = async (pkmToSync: string) => {
-        const pkmSyncKey = await getPkmSyncKey()
+    private async setFolderForPKM(pkmToSync: string) {
+        const data = await getFolder(pkmToSync)
 
-        const getFolderPath = async (pkmToSync: string) => {
-            const response = await fetch(
-                'http://localhost:11922/set-directory',
-                {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        pkmSyncType: pkmToSync,
-                        syncKey: pkmSyncKey,
-                    }),
-                },
-            )
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`)
-            }
-            const directoryPath = await response.text()
-            return directoryPath
-        }
-
-        const folderPath = await getFolderPath(pkmToSync)
-
-        if (pkmToSync === 'logseq') {
-            this.setState({ logSeqFolder: folderPath })
-        } else if (pkmToSync === 'obsidian') {
-            this.setState({ obsidianFolder: folderPath })
-        }
-
-        // Save to local storage
-        await browser.storage.local.set({
-            PKMSYNCpkmFolders: {
-                logSeqFolder: this.state.logSeqFolder,
-                obsidianFolder: this.state.obsidianFolder,
-            },
+        this.setState({
+            logSeqFolder: data.logSeqFolder || null,
+            obsidianFolder: data.obsidianFolder || null,
         })
     }
 
@@ -299,9 +287,13 @@ class Import extends React.PureComponent<Props> {
                         <>
                             {this.state.logSeqFolder !== null ? (
                                 <>
+                                    <Warning>
+                                        Only activate this sync on one of your
+                                        devices to the same graph
+                                    </Warning>
                                     <SelectFolderArea
                                         onClick={async () =>
-                                            await this.getFolder('logseq')
+                                            await this.setFolderForPKM('logseq')
                                         }
                                     >
                                         <TextField
@@ -317,12 +309,14 @@ class Import extends React.PureComponent<Props> {
                                             label={'Change Folder'}
                                             onClick={async (event) => {
                                                 event.stopPropagation()
-                                                await this.getFolder('logseq')
+                                                await this.setFolderForPKM(
+                                                    'logseq',
+                                                )
                                             }}
                                             icon={'folder'}
                                             size={'medium'}
                                             height={'44px'}
-                                            type={'secondary'}
+                                            type={'tertiary'}
                                             padding={'0 8px 0 4px'}
                                         />
                                         <PrimaryAction
@@ -375,13 +369,22 @@ class Import extends React.PureComponent<Props> {
                                             </SettingsValueBox>
                                         </SettingsEntry>
                                         <TooltipBox
-                                            tooltipText={`Add custom tags like the initial default "Memex Sync" to make entries more filterable in LogSeq.`}
+                                            tooltipText={
+                                                <span>
+                                                    Add custom tags like the
+                                                    initial default "Memex Sync"
+                                                    to <br />
+                                                    make entries more filterable
+                                                    in Logseq.
+                                                </span>
+                                            }
+                                            placement="bottom"
                                         >
                                             <SettingsEntry>
                                                 <SettingsLabel>
-                                                    Additional sync tags for
-                                                    pages (separate by comma,
-                                                    can include Spaces){' '}
+                                                    Sync tags for pages
+                                                    (separate by comma, can
+                                                    include Spaces){' '}
                                                 </SettingsLabel>
                                                 <SettingsValueBox>
                                                     <TextField
@@ -428,20 +431,31 @@ class Import extends React.PureComponent<Props> {
                                     </SettingsContainer>
                                 </>
                             ) : this.state.serverOnline ? (
-                                <PrimaryAction
-                                    label={'Select LogSeq Folder'}
-                                    onClick={async (event) => {
-                                        event.stopPropagation()
-                                        await this.getFolder('logseq')
-                                    }}
-                                    icon={'folder'}
-                                    size={'medium'}
-                                    height={'44px'}
-                                    type={'secondary'}
-                                    padding={'0 8px 0 4px'}
-                                />
+                                <InstructionsSection>
+                                    <InstructionsText>
+                                        Select the "pages" folder in your Logseq
+                                        graph folder to sync pages and their
+                                        annotations to.
+                                    </InstructionsText>
+                                    <PrimaryAction
+                                        label={'Select LogSeq Folder'}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            await this.setFolderForPKM('logseq')
+                                        }}
+                                        icon={'folder'}
+                                        size={'medium'}
+                                        type={'secondary'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                </InstructionsSection>
                             ) : (
-                                <>
+                                <InstructionsSection>
+                                    <InstructionsText>
+                                        Download and/or run the Memex Sync
+                                        Helper to get started. The menu tray
+                                        icon is visible when its active.
+                                    </InstructionsText>
                                     <PrimaryAction
                                         label={'Download Sync Helper'}
                                         onClick={async (event) => {
@@ -452,11 +466,10 @@ class Import extends React.PureComponent<Props> {
                                         }}
                                         icon={'inbox'}
                                         size={'medium'}
-                                        height={'44px'}
                                         type={'secondary'}
                                         padding={'0 8px 0 4px'}
                                     />
-                                </>
+                                </InstructionsSection>
                             )}
                         </>
                     )}
@@ -544,7 +557,9 @@ class Import extends React.PureComponent<Props> {
                                 <>
                                     <SelectFolderArea
                                         onClick={async () =>
-                                            await this.getFolder('obsidian')
+                                            await this.setFolderForPKM(
+                                                'obsidian',
+                                            )
                                         }
                                     >
                                         <TextField
@@ -561,11 +576,13 @@ class Import extends React.PureComponent<Props> {
                                             label={'Change Folder'}
                                             onClick={async (event) => {
                                                 event.stopPropagation()
-                                                await this.getFolder('obsidian')
+                                                await this.setFolderForPKM(
+                                                    'obsidian',
+                                                )
                                             }}
                                             icon={'folder'}
                                             size={'medium'}
-                                            type={'secondary'}
+                                            type={'tertiary'}
                                             height={'44px'}
                                             padding={'0 8px 0 4px'}
                                         />
@@ -619,13 +636,22 @@ class Import extends React.PureComponent<Props> {
                                             </SettingsValueBox>
                                         </SettingsEntry>
                                         <TooltipBox
-                                            tooltipText={`Add custom tags like the initial default "Memex Sync" to make entries more filterable in Obsidian.`}
+                                            tooltipText={
+                                                <span>
+                                                    Add custom tags like the
+                                                    initial default "Memex Sync"
+                                                    to <br />
+                                                    make entries more filterable
+                                                    in Obsidian.
+                                                </span>
+                                            }
+                                            placement="bottom"
                                         >
                                             <SettingsEntry>
                                                 <SettingsLabel>
-                                                    Additional sync tags for
-                                                    pages (separate by comma,
-                                                    can include Spaces){' '}
+                                                    Sync tags for pages
+                                                    (separate by comma, can
+                                                    include Spaces){' '}
                                                 </SettingsLabel>
                                                 <SettingsValueBox>
                                                     <TextField
@@ -672,20 +698,33 @@ class Import extends React.PureComponent<Props> {
                                     </SettingsContainer>
                                 </>
                             ) : this.state.serverOnline ? (
-                                <PrimaryAction
-                                    label={'Select Obsidian Folder'}
-                                    onClick={async (event) => {
-                                        event.stopPropagation()
-                                        await this.getFolder('obsidian')
-                                    }}
-                                    icon={'folder'}
-                                    size={'medium'}
-                                    type={'secondary'}
-                                    height={'44px'}
-                                    padding={'0 8px 0 4px'}
-                                />
+                                <InstructionsSection>
+                                    <InstructionsText>
+                                        Select a folder in your Obsidian graph
+                                        folder to sync your pages and
+                                        annotations to.
+                                    </InstructionsText>
+                                    <PrimaryAction
+                                        label={'Select Obsidian Folder'}
+                                        onClick={async (event) => {
+                                            event.stopPropagation()
+                                            await this.setFolderForPKM(
+                                                'obsidian',
+                                            )
+                                        }}
+                                        icon={'folder'}
+                                        size={'medium'}
+                                        type={'secondary'}
+                                        padding={'0 8px 0 4px'}
+                                    />
+                                </InstructionsSection>
                             ) : (
-                                <>
+                                <InstructionsSection>
+                                    <InstructionsText>
+                                        Download and/or run the Memex Sync
+                                        Helper to get started. The menu tray
+                                        icon is visible when its active.
+                                    </InstructionsText>
                                     <PrimaryAction
                                         label={'Download Sync Helper'}
                                         onClick={async (event) => {
@@ -696,11 +735,10 @@ class Import extends React.PureComponent<Props> {
                                         }}
                                         icon={'inbox'}
                                         size={'medium'}
-                                        height={'44px'}
                                         type={'secondary'}
                                         padding={'0 8px 0 4px'}
                                     />
-                                </>
+                                </InstructionsSection>
                             )}
                         </>
                     )}
@@ -921,8 +959,14 @@ const SettingsValueBox = styled.div`
     justify-content: flex-end;
 `
 
+const Instructions = styled.div`
+    font-size: 16px;
+    font-weight: 400;
+    color: ${(props) => props.theme.colors.greyScale6};
+    margin-bottom: 10px;
+`
 const SettingsLabel = styled.div`
-    font-size: 14px;
+    font-size: 16px;
     font-weight: 400;
     color: ${(props) => props.theme.colors.greyScale5};
 `
@@ -1009,8 +1053,8 @@ const InstructionsPill = styled.div`
 `
 
 const InstructionsText = styled.div`
-    font-size: 14px;
-    font-weight: 300;
+    font-size: 16px;
+    font-weight: 400;
     color: ${(props) => props.theme.colors.greyScale6};
 `
 

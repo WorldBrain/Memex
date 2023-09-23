@@ -43,7 +43,6 @@ export class PKMSyncBackgroundModule {
     }
 
     async processChanges(item) {
-        console.log('item', item)
         const validFolders = await this.getValidFolders()
 
         // Process for LogSeq if valid
@@ -126,7 +125,6 @@ export class PKMSyncBackgroundModule {
                             item.data.type,
                             pkmType,
                             syncDateFormat,
-                            customTags,
                         ),
                     item.data.pageTitle || null,
                     item.data.pageURL || null,
@@ -152,8 +150,6 @@ export class PKMSyncBackgroundModule {
                 customTags.split(',').map((tag) => spaces.push(tag.trim()))
             }
 
-            console.log('customTags', customTags, spaces, pkmType)
-
             if (pkmType === 'obsidian') {
                 spacesString = spaces
                     .map((space) => ` - "[[${space}]]"\n`)
@@ -163,7 +159,6 @@ export class PKMSyncBackgroundModule {
                 spacesString = spaces.map((space) => `[[${space}]]`).join(' ')
             }
 
-            console.log('formattedSpaces', spacesString)
             pageHeader = this.pageObjectDefault(
                 item.data.pageTitle,
                 item.data.pageUrl,

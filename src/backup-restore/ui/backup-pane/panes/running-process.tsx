@@ -231,6 +231,8 @@ export default class RunningProcess extends React.Component<Props> {
                                 ? this.handleCancel()
                                 : this.setState({ canceling: true })
                         }}
+                        type={'primary'}
+                        size={'medium'}
                     />
                 )}
             </div>
@@ -245,6 +247,8 @@ export default class RunningProcess extends React.Component<Props> {
                         this.props.onFinish()
                     }}
                     label={'Return to Settings'}
+                    type={'primary'}
+                    size={'medium'}
                 />
             </FinishContainer>
         )
@@ -260,6 +264,8 @@ export default class RunningProcess extends React.Component<Props> {
                             this.props.onFinish()
                         }}
                         label={'Return to Settings'}
+                        type={'primary'}
+                        size={'medium'}
                     />
                 </div>
             </div>

@@ -52,3 +52,51 @@ export async function isPkmSyncEnabled() {
         console.error(e)
     }
 }
+
+export async function getFolder(pkmToSync: string) {
+    const pkmSyncKey = await getPkmSyncKey()
+
+    const getFolderPath = async (pkmToSync: string) => {
+        const response = await fetch('http://localhost:11922/set-directory', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                pkmSyncType: pkmToSync,
+                syncKey: pkmSyncKey,
+            }),
+        })
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
+        }
+        const directoryPath = await response.text()
+        return directoryPath
+    }
+
+    const folderPath = await getFolderPath(pkmToSync)
+
+    // Fetch the existing "PKMSYNCpkmFolders" from local storage
+    let data = await browser.storage.local.get('PKMSYNCpkmFolders')
+    data = data.PKMSYNCpkmFolders || {}
+
+    // Update the value in it that corresponds to the pkmToSync
+    if (pkmToSync === 'logseq') {
+        data['logSeqFolder'] = folderPath
+    } else if (pkmToSync === 'obsidian') {
+        data['obsidianFolder'] = folderPath
+    } else if (pkmToSync === 'backup') {
+        data['backupFolder'] = folderPath
+    }
+
+    // Write the update to local storage
+    await browser.storage.local.set({ PKMSYNCpkmFolders: data })
+
+    return data
+}
+
+export async function getPathsFromLocalStorage() {
+    const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+
+    return data.PKMSYNCpkmFolders
+}

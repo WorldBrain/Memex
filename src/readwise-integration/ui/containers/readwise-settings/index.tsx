@@ -117,6 +117,7 @@ class ReadwiseSettings extends StatefulUIElement<
                                     null,
                                 )
                             }
+                            fontSize={16}
                             label={'Sync existing highlights'}
                         />
                     </ExistingHighlightBox>
