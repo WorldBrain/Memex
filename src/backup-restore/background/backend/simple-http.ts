@@ -64,8 +64,6 @@ export class MemexLocalBackend extends BackupBackend {
         bodyJSON.backupPath = backupFolderPath
         bodyJSON = JSON.stringify(bodyJSON)
 
-        console.log('Writing to', url, body)
-
         await fetch(`${this.url}/${url}`, {
             method: 'PUT',
             headers: {

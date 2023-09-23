@@ -96,7 +96,6 @@ export default class PopupLogic extends UILogic<State, Event> {
                 currentTab.url.startsWith('moz-extension') ||
                 currentTab.url.startsWith('about:')
             ) {
-                console.log('not valid page for popup')
             } else {
                 let identifier
                 if (
@@ -115,7 +114,6 @@ export default class PopupLogic extends UILogic<State, Event> {
                         fullUrl: currentTab.url,
                     })
                 }
-                console.log('identifier', identifier)
                 const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
 
                 // const [isPDFReaderEnabled] = await Promise.all([
