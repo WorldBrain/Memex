@@ -36,6 +36,7 @@ export interface Event {
 
 export interface State {
     pageListIds: number[]
+    pageListNames: string[]
     loadState: UITaskState
     currentTabFullUrl: string
     identifierFullUrl: string
@@ -62,6 +63,7 @@ export default class PopupLogic extends UILogic<State, Event> {
 
     getInitialState = (): State => ({
         pageListIds: [],
+        pageListNames: [],
         currentTabFullUrl: '',
         identifierFullUrl: '',
         underlyingResourceUrl: '',
@@ -132,6 +134,13 @@ export default class PopupLogic extends UILogic<State, Event> {
                 const pageListIds = await customListsBG.fetchPageLists({
                     url: identifier.fullUrl,
                 })
+
+                let pageListNames = []
+                for (let id of pageListIds) {
+                    const list = await customListsBG.fetchListById({ id: id })
+                    pageListNames.push(list.name)
+                }
+
                 const isSavedPage = await this.loadBookmarkState(
                     identifier.fullUrl,
                     pageIndexingBG,
@@ -139,6 +148,7 @@ export default class PopupLogic extends UILogic<State, Event> {
 
                 this.emitMutation({
                     pageListIds: { $set: pageListIds },
+                    pageListNames: { $set: pageListNames },
                     isSavedPage: { $set: isSavedPage },
                 })
             }
@@ -188,9 +198,15 @@ export default class PopupLogic extends UILogic<State, Event> {
     }) => {
         const pageListIdsSet = new Set(previousState.pageListIds)
         pageListIdsSet.add(event.listId)
+        const list = await this.dependencies.customListsBG.fetchListById({
+            id: event.listId,
+        })
+        const pageListNames = [...previousState.pageListNames, list.name]
+
         this.emitMutation({
             pageListIds: { $set: [...pageListIdsSet] },
             showAutoSaved: { $set: true },
+            pageListNames: { $set: pageListNames },
         })
     }
 
@@ -200,9 +216,19 @@ export default class PopupLogic extends UILogic<State, Event> {
     }) => {
         const pageListIdsSet = new Set(previousState.pageListIds)
         pageListIdsSet.delete(event.listId)
+        const list = await this.dependencies.customListsBG.fetchListById({
+            id: event.listId,
+        })
+
+        // Filter out the list name from the array
+        const pageListNames = previousState.pageListNames.filter(
+            (name) => name !== list.name,
+        )
+
         this.emitMutation({
             pageListIds: { $set: [...pageListIdsSet] },
             showAutoSaved: { $set: true },
+            pageListNames: { $set: pageListNames },
         })
     }
 

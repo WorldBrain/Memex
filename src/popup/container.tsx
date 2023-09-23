@@ -140,10 +140,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         if (added) {
             await this.processEvent('addPageList', { listId: added })
             this.props.onCollectionAdd(added)
+            await this.props.initState()
         }
         if (deleted) {
             await this.processEvent('delPageList', { listId: deleted })
             this.props.onCollectionDel(deleted)
+            await this.props.initState()
         }
         return backendResult
     }
@@ -333,6 +335,14 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     isSavedPage={this.state.isSavedPage}
                 />
                 <CollectionsButton pageListsIds={this.state.pageListIds} />
+                {this.state.pageListNames &&
+                    this.state.pageListNames?.length > 0 && (
+                        <ListNamesBox>
+                            {this.state.pageListNames?.map((item) => (
+                                <ListName>{item}</ListName>
+                            ))}
+                        </ListNamesBox>
+                    )}
                 <SpacerLine />
                 {this.isCurrentPagePDF === true && (
                     <PDFReaderButton
@@ -390,6 +400,24 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return <div className={styles.popup}>{this.renderChildren()}</div>
     }
 }
+
+const ListNamesBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 5px;
+    padding: 0 15px 15px 15px;
+    flex-wrap: wrap;
+`
+
+const ListName = styled.div`
+    padding: 2px 5px;
+    border-radius: 5px;
+    background-color: ${(props) => props.theme.colors.greyScale2};
+    color: ${(props) => props.theme.colors.greyScale6};
+    white-space: wrap;
+`
 
 const MemexLogo = styled.div`
     background-image: url('/img/memexLogoGrey.svg');
