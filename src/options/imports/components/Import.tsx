@@ -18,6 +18,7 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { Checkbox } from 'src/common-ui/components'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -59,6 +60,10 @@ class Import extends React.PureComponent<Props> {
         hasSyncEverBeenRunning: false,
         dateformatLogseq: 'MMM Do, YYYY',
         dateformatObsidian: 'YYYY-DD-MM',
+        // syncOnlyAnnotatedPagesLogseq: false,
+        // syncOnlyAnnotatedPagesObsidian false,
+        customTagsLogseq: '',
+        customTagsObsidian: '',
     }
 
     async componentDidMount(): Promise<void> {
@@ -72,8 +77,6 @@ class Import extends React.PureComponent<Props> {
         this.serverOnline = await new MemexLocalBackend({
             url: 'http://localhost:11922',
         }).isReachable()
-
-        console.log('this.server', this.serverOnline)
 
         // Check every 3 seconds if the server is running and update the state accordingly
         setInterval(async () => {
@@ -115,10 +118,32 @@ class Import extends React.PureComponent<Props> {
             'PKMSYNCdateformatObsidian',
         )
 
+        const customTagsObsidian = await browser.storage.local.get(
+            'PKMSYNCcustomTagsObsidian',
+        )
+        const customTagsLogseq = await browser.storage.local.get(
+            'PKMSYNCcustomTagsLogseq',
+        )
+
+        // const syncOnlyAnnotatedPagesLogseq = await browser.storage.local.get(
+        //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
+        // )
+        // const syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
+        //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
+        // )
+
         this.setState({
             dateformatLogseq: PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
             dateformatObsidian:
                 PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
+            customTagsObsidian:
+                customTagsObsidian.PKMSYNCcustomTagsObsidian || 'Memex Sync',
+            customTagsLogseq:
+                customTagsLogseq.PKMSYNCcustomTagsLogseq || 'Memex Sync',
+            // syncOnlyAnnotatedPagesLogseq:
+            //     syncOnlyAnnotatedPagesLogseq.PKMSYNCsyncOnlyAnnotatedPagesLogseq,
+            // syncOnlyAnnotatedPagesObsidian:
+            //     syncOnlyAnnotatedPagesObsidian.PKMSYNCsyncOnlyAnnotatedPagesObsidian,
             serverLoadingState: 'success',
             serverOnline: this.serverOnline,
         })
@@ -161,7 +186,6 @@ class Import extends React.PureComponent<Props> {
 
         const folderPath = await getFolderPath(pkmToSync)
 
-        console.log('folderPath', folderPath)
         if (pkmToSync === 'logseq') {
             this.setState({ logSeqFolder: folderPath })
         } else if (pkmToSync === 'obsidian') {
@@ -350,6 +374,57 @@ class Import extends React.PureComponent<Props> {
                                                 />
                                             </SettingsValueBox>
                                         </SettingsEntry>
+                                        <TooltipBox
+                                            tooltipText={`Add custom tags like the initial default "Memex Sync" to make entries more filterable in LogSeq.`}
+                                        >
+                                            <SettingsEntry>
+                                                <SettingsLabel>
+                                                    Additional sync tags for
+                                                    pages (separate by comma,
+                                                    can include Spaces){' '}
+                                                </SettingsLabel>
+                                                <SettingsValueBox>
+                                                    <TextField
+                                                        value={
+                                                            this.state
+                                                                .customTagsLogseq
+                                                        }
+                                                        onChange={(event) => {
+                                                            this.setState({
+                                                                customTagsLogseq: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            })
+                                                            browser.storage.local.set(
+                                                                {
+                                                                    PKMSYNCcustomTagsLogseq: (event.target as HTMLInputElement)
+                                                                        .value,
+                                                                },
+                                                            )
+                                                        }}
+                                                        width={'300px'}
+                                                    />
+                                                </SettingsValueBox>
+                                            </SettingsEntry>
+                                        </TooltipBox>
+                                        {/* <SettingsEntry>
+                                            <Checkbox
+                                                label="Sync only annotated pages"
+                                                isChecked={
+                                                    this.state
+                                                        .syncOnlyAnnotatedPagesLogseq
+                                                }
+                                                handleChange={async (event) => {
+                                                    this.setState({
+                                                        syncOnlyAnnotatedPagesLogseq: (event.target as HTMLInputElement)
+                                                            .checked,
+                                                    })
+                                                    browser.storage.local.set({
+                                                        PKMSYNCsyncOnlyAnnotatedPagesLogseq: (event.target as HTMLInputElement)
+                                                            .checked,
+                                                    })
+                                                }}
+                                            />
+                                        </SettingsEntry> */}
                                     </SettingsContainer>
                                 </>
                             ) : this.state.serverOnline ? (
@@ -543,6 +618,57 @@ class Import extends React.PureComponent<Props> {
                                                 />
                                             </SettingsValueBox>
                                         </SettingsEntry>
+                                        <TooltipBox
+                                            tooltipText={`Add custom tags like the initial default "Memex Sync" to make entries more filterable in Obsidian.`}
+                                        >
+                                            <SettingsEntry>
+                                                <SettingsLabel>
+                                                    Additional sync tags for
+                                                    pages (separate by comma,
+                                                    can include Spaces){' '}
+                                                </SettingsLabel>
+                                                <SettingsValueBox>
+                                                    <TextField
+                                                        value={
+                                                            this.state
+                                                                .customTagsObsidian
+                                                        }
+                                                        onChange={(event) => {
+                                                            this.setState({
+                                                                customTagsObsidian: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            })
+                                                            browser.storage.local.set(
+                                                                {
+                                                                    PKMSYNCcustomTagsObsidian: (event.target as HTMLInputElement)
+                                                                        .value,
+                                                                },
+                                                            )
+                                                        }}
+                                                        width={'300px'}
+                                                    />
+                                                </SettingsValueBox>
+                                            </SettingsEntry>
+                                        </TooltipBox>
+                                        {/* <SettingsEntry>
+                                            <Checkbox
+                                                label="Sync only annotated pages"
+                                                isChecked={
+                                                    this.state
+                                                        .syncOnlyAnnotatedPagesObsidian
+                                                }
+                                                handleChange={async (event) => {
+                                                    this.setState({
+                                                        syncOnlyAnnotatedPagesObsidian: (event.target as HTMLInputElement)
+                                                            .checked,
+                                                    })
+                                                    browser.storage.local.set({
+                                                        PKMSYNCsyncOnlyAnnotatedPagesObsidian: (event.target as HTMLInputElement)
+                                                            .checked,
+                                                    })
+                                                }}
+                                            />
+                                        </SettingsEntry> */}
                                     </SettingsContainer>
                                 </>
                             ) : this.state.serverOnline ? (

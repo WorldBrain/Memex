@@ -47,14 +47,22 @@ export class PKMSyncBackgroundModule {
 
         // Process for LogSeq if valid
         if (validFolders.logSeq) {
+            // let syncOnlyAnnotatedPagesLogseq = await browser.storage.local.get(
+            //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
+            // )
+
             const PKMSYNCdateformatLogseq = await browser.storage.local.get(
                 'PKMSYNCdateformatLogseq',
+            )
+            const customTagsLogseq = await browser.storage.local.get(
+                'PKMSYNCcustomTagsLogseq',
             )
             try {
                 await this.createPageUpdate(
                     item,
                     'logseq',
                     PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
+                    customTagsLogseq.PKMSYNCcustomTagsLogseq,
                 )
             } catch (e) {
                 console.error('error', e)
@@ -65,14 +73,21 @@ export class PKMSyncBackgroundModule {
 
         // Process for Obsidian if valid
         if (validFolders.obsidian) {
+            // let syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
+            //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
+            // )
             const PKMSYNCdateformatObsidian = await browser.storage.local.get(
                 'PKMSYNCdateformatObsidian',
+            )
+            const customTagsObsidian = await browser.storage.local.get(
+                'PKMSYNCcustomTagsObsidian',
             )
             try {
                 await this.createPageUpdate(
                     item,
                     'obsidian',
                     PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
+                    customTagsObsidian.PKMSYNCcustomTagsObsidian,
                 )
             } catch (e) {
                 console.error('error', e)
@@ -80,7 +95,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    async createPageUpdate(item, pkmType, syncDateFormat) {
+    async createPageUpdate(item, pkmType, syncDateFormat, customTags) {
         let page
 
         try {
@@ -110,6 +125,7 @@ export class PKMSyncBackgroundModule {
                             item.data.type,
                             pkmType,
                             syncDateFormat,
+                            customTags,
                         ),
                     item.data.pageTitle || null,
                     item.data.pageURL || null,
@@ -118,6 +134,7 @@ export class PKMSyncBackgroundModule {
                     item.data.type || null,
                     pkmType,
                     syncDateFormat,
+                    customTags,
                 )
             } else if (item.type === 'annotation') {
                 annotationsSection = this.replaceOrAppendAnnotation(
@@ -128,10 +145,28 @@ export class PKMSyncBackgroundModule {
                 )
             }
         } else {
+            let spaces = []
+            let spacesString = ''
+            if (customTags) {
+                customTags.split(',').map((tag) => spaces.push(tag.trim()))
+            }
+
+            console.log('customTags', customTags, spaces, pkmType)
+
+            if (pkmType === 'obsidian') {
+                spacesString = spaces
+                    .map((space) => ` - "[[${space}]]"\n`)
+                    .join('')
+            }
+            if (pkmType === 'logseq') {
+                spacesString = spaces.map((space) => `[[${space}]]`).join(' ')
+            }
+
+            console.log('formattedSpaces', spacesString)
             pageHeader = this.pageObjectDefault(
                 item.data.pageTitle,
                 item.data.pageUrl,
-                (item.type === 'page' && item.data.spaces) || null,
+                (item.type === 'page' && item.data.spaces) || spacesString,
                 item.data.createdWhen,
                 item.data.type,
                 pkmType,
@@ -408,6 +443,7 @@ export class PKMSyncBackgroundModule {
         type,
         pkmType,
         syncDateFormat,
+        customTags,
     ) {
         let createdWhen = creationDate
         let updatedPageHeader
@@ -449,6 +485,18 @@ export class PKMSyncBackgroundModule {
                     spaces.push(pageSpaces)
                 }
             }
+
+            let tagsArray = []
+            if (customTags) {
+                tagsArray = customTags.split(',')
+                let tagsArrayTrimmed = tagsArray.map((tag) => tag.trim())
+                tagsArrayTrimmed.forEach((tag) => {
+                    if (spaces.indexOf(tag) === -1) {
+                        spaces.push(tag)
+                    }
+                })
+            }
+
             const formattedSpaces = spaces
                 .map((space) => ` - "[[${space}]]"\n`)
                 .join('')

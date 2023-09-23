@@ -20,6 +20,7 @@ export async function sharePageWithPKM(pageData, pkmSyncBG) {
 export async function getPkmSyncKey() {
     // Check for pkmSyncKey in browser.storage.local
     let data = await browser.storage.local.get('PKMSYNCpkmSyncKey')
+
     let pkmSyncKey = data.PKMSYNCpkmSyncKey
 
     // If pkmSyncKey does not exist, create a new one and store it in local storage
