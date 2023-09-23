@@ -21,7 +21,10 @@ import {
     trackSpaceEntryCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { sharePageWithPKM } from 'src/pkm-integrations/background/backend/utils'
+import {
+    isPkmSyncEnabled,
+    sharePageWithPKM,
+} from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export default class CustomListStorage extends StorageModule {
@@ -543,21 +546,23 @@ export default class CustomListStorage extends StorageModule {
                 }
             }
 
-            try {
-                const pageToSave = await this.operation('findPageByUrl', {
-                    url: normalizeUrl(fullUrl),
-                })
+            if (isPkmSyncEnabled()) {
+                try {
+                    const pageToSave = await this.operation('findPageByUrl', {
+                        url: normalizeUrl(fullUrl),
+                    })
 
-                const dataToSave = {
-                    pageUrl: fullUrl,
-                    pageTitle: pageToSave.fullTitle,
-                    pkmSyncType: 'page',
-                    pageSpaces: list.name,
-                    createdAt: pageToSave.createdAt,
-                }
+                    const dataToSave = {
+                        pageUrl: fullUrl,
+                        pageTitle: pageToSave.fullTitle,
+                        pkmSyncType: 'page',
+                        pageSpaces: list.name,
+                        createdAt: pageToSave.createdAt,
+                    }
 
-                sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
-            } catch (error) {}
+                    sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
+                } catch (error) {}
+            }
 
             return this.operation('createListEntry', {
                 listId,

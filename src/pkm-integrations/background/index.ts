@@ -43,6 +43,7 @@ export class PKMSyncBackgroundModule {
     }
 
     async processChanges(item) {
+        console.log('item', item)
         const validFolders = await this.getValidFolders()
 
         // Process for LogSeq if valid

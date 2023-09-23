@@ -42,12 +42,12 @@ export async function isPkmSyncEnabled() {
         if (
             !data.PKMSYNCpkmFolders ||
             (data.PKMSYNCpkmFolders.obsidian?.length > 0 &&
-                data.PKMSYNCpkmFolders.logseq.length > 0)
+                data.PKMSYNCpkmFolders.logseq?.length > 0)
         ) {
-            return false
+            return true
         }
 
-        return true
+        return false
     } catch (e) {
         console.error(e)
     }
