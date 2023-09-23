@@ -86,17 +86,12 @@ import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type {
-    PageAnnotationsCacheInterface,
-    UnifiedList,
-} from 'src/annotations/cache/types'
-import { page } from 'src/sidebar-overlay/sidebar/selectors'
+import type { UnifiedList } from 'src/annotations/cache/types'
 import {
     trackAnnotationCreate,
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import * as htmlToImage from 'html-to-image'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
@@ -566,7 +561,20 @@ export async function main(
     }
 
     async function captureScreenshot(screenshotTarget) {
-        return await htmlToImage.toPng(screenshotTarget)
+        let canvas = document.createElement('canvas')
+        let height = screenshotTarget.offsetHeight
+        let width = screenshotTarget.offsetWidth
+
+        canvas.width = width
+        canvas.height = height
+
+        let ctx = canvas.getContext('2d')
+
+        ctx.drawImage(screenshotTarget, 0, 0, canvas.width, canvas.height)
+
+        let image = canvas.toDataURL('image/jpeg')
+
+        return image
     }
 
     // if (window.location.hostname === 'www.youtube.com') {

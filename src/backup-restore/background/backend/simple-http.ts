@@ -103,7 +103,6 @@ export class MemexLocalBackend extends BackupBackend {
 
         const timestamp = Date.now()
 
-        console.log('Writing changes to', timestamp)
         await this._writeToPath(
             `backup/change-sets/${timestamp}`,
             stringify({ version: currentSchemaVersion, changes }),
