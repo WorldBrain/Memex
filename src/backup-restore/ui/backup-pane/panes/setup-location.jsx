@@ -1,16 +1,13 @@
 import React from 'react'
+import { checkServerStatus, changeBackupPath } from '../../utils'
 import PropTypes from 'prop-types'
-import {
-    checkServerStatus,
-    fetchBackupPath,
-    changeBackupPath,
-} from '../../utils'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import ButtonBar from 'src/options/imports/components/ButtonBar'
 
 export default class SetupLocation extends React.Component {
     state = {
@@ -28,11 +25,23 @@ export default class SetupLocation extends React.Component {
         const initialBackup = await remoteFunction('hasInitialBackup')()
         const backendLocation = await remoteFunction('getBackendLocation')()
         const provider = 'local'
+
         this.setState({
             initialBackup,
             backendLocation,
             provider,
         })
+
+        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        let backupFolder = null
+        if (data) {
+            backupFolder = data.PKMSYNCpkmFolders.backupFolder || null
+            if (backupFolder) {
+                this.setState({
+                    backupPath: backupFolder,
+                })
+            }
+        }
     }
 
     componentWillUnmount() {
@@ -43,16 +52,13 @@ export default class SetupLocation extends React.Component {
 
     _proceedIfServerIsRunning = async () => {
         let overlay = null
-        let backupPath = null
         const status = await checkServerStatus()
         if (status) {
-            backupPath = await fetchBackupPath()
             overlay = null
         } else {
             overlay = 'download'
         }
         this.setState({
-            backupPath,
             overlay,
         })
     }
@@ -66,16 +72,16 @@ export default class SetupLocation extends React.Component {
             if (
                 initialBackup &&
                 backendLocation === 'local' &&
-                newBackupPath !== backupPath
+                newBackupPath.backupFolder !== backupPath
             ) {
                 this.setState({
                     overlay: 'copy',
                 })
+                this.setState({
+                    backupPath: newBackupPath.backupFolder,
+                })
             }
-            this.setState({
-                backupPath: newBackupPath,
-            })
-        } else {
+        } else if (!newBackupPath && !this.state.backupPath) {
             this.setState({
                 overlay: 'download',
             })
@@ -104,7 +110,7 @@ export default class SetupLocation extends React.Component {
                     <Icon
                         onClick={() =>
                             window.open(
-                                'https://links.memex.garden/download/win',
+                                'https://github.com/WorldBrain/memex-local-sync/releases/latest',
                             )
                         }
                         filePath="winLogo"
@@ -117,7 +123,7 @@ export default class SetupLocation extends React.Component {
                     <Icon
                         onClick={() =>
                             window.open(
-                                'https://links.memex.garden/download/mac',
+                                'https://github.com/WorldBrain/memex-local-sync/releases/latest',
                             )
                         }
                         filePath="macLogo"
@@ -129,7 +135,7 @@ export default class SetupLocation extends React.Component {
                     <Icon
                         onClick={() =>
                             window.open(
-                                'https://links.memex.garden/download/linux',
+                                'https://github.com/WorldBrain/memex-local-sync/releases/latest',
                             )
                         }
                         filePath="linuxLogo"
@@ -148,7 +154,9 @@ export default class SetupLocation extends React.Component {
                     onClick={() => {
                         this._proceedIfServerIsRunning()
                     }}
-                    label={"I'm ready"}
+                    label={
+                        "I've installed and started the Memex Local Sync Helper"
+                    }
                     type="primary"
                     size="medium"
                 />
@@ -185,26 +193,43 @@ export default class SetupLocation extends React.Component {
                                     : 'Click to select folder'
                             }
                             disabled
+                            onClick={(e) => {
+                                e.preventDefault()
+                                this._handleChangeBackupPath()
+                            }}
                         />
                     </SelectFolderArea>
                 ) : null}
 
-                <PrimaryAction
-                    disabled={
-                        !this.state.provider ||
-                        (this.state.provider === 'local' &&
-                            !this.state.backupPath)
-                    }
-                    onClick={() => {
-                        this.props.onChoice({
-                            provider: this.state.provider,
-                            type: 'automatic',
-                        })
-                    }}
-                    label={'Continue'}
-                    type="primary"
-                    size="medium"
-                />
+                {this.state.backupPath !== null ? (
+                    <ButtonBar>
+                        <PrimaryAction
+                            onClick={async () => {
+                                await this._handleChangeBackupPath()
+                            }}
+                            label={'Change Backup Folder'}
+                            type="tertiary"
+                            size="medium"
+                        />
+                        <PrimaryAction
+                            onClick={() =>
+                                this.props.onChoice(this.state.provider)
+                            }
+                            label={'Continue'}
+                            type="primary"
+                            size="medium"
+                        />
+                    </ButtonBar>
+                ) : (
+                    <PrimaryAction
+                        onClick={async () => {
+                            await this._handleChangeBackupPath()
+                        }}
+                        label={'Select Backup Folder'}
+                        type="primary"
+                        size="medium"
+                    />
+                )}
             </SettingSection>
         )
 

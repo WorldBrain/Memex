@@ -11,6 +11,8 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { shareAnnotationWithPKM } from 'src/pkm-integrations/background/backend/utils'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -45,6 +47,7 @@ export interface SaveAnnotationParams<
     skipListExistenceCheck?: boolean
     privacyLevelOverride?: AnnotationPrivacyLevels
     syncSettingsBG?: RemoteSyncSettingsInterface
+    pkmSyncBG?: PkmSyncInterface
 }
 
 export interface SaveAnnotationReturnValue {
@@ -77,6 +80,7 @@ export async function createAnnotation({
     annotationData,
     annotationsBG,
     contentSharingBG,
+    pkmSyncBG,
     syncSettingsBG,
     skipPageIndexing,
     skipListExistenceCheck,
@@ -137,6 +141,8 @@ export async function createAnnotation({
                 syncSettingsBG,
             )
 
+            // shareAnnotationWithPKM(annotationData, pkmSyncBG)
+
             return annotationUrl
         })(),
     }
@@ -169,6 +175,7 @@ export async function updateAnnotation({
     contentSharingBG,
     shareOpts,
     keepListsIfUnsharing,
+    pkmSyncBG,
 }: SaveAnnotationParams<AnnotationUpdateData>): Promise<
     SaveAnnotationReturnValue
 > {
@@ -215,6 +222,13 @@ export async function updateAnnotation({
                         keepListsIfUnsharing,
                     }),
             ])
+
+            // let newAnnotationData = this.options.annotationsCache.getAnnotation(
+            //     annotationData.localId,
+            // )
+
+            // shareAnnotationWithPKM(newAnnotationData, pkmSyncBG)
+
             return annotationData.localId
         })(),
     }

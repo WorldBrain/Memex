@@ -27,6 +27,7 @@ export interface Props {
     subLabel?: string
     zIndex?: number
     isLoading?: boolean
+    fontSize?: number
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -104,14 +105,14 @@ const LabelContentBox = styled.div`
 const LabelTitle = styled.div`
     color: ${(props) => props.theme.colors.greyScale6};
     font-weight: 300;
-    font-size: 14px;
+    font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '16px')};
     white-space: nowrap;
 `
 
 const SubLabel = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
-    font-size: 14px;
+    font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '14px')};
     white-space: nowrap;
 `
 
@@ -144,8 +145,8 @@ const InputContainer = styled.input`
     cursor: pointer;
 `
 
-const LabelText = styled.span`
-    font-size: 0.9rem;
+const LabelText = styled.span<{ fontSize }>`
+    font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '0.9em')};
     display: flex;
     align-items: center;
     width: inherit;
