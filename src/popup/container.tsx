@@ -75,6 +75,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 runtimeAPI: browser.runtime,
                 extensionAPI: browser.extension,
                 customListsBG: collections,
+                annotationsBG: runInBackground(),
                 pageIndexingBG: runInBackground(),
                 analyticsBG: runInBackground(),
                 pdfIntegrationBG: runInBackground(),
@@ -329,6 +330,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 <BookmarkButton
                     pageUrl={this.state.currentTabFullUrl}
                     closePopup={this.closePopup}
+                    isSavedPage={this.state.isSavedPage}
                 />
                 <CollectionsButton pageListsIds={this.state.pageListIds} />
                 <SpacerLine />

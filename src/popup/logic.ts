@@ -13,6 +13,7 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import type { AnnotationInterface } from 'src/annotations/background/types'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -23,6 +24,7 @@ export interface Dependencies {
     pdfIntegrationBG: PDFRemoteInterface
     pageIndexingBG: PageIndexingInterface<'caller'>
     analyticsBG: AnalyticsCoreInterface
+    annotationsBG: AnnotationInterface<'caller'>
 }
 
 export interface Event {
@@ -44,6 +46,7 @@ export interface State {
     isFileAccessAllowed: boolean
     showAutoSaved: boolean
     analyticsBG: AnalyticsCoreInterface
+    isSavedPage: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -68,6 +71,7 @@ export default class PopupLogic extends UILogic<State, Event> {
         isFileAccessAllowed: false,
         showAutoSaved: false,
         analyticsBG: null,
+        isSavedPage: false,
     })
 
     async init() {
@@ -79,12 +83,11 @@ export default class PopupLogic extends UILogic<State, Event> {
             customListsBG,
             analyticsBG,
             pageIndexingBG,
+            annotationsBG,
         } = this.dependencies
 
         await loadInitial(this, async () => {
             const currentTab = await getCurrentTab({ runtimeAPI, tabsAPI })
-            console.log('currentTab')
-            console.log('currentTab', currentTab)
             if (
                 currentTab.url === 'about:blank' ||
                 currentTab.url.startsWith('chrome') ||
@@ -113,24 +116,44 @@ export default class PopupLogic extends UILogic<State, Event> {
                 console.log('identifier', identifier)
                 const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
 
-                const pageListIds = await customListsBG.fetchPageLists({
-                    url: identifier.fullUrl,
-                })
+                // const [isPDFReaderEnabled] = await Promise.all([
+                //     syncSettings.pdfIntegration.get('shouldAutoOpen'),
+                // ])
 
-                const [isPDFReaderEnabled] = await Promise.all([
-                    syncSettings.pdfIntegration.get('shouldAutoOpen'),
-                ])
                 this.emitMutation({
                     analyticsBG: { $set: analyticsBG },
-                    pageListIds: { $set: pageListIds },
                     currentTabFullUrl: { $set: currentTab.originalUrl },
                     identifierFullUrl: { $set: identifier.fullUrl },
                     underlyingResourceUrl: { $set: currentTab.url },
-                    isPDFReaderEnabled: { $set: isPDFReaderEnabled },
+                    isPDFReaderEnabled: { $set: false },
                     isFileAccessAllowed: { $set: isFileAccessAllowed },
+                })
+
+                const pageListIds = await customListsBG.fetchPageLists({
+                    url: identifier.fullUrl,
+                })
+                const isSavedPage = await this.loadBookmarkState(
+                    identifier.fullUrl,
+                    pageIndexingBG,
+                )
+
+                this.emitMutation({
+                    pageListIds: { $set: pageListIds },
+                    isSavedPage: { $set: isSavedPage },
                 })
             }
         })
+    }
+
+    loadBookmarkState = async (fullUrl: string, pageIndexingBG) => {
+        const pageTitle = await pageIndexingBG.lookupPageTitleForUrl({
+            fullPageUrl: fullUrl,
+        })
+        if (pageTitle && pageTitle.length > 0) {
+            return true
+        } else {
+            return false
+        }
     }
 
     togglePDFReader: EventHandler<'togglePDFReader'> = async ({
