@@ -43,6 +43,7 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -72,6 +73,7 @@ export interface Props extends RibbonSubcomponentProps {
     isTrial: boolean
     signupDate?: number
     toggleTheme: () => void
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 interface State {
@@ -293,6 +295,7 @@ export default class Ribbon extends Component<Props, State> {
                     spacesBG={this.props.spacesBG}
                     annotationsCache={this.props.annotationsCache}
                     contentSharingBG={this.props.contentSharingBG}
+                    bgScriptBG={this.props.bgScriptBG}
                     analyticsBG={this.props.analyticsBG}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     localStorageAPI={browser.storage.local}

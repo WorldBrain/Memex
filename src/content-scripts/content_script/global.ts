@@ -698,6 +698,7 @@ export async function main(
                 analyticsBG,
                 authBG,
                 annotationsBG,
+                bgScriptBG,
                 summarizeBG,
                 pageIndexingBG,
                 syncSettingsBG,

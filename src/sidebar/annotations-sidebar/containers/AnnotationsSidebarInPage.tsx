@@ -32,6 +32,7 @@ import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -39,6 +40,7 @@ export interface Props extends ContainerProps {
     highlighter: HighlightRendererInterface
     imageSupport?: ImageSupportInterface<'caller'>
     pkmSyncBG: PkmSyncInterface
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
@@ -46,11 +48,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Pick<
         Props,
-        'isLockable' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
+        | 'isLockable'
+        | 'sidebarContext'
+        | 'runtimeAPI'
+        | 'storageAPI'
+        | 'bgScriptBG'
     > = {
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
-
         sidebarContext: 'in-page',
         isLockable: true,
     }

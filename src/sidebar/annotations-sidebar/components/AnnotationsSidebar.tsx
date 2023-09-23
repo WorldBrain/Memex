@@ -79,6 +79,7 @@ import {
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -216,6 +217,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         sharedListReference: SharedListReference,
     ) => RepliesProps['getReplyEditProps']
     imageSupport: ImageSupportInterface<'caller'>
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 interface AnnotationsSidebarState {
