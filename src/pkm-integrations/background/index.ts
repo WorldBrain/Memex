@@ -110,9 +110,7 @@ export class PKMSyncBackgroundModule {
         let fileContent = ''
 
         if (page) {
-            ;[pageHeader, annotationsSection] = page.split(
-                '### Annotations\n\n',
-            )
+            ;[pageHeader, annotationsSection] = page.split('### Annotations\n')
 
             if (item.type === 'page') {
                 pageHeader = this.extractAndUpdatePageData(
@@ -185,7 +183,7 @@ export class PKMSyncBackgroundModule {
         }
 
         fileContent =
-            pageHeader + '### Annotations\n\n' + (annotationsSection || '')
+            pageHeader + '### Annotations\n' + (annotationsSection || '')
 
         return await this.backendNew.storeObject(
             pageIDbyTitle,
@@ -202,7 +200,7 @@ export class PKMSyncBackgroundModule {
     ) {
         let annotationStartIndex
         let annotationEndIndex
-        if (pkmType === 'obsidian') {
+        if (pkmType === 'obsidian' && annotationsSection != null) {
             const annotationStartLine = `<span class="annotationStartLine" id="${item.data.annotationId}"></span>\n`
             const annotationEndLine = `<span class="annotationEndLine" id="${item.data.annotationId}"> --- </span>\n`
             annotationStartIndex = annotationsSection.indexOf(
@@ -240,7 +238,7 @@ export class PKMSyncBackgroundModule {
                 )
             }
         }
-        if (pkmType === 'logseq') {
+        if (pkmType === 'logseq' && annotationsSection != null) {
             let annotationStartLine = `- <span annotationstart id="${item.data.annotationId}">---</span>\n`
             const annotationEndLine = `<span id="${item.data.annotationId}"/>\n\n`
             annotationStartIndex = annotationsSection.indexOf(
@@ -276,7 +274,7 @@ export class PKMSyncBackgroundModule {
             }
         }
 
-        if (annotationStartIndex === -1) {
+        if (annotationStartIndex === -1 || annotationsSection === null) {
             const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',

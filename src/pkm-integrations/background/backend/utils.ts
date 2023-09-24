@@ -36,16 +36,21 @@ export async function getPkmSyncKey() {
 }
 
 export async function isPkmSyncEnabled() {
+    console.log('enters here')
     try {
         let data = await browser.storage.local.get('PKMSYNCpkmFolders')
 
+        console.log('data', data)
         if (
-            !data.PKMSYNCpkmFolders ||
-            (data.PKMSYNCpkmFolders.obsidian?.length > 0 &&
-                data.PKMSYNCpkmFolders.logseq?.length > 0)
+            data.PKMSYNCpkmFolders &&
+            (data.PKMSYNCpkmFolders.obsidianFolder?.length > 0 ||
+                data.PKMSYNCpkmFolders.logseqFolder?.length > 0)
         ) {
+            console.log('isPkmSyncEnabled: true')
             return true
         }
+
+        console.log('not enabled')
 
         return false
     } catch (e) {
