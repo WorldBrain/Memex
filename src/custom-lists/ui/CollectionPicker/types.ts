@@ -14,6 +14,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 type SpacePickerTab = 'user-lists' | 'page-links'
 
@@ -104,4 +105,5 @@ export interface SpacePickerDependencies {
     autoFocus?: boolean
     context?: string
     closePicker?: () => void
+    bgScriptBG?: RemoteBGScriptInterface
 }

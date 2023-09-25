@@ -64,8 +64,6 @@ export class MemexLocalBackend extends BackupBackend {
         bodyJSON.backupPath = backupFolderPath
         bodyJSON = JSON.stringify(bodyJSON)
 
-        console.log('Writing to', url, body)
-
         await fetch(`${this.url}/${url}`, {
             method: 'PUT',
             headers: {
@@ -103,7 +101,6 @@ export class MemexLocalBackend extends BackupBackend {
 
         const timestamp = Date.now()
 
-        console.log('Writing changes to', timestamp)
         await this._writeToPath(
             `backup/change-sets/${timestamp}`,
             stringify({ version: currentSchemaVersion, changes }),

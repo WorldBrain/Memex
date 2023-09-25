@@ -98,6 +98,7 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -112,6 +113,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     youtubeService?: YoutubeService
     imageSupport?: ImageSupportInterface<'caller'>
     pkmSyncBG?: PkmSyncInterface
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 type EventHandler<
