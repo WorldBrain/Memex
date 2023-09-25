@@ -524,6 +524,24 @@ export default class SpacePickerLogic extends UILogic<
         return validationResult
     }
 
+    setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
+        const { annotationsCache, contentSharingBG } = this.dependencies
+        const unifiedId = annotationsCache.getListByLocalId(event.listId)
+            ?.unifiedId
+        if (unifiedId == null) {
+            throw new Error('Tried to set privacy for non-cached list')
+        }
+        annotationsCache.updateList({
+            unifiedId,
+            isPrivate: event.isPrivate,
+        })
+
+        await contentSharingBG.updateListPrivacy({
+            localListId: event.listId,
+            isPrivate: event.isPrivate,
+        })
+    }
+
     renameList: EventHandler<'renameList'> = async ({ event }) => {
         const newName = event.name.trim()
         const listData = __getListDataByLocalId(

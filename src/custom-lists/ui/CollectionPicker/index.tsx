@@ -393,6 +393,12 @@ class SpacePicker extends StatefulUIElement<
                             })
                         }
                         errorMessage={this.state.renameListErrorMessage}
+                        onSetSpacePrivate={(isPrivate) =>
+                            this.processEvent('setListPrivacy', {
+                                listId: list.localId,
+                                isPrivate,
+                            })
+                        }
                         onConfirmSpaceNameEdit={(name) => {
                             this.processEvent('renameList', {
                                 listId: list.localId,

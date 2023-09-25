@@ -59,6 +59,7 @@ export type SpacePickerEvent = UIEvent<{
     toggleEntryContextMenu: { listId: number }
     openListInWebUI: { unifiedListId: UnifiedList['unifiedId'] }
     updateContextMenuPosition: { x?: number; y?: number }
+    setListPrivacy: { listId: number; isPrivate: boolean }
     renameList: { listId: number; name: string }
     deleteList: { listId: number }
     newEntryPress: { entry: string; analyticsBG: AnalyticsCoreInterface }

@@ -85,6 +85,10 @@ export interface ContentSharingInterface
     }): Promise<{
         [annotationUrl: string]: AnnotationPrivacyLevels
     }>
+    updateListPrivacy(args: {
+        localListId: number
+        isPrivate: boolean
+    }): Promise<void>
 }
 
 export interface RemoteContentSharingByTabsInterface<

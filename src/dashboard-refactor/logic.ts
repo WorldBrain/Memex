@@ -3489,6 +3489,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({ searchResults: mutation })
     }
 
+    setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
+        const { annotationsCache, contentShareBG } = this.options
+        const list = annotationsCache.lists.byId[event.listId]
+        if (list?.localId == null) {
+            throw new Error('Tried to set privacy for non-cached list')
+        }
+        annotationsCache.updateList({
+            unifiedId: event.listId,
+            isPrivate: event.isPrivate,
+        })
+        await contentShareBG.updateListPrivacy({
+            localListId: list.localId,
+            isPrivate: event.isPrivate,
+        })
+    }
+
     confirmListEdit: EventHandler<'confirmListEdit'> = async ({
         event,
         previousState,

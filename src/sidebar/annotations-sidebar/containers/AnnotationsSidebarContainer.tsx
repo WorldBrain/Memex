@@ -1177,6 +1177,12 @@ export class AnnotationsSidebarContainer<
                                             oldName: listData.name,
                                         })
                                     }}
+                                    onSetSpacePrivate={(isPrivate) =>
+                                        this.processEvent('setListPrivacy', {
+                                            unifiedListId: listData.unifiedId,
+                                            isPrivate,
+                                        })
+                                    }
                                     onSpaceShare={(
                                         remoteListId,
                                         annotationLocalToRemoteIdsDict,

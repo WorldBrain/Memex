@@ -552,6 +552,11 @@ export class DashboardContainer extends StatefulUIElement<
                             listId,
                             skipDBOps: true,
                         }),
+                    onSetSpacePrivate: (isPrivate) =>
+                        this.processEvent('setListPrivacy', {
+                            listId,
+                            isPrivate,
+                        }),
                     onDeleteSpaceIntent: () =>
                         this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>

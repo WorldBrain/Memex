@@ -1077,6 +1077,22 @@ export class SidebarContainerLogic extends UILogic<
         return listData
     }
 
+    setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
+        const { annotationsCache, contentSharingBG } = this.options
+        const list = annotationsCache.lists.byId[event.unifiedListId]
+        if (list?.localId == null) {
+            throw new Error('Tried to set privacy for non-cached list')
+        }
+        annotationsCache.updateList({
+            unifiedId: event.unifiedListId,
+            isPrivate: event.isPrivate,
+        })
+        await contentSharingBG.updateListPrivacy({
+            localListId: list.localId,
+            isPrivate: event.isPrivate,
+        })
+    }
+
     editListName: EventHandler<'editListName'> = async ({ event }) => {
         const newName = event.newName.trim()
         const listData = this.__getListDataByLocalId(

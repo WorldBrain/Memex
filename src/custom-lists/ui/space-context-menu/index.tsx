@@ -18,9 +18,6 @@ import {
 } from 'src/common-ui/components/dropdown-menu-btn'
 import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
 
-interface SpacePrivacyChoice extends MenuItemProps {
-    value: SpacePrivacyState
-}
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
 }
@@ -232,7 +229,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private renderPrivateListEmailInvites() {
-        if (!this.props.listData.private) {
+        if (!this.props.listData.isPrivate) {
             return null
         }
 
@@ -338,33 +335,28 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         }
 
         const isPageLink = this.props.listData.type === 'page-link'
+        const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
         return (
             <ContextMenuContainer>
                 <DropdownMenuBtn
-                    menuItems={
-                        [
-                            {
-                                id: 'private-space-selection-state',
-                                name: 'Private',
-                                value: 'private',
-                                info: 'Only visible to you and people invited',
-                            },
-                            {
-                                id: 'public-space-selection-state',
-                                name: 'Shared',
-                                value: 'public',
-                                info: 'Viewable to anyone with the link',
-                            },
-                        ] as SpacePrivacyChoice[]
+                    menuItems={[
+                        {
+                            id: SET_LIST_PRIVATE_ID,
+                            name: 'Private',
+                            info: 'Only visible to you and people invited',
+                        },
+                        {
+                            id: 'public-space-selection-state',
+                            name: 'Shared',
+                            info: 'Viewable to anyone with the link',
+                        },
+                    ]}
+                    onMenuItemClick={(item) =>
+                        this.props.onSetSpacePrivate(
+                            item.id === SET_LIST_PRIVATE_ID,
+                        )
                     }
-                    onMenuItemClick={(item: SpacePrivacyChoice) =>
-                        this.processEvent('updateSpacePrivacy', {
-                            state: item.value,
-                        })
-                    }
-                    initSelectedIndex={
-                        this.state.spacePrivacy === 'private' ? 0 : 1
-                    }
+                    initSelectedIndex={this.props.listData.isPrivate ? 0 : 1}
                     keepSelectedState
                 />
                 {this.props.listData.remoteId != null && (

@@ -49,6 +49,7 @@ export type Events = UIEvent<{
     setFollowedListsExpanded: { isExpanded: boolean }
     setJoinedListsExpanded: { isExpanded: boolean }
 
+    setListPrivacy: { listId: string; isPrivate: boolean }
     confirmListEdit: { value: string; listId: string; skipDBOps?: boolean }
     cancelListEdit: null
     setDragOverListId: { listId?: string }

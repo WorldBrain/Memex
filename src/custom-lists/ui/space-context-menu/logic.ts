@@ -17,8 +17,6 @@ import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/even
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
-export type SpacePrivacyState = 'private' | 'public'
-
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
     spacesBG: RemoteCollectionsInterface
@@ -34,6 +32,7 @@ export interface Dependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
     onConfirmSpaceNameEdit: (name: string) => void
+    onSetSpacePrivate: (isPrivate: boolean) => void
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
     analyticsBG: AnalyticsCoreInterface
@@ -50,7 +49,6 @@ export type Event = UIEvent<{
         role: SharedListRoleID.Commenter | SharedListRoleID.ReadWrite
     }
     inviteViaEmail: void
-    updateSpacePrivacy: { state: SpacePrivacyState }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
@@ -66,7 +64,6 @@ export interface State {
     emailInviteInputRole:
         | SharedListRoleID.Commenter
         | SharedListRoleID.ReadWrite
-    spacePrivacy: SpacePrivacyState
     emailInviteInputValue: string
     emailInvites: Array<
         SharedListEmailInvite & {
@@ -95,7 +92,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     }
 
     getInitialState = (): State => ({
-        spacePrivacy: 'private',
         loadState: 'pristine',
         ownershipLoadState: 'pristine',
         listShareLoadState: 'pristine',
@@ -122,7 +118,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             if (state.mode !== 'followed-space') {
                 await Promise.all([
                     this.loadInviteLinks(),
-                    this.dependencies.listData.private
+                    this.dependencies.listData.isPrivate
                         ? this.loadEmailInvites()
                         : Promise.resolve(),
                 ])
@@ -322,12 +318,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             nameValue: { $set: event.name },
             showSaveButton: { $set: true },
         })
-    }
-
-    updateSpacePrivacy: EventHandler<'updateSpacePrivacy'> = async ({
-        event,
-    }) => {
-        this.emitMutation({ spacePrivacy: { $set: event.state } })
     }
 
     updateEmailInviteInputValue: EventHandler<

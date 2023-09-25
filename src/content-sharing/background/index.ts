@@ -284,6 +284,12 @@ export default class ContentSharingBackground {
                     localIds: callOptions.annotationUrls,
                 })
             },
+            updateListPrivacy: async (params) => {
+                return this.storage.updateListPrivacy({
+                    localId: params.localListId,
+                    private: params.isPrivate,
+                })
+            },
             getAnnotationSharingState: this.getAnnotationSharingState,
             getAnnotationSharingStates: this.getAnnotationSharingStates,
             createListEmailInvite: (params) =>
