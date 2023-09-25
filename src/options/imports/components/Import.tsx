@@ -131,12 +131,30 @@ class Import extends React.PureComponent<Props> {
             })
         }
 
-        const PKMSYNCdateformatLogseq = await browser.storage.local.get(
+        let PKMSYNCdateformatLogseq = await browser.storage.local.get(
             'PKMSYNCdateformatLogseq',
         )
-        const PKMSYNCdateformatObsidian = await browser.storage.local.get(
+        let PKMSYNCdateformatObsidian = await browser.storage.local.get(
             'PKMSYNCdateformatObsidian',
         )
+
+        // Store the current state of the dateformatLogseq to the local storage if it returns null
+        if (PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq == null) {
+            PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq = this.state.dateformatLogseq
+            await browser.storage.local.set({
+                PKMSYNCdateformatLogseq:
+                    PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
+            })
+        }
+
+        // Store the current state of the dateformatObsidian to the local storage if it returns null
+        if (PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian == null) {
+            PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian = this.state.dateformatObsidian
+            await browser.storage.local.set({
+                PKMSYNCdateformatObsidian:
+                    PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
+            })
+        }
 
         const customTagsObsidian = await browser.storage.local.get(
             'PKMSYNCcustomTagsObsidian',
@@ -153,9 +171,14 @@ class Import extends React.PureComponent<Props> {
         // )
 
         this.setState({
-            dateformatLogseq: PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
+            dateformatLogseq:
+                PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq != null
+                    ? PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq
+                    : this.state.dateformatLogseq,
             dateformatObsidian:
-                PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
+                PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian != null
+                    ? PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian
+                    : this.state.dateformatObsidian,
             customTagsObsidian:
                 customTagsObsidian.PKMSYNCcustomTagsObsidian || 'Memex Sync',
             customTagsLogseq:
@@ -338,7 +361,7 @@ class Import extends React.PureComponent<Props> {
                                         <SettingsTitle>Settings</SettingsTitle>
                                         <SettingsEntry>
                                             <SettingsLabel>
-                                                Date format for page entries{' '}
+                                                Date format{' '}
                                             </SettingsLabel>
                                             <SettingsValueBox>
                                                 <SettingsLink
