@@ -47,7 +47,8 @@ export type Event = UIEvent<{
     updateEmailInviteInputRole: {
         role: SharedListRoleID.Commenter | SharedListRoleID.ReadWrite
     }
-    inviteViaEmail: void
+    inviteViaEmail: { now?: number }
+    deleteEmailInvite: { id?: number }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
@@ -60,6 +61,7 @@ export interface State {
     listShareLoadState: TaskState
     inviteLinksLoadState: TaskState
     emailInvitesLoadState: TaskState
+    emailInvitesCreateState: TaskState
     emailInviteInputRole:
         | SharedListRoleID.Commenter
         | SharedListRoleID.ReadWrite
@@ -67,6 +69,7 @@ export interface State {
     emailInvites: Array<
         SharedListEmailInvite & {
             id: AutoPk
+            sharedListKey: AutoPk
             roleID: SharedListRoleID
         }
     >
@@ -96,6 +99,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         listShareLoadState: 'pristine',
         inviteLinksLoadState: 'pristine',
         emailInvitesLoadState: 'pristine',
+        emailInvitesCreateState: 'pristine',
         emailInviteInputRole: SharedListRoleID.Commenter,
         emailInviteInputValue: '',
         emailInvites: [],
@@ -329,6 +333,54 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         'updateEmailInviteInputRole'
     > = async ({ event }) => {
         this.emitMutation({ emailInviteInputRole: { $set: event.role } })
+    }
+
+    inviteViaEmail: EventHandler<'inviteViaEmail'> = async ({
+        event,
+        previousState,
+    }) => {
+        const now = event.now ?? Date.now()
+        const email = previousState.emailInviteInputValue.trim()
+        const roleID = previousState.emailInviteInputRole
+
+        const prevInvites = [...previousState.emailInvites]
+        this.emitMutation({
+            emailInviteInputValue: { $set: '' },
+            emailInvites: {
+                $push: [
+                    {
+                        id: `tmp-invite-id-${prevInvites.length}`,
+                        email,
+                        roleID,
+                        createdWhen: now,
+                        sharedListKey: null,
+                    },
+                ],
+            },
+        })
+        await executeUITask(this, 'emailInvitesCreateState', async () => {
+            const result = await this.dependencies.contentSharingBG.createListEmailInvite(
+                {
+                    now,
+                    email,
+                    roleID,
+                    listId: this.dependencies.listData.remoteId,
+                },
+            )
+            if (result.status === 'success') {
+                // Update already-set emailInvites state with the key
+                this.emitMutation({
+                    emailInvites: {
+                        [prevInvites.length]: {
+                            id: { $set: result.keyString },
+                            sharedListKey: { $set: result.keyString },
+                        },
+                    },
+                })
+            } else if (result.status === 'permission-denied') {
+                throw new Error('Email invite encountered an error')
+            }
+        })
     }
 
     cancelSpaceNameEdit: EventHandler<'cancelSpaceNameEdit'> = async ({}) => {

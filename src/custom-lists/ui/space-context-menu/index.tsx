@@ -258,10 +258,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     {this.shouldShowInviteBtn && (
                         <PrimaryAction
                             onClick={() =>
-                                console.log(
-                                    'invite!',
-                                    this.state.emailInviteInputValue,
-                                )
+                                this.processEvent('inviteViaEmail', {})
                             }
                             label="Invite"
                             type="secondary"
