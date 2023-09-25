@@ -16,6 +16,7 @@ import {
     DropdownMenuBtn,
     MenuItemProps,
 } from 'src/common-ui/components/dropdown-menu-btn'
+import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
 
 interface SpacePrivacyChoice extends MenuItemProps {
     value: SpacePrivacyState
@@ -48,6 +49,24 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
+    private get shouldShowInviteBtn(): boolean {
+        const inputValue = this.state.emailInviteInputValue.trim()
+        if (!inputValue.length) {
+            return false
+        }
+        if (!isValidEmail(inputValue)) {
+            return false
+        }
+        let alreadyInvited = false
+        for (const invite of this.state.emailInvites) {
+            if (invite.email === inputValue) {
+                alreadyInvited = true
+                break
+            }
+        }
+        return !alreadyInvited
+    }
+
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
         const { listData } = this.props
         if (listData.remoteId != null) {
@@ -58,6 +77,13 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     private handleNameChange: React.KeyboardEventHandler = async (event) => {
         const name = (event.target as HTMLInputElement).value
         await this.processEvent('updateSpaceName', { name })
+    }
+
+    private handleInviteInputChange: React.KeyboardEventHandler = async (
+        event,
+    ) => {
+        const value = (event.target as HTMLInputElement).value
+        await this.processEvent('updateEmailInviteInputValue', { value })
     }
 
     private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
@@ -202,6 +228,51 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     ),
                 )}
             </ShareSectionContainer>
+        )
+    }
+
+    private renderPrivateListEmailInvites() {
+        if (!this.props.listData.private) {
+            return null
+        }
+
+        return (
+            <>
+                <SectionTitle>Invite via Email</SectionTitle>
+                <Container
+                    onClick={(e) => {
+                        e.preventDefault()
+                        e.stopPropagation()
+                    }}
+                >
+                    <EditableTextField
+                        onClick={(e) => {
+                            e.preventDefault()
+                            e.stopPropagation()
+                        }}
+                        value={this.state.emailInviteInputValue}
+                        onChange={this.handleInviteInputChange}
+                        disabled={this.props.disableWriteOps}
+                        placeholder="Add email address"
+                        icon="mail"
+                        // onKeyDown={this.handleNameEditInputKeyDown}
+                    />
+
+                    {this.shouldShowInviteBtn && (
+                        <PrimaryAction
+                            onClick={() =>
+                                console.log(
+                                    'invite!',
+                                    this.state.emailInviteInputValue,
+                                )
+                            }
+                            label="Invite"
+                            type="secondary"
+                            size="medium"
+                        />
+                    )}
+                </Container>
+            </>
         )
     }
 
@@ -371,33 +442,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                             )}
                     </>
                 </ButtonBox>
-                <SectionTitle>Invite via Email</SectionTitle>
-                <Container
-                    onClick={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                    }}
-                >
-                    <EditableTextField
-                        onClick={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                        }}
-                        value={this.state.emailInviteInputValue}
-                        onChange={(value) =>
-                            this.processEvent('updateEmailInviteInputValue', {
-                                value,
-                            })
-                        }
-                        disabled={this.props.disableWriteOps}
-                        placeholder="Add email address"
-                        icon="mail"
-                        // onKeyDown={this.handleNameEditInputKeyDown}
-                    />
-                    {/* {this.state.emailInviteInputValue.trim().length > 0 && (
-
-                                    )} */}
-                </Container>
+                {this.renderPrivateListEmailInvites()}
             </ContextMenuContainer>
         )
     }

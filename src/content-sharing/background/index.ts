@@ -286,6 +286,14 @@ export default class ContentSharingBackground {
             },
             getAnnotationSharingState: this.getAnnotationSharingState,
             getAnnotationSharingStates: this.getAnnotationSharingStates,
+            createListEmailInvite: (params) =>
+                this.options.backend.createListEmailInvite(params),
+            deleteListEmailInvite: (params) =>
+                this.options.backend.deleteListEmailInvite(params),
+            acceptListEmailInvite: (params) =>
+                this.options.backend.acceptListEmailInvite(params),
+            loadListEmailInvites: (params) =>
+                this.options.backend.loadListEmailInvites(params),
             // The following are all old RPCs that aren't used anymore, though their implementations still exist
             // shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
             // unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,

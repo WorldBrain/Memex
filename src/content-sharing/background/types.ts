@@ -10,6 +10,7 @@ import type {
     RemoteFunction,
     RemoteFunctionRole,
 } from 'src/util/webextensionRPC'
+import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 
 export interface ContentSharingInterface
     extends Pick<
@@ -22,6 +23,13 @@ export interface ContentSharingInterface
             | 'setAnnotationPrivacyLevel'
             | 'getAnnotationSharingState'
             | 'getAnnotationSharingStates'
+        >,
+        Pick<
+            ContentSharingBackendInterface,
+            | 'createListEmailInvite'
+            | 'deleteListEmailInvite'
+            | 'acceptListEmailInvite'
+            | 'loadListEmailInvites'
         > {
     scheduleListShare(params: {
         localListId: number

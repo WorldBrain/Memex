@@ -9,7 +9,10 @@ import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import {
+    SharedListEmailInvite,
+    SharedListRoleID,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
@@ -65,10 +68,12 @@ export interface State {
         | SharedListRoleID.ReadWrite
     spacePrivacy: SpacePrivacyState
     emailInviteInputValue: string
-    emailInvites: Array<{
-        email: string
-        role: SharedListRoleID.Commenter | SharedListRoleID.ReadWrite
-    }>
+    emailInvites: Array<
+        SharedListEmailInvite & {
+            id: AutoPk
+            roleID: SharedListRoleID
+        }
+    >
     inviteLinks: InviteLink[]
     showSuccessMsg: boolean
     mode: 'confirm-space-delete' | 'followed-space' | null
@@ -113,8 +118,14 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 state = await this.loadSpaceOwnership(previousState)
             }
 
+            // If my own list, load collab links and potential email invite links
             if (state.mode !== 'followed-space') {
-                await this.loadInviteLinks()
+                await Promise.all([
+                    this.loadInviteLinks(),
+                    this.dependencies.listData.private
+                        ? this.loadEmailInvites()
+                        : Promise.resolve(),
+                ])
             }
         })
     }
@@ -146,6 +157,27 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         this.emitMutation(mutation)
         return this.withMutation(previousState, mutation)
+    }
+
+    private async loadEmailInvites() {
+        const { listData, contentSharingBG } = this.dependencies
+
+        await executeUITask(this, 'emailInvitesLoadState', async () => {
+            if (listData.remoteId == null) {
+                return
+            }
+
+            const emailInvites = await contentSharingBG.loadListEmailInvites({
+                listReference: {
+                    type: 'shared-list-reference',
+                    id: listData.remoteId,
+                },
+            })
+            if (emailInvites.status !== 'success') {
+                throw new Error('Failed to load email invites for list')
+            }
+            this.emitMutation({ emailInvites: { $set: emailInvites.data } })
+        })
     }
 
     private async loadInviteLinks() {

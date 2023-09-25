@@ -133,6 +133,7 @@ type CoreUnifiedList<T> = {
     remoteId?: string
     collabKey?: string
     name: string
+    private?: boolean
     description?: string
     creator?: UserReference
     hasRemoteAnnotationsToLoad: boolean
