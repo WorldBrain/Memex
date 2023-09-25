@@ -71,8 +71,8 @@ class Import extends React.PureComponent<Props> {
         dateformatObsidian: 'YYYY-DD-MM',
         // syncOnlyAnnotatedPagesLogseq: false,
         // syncOnlyAnnotatedPagesObsidian false,
-        customTagsLogseq: '',
-        customTagsObsidian: '',
+        customTagsLogseq: 'Memex Sync',
+        customTagsObsidian: 'Memex Sync',
     }
 
     async componentDidMount(): Promise<void> {
@@ -170,6 +170,30 @@ class Import extends React.PureComponent<Props> {
         //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
         // )
 
+        let PKMSYNCcustomTagsLogseq = await browser.storage.local.get(
+            'PKMSYNCcustomTagsLogseq',
+        )
+        let PKMSYNCcustomTagsObsidian = await browser.storage.local.get(
+            'PKMSYNCcustomTagsObsidian',
+        )
+
+        if (PKMSYNCcustomTagsLogseq.PKMSYNCcustomTagsLogseq == null) {
+            PKMSYNCcustomTagsLogseq.PKMSYNCcustomTagsLogseq = this.state.customTagsLogseq
+            await browser.storage.local.set({
+                PKMSYNCcustomTagsLogseq:
+                    PKMSYNCcustomTagsLogseq.PKMSYNCcustomTagsLogseq,
+            })
+        }
+
+        // Store the current state of the customTagsObsidian to the local storage if it returns null
+        if (PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian == null) {
+            PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian = this.state.customTagsObsidian
+            await browser.storage.local.set({
+                PKMSYNCcustomTagsObsidian:
+                    PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian,
+            })
+        }
+
         this.setState({
             dateformatLogseq:
                 PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq != null
@@ -179,10 +203,8 @@ class Import extends React.PureComponent<Props> {
                 PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian != null
                     ? PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian
                     : this.state.dateformatObsidian,
-            customTagsObsidian:
-                customTagsObsidian.PKMSYNCcustomTagsObsidian || 'Memex Sync',
-            customTagsLogseq:
-                customTagsLogseq.PKMSYNCcustomTagsLogseq || 'Memex Sync',
+            customTagsObsidian: customTagsObsidian.PKMSYNCcustomTagsObsidian,
+            customTagsLogseq: customTagsLogseq.PKMSYNCcustomTagsLogseq,
             // syncOnlyAnnotatedPagesLogseq:
             //     syncOnlyAnnotatedPagesLogseq.PKMSYNCsyncOnlyAnnotatedPagesLogseq,
             // syncOnlyAnnotatedPagesObsidian:
