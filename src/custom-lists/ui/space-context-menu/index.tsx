@@ -1,6 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
-import Logic, { Dependencies, State, Event, SpacePrivacyState } from './logic'
+import Logic, { Dependencies, State, Event } from './logic'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -268,6 +268,22 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                             size="medium"
                         />
                     )}
+
+                    {this.state.emailInvites.map((invite) => (
+                        <div>
+                            <span>{invite.email}</span>
+                            <span>
+                                {sharedListRoleIDToString(invite.roleID)}
+                            </span>
+                            <PrimaryAction
+                                onClick={() =>
+                                    console.log('remove invite:', invite)
+                                }
+                                type="secondary"
+                                label="Remove"
+                            />
+                        </div>
+                    ))}
                 </Container>
             </>
         )
@@ -338,27 +354,31 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
         return (
             <ContextMenuContainer>
-                <DropdownMenuBtn
-                    menuItems={[
-                        {
-                            id: SET_LIST_PRIVATE_ID,
-                            name: 'Private',
-                            info: 'Only visible to you and people invited',
-                        },
-                        {
-                            id: 'public-space-selection-state',
-                            name: 'Shared',
-                            info: 'Viewable to anyone with the link',
-                        },
-                    ]}
-                    onMenuItemClick={(item) =>
-                        this.props.onSetSpacePrivate(
-                            item.id === SET_LIST_PRIVATE_ID,
-                        )
-                    }
-                    initSelectedIndex={this.props.listData.isPrivate ? 0 : 1}
-                    keepSelectedState
-                />
+                {this.props.isCreator && this.props.listData.remoteId != null && (
+                    <DropdownMenuBtn
+                        menuItems={[
+                            {
+                                id: SET_LIST_PRIVATE_ID,
+                                name: 'Private',
+                                info: 'Only visible to you and people invited',
+                            },
+                            {
+                                id: 'public-space-selection-state',
+                                name: 'Shared',
+                                info: 'Viewable to anyone with the link',
+                            },
+                        ]}
+                        onMenuItemClick={(item) =>
+                            this.props.onSetSpacePrivate(
+                                item.id === SET_LIST_PRIVATE_ID,
+                            )
+                        }
+                        initSelectedIndex={
+                            this.props.listData.isPrivate ? 0 : 1
+                        }
+                        keepSelectedState
+                    />
+                )}
                 {this.props.listData.remoteId != null && (
                     <SectionTitle>Invite Links</SectionTitle>
                 )}

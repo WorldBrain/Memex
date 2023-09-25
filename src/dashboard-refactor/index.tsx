@@ -571,7 +571,6 @@ export class DashboardContainer extends StatefulUIElement<
                             annotationLocalToRemoteIdsDict,
                         }),
                     analyticsBG: this.props.analyticsBG,
-                    currentUser: this.state.currentUser,
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {

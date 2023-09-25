@@ -21,7 +21,7 @@ export interface Dependencies {
     contentSharingBG: ContentSharingInterface
     spacesBG: RemoteCollectionsInterface
     listData: UnifiedList
-    isCreator?: boolean
+    isCreator: boolean
     errorMessage?: string
     loadOwnershipData?: boolean
     onCancelEdit?: () => void
@@ -36,7 +36,6 @@ export interface Dependencies {
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
     analyticsBG: AnalyticsCoreInterface
-    currentUser: any
 }
 
 export type Event = UIEvent<{

@@ -36,7 +36,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
         listId: string,
     ) => Omit<
         SpaceContextMenuBtnProps,
-        'isMenuDisplayed' | 'errorMessage' | 'listData'
+        'isMenuDisplayed' | 'errorMessage' | 'listData' | 'isCreator'
     >
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup
@@ -152,6 +152,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             list.unifiedId,
                                         )}
                                         listData={list}
+                                        isCreator={
+                                            list.creator?.id ===
+                                            this.props.currentUser?.id
+                                        }
                                         isMenuDisplayed={
                                             this.props.showMoreMenuListId ===
                                             list.unifiedId
@@ -165,7 +169,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 newName,
                                             )
                                         }}
-                                        currentUser={this.props.currentUser?.id}
                                     />
                                 )}
                             />
