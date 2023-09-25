@@ -5,6 +5,9 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import { runtime } from 'webextension-polyfill'
+import { browser } from 'webextension-polyfill-ts'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onPress: () => void
@@ -25,6 +28,9 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     keepScrollPosition?: () => void
     addedToAllIds?: number[]
     onListFocus?: (listId) => void
+    goToButtonRef?: React.RefObject<HTMLDivElement>
+    localId?: number
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 class EntryRow extends React.Component<Props> {
@@ -50,9 +56,13 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
+        console.log('ref', this.props.goToButtonRef?.current)
         if (!e.shiftKey) {
             if (
-                this.props.contextMenuBtnRef?.current.contains(e.target as Node)
+                this.props.contextMenuBtnRef?.current.contains(
+                    e.target as Node,
+                ) ||
+                this.props.goToButtonRef?.current.contains(e.target as Node)
             ) {
                 return
             }
@@ -79,6 +89,17 @@ class EntryRow extends React.Component<Props> {
         })
     }
 
+    private handleOpenSpaceFromPicker: React.MouseEventHandler = async (
+        event,
+    ) => {
+        await this.props.bgScriptBG?.openOverviewTab({
+            // TODO: fix type but list.localId is not working. Tetst by clicking on the pills in telegram/twitter. They should jump to the right space in the dashboard
+            /** @ts-ignore */
+            selectedSpace: this.props.localId,
+        })
+        event.preventDefault()
+        event.stopPropagation()
+    }
     render() {
         const {
             id,
@@ -88,6 +109,7 @@ class EntryRow extends React.Component<Props> {
             resultItem,
             onPressActOnAll,
             contextMenuBtnRef,
+            goToButtonRef,
             keyboardNavActive,
         } = this.props
 
@@ -131,19 +153,35 @@ class EntryRow extends React.Component<Props> {
                 </NameWrapper>
                 <IconStyleWrapper>
                     {focused && this.props.onContextMenuBtnPress != null && (
-                        <TooltipBox
-                            tooltipText={'Share & Edit Space'}
-                            placement="bottom"
-                            targetElementRef={contextMenuBtnRef.current}
-                        >
-                            <ButtonContainer ref={contextMenuBtnRef}>
-                                <Icon
-                                    filePath={icons.invite}
-                                    heightAndWidth="20px"
-                                    onClick={this.handleContextMenuBtnPress}
-                                />
-                            </ButtonContainer>
-                        </TooltipBox>
+                        <>
+                            <TooltipBox
+                                tooltipText={'Share & Edit Space'}
+                                placement="bottom"
+                                targetElementRef={contextMenuBtnRef?.current}
+                            >
+                                <ButtonContainer ref={contextMenuBtnRef}>
+                                    <Icon
+                                        filePath={icons.invite}
+                                        heightAndWidth="20px"
+                                        onClick={this.handleContextMenuBtnPress}
+                                    />
+                                </ButtonContainer>
+                            </TooltipBox>
+
+                            <TooltipBox
+                                tooltipText={'Go to Space'}
+                                placement="bottom"
+                                targetElementRef={goToButtonRef?.current}
+                            >
+                                <ButtonContainer ref={goToButtonRef}>
+                                    <Icon
+                                        filePath={icons.goTo}
+                                        heightAndWidth="20px"
+                                        onClick={this.handleOpenSpaceFromPicker}
+                                    />
+                                </ButtonContainer>
+                            </TooltipBox>
+                        </>
                     )}
                     {focused && onPressActOnAll && (
                         <ButtonContainer>

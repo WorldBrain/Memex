@@ -12,6 +12,8 @@ import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import type { AnnotationInterface } from 'src/annotations/background/types'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -22,6 +24,7 @@ export interface Dependencies {
     pdfIntegrationBG: PDFRemoteInterface
     pageIndexingBG: PageIndexingInterface<'caller'>
     analyticsBG: AnalyticsCoreInterface
+    annotationsBG: AnnotationInterface<'provider'>
 }
 
 export interface Event {
@@ -33,6 +36,7 @@ export interface Event {
 
 export interface State {
     pageListIds: number[]
+    pageListNames: string[]
     loadState: UITaskState
     currentTabFullUrl: string
     identifierFullUrl: string
@@ -43,6 +47,7 @@ export interface State {
     isFileAccessAllowed: boolean
     showAutoSaved: boolean
     analyticsBG: AnalyticsCoreInterface
+    isSavedPage: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -58,6 +63,7 @@ export default class PopupLogic extends UILogic<State, Event> {
 
     getInitialState = (): State => ({
         pageListIds: [],
+        pageListNames: [],
         currentTabFullUrl: '',
         identifierFullUrl: '',
         underlyingResourceUrl: '',
@@ -67,6 +73,7 @@ export default class PopupLogic extends UILogic<State, Event> {
         isFileAccessAllowed: false,
         showAutoSaved: false,
         analyticsBG: null,
+        isSavedPage: false,
     })
 
     async init() {
@@ -78,6 +85,7 @@ export default class PopupLogic extends UILogic<State, Event> {
             customListsBG,
             analyticsBG,
             pageIndexingBG,
+            annotationsBG,
         } = this.dependencies
 
         await loadInitial(this, async () => {
@@ -89,32 +97,71 @@ export default class PopupLogic extends UILogic<State, Event> {
                 currentTab.url.startsWith('about:')
             ) {
             } else {
-                const identifier = await pageIndexingBG.waitForContentIdentifier(
-                    {
+                let identifier
+                if (
+                    currentTab.url.startsWith('file://') ||
+                    (currentTab.url.endsWith('.pdf') &&
+                        (!currentTab.url.startsWith('chrome-extension') ||
+                            !currentTab.url.startsWith('moz-extension')))
+                ) {
+                    identifier = {
+                        fullUrl: currentTab.url,
+                        normalizedUrl: normalizeUrl(currentTab.url),
+                    }
+                } else {
+                    identifier = await pageIndexingBG.waitForContentIdentifier({
                         tabId: currentTab.id,
                         fullUrl: currentTab.url,
-                    },
-                )
+                    })
+                }
                 const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
+
+                // const [isPDFReaderEnabled] = await Promise.all([
+                //     syncSettings.pdfIntegration.get('shouldAutoOpen'),
+                // ])
+
+                this.emitMutation({
+                    analyticsBG: { $set: analyticsBG },
+                    currentTabFullUrl: { $set: currentTab.originalUrl },
+                    identifierFullUrl: { $set: identifier.fullUrl },
+                    underlyingResourceUrl: { $set: currentTab.url },
+                    isPDFReaderEnabled: { $set: false },
+                    isFileAccessAllowed: { $set: isFileAccessAllowed },
+                })
 
                 const pageListIds = await customListsBG.fetchPageLists({
                     url: identifier.fullUrl,
                 })
 
-                const [isPDFReaderEnabled] = await Promise.all([
-                    syncSettings.pdfIntegration.get('shouldAutoOpen'),
-                ])
+                let pageListNames = []
+                for (let id of pageListIds) {
+                    const list = await customListsBG.fetchListById({ id: id })
+                    pageListNames.push(list.name)
+                }
+
+                const isSavedPage = await this.loadBookmarkState(
+                    identifier.fullUrl,
+                    pageIndexingBG,
+                )
+
                 this.emitMutation({
-                    analyticsBG: { $set: analyticsBG },
                     pageListIds: { $set: pageListIds },
-                    currentTabFullUrl: { $set: currentTab.originalUrl },
-                    identifierFullUrl: { $set: identifier.fullUrl },
-                    underlyingResourceUrl: { $set: currentTab.url },
-                    isPDFReaderEnabled: { $set: isPDFReaderEnabled },
-                    isFileAccessAllowed: { $set: isFileAccessAllowed },
+                    pageListNames: { $set: pageListNames },
+                    isSavedPage: { $set: isSavedPage },
                 })
             }
         })
+    }
+
+    loadBookmarkState = async (fullUrl: string, pageIndexingBG) => {
+        const pageTitle = await pageIndexingBG.lookupPageTitleForUrl({
+            fullPageUrl: fullUrl,
+        })
+        if (pageTitle && pageTitle.length > 0) {
+            return true
+        } else {
+            return false
+        }
     }
 
     togglePDFReader: EventHandler<'togglePDFReader'> = async ({
@@ -149,9 +196,15 @@ export default class PopupLogic extends UILogic<State, Event> {
     }) => {
         const pageListIdsSet = new Set(previousState.pageListIds)
         pageListIdsSet.add(event.listId)
+        const list = await this.dependencies.customListsBG.fetchListById({
+            id: event.listId,
+        })
+        const pageListNames = [...previousState.pageListNames, list.name]
+
         this.emitMutation({
             pageListIds: { $set: [...pageListIdsSet] },
             showAutoSaved: { $set: true },
+            pageListNames: { $set: pageListNames },
         })
     }
 
@@ -161,9 +214,19 @@ export default class PopupLogic extends UILogic<State, Event> {
     }) => {
         const pageListIdsSet = new Set(previousState.pageListIds)
         pageListIdsSet.delete(event.listId)
+        const list = await this.dependencies.customListsBG.fetchListById({
+            id: event.listId,
+        })
+
+        // Filter out the list name from the array
+        const pageListNames = previousState.pageListNames.filter(
+            (name) => name !== list.name,
+        )
+
         this.emitMutation({
             pageListIds: { $set: [...pageListIdsSet] },
             showAutoSaved: { $set: true },
+            pageListNames: { $set: pageListNames },
         })
     }
 

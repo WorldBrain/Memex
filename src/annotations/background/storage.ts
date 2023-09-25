@@ -17,6 +17,11 @@ import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import {
+    isPkmSyncEnabled,
+    shareAnnotationWithPKM,
+} from 'src/pkm-integrations/background/backend/utils'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -26,8 +31,16 @@ export default class AnnotationStorage extends StorageModule {
     static LISTS_COLL = LIST_COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
 
-    constructor(private options: { storageManager: Storex }) {
-        super({ storageManager: options.storageManager })
+    constructor(
+        private options: {
+            storageManager: Storex
+            pkmSyncBG: PkmSyncInterface
+        },
+    ) {
+        super({
+            storageManager: options.storageManager,
+            pkmSyncBG: options.pkmSyncBG,
+        })
     }
 
     getConfig = (): StorageModuleConfig => ({
@@ -311,6 +324,27 @@ export default class AnnotationStorage extends StorageModule {
             url,
             createdAt: new Date(),
         })
+
+        // Send to PKM Sync
+        if (await isPkmSyncEnabled()) {
+            try {
+                const annotationsData = await this.getAnnotations([url])
+                const annotationDataForPKMSyncUpdate = annotationsData[0]
+                const listData = await this.options.storageManager
+                    .collection(AnnotationStorage.LISTS_COLL)
+                    .findOneObject<{ id: number; name: string }>({ id: listId })
+                const listName = listData.name
+
+                const annotationData = {
+                    annotationId: annotationDataForPKMSyncUpdate.url,
+                    pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
+                    pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
+                    annotationSpaces: listName,
+                }
+
+                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+            } catch (e) {}
+        }
     }
 
     async ensureAnnotInList(
@@ -327,6 +361,26 @@ export default class AnnotationStorage extends StorageModule {
         await this.getListById({ listId })
 
         await this.operation('deleteAnnotationFromList', { listId, url })
+
+        if (await isPkmSyncEnabled()) {
+            try {
+                const annotationsData = await this.getAnnotations([url])
+                const annotationDataForPKMSyncUpdate = annotationsData[0]
+                const listData = await this.options.storageManager
+                    .collection(AnnotationStorage.LISTS_COLL)
+                    .findOneObject<{ id: number; name: string }>({ id: listId })
+                const listName = listData.name
+
+                const annotationData = {
+                    annotationId: annotationDataForPKMSyncUpdate.url,
+                    pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
+                    pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
+                    annotationSpaces: listName,
+                }
+
+                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+            } catch (e) {}
+        }
     }
 
     /**
@@ -401,7 +455,19 @@ export default class AnnotationStorage extends StorageModule {
                 'Failed create annotation attempt - no highlight or comment supplied',
             )
         }
+        if (await isPkmSyncEnabled()) {
+            try {
+                const annotationData = {
+                    annotationId: url,
+                    pageTitle: pageTitle,
+                    body: body,
+                    comment: comment,
+                    createdWhen: createdWhen,
+                }
 
+                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+            } catch (e) {}
+        }
         return this.operation('createAnnotation', {
             pageTitle,
             pageUrl,
@@ -419,6 +485,23 @@ export default class AnnotationStorage extends StorageModule {
         comment: string,
         lastEdited = new Date(),
     ) {
+        if (await isPkmSyncEnabled()) {
+            try {
+                const annotationsData = await this.getAnnotations([url])
+                const annotationDataForPKMSyncUpdate = annotationsData[0]
+
+                const annotationData = {
+                    annotationId: annotationDataForPKMSyncUpdate.url,
+                    pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
+                    body: annotationDataForPKMSyncUpdate.body,
+                    createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
+                    comment,
+                }
+
+                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+            } catch (e) {}
+        }
+
         return this.operation('editAnnotation', {
             url,
             comment,

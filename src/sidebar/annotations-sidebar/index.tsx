@@ -21,7 +21,7 @@ interface RootProps {
     mount: InPageUIRootMount
     dependencies: Omit<
         AnnotationsSidebarDependencies,
-        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme'
+        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme' | 'bgScriptBG'
     >
 }
 interface RootState {
@@ -66,6 +66,7 @@ class Root extends React.Component<RootProps, RootState> {
         }
 
         const { props } = this
+
         return (
             <StyleSheetManager target={props.mount.shadowRoot as any}>
                 <ThemeProvider theme={this.state.theme}>
@@ -83,7 +84,7 @@ export function setupInPageSidebarUI(
     mount: InPageUIRootMount,
     dependencies: Omit<
         AnnotationsSidebarDependencies,
-        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme'
+        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme' | 'bgScriptBG'
     >,
 ) {
     ReactDOM.render(

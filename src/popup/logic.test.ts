@@ -39,6 +39,7 @@ async function setupTest(
         customListsBG: backgroundModules.customLists.remoteFunctions,
         analyticsBG: backgroundModules.analyticsBG,
         extensionAPI: { isAllowedFileSchemeAccess: async () => true },
+        annotationsBG: backgroundModules.directLinking.remoteFunctions,
     })
 
     const logic = createElement<State, Event>(_logic)
