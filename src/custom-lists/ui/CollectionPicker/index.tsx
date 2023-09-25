@@ -38,7 +38,7 @@ import { RemoteBGScriptInterface } from 'src/background-script/types'
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
     onListFocus?: (listId: UnifiedList['localId']) => void
-    bgScriptBG: RemoteBGScriptInterface
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 class SpacePicker extends StatefulUIElement<

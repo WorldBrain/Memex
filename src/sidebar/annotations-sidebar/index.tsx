@@ -67,12 +67,10 @@ class Root extends React.Component<RootProps, RootState> {
 
         const { props } = this
 
-        console.log('TESt', props.dependencies.bgScriptBG)
         return (
             <StyleSheetManager target={props.mount.shadowRoot as any}>
                 <ThemeProvider theme={this.state.theme}>
                     <AnnotationsSidebarInPage
-                        bgScriptBG={props.dependencies.bgScriptBG}
                         {...props.dependencies}
                         theme={this.state.theme}
                     />

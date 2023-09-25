@@ -58,6 +58,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         storageAPI: browser.storage,
         sidebarContext: 'in-page',
         isLockable: true,
+        bgScriptBG: null,
     }
 
     private initLogicPromise = resolvablePromise()

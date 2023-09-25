@@ -24,7 +24,7 @@ export interface Dependencies {
     pdfIntegrationBG: PDFRemoteInterface
     pageIndexingBG: PageIndexingInterface<'caller'>
     analyticsBG: AnalyticsCoreInterface
-    annotationsBG: AnnotationInterface<'caller'>
+    annotationsBG: AnnotationInterface<'provider'>
 }
 
 export interface Event {
