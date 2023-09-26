@@ -9,7 +9,7 @@ import type { GetContentFingerprints } from './types'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import { getPDFTitle } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/get-title'
-import { promptPdfScreenshot } from 'src/pdf/screenshots/selection'
+import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 
 const waitForDocument = async () => {
     while (true) {
