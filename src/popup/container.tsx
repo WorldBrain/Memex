@@ -75,6 +75,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 runtimeAPI: browser.runtime,
                 extensionAPI: browser.extension,
                 customListsBG: collections,
+                annotationsBG: runInBackground(),
                 pageIndexingBG: runInBackground(),
                 analyticsBG: runInBackground(),
                 pdfIntegrationBG: runInBackground(),
@@ -139,10 +140,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         if (added) {
             await this.processEvent('addPageList', { listId: added })
             this.props.onCollectionAdd(added)
+            await this.props.initState()
         }
         if (deleted) {
             await this.processEvent('delPageList', { listId: deleted })
             this.props.onCollectionDel(deleted)
+            await this.props.initState()
         }
         return backendResult
     }
@@ -194,7 +197,8 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             return (
                 <BlurredNotice browser={this.browserName}>
                     <NoticeTitle>
-                        Annotating local PDFs is not possible on Firefox
+                        Annotating local PDFs <br />
+                        is not possible on Firefox
                     </NoticeTitle>
                     <NoticeSubTitle>
                         Use Chromium-based browsers to use this feature
@@ -328,8 +332,17 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 <BookmarkButton
                     pageUrl={this.state.currentTabFullUrl}
                     closePopup={this.closePopup}
+                    isSavedPage={this.state.isSavedPage}
                 />
                 <CollectionsButton pageListsIds={this.state.pageListIds} />
+                {this.state.pageListNames &&
+                    this.state.pageListNames?.length > 0 && (
+                        <ListNamesBox>
+                            {this.state.pageListNames?.map((item) => (
+                                <ListName>{item}</ListName>
+                            ))}
+                        </ListNamesBox>
+                    )}
                 <SpacerLine />
                 {this.isCurrentPagePDF === true && (
                     <PDFReaderButton
@@ -387,6 +400,24 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
         return <div className={styles.popup}>{this.renderChildren()}</div>
     }
 }
+
+const ListNamesBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 5px;
+    padding: 0 15px 15px 15px;
+    flex-wrap: wrap;
+`
+
+const ListName = styled.div`
+    padding: 2px 5px;
+    border-radius: 5px;
+    background-color: ${(props) => props.theme.colors.greyScale2};
+    color: ${(props) => props.theme.colors.greyScale6};
+    white-space: wrap;
+`
 
 const MemexLogo = styled.div`
     background-image: url('/img/memexLogoGrey.svg');
@@ -480,12 +511,16 @@ const BlurredNotice = styled.div<{
     position: absolute;
     height: 100%;
     width: 100%;
+    width: fill-available;
+    width: -moz-available;
+    height: 100%;
     z-index: 30;
     overflow-y: ${(props) =>
         props.browser === 'firefox' && props.location === 'local'
             ? 'hidden'
             : 'scroll'};
-    background: ${(props) => (props.browser === 'firefox' ? 'white' : 'none')};
+    background: ${(props) =>
+        props.browser === 'firefox' ? props.theme.colors.black + 90 : 'none'};
     backdrop-filter: blur(10px);
     display: flex;
     justify-content: center;

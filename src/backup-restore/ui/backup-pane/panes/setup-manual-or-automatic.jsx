@@ -42,6 +42,8 @@ class SetupManualOrAutomatic extends React.Component {
                                         this.props.onChoice({ type: 'manual' })
                                     }
                                     label={'Continue'}
+                                    type={'primary'}
+                                    size={'medium'}
                                 />
                             )}
                             {this.state.mode === 'automatic' && (
@@ -53,6 +55,8 @@ class SetupManualOrAutomatic extends React.Component {
                                         })
                                     }
                                     label={'Next'}
+                                    type={'primary'}
+                                    size={'medium'}
                                 />
                             )}
                         </div>

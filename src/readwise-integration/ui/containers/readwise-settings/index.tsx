@@ -22,6 +22,7 @@ import { AuthContextInterface } from 'src/authentication/background/types'
 import { userAuthorizedForReadwise } from './utils'
 import analytics from 'src/analytics'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import { directoryOpen } from 'browser-fs-access'
 
 class ReadwiseSettingsContainer extends React.Component<
     AuthContextInterface & { showSubscriptionModal: () => void }
@@ -116,6 +117,7 @@ class ReadwiseSettings extends StatefulUIElement<
                                     null,
                                 )
                             }
+                            fontSize={16}
                             label={'Sync existing highlights'}
                         />
                     </ExistingHighlightBox>
@@ -169,6 +171,8 @@ class ReadwiseSettings extends StatefulUIElement<
                                 icon={'check'}
                                 size={'medium'}
                                 type={'secondary'}
+                                padding={'0 8px 0 4px'}
+                                height="44px"
                             />
                         </div>
                     )}
@@ -179,6 +183,8 @@ class ReadwiseSettings extends StatefulUIElement<
                             icon={'check'}
                             size={'medium'}
                             type={'secondary'}
+                            padding={'0 8px 0 4px'}
+                            height="44px"
                         />
                     )}
                 </MainBox>

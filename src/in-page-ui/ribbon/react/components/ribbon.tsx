@@ -43,6 +43,7 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -72,6 +73,7 @@ export interface Props extends RibbonSubcomponentProps {
     isTrial: boolean
     signupDate?: number
     toggleTheme: () => void
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 interface State {
@@ -293,6 +295,7 @@ export default class Ribbon extends Component<Props, State> {
                     spacesBG={this.props.spacesBG}
                     annotationsCache={this.props.annotationsCache}
                     contentSharingBG={this.props.contentSharingBG}
+                    bgScriptBG={this.props.bgScriptBG}
                     analyticsBG={this.props.analyticsBG}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     localStorageAPI={browser.storage.local}
@@ -2217,7 +2220,7 @@ const UpperPart = styled.div<{ ribbonPosition; isSidebarOpen }>`
             align-items: center;
             flex-direction: column;
             justify-content: space-between;
-            padding: 0px 10px;
+            padding: 10px 10px;
         `}
 `
 
@@ -2249,7 +2252,7 @@ const BottomSection = styled.div<{ ribbonPosition; sidebarOpen }>`
             align-items: center;
             flex-direction: column;
             justify-content: space-between;
-            padding: 0px 10px;
+            padding: 10px 10px;
         `}
 `
 
@@ -2343,10 +2346,9 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                     display: flex;
                     box-shadow: none;
                     justify-content: center;
-                    height: fill-available;
                     height: 100%;
                     flex-direction: column;
-                    padding: 20px 0px;
+                    padding: 0px 0px;
                     width: ${TOOLTIP_WIDTH};
                     align-items: flex-start;
                     right: 0px;

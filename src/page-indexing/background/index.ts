@@ -64,6 +64,7 @@ import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/ut
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { AuthBackground } from 'src/authentication/background'
 import { AuthServices } from 'src/services/types'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -107,10 +108,12 @@ export class PageIndexingBackground {
             fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
+            pkmSyncBG?: PkmSyncInterface
         },
     ) {
         this.storage = new PageStorage({
             storageManager: options.storageManager,
+            pkmSyncBG: options.pkmSyncBG,
         })
         this.persistentStorage = new PersistentPageStorage({
             storageManager: options.persistentStorageManager,

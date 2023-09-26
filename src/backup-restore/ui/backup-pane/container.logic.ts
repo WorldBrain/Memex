@@ -247,6 +247,7 @@ export async function processEvent({
                 await localBackupSettings.set('automaticBackupsEnabled', true)
                 await remoteFunction('enableAutomaticBackup')
                 await localBackupSettings.set('runningBackup', true)
+                await remoteFunction('startBackup')
                 return { screen: 'running-backup' }
             },
             onChangeLocalLocation: () => {
@@ -277,6 +278,7 @@ export async function processEvent({
                         'automaticBackupsEnabled',
                         true,
                     )
+                    await remoteFunction('startBackup')
                     await remoteFunction('enableAutomaticBackup')
                 }
                 return { screen: 'onboarding-size' }
