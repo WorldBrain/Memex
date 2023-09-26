@@ -48,9 +48,7 @@ export type Event = UIEvent<{
     confirmSpaceNameEdit: null
     updateSpaceName: { name: string }
     updateEmailInviteInputValue: { value: string }
-    updateEmailInviteInputRole: {
-        role: SharedListRoleID.Commenter | SharedListRoleID.ReadWrite
-    }
+    updateEmailInviteInputRole: { role: SharedListRoleID }
     inviteViaEmail: { now?: number }
     deleteEmailInvite: { key: string }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
@@ -345,6 +343,14 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     updateEmailInviteInputRole: EventHandler<
         'updateEmailInviteInputRole'
     > = async ({ event }) => {
+        if (
+            event.role !== SharedListRoleID.Commenter &&
+            event.role !== SharedListRoleID.ReadWrite
+        ) {
+            throw new Error(
+                'Cannot set invite role other than Commenter and ReadWrite',
+            )
+        }
         this.emitMutation({ emailInviteInputRole: { $set: event.role } })
     }
 

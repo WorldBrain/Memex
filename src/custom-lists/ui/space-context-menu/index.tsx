@@ -257,14 +257,47 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     />
 
                     {this.shouldShowInviteBtn && (
-                        <PrimaryAction
-                            onClick={() =>
-                                this.processEvent('inviteViaEmail', {})
-                            }
-                            label="Invite"
-                            type="secondary"
-                            size="medium"
-                        />
+                        <>
+                            <DropdownMenuBtn
+                                menuItems={[
+                                    {
+                                        id: SharedListRoleID.Commenter,
+                                        name: sharedListRoleIDToString(
+                                            SharedListRoleID.Commenter,
+                                        ),
+                                    },
+                                    {
+                                        id: SharedListRoleID.ReadWrite,
+                                        name: sharedListRoleIDToString(
+                                            SharedListRoleID.ReadWrite,
+                                        ),
+                                    },
+                                ]}
+                                onMenuItemClick={(item) =>
+                                    this.processEvent(
+                                        'updateEmailInviteInputRole',
+                                        {
+                                            role: item.id as SharedListRoleID,
+                                        },
+                                    )
+                                }
+                                initSelectedIndex={
+                                    this.state.emailInviteInputRole ===
+                                    SharedListRoleID.Commenter
+                                        ? 0
+                                        : 1
+                                }
+                                keepSelectedState
+                            />
+                            <PrimaryAction
+                                onClick={() =>
+                                    this.processEvent('inviteViaEmail', {})
+                                }
+                                label="Invite"
+                                type="secondary"
+                                size="medium"
+                            />
+                        </>
                     )}
 
                     {normalizedStateToArray(this.state.emailInvites).map(
