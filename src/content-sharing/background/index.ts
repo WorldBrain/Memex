@@ -269,11 +269,6 @@ export default class ContentSharingBackground {
                     localId: callOptions.localListId,
                 })
             },
-            getRemoteListIds: async (callOptions) => {
-                return this.storage.getRemoteListIds({
-                    localIds: callOptions.localListIds,
-                })
-            },
             getRemoteAnnotationIds: async (callOptions) => {
                 return this.storage.getRemoteAnnotationIds({
                     localIds: callOptions.annotationUrls,
@@ -282,6 +277,11 @@ export default class ContentSharingBackground {
             getRemoteAnnotationMetadata: async (callOptions) => {
                 return this.storage.getRemoteAnnotationMetadata({
                     localIds: callOptions.annotationUrls,
+                })
+            },
+            getListShareMetadata: async (params) => {
+                return this.storage.getListShareMetadata({
+                    localIds: params.localListIds,
                 })
             },
             updateListPrivacy: async (params) => {
