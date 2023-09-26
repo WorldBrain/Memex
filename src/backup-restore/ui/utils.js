@@ -1,5 +1,6 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { LOCAL_SERVER_ENDPOINTS } from './backup-pane/constants'
+import { getFolder } from 'src/pkm-integrations/background/backend/utils'
 export async function redirectToGDriveLogin() {
     window.location.href = await remoteFunction('getBackupProviderLoginLink')({
         returnUrl: 'http://memex.cloud/backup/auth-redirect/google-drive',
@@ -7,7 +8,7 @@ export async function redirectToGDriveLogin() {
     })
 }
 
-export const getStringFromResponseBody = async response => {
+export const getStringFromResponseBody = async (response) => {
     const { value } = await response.body.getReader().read()
     return new TextDecoder('utf-8').decode(value)
 }
@@ -27,8 +28,22 @@ export const checkServerStatus = async () => {
 
 export const fetchBackupPath = async () => {
     try {
-        const response = await fetch(LOCAL_SERVER_ENDPOINTS.LOCATION)
-        const backupPath = await getStringFromResponseBody(response)
+        const storage = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const backupPath = storage.PKMSYNCpkmFolders.backupFolder
+        // const syncKey = await getPkmSyncKey()
+        // const body = {
+        //     pkmSyncType: 'backup',
+        //     syncKey: syncKey,
+        // }
+        // const response = await fetch(LOCAL_SERVER_ENDPOINTS.LOCATION, {
+        //     method: 'GET',
+        //     headers: {
+        //         'Content-Type': 'application/json',
+        //     },
+        //     body: JSON.stringify(body),
+        // })
+        // const backupPath = await getStringFromResponseBody(response)
+
         if (backupPath && backupPath.length) {
             return backupPath
         }
@@ -40,9 +55,8 @@ export const fetchBackupPath = async () => {
 
 export const changeBackupPath = async () => {
     try {
-        const response = await fetch(LOCAL_SERVER_ENDPOINTS.CHANGE_LOCATION)
-        const backupPath = await getStringFromResponseBody(response)
-        return backupPath
+        const folder = await getFolder('backup')
+        return folder
     } catch (err) {
         return false
     }

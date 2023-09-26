@@ -97,6 +97,8 @@ import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -110,6 +112,8 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
     imageSupport?: ImageSupportInterface<'caller'>
+    pkmSyncBG?: PkmSyncInterface
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 type EventHandler<
@@ -1266,9 +1270,22 @@ export class SidebarContainerLogic extends UILogic<
     })
 
     /* -- START: Annotation card instance events -- */
-    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = ({
+    setAnnotationEditMode: EventHandler<'setAnnotationEditMode'> = async ({
+        previousState,
         event,
     }) => {
+        if (event.instanceLocation === 'annotations-tab') {
+            if (previousState.activeTab !== 'annotations') {
+                this.emitMutation({
+                    activeTab: { $set: 'annotations' },
+                })
+            }
+        } else {
+            this.emitMutation({
+                activeTab: { $set: 'spaces' },
+            })
+        }
+
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
@@ -1408,6 +1425,7 @@ export class SidebarContainerLogic extends UILogic<
                     event.isProtected || !!event.keepListsIfUnsharing,
                 skipPrivacyLevelUpdate: event.mainBtnPressed,
             },
+            pkmSyncBG: this.options.pkmSyncBG,
         })
 
         this.options.annotationsCache.updateAnnotation(
@@ -1619,6 +1637,7 @@ export class SidebarContainerLogic extends UILogic<
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
+                pkmSyncBG: this.options.pkmSyncBG,
             })
 
             this.options.annotationsCache.addAnnotation({
@@ -2674,6 +2693,9 @@ export class SidebarContainerLogic extends UILogic<
             pageSummary: { $set: '' },
             prompt: { $set: null },
         })
+        // is here bc for some reason else the timestamps will not be pushed, seems like a race condition
+
+        await sleepPromise(0)
         const timestampToInsert = event.timeStampANDSummaryJSON[0]
 
         const maxRetries = 30

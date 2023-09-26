@@ -208,6 +208,8 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
                                                 ? 'Backup Now'
                                                 : 'Go to Backup'
                                         }
+                                        type={'primary'}
+                                        size={'medium'}
                                     />
                                 )}
                             </StatusLine>

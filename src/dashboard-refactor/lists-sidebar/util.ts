@@ -5,7 +5,9 @@ export const filterListsByQuery = (
     lists: Pick<UnifiedList, 'name' | 'unifiedId'>[],
 ) => {
     const normalizedQuery = query.toLocaleLowerCase()
-    return lists.filter((list) =>
-        list.name.toLocaleLowerCase().includes(normalizedQuery),
+    return lists.filter(
+        (list) =>
+            list.name != null &&
+            list.name.toLocaleLowerCase().includes(normalizedQuery),
     )
 }

@@ -31,12 +31,16 @@ import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
     imageSupport?: ImageSupportInterface<'caller'>
+    pkmSyncBG: PkmSyncInterface
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
@@ -44,11 +48,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 > {
     static defaultProps: Pick<
         Props,
-        'isLockable' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI'
+        | 'isLockable'
+        | 'sidebarContext'
+        | 'runtimeAPI'
+        | 'storageAPI'
+        | 'bgScriptBG'
     > = {
         runtimeAPI: browser.runtime,
         storageAPI: browser.storage,
-
         sidebarContext: 'in-page',
         isLockable: true,
     }
@@ -264,13 +271,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
             await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab:
-                    this.state.selectedListId &&
-                    this.state.activeTab === 'spaces'
-                        ? 'spaces'
-                        : 'annotations',
-            })
             await this.processEvent('setAnnotationEditMode', {
                 instanceLocation:
                     this.state.selectedListId &&
@@ -347,9 +347,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (
             event.action === 'create_youtube_timestamp_with_screenshot'
         ) {
-            // await this.processEvent('setActiveSidebarTab', {
-            //     tab: 'annotations',
-            // })
+            if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+                await sleepPromise(100)
+            }
 
             this.processEvent('createYoutubeTimestampWithScreenshot', {
                 imageData: event.imageData,

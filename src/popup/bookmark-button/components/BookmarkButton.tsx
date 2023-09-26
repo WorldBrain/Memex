@@ -20,6 +20,7 @@ const buttonStyles = require('../../components/Button.css')
 export interface OwnProps {
     closePopup: () => void
     pageUrl: string
+    isSavedPage: boolean
 }
 
 interface StateProps {
@@ -59,20 +60,18 @@ class BookmarkButton extends PureComponent<Props> {
     }
 
     render() {
-        const text = this.props.isBookmarked ? 'Page Saved!' : 'Save Page'
+        const isPageSaved = this.props.isSavedPage || this.props.isBookmarked
+
+        const text = isPageSaved ? 'Page Saved!' : 'Save Page'
 
         return (
             <ButtonItem
-                onClick={!this.props.isDisabled && this.props.toggleBookmark}
-                disabled={this.props.isDisabled || this.props.isBookmarked}
+                onClick={!isPageSaved && this.props.toggleBookmark}
+                disabled={this.props.isDisabled || isPageSaved}
             >
                 <Icon
-                    filePath={
-                        this.props.isBookmarked
-                            ? icons.heartFull
-                            : icons.heartEmpty
-                    }
-                    color={this.props.isBookmarked ? 'prime1' : 'greyScale6'}
+                    filePath={isPageSaved ? icons.heartFull : icons.heartEmpty}
+                    color={isPageSaved ? 'prime1' : 'greyScale6'}
                     heightAndWidth="22px"
                     hoverOff
                 />

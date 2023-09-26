@@ -33,10 +33,12 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
     onListFocus?: (listId: UnifiedList['localId']) => void
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 class SpacePicker extends StatefulUIElement<
@@ -73,6 +75,7 @@ class SpacePicker extends StatefulUIElement<
     private displayListRef = React.createRef<HTMLDivElement>()
     private contextMenuRef = React.createRef<SpaceContextMenu>()
     private contextMenuBtnRef = React.createRef<HTMLDivElement>()
+    private goToButtonRef = React.createRef<HTMLDivElement>()
 
     constructor(props: Props) {
         super(props, new ListPickerLogic(props))
@@ -243,6 +246,7 @@ class SpacePicker extends StatefulUIElement<
                               })
                         : undefined
                 }
+                bgScriptBG={this.props.bgScriptBG}
                 onFocus={async () => {
                     // const el = document.getElementById(
                     //     `ListKeyName-${entry.unifiedId}`,
@@ -266,11 +270,13 @@ class SpacePicker extends StatefulUIElement<
                 keyboardNavActive={this.state.keyboardNavActive}
                 selected={this.state.selectedListIds.includes(entry.localId)}
                 focused={this.state.focusedListId === entry.unifiedId}
+                localId={entry.localId}
                 resultItem={<ListResultItem>{entry.name}</ListResultItem>}
                 removeTooltipText={
                     this.props.removeTooltipText ?? 'Remove from Space'
                 }
                 contextMenuBtnRef={this.contextMenuBtnRef}
+                goToButtonRef={this.goToButtonRef}
                 onContextMenuBtnPress={
                     entry.creator?.id === this.state.currentUser?.id
                         ? () =>

@@ -176,6 +176,7 @@ const generateForPages = async ({
             PageUrl: fullUrl,
             PageLink: pageLink,
             PageCreatedAt: serializeDate(pageCreatedAt[normalizedPageUrl]),
+            HasNotes: noteUrls.length > 0,
 
             Notes: noteUrls.map((url) => ({
                 NoteText: notes[url]?.comment,
@@ -375,6 +376,7 @@ const generateForNotes = async ({
             PageSpacesList: pageSpaces[pageUrl],
             PageLink: pageLinks[pageUrl],
             PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
+            HasNotes: notesByPageUrl[pageUrl].length > 0,
 
             title: fullTitle,
             url: fullUrl,

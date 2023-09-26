@@ -5,7 +5,7 @@ import { LesserLink } from 'src/common-ui/components/design-library/actions/Less
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
+import TextAreaMarkedUp from '@worldbrain/memex-common/lib/common-ui/components/text-area-marked-up'
 
 const styles = require('./TemplateEditorStyles.css')
 
@@ -103,7 +103,7 @@ const TextInput = styled(TextField)`
     }
 `
 
-const TextAreaContainer = styled(TextArea)`
+const TextAreaContainer = styled(TextAreaMarkedUp)`
     outline: none;
     height: fill-available;
     width: fill-available;
@@ -192,6 +192,31 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
         return !this.props.template?.title.length
     }
 
+    componentDidMount(): void {
+        let textarea
+
+        const sidebarContainer = document.getElementById(
+            'memex-sidebar-container',
+        )
+        const sidebar = sidebarContainer?.shadowRoot.getElementById(
+            'annotationSidebarContainer',
+        )
+        const test = sidebarContainer?.shadowRoot.getElementById(
+            'CopyPasterTextArea',
+        )
+
+        if (sidebar != null) {
+            textarea = sidebar.querySelector('#CopyPasterTextArea')
+        } else {
+            textarea = document.getElementById('CopyPasterTextArea')
+        }
+
+        if (textarea != null) {
+            textarea.style.height = 'auto'
+            textarea.style.height = textarea.scrollHeight + 'px'
+        }
+    }
+
     render() {
         const { template } = this.props
 
@@ -265,6 +290,7 @@ export default class TemplateEditor extends PureComponent<TemplateEditorProps> {
                         onChange={(e) =>
                             this.props.onCodeChange(e.target.value)
                         }
+                        markedUpEditor={true}
                         rows={5}
                     />
                 </TextInputBox>

@@ -169,8 +169,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                     {this.renderLinkContent()}
                                 </LinkCopierBox>
                                 <Checkbox
-                                    key={1}
-                                    id={'1'}
+                                    key={2}
+                                    id={'2'}
                                     isChecked={
                                         this.props.autoCreateLinkSetting ===
                                         true

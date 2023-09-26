@@ -29,6 +29,7 @@ import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/ty
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
 import ContentSharingBackground from 'src/content-sharing/background'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -61,11 +62,13 @@ export default class CustomListBackground {
                 ServerStorageModules,
                 'activityFollows' | 'contentSharing'
             >
+            pkmSyncBG?: PkmSyncInterface
         },
     ) {
         // Makes the custom list Table in indexed DB.
         this.storage = new CustomListStorage({
             storageManager: options.storageManager,
+            pkmSyncBG: options.pkmSyncBG,
         })
 
         this.remoteFunctions = {

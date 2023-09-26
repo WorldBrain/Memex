@@ -79,6 +79,7 @@ import {
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -216,6 +217,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         sharedListReference: SharedListReference,
     ) => RepliesProps['getReplyEditProps']
     imageSupport: ImageSupportInterface<'caller'>
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 interface AnnotationsSidebarState {
@@ -2199,7 +2201,7 @@ export class AnnotationsSidebar extends React.Component<
 
         event.stopPropagation()
         if (
-            (event.target as HTMLInputElement).value.length > 0 &&
+            (event.target as HTMLInputElement).value.length != null &&
             event.key === 'Enter'
         ) {
             // this blurring is tracked and will automatically save it
@@ -2302,7 +2304,7 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTitleEditField
                     ref={this.spaceTitleEditFieldRef}
                     value={
-                        this.props.spaceTitleEditValue
+                        this.props.spaceTitleEditValue != null
                             ? this.props.spaceTitleEditValue
                             : selectedList.name
                     }
@@ -3724,7 +3726,7 @@ const NewAnnotationSection = styled.section`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
-    width: fill-available;
+    width: 100%;
     z-index: 11200;
     margin-top: 5px;
 `

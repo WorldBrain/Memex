@@ -62,6 +62,8 @@ import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -71,6 +73,8 @@ export interface Props extends SidebarContainerOptions {
     youtubeService?: YoutubeService
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
+    pkmSyncBG?: PkmSyncInterface
+    bgScriptBG?: RemoteBGScriptInterface
 }
 
 export class AnnotationsSidebarContainer<
@@ -105,8 +109,12 @@ export class AnnotationsSidebarContainer<
                     )
                 },
                 imageSupport: props.imageSupport,
+                pkmSyncBG: props.pkmSyncBG,
+                bgScriptBG: props.bgScriptBG,
             }),
         )
+
+        console.log('slalsd', this.props.bgScriptBG)
 
         window['_getState'] = () => ({ ...this.state })
         this.listenToWindowChanges()
@@ -371,6 +379,7 @@ export class AnnotationsSidebarContainer<
                     normalizedPageUrlToFilterPageLinksBy={normalizeUrl(
                         this.state.fullPageUrl,
                     )}
+                    bgScriptBG={this.props.bgScriptBG}
                     onListFocus={(listId: UnifiedList['localId']) => {
                         const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
                             listId,
@@ -426,6 +435,7 @@ export class AnnotationsSidebarContainer<
             pageActivityIndicatorBG,
             spacesBG: customListsBG,
             showPageLinks: true,
+            bgScriptBG: this.props.bgScriptBG,
             localStorageAPI: this.props.storageAPI.local,
             unifiedAnnotationId: params.annotation.unifiedId,
             createNewEntry: this.createNewList(params.annotation.unifiedId),
@@ -487,6 +497,7 @@ export class AnnotationsSidebarContainer<
                     annotation,
                     showExternalConfirmations: true,
                 })}
+                bgScriptBG={this.props.bgScriptBG}
                 closePicker={closePicker}
                 onListFocus={(listId: UnifiedList['localId']) => {
                     const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
@@ -831,6 +842,7 @@ export class AnnotationsSidebarContainer<
                         <AnnotationsSidebar
                             {...this.state}
                             imageSupport={this.props.imageSupport}
+                            bgScriptBG={this.props.bgScriptBG}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,
                                 annotationReference,
