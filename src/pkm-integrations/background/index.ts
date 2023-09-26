@@ -6,6 +6,7 @@ import { marked } from 'marked'
 import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
+import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
     remoteFunctions: PkmSyncInterface

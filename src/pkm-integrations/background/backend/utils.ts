@@ -1,4 +1,5 @@
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
 import { browser } from 'webextension-polyfill-ts'
 
 export async function shareAnnotationWithPKM(
@@ -12,12 +13,9 @@ export async function shareAnnotationWithPKM(
     }
 
     if (item.data.comment) {
-        item.data.comment = await processCommentForImageUpload(
+        item.data.comment = await replaceImgSrcWithFunctionOutput(
             item.data.comment,
-            item.data.pageUrl,
-            item.data.annotationId,
             imageSupport,
-            true,
         )
     }
 
