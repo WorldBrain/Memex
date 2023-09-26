@@ -45,8 +45,6 @@ export class PKMSyncBackgroundModule {
     async processChanges(item) {
         const validFolders = await this.getValidFolders()
 
-        console.log('item', item)
-
         // Process for LogSeq if valid
         if (validFolders.logSeq) {
             // let syncOnlyAnnotatedPagesLogseq = await browser.storage.local.get(
@@ -352,7 +350,6 @@ export class PKMSyncBackgroundModule {
                 (creationDateMatch ? creationDateMatch[1] : null) ||
                 moment(creationDate).format(`${syncDateFormat} hh:mma`)
 
-            console.log('newCreationDateO', newCreationDate)
             const existingSpaces = spacesMatch
                 ? spacesMatch[1]
                       .split(', ')
@@ -400,7 +397,6 @@ export class PKMSyncBackgroundModule {
                 (creationDateMatch ? creationDateMatch[1] : null) ||
                 moment(creationDate).format(`${syncDateFormat} hh:mma`)
 
-            console.log('newCreationDateL', newCreationDate)
             const existingSpaces = spacesMatch
                 ? spacesMatch[1]
                       .split(', ')
