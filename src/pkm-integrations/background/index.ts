@@ -280,7 +280,9 @@ export class PKMSyncBackgroundModule {
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
                 item.data.comment,
                 item.data.annotationSpaces,
-                item.data.createdWhen,
+                moment(item.data.createdWhen).format(
+                    `${syncDateFormat} hh:mma`,
+                ),
                 item.data.type,
                 pkmType,
                 syncDateFormat,
@@ -346,7 +348,7 @@ export class PKMSyncBackgroundModule {
 
             const newCreationDate =
                 (creationDateMatch ? creationDateMatch[1] : null) ||
-                creationDate
+                moment(creationDate).format(`${syncDateFormat} hh:mma`)
 
             const existingSpaces = spacesMatch
                 ? spacesMatch[1]
@@ -393,7 +395,8 @@ export class PKMSyncBackgroundModule {
                 comment || (HighlightNoteMatch ? HighlightNoteMatch[1] : null)
             const newCreationDate =
                 (creationDateMatch ? creationDateMatch[1] : null) ||
-                creationDate
+                moment(creationDate).format(`${syncDateFormat} hh:mma`)
+
             const existingSpaces = spacesMatch
                 ? spacesMatch[1]
                       .split(', ')
@@ -623,17 +626,6 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
     ) {
-        let createdWhen = creationDate
-        if (pkmType === 'obsidian' && typeof createdWhen === 'number') {
-            createdWhen = `"[[${moment
-                .unix(createdWhen / 1000)
-                .format(syncDateFormat)}]]"`
-        } else if (pkmType === 'logseq' && typeof createdWhen === 'number') {
-            createdWhen = `[[${moment
-                .unix(createdWhen / 1000)
-                .format(syncDateFormat)}]]`
-        }
-
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = body ? `> ${body}\n\n` : ''
@@ -645,9 +637,7 @@ export class PKMSyncBackgroundModule {
             const highlightSpacesLine = annotationSpaces
                 ? `<span class="annotationSpaces" id="${annotationId}"><strong>Spaces:</strong></span> ${annotationSpaces}\n`
                 : ''
-            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"><strong>Created at:</strong></span> ${moment(
-                createdWhen,
-            ).format(`${syncDateFormat} hh:mm a`)}\n`
+            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"><strong>Created at:</strong></span> ${creationDate}\n`
             const annotationEndLine = `\r<span class="annotationEndLine" id="${annotationId}"> --- </span>\n`
 
             return (
@@ -672,9 +662,7 @@ export class PKMSyncBackgroundModule {
             const highlightSpacesLine = annotationSpaces
                 ? `  - **Spaces:** ${annotationSpaces}\n`
                 : ''
-            const creationDateLine = `  - **Created at:** ${moment(
-                createdWhen,
-            ).format(`${syncDateFormat} hh:mm a`)}\r`
+            const creationDateLine = `  - **Created at:** ${creationDate}\r`
             const annotationEndLine = `<span id="${annotationId}"/>\n\n`
             return (
                 separatedLine +
