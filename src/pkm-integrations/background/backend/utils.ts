@@ -1,9 +1,23 @@
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
 import { browser } from 'webextension-polyfill-ts'
 
-export async function shareAnnotationWithPKM(annotationData, pkmSyncBG) {
+export async function shareAnnotationWithPKM(
+    annotationData,
+    pkmSyncBG,
+    imageSupport,
+) {
     let item = {
         type: 'annotation',
         data: annotationData,
+    }
+
+    if (item.data.comment) {
+        item.data.comment = await replaceImgSrcWithFunctionOutput(
+            item.data.comment,
+            imageSupport,
+            true,
+        )
     }
 
     await pkmSyncBG.pushPKMSyncUpdate(item)
@@ -36,21 +50,16 @@ export async function getPkmSyncKey() {
 }
 
 export async function isPkmSyncEnabled() {
-    console.log('enters here')
     try {
         let data = await browser.storage.local.get('PKMSYNCpkmFolders')
 
-        console.log('data', data)
         if (
             data.PKMSYNCpkmFolders &&
             (data.PKMSYNCpkmFolders.obsidianFolder?.length > 0 ||
                 data.PKMSYNCpkmFolders.logseqFolder?.length > 0)
         ) {
-            console.log('isPkmSyncEnabled: true')
             return true
         }
-
-        console.log('not enabled')
 
         return false
     } catch (e) {

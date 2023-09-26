@@ -22,6 +22,7 @@ import {
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
+import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -35,6 +36,7 @@ export default class AnnotationStorage extends StorageModule {
         private options: {
             storageManager: Storex
             pkmSyncBG: PkmSyncInterface
+            imageSupport?: ImageSupportInterface
         },
     ) {
         super({
@@ -342,7 +344,11 @@ export default class AnnotationStorage extends StorageModule {
                     annotationSpaces: listName,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
     }
@@ -378,7 +384,11 @@ export default class AnnotationStorage extends StorageModule {
                     annotationSpaces: listName,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
     }
@@ -465,7 +475,11 @@ export default class AnnotationStorage extends StorageModule {
                     createdWhen: createdWhen,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
         return this.operation('createAnnotation', {
@@ -498,7 +512,11 @@ export default class AnnotationStorage extends StorageModule {
                     comment,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
 
