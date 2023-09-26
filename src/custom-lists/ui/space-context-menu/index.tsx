@@ -269,15 +269,19 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
                     {normalizedStateToArray(this.state.emailInvites).map(
                         (invite) => (
-                            <div>
+                            <div key={invite.id}>
                                 <span>{invite.email}</span>
                                 <span>
                                     {sharedListRoleIDToString(invite.roleID)}
                                 </span>
                                 <PrimaryAction
                                     onClick={() =>
-                                        console.log('remove invite:', invite)
+                                        this.processEvent('deleteEmailInvite', {
+                                            key: invite.sharedListKey.toString(),
+                                        })
                                     }
+                                    /* sharedListKey will be missing between when the user creates an invite and when the server-side write actually completes. */
+                                    disabled={invite.sharedListKey == null}
                                     type="secondary"
                                     label="Remove"
                                 />

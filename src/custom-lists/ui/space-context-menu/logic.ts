@@ -52,7 +52,7 @@ export type Event = UIEvent<{
         role: SharedListRoleID.Commenter | SharedListRoleID.ReadWrite
     }
     inviteViaEmail: { now?: number }
-    deleteEmailInvite: { id?: number }
+    deleteEmailInvite: { key: string }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
@@ -66,6 +66,7 @@ export interface State {
     inviteLinksLoadState: TaskState
     emailInvitesLoadState: TaskState
     emailInvitesCreateState: TaskState
+    emailInvitesDeleteState: TaskState
     emailInviteInputRole:
         | SharedListRoleID.Commenter
         | SharedListRoleID.ReadWrite
@@ -104,6 +105,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         inviteLinksLoadState: 'pristine',
         emailInvitesLoadState: 'pristine',
         emailInvitesCreateState: 'pristine',
+        emailInvitesDeleteState: 'pristine',
         emailInviteInputRole: SharedListRoleID.Commenter,
         emailInviteInputValue: '',
         emailInvites: initNormalizedState(),
@@ -183,7 +185,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 emailInvites: {
                     $set: initNormalizedState({
                         seedData: emailInvites.data,
-                        getId: (invite) => invite.id.toString(),
+                        getId: (invite) => invite.sharedListKey.toString(),
                     }),
                 },
             })
@@ -406,11 +408,47 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             } else if (result.status === 'permission-denied') {
                 this.emitMutation({
                     emailInvites: {
-                        allIds: { $unshift: [tmpId] },
                         byId: { $unset: [tmpId] },
+                        allIds: {
+                            $apply: (prev) =>
+                                prev.filter((ids) => ids !== tmpId),
+                        },
                     },
                 })
                 throw new Error('Email invite encountered an error')
+            }
+        })
+    }
+
+    deleteEmailInvite: EventHandler<'deleteEmailInvite'> = async ({
+        event,
+        previousState,
+    }) => {
+        await executeUITask(this, 'emailInvitesDeleteState', async () => {
+            if (previousState.emailInvites.byId[event.key] == null) {
+                throw new Error(
+                    'Attempted to delete email invite that is not in state',
+                )
+            }
+
+            this.emitMutation({
+                emailInvites: {
+                    byId: { $unset: [event.key] },
+                    allIds: {
+                        $apply: (prev) =>
+                            prev.filter((ids) => ids !== event.key),
+                    },
+                },
+            })
+            const result = await this.dependencies.contentSharingBG.deleteListEmailInvite(
+                {
+                    keyString: event.key,
+                },
+            )
+            if (result.status !== 'success') {
+                throw new Error(
+                    'Email invite deletion encountered a server-side error',
+                )
             }
         })
     }
