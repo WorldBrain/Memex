@@ -17,6 +17,7 @@ import {
     MenuItemProps,
 } from 'src/common-ui/components/dropdown-menu-btn'
 import { isValidEmail } from '@worldbrain/memex-common/lib/utils/email-validation'
+import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -55,7 +56,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             return false
         }
         let alreadyInvited = false
-        for (const invite of this.state.emailInvites) {
+        for (const invite of normalizedStateToArray(this.state.emailInvites)) {
             if (invite.email === inputValue) {
                 alreadyInvited = true
                 break
@@ -266,21 +267,23 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         />
                     )}
 
-                    {this.state.emailInvites.map((invite) => (
-                        <div>
-                            <span>{invite.email}</span>
-                            <span>
-                                {sharedListRoleIDToString(invite.roleID)}
-                            </span>
-                            <PrimaryAction
-                                onClick={() =>
-                                    console.log('remove invite:', invite)
-                                }
-                                type="secondary"
-                                label="Remove"
-                            />
-                        </div>
-                    ))}
+                    {normalizedStateToArray(this.state.emailInvites).map(
+                        (invite) => (
+                            <div>
+                                <span>{invite.email}</span>
+                                <span>
+                                    {sharedListRoleIDToString(invite.roleID)}
+                                </span>
+                                <PrimaryAction
+                                    onClick={() =>
+                                        console.log('remove invite:', invite)
+                                    }
+                                    type="secondary"
+                                    label="Remove"
+                                />
+                            </div>
+                        ),
+                    )}
                 </Container>
             </>
         )

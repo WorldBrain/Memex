@@ -16,6 +16,10 @@ import {
 import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import {
+    NormalizedState,
+    initNormalizedState,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -66,7 +70,7 @@ export interface State {
         | SharedListRoleID.Commenter
         | SharedListRoleID.ReadWrite
     emailInviteInputValue: string
-    emailInvites: Array<
+    emailInvites: NormalizedState<
         SharedListEmailInvite & {
             id: AutoPk
             sharedListKey: AutoPk
@@ -102,7 +106,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         emailInvitesCreateState: 'pristine',
         emailInviteInputRole: SharedListRoleID.Commenter,
         emailInviteInputValue: '',
-        emailInvites: [],
+        emailInvites: initNormalizedState(),
         inviteLinks: [],
         nameValue: this.dependencies.listData.name,
         showSuccessMsg: false,
@@ -175,7 +179,14 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             if (emailInvites.status !== 'success') {
                 throw new Error('Failed to load email invites for list')
             }
-            this.emitMutation({ emailInvites: { $set: emailInvites.data } })
+            this.emitMutation({
+                emailInvites: {
+                    $set: initNormalizedState({
+                        seedData: emailInvites.data,
+                        getId: (invite) => invite.id.toString(),
+                    }),
+                },
+            })
         })
     }
 
@@ -343,19 +354,23 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         const email = previousState.emailInviteInputValue.trim()
         const roleID = previousState.emailInviteInputRole
 
-        const prevInvites = [...previousState.emailInvites]
+        const prevInviteCount = previousState.emailInvites.allIds.length
+        const tmpId = `tmp-invite-id-${prevInviteCount}`
         this.emitMutation({
             emailInviteInputValue: { $set: '' },
             emailInvites: {
-                $push: [
-                    {
-                        id: `tmp-invite-id-${prevInvites.length}`,
-                        email,
-                        roleID,
-                        createdWhen: now,
-                        sharedListKey: null,
+                allIds: { $push: [tmpId] },
+                byId: {
+                    [tmpId]: {
+                        $set: {
+                            email,
+                            roleID,
+                            id: tmpId,
+                            createdWhen: now,
+                            sharedListKey: null,
+                        },
                     },
-                ],
+                },
             },
         })
         await executeUITask(this, 'emailInvitesCreateState', async () => {
@@ -368,16 +383,33 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 },
             )
             if (result.status === 'success') {
-                // Update already-set emailInvites state with the key
+                // Replace temp emailInvites state with the full one
                 this.emitMutation({
                     emailInvites: {
-                        [prevInvites.length]: {
-                            id: { $set: result.keyString },
-                            sharedListKey: { $set: result.keyString },
+                        allIds: {
+                            [prevInviteCount]: { $set: result.keyString },
+                        },
+                        byId: {
+                            $unset: [tmpId],
+                            [result.keyString]: {
+                                $set: {
+                                    email,
+                                    roleID,
+                                    createdWhen: now,
+                                    id: result.keyString,
+                                    sharedListKey: result.keyString,
+                                },
+                            },
                         },
                     },
                 })
             } else if (result.status === 'permission-denied') {
+                this.emitMutation({
+                    emailInvites: {
+                        allIds: { $unshift: [tmpId] },
+                        byId: { $unset: [tmpId] },
+                    },
+                })
                 throw new Error('Email invite encountered an error')
             }
         })
