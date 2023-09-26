@@ -13,6 +13,7 @@ import {
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -27,6 +28,7 @@ export const handleIncomingData = (deps: {
     persistentStorageManager: StorageManager
     storageManager: StorageManager
     pkmSyncBG: PkmSyncInterface
+    imageSupport: ImageSupportInterface
 }) => async ({
     storageType,
     collection,
@@ -102,6 +104,7 @@ export const handleIncomingData = (deps: {
         updates,
         where,
         deps.storageManager,
+        deps.imageSupport,
     )
 }
 
@@ -111,6 +114,7 @@ async function handleSyncedDataForPKMSync(
     updates,
     where,
     storageManager: StorageManager,
+    imageSupport: ImageSupportInterface,
 ) {
     if (await isPkmSyncEnabled()) {
         try {
@@ -123,7 +127,11 @@ async function handleSyncedDataForPKMSync(
                     createdWhen: updates.createdWhen,
                 }
 
-                await shareAnnotationWithPKM(annotationData, pkmSyncBG)
+                await shareAnnotationWithPKM(
+                    annotationData,
+                    pkmSyncBG,
+                    imageSupport,
+                )
             }
 
             if (collection === 'annotListEntries') {
@@ -145,7 +153,11 @@ async function handleSyncedDataForPKMSync(
                     annotationSpaces: listData.name,
                 }
 
-                await shareAnnotationWithPKM(annotationData, pkmSyncBG)
+                await shareAnnotationWithPKM(
+                    annotationData,
+                    pkmSyncBG,
+                    imageSupport,
+                )
             }
             if (collection === 'pages') {
                 const pageData = {
