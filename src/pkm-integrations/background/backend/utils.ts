@@ -16,10 +16,9 @@ export async function shareAnnotationWithPKM(
         item.data.comment = await replaceImgSrcWithFunctionOutput(
             item.data.comment,
             imageSupport,
+            true,
         )
     }
-
-    console.log('itemafter', item)
 
     await pkmSyncBG.pushPKMSyncUpdate(item)
 }
