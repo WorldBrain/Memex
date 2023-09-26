@@ -1,10 +1,27 @@
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { browser } from 'webextension-polyfill-ts'
 
-export async function shareAnnotationWithPKM(annotationData, pkmSyncBG) {
+export async function shareAnnotationWithPKM(
+    annotationData,
+    pkmSyncBG,
+    imageSupport,
+) {
     let item = {
         type: 'annotation',
         data: annotationData,
     }
+
+    if (item.data.comment) {
+        item.data.comment = await processCommentForImageUpload(
+            item.data.comment,
+            item.data.pageUrl,
+            item.data.annotationId,
+            imageSupport,
+            true,
+        )
+    }
+
+    console.log('itemafter', item)
 
     await pkmSyncBG.pushPKMSyncUpdate(item)
 }

@@ -339,6 +339,13 @@ export function createBackgroundModules(options: {
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
         },
+        imageSupport: new ImageSupportBackground({
+            backend: options.imageSupportBackend,
+            storageManager: options.storageManager,
+            generateImageId() {
+                return generateServerId('UPLOADED_IMAGES') as string
+            },
+        }),
     })
 
     const activityStreams = new ActivityStreamsBackground({
@@ -550,6 +557,13 @@ export function createBackgroundModules(options: {
             persistentStorageManager: options.persistentStorageManager,
             storageManager: options.storageManager,
             pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
+            imageSupport: new ImageSupportBackground({
+                backend: options.imageSupportBackend,
+                storageManager: options.storageManager,
+                generateImageId() {
+                    return generateServerId('UPLOADED_IMAGES') as string
+                },
+            }),
         }),
     })
 
