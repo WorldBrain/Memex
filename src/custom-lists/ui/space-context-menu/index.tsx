@@ -108,6 +108,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         e.stopPropagation()
     }
 
+    private renderLoadingSpinner = () => (
+        <LoadingContainer>
+            <LoadingIndicator size={30} />
+        </LoadingContainer>
+    )
+
     private renderShareLinks(isPageLink: boolean) {
         if (!this.state.inviteLinks.length) {
             return (
@@ -230,6 +236,10 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private renderPrivateListEmailInvites() {
+        if (this.state.emailInvitesLoadState === 'running') {
+            return this.renderLoadingSpinner()
+        }
+
         if (!this.props.listData.isPrivate) {
             return null
         }
@@ -380,9 +390,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         ) {
             return (
                 <ContextMenuContainer>
-                    <LoadingContainer>
-                        <LoadingIndicator size={30} />
-                    </LoadingContainer>
+                    {this.renderLoadingSpinner()}
                 </ContextMenuContainer>
             )
         }
@@ -406,9 +414,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                             },
                         ]}
                         onMenuItemClick={(item) =>
-                            this.props.onSetSpacePrivate(
-                                item.id === SET_LIST_PRIVATE_ID,
-                            )
+                            this.processEvent('updateSpacePrivacy', {
+                                isPrivate: item.id === SET_LIST_PRIVATE_ID,
+                            })
                         }
                         initSelectedIndex={
                             this.props.listData.isPrivate ? 0 : 1

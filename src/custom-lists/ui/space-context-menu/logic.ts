@@ -36,7 +36,7 @@ export interface Dependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
     onConfirmSpaceNameEdit: (name: string) => void
-    onSetSpacePrivate: (isPrivate: boolean) => void
+    onSetSpacePrivate: (isPrivate: boolean) => Promise<void>
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
     analyticsBG: AnalyticsCoreInterface
@@ -49,6 +49,7 @@ export type Event = UIEvent<{
     updateSpaceName: { name: string }
     updateEmailInviteInputValue: { value: string }
     updateEmailInviteInputRole: { role: SharedListRoleID }
+    updateSpacePrivacy: { isPrivate: boolean }
     inviteViaEmail: { now?: number }
     deleteEmailInvite: { key: string }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
@@ -352,6 +353,19 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             )
         }
         this.emitMutation({ emailInviteInputRole: { $set: event.role } })
+    }
+
+    updateSpacePrivacy: EventHandler<'updateSpacePrivacy'> = async ({
+        event,
+        previousState,
+    }) => {
+        await Promise.all([
+            event.isPrivate &&
+            previousState.emailInvitesLoadState === 'pristine'
+                ? this.loadEmailInvites()
+                : Promise.resolve(),
+            this.dependencies.onSetSpacePrivate(event.isPrivate),
+        ])
     }
 
     inviteViaEmail: EventHandler<'inviteViaEmail'> = async ({
