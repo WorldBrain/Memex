@@ -1375,8 +1375,6 @@ export class SidebarContainerLogic extends UILogic<
             this.options.imageSupport,
         )
 
-        console.log('commentForSaving', commentForSaving)
-
         // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
         // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
         //  to make a SAS annotation private protected upon save btn press

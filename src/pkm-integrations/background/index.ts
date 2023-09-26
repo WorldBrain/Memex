@@ -168,19 +168,23 @@ export class PKMSyncBackgroundModule {
                 syncDateFormat,
             )
 
-            // if (item.type === 'annotation' || item.type === 'note') {
-            //     annotationsSection = this.annotationObjectDefault(
-            //         item.data.annotationId,
-            //         item.data.body
-            //             ? convertHTMLintoMarkdown(item.data.body)
-            //             : '',
-            //         item.data.comment,
-            //         (item === 'annotation' && item.data.annotationSpaces) ||
-            //             null,
-            //         item.data.createdWhen,
-            //         pkmType,
-            //     )
-            // }
+            if (item.type === 'annotation' || item.type === 'note') {
+                annotationsSection = this.annotationObjectDefault(
+                    item.data.annotationId,
+                    item.data.body
+                        ? convertHTMLintoMarkdown(item.data.body)
+                        : '',
+                    item.data.comment,
+                    (item === 'annotation' && item.data.annotationSpaces) ||
+                        null,
+                    moment(item.data.createdWhen).format(
+                        `${syncDateFormat} hh:mma`,
+                    ),
+                    item.data.type,
+                    pkmType,
+                    syncDateFormat,
+                )
+            }
         }
 
         fileContent =
