@@ -864,39 +864,6 @@ export default class ContentSharingBackground {
         return suggestions
     }
 
-    canWriteToSharedListRemoteId: __DeprecatedContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
-        remoteId,
-    }) => {
-        // const remoteId = await this.storage.getRemoteListId({localId: params.localId,})
-        const currentUser = await this.options
-            .getBgModules()
-            .auth.authService.getCurrentUser()
-        const listRole = await this.options.serverStorage.contentSharing.getListRole(
-            {
-                listReference: { type: 'shared-list-reference', id: remoteId },
-                userReference: {
-                    type: 'user-reference',
-                    id: currentUser?.id,
-                },
-            },
-        )
-        const canWrite = [
-            SharedListRoleID.AddOnly,
-            SharedListRoleID.ReadWrite,
-            SharedListRoleID.Owner,
-            SharedListRoleID.Admin,
-        ].includes(listRole?.roleID)
-        return canWrite
-    }
-    canWriteToSharedList: __DeprecatedContentSharingInterface['canWriteToSharedList'] = async (
-        params,
-    ) => {
-        const remoteId = await this.storage.getRemoteListId({
-            localId: params.localId,
-        })
-        return await this.canWriteToSharedListRemoteId({ remoteId })
-    }
-
     async handlePostStorageChange(
         event: StorageOperationEvent<'post'>,
         options: {

@@ -1,3 +1,4 @@
+import type { LoadPageAnnotationRefsForListsResult } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type {
     SharedAnnotation,
@@ -128,9 +129,7 @@ export interface RemoteCollectionsInterface {
     fetchAnnotationRefsForRemoteListsOnPage(args: {
         sharedListIds: string[]
         normalizedPageUrl: string
-    }): Promise<{
-        [sharedListId: string]: SharedAnnotationReference[]
-    }>
+    }): Promise<LoadPageAnnotationRefsForListsResult>
     fetchFollowedListsWithAnnotations(args: {
         normalizedPageUrl: string
     }): Promise<SharedAnnotationList[]>

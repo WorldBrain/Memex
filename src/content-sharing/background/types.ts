@@ -137,8 +137,6 @@ export interface __DeprecatedContentSharingInterface {
             createdAt: number
         }>
     >
-    canWriteToSharedList(params: { localId: number }): Promise<boolean>
-    canWriteToSharedListRemoteId(params: { remoteId: string }): Promise<boolean>
     unshareAnnotationsFromAllLists(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean

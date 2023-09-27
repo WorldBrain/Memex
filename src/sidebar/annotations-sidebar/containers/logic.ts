@@ -1928,7 +1928,7 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             }),
             async () => {
-                const annotationRefsByList = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
+                const response = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
                     {
                         normalizedPageUrl: normalizeUrl(state.fullPageUrl),
                         sharedListIds: lists.map((list) => list.remoteId!),
@@ -1940,10 +1940,13 @@ export class SidebarContainerLogic extends UILogic<
                 > = {}
 
                 for (const { unifiedId, remoteId } of lists) {
-                    mutation[unifiedId] = {
-                        sharedAnnotationReferences: {
-                            $set: annotationRefsByList[remoteId] ?? [],
-                        },
+                    const result = response[remoteId]
+                    if (result?.status === 'success') {
+                        mutation[unifiedId] = {
+                            sharedAnnotationReferences: { $set: result.data },
+                        }
+                    } else {
+                        // TODO: Handle non-success cases in UI
                     }
                 }
 

@@ -26,10 +26,9 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import ContentSharingBackground from 'src/content-sharing/background'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type ContentSharingBackground from 'src/content-sharing/background'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -206,24 +205,13 @@ export default class CustomListBackground {
         sharedListIds,
         normalizedPageUrl,
     }) => {
-        const { contentSharing } = this.options.serverStorage
-
-        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForListsOnPage(
+        const response = await this.options.contentSharing.options.backend.loadPageAnnotationRefsForLists(
             {
-                listReferences: sharedListIds.map((id) => ({
-                    type: 'shared-list-reference',
-                    id,
-                })),
+                listIds: sharedListIds,
                 normalizedPageUrl,
             },
         )
-
-        return fromPairs(
-            Object.entries(listEntriesByPageByList).map(([listId, entries]) => [
-                listId,
-                entries.map((entry) => entry.sharedAnnotation),
-            ]),
-        )
+        return response
     }
 
     fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
