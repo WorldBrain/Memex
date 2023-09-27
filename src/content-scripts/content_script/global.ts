@@ -94,6 +94,7 @@ import {
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -275,7 +276,7 @@ export async function main(
                 unifiedId: unifiedAnnotationId.toString(),
             })
         },
-        scheduleAnnotationCreation: (data) => {
+        scheduleAnnotationCreation: async (data) => {
             const localId = generateAnnotationUrl({
                 pageUrl: data.fullPageUrl,
                 now: () => data.createdWhen,
@@ -322,6 +323,14 @@ export async function main(
             })
 
             const createPromise = (async () => {
+                const bodyForSaving = await processCommentForImageUpload(
+                    data.body,
+                    data.fullPageUrl,
+                    localId,
+                    imageSupport,
+                    false,
+                )
+
                 const {
                     savePromise,
                     remoteAnnotationId,
@@ -340,7 +349,7 @@ export async function main(
                     annotationData: {
                         localId,
                         localListIds,
-                        body: data.body,
+                        body: bodyForSaving,
                         comment: data.comment,
                         selector: data.selector,
                         fullPageUrl: data.fullPageUrl,
@@ -452,7 +461,9 @@ export async function main(
                 window.location.href.endsWith('.pdf') &&
                 window.getSelection().toString().length === 0
             ) {
+                console.log('test1')
                 screenshotGrabResult = await promptPdfScreenshot()
+                console.log('test2')
 
                 if (
                     screenshotGrabResult == null ||
