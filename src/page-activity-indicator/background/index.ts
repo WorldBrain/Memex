@@ -307,10 +307,12 @@ export class PageActivityIndicatorBackground {
         ]
 
         const entriesForLists = await this.deps.contentSharingBackend.loadEntriesForLists(
-            followedLists.map((list) => ({
-                listId: list.sharedList,
-                from: list.lastSync,
-            })),
+            {
+                listIds: followedLists.map((list) => ({
+                    listId: list.sharedList,
+                    from: list.lastSync,
+                })),
+            },
         )
 
         for (const followedList of followedLists) {
