@@ -413,7 +413,6 @@ export function createBackgroundModules(options: {
         searchIndex: search.searchIndex,
         pages,
         localBrowserStorage: options.browserAPIs.storage.local,
-        serverStorage: options.serverStorage.modules,
         authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
             directLinking,

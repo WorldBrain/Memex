@@ -54,10 +54,6 @@ export default class CustomListBackground {
                 normalizedPageUrl: string,
                 listId: number,
             ) => Promise<void>
-            serverStorage: Pick<
-                ServerStorageModules,
-                'activityFollows' | 'contentSharing'
-            >
             pkmSyncBG?: PkmSyncInterface
         },
     ) {
@@ -151,43 +147,24 @@ export default class CustomListBackground {
         normalizedPageUrl,
         remoteListId,
     }) => {
-        const { contentSharing } = this.options.serverStorage
-        const listReference: SharedListReference = {
-            id: remoteListId,
-            type: 'shared-list-reference',
-        }
-        const sharedList = await contentSharing.getListByReference(
-            listReference,
+        const response = await this.options.contentSharing.options.backend.loadCollectionDetails(
+            {
+                listId: remoteListId,
+                normalizedPageUrl,
+            },
         )
 
-        if (sharedList == null) {
+        if (response.status === 'permission-denied') {
+            throw new Error(
+                'Cannot get user data from server when unauthorized',
+            )
+        }
+        if (response.status === 'not-found') {
             return null
         }
-
-        const {
-            [normalizedPageUrl]: annotations,
-        } = await contentSharing.getAnnotationsForPagesInList({
-            listReference,
-            normalizedPageUrls: [normalizedPageUrl],
-        })
-
-        if (!annotations) {
-            return {
-                ...sharedList,
-                sharedAnnotations: undefined,
-            }
-        }
-
         return {
-            ...sharedList,
-            sharedAnnotations: annotations.map(({ annotation }) => ({
-                ...annotation,
-                creator: { type: 'user-reference', id: annotation.creator },
-                reference: {
-                    type: 'shared-annotation-reference',
-                    id: annotation.id,
-                },
-            })),
+            ...response.data.retrievedList.sharedList,
+            sharedAnnotations: Object.values(response.data.annotations ?? {}),
         }
     }
 
@@ -199,19 +176,25 @@ export default class CustomListBackground {
             return null
         }
 
-        const { contentSharing } = this.options.serverStorage
-        const sharedList = await contentSharing.getListByReference({
-            id: remoteListId,
-            type: 'shared-list-reference',
-        })
-        if (sharedList == null) {
+        const response = await this.options.contentSharing.options.backend.loadCollectionDetails(
+            {
+                listId: remoteListId,
+            },
+        )
+        if (response.status === 'permission-denied') {
+            throw new Error(
+                'Cannot get user data from server when unauthorized',
+            )
+        }
+        if (response.status === 'not-found') {
             return null
         }
+        const sharedList = response.data.retrievedList.sharedList
 
         return {
             name: sharedList.title,
             id: sharedList.createdWhen,
-            remoteId: sharedList.reference.id as string,
+            remoteId: sharedList.reference.id.toString(),
             createdAt: new Date(sharedList.createdWhen),
             isOwned: sharedList.creator.id === currentUser.id,
         }
