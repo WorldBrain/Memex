@@ -129,66 +129,22 @@ export default class CustomListBackground {
         remoteListId,
         opts,
     }) => {
-        const user = await this.options.authServices.auth.getCurrentUser()
-        if (!user) {
+        const response = await this.options.contentSharing.options.backend.loadLocalDataForListEntry(
+            {
+                listId: remoteListId,
+                normalizedPageUrl,
+                opts,
+            },
+        )
+        if (response.status === 'permission-denied') {
             throw new Error(
                 'Cannot get user data from server when unauthorized',
             )
         }
-
-        const { contentSharing } = this.options.serverStorage
-        const listReference: SharedListReference = {
-            type: 'shared-list-reference',
-            id: remoteListId,
-        }
-
-        const [
-            personalList,
-            sharedListEntry,
-            annotationListEntries,
-        ] = await Promise.all([
-            opts.needLocalListd
-                ? contentSharing.getUserPersonalListBySharedListRef({
-                      listReference,
-                      userReference: {
-                          type: 'user-reference',
-                          id: user.id,
-                      },
-                  })
-                : Promise.resolve(),
-            contentSharing.getListEntryByListAndUrl({
-                listReference,
-                normalizedPageUrl,
-            }),
-            opts.needAnnotsFlag
-                ? contentSharing.getAnnotationListEntriesForListsOnPage({
-                      listReferences: [listReference],
-                      normalizedPageUrl,
-                  })
-                : Promise.resolve(),
-        ])
-
-        if (
-            (opts.needLocalListd &&
-                (personalList as PersonalList)?.localId == null) ||
-            (opts.needAnnotsFlag &&
-                !annotationListEntries[remoteListId]?.length) ||
-            !sharedListEntry
-        ) {
+        if (response.status === 'not-found') {
             return null
         }
-
-        return {
-            sharedListEntryId: sharedListEntry.reference.id.toString(),
-            localListId: opts.needLocalListd
-                ? (personalList as PersonalList).localId
-                : undefined,
-            hasAnnotationsFromOthers: opts.needAnnotsFlag
-                ? annotationListEntries[remoteListId].some(
-                      (entry) => entry.creator.id !== user.id,
-                  )
-                : undefined,
-        }
+        return response.data
     }
 
     fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({
