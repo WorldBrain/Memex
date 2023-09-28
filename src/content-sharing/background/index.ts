@@ -83,7 +83,6 @@ export default class ContentSharingBackground {
                 | 'customLists'
                 | 'directLinking'
                 | 'pageActivityIndicator'
-                | 'contentSharing'
             >
             captureException?: (e: Error) => void
             serverStorage: Pick<ServerStorageModules, 'contentSharing'>

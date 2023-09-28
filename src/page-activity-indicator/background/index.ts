@@ -3,7 +3,6 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import type Storex from '@worldbrain/storex'
 import fromPairs from 'lodash/fromPairs'
 import * as Raven from 'src/util/raven'
-import type { ServerStorageModules } from 'src/storage/types'
 import type {
     FollowedList,
     RemotePageActivityIndicatorInterface,
@@ -23,20 +22,14 @@ import type {
     SharedListTimestampGetRequest,
 } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/types'
 import { SHARED_LIST_TIMESTAMP_GET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
-import type ContentSharingBackground from 'src/content-sharing/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 
 export interface PageActivityIndicatorDependencies {
     fetch: typeof fetch
     storageManager: Storex
     jobScheduler: JobScheduler
-    contentSharing: ContentSharingBackground
     contentSharingBackend: ContentSharingBackendInterface
     getCurrentUserId: () => Promise<AutoPk | null>
-    serverStorage: Pick<
-        ServerStorageModules,
-        'activityFollows' | 'contentSharing'
-    >
 }
 
 export const PERIODIC_SYNC_JOB_NAME = 'followed-list-entry-sync'
@@ -309,40 +302,36 @@ export class PageActivityIndicatorBackground {
             return
         }
 
-        const { contentSharing } = this.deps.serverStorage
+        const followedLists = opts?.forFollowedLists ?? [
+            ...(await this.storage.findAllFollowedLists()).values(),
+        ]
 
-        const followedLists =
-            opts?.forFollowedLists ??
-            (await this.storage.findAllFollowedLists()).values()
+        const entriesForLists = await this.deps.contentSharingBackend.loadEntriesForLists(
+            followedLists.map((list) => ({
+                listId: list.sharedList,
+                from: list.lastSync,
+            })),
+        )
 
         for (const followedList of followedLists) {
             let shouldUpdateLastSyncTimestamp = false
-
-            const listReference: SharedListReference = {
-                type: 'shared-list-reference',
-                id: followedList.sharedList,
-            }
             const existingFollowedListEntryLookup = await this.storage.findAllFollowedListEntries(
                 {
                     sharedList: followedList.sharedList,
                 },
             )
-            const sharedListEntries = await contentSharing.getListEntriesByList(
-                {
-                    listReference,
-                    from: followedList.lastSync,
-                },
-            )
-            shouldUpdateLastSyncTimestamp = sharedListEntries.length > 0
 
-            const sharedAnnotationListEntries = await contentSharing.getAnnotationListEntries(
-                {
-                    listReference,
-                    ignoreFromUser: currentUser,
-                    // NOTE: We have to always get all the annotation entries as there's way to determine the true->false case for `followedListEntry.hasAnnotationsFromOthers` if you only have partial results
-                    // from: localFollowedList?.lastSync,
-                },
-            )
+            const entriesResult = entriesForLists[followedList.sharedList]
+            const sharedListEntries =
+                entriesResult.status !== 'success'
+                    ? []
+                    : entriesResult.data.listEntries
+            const sharedAnnotationListEntries =
+                entriesResult.status !== 'success'
+                    ? {}
+                    : entriesResult.data.annotationListEntries
+
+            shouldUpdateLastSyncTimestamp = sharedListEntries.length > 0
 
             for (const entry of sharedListEntries) {
                 const hasAnnotationsFromOthers = !!sharedAnnotationListEntries[

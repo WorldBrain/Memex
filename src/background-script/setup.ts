@@ -396,11 +396,10 @@ export function createBackgroundModules(options: {
         generateServerId,
         getBgModules: () => ({
             auth,
+            pages,
             customLists,
             directLinking,
             pageActivityIndicator,
-            pages,
-            contentSharing,
         }),
     })
 
@@ -471,9 +470,7 @@ export function createBackgroundModules(options: {
         fetch,
         storageManager,
         getCurrentUserId,
-        contentSharing,
         contentSharingBackend,
-        serverStorage: options.serverStorage.modules,
         jobScheduler: jobScheduler.scheduler,
     })
     const summarizeBG = new SummarizeBackground({
