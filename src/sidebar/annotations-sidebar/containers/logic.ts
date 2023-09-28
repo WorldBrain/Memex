@@ -362,7 +362,6 @@ export class SidebarContainerLogic extends UILogic<
                 this.options.annotationsCache.annotations,
             )
             const activeTab = 'annotations' // replace this with the actual value if available
-            console.log('annotations', annotations, activeTab)
             this.renderOwnHighlights({ annotations, activeTab })
         }
     }

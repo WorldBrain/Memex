@@ -114,8 +114,6 @@ export class AnnotationsSidebarContainer<
             }),
         )
 
-        console.log('slalsd', this.props.bgScriptBG)
-
         window['_getState'] = () => ({ ...this.state })
         this.listenToWindowChanges()
     }
