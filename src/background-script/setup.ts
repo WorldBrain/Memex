@@ -370,14 +370,15 @@ export function createBackgroundModules(options: {
         })
     }
     const userMessages = options.userMessageService
+    const contentSharingBackend =
+        options.contentSharingBackend ??
+        firebaseService<ContentSharingBackend>(
+            'contentSharing',
+            callFirebaseFunction,
+        )
 
     const contentSharing = new ContentSharingBackground({
-        backend:
-            options.contentSharingBackend ??
-            firebaseService<ContentSharingBackend>(
-                'contentSharing',
-                callFirebaseFunction,
-            ),
+        backend: contentSharingBackend,
         remoteEmitter: createRemoteEventEmitter('contentSharing', {
             broadcastToTabs: true,
         }),
@@ -408,6 +409,7 @@ export function createBackgroundModules(options: {
         storageManager,
         tabManagement,
         contentSharing,
+        contentSharingBackend,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchIndex: search.searchIndex,
@@ -469,6 +471,8 @@ export function createBackgroundModules(options: {
         fetch,
         storageManager,
         getCurrentUserId,
+        contentSharing,
+        contentSharingBackend,
         serverStorage: options.serverStorage.modules,
         jobScheduler: jobScheduler.scheduler,
     })

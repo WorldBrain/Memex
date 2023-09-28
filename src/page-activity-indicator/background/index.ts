@@ -8,10 +8,7 @@ import type {
     FollowedList,
     RemotePageActivityIndicatorInterface,
 } from './types'
-import type {
-    SharedList,
-    SharedListReference,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import PageActivityIndicatorStorage from './storage'
 import {
@@ -26,11 +23,15 @@ import type {
     SharedListTimestampGetRequest,
 } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/types'
 import { SHARED_LIST_TIMESTAMP_GET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
+import type ContentSharingBackground from 'src/content-sharing/background'
+import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 
 export interface PageActivityIndicatorDependencies {
     fetch: typeof fetch
     storageManager: Storex
     jobScheduler: JobScheduler
+    contentSharing: ContentSharingBackground
+    contentSharingBackend: ContentSharingBackendInterface
     getCurrentUserId: () => Promise<AutoPk | null>
     serverStorage: Pick<
         ServerStorageModules,
@@ -261,50 +262,16 @@ export class PageActivityIndicatorBackground {
     deleteAllFollowedListsData: PageActivityIndicatorStorage['deleteAllFollowedListsData'] = () =>
         this.storage.deleteAllFollowedListsData()
 
-    private async getAllUserFollowedSharedListsFromServer(
-        userReference: UserReference,
-    ): Promise<Array<SharedList & { id: AutoPk; creator: AutoPk }>> {
-        const { activityFollows, contentSharing } = this.deps.serverStorage
-
-        const [sharedListFollows, ownedSharedLists] = await Promise.all([
-            activityFollows.getAllFollowsByCollection({
-                collection: 'sharedList',
-                userReference,
-            }),
-            contentSharing.getListsByCreator(userReference),
-        ])
-
-        // A user can follow their own shared lists, so filter them out to reduce reads
-        const ownedSharedListIds = new Set(
-            ownedSharedLists.map((list) => list.id),
-        )
-        const followedSharedLists = await contentSharing.getListsByReferences(
-            sharedListFollows
-                .filter((follow) => !ownedSharedListIds.has(follow.objectId))
-                .map((follow) => ({
-                    type: 'shared-list-reference',
-                    id: follow.objectId,
-                })),
-        )
-
-        return [
-            ...ownedSharedLists,
-            ...followedSharedLists.map((list) => ({
-                ...list,
-                id: list.reference.id,
-                creator: list.creator.id,
-            })),
-        ]
-    }
-
     async syncFollowedLists(): Promise<void> {
         const user = await this.getCurrentUser()
         if (user == null) {
             return
         }
-        const sharedLists = await this.getAllUserFollowedSharedListsFromServer(
-            user,
-        )
+        const response = await this.deps.contentSharingBackend.loadUserFollowedLists()
+        if (response.status === 'permission-denied') {
+            return
+        }
+        const sharedLists = response.data
         const existingFollowedListsLookup = await this.storage.findAllFollowedLists()
 
         // Remove any local followedLists that don't have an associated remote sharedList (carry over from old implementation, b)

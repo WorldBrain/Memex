@@ -17,16 +17,13 @@ import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type TabManagementBackground from 'src/tab-management/background'
-import type { ServerStorageModules } from 'src/storage/types'
 import type { AuthServices } from 'src/services/types'
-import type { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { isExtensionTab } from 'src/tab-management/utils'
-import type { UnifiedList } from 'src/annotations/cache/types'
-import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 
 const limitSuggestionsStorageLength = 25
 
@@ -41,6 +38,7 @@ export default class CustomListBackground {
             storageManager: Storex
             searchIndex: SearchIndex
             analyticsBG: AnalyticsCoreInterface
+            contentSharingBackend: ContentSharingBackendInterface
             contentSharing: ContentSharingBackground
             pages: PageIndexingBackground
             tabManagement: TabManagementBackground
@@ -111,7 +109,7 @@ export default class CustomListBackground {
         sharedListIds,
         normalizedPageUrl,
     }) => {
-        const response = await this.options.contentSharing.options.backend.loadPageAnnotationRefsForLists(
+        const response = await this.options.contentSharingBackend.loadPageAnnotationRefsForLists(
             {
                 listIds: sharedListIds,
                 normalizedPageUrl,
@@ -125,7 +123,7 @@ export default class CustomListBackground {
         remoteListId,
         opts,
     }) => {
-        const response = await this.options.contentSharing.options.backend.loadLocalDataForListEntry(
+        const response = await this.options.contentSharingBackend.loadLocalDataForListEntry(
             {
                 listId: remoteListId,
                 normalizedPageUrl,
@@ -147,7 +145,7 @@ export default class CustomListBackground {
         normalizedPageUrl,
         remoteListId,
     }) => {
-        const response = await this.options.contentSharing.options.backend.loadCollectionDetails(
+        const response = await this.options.contentSharingBackend.loadCollectionDetails(
             {
                 listId: remoteListId,
                 normalizedPageUrl,
@@ -176,7 +174,7 @@ export default class CustomListBackground {
             return null
         }
 
-        const response = await this.options.contentSharing.options.backend.loadCollectionDetails(
+        const response = await this.options.contentSharingBackend.loadCollectionDetails(
             {
                 listId: remoteListId,
             },
