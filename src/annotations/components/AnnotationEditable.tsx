@@ -400,6 +400,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     ) : undefined}
                 </HighlightActionsBox>
             ) : null
+
         return (
             <HighlightStyled
                 onClick={this.props.onHighlightClick}

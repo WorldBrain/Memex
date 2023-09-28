@@ -34,6 +34,7 @@ import {
 } from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import {
+    NormalizedState,
     initNormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
@@ -50,6 +51,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type {
     PageAnnotationsCacheEvents,
+    UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
 } from 'src/annotations/cache/types'
@@ -356,19 +358,36 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (opts.renderHighlights) {
-            this.renderOwnHighlights(this.options.annotationsCache)
+            const annotations = this.transformAnnotations(
+                this.options.annotationsCache.annotations,
+            )
+            const activeTab = 'annotations' // replace this with the actual value if available
+            console.log('annotations', annotations, activeTab)
+            this.renderOwnHighlights({ annotations, activeTab })
         }
     }
 
-    private renderOwnHighlights = ({
-        annotations,
-    }: Pick<SidebarContainerState, 'annotations'>) => {
+    private transformAnnotations(
+        annotations: any,
+    ): NormalizedState<UnifiedAnnotation, string> {
+        // Transform `annotations` into the format expected by `renderOwnHighlights`
+        // This is just a placeholder. Replace with your actual transformation logic.
+        return {
+            allIds: [],
+            byId: {},
+        }
+    }
+
+    private renderOwnHighlights = (
+        state: Pick<SidebarContainerState, 'annotations' | 'activeTab'>,
+    ) => {
         const highlights = cacheUtils.getUserHighlightsArray(
-            { annotations },
+            { annotations: state.annotations },
             this.options.getCurrentUser()?.id.toString(),
         )
         this.options.events?.emit('renderHighlights', {
             highlights,
+            removeExisting: state.activeTab === 'annotations' ? false : true,
         })
     }
 
@@ -395,6 +414,7 @@ export class SidebarContainerLogic extends UILogic<
 
         this.options.events?.emit('renderHighlights', {
             highlights,
+            removeExisting: true,
         })
     }
 
@@ -810,7 +830,7 @@ export class SidebarContainerLogic extends UILogic<
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 30 + 'px'
+                currentWindowWidth - currentsidebarWidth - 40 + 'px'
 
             document.body.style.width = readingWidth
         }
@@ -2334,6 +2354,7 @@ export class SidebarContainerLogic extends UILogic<
                     this.options.annotationsCache,
                     previousState.selectedListId,
                 ),
+                removeExisting: true,
             })
         } else if (event.tab === 'spaces') {
             await this.loadRemoteAnnototationReferencesForCachedLists(
@@ -2617,6 +2638,7 @@ export class SidebarContainerLogic extends UILogic<
                 this.options.annotationsCache,
                 unifiedListId,
             ),
+            removeExisting: true,
         })
 
         if (list.remoteId != null) {
@@ -2820,6 +2842,7 @@ export class SidebarContainerLogic extends UILogic<
                     annotationsCache,
                     cachedList.unifiedId,
                 ),
+                removeExisting: true,
             })
             return
         }
@@ -2963,6 +2986,7 @@ export class SidebarContainerLogic extends UILogic<
                     annotationsCache,
                     unifiedListId,
                 ),
+                removeExisting: true,
             })
 
             await this.detectConversationThreads(

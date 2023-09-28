@@ -103,7 +103,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
-        if (event.key === 'Escape') {
+        if (
+            event.key === 'Escape' &&
+            !window.location.href.includes('/pdfjs/viewer.html?file')
+        ) {
             this.hideSidebar()
         }
     }
@@ -178,22 +181,25 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     }),
             ),
         )
-        sidebarEvents.on('renderHighlights', async ({ highlights }) => {
-            await highlighter.renderHighlights(
-                highlights.map((h) => ({
-                    id: h.unifiedId,
-                    selector: h.selector,
-                })),
-                ({ annotationId, openInEdit }) =>
-                    inPageUI.showSidebar({
-                        annotationCacheId: annotationId.toString(),
-                        action: openInEdit
-                            ? 'edit_annotation'
-                            : 'show_annotation',
-                    }),
-                { removeExisting: true },
-            )
-        })
+        sidebarEvents.on(
+            'renderHighlights',
+            async ({ highlights, removeExisting }) => {
+                await highlighter.renderHighlights(
+                    highlights.map((h) => ({
+                        id: h.unifiedId,
+                        selector: h.selector,
+                    })),
+                    ({ annotationId, openInEdit }) =>
+                        inPageUI.showSidebar({
+                            annotationCacheId: annotationId.toString(),
+                            action: openInEdit
+                                ? 'edit_annotation'
+                                : 'show_annotation',
+                        }),
+                    { removeExisting: removeExisting },
+                )
+            },
+        )
         sidebarEvents.on('setSelectedList', async (selectedList) => {
             inPageUI.selectedList = selectedList
         })
@@ -261,6 +267,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
         } else if (event.action === 'show_annotation') {
+            await this.activateAnnotation(event.annotationCacheId, 'show')
             await sleepPromise(500)
             await this.processEvent('setActiveSidebarTab', {
                 tab:
@@ -269,7 +276,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         ? 'spaces'
                         : 'annotations',
             })
-            await this.activateAnnotation(event.annotationCacheId, 'show')
         } else if (event.action === 'edit_annotation') {
             await this.processEvent('setAnnotationEditMode', {
                 instanceLocation:
