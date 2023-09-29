@@ -390,7 +390,7 @@ export class PKMSyncBackgroundModule {
                 /  - \*\*Note\*\* \n    - (.+)\n/,
             )
             const creationDateMatch = annotation.match(/Created at:\*\* (.+)\r/)
-            const spacesMatch = annotation.match(/Spaces:\*\* (.+)\n/)
+            const spacesMatch = annotation.match(/  - \*\*Spaces:\*\* (.+)\n/)
 
             const newHighlightText =
                 (highlightTextMatch ? highlightTextMatch[1] : null) || body
@@ -402,10 +402,11 @@ export class PKMSyncBackgroundModule {
 
             const existingSpaces = spacesMatch
                 ? spacesMatch[1]
-                      .split(', ')
+                      .split(' ')
                       .map((space) => space.replace(/\[\[(.+)\]\]/, '$1'))
                 : []
 
+            console.log('exisitng spaces', existingSpaces)
             // replace content
             if (annotationSpaces) {
                 const index = existingSpaces.indexOf(annotationSpaces)
@@ -415,6 +416,7 @@ export class PKMSyncBackgroundModule {
                     existingSpaces.push(annotationSpaces)
                 }
             }
+            console.log('exisitng spaces2', existingSpaces)
             const formattedSpaces = existingSpaces
                 .map((space) => `[[${space}]]`)
                 .join(' ')
