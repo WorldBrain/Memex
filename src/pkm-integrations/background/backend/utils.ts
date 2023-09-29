@@ -56,7 +56,6 @@ export async function isPkmSyncEnabled() {
             (data.PKMSYNCpkmFolders.obsidianFolder?.length > 0 ||
                 data.PKMSYNCpkmFolders.logSeqFolder?.length > 0)
         ) {
-            console.log('pkmSync is enabled')
             return true
         }
 

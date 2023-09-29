@@ -41,7 +41,6 @@ export default class AnnotationStorage extends StorageModule {
     ) {
         super({
             storageManager: options.storageManager,
-            pkmSyncBG: options.pkmSyncBG,
         })
     }
 
@@ -493,8 +492,6 @@ export default class AnnotationStorage extends StorageModule {
                         url: normalizeUrl(pageUrl),
                     })
                 const pageDate = pageDataStorage.time
-
-                console.log('pageDate', pageDate)
 
                 const annotationData = {
                     annotationId: url,
