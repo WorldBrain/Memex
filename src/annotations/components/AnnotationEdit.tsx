@@ -38,6 +38,7 @@ export interface AnnotationEditGeneralProps {
     isBulkShareProtected?: boolean
     getYoutubePlayer?(): YoutubePlayer
     contextLocation?: string
+    selector?: string
 }
 
 export interface Props

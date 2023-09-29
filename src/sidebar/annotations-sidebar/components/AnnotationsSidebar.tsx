@@ -1920,6 +1920,7 @@ export class AnnotationsSidebar extends React.Component<
                         <AnnotationEditable
                             {...annot}
                             {...this.props}
+                            selector={annot.selector}
                             creatorId={annot.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             onSpacePickerToggle={() => {

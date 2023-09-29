@@ -29,7 +29,6 @@ import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-m
 import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 import { browser } from 'webextension-polyfill-ts'
 
