@@ -7,6 +7,7 @@ import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
+import { pageTitle } from 'src/sidebar-overlay/sidebar/selectors'
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
     remoteFunctions: PkmSyncInterface
@@ -52,6 +53,9 @@ export class PKMSyncBackgroundModule {
             //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
             // )
 
+            const PKMSYNCtitleformatLogseq = await browser.storage.local.get(
+                'PKMSYNCtitleformatLogseq',
+            )
             const PKMSYNCdateformatLogseq = await browser.storage.local.get(
                 'PKMSYNCdateformatLogseq',
             )
@@ -64,6 +68,7 @@ export class PKMSyncBackgroundModule {
                     'logseq',
                     PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
                     customTagsLogseq.PKMSYNCcustomTagsLogseq,
+                    PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq,
                 )
             } catch (e) {
                 console.error('error', e)
@@ -77,6 +82,9 @@ export class PKMSyncBackgroundModule {
             // let syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
             // )
+            const PKMSYNCtitleformatObsidian = await browser.storage.local.get(
+                'PKMSYNCtitleformatObsidian',
+            )
             const PKMSYNCdateformatObsidian = await browser.storage.local.get(
                 'PKMSYNCdateformatObsidian',
             )
@@ -89,6 +97,7 @@ export class PKMSyncBackgroundModule {
                     'obsidian',
                     PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
                     customTagsObsidian.PKMSYNCcustomTagsObsidian,
+                    PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian,
                 )
             } catch (e) {
                 console.error('error', e)
@@ -96,19 +105,43 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    async createPageUpdate(item, pkmType, syncDateFormat, customTags) {
-        let page
+    processPageTitleFormat(pageTitleFormat, pageTitle, pageCreatedWhen) {
+        let finalTitle = pageTitleFormat
 
-        try {
-            page = await this.backendNew.retrievePage(
-                item.data.pageTitle,
-                pkmType,
-            )
-        } catch (e) {}
+        finalTitle = finalTitle.replace('{{{PageTitle}}}', pageTitle)
 
+        const datePattern = /{{{Date: "(.*?)"}}}/
+        const match = finalTitle.match(datePattern)
+        if (match) {
+            const dateFormat = match[1]
+            const formattedDate = moment(pageCreatedWhen).format(dateFormat)
+            finalTitle = finalTitle.replace(datePattern, formattedDate)
+        }
+
+        return finalTitle.trim()
+    }
+
+    async createPageUpdate(
+        item,
+        pkmType,
+        syncDateFormat,
+        customTags,
+        pageTitleFormat,
+    ) {
+        const fileName = this.processPageTitleFormat(
+            pageTitleFormat,
+            item.data.pageTitle,
+            item.data.pageCreatedWhen,
+        )
+
+        console.log('filename', fileName)
         let [pageHeader, annotationsSection] = [null, null]
-        let pageIDbyTitle = item.data.pageTitle
         let fileContent = ''
+
+        let page
+        try {
+            page = await this.backendNew.retrievePage(fileName, pkmType)
+        } catch (e) {}
 
         if (page) {
             ;[pageHeader, annotationsSection] = page.split('### Annotations\n')
@@ -124,6 +157,7 @@ export class PKMSyncBackgroundModule {
                             item.data.type,
                             pkmType,
                             syncDateFormat,
+                            pageTitleFormat,
                         ),
                     item.data.pageTitle || null,
                     item.data.pageURL || null,
@@ -133,6 +167,7 @@ export class PKMSyncBackgroundModule {
                     pkmType,
                     syncDateFormat,
                     customTags,
+                    pageTitleFormat,
                 )
             } else if (item.type === 'annotation') {
                 annotationsSection = this.replaceOrAppendAnnotation(
@@ -166,6 +201,7 @@ export class PKMSyncBackgroundModule {
                 item.data.type,
                 pkmType,
                 syncDateFormat,
+                pageTitleFormat,
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
@@ -190,11 +226,7 @@ export class PKMSyncBackgroundModule {
         fileContent =
             pageHeader + '### Annotations\n' + (annotationsSection || '')
 
-        return await this.backendNew.storeObject(
-            pageIDbyTitle,
-            fileContent,
-            pkmType,
-        )
+        return await this.backendNew.storeObject(fileName, fileContent, pkmType)
     }
 
     replaceOrAppendAnnotation(
@@ -244,8 +276,8 @@ export class PKMSyncBackgroundModule {
             }
         }
         if (pkmType === 'logseq' && annotationsSection != null) {
-            let annotationStartLine = `- <span annotationstart id="${item.data.annotationId}">---</span>\n`
-            const annotationEndLine = `<span id="${item.data.annotationId}"/>\n\n`
+            let annotationStartLine = `- <!-- NoteStartLine ${item.data.annotationId} -->---\n`
+            const annotationEndLine = ` <!-- NoteEndLine ${item.data.annotationId} -->\n\n`
             annotationStartIndex = annotationsSection.indexOf(
                 annotationStartLine,
             )
@@ -292,7 +324,11 @@ export class PKMSyncBackgroundModule {
                 pkmType,
                 syncDateFormat,
             )
-            return annotationsSection + newAnnotationContent
+            if (!annotationsSection) {
+                return newAnnotationContent
+            } else {
+                return annotationsSection + newAnnotationContent
+            }
         }
     }
 
@@ -322,10 +358,10 @@ export class PKMSyncBackgroundModule {
             let highlightTextMatch
             highlightTextMatch = annotation.match(/> \s*(.+)\n\n/)
 
-            const noteStartString = `<span class="annotationNoteStart"><strong>Note:</strong></span>\n`
+            const noteStartString = `<!-- Note -->\n`
             const annotationNoteStartIndex = annotation.indexOf(noteStartString)
             const annotationNoteEndIndex = annotation.indexOf(
-                '<span class="annotationNoteEnd"/>',
+                '\n<div id="end"/>\n\r',
             )
             if (
                 annotationNoteStartIndex !== -1 &&
@@ -338,12 +374,10 @@ export class PKMSyncBackgroundModule {
             }
 
             const creationDateMatch = annotation.match(
-                /<strong>Created at:<\/strong><\/span> (.+)\n/,
+                /<!-- Created at -->\n(.+)\n/,
             )
 
-            const spacesMatch = annotation.match(
-                /<strong>Spaces:<\/strong><\/span> (.+)\n/,
-            )
+            const spacesMatch = annotation.match(/<!-- Spaces -->\n(.+)\n\n/)
 
             const newHighlightText =
                 (highlightTextMatch ? highlightTextMatch[1] : null) || body
@@ -389,10 +423,10 @@ export class PKMSyncBackgroundModule {
             let highlightTextMatch = annotation.match(/ - >\s*(.+)\n/)
 
             const HighlightNoteMatch = annotation.match(
-                /<span id=".*"><strong>Note:<\/strong><\/span>\n    - (.+)\n/,
+                /  - \*\*Note\*\* \n    - (.+)\n/,
             )
             const creationDateMatch = annotation.match(/Created at:\*\* (.+)\r/)
-            const spacesMatch = annotation.match(/Spaces:\*\* (.+)\n/)
+            const spacesMatch = annotation.match(/  - \*\*Spaces:\*\* (.+)\n/)
 
             const newHighlightText =
                 (highlightTextMatch ? highlightTextMatch[1] : null) || body
@@ -404,10 +438,11 @@ export class PKMSyncBackgroundModule {
 
             const existingSpaces = spacesMatch
                 ? spacesMatch[1]
-                      .split(', ')
+                      .split(' ')
                       .map((space) => space.replace(/\[\[(.+)\]\]/, '$1'))
                 : []
 
+            console.log('exisitng spaces', existingSpaces)
             // replace content
             if (annotationSpaces) {
                 const index = existingSpaces.indexOf(annotationSpaces)
@@ -417,6 +452,7 @@ export class PKMSyncBackgroundModule {
                     existingSpaces.push(annotationSpaces)
                 }
             }
+            console.log('exisitng spaces2', existingSpaces)
             const formattedSpaces = existingSpaces
                 .map((space) => `[[${space}]]`)
                 .join(' ')
@@ -446,6 +482,7 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
         customTags,
+        pageTitleFormat,
     ) {
         let createdWhen = creationDate
         let updatedPageHeader
@@ -511,6 +548,7 @@ export class PKMSyncBackgroundModule {
                 type,
                 pkmType,
                 syncDateFormat,
+                pageTitleFormat,
             )
         }
         if (pkmType === 'logseq') {
@@ -524,6 +562,7 @@ export class PKMSyncBackgroundModule {
             const newURL = (urlMatch ? urlMatch[1] : null) || pageURL
             const newCreationDate =
                 (creationDateMatch ? creationDateMatch[1] : null) || createdWhen
+
             // Step 1: Extract content inside [[]] from the line starting with "spaces::" and put them into an array
             let spaces = []
             let spacesLine = pageHeader
@@ -559,6 +598,7 @@ export class PKMSyncBackgroundModule {
                 type,
                 pkmType,
                 syncDateFormat,
+                pageTitleFormat,
             )
         }
 
@@ -573,6 +613,7 @@ export class PKMSyncBackgroundModule {
         type,
         pkmType,
         syncDateFormat,
+        pageTitleFormat,
     ) {
         let createdWhen = creationDate
         let titleLine
@@ -635,14 +676,14 @@ export class PKMSyncBackgroundModule {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = body ? `> ${body}\n\n` : ''
             const highlightNoteLine = comment
-                ? `<span class="annotationNoteStart"><strong>Note:</strong></span>\n${convertHTMLintoMarkdown(
+                ? `<!-- Note -->\n${convertHTMLintoMarkdown(
                       comment,
-                  )}\n<span class="annotationNoteEnd"/>\n`
+                  )}\n<div id="end"/>\n\r`
                 : ''
             const highlightSpacesLine = annotationSpaces
-                ? `<span class="annotationSpaces" id="${annotationId}"><strong>Spaces:</strong></span> ${annotationSpaces}\n`
+                ? `<!-- Spaces -->\n${annotationSpaces}\n\n`
                 : ''
-            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"><strong>Created at:</strong></span> ${creationDate}\n`
+            const creationDateLine = `<!-- Created at -->\n${creationDate}\n`
             const annotationEndLine = `\r<span class="annotationEndLine" id="${annotationId}"> --- </span>\n`
 
             return (
@@ -656,19 +697,17 @@ export class PKMSyncBackgroundModule {
         }
         if (pkmType === 'logseq') {
             let highlightTextLine = ''
-            const separatedLine = `- <span annotationstart id="${annotationId}">---</span>\n`
+            const separatedLine = `- <!-- NoteStartLine ${annotationId} -->---\n`
             highlightTextLine = body ? ` - > ${body}\n` : ''
 
             const highlightNoteLine = comment
-                ? `  - <span id="${annotationId}"><strong>Note:</strong></span>\n    - ${convertHTMLintoMarkdown(
-                      comment,
-                  )}\n`
+                ? `  - **Note** \n    - ${convertHTMLintoMarkdown(comment)}\n`
                 : ''
             const highlightSpacesLine = annotationSpaces
                 ? `  - **Spaces:** ${annotationSpaces}\n`
                 : ''
             const creationDateLine = `  - **Created at:** ${creationDate}\r`
-            const annotationEndLine = `<span id="${annotationId}"/>\n\n`
+            const annotationEndLine = ` <!-- NoteEndLine ${annotationId} -->\n\n`
             return (
                 separatedLine +
                 highlightTextLine +

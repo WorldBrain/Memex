@@ -31,6 +31,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import { browser } from 'webextension-polyfill-ts'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -285,7 +286,14 @@ export default class DirectLinkingBackground {
             normalizedPageUrl = await this.lookupSocialId(normalizedPageUrl)
         }
 
-        const pageTitle = toCreate.title == null ? tab.title : toCreate.title
+        const activeTab = await browser.tabs.query({
+            active: true,
+            currentWindow: true,
+        })
+        const activeTabTitle = activeTab[0]?.title
+
+        const pageTitle =
+            toCreate.title == null ? activeTabTitle : toCreate.title
 
         if (!skipPageIndexing) {
             await this.options.pages.indexPage(

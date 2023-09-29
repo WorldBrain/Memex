@@ -52,12 +52,12 @@ export async function getPkmSyncKey() {
 export async function isPkmSyncEnabled() {
     try {
         let data = await browser.storage.local.get('PKMSYNCpkmFolders')
-
         if (
             data.PKMSYNCpkmFolders &&
             (data.PKMSYNCpkmFolders.obsidianFolder?.length > 0 ||
-                data.PKMSYNCpkmFolders.logseqFolder?.length > 0)
+                data.PKMSYNCpkmFolders.logSeqFolder?.length > 0)
         ) {
+            console.log('pkmSync is enabled')
             return true
         }
 
