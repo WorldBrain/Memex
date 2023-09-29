@@ -305,7 +305,7 @@ class Import extends React.PureComponent<Props> {
                                 target="_blank"
                                 style={{ marginLeft: '5px' }}
                             >
-                                <span>Go to tutorial > </span>
+                                <span>Go to tutorial {'>'} </span>
                             </a>
                         </div>
                     }
@@ -610,7 +610,7 @@ class Import extends React.PureComponent<Props> {
                                 target="_blank"
                                 style={{ marginLeft: '5px' }}
                             >
-                                <span>Go to tutorial > </span>
+                                <span>Go to tutorial {'>'} </span>
                             </a>
                         </div>
                     }
