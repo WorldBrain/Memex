@@ -465,9 +465,7 @@ export async function main(
                 window.location.href.endsWith('.pdf') &&
                 window.getSelection().toString().length === 0
             ) {
-                console.log('test1')
                 screenshotGrabResult = await promptPdfScreenshot()
-                console.log('test2')
 
                 if (
                     screenshotGrabResult == null ||

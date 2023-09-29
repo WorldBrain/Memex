@@ -2283,13 +2283,13 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         const pattern = new RegExp(event.prompt, 'i')
-        const newSuggestions = this.AIpromptSuggestions.filter((item) =>
+        const newSuggestions = this.AIpromptSuggestions?.filter((item) =>
             pattern.test(item.prompt),
         )
-        if (event.prompt.length === 0) {
+        if (event.prompt?.length === 0) {
             this._updateFocusAISuggestions(-1, newSuggestions)
         } else {
-            if (newSuggestions.length > 0) {
+            if (newSuggestions?.length > 0) {
                 this.emitMutation({
                     showAISuggestionsDropDown: { $set: true },
                 })
@@ -2361,8 +2361,8 @@ export class SidebarContainerLogic extends UILogic<
             )
         } else if (
             event.tab === 'summary' &&
-            ((event.prompt && event.prompt.length > 0) ||
-                event.textToProcess.length > 0)
+            ((event.prompt && event.prompt?.length > 0) ||
+                event.textToProcess?.length > 0)
         ) {
             if (previousState.pageSummary.length === 0) {
                 let isPagePDF = window.location.href.includes(
