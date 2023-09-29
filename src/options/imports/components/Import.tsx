@@ -69,6 +69,8 @@ class Import extends React.PureComponent<Props> {
         hasSyncEverBeenRunning: false,
         dateformatLogseq: 'MMM Do, YYYY',
         dateformatObsidian: 'YYYY-DD-MM',
+        titleformatLogseq: '{{{PageTitle}}}',
+        titleformatObsidian: '{{{PageTitle}}}',
         // syncOnlyAnnotatedPagesLogseq: false,
         // syncOnlyAnnotatedPagesObsidian false,
         customTagsLogseq: 'Memex Sync',
@@ -128,6 +130,31 @@ class Import extends React.PureComponent<Props> {
         if (syncExists) {
             this.setState({
                 hasSyncEverBeenRunning: true,
+            })
+        }
+
+        let PKMSYNCtitleformatLogseq = await browser.storage.local.get(
+            'PKMSYNCtitleformatLogseq',
+        )
+        let PKMSYNCtitleformatObsidian = await browser.storage.local.get(
+            'PKMSYNCtitleformatObsidian',
+        )
+
+        // Store the current state of the dateformatLogseq to the local storage if it returns null
+        if (PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq == null) {
+            PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq = this.state.titleformatLogseq
+            await browser.storage.local.set({
+                PKMSYNCtitleformatLogseq:
+                    PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq,
+            })
+        }
+
+        // Store the current state of the dateformatObsidian to the local storage if it returns null
+        if (PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian == null) {
+            PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian = this.state.titleformatObsidian
+            await browser.storage.local.set({
+                PKMSYNCtitleformatObsidian:
+                    PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian,
             })
         }
 
@@ -203,6 +230,14 @@ class Import extends React.PureComponent<Props> {
                 PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian != null
                     ? PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian
                     : this.state.dateformatObsidian,
+            titleformatLogseq:
+                PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq != null
+                    ? PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq
+                    : this.state.titleformatLogseq,
+            titleformatObsidian:
+                PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian != null
+                    ? PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian
+                    : this.state.titleformatObsidian,
             customTagsObsidian: customTagsObsidian.PKMSYNCcustomTagsObsidian,
             customTagsLogseq: customTagsLogseq.PKMSYNCcustomTagsLogseq,
             // syncOnlyAnnotatedPagesLogseq:
@@ -264,10 +299,14 @@ class Import extends React.PureComponent<Props> {
                     originalImage
                     description={
                         <div>
-                            <span>
-                                Automatically sync pages and annotations to
-                                LogSeq.
-                            </span>
+                            <span>Sync pages and annotations to LogSeq.</span>
+                            <a
+                                href="https://tutorials.memex.garden/tutorials/obsidian-and-logseq-sync"
+                                target="_blank"
+                                style={{ marginLeft: '5px' }}
+                            >
+                                <span>Go to tutorial > </span>
+                            </a>
                         </div>
                     }
                 >
@@ -383,6 +422,38 @@ class Import extends React.PureComponent<Props> {
                                         <SettingsTitle>Settings</SettingsTitle>
                                         <SettingsEntry>
                                             <SettingsLabel>
+                                                File name format{' '}
+                                            </SettingsLabel>
+                                            <SettingsValueBox>
+                                                <SettingsLink
+                                                    href="https://tutorials.memex.garden/tutorials/obsidian-and-logseq-sync"
+                                                    target="_blank"
+                                                >
+                                                    Formatting Help
+                                                </SettingsLink>
+                                                <TextField
+                                                    value={
+                                                        this.state
+                                                            .titleformatLogseq
+                                                    }
+                                                    onChange={(event) => {
+                                                        this.setState({
+                                                            titleformatLogseq: (event.target as HTMLInputElement)
+                                                                .value,
+                                                        })
+                                                        browser.storage.local.set(
+                                                            {
+                                                                PKMSYNCtitleformatLogseq: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            },
+                                                        )
+                                                    }}
+                                                    width={'300px'}
+                                                />
+                                            </SettingsValueBox>
+                                        </SettingsEntry>
+                                        <SettingsEntry>
+                                            <SettingsLabel>
                                                 Date format{' '}
                                             </SettingsLabel>
                                             <SettingsValueBox>
@@ -413,6 +484,7 @@ class Import extends React.PureComponent<Props> {
                                                 />
                                             </SettingsValueBox>
                                         </SettingsEntry>
+
                                         <TooltipBox
                                             tooltipText={
                                                 <span>
@@ -532,10 +604,14 @@ class Import extends React.PureComponent<Props> {
                     originalImage
                     description={
                         <div>
-                            <span>
-                                Automatically sync pages and annotations to
-                                Obsidian.
-                            </span>
+                            <span>Sync pages and annotations to Obsidian.</span>
+                            <a
+                                href="https://tutorials.memex.garden/tutorials/obsidian-and-logseq-sync"
+                                target="_blank"
+                                style={{ marginLeft: '5px' }}
+                            >
+                                <span>Go to tutorial > </span>
+                            </a>
                         </div>
                     }
                 >
@@ -650,7 +726,39 @@ class Import extends React.PureComponent<Props> {
                                         <SettingsTitle>Settings</SettingsTitle>
                                         <SettingsEntry>
                                             <SettingsLabel>
-                                                Date format for page entries{' '}
+                                                File name format{' '}
+                                            </SettingsLabel>
+                                            <SettingsValueBox>
+                                                <SettingsLink
+                                                    href="https://tutorials.memex.garden/tutorials/obsidian-and-logseq-sync"
+                                                    target="_blank"
+                                                >
+                                                    Formatting Help
+                                                </SettingsLink>
+                                                <TextField
+                                                    value={
+                                                        this.state
+                                                            .titleformatObsidian
+                                                    }
+                                                    onChange={(event) => {
+                                                        this.setState({
+                                                            titleformatObsidian: (event.target as HTMLInputElement)
+                                                                .value,
+                                                        })
+                                                        browser.storage.local.set(
+                                                            {
+                                                                PKMSYNCtitleformatObsidian: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            },
+                                                        )
+                                                    }}
+                                                    width={'300px'}
+                                                />
+                                            </SettingsValueBox>
+                                        </SettingsEntry>
+                                        <SettingsEntry>
+                                            <SettingsLabel>
+                                                Date format{' '}
                                             </SettingsLabel>
                                             <SettingsValueBox>
                                                 <SettingsLink

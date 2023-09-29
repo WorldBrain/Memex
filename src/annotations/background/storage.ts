@@ -337,11 +337,21 @@ export default class AnnotationStorage extends StorageModule {
                     .findOneObject<{ id: number; name: string }>({ id: listId })
                 const listName = listData.name
 
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
+                const pageDate = pageDataStorage.time
+
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                     pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
                     annotationSpaces: listName,
+                    pageCreatedWhen: pageDate,
                 }
 
                 shareAnnotationWithPKM(
@@ -377,11 +387,21 @@ export default class AnnotationStorage extends StorageModule {
                     .findOneObject<{ id: number; name: string }>({ id: listId })
                 const listName = listData.name
 
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
+                const pageDate = pageDataStorage.time
+
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                     pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
                     annotationSpaces: listName,
+                    pageCreatedWhen: pageDate,
                 }
 
                 shareAnnotationWithPKM(
@@ -467,12 +487,22 @@ export default class AnnotationStorage extends StorageModule {
         }
         if (await isPkmSyncEnabled()) {
             try {
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(pageUrl),
+                    })
+                const pageDate = pageDataStorage.time
+
+                console.log('pageDate', pageDate)
+
                 const annotationData = {
                     annotationId: url,
                     pageTitle: pageTitle,
                     body: body,
                     comment: comment,
                     createdWhen: createdWhen,
+                    pageCreatedWhen: pageDate,
                 }
 
                 shareAnnotationWithPKM(
@@ -504,12 +534,22 @@ export default class AnnotationStorage extends StorageModule {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
 
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
+                const pageDate = pageDataStorage.time
+
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                     body: annotationDataForPKMSyncUpdate.body,
                     createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
                     comment,
+                    pageCreatedWhen: pageDate,
                 }
 
                 shareAnnotationWithPKM(
