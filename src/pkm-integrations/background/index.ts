@@ -291,7 +291,11 @@ export class PKMSyncBackgroundModule {
                 pkmType,
                 syncDateFormat,
             )
-            return annotationsSection + newAnnotationContent
+            if (!annotationsSection) {
+                return newAnnotationContent
+            } else {
+                return annotationsSection + newAnnotationContent
+            }
         }
     }
 
