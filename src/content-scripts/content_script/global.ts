@@ -370,7 +370,11 @@ export async function main(
                 }
                 await savePromise
             })()
-            return { annotationId: unifiedId, localId: localId, createPromise }
+            return {
+                annotationId: unifiedId as AutoPk,
+                localId: localId,
+                createPromise,
+            }
         },
     })
 

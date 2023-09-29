@@ -133,8 +133,6 @@ export class PKMSyncBackgroundModule {
             item.data.pageTitle,
             item.data.pageCreatedWhen,
         )
-
-        console.log('filename', fileName)
         let [pageHeader, annotationsSection] = [null, null]
         let fileContent = ''
 
@@ -442,7 +440,6 @@ export class PKMSyncBackgroundModule {
                       .map((space) => space.replace(/\[\[(.+)\]\]/, '$1'))
                 : []
 
-            console.log('exisitng spaces', existingSpaces)
             // replace content
             if (annotationSpaces) {
                 const index = existingSpaces.indexOf(annotationSpaces)
@@ -452,7 +449,6 @@ export class PKMSyncBackgroundModule {
                     existingSpaces.push(annotationSpaces)
                 }
             }
-            console.log('exisitng spaces2', existingSpaces)
             const formattedSpaces = existingSpaces
                 .map((space) => `[[${space}]]`)
                 .join(' ')
