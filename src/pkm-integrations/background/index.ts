@@ -244,8 +244,8 @@ export class PKMSyncBackgroundModule {
             }
         }
         if (pkmType === 'logseq' && annotationsSection != null) {
-            let annotationStartLine = `- <span annotationstart id="${item.data.annotationId}">---</span>\n`
-            const annotationEndLine = `<span id="${item.data.annotationId}"/>\n\n`
+            let annotationStartLine = `- <!-- NoteStartLine ${item.data.annotationId} -->---\n`
+            const annotationEndLine = ` <!-- NoteEndLine ${item.data.annotationId} -->\n\n`
             annotationStartIndex = annotationsSection.indexOf(
                 annotationStartLine,
             )
@@ -322,10 +322,10 @@ export class PKMSyncBackgroundModule {
             let highlightTextMatch
             highlightTextMatch = annotation.match(/> \s*(.+)\n\n/)
 
-            const noteStartString = `<span class="annotationNoteStart"><strong>Note:</strong></span>\n`
+            const noteStartString = `<!-- Note -->\n`
             const annotationNoteStartIndex = annotation.indexOf(noteStartString)
             const annotationNoteEndIndex = annotation.indexOf(
-                '<span class="annotationNoteEnd"/>',
+                '\n<div id="end"/>\n\r',
             )
             if (
                 annotationNoteStartIndex !== -1 &&
@@ -338,12 +338,10 @@ export class PKMSyncBackgroundModule {
             }
 
             const creationDateMatch = annotation.match(
-                /<strong>Created at:<\/strong><\/span> (.+)\n/,
+                /<!-- Created at -->\n(.+)\n/,
             )
 
-            const spacesMatch = annotation.match(
-                /<strong>Spaces:<\/strong><\/span> (.+)\n/,
-            )
+            const spacesMatch = annotation.match(/<!-- Spaces -->\n(.+)\n\n/)
 
             const newHighlightText =
                 (highlightTextMatch ? highlightTextMatch[1] : null) || body
@@ -389,7 +387,7 @@ export class PKMSyncBackgroundModule {
             let highlightTextMatch = annotation.match(/ - >\s*(.+)\n/)
 
             const HighlightNoteMatch = annotation.match(
-                /<span id=".*"><strong>Note:<\/strong><\/span>\n    - (.+)\n/,
+                /  - \*\*Note\*\* \n    - (.+)\n/,
             )
             const creationDateMatch = annotation.match(/Created at:\*\* (.+)\r/)
             const spacesMatch = annotation.match(/Spaces:\*\* (.+)\n/)
@@ -524,6 +522,7 @@ export class PKMSyncBackgroundModule {
             const newURL = (urlMatch ? urlMatch[1] : null) || pageURL
             const newCreationDate =
                 (creationDateMatch ? creationDateMatch[1] : null) || createdWhen
+
             // Step 1: Extract content inside [[]] from the line starting with "spaces::" and put them into an array
             let spaces = []
             let spacesLine = pageHeader
@@ -635,14 +634,14 @@ export class PKMSyncBackgroundModule {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = body ? `> ${body}\n\n` : ''
             const highlightNoteLine = comment
-                ? `<span class="annotationNoteStart"><strong>Note:</strong></span>\n${convertHTMLintoMarkdown(
+                ? `<!-- Note -->\n${convertHTMLintoMarkdown(
                       comment,
-                  )}\n<span class="annotationNoteEnd"/>\n`
+                  )}\n<div id="end"/>\n\r`
                 : ''
             const highlightSpacesLine = annotationSpaces
-                ? `<span class="annotationSpaces" id="${annotationId}"><strong>Spaces:</strong></span> ${annotationSpaces}\n`
+                ? `<!-- Spaces -->\n${annotationSpaces}\n\n`
                 : ''
-            const creationDateLine = `<span class="annotationCreatedAt" id="${annotationId}"><strong>Created at:</strong></span> ${creationDate}\n`
+            const creationDateLine = `<!-- Created at -->\n${creationDate}\n`
             const annotationEndLine = `\r<span class="annotationEndLine" id="${annotationId}"> --- </span>\n`
 
             return (
@@ -656,19 +655,17 @@ export class PKMSyncBackgroundModule {
         }
         if (pkmType === 'logseq') {
             let highlightTextLine = ''
-            const separatedLine = `- <span annotationstart id="${annotationId}">---</span>\n`
+            const separatedLine = `- <!-- NoteStartLine ${annotationId} -->---\n`
             highlightTextLine = body ? ` - > ${body}\n` : ''
 
             const highlightNoteLine = comment
-                ? `  - <span id="${annotationId}"><strong>Note:</strong></span>\n    - ${convertHTMLintoMarkdown(
-                      comment,
-                  )}\n`
+                ? `  - **Note** \n    - ${convertHTMLintoMarkdown(comment)}\n`
                 : ''
             const highlightSpacesLine = annotationSpaces
                 ? `  - **Spaces:** ${annotationSpaces}\n`
                 : ''
             const creationDateLine = `  - **Created at:** ${creationDate}\r`
-            const annotationEndLine = `<span id="${annotationId}"/>\n\n`
+            const annotationEndLine = ` <!-- NoteEndLine ${annotationId} -->\n\n`
             return (
                 separatedLine +
                 highlightTextLine +
