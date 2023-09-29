@@ -7,6 +7,7 @@ import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
+import { pageTitle } from 'src/sidebar-overlay/sidebar/selectors'
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
     remoteFunctions: PkmSyncInterface
@@ -52,6 +53,9 @@ export class PKMSyncBackgroundModule {
             //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
             // )
 
+            const PKMSYNCtitleformatLogseq = await browser.storage.local.get(
+                'PKMSYNCtitleformatLogseq',
+            )
             const PKMSYNCdateformatLogseq = await browser.storage.local.get(
                 'PKMSYNCdateformatLogseq',
             )
@@ -64,6 +68,7 @@ export class PKMSyncBackgroundModule {
                     'logseq',
                     PKMSYNCdateformatLogseq.PKMSYNCdateformatLogseq,
                     customTagsLogseq.PKMSYNCcustomTagsLogseq,
+                    PKMSYNCtitleformatLogseq.PKMSYNCtitleformatLogseq,
                 )
             } catch (e) {
                 console.error('error', e)
@@ -77,6 +82,9 @@ export class PKMSyncBackgroundModule {
             // let syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
             // )
+            const PKMSYNCtitleformatObsidian = await browser.storage.local.get(
+                'PKMSYNCtitleformatObsidian',
+            )
             const PKMSYNCdateformatObsidian = await browser.storage.local.get(
                 'PKMSYNCdateformatObsidian',
             )
@@ -89,6 +97,7 @@ export class PKMSyncBackgroundModule {
                     'obsidian',
                     PKMSYNCdateformatObsidian.PKMSYNCdateformatObsidian,
                     customTagsObsidian.PKMSYNCcustomTagsObsidian,
+                    PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian,
                 )
             } catch (e) {
                 console.error('error', e)
@@ -96,17 +105,42 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    async createPageUpdate(item, pkmType, syncDateFormat, customTags) {
+    processPageTitleFormat(pageTitleFormat, pageTitle, pageCreatedWhen) {
+        let finalTitle = pageTitleFormat
+
+        finalTitle = finalTitle.replace('{{{PageTitle}}}', pageTitle)
+
+        const datePattern = /{{{Date: "(.*?)"}}}/
+        const match = finalTitle.match(datePattern)
+        if (match) {
+            const dateFormat = match[1]
+            const formattedDate = moment(pageCreatedWhen).format(dateFormat)
+            finalTitle = finalTitle.replace(datePattern, formattedDate)
+        }
+
+        return finalTitle.trim()
+    }
+
+    async createPageUpdate(
+        item,
+        pkmType,
+        syncDateFormat,
+        customTags,
+        pageTitleFormat,
+    ) {
+        const fileName = this.processPageTitleFormat(
+            pageTitleFormat,
+            item.data.pageTitle,
+            item.data.pageCreatedWhen,
+        )
+
+        console.log('filename', fileName)
         let [pageHeader, annotationsSection] = [null, null]
-        let pageIDbyTitle = item.data.pageTitle
         let fileContent = ''
 
         let page
         try {
-            page = await this.backendNew.retrievePage(
-                item.data.pageTitle,
-                pkmType,
-            )
+            page = await this.backendNew.retrievePage(fileName, pkmType)
         } catch (e) {}
 
         if (page) {
@@ -123,6 +157,7 @@ export class PKMSyncBackgroundModule {
                             item.data.type,
                             pkmType,
                             syncDateFormat,
+                            pageTitleFormat,
                         ),
                     item.data.pageTitle || null,
                     item.data.pageURL || null,
@@ -132,6 +167,7 @@ export class PKMSyncBackgroundModule {
                     pkmType,
                     syncDateFormat,
                     customTags,
+                    pageTitleFormat,
                 )
             } else if (item.type === 'annotation') {
                 annotationsSection = this.replaceOrAppendAnnotation(
@@ -165,6 +201,7 @@ export class PKMSyncBackgroundModule {
                 item.data.type,
                 pkmType,
                 syncDateFormat,
+                pageTitleFormat,
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
@@ -189,11 +226,7 @@ export class PKMSyncBackgroundModule {
         fileContent =
             pageHeader + '### Annotations\n' + (annotationsSection || '')
 
-        return await this.backendNew.storeObject(
-            pageIDbyTitle,
-            fileContent,
-            pkmType,
-        )
+        return await this.backendNew.storeObject(fileName, fileContent, pkmType)
     }
 
     replaceOrAppendAnnotation(
@@ -449,6 +482,7 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
         customTags,
+        pageTitleFormat,
     ) {
         let createdWhen = creationDate
         let updatedPageHeader
@@ -514,6 +548,7 @@ export class PKMSyncBackgroundModule {
                 type,
                 pkmType,
                 syncDateFormat,
+                pageTitleFormat,
             )
         }
         if (pkmType === 'logseq') {
@@ -563,6 +598,7 @@ export class PKMSyncBackgroundModule {
                 type,
                 pkmType,
                 syncDateFormat,
+                pageTitleFormat,
             )
         }
 
@@ -577,6 +613,7 @@ export class PKMSyncBackgroundModule {
         type,
         pkmType,
         syncDateFormat,
+        pageTitleFormat,
     ) {
         let createdWhen = creationDate
         let titleLine
