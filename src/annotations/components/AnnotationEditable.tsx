@@ -404,7 +404,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 </HighlightActionsBox>
             ) : null
 
-        const isScreenshotAnnotation = this.props.selector.dimensions != null
+        const isScreenshotAnnotation = this.props.selector?.dimensions != null
 
         return (
             <HighlightStyled
