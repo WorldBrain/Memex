@@ -119,12 +119,29 @@ async function handleSyncedDataForPKMSync(
     if (await isPkmSyncEnabled()) {
         try {
             if (collection === 'annotations') {
+                const pageDataStorage = await storageManager
+                    .collection('pages')
+                    .findOneObject<{
+                        fullTitle: string
+                        fullUrl: string
+                    }>({
+                        url: updates.url.split('/#')[0],
+                    })
+
+                const visitsStorage = await storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(updates.url.split('/#')[0]),
+                    })
+                const pageDate = visitsStorage.time
+
                 const annotationData = {
                     annotationId: updates.url,
                     pageTitle: updates.pageTitle,
                     body: updates.body,
                     comment: updates.comment,
                     createdWhen: updates.createdWhen,
+                    pageCreatedWhen: pageDate,
                 }
 
                 await shareAnnotationWithPKM(
@@ -142,15 +159,26 @@ async function handleSyncedDataForPKMSync(
                     })
                 const pageDataStorage = await storageManager
                     .collection('pages')
-                    .findOneObject<{ fullTitle: string; fullUrl: string }>({
+                    .findOneObject<{
+                        fullTitle: string
+                        fullUrl: string
+                        createdWhen: string
+                    }>({
                         url: updates.url.split('/#')[0],
                     })
+                const visitsStorage = await storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(updates.url.split('/#')[0]),
+                    })
+                const pageDate = visitsStorage.time
 
                 const annotationData = {
                     pageTitle: pageDataStorage.fullTitle,
                     annotationId: updates.url,
                     pageUrl: pageDataStorage.fullUrl,
                     annotationSpaces: listData.name,
+                    pageCreatedWhen: pageDate,
                 }
 
                 await shareAnnotationWithPKM(
