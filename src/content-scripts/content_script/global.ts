@@ -93,6 +93,8 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -206,6 +208,7 @@ export async function main(
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
+    const imageSupport = runInBackground()
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
@@ -273,7 +276,7 @@ export async function main(
                 unifiedId: unifiedAnnotationId.toString(),
             })
         },
-        scheduleAnnotationCreation: (data) => {
+        scheduleAnnotationCreation: async (data) => {
             const localId = generateAnnotationUrl({
                 pageUrl: data.fullPageUrl,
                 now: () => data.createdWhen,
@@ -320,6 +323,14 @@ export async function main(
             })
 
             const createPromise = (async () => {
+                const bodyForSaving = await processCommentForImageUpload(
+                    data.body,
+                    data.fullPageUrl,
+                    localId,
+                    imageSupport,
+                    false,
+                )
+
                 const {
                     savePromise,
                     remoteAnnotationId,
@@ -338,7 +349,7 @@ export async function main(
                     annotationData: {
                         localId,
                         localListIds,
-                        body: data.body,
+                        body: bodyForSaving,
                         comment: data.comment,
                         selector: data.selector,
                         fullPageUrl: data.fullPageUrl,
@@ -405,7 +416,12 @@ export async function main(
             .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
-    async function saveHighlight(shouldShare: boolean): Promise<AutoPk> {
+    async function saveHighlight(
+        shouldShare: boolean,
+        screenshotAnchor?,
+        screenshotImage?,
+        imageSupport?,
+    ): Promise<AutoPk> {
         let highlightId: AutoPk
         try {
             highlightId = await highlightRenderer.saveAndRenderHighlight({
@@ -421,6 +437,9 @@ export async function main(
                 getFullPageUrl: async () => pageInfo.getFullPageUrl(),
                 isPdf: pageInfo.isPdf,
                 shouldShare,
+                screenshotAnchor,
+                screenshotImage,
+                imageSupport,
             })
         } catch (err) {
             captureException(err)
@@ -434,18 +453,41 @@ export async function main(
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (selection: Selection, shouldShare: boolean) => {
-            if (
-                !(await pageActionAllowed(analyticsBG)) ||
-                window.getSelection().toString().length === 0
-            ) {
+            if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
-            await saveHighlight(shouldShare)
+            let screenshotGrabResult
+            if (
+                window.location.href.endsWith('.pdf') &&
+                window.getSelection().toString().length === 0
+            ) {
+                console.log('test1')
+                screenshotGrabResult = await promptPdfScreenshot()
+                console.log('test2')
+
+                if (
+                    screenshotGrabResult == null ||
+                    screenshotGrabResult.anchor == null
+                ) {
+                    return
+                }
+
+                await saveHighlight(
+                    shouldShare,
+                    screenshotGrabResult.anchor,
+                    screenshotGrabResult.screenshot,
+                    imageSupport,
+                )
+            } else {
+                await saveHighlight(shouldShare)
+            }
+
             if (inPageUI.componentsShown.sidebar) {
                 inPageUI.showSidebar({
                     action: 'show_annotation',
                 })
             }
+            await inPageUI.hideTooltip()
             if (analyticsBG) {
                 try {
                     trackAnnotationCreate(analyticsBG, {
@@ -457,7 +499,6 @@ export async function main(
                     )
                 }
             }
-            await inPageUI.hideTooltip()
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
@@ -470,19 +511,6 @@ export async function main(
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
-            }
-
-            if (analyticsBG) {
-                // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
-                try {
-                    trackAnnotationCreate(analyticsBG, {
-                        annotationType: 'highlight',
-                    })
-                } catch (error) {
-                    console.error(
-                        `Error tracking space create event', ${error}`,
-                    )
-                }
             }
 
             if (selection && window.getSelection().toString().length > 0) {
@@ -508,6 +536,18 @@ export async function main(
             }
 
             await inPageUI.hideTooltip()
+            if (analyticsBG) {
+                // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
+                try {
+                    trackAnnotationCreate(analyticsBG, {
+                        annotationType: 'highlight',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking space create event', ${error}`,
+                    )
+                }
+            }
         },
         askAI: () => (highlightedText: string) => {
             inPageUI.showSidebar({
@@ -1022,17 +1062,13 @@ export function createContentScriptLoader(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     loadRemotely: boolean
 }) {
-    const remoteLoader: ContentScriptLoader = async (
-        component: ContentScriptComponent,
-    ) => {
+    const remoteLoader: ContentScriptLoader = async (component) => {
         await args.contentScriptsBG.injectContentScriptComponent({
             component,
         })
     }
 
-    const localLoader: ContentScriptLoader = async (
-        component: ContentScriptComponent,
-    ) => {
+    const localLoader: ContentScriptLoader = async (component) => {
         const script = document.createElement('script')
         script.src = `../content_script_${component}.js`
         document.body.appendChild(script)

@@ -7,7 +7,10 @@ import type {
 export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     setSelectedList: (unifiedListId: UnifiedList['unifiedId']) => void
     renderHighlight: (args: { highlight: UnifiedAnnotation }) => void
-    renderHighlights: (args: { highlights: UnifiedAnnotation[] }) => void
+    renderHighlights: (args: {
+        highlights: UnifiedAnnotation[]
+        removeExisting: boolean
+    }) => void
     highlightAndScroll: (args: { highlight: UnifiedAnnotation }) => void
     triggerYoutubeTimestampSummary: (
         args: { text: string; showLoadingSpinner?: boolean },
