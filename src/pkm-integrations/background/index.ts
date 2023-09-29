@@ -97,18 +97,17 @@ export class PKMSyncBackgroundModule {
     }
 
     async createPageUpdate(item, pkmType, syncDateFormat, customTags) {
-        let page
+        let [pageHeader, annotationsSection] = [null, null]
+        let pageIDbyTitle = item.data.pageTitle
+        let fileContent = ''
 
+        let page
         try {
             page = await this.backendNew.retrievePage(
                 item.data.pageTitle,
                 pkmType,
             )
         } catch (e) {}
-
-        let [pageHeader, annotationsSection] = [null, null]
-        let pageIDbyTitle = item.data.pageTitle
-        let fileContent = ''
 
         if (page) {
             ;[pageHeader, annotationsSection] = page.split('### Annotations\n')
