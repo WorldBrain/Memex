@@ -249,10 +249,19 @@ export async function main(
     })
 
     const highlightRenderer = new HighlightRenderer({
+        getDocument: () => document,
+        icons: () => null,
         captureException,
         getUndoHistory: async () => {
             const storage = await browser.storage.local.get(UNDO_HISTORY)
             return storage[UNDO_HISTORY] ?? []
+        },
+        createHighlight: async (
+            createHighlightselection,
+            shouldShare,
+            drawRectangle,
+        ) => {
+            annotationsFunctions.createHighlight()(null, false)
         },
         setUndoHistory: async (undoHistory) =>
             browser.storage.local.set({
@@ -462,10 +471,14 @@ export async function main(
             }
             let screenshotGrabResult
             if (
-                window.location.href.endsWith('.pdf') &&
+                isPdfViewerRunning &&
                 window.getSelection().toString().length === 0
             ) {
-                screenshotGrabResult = await promptPdfScreenshot()
+                const pdfViewer = globalThis as any
+                screenshotGrabResult = await promptPdfScreenshot(
+                    document,
+                    pdfViewer,
+                )
 
                 if (
                     screenshotGrabResult == null ||

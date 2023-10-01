@@ -217,6 +217,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
+                    imageSupport: options.imageSupport,
                 },
             ),
         )
@@ -2558,6 +2559,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
+                    imageSupport: this.options.imageSupport,
                 })
             },
         )
