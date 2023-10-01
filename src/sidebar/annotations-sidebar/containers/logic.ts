@@ -399,6 +399,11 @@ export class SidebarContainerLogic extends UILogic<
         SidebarContainerState,
         'annotations' | 'lists' | 'listInstances'
     >) => {
+        this.options.events?.emit('renderHighlights', {
+            highlights: [],
+            removeExisting: true,
+        })
+
         const highlights = Object.values(listInstances)
             .filter((instance) => instance.isOpen)
             .map(
@@ -414,7 +419,7 @@ export class SidebarContainerLogic extends UILogic<
 
         this.options.events?.emit('renderHighlights', {
             highlights,
-            removeExisting: true,
+            removeExisting: false,
         })
     }
 
@@ -2346,7 +2351,10 @@ export class SidebarContainerLogic extends UILogic<
             returningToSelectedListMode ? previousState.selectedListId : null,
         )
 
-        if (event.tab === 'annotations') {
+        if (
+            event.tab === 'annotations' &&
+            previousState.activeTab !== 'annotations'
+        ) {
             this.renderOwnHighlights(previousState)
         } else if (returningToSelectedListMode) {
             this.options.events?.emit('renderHighlights', {
@@ -2872,6 +2880,7 @@ export class SidebarContainerLogic extends UILogic<
                 localListId?: number
                 sharedListEntryId: AutoPk
             }
+
             if (event.manuallyPullLocalListData) {
                 localListData = await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
                     {
