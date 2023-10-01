@@ -1850,10 +1850,12 @@ export class SidebarContainerLogic extends UILogic<
         const cachedAnnotation = this.options.annotationsCache.annotations.byId[
             event.unifiedAnnotationId
         ]
-        if (cachedAnnotation?.selector != null) {
-            this.options.events?.emit('highlightAndScroll', {
-                highlight: cachedAnnotation,
-            })
+        if (event.source === 'highlightCard') {
+            if (cachedAnnotation?.selector != null) {
+                this.options.events?.emit('highlightAndScroll', {
+                    highlight: cachedAnnotation,
+                })
+            }
         }
 
         if (!event.mode) {

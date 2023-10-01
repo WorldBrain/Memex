@@ -236,11 +236,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         if (!annotationBoxNode) {
             return
         }
-
-        annotationBoxNode.scrollIntoView({
-            block: 'center',
-            behavior: 'smooth',
-        })
     }
 
     private handleExternalAction = async (event: SidebarActionOptions) => {
