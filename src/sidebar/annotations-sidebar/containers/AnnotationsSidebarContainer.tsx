@@ -1255,10 +1255,11 @@ export class AnnotationsSidebarContainer<
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }
-                            setActiveTab={(tab) => (event) =>
+                            setActiveTab={(tab) => (event) => {
                                 this.processEvent('setActiveSidebarTab', {
                                     tab,
-                                })}
+                                })
+                            }}
                             expandFollowedListNotes={(unifiedListId) =>
                                 this.processEvent('expandListAnnotations', {
                                     unifiedListId,

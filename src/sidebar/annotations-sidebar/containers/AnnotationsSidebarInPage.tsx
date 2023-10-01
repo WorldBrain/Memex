@@ -269,13 +269,18 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (event.action === 'show_annotation') {
             await this.activateAnnotation(event.annotationCacheId, 'show')
             await sleepPromise(500)
-            await this.processEvent('setActiveSidebarTab', {
-                tab:
-                    this.state.selectedListId &&
-                    this.state.activeTab === 'spaces'
-                        ? 'spaces'
-                        : 'annotations',
-            })
+            if (
+                this.state.selectedListId &&
+                this.state.activeTab === 'spaces'
+            ) {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'spaces',
+                })
+            } else if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+            }
         } else if (event.action === 'edit_annotation') {
             await this.processEvent('setAnnotationEditMode', {
                 instanceLocation:

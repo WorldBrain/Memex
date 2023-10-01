@@ -2351,10 +2351,7 @@ export class SidebarContainerLogic extends UILogic<
             returningToSelectedListMode ? previousState.selectedListId : null,
         )
 
-        if (
-            event.tab === 'annotations' &&
-            previousState.activeTab !== 'annotations'
-        ) {
+        if (event.tab === 'annotations') {
             this.renderOwnHighlights(previousState)
         } else if (returningToSelectedListMode) {
             this.options.events?.emit('renderHighlights', {
