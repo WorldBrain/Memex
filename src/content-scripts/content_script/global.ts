@@ -494,7 +494,10 @@ export async function main(
                     screenshotGrabResult.screenshot,
                     imageSupport,
                 )
-            } else {
+            } else if (
+                selection &&
+                window.getSelection().toString().length > 0
+            ) {
                 await saveHighlight(shouldShare)
             }
 
@@ -529,7 +532,47 @@ export async function main(
                 return
             }
 
-            if (selection && window.getSelection().toString().length > 0) {
+            let screenshotGrabResult
+            if (
+                isPdfViewerRunning &&
+                window.getSelection().toString().length === 0
+            ) {
+                const pdfViewer = globalThis as any
+                screenshotGrabResult = await promptPdfScreenshot(
+                    document,
+                    pdfViewer,
+                )
+
+                if (
+                    screenshotGrabResult == null ||
+                    screenshotGrabResult.anchor == null
+                ) {
+                    return
+                }
+
+                const annotationId = await saveHighlight(
+                    shouldShare,
+                    screenshotGrabResult.anchor,
+                    screenshotGrabResult.screenshot,
+                    imageSupport,
+                )
+                await inPageUI.showSidebar(
+                    annotationId
+                        ? {
+                              annotationCacheId: annotationId.toString(),
+                              action: showSpacePicker
+                                  ? 'edit_annotation_spaces'
+                                  : 'edit_annotation',
+                          }
+                        : {
+                              action: 'comment',
+                              commentText: commentText ?? '',
+                          },
+                )
+            } else if (
+                selection &&
+                window.getSelection().toString().length > 0
+            ) {
                 const annotationId = await saveHighlight(shouldShare)
                 await inPageUI.showSidebar(
                     annotationId
@@ -544,12 +587,38 @@ export async function main(
                               commentText: commentText ?? '',
                           },
                 )
-            } else {
+            } else if (window.location.href.includes('youtube.com')) {
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
                     commentText: commentText,
                 })
             }
+
+            // if (selection && window.getSelection().toString().length > 0) {
+            //     const annotationId = await saveHighlight(shouldShare)
+            //     await inPageUI.showSidebar(
+            //         annotationId
+            //             ? {
+            //                   annotationCacheId: annotationId.toString(),
+            //                   action: showSpacePicker
+            //                       ? 'edit_annotation_spaces'
+            //                       : 'edit_annotation',
+            //               }
+            //             : {
+            //                   action: 'comment',
+            //                   commentText: commentText ?? '',
+            //               },
+            //     )
+            // } else {
+            //     await inPageUI.showSidebar({
+            //         action: 'youtube_timestamp',
+            //         commentText: commentText,
+            //     })
+            // }
+            // await inPageUI.showSidebar({
+            //     action: 'youtube_timestamp',
+            //     commentText: commentText,
+            // })
 
             await inPageUI.hideTooltip()
             if (analyticsBG) {
