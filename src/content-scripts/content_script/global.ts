@@ -95,6 +95,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import { theme } from 'src/common-ui/components/design-library/theme'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -250,7 +251,7 @@ export async function main(
 
     const highlightRenderer = new HighlightRenderer({
         getDocument: () => document,
-        icons: () => null,
+        icons: (iconName) => theme({ variant: 'dark' }).icons[iconName],
         captureException,
         getUndoHistory: async () => {
             const storage = await browser.storage.local.get(UNDO_HISTORY)
