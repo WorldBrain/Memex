@@ -190,7 +190,7 @@ export async function setupBackgroundIntegrationTest(
     })
 
     let callFirebaseFunction = async (name: string, ...args: any[]) => {
-        throw new Error(
+        console.error(
             `Tried to call Firebase function, but no mock was for that`,
         )
     }

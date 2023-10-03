@@ -31,6 +31,9 @@ export interface ContentSharingInterface
         }
     >
     waitForListShare(params: { localListId: number }): Promise<void>
+    deleteListAndAllAssociatedData(params: {
+        localListId: number
+    }): Promise<void>
     shareAnnotations(options: {
         annotationUrls: string[]
         shareToParentPageLists?: boolean

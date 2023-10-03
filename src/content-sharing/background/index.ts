@@ -83,7 +83,6 @@ export default class ContentSharingBackground {
                 | 'customLists'
                 | 'directLinking'
                 | 'pageActivityIndicator'
-                | 'contentSharing'
             >
             captureException?: (e: Error) => void
             serverStorage: Pick<ServerStorageModules, 'contentSharing'>
@@ -250,6 +249,7 @@ export default class ContentSharingBackground {
             },
             scheduleListShare: this.scheduleListShare,
             waitForListShare: this.waitForListShare,
+            deleteListAndAllAssociatedData: this.deleteListAndAllAssociatedData,
             shareAnnotation: this.shareAnnotation,
             shareAnnotations: this.shareAnnotations,
             executePendingActions: this.executePendingActions.bind(this),
@@ -351,6 +351,35 @@ export default class ContentSharingBackground {
         }
 
         return remoteListData
+    }
+
+    deleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
+        localListId,
+    }) => {
+        const {
+            customLists,
+            directLinking,
+            pageActivityIndicator,
+        } = this.options.getBgModules()
+
+        await directLinking.annotationStorage.removeAnnotsFromList({
+            listId: localListId,
+        })
+        const remoteListId = await this.storage.getRemoteListId({
+            localId: localListId,
+        })
+        if (remoteListId != null) {
+            await this.storage.deleteMetadataByLocalListId({ localListId })
+            await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
+                {
+                    sharedList: remoteListId,
+                },
+            )
+        }
+        await customLists.storage.removeListAssociatedData({
+            listId: localListId,
+        })
+        await customLists.storage.removeList({ id: localListId })
     }
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({
