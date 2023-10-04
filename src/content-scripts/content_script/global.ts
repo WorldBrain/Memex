@@ -1,5 +1,4 @@
 import 'core-js'
-import hexToRgb from 'hex-to-rgb'
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
@@ -268,11 +267,9 @@ export async function main(
             browser.storage.local.set({
                 [UNDO_HISTORY]: undoHistory,
             }),
-        getHighlightColorRGB: async () => {
+        getHighlightColor: async () => {
             const storage = await browser.storage.local.get(HIGHLIGHT_COLOR_KEY)
-            return hexToRgb(
-                storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR,
-            )
+            return storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR
         },
         onHighlightColorChange: (cb) => {
             browser.storage.onChanged.addListener((changes) => {
