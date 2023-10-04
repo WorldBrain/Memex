@@ -48,6 +48,7 @@ export interface Props
     >
     filterbyList: (listId: number) => void
     analyticsBG: AnalyticsCoreInterface
+    index: number
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -279,7 +280,10 @@ export default class PageResultView extends PureComponent<Props> {
                 {
                     key: 'copy-paste-page-btn',
                     image: 'copy',
-                    onClick: this.props.onCopyPasterBtnClick,
+                    onClick: (event) => {
+                        this.props.showPopoutsForResultBox(this.props.index)
+                        this.props.onCopyPasterBtnClick(event)
+                    },
                     buttonRef: this.copyPasteronPageButtonRef,
                     tooltipText: 'Copy Page',
                     active: this.props.isCopyPasterShown,
@@ -296,7 +300,10 @@ export default class PageResultView extends PureComponent<Props> {
                     imageColor: 'prime1',
                     ButtonText: 'Spaces',
                     iconSize: '14px',
-                    onClick: this.props.onListPickerFooterBtnClick,
+                    onClick: (event) => {
+                        this.props.showPopoutsForResultBox(this.props.index)
+                        this.props.onListPickerFooterBtnClick(event)
+                    },
                     buttonRef: this.spacePickerButtonRef,
                     active: this.props.listPickerShowStatus === 'footer',
                 },
