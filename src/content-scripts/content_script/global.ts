@@ -479,6 +479,7 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
+                    browser,
                 )
 
                 if (
@@ -541,6 +542,7 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
+                    browser,
                 )
 
                 if (
