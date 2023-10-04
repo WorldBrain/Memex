@@ -1126,10 +1126,15 @@ export class AnnotationsSidebarContainer<
                             appendLoader={
                                 this.state.secondarySearchState === 'running'
                             }
-                            setActiveAnnotation={(unifiedAnnotationId) => () =>
+                            setActiveAnnotation={(
+                                unifiedAnnotationId,
+                                source,
+                            ) => () => {
                                 this.processEvent('setActiveAnnotation', {
                                     unifiedAnnotationId,
-                                })}
+                                    source: source,
+                                })
+                            }}
                             setPopoutsActive={(isActive) => {
                                 this.processEvent('setPopoutsActive', isActive)
                             }}
@@ -1255,10 +1260,11 @@ export class AnnotationsSidebarContainer<
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }
-                            setActiveTab={(tab) => (event) =>
+                            setActiveTab={(tab) => (event) => {
                                 this.processEvent('setActiveSidebarTab', {
                                     tab,
-                                })}
+                                })
+                            }}
                             expandFollowedListNotes={(unifiedListId) =>
                                 this.processEvent('expandListAnnotations', {
                                     unifiedListId,

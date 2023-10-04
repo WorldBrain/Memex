@@ -330,6 +330,7 @@ interface SidebarEvents {
     deleteAnnotation: AnnotationEvent<{}>
     setActiveAnnotation: AnnotationEvent<{
         mode?: 'show' | 'edit' | 'edit_spaces'
+        source?: 'highlightInPage' | 'highlightCard'
     }>
     updateListsForAnnotation: AnnotationEvent<{
         added: number | null

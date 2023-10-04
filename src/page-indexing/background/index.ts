@@ -494,7 +494,7 @@ export class PageIndexingBackground {
         if (existingPage) {
             await this.storage.updatePage(pageData, existingPage)
         } else {
-            await this.storage.createPage(pageData)
+            await this.storage.createPage(pageData, pageContentInfo)
         }
 
         if (contentIdentifier) {

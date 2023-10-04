@@ -92,6 +92,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
 
     setActiveAnnotation: (
         annotationId: UnifiedAnnotation['unifiedId'],
+        source?: 'highlightInPage' | 'highlightCard',
     ) => React.MouseEventHandler
     setSpacePickerAnnotationInstance: (
         state: SidebarContainerState['spacePickerAnnotationInstance'],
@@ -754,6 +755,7 @@ export class AnnotationsSidebar extends React.Component<
                             onReplyBtnClick={eventHandlers.onReplyBtnClick}
                             onHighlightClick={this.props.setActiveAnnotation(
                                 annotation.unifiedId,
+                                'highlightCard',
                             )}
                             onListClick={this.props.onLocalListSelect}
                             isClickable={
@@ -1959,6 +1961,7 @@ export class AnnotationsSidebar extends React.Component<
                             onListClick={this.props.onLocalListSelect}
                             onHighlightClick={this.props.setActiveAnnotation(
                                 annot.unifiedId,
+                                'highlightCard',
                             )}
                             onGoToAnnotation={footerDeps.onGoToAnnotation}
                             annotationEditDependencies={this.props.bindAnnotationEditProps(
