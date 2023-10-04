@@ -59,11 +59,6 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
             browserName = 'Safari'
         } else if (navigator.userAgent.indexOf('Firefox') != -1) {
             browserName = 'Firefox'
-        } else if (
-            navigator.userAgent.indexOf('MSIE') != -1 ||
-            !!document.documentMode == true
-        ) {
-            browserName = 'IE' //crap
         }
         return browserName
     }
