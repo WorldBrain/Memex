@@ -49,6 +49,7 @@ export interface Props
     filterbyList: (listId: number) => void
     analyticsBG: AnalyticsCoreInterface
     index: number
+    showPopoutsForResultBox: (index: number) => void
 }
 
 export default class PageResultView extends PureComponent<Props> {
