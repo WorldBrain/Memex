@@ -368,6 +368,10 @@ export default class ContentSharingBackground {
         const remoteListId = await this.storage.getRemoteListId({
             localId: localListId,
         })
+        await customLists.storage.removeListAssociatedData({
+            listId: localListId,
+        })
+        await customLists.storage.removeList({ id: localListId })
         if (remoteListId != null) {
             await this.storage.deleteMetadataByLocalListId({ localListId })
             await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
@@ -376,10 +380,6 @@ export default class ContentSharingBackground {
                 },
             )
         }
-        await customLists.storage.removeListAssociatedData({
-            listId: localListId,
-        })
-        await customLists.storage.removeList({ id: localListId })
     }
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({
