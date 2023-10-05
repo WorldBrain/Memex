@@ -919,6 +919,10 @@ export async function main(
             resetKeyboardShortcuts()
         },
         handleHistoryStateUpdate: async (tabId) => {
+            if (isPdfViewerRunning) {
+                return
+            }
+
             await inPageUI.hideRibbon()
 
             if (window.location.href.includes('web.telegram.org/')) {
