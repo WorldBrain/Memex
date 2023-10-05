@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.7.4",
+    "version": "3.7.5",
     "homepage": "https://worldbrain.io",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -155,6 +155,7 @@
         "styled-components": "^5.2.1",
         "styled-components-spacing": "^3.1.1",
         "styled-props": "^1.1.2",
+        "tinycolor2": "^1.6.0",
         "traverse": "^0.6.6",
         "turndown": "^7.1.1",
         "tweetnacl": "^1.0.1",
@@ -210,6 +211,7 @@
         "@types/simple-peer": "^6.1.6",
         "@types/sinon": "^7.0.3",
         "@types/styled-components": "^5.1.4",
+        "@types/tinycolor2": "^1.4.4",
         "@types/turndown": "^5.0.1",
         "@types/url-regex": "^4.1.0",
         "@types/webextension-polyfill": "^0.9.0",

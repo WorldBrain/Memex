@@ -30,9 +30,9 @@ import type {
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
-import { ImageSupportInterface } from 'src/image-support/background/types'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
