@@ -23,6 +23,7 @@ export interface CommonInteractionProps {
     onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBarBtnClick: React.MouseEventHandler
     onListPickerFooterBtnClick: React.MouseEventHandler
+
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
     createNewList: (name: string) => Promise<number>
