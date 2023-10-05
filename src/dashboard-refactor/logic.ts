@@ -3671,7 +3671,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 })
-                await this.options.listsBG.removeList({ id: listData.localId! })
+                await this.options.contentShareBG.deleteListAndAllAssociatedData(
+                    { localListId: listData.localId! },
+                )
             },
         )
     }

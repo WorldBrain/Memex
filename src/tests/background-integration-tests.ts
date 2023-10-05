@@ -238,8 +238,8 @@ export async function setupBackgroundIntegrationTest(
         authServices,
         fetch,
         userMessageService: userMessages,
-        callFirebaseFunction: (name, ...args) => {
-            return callFirebaseFunction(name, ...args)
+        callFirebaseFunction: async (name, ...args) => {
+            return callFirebaseFunction(name, ...args) as any
         },
         personalCloudMediaBackend:
             options?.personalCloudMediaBackend ??

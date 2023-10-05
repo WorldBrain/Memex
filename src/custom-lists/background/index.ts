@@ -13,7 +13,7 @@ import type {
     PageListEntry,
 } from './types'
 import { maybeIndexTabs } from 'src/page-indexing/utils'
-import { Analytics } from 'src/analytics/types'
+import type { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
@@ -26,10 +26,9 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import ContentSharingBackground from 'src/content-sharing/background'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type ContentSharingBackground from 'src/content-sharing/background'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
@@ -82,7 +81,6 @@ export default class CustomListBackground {
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
-            removeList: this.removeList,
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
             fetchAllFollowedLists: this.fetchAllFollowedLists,
@@ -713,12 +711,6 @@ export default class CustomListBackground {
         })
 
         return retVal
-    }
-
-    removeList = async ({ id }: { id: number }) => {
-        return this.storage.removeList({
-            id,
-        })
     }
 
     removePageFromList = async ({ id, url }: { id: number; url: string }) => {

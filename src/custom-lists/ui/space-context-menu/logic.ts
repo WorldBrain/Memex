@@ -244,7 +244,9 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             return
         }
         this.dependencies.onDeleteSpaceConfirm?.(event.reactEvent)
-        await this.dependencies.spacesBG.removeList({ id: listData.localId })
+        await this.dependencies.contentSharingBG.deleteListAndAllAssociatedData(
+            { localListId: listData.localId },
+        )
     }
 
     intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
