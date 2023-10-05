@@ -132,6 +132,7 @@ export interface State {
     tutorialState: []
     showTutorialVideo: boolean
     showHorizontalScrollSwitch: string
+    showPopoutsForResultBox: number
 }
 
 export default class SearchResultsContainer extends React.Component<
@@ -252,6 +253,7 @@ export default class SearchResultsContainer extends React.Component<
         showTutorialVideo: false,
         tutorialState: undefined,
         showHorizontalScrollSwitch: 'none',
+        showPopoutsForResultBox: null,
     }
 
     private getLocalListIdsForCacheIds = (listIds: string[]): number[] =>
@@ -546,10 +548,10 @@ export default class SearchResultsContainer extends React.Component<
         return (
             <ResultBox
                 zIndex={
-                    interactionProps.onMainContentHover
+                    this.state.showPopoutsForResultBox === index
                         ? index +
                           this.props.results[day].pages.allIds.length +
-                          1
+                          1000
                         : index
                 }
                 bottom="10px"
@@ -557,12 +559,18 @@ export default class SearchResultsContainer extends React.Component<
                 order={order}
             >
                 <PageResult
+                    index={index}
                     activePage={this.props.activePage}
                     annotationsCache={this.props.annotationsCache}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={
                         this.props.listData.byId[this.props.selectedListId]
                             ?.localId
+                    }
+                    showPopoutsForResultBox={(show) =>
+                        this.setState({
+                            showPopoutsForResultBox: show,
+                        })
                     }
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
