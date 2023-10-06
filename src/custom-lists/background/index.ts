@@ -1,8 +1,8 @@
 import type Storex from '@worldbrain/storex'
 import fromPairs from 'lodash/fromPairs'
 import type { Windows, Tabs, Storage } from 'webextension-polyfill'
-import { isFullUrl } from '@worldbrain/memex-url-utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/utils'
 
 import CustomListStorage from './storage'
 import type { SearchIndex } from 'src/search'
