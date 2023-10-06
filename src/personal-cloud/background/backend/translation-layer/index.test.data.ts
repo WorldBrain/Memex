@@ -163,6 +163,7 @@ const LOCAL_LISTS_V24 = {
         createdAt: new Date(1619414286452),
         isDeletable: true,
         isNestable: true,
+        type: null,
     },
     second: {
         id: 1619414286456,
@@ -171,6 +172,7 @@ const LOCAL_LISTS_V24 = {
         createdAt: new Date(1619414286456),
         isDeletable: true,
         isNestable: true,
+        type: null,
     },
 }
 
@@ -1119,6 +1121,7 @@ export const REMOTE_TEST_DATA_V24 = {
             localId: LOCAL_TEST_DATA_V24.templates.first.id,
             code: LOCAL_TEST_DATA_V24.templates.first.code,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
+            outputFormat: 'markdown',
             user: TEST_USER.id,
             createdWhen: 561,
             updatedWhen: 561,
@@ -1130,6 +1133,7 @@ export const REMOTE_TEST_DATA_V24 = {
             localId: LOCAL_TEST_DATA_V24.templates.second.id,
             code: LOCAL_TEST_DATA_V24.templates.second.code,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
+            outputFormat: 'markdown',
             user: TEST_USER.id,
             createdWhen: 562,
             updatedWhen: 562,

@@ -14,6 +14,8 @@ import {
 } from './index.test.data'
 import {
     DataChangeType,
+    FingerprintSchemeType,
+    LocationSchemeType,
     PersonalDeviceType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
@@ -4991,6 +4993,23 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
+                const expectedSharedFingerprint = {
+                    id: expect.anything(),
+                    creator: TEST_USER.id,
+                    normalizedUrl:
+                        LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                    fingerprint: testLocators.third.fingerprint,
+                    fingerprintScheme: FingerprintSchemeType.PdfV1,
+                }
+                const expectedSharedLocator = {
+                    id: expect.anything(),
+                    creator: TEST_USER.id,
+                    locationScheme: LocationSchemeType.NormalizedUrlV1,
+                    normalizedUrl:
+                        LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                    originalUrl: testLocators.third.originalLocation,
+                }
+
                 // prettier-ignore
                 expect(
                     await getDatabaseContents([
@@ -5036,16 +5055,18 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentFingerprint: [
-                        expect.objectContaining({
-                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
-                            fingerprint: testLocators.third.fingerprint,
-                        }),
+                        expectedSharedFingerprint,
+                        {
+                            ...expectedSharedFingerprint,
+                            sharedList: expect.any(String),
+                        },
                     ],
                     sharedContentLocator: [
-                        expect.objectContaining({
-                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
-                            originalUrl: testLocators.third.originalLocation,
-                        }),
+                        expectedSharedLocator,
+                        {
+                            ...expectedSharedLocator,
+                            sharedList: expect.any(String),
+                        },
                     ],
                 })
 
@@ -5530,7 +5551,10 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: LOCAL_TEST_DATA_V24.followedList.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: {
+                    ...LOCAL_TEST_DATA_V24.followedList.first,
+                    type: null
+                 } },
             ], { skip: 2 })
             testSyncPushTrigger({ wasTriggered: true })
         })
@@ -5605,7 +5629,7 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'followedList', where: { sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId } },
-            ], { skip: 2 })
+            ], { skip: 3 })
             testSyncPushTrigger({ wasTriggered: true })
         })
     })
