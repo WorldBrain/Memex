@@ -1225,6 +1225,12 @@ export class AnnotationsSidebarContainer<
                                     disableWriteOps={
                                         this.state.hasListDataBeenManuallyPulled
                                     }
+                                    annotationsCache={
+                                        this.props.annotationsCache
+                                    }
+                                    pageListDataForCurrentPage={
+                                        this.state.pageListDataForCurrentPage
+                                    }
                                     onSpaceShare={() => {
                                         this.processEvent('createPageLink', {
                                             forceCreate: true,
