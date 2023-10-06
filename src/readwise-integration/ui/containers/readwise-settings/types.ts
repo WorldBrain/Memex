@@ -10,6 +10,8 @@ export interface ReadwiseSettingsState {
     apiKey?: string
     apiKeyEditable: boolean
     syncExistingNotes?: boolean
+    syncOnlyNotesWithHighlights?: boolean
+
     isFeatureAuthorized?: boolean
 }
 
@@ -21,6 +23,7 @@ export interface ReadwiseSettingsDependencies {
 
 export type ReadwiseSettingsEvent = UIEvent<{
     toggleSyncExistingNotes: null
+    toggleOnlySyncNotes: null
     setAPIKey: { key: string }
     saveAPIKey: null
     removeAPIKey: null

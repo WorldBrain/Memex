@@ -980,7 +980,9 @@ export async function main(
                 await inPageUI.removeTooltip()
                 await inPageUI.removeRibbon()
             } else {
-                await inPageUI.reloadComponent('tooltip')
+                if (await tooltipUtils.getTooltipState()) {
+                    await inPageUI.reloadComponent('tooltip')
+                }
                 await inPageUI.reloadRibbon()
             }
 

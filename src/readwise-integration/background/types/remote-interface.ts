@@ -17,6 +17,16 @@ export interface ReadwiseInterface<Role extends RemoteFunctionRole> {
         { validatedKey: string },
         void
     >
+    setOnlyHighlightsSetting: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { setting: boolean },
+        void
+    >
+    getOnlyHighlightsSetting: RemoteFunctionWithoutExtraArgs<
+        Role,
+        void,
+        boolean | null
+    >
     uploadAllAnnotations: RemoteFunctionWithoutExtraArgs<
         Role,
         {
