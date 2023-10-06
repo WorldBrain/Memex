@@ -37,6 +37,7 @@ import {
     InitSqlUsageParams,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import type { MockPushMessagingService } from 'src/tests/push-messaging'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -304,7 +305,11 @@ async function setup(options?: { withStorageHooks?: boolean }) {
         (await getSqlStorageMananager?.()) ?? serverStorage.manager
     serverIdCapturer.setup(serverStorageManager)
     storageHooksChangeWatcher.setUp({
-        getFunctionsConfig: () => ({}), // TODO: implement
+        getFunctionsConfig: () => ({
+            content_sharing: {
+                cloudflare_worker_credentials: 'fake-creds',
+            },
+        }),
         fetch: fakeFetch.fetch as any,
         captureException: async (err) => undefined, // TODO: implement
         serverStorageManager,
@@ -5630,6 +5635,188 @@ describe('Personal cloud translation layer', () => {
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'followedList', where: { sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId } },
             ], { skip: 3 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should remove every trace of a list and associated data on local delete', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup({ withStorageHooks: true })
+            const TEST_USER_2_ID = 'another-user@test.com'
+            await setups[0].backgroundModules.auth.options.userManagement.ensureUser(
+                { displayName: TEST_USER.displayName },
+                {
+                    type: 'user-reference',
+                    id: TEST_USER.id,
+                },
+            )
+            await setups[0].backgroundModules.auth.options.userManagement.ensureUser(
+                { displayName: TEST_USER_2_ID },
+                {
+                    type: 'user-reference',
+                    id: TEST_USER_2_ID,
+                },
+            )
+
+            // Set up the second device with a different user
+            await setups[1].authService.loginWithEmailAndPassword(
+                TEST_USER_2_ID,
+                'password',
+            )
+
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.first)
+            await setups[0].storageManager
+                .collection('pageListEntries')
+                .createObject(LOCAL_TEST_DATA_V24.pageListEntries.first)
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[0].storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject(
+                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                )
+            await setups[0].storageManager
+                .collection('annotationPrivacyLevels')
+                .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
+            await setups[0].storageManager
+                .collection('annotListEntries')
+                .createObject(LOCAL_TEST_DATA_V24.annotationListEntries.first)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const serverStorage = setups[0].serverStorage
+            await serverStorage.modules.activityFollows.storeFollow({
+                collection: 'sharedList',
+                userReference: { id: TEST_USER.id, type: 'user-reference' },
+                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+            })
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // Create key from owner then join with other device/user
+            const sharedListKeyId = 123
+            await setups[0].services.contentSharing.generateKeyLink({
+                key: { roleID: SharedListRoleID.ReadWrite },
+                listKeyReference: {
+                    type: 'shared-list-key-reference',
+                    id: sharedListKeyId,
+                },
+                listReference: {
+                    type: 'shared-list-reference',
+                    id: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                },
+            })
+            await setups[1].backgroundModules.contentSharing.options.backend.processListKey(
+                {
+                    keyString: sharedListKeyId as any,
+                    listId:
+                        LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                },
+            )
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    'sharedListRole',
+                    'sharedListRoleByUser',
+                    'sharedListEntry',
+                    'sharedAnnotation',
+                    'sharedAnnotationListEntry',
+                    'sharedListKey',
+                    'sharedList',
+                    'personalList',
+                    'personalListShare',
+                    'personalFollowedList',
+                    'personalListEntry',
+                    'personalAnnotationListEntry',
+                    'personalAnnotation',
+                ], {
+                    getWhere: getPersonalWhere,
+                }),
+            ).toEqual({
+                sharedListRole: [
+                    expect.objectContaining({
+                        roleID: SharedListRoleID.ReadWrite,
+                        sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                        user: TEST_USER_2_ID,
+                    }),
+                ],
+                sharedListRoleByUser: [
+                    expect.objectContaining({
+                        roleID: SharedListRoleID.ReadWrite,
+                        sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                        user: TEST_USER_2_ID,
+                    }),
+                ],
+                sharedListEntry: [
+                    expect.objectContaining({
+                        sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                        normalizedUrl: LOCAL_TEST_DATA_V24.pageListEntries.first.pageUrl
+                    }),
+                ],
+                sharedListKey: [
+                    expect.objectContaining({
+                        disabled: false,
+                        id: sharedListKeyId,
+                        roleID: SharedListRoleID.ReadWrite,
+                        sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                    }),
+                ],
+                sharedList: [
+                    expect.objectContaining({
+                        id: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                        title: LOCAL_TEST_DATA_V24.customLists.first.name,
+                    }),
+                ],
+                sharedAnnotation: [
+                    expect.objectContaining({
+                        id: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first.remoteId,
+                        comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                        normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.first.pageUrl,
+                    }),
+                ],
+                sharedAnnotationListEntry: [
+                    expect.objectContaining({
+                        sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                        sharedAnnotation: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first.remoteId,
+                        normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.first.pageUrl,
+                    }),
+                ],
+                personalList: [remoteData.personalList.first],
+                personalListShare: [remoteData.personalListShare.first],
+                personalListEntry: [remoteData.personalListEntry.first],
+                personalAnnotationListEntry: [remoteData.personalAnnotationListEntry.first],
+                personalAnnotation: [remoteData.personalAnnotation.first],
+                personalFollowedList: [
+                    {
+                        ...remoteData.personalFollowedList.first,
+                        createdByDevice: undefined, // This is created via a storage hook, thus no device
+                    },
+                ],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: {
+                    ...LOCAL_TEST_DATA_V24.followedList.first,
+                    type: null
+                 } },
+            ], { skip: 2 })
             testSyncPushTrigger({ wasTriggered: true })
         })
     })

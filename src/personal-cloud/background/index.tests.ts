@@ -406,7 +406,7 @@ export async function setupSyncBackgroundTest(
         )
         setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
         setup.backgroundModules.personalCloud.strictErrorReporting = true
-        await setup.authService.setUser({ ...TEST_USER })
+        setup.authService.setUser({ ...TEST_USER })
         await setup.backgroundModules.personalCloud.options.settingStore.set(
             'deviceId',
             i + 1,
