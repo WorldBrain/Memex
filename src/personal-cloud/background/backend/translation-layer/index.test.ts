@@ -5642,7 +5642,6 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                getPersonalWhere,
                 getDatabaseContents,
                 testDownload,
                 testSyncPushTrigger,
@@ -5661,12 +5660,6 @@ describe('Personal cloud translation layer', () => {
                     type: 'user-reference',
                     id: TEST_USER_2_ID,
                 },
-            )
-
-            // Set up the second device with a different user
-            await setups[1].authService.loginWithEmailAndPassword(
-                TEST_USER_2_ID,
-                'password',
             )
 
             await setups[0].storageManager
@@ -5697,14 +5690,11 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.annotationListEntries.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const serverStorage = setups[0].serverStorage
-            await serverStorage.modules.activityFollows.storeFollow({
-                collection: 'sharedList',
-                userReference: { id: TEST_USER.id, type: 'user-reference' },
-                objectId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
-            })
-
-            await setups[0].backgroundModules.personalCloud.waitForSync()
+            // Set up the second device with a different user
+            await setups[1].authService.loginWithEmailAndPassword(
+                TEST_USER_2_ID,
+                'password',
+            )
 
             // Create key from owner then join with other device/user
             const sharedListKeyId = 123
@@ -5727,8 +5717,36 @@ describe('Personal cloud translation layer', () => {
                 },
             )
 
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[1].backgroundModules.personalCloud.waitForSync()
+
+            // Add an annot to the shared list on the second user's device
+            await setups[1].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.first)
+            await setups[1].storageManager
+                .collection('pageListEntries')
+                .createObject(LOCAL_TEST_DATA_V24.pageListEntries.first)
+            await setups[1].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[1].storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject(
+                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                )
+            await setups[1].storageManager
+                .collection('annotationPrivacyLevels')
+                .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
+            await setups[1].storageManager
+                .collection('annotListEntries')
+                .createObject(LOCAL_TEST_DATA_V24.annotationListEntries.first)
+
+            await setups[1].backgroundModules.personalCloud.waitForSync()
+
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
 
+            // Assert shared* cloud data, pre-delete
             // prettier-ignore
             expect(
                 await getDatabaseContents([
@@ -5739,15 +5757,7 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotationListEntry',
                     'sharedListKey',
                     'sharedList',
-                    'personalList',
-                    'personalListShare',
-                    'personalFollowedList',
-                    'personalListEntry',
-                    'personalAnnotationListEntry',
-                    'personalAnnotation',
-                ], {
-                    getWhere: getPersonalWhere,
-                }),
+                ]),
             ).toEqual({
                 sharedListRole: [
                     expect.objectContaining({
@@ -5797,6 +5807,57 @@ describe('Personal cloud translation layer', () => {
                         normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.first.pageUrl,
                     }),
                 ],
+            })
+
+            // Assert user A (list owner)'s sync data, pre-delete
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    'personalList',
+                    'personalListShare',
+                    'personalFollowedList',
+                    'personalListEntry',
+                    'personalAnnotationListEntry',
+                    'personalAnnotation',
+                ], {
+                    getWhere: (collection) => {
+                        if (collection.startsWith('personal')) {
+                            return { user: TEST_USER.id }
+                        }
+                    },
+                }),
+            ).toEqual({
+                personalList: [remoteData.personalList.first],
+                personalListShare: [remoteData.personalListShare.first],
+                personalListEntry: [remoteData.personalListEntry.first],
+                personalAnnotationListEntry: [remoteData.personalAnnotationListEntry.first],
+                personalAnnotation: [remoteData.personalAnnotation.first],
+                personalFollowedList: [
+                    {
+                        ...remoteData.personalFollowedList.first,
+                        createdByDevice: undefined, // This is created via a storage hook, thus no device
+                    },
+                ],
+            })
+
+            // Assert user B (list joiner)'s sync data, pre-delete
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    'personalList',
+                    'personalListShare',
+                    'personalFollowedList',
+                    'personalListEntry',
+                    'personalAnnotationListEntry',
+                    'personalAnnotation',
+                ], {
+                    getWhere: (collection) => {
+                        if (collection.startsWith('personal')) {
+                            return { user: TEST_USER_2_ID }
+                        }
+                    },
+                }),
+            ).toEqual({
                 personalList: [remoteData.personalList.first],
                 personalListShare: [remoteData.personalListShare.first],
                 personalListEntry: [remoteData.personalListEntry.first],
