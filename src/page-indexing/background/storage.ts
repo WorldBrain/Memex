@@ -162,7 +162,6 @@ export default class PageStorage extends StorageModule {
         })
 
         if (await isPkmSyncEnabled()) {
-            console.log('pagedata', pageData)
             try {
                 let dataToSave
                 // if pdfs
@@ -170,7 +169,6 @@ export default class PageStorage extends StorageModule {
                     const urlToSync =
                         pageContentInfo[pageData.url]?.locators[0]
                             .originalLocation
-                    console.log('urlToSync', urlToSync)
                     dataToSave = {
                         pageUrl: urlToSync,
                         pageTitle: pageData.fullTitle,

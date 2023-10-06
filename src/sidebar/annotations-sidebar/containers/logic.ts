@@ -116,6 +116,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     imageSupport?: ImageSupportInterface<'caller'>
     pkmSyncBG?: PkmSyncInterface
     bgScriptBG?: RemoteBGScriptInterface
+    spacesBG?: SpacePickerDependencies['spacesBG']
 }
 
 type EventHandler<
@@ -318,6 +319,7 @@ export class SidebarContainerLogic extends UILogic<
             renameListErrorMessage: null,
             sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
+            pageListDataForCurrentPage: null,
         }
     }
 
@@ -3134,13 +3136,26 @@ export class SidebarContainerLogic extends UILogic<
             normalizeUrl(fullPageUrl),
         )
 
-        if (existingPageLink.length > 0) {
+        let listsOfPageData = null
+        for (const list of existingPageLink) {
+            let listData = await this.options.annotationsCache.lists.byId[list]
+
+            if (
+                listData.type === 'page-link' &&
+                (listData?.localId > listsOfPageData?.localId ||
+                    listsOfPageData == null)
+            ) {
+                listsOfPageData = listData
+            }
+        }
+
+        if (listsOfPageData) {
             this.emitMutation({
                 showSharePageTooltip: { $set: true },
             })
             this.emitMutation({
                 selectedListForShareMenu: {
-                    $set: existingPageLink[existingPageLink.length - 1],
+                    $set: listsOfPageData.unifiedId,
                 },
             })
             if (!event.forceCreate) {
@@ -3174,6 +3189,9 @@ export class SidebarContainerLogic extends UILogic<
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
             }
+            this.emitMutation({
+                pageListDataForCurrentPage: { $set: cacheListData },
+            })
             const { unifiedId } = this.options.annotationsCache.addList(
                 cacheListData,
             )
