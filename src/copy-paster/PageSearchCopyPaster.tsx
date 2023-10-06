@@ -6,6 +6,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 
 export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
     searchParams: BackgroundSearchParams
+    preventClosingBcEditState?: (state: boolean) => void
 }
 
 export default class PageSearchCopyPaster extends React.PureComponent<Props> {

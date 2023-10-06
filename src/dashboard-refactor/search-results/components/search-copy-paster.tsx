@@ -20,56 +20,73 @@ export interface Props {
     toggleCopyPaster?: React.MouseEventHandler
 }
 
-function renderCopyPaster(props: Props) {
-    const CopyPaster =
-        props.searchType === 'notes'
-            ? AnnotationSearchCopyPaster
-            : PageSearchCopyPaster
+class SearchCopyPaster extends React.Component<Props> {
+    copypasterButtonRef = React.createRef<HTMLDivElement>()
 
-    return (
-        <CopyPaster
-            searchParams={props.searchParams}
-            onClickOutside={props.hideCopyPaster}
-        />
-    )
-}
+    state = {
+        preventClosingBcEditState: false,
+    }
 
-function renderCopyPasterBox(props, copypasterButtonRef) {
-    if (props.isCopyPasterShown) {
+    renderCopyPaster() {
+        const CopyPaster =
+            this.props.searchType === 'notes'
+                ? AnnotationSearchCopyPaster
+                : PageSearchCopyPaster
+
         return (
-            <PopoutBox
-                placement={'bottom-end'}
-                offsetX={10}
-                closeComponent={props.toggleCopyPaster}
-                targetElementRef={copypasterButtonRef.current}
-            >
-                {renderCopyPaster(props)}
-            </PopoutBox>
+            <CopyPaster
+                searchParams={this.props.searchParams}
+                onClickOutside={this.props.hideCopyPaster}
+                preventClosingBcEditState={(state) =>
+                    this.setState({ preventClosingBcEditState: state })
+                }
+            />
         )
-    } else {
-        return null
+    }
+
+    renderCopyPasterBox() {
+        if (this.props.isCopyPasterShown) {
+            return (
+                <PopoutBox
+                    placement={'bottom'}
+                    offsetX={10}
+                    closeComponent={
+                        !this.state.preventClosingBcEditState &&
+                        this.props.toggleCopyPaster
+                    }
+                    targetElementRef={this.copypasterButtonRef.current}
+                >
+                    {this.renderCopyPaster()}
+                </PopoutBox>
+            )
+        } else {
+            return null
+        }
+    }
+
+    render() {
+        return (
+            <Container>
+                <TooltipBox
+                    tooltipText={'Copy Search Results'}
+                    placement="bottom"
+                >
+                    <Icon
+                        filePath={icons.copy}
+                        heightAndWidth="22px"
+                        onClick={this.props.toggleCopyPaster}
+                        active={this.props.isCopyPasterShown}
+                        padding={'6px'}
+                        containerRef={this.copypasterButtonRef}
+                    />
+                </TooltipBox>
+                {this.renderCopyPasterBox()}
+            </Container>
+        )
     }
 }
 
-export default function SearchCopyPaster(props: Props) {
-    const copypasterButtonRef = React.useRef<HTMLDivElement>(null)
-
-    return (
-        <Container>
-            <TooltipBox tooltipText={'Copy Search Results'} placement="bottom">
-                <Icon
-                    filePath={icons.copy}
-                    heightAndWidth="22px"
-                    onClick={props.toggleCopyPaster}
-                    active={props.isCopyPasterShown}
-                    padding={'6px'}
-                    containerRef={copypasterButtonRef}
-                />
-            </TooltipBox>
-            {renderCopyPasterBox(props, copypasterButtonRef)}
-        </Container>
-    )
-}
+export default SearchCopyPaster
 
 // TODO: inheirits from .nakedSquareButton
 
