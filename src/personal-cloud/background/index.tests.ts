@@ -290,8 +290,6 @@ export async function setupSyncBackgroundTest(
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
-    const userId = TEST_USER.id
-
     const translationLayerTestBackend =
         process.env.TRANSLATION_LAYER_TEST_BACKEND
     const serverStorage =
@@ -366,6 +364,10 @@ export async function setupSyncBackgroundTest(
             serverStorage,
             authService: authServices.auth,
         })
+        const getUserId = async () => {
+            const currentUser = await authServices.auth.getCurrentUser()
+            return currentUser?.id ?? null
+        }
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
@@ -377,7 +379,7 @@ export async function setupSyncBackgroundTest(
             },
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,
-            getUserId: async () => userId,
+            getUserId,
             getNow,
             useDownloadTranslationLayer:
                 options.useDownloadTranslationLayer ?? true,
@@ -388,8 +390,8 @@ export async function setupSyncBackgroundTest(
         })
         const personalCloudMediaBackend = new StorexPersonalCloudMediaBackend({
             getNow,
+            getUserId,
             view: cloudHub.getView(),
-            getUserId: async () => userId,
             storageManager: serverStorage.manager,
         })
 
@@ -434,7 +436,6 @@ export async function setupSyncBackgroundTest(
     }
 
     return {
-        userId,
         setups,
         sync,
         serverStorage,

@@ -264,7 +264,6 @@ async function setup(options?: { withStorageHooks?: boolean }) {
 
     const {
         setups,
-        userId,
         serverStorage,
         getSqlStorageMananager,
         getNow,
@@ -314,10 +313,12 @@ async function setup(options?: { withStorageHooks?: boolean }) {
         captureException: async (err) => undefined, // TODO: implement
         serverStorageManager,
         getSqlStorageMananager,
-        getCurrentUserReference: async () => ({
-            id: userId,
-            type: 'user-reference',
-        }),
+        getCurrentUserReference: async () => {
+            return {
+                id: TEST_USER.email,
+                type: 'user-reference',
+            }
+        },
         services: {
             activityStreams: setups[0].services.activityStreams,
         },
