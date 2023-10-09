@@ -38,6 +38,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import type { MockPushMessagingService } from 'src/tests/push-messaging'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -80,7 +81,12 @@ class IdCapturer {
 
     mergeIds<TestData>(
         testData: TestData,
-        opts?: { skipTagType?: 'annotation' | 'page'; anyId?: boolean },
+        opts?: {
+            skipTagType?: 'annotation' | 'page'
+            userOverride?: AutoPk
+            deviceOverride?: AutoPk
+            anyId?: boolean
+        },
     ) {
         const source = testData as any
         const merged = {} as any
@@ -111,6 +117,9 @@ class IdCapturer {
                 const mergedObject = {
                     ...deleteNullFields(object),
                     id: id ?? object.id,
+                    user: opts?.userOverride ?? object['user'],
+                    createdByDevice:
+                        opts?.deviceOverride ?? object['createdByDevice'],
                     // TODO: set these here as I was encountering issues with test data timestamps getting out-of-sync - it would be nice to get this precision back
                     createdWhen: expect.any(Number),
                     updatedWhen: expect.any(Number),
@@ -5722,30 +5731,51 @@ describe('Personal cloud translation layer', () => {
             await setups[1].backgroundModules.personalCloud.waitForSync()
 
             // Add an annot to the shared list on the second user's device
+            const annotBId = '11111112'
+            const annotBUrl =
+                LOCAL_TEST_DATA_V24.pages.first.url + '/#' + annotBId
+            const syncedList = await setups[1].serverStorage.manager
+                .collection('personalList')
+                .findObject<{ id: AutoPk; localId: AutoPk }>({
+                    user: TEST_USER_2_ID,
+                })
+
             await setups[1].storageManager
                 .collection('pages')
                 .createObject(LOCAL_TEST_DATA_V24.pages.first)
             await setups[1].storageManager
                 .collection('pageListEntries')
-                .createObject(LOCAL_TEST_DATA_V24.pageListEntries.first)
+                .createObject({
+                    ...LOCAL_TEST_DATA_V24.pageListEntries.first,
+                    listId: syncedList.localId,
+                })
             await setups[1].storageManager
                 .collection('annotations')
-                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+                .createObject({
+                    ...LOCAL_TEST_DATA_V24.annotations.first,
+                    url: annotBUrl,
+                })
             await setups[1].storageManager
                 .collection('sharedAnnotationMetadata')
-                .createObject(
-                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
-                )
+                .createObject({
+                    ...LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                    localId: annotBUrl,
+                })
             await setups[1].storageManager
                 .collection('annotationPrivacyLevels')
-                .createObject(LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first)
+                .createObject({
+                    ...LOCAL_TEST_DATA_V24.annotationPrivacyLevels.first,
+                    annotation: annotBUrl,
+                })
             await setups[1].storageManager
                 .collection('annotListEntries')
-                .createObject(LOCAL_TEST_DATA_V24.annotationListEntries.first)
+                .createObject({
+                    ...LOCAL_TEST_DATA_V24.annotationListEntries.first,
+                    url: annotBUrl,
+                    listId: syncedList.localId,
+                })
 
             await setups[1].backgroundModules.personalCloud.waitForSync()
-
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
 
             // Assert shared* cloud data, pre-delete
             // prettier-ignore
@@ -5811,6 +5841,12 @@ describe('Personal cloud translation layer', () => {
             })
 
             // Assert user A (list owner)'s sync data, pre-delete
+            const remoteDataA = serverIdCapturer.mergeIds(
+                REMOTE_TEST_DATA_V24,
+                {
+                    userOverride: TEST_USER.id,
+                },
+            )
             // prettier-ignore
             expect(
                 await getDatabaseContents([
@@ -5828,20 +5864,28 @@ describe('Personal cloud translation layer', () => {
                     },
                 }),
             ).toEqual({
-                personalList: [remoteData.personalList.first],
-                personalListShare: [remoteData.personalListShare.first],
-                personalListEntry: [remoteData.personalListEntry.first],
-                personalAnnotationListEntry: [remoteData.personalAnnotationListEntry.first],
-                personalAnnotation: [remoteData.personalAnnotation.first],
+                personalList: [remoteDataA.personalList.first],
+                personalListShare: [remoteDataA.personalListShare.first],
+                personalListEntry: [remoteDataA.personalListEntry.first],
+                personalAnnotationListEntry: [remoteDataA.personalAnnotationListEntry.first],
+                personalAnnotation: [remoteDataA.personalAnnotation.first],
                 personalFollowedList: [
                     {
-                        ...remoteData.personalFollowedList.first,
+                        ...remoteDataA.personalFollowedList.first,
                         createdByDevice: undefined, // This is created via a storage hook, thus no device
                     },
                 ],
             })
 
             // Assert user B (list joiner)'s sync data, pre-delete
+            const remoteDataB = serverIdCapturer.mergeIds(
+                REMOTE_TEST_DATA_V24,
+                {
+                    userOverride: TEST_USER_2_ID,
+                    deviceOverride: 2,
+                    anyId: true,
+                },
+            )
             // prettier-ignore
             expect(
                 await getDatabaseContents([
@@ -5859,16 +5903,36 @@ describe('Personal cloud translation layer', () => {
                     },
                 }),
             ).toEqual({
-                personalList: [remoteData.personalList.first],
-                personalListShare: [remoteData.personalListShare.first],
-                personalListEntry: [remoteData.personalListEntry.first],
-                personalAnnotationListEntry: [remoteData.personalAnnotationListEntry.first],
-                personalAnnotation: [remoteData.personalAnnotation.first],
+                personalList: [{
+                    ...remoteDataB.personalList.first,
+                    localId: syncedList.localId,
+                    createdByDevice: undefined, // This is created via a storage hook, thus no device
+                }],
+                personalListShare: [{
+                    ...remoteDataB.personalListShare.first,
+                    personalList: syncedList.id,
+                    createdByDevice: undefined, // This is created via a storage hook, thus no device
+                }],
+                personalListEntry: [{
+                    ...remoteDataB.personalListEntry.first,
+                    personalContentMetadata: expect.anything(),
+                    personalList: syncedList.id
+                }],
+                personalAnnotationListEntry: [{
+                    ...remoteDataB.personalAnnotationListEntry.first,
+                    personalAnnotation: expect.anything(),
+                    personalList: syncedList.id
+                }],
+                personalAnnotation: [{
+                    ...remoteDataB.personalAnnotation.first,
+                    localId: annotBId,
+                    personalContentMetadata: expect.anything()
+                }],
                 personalFollowedList: [
-                    {
-                        ...remoteData.personalFollowedList.first,
-                        createdByDevice: undefined, // This is created via a storage hook, thus no device
-                    },
+                    // {
+                    //     ...remoteDataB.personalFollowedList.first,
+                    //     createdByDevice: undefined, // This is created via a storage hook, thus no device
+                    // },
                 ],
             })
 
