@@ -14,7 +14,6 @@ import { ALLOWED_STORAGE_MODULE_OPERATIONS } from '@worldbrain/memex-common/lib/
 import { createClientApplicationLayer } from '@worldbrain/memex-common/lib/firebase-backend/app-layer/client'
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
-import { createOperationLoggingMiddleware } from 'src/storage/middleware'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import { ServerStorage } from './types'
 import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
@@ -23,10 +22,6 @@ import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follow
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
 import { DiscordRetroSyncStorage } from '@worldbrain/memex-common/lib/discord/queue'
 import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
-import {
-    ChangeWatchMiddleware,
-    ChangeWatchMiddlewareSettings,
-} from '@worldbrain/storex-middleware-change-watcher'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import SlackStorage from '@worldbrain/memex-common/lib/slack/storage'
 import { SlackRetroSyncStorage } from '@worldbrain/memex-common/lib/slack/storage/retro-sync'
@@ -34,7 +29,7 @@ import { SlackRetroSyncStorage } from '@worldbrain/memex-common/lib/slack/storag
 let shouldLogOperations = false
 
 export function createServerStorageManager(options?: {
-    changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
+    setupMiddleware?(manager: StorageManager): StorageMiddleware[]
 }) {
     const firebase = getFirebase()
     const serverStorageBackend = new FirestoreStorageBackend({
@@ -50,10 +45,7 @@ export async function createServerStorage(
         autoPkType: 'string' | 'number'
         sharedSyncLog?: SharedSyncLogStorage
         skipApplicationLayer?: boolean
-        changeWatchSettings?: Omit<
-            ChangeWatchMiddlewareSettings,
-            'storageManager'
-        >
+        middleware?: StorageMiddleware[]
     },
 ): Promise<ServerStorage> {
     try {
@@ -137,7 +129,7 @@ export async function createServerStorage(
 }
 
 export function createMemoryServerStorage(options?: {
-    changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
+    setupMiddleware?(manager: StorageManager): StorageMiddleware[]
 }): Promise<ServerStorage> {
     const backend = new DexieStorageBackend({
         dbName: 'server',
@@ -156,7 +148,7 @@ export async function createTestServerStorage(options?: {
     firebaseProjectId?: string
     withTestUser?: { uid: string } | boolean
     superuser?: boolean
-    changeWatchSettings?: Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
+    setupMiddleware?: (storageMan: StorageManager) => StorageMiddleware[]
 }): Promise<ServerStorage> {
     if (process.env.TEST_SERVER_STORAGE === 'firebase-emulator') {
         const firebaseTesting = require('@firebase/testing')
@@ -210,40 +202,15 @@ export async function createTestServerStorage(options?: {
 function createStorageManager(
     backend: StorageBackend,
     options?: {
-        changeWatchSettings?: Omit<
-            ChangeWatchMiddlewareSettings,
-            'storageManager'
-        >
+        setupMiddleware?(manager: StorageManager): StorageMiddleware[]
     },
 ) {
     const storageManager = new StorageManager({ backend })
-    setupServerStorageManagerMiddleware(storageManager, options)
-    return storageManager
-}
-
-export function setupServerStorageManagerMiddleware(
-    storageManager: StorageManager,
-    options?: {
-        changeWatchSettings?: Omit<
-            ChangeWatchMiddlewareSettings,
-            'storageManager'
-        >
-    },
-) {
-    const middleware: StorageMiddleware[] = [
-        createOperationLoggingMiddleware({
-            shouldLog: () => shouldLogOperations,
-        }),
-    ]
-    if (options?.changeWatchSettings) {
-        middleware.push(
-            new ChangeWatchMiddleware({
-                ...options.changeWatchSettings,
-                storageManager,
-            }),
-        )
+    const middleware = options?.setupMiddleware?.(storageManager) ?? []
+    if (middleware.length) {
+        storageManager.setMiddleware(middleware)
     }
-    storageManager.setMiddleware(middleware)
+    return storageManager
 }
 
 function getFirebaseOperationExecuter(storageManager: StorageManager) {

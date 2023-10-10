@@ -276,9 +276,8 @@ export async function setupSyncBackgroundTest(
         deviceCount: number
         debugStorageOperations?: boolean
         superuser?: boolean
-        serverChangeWatchSettings?: Omit<
-            ChangeWatchMiddlewareSettings,
-            'storageManager'
+        serverChangeWatchSettings?: Array<
+            Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
         >
         sqlChangeWatchSettings?: Omit<
             ChangeWatchMiddlewareSettings,
@@ -292,15 +291,27 @@ export async function setupSyncBackgroundTest(
 ) {
     const translationLayerTestBackend =
         process.env.TRANSLATION_LAYER_TEST_BACKEND
+
+    const changeWatchSettings = !!translationLayerTestBackend
+        ? options.serverChangeWatchSettings
+        : (options.serverChangeWatchSettings ?? []).map((settings) =>
+              mergeChangeWatchSettings([
+                  settings,
+                  options.sqlChangeWatchSettings,
+              ]),
+          )
+
     const serverStorage =
         (await options.testInstance?.getSetupOptions?.())?.serverStorage ??
         (await createTestServerStorage({
-            changeWatchSettings: !!translationLayerTestBackend
-                ? options.serverChangeWatchSettings
-                : mergeChangeWatchSettings([
-                      options.serverChangeWatchSettings,
-                      options.sqlChangeWatchSettings,
-                  ]),
+            setupMiddleware: (storageManager) =>
+                changeWatchSettings.map(
+                    (settings) =>
+                        new ChangeWatchMiddleware({
+                            ...settings,
+                            storageManager,
+                        }),
+                ),
         }))
     const cloudHub = new PersonalCloudHub()
 

@@ -39,6 +39,7 @@ import {
 import type { MockPushMessagingService } from 'src/tests/push-messaging'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher/lib/index'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -236,9 +237,13 @@ function blockStats(params: { userId: number | string; usedBlocks: number }) {
     }
 }
 
+const DEFAULT_DEVICE_USERS = [TEST_USER.email, TEST_USER.email]
+
 async function setup(options?: {
+    /** Denotes whether or not to run storage hooks. */
     withStorageHooks?: boolean
-    storageHookUserId?: AutoPk
+    /** Length of the array is # of devices, with each value being the user of that indices device. */
+    deviceUsers?: AutoPk[]
 }) {
     const serverIdCapturer = new IdCapturer({
         postprocesessMerge: (params) => {
@@ -272,7 +277,27 @@ async function setup(options?: {
     })
 
     const fakeFetch = new FakeFetch()
-    const storageHooksChangeWatcher = new StorageHooksChangeWatcher()
+    const deviceUsers = options?.deviceUsers ?? DEFAULT_DEVICE_USERS
+    const deviceUsersSet = new Set(deviceUsers)
+    if (!deviceUsers.length) {
+        throw new Error('Sync test must have at least one device')
+    }
+    const storageHooksChangeWatchers = new Map(
+        [...deviceUsersSet].map((user) => [
+            user,
+            new StorageHooksChangeWatcher(),
+        ]),
+    )
+
+    const serverChangeWatchSettings: ChangeWatchMiddlewareSettings[] = options?.withStorageHooks
+        ? [...storageHooksChangeWatchers.values()]
+        : [...deviceUsersSet].map(() => ({
+              shouldWatchCollection: (collection) =>
+                  collection.startsWith('personal'),
+              postprocessOperation: async (context) => {
+                  await serverIdCapturer.handlePostStorageChange(context)
+              },
+          }))
 
     const {
         setups,
@@ -280,26 +305,16 @@ async function setup(options?: {
         getSqlStorageMananager,
         getNow,
     } = await setupSyncBackgroundTest({
-        deviceCount: 2,
-        serverChangeWatchSettings: options?.withStorageHooks
-            ? storageHooksChangeWatcher
-            : {
-                  shouldWatchCollection: (collection) =>
-                      collection.startsWith('personal'),
-                  postprocessOperation: async (context) => {
-                      await serverIdCapturer.handlePostStorageChange(context)
-                  },
-              },
+        deviceCount: deviceUsers.length,
+        serverChangeWatchSettings,
     })
 
-    await setups[0].authService.loginWithEmailAndPassword(
-        TEST_USER.email,
-        'password',
-    )
-    await setups[1].authService.loginWithEmailAndPassword(
-        TEST_USER.email,
-        'password',
-    )
+    for (let deviceIndex = 0; deviceIndex++; deviceIndex < deviceUsers.length) {
+        await setups[deviceIndex].authService.loginWithEmailAndPassword(
+            deviceUsers[deviceIndex].toString(),
+            'password',
+        )
+    }
 
     let sqlUserId: number | string | undefined
     if (getSqlStorageMananager) {
@@ -315,24 +330,26 @@ async function setup(options?: {
     const serverStorageManager =
         (await getSqlStorageMananager?.()) ?? serverStorage.manager
     serverIdCapturer.setup(serverStorageManager)
-    storageHooksChangeWatcher.setUp({
-        getFunctionsConfig: () => ({
-            content_sharing: {
-                cloudflare_worker_credentials: 'fake-creds',
+    for (const user of deviceUsersSet) {
+        storageHooksChangeWatchers.get(user).setUp({
+            getFunctionsConfig: () => ({
+                content_sharing: {
+                    cloudflare_worker_credentials: 'fake-creds',
+                },
+            }),
+            fetch: fakeFetch.fetch as any,
+            captureException: async (err) => undefined, // TODO: implement
+            serverStorageManager,
+            getSqlStorageMananager,
+            getCurrentUserReference: async () => ({
+                id: user,
+                type: 'user-reference',
+            }),
+            services: {
+                activityStreams: setups[0].services.activityStreams,
             },
-        }),
-        fetch: fakeFetch.fetch as any,
-        captureException: async (err) => undefined, // TODO: implement
-        serverStorageManager,
-        getSqlStorageMananager,
-        getCurrentUserReference: async () => ({
-            id: options?.storageHookUserId ?? TEST_USER.id,
-            type: 'user-reference',
-        }),
-        services: {
-            activityStreams: setups[0].services.activityStreams,
-        },
-    })
+        })
+    }
 
     const getPersonalWhere = (collection: string) => {
         if (collection.startsWith('personal')) {
@@ -5662,7 +5679,7 @@ describe('Personal cloud translation layer', () => {
                 testSyncPushTrigger,
             } = await setup({
                 withStorageHooks: true,
-                storageHookUserId: TEST_USER_2_ID,
+                deviceUsers: [TEST_USER.email, TEST_USER_2_ID],
             })
             await setups[0].backgroundModules.auth.options.userManagement.ensureUser(
                 { displayName: TEST_USER.displayName },
