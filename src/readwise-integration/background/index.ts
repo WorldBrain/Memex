@@ -181,7 +181,6 @@ export class ReadwiseBackground {
                             !annotation.body &&
                             (await this.getOnlyHighlightsSetting())
                         ) {
-                            console.log('this happeend')
                             return null
                         }
 

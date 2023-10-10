@@ -38,7 +38,6 @@ export default class ReadwiseSettingsLogic extends UILogic<
         await loadInitial<ReadwiseSettingsState>(this, async () => {
             const apiKey = await this.dependencies.readwise.getAPIKey()
             const onlyHighlightSyncSetting = await this.dependencies.readwise.getOnlyHighlightsSetting()
-            console.log('onlyHighlightSyncSetting', onlyHighlightSyncSetting)
             const isFeatureAuthorized = await this.dependencies.checkFeatureAuthorized()
             this.emitMutation({
                 apiKey: { $set: apiKey },
