@@ -5936,6 +5936,42 @@ describe('Personal cloud translation layer', () => {
                 ],
             })
 
+            // Perform the list delete on the first device (owner)
+            setups[0].backgroundModules.personalCloud.actionQueue.pause()
+            await setups[0].backgroundModules.contentSharing.deleteListAndAllAssociatedData(
+                { localListId: LOCAL_TEST_DATA_V24.customLists.first.id },
+            )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[1].backgroundModules.personalCloud.waitForSync()
+
+            // Assert shared* cloud data, post-delete
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    'sharedListRole',
+                    'sharedListRoleByUser',
+                    'sharedListEntry',
+                    'sharedAnnotation',
+                    'sharedAnnotationListEntry',
+                    'sharedListKey',
+                    'sharedList',
+                ]),
+            ).toEqual({
+                sharedListRole: [],
+                sharedListRoleByUser: [],
+                sharedListEntry: [],
+                sharedListKey: [],
+                sharedList: [],
+                sharedAnnotation: [
+                    expect.objectContaining({
+                        id: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first.remoteId,
+                        comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                        normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.first.pageUrl,
+                    }),
+                ],
+                sharedAnnotationListEntry: [],
+            })
+
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: {
