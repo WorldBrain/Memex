@@ -309,7 +309,7 @@ async function setup(options?: {
         serverChangeWatchSettings,
     })
 
-    for (let deviceIndex = 0; deviceIndex++; deviceIndex < deviceUsers.length) {
+    for (let deviceIndex = 0; deviceIndex < deviceUsers.length; deviceIndex++) {
         await setups[deviceIndex].authService.loginWithEmailAndPassword(
             deviceUsers[deviceIndex].toString(),
             'password',
@@ -5724,12 +5724,6 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.annotationListEntries.first)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            // Set up the second device with a different user
-            await setups[1].authService.loginWithEmailAndPassword(
-                TEST_USER_2_ID,
-                'password',
-            )
-
             // Create key from owner then join with other device/user
             const sharedListKeyId = 123
             await setups[0].services.contentSharing.generateKeyLink({
@@ -5894,10 +5888,11 @@ describe('Personal cloud translation layer', () => {
                 personalAnnotationListEntry: [remoteDataA.personalAnnotationListEntry.first],
                 personalAnnotation: [remoteDataA.personalAnnotation.first],
                 personalFollowedList: [
-                    // {
-                    //     ...remoteDataA.personalFollowedList.first,
-                    //     createdByDevice: undefined, // This is created via a storage hook, thus no device
-                    // },
+                    {
+                        ...remoteDataA.personalFollowedList.first,
+                        createdByDevice: undefined, // This is created via a storage hook, thus no device
+                        id: expect.anything(),
+                    },
                 ],
             })
 
@@ -5951,19 +5946,17 @@ describe('Personal cloud translation layer', () => {
                     ...remoteDataB.personalAnnotation.first,
                     localId: annotBId,
                     personalContentMetadata: expect.anything()
-                },
-                expect.anything(), // TODO: This is something to do with the sharedAnnotation create hook
-                ],
+                }],
                 personalFollowedList: [
                     {
                         ...remoteDataB.personalFollowedList.first,
                         createdByDevice: undefined, // This is created via a storage hook, thus no device
+                        id: expect.anything(),
                     },
                 ],
             })
 
             // Perform the list delete on the first device (owner)
-            setups[0].backgroundModules.personalCloud.actionQueue.pause()
             await setups[0].backgroundModules.contentSharing.deleteListAndAllAssociatedData(
                 { localListId: LOCAL_TEST_DATA_V24.customLists.first.id },
             )
@@ -6046,7 +6039,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'customLists', where: {
                     id: syncedList.localId,
                  } },
-            ], { skip: 4, deviceIndex: 1, userId: TEST_USER_2_ID, queryResultLimit: 1000 })
+            ], { skip: 0, deviceIndex: 1, userId: TEST_USER_2_ID, queryResultLimit: 1000 })
 
             // Assert user B (list joiner)'s list data has also been deleted
             // prettier-ignore
@@ -6074,15 +6067,8 @@ describe('Personal cloud translation layer', () => {
                     ...remoteDataB.personalAnnotation.first,
                     localId: annotBId,
                     personalContentMetadata: expect.anything()
-                },
-                expect.anything(), // TODO: This is something to do with the sharedAnnotation create hook
-                ],
-                personalFollowedList: [
-                    // {
-                    //     ...remoteDataB.personalFollowedList.first,
-                    //     createdByDevice: undefined, // This is created via a storage hook, thus no device
-                    // },
-                ],
+                }],
+                personalFollowedList: [],
             })
 
             testSyncPushTrigger({ wasTriggered: true })
