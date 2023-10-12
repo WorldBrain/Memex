@@ -31,6 +31,7 @@ export interface SpacePickerState {
     contextMenuPositionX: number
     contextMenuPositionY: number
     contextMenuListId: number | null
+    editMenuListId: number | null
     loadState: TaskState
     renameListErrorMessage: string | null
     allTabsButtonPressed?: string
@@ -58,6 +59,7 @@ export type SpacePickerEvent = UIEvent<{
         annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
     }
     toggleEntryContextMenu: { listId: number }
+    toggleEntryEditMenu: { listId: number }
     openListInWebUI: { unifiedListId: UnifiedList['unifiedId'] }
     updateContextMenuPosition: { x?: number; y?: number }
     setListPrivacy: { listId: number; isPrivate: boolean }

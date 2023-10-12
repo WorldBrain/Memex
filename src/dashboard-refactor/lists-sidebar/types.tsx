@@ -20,6 +20,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     editingListId?: string
     selectedListId: string | null
     showMoreMenuListId?: string
+    editMenuListId?: string
     isSidebarToggleHovered?: boolean
     hasFeedActivity: boolean
     isSidebarLocked: boolean
@@ -56,6 +57,7 @@ export type Events = UIEvent<{
     setEditingListId: { listId: string }
     setSelectedListId: { listId: string }
     setShowMoreMenuListId: { listId: string }
+    setEditMenuListId: { listId: string }
     dropPageOnListItem: { listId: string; dataTransfer: DataTransfer }
     handleListShare: {
         listId: string

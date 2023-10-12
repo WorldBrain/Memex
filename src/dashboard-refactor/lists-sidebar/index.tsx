@@ -10,6 +10,9 @@ import ListsSidebarSearchBar, {
 import SpaceContextMenuBtn, {
     Props as SpaceContextMenuBtnProps,
 } from './components/space-context-menu-btn'
+import SpaceEditMenuBtn, {
+    Props as SpaceEditMenuBtnProps,
+} from './components/space-edit-menu-btn'
 import DropTargetSidebarItem from './components/drop-target-sidebar-item'
 import FollowedListSidebarItem from './components/followed-list-sidebar-item'
 import StaticSidebarItem from './components/static-sidebar-item'
@@ -38,6 +41,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
         SpaceContextMenuBtnProps,
         'isMenuDisplayed' | 'errorMessage' | 'listData' | 'isCreator'
     >
+    initEditMenuBtnProps: (listId: string) => SpaceEditMenuBtnProps
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup
     joinedListsGroup: ListGroup
@@ -145,7 +149,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 dropReceivingState={this.props.initDropReceivingState(
                                     list.unifiedId,
                                 )}
-                                isCollaborative={list.remoteId != null}
+                                isPrivate={list.isPrivate}
+                                areAnyMenusDisplayed={
+                                    this.props.showMoreMenuListId ===
+                                        list.unifiedId ||
+                                    this.props.editMenuListId === list.unifiedId
+                                }
                                 renderRightSideIcon={() => (
                                     <SpaceContextMenuBtn
                                         {...this.props.initContextMenuBtnProps(
@@ -158,6 +167,31 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         }
                                         isMenuDisplayed={
                                             this.props.showMoreMenuListId ===
+                                            list.unifiedId
+                                        }
+                                        errorMessage={
+                                            this.props.editListErrorMessage
+                                        }
+                                        onConfirmSpaceNameEdit={(newName) => {
+                                            this.props.onConfirmListEdit(
+                                                list.unifiedId,
+                                                newName,
+                                            )
+                                        }}
+                                    />
+                                )}
+                                renderEditIcon={() => (
+                                    <SpaceEditMenuBtn
+                                        {...this.props.initContextMenuBtnProps(
+                                            list.unifiedId,
+                                        )}
+                                        listData={list}
+                                        isCreator={
+                                            list.creator?.id ===
+                                            this.props.currentUser?.id
+                                        }
+                                        isMenuDisplayed={
+                                            this.props.editMenuListId ===
                                             list.unifiedId
                                         }
                                         errorMessage={
@@ -209,7 +243,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 dropReceivingState={this.props.initDropReceivingState(
                                     list.unifiedId,
                                 )}
-                                isCollaborative
+                                isPrivate
                             />
                         ))}
                     </ListsSidebarGroup>

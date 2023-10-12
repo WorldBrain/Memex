@@ -2,24 +2,23 @@ import React, { PureComponent } from 'react'
 
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import SpaceContextMenu, {
-    Props as SpaceContextMenuProps,
-} from 'src/custom-lists/ui/space-context-menu'
+import SpaceEditMenu, {
+    Props as SpaceEditMenuProps,
+} from 'src/custom-lists/ui/space-edit-menu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
-export interface Props extends Omit<SpaceContextMenuProps, 'copyToClipboard'> {
+export interface Props extends Omit<SpaceEditMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean
-    toggleMenu: React.MouseEventHandler
     toggleEditMenu: React.MouseEventHandler
 }
 
-export default class SpaceContextMenuButton extends PureComponent<Props> {
-    private spaceContextMenuButton = React.createRef<HTMLInputElement>()
-    private contextMenuRef: React.RefObject<SpaceContextMenu>
+export default class SpaceEditMenuBtn extends PureComponent<Props> {
+    private spaceEditMenuButton = React.createRef<HTMLInputElement>()
+    private contextMenuRef: React.RefObject<SpaceEditMenu>
 
-    private toggleMenu = (e) => {
-        this.props.toggleMenu(e)
+    private toggleEditMenu = (e) => {
+        this.props.toggleEditMenu(e)
         e.stopPropagation()
 
         return
@@ -32,18 +31,18 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
 
         return (
             <PopoutBox
-                targetElementRef={this.spaceContextMenuButton.current}
+                targetElementRef={this.spaceEditMenuButton.current}
                 placement={'right-start'}
                 offsetX={10}
                 offsetY={-10}
                 closeComponent={(e) => {
-                    this.toggleMenu(e)
+                    this.toggleEditMenu(e)
                     this.props.onCancelEdit()
                 }}
                 strategy={'fixed'}
                 width={'300px'}
             >
-                <SpaceContextMenu
+                <SpaceEditMenu
                     ref={this.contextMenuRef}
                     {...this.props}
                     {...this.state}
@@ -56,16 +55,16 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
         return (
             <>
                 <TooltipBox
-                    tooltipText={'Share Space'}
+                    tooltipText={'Edit Space'}
                     placement={'bottom'}
                     strategy={'fixed'}
                 >
                     <Icon
-                        onClick={(e) => this.toggleMenu(e)}
+                        onClick={(e) => this.toggleEditMenu(e)}
                         heightAndWidth="14px"
-                        filePath={icons.invite}
+                        filePath={icons.edit}
                         active={this.props.isMenuDisplayed}
-                        containerRef={this.spaceContextMenuButton}
+                        containerRef={this.spaceEditMenuButton}
                     />
                 </TooltipBox>
                 {this.renderContextMenu()}

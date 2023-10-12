@@ -450,6 +450,14 @@ export default class SpacePickerLogic extends UILogic<
                 : event.listId
         this.emitMutation({ contextMenuListId: { $set: nextListId } })
     }
+    toggleEntryEditMenu: EventHandler<'toggleEntryEditMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        const nextListId =
+            previousState.editMenuListId === event.listId ? null : event.listId
+        this.emitMutation({ editMenuListId: { $set: nextListId } })
+    }
 
     updateContextMenuPosition: EventHandler<
         'updateContextMenuPosition'

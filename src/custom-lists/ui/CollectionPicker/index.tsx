@@ -26,6 +26,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
+import SpaceEditMenu from 'src/custom-lists/ui/space-edit-menu'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
@@ -285,7 +286,18 @@ class SpacePicker extends StatefulUIElement<
                               })
                         : undefined
                 }
+                onEditMenuBtnPress={
+                    entry.creator?.id === this.state.currentUser?.id
+                        ? () =>
+                              this.processEvent('toggleEntryEditMenu', {
+                                  listId: entry.localId,
+                              })
+                        : undefined
+                }
                 actOnAllTooltipText="Add all tabs in window to Space"
+                shareState={
+                    entry?.isPrivate ?? 'private' ? 'private' : 'shared'
+                }
                 {...entry}
             />
         </EntryRowContainer>
@@ -384,6 +396,70 @@ class SpacePicker extends StatefulUIElement<
                         )}
                     </PrimaryActionBox>
                     <SpaceContextMenu
+                        loadOwnershipData
+                        isCreator={
+                            list.creator?.id === this.state.currentUser?.id
+                        }
+                        listData={list}
+                        ref={this.contextMenuRef}
+                        contentSharingBG={this.props.contentSharingBG}
+                        analyticsBG={this.props.analyticsBG}
+                        spacesBG={this.props.spacesBG}
+                        onDeleteSpaceConfirm={() =>
+                            this.processEvent('deleteList', {
+                                listId: list.localId,
+                            })
+                        }
+                        errorMessage={this.state.renameListErrorMessage}
+                        onSetSpacePrivate={(isPrivate) =>
+                            this.processEvent('setListPrivacy', {
+                                listId: list.localId,
+                                isPrivate,
+                            })
+                        }
+                        onConfirmSpaceNameEdit={(name) => {
+                            this.processEvent('renameList', {
+                                listId: list.localId,
+                                name,
+                            })
+                        }}
+                        onCancelEdit={this.handleSpaceContextMenuClose(
+                            list.localId,
+                        )}
+                        onSpaceShare={(
+                            remoteListId,
+                            annotationLocalToRemoteIdsDict,
+                        ) =>
+                            this.processEvent('setListRemoteId', {
+                                annotationLocalToRemoteIdsDict,
+                                localListId: list.localId,
+                                remoteListId,
+                            })
+                        }
+                    />
+                </>
+            )
+        }
+        if (this.state.editMenuListId != null) {
+            const list = this.props.annotationsCache.getListByLocalId(
+                this.state.editMenuListId,
+            )
+            return (
+                <>
+                    <PrimaryActionBox>
+                        <PrimaryAction
+                            type="tertiary"
+                            size="small"
+                            label="Go back"
+                            icon="arrowLeft"
+                            onClick={async () =>
+                                await this.processEvent('toggleEntryEditMenu', {
+                                    listId: list.localId,
+                                })
+                            }
+                        />
+                    </PrimaryActionBox>
+                    <SpaceEditMenu
                         loadOwnershipData
                         isCreator={
                             list.creator?.id === this.state.currentUser?.id

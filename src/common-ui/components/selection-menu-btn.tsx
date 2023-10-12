@@ -34,7 +34,7 @@ interface State {
     selected: number
 }
 
-export class DropdownMenuBtn extends React.PureComponent<Props, State> {
+export class SelectionMenuBtn extends React.PureComponent<Props, State> {
     static defaultProps: Partial<Props> = { initSelectedIndex: 0 }
 
     state: State = {

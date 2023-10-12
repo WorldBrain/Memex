@@ -9,9 +9,9 @@ import {
     AnnotationsSorter,
 } from '../sorting'
 import {
-    DropdownMenuBtn,
+    SelectionMenuBtn,
     MenuItemProps,
-} from 'src/common-ui/components/dropdown-menu-btn'
+} from 'src/common-ui/components/selection-menu-btn'
 
 interface SortingMenuItemProps extends MenuItemProps {
     sortingFn: AnnotationsSorter
@@ -45,11 +45,11 @@ export class SortingDropdownMenuBtn extends React.PureComponent<Props> {
         return (
             <SortingContainer>
                 {/* <SortingTitle>Sort Notes</SortingTitle> */}
-                <DropdownMenuBtn
+                <SelectionMenuBtn
                     onMenuItemClick={this.props.onMenuItemClick}
                     menuItems={this.props.menuItems}
                     theme={{ leftMenuOffset: '35px' }}
-                    btnId="DropdownMenuBtn"
+                    btnId="SelectionMenuBtn"
                     keepSelectedState
                     onClickOutside={this.props.onClickOutSide}
                 />

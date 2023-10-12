@@ -3606,6 +3606,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+    setEditMenuListId: EventHandler<'setEditMenuListId'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listIdToSet =
+            previousState.listsSidebar.editMenuListId === event.listId
+                ? undefined
+                : event.listId
+
+        this.emitMutation({
+            listsSidebar: {
+                editMenuListId: { $set: listIdToSet },
+                editingListId: { $set: listIdToSet },
+            },
+        })
+    }
 
     setDeletingListId: EventHandler<'setDeletingListId'> = async ({
         event,

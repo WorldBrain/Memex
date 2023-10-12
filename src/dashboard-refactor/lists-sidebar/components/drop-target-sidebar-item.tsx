@@ -35,6 +35,9 @@ const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
             }
             return props.renderRightSideIcon?.() ?? null
         }}
+        renderEditIcon={() => {
+            return props.renderEditIcon?.() ?? null
+        }}
     />
 )
 
