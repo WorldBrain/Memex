@@ -1,5 +1,4 @@
 import 'core-js'
-import hexToRgb from 'hex-to-rgb'
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
@@ -93,6 +92,9 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import { theme } from 'src/common-ui/components/design-library/theme'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -206,6 +208,7 @@ export async function main(
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
+    const imageSupport = runInBackground()
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
@@ -246,20 +249,27 @@ export async function main(
     })
 
     const highlightRenderer = new HighlightRenderer({
+        getDocument: () => document,
+        icons: (iconName) => theme({ variant: 'dark' }).icons[iconName],
         captureException,
         getUndoHistory: async () => {
             const storage = await browser.storage.local.get(UNDO_HISTORY)
             return storage[UNDO_HISTORY] ?? []
         },
+        createHighlight: async (
+            createHighlightselection,
+            shouldShare,
+            drawRectangle,
+        ) => {
+            annotationsFunctions.createHighlight()(null, false)
+        },
         setUndoHistory: async (undoHistory) =>
             browser.storage.local.set({
                 [UNDO_HISTORY]: undoHistory,
             }),
-        getHighlightColorRGB: async () => {
+        getHighlightColor: async () => {
             const storage = await browser.storage.local.get(HIGHLIGHT_COLOR_KEY)
-            return hexToRgb(
-                storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR,
-            )
+            return storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR
         },
         onHighlightColorChange: (cb) => {
             browser.storage.onChanged.addListener((changes) => {
@@ -273,7 +283,7 @@ export async function main(
                 unifiedId: unifiedAnnotationId.toString(),
             })
         },
-        scheduleAnnotationCreation: (data) => {
+        scheduleAnnotationCreation: async (data) => {
             const localId = generateAnnotationUrl({
                 pageUrl: data.fullPageUrl,
                 now: () => data.createdWhen,
@@ -320,6 +330,14 @@ export async function main(
             })
 
             const createPromise = (async () => {
+                const bodyForSaving = await processCommentForImageUpload(
+                    data.body,
+                    data.fullPageUrl,
+                    localId,
+                    imageSupport,
+                    false,
+                )
+
                 const {
                     savePromise,
                     remoteAnnotationId,
@@ -338,7 +356,7 @@ export async function main(
                     annotationData: {
                         localId,
                         localListIds,
-                        body: data.body,
+                        body: bodyForSaving,
                         comment: data.comment,
                         selector: data.selector,
                         fullPageUrl: data.fullPageUrl,
@@ -359,7 +377,11 @@ export async function main(
                 }
                 await savePromise
             })()
-            return { annotationId: unifiedId, localId: localId, createPromise }
+            return {
+                annotationId: unifiedId as AutoPk,
+                localId: localId,
+                createPromise,
+            }
         },
     })
 
@@ -405,7 +427,12 @@ export async function main(
             .then((annotations) => annotations.length > 0))
     await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
-    async function saveHighlight(shouldShare: boolean): Promise<AutoPk> {
+    async function saveHighlight(
+        shouldShare: boolean,
+        screenshotAnchor?,
+        screenshotImage?,
+        imageSupport?,
+    ): Promise<AutoPk> {
         let highlightId: AutoPk
         try {
             highlightId = await highlightRenderer.saveAndRenderHighlight({
@@ -421,6 +448,9 @@ export async function main(
                 getFullPageUrl: async () => pageInfo.getFullPageUrl(),
                 isPdf: pageInfo.isPdf,
                 shouldShare,
+                screenshotAnchor,
+                screenshotImage,
+                imageSupport,
             })
         } catch (err) {
             captureException(err)
@@ -434,18 +464,47 @@ export async function main(
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (selection: Selection, shouldShare: boolean) => {
-            if (
-                !(await pageActionAllowed(analyticsBG)) ||
-                window.getSelection().toString().length === 0
-            ) {
+            if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
-            await saveHighlight(shouldShare)
+            let screenshotGrabResult
+            if (
+                isPdfViewerRunning &&
+                window.getSelection().toString().length === 0
+            ) {
+                const pdfViewer = globalThis as any
+                screenshotGrabResult = await promptPdfScreenshot(
+                    document,
+                    pdfViewer,
+                    browser,
+                )
+
+                if (
+                    screenshotGrabResult == null ||
+                    screenshotGrabResult.anchor == null
+                ) {
+                    return
+                }
+
+                await saveHighlight(
+                    shouldShare,
+                    screenshotGrabResult.anchor,
+                    screenshotGrabResult.screenshot,
+                    imageSupport,
+                )
+            } else if (
+                selection &&
+                window.getSelection().toString().length > 0
+            ) {
+                await saveHighlight(shouldShare)
+            }
+
             if (inPageUI.componentsShown.sidebar) {
                 inPageUI.showSidebar({
                     action: 'show_annotation',
                 })
             }
+            await inPageUI.hideTooltip()
             if (analyticsBG) {
                 try {
                     trackAnnotationCreate(analyticsBG, {
@@ -457,7 +516,6 @@ export async function main(
                     )
                 }
             }
-            await inPageUI.hideTooltip()
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
@@ -472,20 +530,48 @@ export async function main(
                 return
             }
 
-            if (analyticsBG) {
-                // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
-                try {
-                    trackAnnotationCreate(analyticsBG, {
-                        annotationType: 'highlight',
-                    })
-                } catch (error) {
-                    console.error(
-                        `Error tracking space create event', ${error}`,
-                    )
-                }
-            }
+            let screenshotGrabResult
+            if (
+                isPdfViewerRunning &&
+                window.getSelection().toString().length === 0
+            ) {
+                const pdfViewer = globalThis as any
+                screenshotGrabResult = await promptPdfScreenshot(
+                    document,
+                    pdfViewer,
+                    browser,
+                )
 
-            if (selection && window.getSelection().toString().length > 0) {
+                if (
+                    screenshotGrabResult == null ||
+                    screenshotGrabResult.anchor == null
+                ) {
+                    return
+                }
+
+                const annotationId = await saveHighlight(
+                    shouldShare,
+                    screenshotGrabResult.anchor,
+                    screenshotGrabResult.screenshot,
+                    imageSupport,
+                )
+                await inPageUI.showSidebar(
+                    annotationId
+                        ? {
+                              annotationCacheId: annotationId.toString(),
+                              action: showSpacePicker
+                                  ? 'edit_annotation_spaces'
+                                  : 'edit_annotation',
+                          }
+                        : {
+                              action: 'comment',
+                              commentText: commentText ?? '',
+                          },
+                )
+            } else if (
+                selection &&
+                window.getSelection().toString().length > 0
+            ) {
                 const annotationId = await saveHighlight(shouldShare)
                 await inPageUI.showSidebar(
                     annotationId
@@ -500,14 +586,52 @@ export async function main(
                               commentText: commentText ?? '',
                           },
                 )
-            } else {
+            } else if (window.location.href.includes('youtube.com')) {
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
                     commentText: commentText,
                 })
             }
 
+            // if (selection && window.getSelection().toString().length > 0) {
+            //     const annotationId = await saveHighlight(shouldShare)
+            //     await inPageUI.showSidebar(
+            //         annotationId
+            //             ? {
+            //                   annotationCacheId: annotationId.toString(),
+            //                   action: showSpacePicker
+            //                       ? 'edit_annotation_spaces'
+            //                       : 'edit_annotation',
+            //               }
+            //             : {
+            //                   action: 'comment',
+            //                   commentText: commentText ?? '',
+            //               },
+            //     )
+            // } else {
+            //     await inPageUI.showSidebar({
+            //         action: 'youtube_timestamp',
+            //         commentText: commentText,
+            //     })
+            // }
+            // await inPageUI.showSidebar({
+            //     action: 'youtube_timestamp',
+            //     commentText: commentText,
+            // })
+
             await inPageUI.hideTooltip()
+            if (analyticsBG) {
+                // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
+                try {
+                    trackAnnotationCreate(analyticsBG, {
+                        annotationType: 'highlight',
+                    })
+                } catch (error) {
+                    console.error(
+                        `Error tracking space create event', ${error}`,
+                    )
+                }
+            }
         },
         askAI: () => (highlightedText: string) => {
             inPageUI.showSidebar({
@@ -795,6 +919,10 @@ export async function main(
             resetKeyboardShortcuts()
         },
         handleHistoryStateUpdate: async (tabId) => {
+            if (isPdfViewerRunning) {
+                return
+            }
+
             await inPageUI.hideRibbon()
 
             if (window.location.href.includes('web.telegram.org/')) {
@@ -852,7 +980,9 @@ export async function main(
                 await inPageUI.removeTooltip()
                 await inPageUI.removeRibbon()
             } else {
-                await inPageUI.reloadComponent('tooltip')
+                if (await tooltipUtils.getTooltipState()) {
+                    await inPageUI.reloadComponent('tooltip')
+                }
                 await inPageUI.reloadRibbon()
             }
 
@@ -1022,17 +1152,13 @@ export function createContentScriptLoader(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     loadRemotely: boolean
 }) {
-    const remoteLoader: ContentScriptLoader = async (
-        component: ContentScriptComponent,
-    ) => {
+    const remoteLoader: ContentScriptLoader = async (component) => {
         await args.contentScriptsBG.injectContentScriptComponent({
             component,
         })
     }
 
-    const localLoader: ContentScriptLoader = async (
-        component: ContentScriptComponent,
-    ) => {
+    const localLoader: ContentScriptLoader = async (component) => {
         const script = document.createElement('script')
         script.src = `../content_script_${component}.js`
         document.body.appendChild(script)

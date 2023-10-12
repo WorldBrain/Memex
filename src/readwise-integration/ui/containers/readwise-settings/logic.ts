@@ -11,6 +11,7 @@ export const INITIAL_STATE: ReadwiseSettingsState = {
     keySaveState: 'pristine',
     syncState: 'pristine',
     syncExistingNotes: true,
+    syncOnlyNotesWithHighlights: false,
     apiKeyEditable: false,
     apiKey: null,
 }
@@ -36,9 +37,11 @@ export default class ReadwiseSettingsLogic extends UILogic<
     init = async () => {
         await loadInitial<ReadwiseSettingsState>(this, async () => {
             const apiKey = await this.dependencies.readwise.getAPIKey()
+            const onlyHighlightSyncSetting = await this.dependencies.readwise.getOnlyHighlightsSetting()
             const isFeatureAuthorized = await this.dependencies.checkFeatureAuthorized()
             this.emitMutation({
                 apiKey: { $set: apiKey },
+                syncOnlyNotesWithHighlights: { $set: onlyHighlightSyncSetting },
                 apiKeyEditable: { $set: !apiKey },
                 isFeatureAuthorized: { $set: isFeatureAuthorized },
             })
@@ -49,6 +52,16 @@ export default class ReadwiseSettingsLogic extends UILogic<
         event,
     }) => {
         return { $toggle: ['syncExistingNotes'] }
+    }
+    toggleOnlySyncNotes: EventHandler<'toggleOnlySyncNotes'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.dependencies.readwise.setOnlyHighlightsSetting({
+            setting: !previousState.syncOnlyNotesWithHighlights,
+        })
+
+        return { $toggle: ['syncOnlyNotesWithHighlights'] }
     }
 
     setAPIKey: EventHandler<'setAPIKey'> = async ({ event }) => {

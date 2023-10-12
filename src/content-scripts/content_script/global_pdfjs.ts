@@ -56,6 +56,21 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
     async (inPageUI) => {
+        // DEBUG: Use this in console to debug screenshot UX
+        // ;(window as any)['promptPdfScreenshot'] = promptPdfScreenshot
+        // // DEBUG: Uncomment to trigger screenshot as soon as PDF is loaded
+        // setTimeout(() => {
+        //     promptPdfScreenshot()
+        // }, 0)
+        // ;(window as any)['testPdfScreenshotAnchoring'] = () => {
+        //     const anchor: PdfScreenshotAnchor = {
+        //         pageNumber: 2,
+        //         position: [91.19998168945312, 122.19999694824219],
+        //         dimensions: [634, 388],
+        //     }
+        //     return anchorPdfScreenshot(anchor)
+        // }
+
         makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
             extractPDFContents: async () => {
                 const searchParams = new URLSearchParams(location.search)

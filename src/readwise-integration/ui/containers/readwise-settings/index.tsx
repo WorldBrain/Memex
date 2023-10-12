@@ -122,6 +122,19 @@ class ReadwiseSettings extends StatefulUIElement<
                         />
                     </ExistingHighlightBox>
                 )}
+                <ExistingHighlightBox>
+                    <Checkbox
+                        id="Sync only notes with highlights"
+                        isChecked={
+                            this.state.syncOnlyNotesWithHighlights ?? false
+                        }
+                        handleChange={(e) =>
+                            this.processEvent('toggleOnlySyncNotes', null)
+                        }
+                        fontSize={16}
+                        label={'Sync only notes with highlights'}
+                    />
+                </ExistingHighlightBox>
 
                 {selectors.showKeySaveError(this.state) ? (
                     <ErrorMessage>

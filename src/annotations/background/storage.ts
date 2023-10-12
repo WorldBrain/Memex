@@ -22,6 +22,7 @@ import {
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
+import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -35,11 +36,11 @@ export default class AnnotationStorage extends StorageModule {
         private options: {
             storageManager: Storex
             pkmSyncBG: PkmSyncInterface
+            imageSupport?: ImageSupportInterface
         },
     ) {
         super({
             storageManager: options.storageManager,
-            pkmSyncBG: options.pkmSyncBG,
         })
     }
 
@@ -335,14 +336,28 @@ export default class AnnotationStorage extends StorageModule {
                     .findOneObject<{ id: number; name: string }>({ id: listId })
                 const listName = listData.name
 
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
+                const pageDate = pageDataStorage.time
+
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                     pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
                     annotationSpaces: listName,
+                    pageCreatedWhen: pageDate,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
     }
@@ -371,14 +386,28 @@ export default class AnnotationStorage extends StorageModule {
                     .findOneObject<{ id: number; name: string }>({ id: listId })
                 const listName = listData.name
 
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
+                const pageDate = pageDataStorage.time
+
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                     pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
                     annotationSpaces: listName,
+                    pageCreatedWhen: pageDate,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
     }
@@ -457,15 +486,27 @@ export default class AnnotationStorage extends StorageModule {
         }
         if (await isPkmSyncEnabled()) {
             try {
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(pageUrl),
+                    })
+                const pageDate = pageDataStorage.time
+
                 const annotationData = {
                     annotationId: url,
                     pageTitle: pageTitle,
                     body: body,
                     comment: comment,
                     createdWhen: createdWhen,
+                    pageCreatedWhen: pageDate,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
         return this.operation('createAnnotation', {
@@ -490,15 +531,29 @@ export default class AnnotationStorage extends StorageModule {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
 
+                const pageDataStorage = await this.options.storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
+                const pageDate = pageDataStorage.time
+
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                     body: annotationDataForPKMSyncUpdate.body,
                     createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
                     comment,
+                    pageCreatedWhen: pageDate,
                 }
 
-                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
+                shareAnnotationWithPKM(
+                    annotationData,
+                    this.options.pkmSyncBG,
+                    this.options.imageSupport,
+                )
             } catch (e) {}
         }
 

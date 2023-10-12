@@ -399,16 +399,14 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 </>
                             )}
                     </Container>
-                    {this.props.description?.length > 0 && (
-                        <DescriptionContainer>
-                            {this.renderDescription()}
-                            {/* {!this.state.isEditingDescription && (
+                    <DescriptionContainer>
+                        {this.renderDescription()}
+                        {/* {!this.state.isEditingDescription && (
                             <DescriptionEditContainer>
                                 {this.renderEditButton()}
                             </DescriptionEditContainer>
                         )} */}
-                        </DescriptionContainer>
-                    )}
+                    </DescriptionContainer>
                     {this.state.showQuickTutorial && (
                         <PopoutBox
                             targetElementRef={this.formattingHelpBtn.current}

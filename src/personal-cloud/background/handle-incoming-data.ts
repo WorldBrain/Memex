@@ -13,6 +13,7 @@ import {
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -27,6 +28,7 @@ export const handleIncomingData = (deps: {
     persistentStorageManager: StorageManager
     storageManager: StorageManager
     pkmSyncBG: PkmSyncInterface
+    imageSupport: ImageSupportInterface
 }) => async ({
     storageType,
     collection,
@@ -102,6 +104,7 @@ export const handleIncomingData = (deps: {
         updates,
         where,
         deps.storageManager,
+        deps.imageSupport,
     )
 }
 
@@ -111,19 +114,41 @@ async function handleSyncedDataForPKMSync(
     updates,
     where,
     storageManager: StorageManager,
+    imageSupport: ImageSupportInterface,
 ) {
     if (await isPkmSyncEnabled()) {
         try {
             if (collection === 'annotations') {
+                const pageDataStorage = await storageManager
+                    .collection('pages')
+                    .findOneObject<{
+                        fullTitle: string
+                        fullUrl: string
+                    }>({
+                        url: updates.url.split('/#')[0],
+                    })
+
+                const visitsStorage = await storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(updates.url.split('/#')[0]),
+                    })
+                const pageDate = visitsStorage.time
+
                 const annotationData = {
                     annotationId: updates.url,
                     pageTitle: updates.pageTitle,
                     body: updates.body,
                     comment: updates.comment,
                     createdWhen: updates.createdWhen,
+                    pageCreatedWhen: pageDate,
                 }
 
-                await shareAnnotationWithPKM(annotationData, pkmSyncBG)
+                await shareAnnotationWithPKM(
+                    annotationData,
+                    pkmSyncBG,
+                    imageSupport,
+                )
             }
 
             if (collection === 'annotListEntries') {
@@ -134,18 +159,33 @@ async function handleSyncedDataForPKMSync(
                     })
                 const pageDataStorage = await storageManager
                     .collection('pages')
-                    .findOneObject<{ fullTitle: string; fullUrl: string }>({
+                    .findOneObject<{
+                        fullTitle: string
+                        fullUrl: string
+                        createdWhen: string
+                    }>({
                         url: updates.url.split('/#')[0],
                     })
+                const visitsStorage = await storageManager
+                    .collection('visits')
+                    .findOneObject<{ time: string }>({
+                        url: normalizeUrl(updates.url.split('/#')[0]),
+                    })
+                const pageDate = visitsStorage.time
 
                 const annotationData = {
                     pageTitle: pageDataStorage.fullTitle,
                     annotationId: updates.url,
                     pageUrl: pageDataStorage.fullUrl,
                     annotationSpaces: listData.name,
+                    pageCreatedWhen: pageDate,
                 }
 
-                await shareAnnotationWithPKM(annotationData, pkmSyncBG)
+                await shareAnnotationWithPKM(
+                    annotationData,
+                    pkmSyncBG,
+                    imageSupport,
+                )
             }
             if (collection === 'pages') {
                 const pageData = {

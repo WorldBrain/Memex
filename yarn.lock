@@ -3800,6 +3800,11 @@
     "@types/testing-library__dom" "*"
     pretty-format "^25.1.0"
 
+"@types/tinycolor2@^1.4.4":
+  version "1.4.4"
+  resolved "https://registry.yarnpkg.com/@types/tinycolor2/-/tinycolor2-1.4.4.tgz#bca7469668247469087d6eba588c02e7709fcab5"
+  integrity sha512-FYK4mlLxUUajo/mblv7EUDHku20qT6ThYNsGZsTHilcHRvIkF8WXqtZO+DVTYkpHWCaAT97LueV59H/5Ve3bGA==
+
 "@types/tough-cookie@*":
   version "4.0.2"
   resolved "https://registry.yarnpkg.com/@types/tough-cookie/-/tough-cookie-4.0.2.tgz#6286b4c7228d58ab7866d19716f3696e03a09397"
@@ -19124,6 +19129,11 @@ timers-ext@^0.1.5:
 timsort@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/timsort/-/timsort-0.3.0.tgz#405411a8e7e6339fe64db9a234de11dc31e02bd4"
+
+tinycolor2@^1.6.0:
+  version "1.6.0"
+  resolved "https://registry.yarnpkg.com/tinycolor2/-/tinycolor2-1.6.0.tgz#f98007460169b0263b97072c5ae92484ce02d09e"
+  integrity sha512-XPaBkWQJdsf3pLKJV9p4qN/S+fm2Oj8AIPo1BTUhg5oxkvm9+SVEGFdhyOz7tTdUTfvxMiAs4sp6/eZO2Ew+pw==
 
 tippy.js@^6.3.6:
   version "6.3.7"

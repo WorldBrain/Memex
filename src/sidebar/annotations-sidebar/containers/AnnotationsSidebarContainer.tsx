@@ -114,8 +114,6 @@ export class AnnotationsSidebarContainer<
             }),
         )
 
-        console.log('slalsd', this.props.bgScriptBG)
-
         window['_getState'] = () => ({ ...this.state })
         this.listenToWindowChanges()
     }
@@ -1128,10 +1126,15 @@ export class AnnotationsSidebarContainer<
                             appendLoader={
                                 this.state.secondarySearchState === 'running'
                             }
-                            setActiveAnnotation={(unifiedAnnotationId) => () =>
+                            setActiveAnnotation={(
+                                unifiedAnnotationId,
+                                source,
+                            ) => () => {
                                 this.processEvent('setActiveAnnotation', {
                                     unifiedAnnotationId,
-                                })}
+                                    source: source,
+                                })
+                            }}
                             setPopoutsActive={(isActive) => {
                                 this.processEvent('setPopoutsActive', isActive)
                             }}
@@ -1227,6 +1230,12 @@ export class AnnotationsSidebarContainer<
                                     disableWriteOps={
                                         this.state.hasListDataBeenManuallyPulled
                                     }
+                                    annotationsCache={
+                                        this.props.annotationsCache
+                                    }
+                                    pageListDataForCurrentPage={
+                                        this.state.pageListDataForCurrentPage
+                                    }
                                     onSpaceShare={() => {
                                         this.processEvent('createPageLink', {
                                             forceCreate: true,
@@ -1262,10 +1271,11 @@ export class AnnotationsSidebarContainer<
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }
-                            setActiveTab={(tab) => (event) =>
+                            setActiveTab={(tab) => (event) => {
                                 this.processEvent('setActiveSidebarTab', {
                                     tab,
-                                })}
+                                })
+                            }}
                             expandFollowedListNotes={(unifiedListId) =>
                                 this.processEvent('expandListAnnotations', {
                                     unifiedListId,

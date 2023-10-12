@@ -27,6 +27,7 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotation,
     UnifiedList,
+    UnifiedListForCache,
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
@@ -221,6 +222,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
      */
     hasListDataBeenManuallyPulled?: boolean
     annotationCreateEditorRef?: any
+    pageListDataForCurrentPage: UnifiedListForCache<'page-link'> | null
 }
 
 export type AnnotationEvent<T> = {
@@ -330,6 +332,7 @@ interface SidebarEvents {
     deleteAnnotation: AnnotationEvent<{}>
     setActiveAnnotation: AnnotationEvent<{
         mode?: 'show' | 'edit' | 'edit_spaces'
+        source?: 'highlightInPage' | 'highlightCard'
     }>
     updateListsForAnnotation: AnnotationEvent<{
         added: number | null

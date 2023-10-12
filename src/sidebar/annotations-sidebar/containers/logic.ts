@@ -34,6 +34,7 @@ import {
 } from 'src/annotations/utils'
 import { FocusableComponent } from 'src/annotations/components/types'
 import {
+    NormalizedState,
     initNormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
@@ -50,6 +51,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type {
     PageAnnotationsCacheEvents,
+    UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
 } from 'src/annotations/cache/types'
@@ -114,6 +116,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     imageSupport?: ImageSupportInterface<'caller'>
     pkmSyncBG?: PkmSyncInterface
     bgScriptBG?: RemoteBGScriptInterface
+    spacesBG?: SpacePickerDependencies['spacesBG']
 }
 
 type EventHandler<
@@ -215,6 +218,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
+                    imageSupport: options.imageSupport,
                 },
             ),
         )
@@ -315,6 +319,7 @@ export class SidebarContainerLogic extends UILogic<
             renameListErrorMessage: null,
             sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
+            pageListDataForCurrentPage: null,
         }
     }
 
@@ -356,19 +361,35 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (opts.renderHighlights) {
-            this.renderOwnHighlights(this.options.annotationsCache)
+            const annotations = this.transformAnnotations(
+                this.options.annotationsCache.annotations,
+            )
+            const activeTab = 'annotations' // replace this with the actual value if available
+            this.renderOwnHighlights({ annotations, activeTab })
         }
     }
 
-    private renderOwnHighlights = ({
-        annotations,
-    }: Pick<SidebarContainerState, 'annotations'>) => {
+    private transformAnnotations(
+        annotations: any,
+    ): NormalizedState<UnifiedAnnotation, string> {
+        // Transform `annotations` into the format expected by `renderOwnHighlights`
+        // This is just a placeholder. Replace with your actual transformation logic.
+        return {
+            allIds: [],
+            byId: {},
+        }
+    }
+
+    private renderOwnHighlights = (
+        state: Pick<SidebarContainerState, 'annotations' | 'activeTab'>,
+    ) => {
         const highlights = cacheUtils.getUserHighlightsArray(
-            { annotations },
+            { annotations: state.annotations },
             this.options.getCurrentUser()?.id.toString(),
         )
         this.options.events?.emit('renderHighlights', {
             highlights,
+            removeExisting: state.activeTab === 'annotations' ? false : true,
         })
     }
 
@@ -380,6 +401,11 @@ export class SidebarContainerLogic extends UILogic<
         SidebarContainerState,
         'annotations' | 'lists' | 'listInstances'
     >) => {
+        this.options.events?.emit('renderHighlights', {
+            highlights: [],
+            removeExisting: true,
+        })
+
         const highlights = Object.values(listInstances)
             .filter((instance) => instance.isOpen)
             .map(
@@ -395,6 +421,7 @@ export class SidebarContainerLogic extends UILogic<
 
         this.options.events?.emit('renderHighlights', {
             highlights,
+            removeExisting: false,
         })
     }
 
@@ -810,7 +837,7 @@ export class SidebarContainerLogic extends UILogic<
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
             let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 30 + 'px'
+                currentWindowWidth - currentsidebarWidth - 40 + 'px'
 
             document.body.style.width = readingWidth
         }
@@ -1841,10 +1868,12 @@ export class SidebarContainerLogic extends UILogic<
         const cachedAnnotation = this.options.annotationsCache.annotations.byId[
             event.unifiedAnnotationId
         ]
-        if (cachedAnnotation?.selector != null) {
-            this.options.events?.emit('highlightAndScroll', {
-                highlight: cachedAnnotation,
-            })
+        if (event.source === 'highlightCard') {
+            if (cachedAnnotation?.selector != null) {
+                this.options.events?.emit('highlightAndScroll', {
+                    highlight: cachedAnnotation,
+                })
+            }
         }
 
         if (!event.mode) {
@@ -2283,13 +2312,13 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         const pattern = new RegExp(event.prompt, 'i')
-        const newSuggestions = this.AIpromptSuggestions.filter((item) =>
+        const newSuggestions = this.AIpromptSuggestions?.filter((item) =>
             pattern.test(item.prompt),
         )
-        if (event.prompt.length === 0) {
+        if (event.prompt?.length === 0) {
             this._updateFocusAISuggestions(-1, newSuggestions)
         } else {
-            if (newSuggestions.length > 0) {
+            if (newSuggestions?.length > 0) {
                 this.emitMutation({
                     showAISuggestionsDropDown: { $set: true },
                 })
@@ -2353,6 +2382,7 @@ export class SidebarContainerLogic extends UILogic<
                     this.options.annotationsCache,
                     previousState.selectedListId,
                 ),
+                removeExisting: true,
             })
         } else if (event.tab === 'spaces') {
             await this.loadRemoteAnnototationReferencesForCachedLists(
@@ -2360,8 +2390,8 @@ export class SidebarContainerLogic extends UILogic<
             )
         } else if (
             event.tab === 'summary' &&
-            ((event.prompt && event.prompt.length > 0) ||
-                event.textToProcess.length > 0)
+            ((event.prompt && event.prompt?.length > 0) ||
+                event.textToProcess?.length > 0)
         ) {
             if (previousState.pageSummary.length === 0) {
                 let isPagePDF = window.location.href.includes(
@@ -2557,6 +2587,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
+                    imageSupport: this.options.imageSupport,
                 })
             },
         )
@@ -2636,6 +2667,7 @@ export class SidebarContainerLogic extends UILogic<
                 this.options.annotationsCache,
                 unifiedListId,
             ),
+            removeExisting: true,
         })
 
         if (list.remoteId != null) {
@@ -2839,6 +2871,7 @@ export class SidebarContainerLogic extends UILogic<
                     annotationsCache,
                     cachedList.unifiedId,
                 ),
+                removeExisting: true,
             })
             return
         }
@@ -2867,6 +2900,7 @@ export class SidebarContainerLogic extends UILogic<
                 localListId?: number
                 sharedListEntryId: AutoPk
             }
+
             if (event.manuallyPullLocalListData) {
                 localListData = await customListsBG.fetchLocalDataForRemoteListEntryFromServer(
                     {
@@ -2982,6 +3016,7 @@ export class SidebarContainerLogic extends UILogic<
                     annotationsCache,
                     unifiedListId,
                 ),
+                removeExisting: true,
             })
 
             await this.detectConversationThreads(
@@ -3120,13 +3155,26 @@ export class SidebarContainerLogic extends UILogic<
             normalizeUrl(fullPageUrl),
         )
 
-        if (existingPageLink.length > 0) {
+        let listsOfPageData = null
+        for (const list of existingPageLink) {
+            let listData = await this.options.annotationsCache.lists.byId[list]
+
+            if (
+                listData.type === 'page-link' &&
+                (listData?.localId > listsOfPageData?.localId ||
+                    listsOfPageData == null)
+            ) {
+                listsOfPageData = listData
+            }
+        }
+
+        if (listsOfPageData) {
             this.emitMutation({
                 showSharePageTooltip: { $set: true },
             })
             this.emitMutation({
                 selectedListForShareMenu: {
-                    $set: existingPageLink[existingPageLink.length - 1],
+                    $set: listsOfPageData.unifiedId,
                 },
             })
             if (!event.forceCreate) {
@@ -3160,6 +3208,9 @@ export class SidebarContainerLogic extends UILogic<
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
             }
+            this.emitMutation({
+                pageListDataForCurrentPage: { $set: cacheListData },
+            })
             const { unifiedId } = this.options.annotationsCache.addList(
                 cacheListData,
             )

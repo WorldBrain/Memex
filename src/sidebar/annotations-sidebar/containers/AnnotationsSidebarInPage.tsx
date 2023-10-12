@@ -30,9 +30,9 @@ import type {
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
-import { ImageSupportInterface } from 'src/image-support/background/types'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -103,7 +103,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
-        if (event.key === 'Escape') {
+        if (
+            event.key === 'Escape' &&
+            !window.location.href.includes('/pdfjs/viewer.html?file')
+        ) {
             this.hideSidebar()
         }
     }
@@ -178,22 +181,25 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     }),
             ),
         )
-        sidebarEvents.on('renderHighlights', async ({ highlights }) => {
-            await highlighter.renderHighlights(
-                highlights.map((h) => ({
-                    id: h.unifiedId,
-                    selector: h.selector,
-                })),
-                ({ annotationId, openInEdit }) =>
-                    inPageUI.showSidebar({
-                        annotationCacheId: annotationId.toString(),
-                        action: openInEdit
-                            ? 'edit_annotation'
-                            : 'show_annotation',
-                    }),
-                { removeExisting: true },
-            )
-        })
+        sidebarEvents.on(
+            'renderHighlights',
+            async ({ highlights, removeExisting }) => {
+                await highlighter.renderHighlights(
+                    highlights.map((h) => ({
+                        id: h.unifiedId,
+                        selector: h.selector,
+                    })),
+                    ({ annotationId, openInEdit }) =>
+                        inPageUI.showSidebar({
+                            annotationCacheId: annotationId.toString(),
+                            action: openInEdit
+                                ? 'edit_annotation'
+                                : 'show_annotation',
+                        }),
+                    { removeExisting: removeExisting },
+                )
+            },
+        )
         sidebarEvents.on('setSelectedList', async (selectedList) => {
             inPageUI.selectedList = selectedList
         })
@@ -230,11 +236,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         if (!annotationBoxNode) {
             return
         }
-
-        annotationBoxNode.scrollIntoView({
-            block: 'center',
-            behavior: 'smooth',
-        })
     }
 
     private handleExternalAction = async (event: SidebarActionOptions) => {
@@ -261,15 +262,20 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
         } else if (event.action === 'show_annotation') {
-            await sleepPromise(500)
-            await this.processEvent('setActiveSidebarTab', {
-                tab:
-                    this.state.selectedListId &&
-                    this.state.activeTab === 'spaces'
-                        ? 'spaces'
-                        : 'annotations',
-            })
             await this.activateAnnotation(event.annotationCacheId, 'show')
+            await sleepPromise(500)
+            if (
+                this.state.selectedListId &&
+                this.state.activeTab === 'spaces'
+            ) {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'spaces',
+                })
+            } else if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+            }
         } else if (event.action === 'edit_annotation') {
             await this.processEvent('setAnnotationEditMode', {
                 instanceLocation:

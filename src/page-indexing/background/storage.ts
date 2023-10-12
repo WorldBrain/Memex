@@ -153,7 +153,7 @@ export default class PageStorage extends StorageModule {
         }
     }
 
-    async createPage(pageData: PipelineRes) {
+    async createPage(pageData: PipelineRes, pageContentInfo?: any) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
         await this.operation('createPage', {
@@ -163,11 +163,25 @@ export default class PageStorage extends StorageModule {
 
         if (await isPkmSyncEnabled()) {
             try {
-                const dataToSave = {
-                    pageUrl: pageData.fullUrl,
-                    pageTitle: pageData.fullTitle,
-                    createdWhen: Date.now(),
-                    pkmSyncType: 'page',
+                let dataToSave
+                // if pdfs
+                if (pageData.fullUrl.startsWith('https://memex.cloud')) {
+                    const urlToSync =
+                        pageContentInfo[pageData.url]?.locators[0]
+                            .originalLocation
+                    dataToSave = {
+                        pageUrl: urlToSync,
+                        pageTitle: pageData.fullTitle,
+                        createdWhen: Date.now(),
+                        pkmSyncType: 'page',
+                    }
+                } else {
+                    dataToSave = {
+                        pageUrl: pageData.fullUrl,
+                        pageTitle: pageData.fullTitle,
+                        createdWhen: Date.now(),
+                        pkmSyncType: 'page',
+                    }
                 }
 
                 sharePageWithPKM(dataToSave, this.options.pkmSyncBG)

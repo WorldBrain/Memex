@@ -39,7 +39,7 @@ const showHighlights = async (options: HighlightDependencies) => {
                 action: openInEdit ? 'edit_annotation' : 'show_annotation',
                 annotationCacheId: annotationId.toString(),
             }),
-        { removeExisting: true },
+        { removeExisting: false },
     )
 }
 

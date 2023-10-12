@@ -32,10 +32,12 @@ import type { UnifiedAnnotation } from '../cache/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { Anchor } from 'src/highlighting/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
     comment?: string
+    selector?: Anchor
 }
 
 export interface NoteProps extends AnnotationProps {
@@ -105,6 +107,7 @@ export interface AnnotationProps {
     spacePickerAnnotationInstance: string
     shareMenuAnnotationInstanceId: string
     imageSupport: ImageSupportInterface<'caller'>
+    selector?: Anchor
 }
 
 export interface AnnotationEditableEventProps {
@@ -400,13 +403,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     ) : undefined}
                 </HighlightActionsBox>
             ) : null
+
+        const isScreenshotAnnotation = this.props.selector?.dimensions != null
+
         return (
             <HighlightStyled
                 onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
             >
                 <ActionBox>{actionsBox}</ActionBox>
-                <Highlightbar />
+                {!isScreenshotAnnotation && <Highlightbar />}
                 <Markdown
                     imageSupport={this.props.imageSupport}
                     isHighlight

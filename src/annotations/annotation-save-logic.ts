@@ -12,7 +12,6 @@ import {
 } from 'src/sync-settings/util'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { shareAnnotationWithPKM } from 'src/pkm-integrations/background/backend/utils'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -141,8 +140,6 @@ export async function createAnnotation({
                 syncSettingsBG,
             )
 
-            // shareAnnotationWithPKM(annotationData, pkmSyncBG)
-
             return annotationUrl
         })(),
     }
@@ -222,12 +219,6 @@ export async function updateAnnotation({
                         keepListsIfUnsharing,
                     }),
             ])
-
-            // let newAnnotationData = this.options.annotationsCache.getAnnotation(
-            //     annotationData.localId,
-            // )
-
-            // shareAnnotationWithPKM(newAnnotationData, pkmSyncBG)
 
             return annotationData.localId
         })(),
