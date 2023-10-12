@@ -6021,6 +6021,9 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
+                { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: {
+                    listId: syncedList.localId,
+                 } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'followedListEntry', where: {
                     followedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
                  } },
@@ -6028,9 +6031,6 @@ describe('Personal cloud translation layer', () => {
                     sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
                  } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'pageListEntries', where: {
-                    listId: syncedList.localId,
-                 } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: {
                     listId: syncedList.localId,
                  } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'sharedListMetadata', where: {
