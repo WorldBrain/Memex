@@ -29,6 +29,7 @@ export interface Props {
     onClickOutside: React.MouseEventHandler
     renderTemplate: (id: number) => Promise<string>
     copyPaster?: RemoteCopyPasterInterface
+    preventClosingBcEditState?: (state) => void
 }
 
 export default class CopyPasterContainer extends React.PureComponent<
@@ -172,6 +173,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         }
 
         this.setState({ tmpTemplate: undefined, isNew: undefined })
+        this.props.preventClosingBcEditState(false)
         await this.syncTemplates()
     }
 
@@ -191,18 +193,21 @@ export default class CopyPasterContainer extends React.PureComponent<
                 onClickEdit={(id) => {
                     const template = this.findTemplateForId(id)
                     this.setState({ tmpTemplate: template, isNew: false })
+                    this.props.preventClosingBcEditState(true)
                 }}
                 onClickCancel={() => {
                     this.setState({
                         tmpTemplate: undefined,
                         isNew: undefined,
                     })
+                    this.props.preventClosingBcEditState(false)
                 }}
                 onClickNew={() => {
                     this.setState({
                         tmpTemplate: CopyPasterContainer.DEF_TEMPLATE,
                         isNew: true,
                     })
+                    this.props.preventClosingBcEditState(true)
                 }}
                 onClickHowto={() => {
                     window.open(

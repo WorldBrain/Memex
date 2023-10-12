@@ -2293,7 +2293,8 @@ export class AnnotationsSidebar extends React.Component<
                                           })
 
                                     if (webUIUrl.includes('?') && isPageLink) {
-                                        webUIUrl = webUIUrl + '&noAutoOpen=true'
+                                        webUIUrl =
+                                            webUIUrl + '&´noAutoOpen=true'
                                     } else if (isPageLink) {
                                         webUIUrl = webUIUrl + '?noAutoOpen=true'
                                     }
