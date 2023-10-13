@@ -176,7 +176,7 @@ class BackgroundScript {
                     await this.handleUnifiedLogic()
                     await setLocalStorage(READ_STORAGE_FLAG, true)
                     await this.setOnboardingTutorialState()
-                    this.trackInstallTime()
+                    await this.trackInstallTime()
                     break
                 case 'update':
                     await this.runQuickAndDirtyMigrations()
@@ -189,8 +189,8 @@ class BackgroundScript {
         })
     }
 
-    private trackInstallTime() {
-        trackOnboardingPath(this.deps.analyticsBG, {
+    private async trackInstallTime() {
+        await trackOnboardingPath(this.deps.analyticsBG, {
             type: 'interactive',
         })
     }

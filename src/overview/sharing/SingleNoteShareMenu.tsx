@@ -261,7 +261,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         if (this.props.analyticsBG) {
             try {
-                trackSharedAnnotation(this.props.analyticsBG, {
+                await trackSharedAnnotation(this.props.analyticsBG, {
                     type: 'single',
                 })
             } catch (error) {

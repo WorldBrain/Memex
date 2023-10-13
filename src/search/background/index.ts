@@ -216,7 +216,7 @@ export default class SearchBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackSearchExecution(this.options.analyticsBG)
+                await trackSearchExecution(this.options.analyticsBG)
             } catch (error) {
                 console.error(
                     `Error tracking search execution create event', ${error}`,

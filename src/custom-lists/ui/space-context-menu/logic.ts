@@ -310,7 +310,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         if (this.dependencies.analyticsBG) {
             try {
-                trackCopyInviteLink(this.dependencies.analyticsBG, {
+                await trackCopyInviteLink(this.dependencies.analyticsBG, {
                     inviteType:
                         event.linkIndex === 0 ? 'reader' : 'contributer',
                     linkType:
