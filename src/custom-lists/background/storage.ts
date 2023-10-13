@@ -458,7 +458,7 @@ export default class CustomListStorage extends StorageModule {
 
         if (analyticsBG && dontTrack == null) {
             try {
-                trackSpaceCreate(analyticsBG, { type: 'private' })
+                await trackSpaceCreate(analyticsBG, { type: 'private' })
             } catch (error) {
                 console.error(`Error tracking space create event', ${error}`)
             }
@@ -535,11 +535,9 @@ export default class CustomListStorage extends StorageModule {
                 listId !== SPECIAL_LIST_IDS.MOBILE
             ) {
                 try {
-                    if (isShared) {
-                        trackSpaceEntryCreate(analyticsBG, { type: 'shared' })
-                    } else {
-                        trackSpaceEntryCreate(analyticsBG, { type: 'private' })
-                    }
+                    await trackSpaceEntryCreate(analyticsBG, {
+                        type: isShared ? 'shared' : 'private',
+                    })
                 } catch (error) {
                     console.error(
                         `Error tracking space Entry create event', ${error}`,
