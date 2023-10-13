@@ -181,7 +181,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <>
                         <OnboardingContainer>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     this.props.navToGuidedTutorial()
 
                                     if (this.props.analyticsBG) {
@@ -212,7 +212,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     this.processEvent(
                                         'showOnboardingVideo',
                                         null,
@@ -242,14 +242,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     window.open(
                                         'https://tutorials.memex.garden/tutorials',
                                         '_blank',
                                     )
                                     if (this.props.analyticsBG) {
                                         try {
-                                            await OnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'docs',
@@ -272,7 +272,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     window.open(
                                         'https://calendly.com/worldbrain/memex-onboarding-call',
                                         '_blank',
@@ -305,7 +305,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                         <PrimaryAction
                             type="tertiary"
                             label="I'll just start by playing around"
-                            onClick={() => {
+                            onClick={async () => {
                                 this.props.navToDashboard()
                                 if (this.props.analyticsBG) {
                                     try {

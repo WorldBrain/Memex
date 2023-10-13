@@ -617,7 +617,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                await UnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'autoShared',
                 })
             } catch (error) {
@@ -710,7 +710,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackUnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'bulk',
                 })
             } catch (error) {
