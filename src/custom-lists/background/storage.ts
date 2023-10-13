@@ -527,12 +527,13 @@ export default class CustomListStorage extends StorageModule {
         const list = await this.fetchListById(listId)
         const idExists = Boolean(list)
 
-        if (
-            idExists &&
-            listId !== SPECIAL_LIST_IDS.INBOX &&
-            listId != SPECIAL_LIST_IDS.MOBILE
-        ) {
-            if (analyticsBG && dontTrack == null) {
+        if (idExists) {
+            if (
+                analyticsBG &&
+                dontTrack == null &&
+                listId !== SPECIAL_LIST_IDS.INBOX &&
+                listId !== SPECIAL_LIST_IDS.MOBILE
+            ) {
                 try {
                     if (isShared) {
                         trackSpaceEntryCreate(analyticsBG, { type: 'shared' })
