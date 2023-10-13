@@ -556,7 +556,7 @@ export default class CustomListStorage extends StorageModule {
                         pageTitle: pageToSave.fullTitle,
                         pkmSyncType: 'page',
                         pageSpaces: list.name,
-                        createdAt: pageToSave.createdAt,
+                        createdWhen: Date.now(),
                     }
 
                     sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
