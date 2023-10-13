@@ -186,7 +186,7 @@ export default class OnboardingScreen extends StatefulUIElement<
 
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'interactive',
@@ -219,7 +219,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     )
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'video',
@@ -249,7 +249,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     )
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await OnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'docs',
@@ -279,7 +279,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                     )
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'onboardingCall',
@@ -309,7 +309,7 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 this.props.navToDashboard()
                                 if (this.props.analyticsBG) {
                                     try {
-                                        trackOnboardingPath(
+                                        await trackOnboardingPath(
                                             this.props.analyticsBG,
                                             {
                                                 type: 'skip',
