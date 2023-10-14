@@ -121,19 +121,16 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         let state = previousState
         await loadInitial(this, async () => {
-            console.log('init', this.dependencies.listData)
             if (this.dependencies.listData.remoteId == null) {
                 await this.processUIEvent('shareSpace', {
                     event: { privacyStatus: 'private' },
                     previousState,
                 })
             }
-            if (state.mode !== 'followed-space') {
+            if (state == null || state.mode !== 'followed-space') {
                 await Promise.all([
                     this.loadInviteLinks(),
-                    this.dependencies.listData.isPrivate
-                        ? this.loadEmailInvites()
-                        : Promise.resolve(),
+                    this.loadEmailInvites(),
                 ])
             }
             if (this.dependencies.loadOwnershipData) {
