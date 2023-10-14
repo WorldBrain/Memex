@@ -18,7 +18,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     isOpen?: boolean
     toggleOpen?: () => void
     menuItems: T[]
-    btnChildren: React.ReactNode
+    btnChildren?: React.ReactNode
     onMenuItemClick?: (itemProps: T) => void
     theme?: ThemeProps
     keepSelectedState?: boolean
@@ -34,7 +34,7 @@ interface State {
     selected: number
 }
 
-export class DropdownMenuBtn extends React.PureComponent<Props, State> {
+export class SelectionMenuBtn extends React.PureComponent<Props, State> {
     static defaultProps: Partial<Props> = { initSelectedIndex: 0 }
 
     state: State = {

@@ -552,10 +552,17 @@ export class DashboardContainer extends StatefulUIElement<
                             listId,
                             skipDBOps: true,
                         }),
+                    onSetSpacePrivate: (isPrivate) =>
+                        this.processEvent('setListPrivacy', {
+                            listId,
+                            isPrivate,
+                        }),
                     onDeleteSpaceIntent: () =>
                         this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
+                    toggleEditMenu: () =>
+                        this.processEvent('setEditMenuListId', { listId }),
                     onSpaceShare: (
                         remoteListId,
                         annotationLocalToRemoteIdsDict,
@@ -566,7 +573,6 @@ export class DashboardContainer extends StatefulUIElement<
                             annotationLocalToRemoteIdsDict,
                         }),
                     analyticsBG: this.props.analyticsBG,
-                    currentUser: this.state.currentUser,
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {

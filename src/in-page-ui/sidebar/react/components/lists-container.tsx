@@ -200,17 +200,6 @@ export default class ListContainer extends Component<Props> {
                         this.props.handleDeleteList()
                     }}
                 />
-                {this.props.showCrowdFundingModal && (
-                    <CrowdfundingModal
-                        onClose={(e) => {
-                            e.preventDefault()
-                            e.stopPropagation()
-                            this.props.setShowCrowdFundingModal(false)
-                        }}
-                        context="collections"
-                        learnMoreUrl="https://worldbrain.io/pricing/"
-                    />
-                )}
             </React.Fragment>
         )
     }

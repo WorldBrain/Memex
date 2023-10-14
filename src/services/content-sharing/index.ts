@@ -14,6 +14,10 @@ export default class ListKeysService extends AbstractListKeysService {
         return params.keyString ? `${link}?key=${params.keyString}` : link
     }
 
+    getCurrentKey: AbstractListKeysService['getCurrentKey'] = () => {
+        throw new Error('TODO: Implement me')
+    }
+
     hasCurrentKey = () => {
         throw new Error('TODO: Implement me')
     }

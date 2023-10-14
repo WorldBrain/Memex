@@ -2,12 +2,9 @@ import React from 'react'
 import styled from 'styled-components'
 
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
-import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
 import SharePrivacyOption from 'src/overview/sharing/components/SharePrivacyOption'
-import { getShareButtonData } from '../sharing-utils'
 import Mousetrap from 'mousetrap'
 import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
 import {

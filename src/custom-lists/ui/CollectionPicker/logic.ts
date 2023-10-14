@@ -151,6 +151,7 @@ export default class SpacePickerLogic extends UILogic<
         contextMenuPositionY: 0,
         keyboardNavActive: false,
         addedToAllIds: [],
+        editMenuListId: null,
     })
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']
@@ -450,6 +451,14 @@ export default class SpacePickerLogic extends UILogic<
                 : event.listId
         this.emitMutation({ contextMenuListId: { $set: nextListId } })
     }
+    toggleEntryEditMenu: EventHandler<'toggleEntryEditMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        const nextListId =
+            previousState.editMenuListId === event.listId ? null : event.listId
+        this.emitMutation({ editMenuListId: { $set: nextListId } })
+    }
 
     updateContextMenuPosition: EventHandler<
         'updateContextMenuPosition'
@@ -522,6 +531,24 @@ export default class SpacePickerLogic extends UILogic<
         })
 
         return validationResult
+    }
+
+    setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
+        const { annotationsCache, contentSharingBG } = this.dependencies
+        const unifiedId = annotationsCache.getListByLocalId(event.listId)
+            ?.unifiedId
+        if (unifiedId == null) {
+            throw new Error('Tried to set privacy for non-cached list')
+        }
+        annotationsCache.updateList({
+            unifiedId,
+            isPrivate: event.isPrivate,
+        })
+
+        await contentSharingBG.updateListPrivacy({
+            localListId: event.listId,
+            isPrivate: event.isPrivate,
+        })
     }
 
     renameList: EventHandler<'renameList'> = async ({ event }) => {

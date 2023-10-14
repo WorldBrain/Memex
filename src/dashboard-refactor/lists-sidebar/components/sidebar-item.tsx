@@ -8,12 +8,15 @@ import type { DropReceivingState } from 'src/dashboard-refactor/types'
 export interface Props {
     name: string
     isSelected: boolean
-    isCollaborative?: boolean
+    isPrivate?: boolean
+    isShared?: boolean
     alwaysShowRightSideIcon?: boolean
     dropReceivingState?: DropReceivingState
     onClick: React.MouseEventHandler
     renderLeftSideIcon?: () => JSX.Element
     renderRightSideIcon?: () => JSX.Element
+    renderEditIcon?: () => JSX.Element
+    areAnyMenusDisplayed?: boolean
 }
 
 export interface State {
@@ -58,13 +61,16 @@ export default class ListsSidebarItem extends React.PureComponent<
                     onDrop={this.handleDrop}
                     onMouseEnter={() => this.setState({ isHovering: true })}
                     onMouseOver={() => this.setState({ isHovering: true })}
-                    onMouseLeave={() => this.setState({ isHovering: false })}
+                    onMouseLeave={() =>
+                        !this.props.areAnyMenusDisplayed &&
+                        this.setState({ isHovering: false })
+                    }
                 >
                     {this.props.renderLeftSideIcon?.()}
                     <TitleBox>
                         <ListTitle>
                             <Name>{this.props.name}</Name>
-                            {this.props.isCollaborative && (
+                            {this.props.isShared && (
                                 <TooltipBox
                                     tooltipText="Shared Space"
                                     placement="bottom"
@@ -79,6 +85,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                         </ListTitle>
                     </TitleBox>
                     <IconBox {...this.props} {...this.state}>
+                        {this.props.renderEditIcon?.()}
                         {this.props.renderRightSideIcon?.()}
                     </IconBox>
                 </SidebarItem>
@@ -200,5 +207,6 @@ const IconBox = styled.div<Props & State>`
             props.isMenuDisplayed) &&
         css`
             display: flex;
+            grid-gap: 10px;
         `}
 `

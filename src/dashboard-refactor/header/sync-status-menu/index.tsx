@@ -244,14 +244,14 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     <HelpTextBlock> Report sync problems:</HelpTextBlock>
                     <HelpTextBlockLink
                         target="_blank"
-                        href="https://worldbrain.io/faq/new-sync"
+                        href="https://memex.featurebase.app/"
                     >
                         {' '}
                         Forum
                     </HelpTextBlockLink>
                     <HelpTextBlockLink
                         target="_blank"
-                        href="mailto:support@worldbrain.io"
+                        href="mailto:support@memex.garden"
                     >
                         {' '}
                         Email

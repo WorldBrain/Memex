@@ -1,7 +1,7 @@
 import React from 'react'
 import styled from 'styled-components'
 
-import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
+import { SelectionMenuBtn } from 'src/common-ui/components/selection-menu-btn'
 import { getTextInsertedAtInputSelection } from 'src/util/input-utils'
 import {
     MarkdownPreview,
@@ -47,11 +47,11 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
 
     private renderInsertMenu = () => (
         <DropdownMenuContainer>
-            <DropdownMenuBtn
+            <SelectionMenuBtn
                 onMenuItemClick={this.handleItemClick}
                 menuItems={this.props.menuItems}
                 btnChildren="Insert"
-                btnId="DropdownMenuBtn"
+                btnId="SelectionMenuBtn"
             />
         </DropdownMenuContainer>
     )
@@ -68,7 +68,7 @@ export class MarkdownPreviewAnnotationInsertMenu extends React.PureComponent<
 }
 
 const DropdownMenuContainer = styled.div`
-    & #DropdownMenuBtn {
+    & #SelectionMenuBtn {
         padding: 2px 6px;
     }
 `

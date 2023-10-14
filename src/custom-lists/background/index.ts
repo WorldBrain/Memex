@@ -1,5 +1,4 @@
 import type Storex from '@worldbrain/storex'
-import fromPairs from 'lodash/fromPairs'
 import type { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { isFullUrl } from '@worldbrain/memex-url-utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
@@ -13,25 +12,19 @@ import type {
     PageListEntry,
 } from './types'
 import { maybeIndexTabs } from 'src/page-indexing/utils'
-import { Analytics } from 'src/analytics/types'
+import type { Analytics } from 'src/analytics/types'
 import { BrowserSettingsStore } from 'src/util/settings'
 import { updateSuggestionsCache } from '@worldbrain/memex-common/lib/utils/suggestions-cache'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type TabManagementBackground from 'src/tab-management/background'
-import type { ServerStorageModules } from 'src/storage/types'
 import type { AuthServices } from 'src/services/types'
-import type { SharedListReference } from '@worldbrain/memex-common/lib/content-sharing/types'
-import type { GetAnnotationListEntriesElement } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { isExtensionTab } from 'src/tab-management/utils'
-import type { UnifiedList } from 'src/annotations/cache/types'
-import type { PersonalList } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
-import ContentSharingBackground from 'src/content-sharing/background'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type ContentSharingBackground from 'src/content-sharing/background'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 
-const limitSuggestionsReturnLength = 1000
 const limitSuggestionsStorageLength = 25
 
 export default class CustomListBackground {
@@ -45,6 +38,7 @@ export default class CustomListBackground {
             storageManager: Storex
             searchIndex: SearchIndex
             analyticsBG: AnalyticsCoreInterface
+            contentSharingBackend: ContentSharingBackendInterface
             contentSharing: ContentSharingBackground
             pages: PageIndexingBackground
             tabManagement: TabManagementBackground
@@ -58,10 +52,6 @@ export default class CustomListBackground {
                 normalizedPageUrl: string,
                 listId: number,
             ) => Promise<void>
-            serverStorage: Pick<
-                ServerStorageModules,
-                'activityFollows' | 'contentSharing'
-            >
             pkmSyncBG?: PkmSyncInterface
         },
     ) {
@@ -85,26 +75,16 @@ export default class CustomListBackground {
             removeList: this.removeList,
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
-            fetchAllFollowedLists: this.fetchAllFollowedLists,
-            fetchCollaborativeLists: this.fetchCollaborativeLists,
             fetchListById: this.fetchListById,
-            fetchListByName: this.fetchListByName,
             fetchAnnotationRefsForRemoteListsOnPage: this
                 .fetchAnnotationRefsForRemoteListsOnPage,
-            fetchFollowedListsWithAnnotations: this
-                .fetchFollowedListsWithAnnotations,
             fetchSharedListDataWithPageAnnotations: this
                 .fetchSharedListDataWithPageAnnotations,
             fetchSharedListDataWithOwnership: this
                 .fetchSharedListDataWithOwnership,
             fetchListPagesByUrl: this.fetchListPagesByUrl,
             fetchPageListEntriesByUrl: this.fetchPageListEntriesByUrl,
-            fetchListIdsByUrl: this.fetchListIdsByUrl,
-            fetchInitialListSuggestions: this.fetchInitialListSuggestions,
-            fetchListPagesById: this.fetchListPagesById,
             fetchPageLists: this.fetchPageLists,
-            fetchListIgnoreCase: this.fetchListIgnoreCase,
-            searchForListSuggestions: this.searchForListSuggestions,
             addOpenTabsToList: this.addOpenTabsToList,
             removeOpenTabsFromList: this.removeOpenTabsFromList,
             updateListForPage: this.updateListForPage,
@@ -125,214 +105,17 @@ export default class CustomListBackground {
         return Date.now()
     }
 
-    private fetchOwnListReferences = async (): Promise<
-        SharedListReference[]
-    > => {
-        const { auth } = this.options.authServices
-        const { contentSharing } = this.options.serverStorage
-
-        const currentUser = await auth.getCurrentUser()
-        if (!currentUser) {
-            return []
-        }
-
-        return contentSharing.getListReferencesByCreator({
-            id: currentUser.id,
-            type: 'user-reference',
-        })
-    }
-
-    private fetchFollowedListReferences = async (): Promise<
-        SharedListReference[]
-    > => {
-        const { auth } = this.options.authServices
-        const { activityFollows } = this.options.serverStorage
-
-        const currentUser = await auth.getCurrentUser()
-        if (!currentUser) {
-            return []
-        }
-
-        const follows = await activityFollows.getAllFollowsByCollection({
-            collection: 'sharedList',
-            userReference: {
-                type: 'user-reference',
-                id: currentUser.id,
-            },
-        })
-
-        return follows.map(
-            (follow) =>
-                ({
-                    id: follow.objectId,
-                    type: 'shared-list-reference',
-                } as SharedListReference),
-        )
-    }
-
-    private fetchCollaborativeListReferences = async (): Promise<
-        SharedListReference[]
-    > => {
-        const { auth } = this.options.authServices
-        const { contentSharing } = this.options.serverStorage
-
-        const currentUser = await auth.getCurrentUser()
-        if (!currentUser) {
-            return []
-        }
-
-        const seenLists = new Set()
-        const listRoles = await contentSharing.getUserListRoles({
-            userReference: {
-                type: 'user-reference',
-                id: currentUser.id,
-            },
-        })
-
-        for (const { sharedList } of listRoles) {
-            if (seenLists.has(sharedList.id)) {
-                continue
-            }
-            seenLists.add(sharedList.id)
-        }
-
-        return [...seenLists].map(
-            (id) =>
-                ({ id, type: 'shared-list-reference' } as SharedListReference),
-        )
-    }
-
     fetchAnnotationRefsForRemoteListsOnPage: RemoteCollectionsInterface['fetchAnnotationRefsForRemoteListsOnPage'] = async ({
         sharedListIds,
         normalizedPageUrl,
     }) => {
-        const { contentSharing } = this.options.serverStorage
-
-        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForListsOnPage(
+        const response = await this.options.contentSharingBackend.loadPageAnnotationRefsForLists(
             {
-                listReferences: sharedListIds.map((id) => ({
-                    type: 'shared-list-reference',
-                    id,
-                })),
+                listIds: sharedListIds,
                 normalizedPageUrl,
             },
         )
-
-        return fromPairs(
-            Object.entries(listEntriesByPageByList).map(([listId, entries]) => [
-                listId,
-                entries.map((entry) => entry.sharedAnnotation),
-            ]),
-        )
-    }
-
-    fetchFollowedListsWithAnnotations: RemoteCollectionsInterface['fetchFollowedListsWithAnnotations'] = async ({
-        normalizedPageUrl,
-    }) => {
-        const { contentSharing } = this.options.serverStorage
-        const seenListIds = new Set()
-        const allListReferences = [
-            ...(await this.fetchOwnListReferences()),
-            ...(await this.fetchFollowedListReferences()),
-            ...(await this.fetchCollaborativeListReferences()),
-        ]
-
-        const uniqueListReferences = allListReferences.filter((listRef) => {
-            if (seenListIds.has(listRef.id)) {
-                return false
-            }
-
-            seenListIds.add(listRef.id)
-            return true
-        })
-
-        const fingerprints = await this.options.pages.getContentFingerprints({
-            normalizedUrl: normalizedPageUrl,
-        })
-
-        const sharedFingerprintsByList = fingerprints?.length
-            ? await contentSharing.getNormalizedUrlsByFingerprints({
-                  fingerprints,
-                  listReferences: uniqueListReferences,
-              })
-            : {}
-
-        const annotListEntriesByList = new Map<
-            string | number,
-            GetAnnotationListEntriesElement[]
-        >()
-
-        const listEntriesByPageByList = await contentSharing.getAnnotationListEntriesForLists(
-            { listReferences: uniqueListReferences },
-        )
-
-        for (const listReference of uniqueListReferences) {
-            let normalizedUrlInList = normalizedPageUrl
-            const sharedFingerprint = sharedFingerprintsByList[listReference.id]
-            if (sharedFingerprint) {
-                normalizedUrlInList = sharedFingerprint.normalizedUrl
-            }
-
-            if (
-                !listEntriesByPageByList[listReference.id]?.[
-                    normalizedUrlInList
-                ]?.length
-            ) {
-                continue
-            }
-            annotListEntriesByList.set(
-                listReference.id,
-                listEntriesByPageByList[listReference.id][normalizedUrlInList],
-            )
-        }
-
-        const sharedLists = await contentSharing.getListsByReferences(
-            [...annotListEntriesByList.keys()].map((id) => ({
-                id,
-                type: 'shared-list-reference',
-            })),
-        )
-
-        return sharedLists.map((list) => ({
-            id: list.reference.id as string,
-            name: list.title,
-            creatorReference: list.creator,
-            sharedAnnotationReferences: annotListEntriesByList
-                .get(list.reference.id)
-                .map((entry) => entry.sharedAnnotation),
-        }))
-    }
-
-    private fetchListsFromReferences = async (
-        references: SharedListReference[],
-    ): Promise<PageList[]> => {
-        const { auth } = this.options.authServices
-        const { contentSharing } = this.options.serverStorage
-
-        const sharedLists = await contentSharing.getListsByReferences(
-            references,
-        )
-        const currentUser = await auth.getCurrentUser()!
-
-        return sharedLists
-            .sort((a, b) => {
-                if (a.title < b.title) {
-                    return -1
-                }
-                if (a.title > b.title) {
-                    return 1
-                }
-                return 0
-            })
-            .map((sharedList) => ({
-                isOwned: sharedList.creator.id === currentUser.id,
-                remoteId: sharedList.reference.id as string,
-                description: sharedList.description,
-                id: sharedList.createdWhen,
-                name: sharedList.title,
-                isFollowed: true,
-                createdAt: new Date(sharedList.createdWhen),
-            }))
+        return response
     }
 
     fetchLocalDataForRemoteListEntryFromServer: RemoteCollectionsInterface['fetchLocalDataForRemoteListEntryFromServer'] = async ({
@@ -340,109 +123,46 @@ export default class CustomListBackground {
         remoteListId,
         opts,
     }) => {
-        const user = await this.options.authServices.auth.getCurrentUser()
-        if (!user) {
+        const response = await this.options.contentSharingBackend.loadLocalDataForListEntry(
+            {
+                listId: remoteListId,
+                normalizedPageUrl,
+                opts,
+            },
+        )
+        if (response.status === 'permission-denied') {
             throw new Error(
                 'Cannot get user data from server when unauthorized',
             )
         }
-
-        const { contentSharing } = this.options.serverStorage
-        const listReference: SharedListReference = {
-            type: 'shared-list-reference',
-            id: remoteListId,
-        }
-
-        const [
-            personalList,
-            sharedListEntry,
-            annotationListEntries,
-        ] = await Promise.all([
-            opts.needLocalListd
-                ? contentSharing.getUserPersonalListBySharedListRef({
-                      listReference,
-                      userReference: {
-                          type: 'user-reference',
-                          id: user.id,
-                      },
-                  })
-                : Promise.resolve(),
-            contentSharing.getListEntryByListAndUrl({
-                listReference,
-                normalizedPageUrl,
-            }),
-            opts.needAnnotsFlag
-                ? contentSharing.getAnnotationListEntriesForListsOnPage({
-                      listReferences: [listReference],
-                      normalizedPageUrl,
-                  })
-                : Promise.resolve(),
-        ])
-
-        if (
-            (opts.needLocalListd &&
-                (personalList as PersonalList)?.localId == null) ||
-            (opts.needAnnotsFlag &&
-                !annotationListEntries[remoteListId]?.length) ||
-            !sharedListEntry
-        ) {
+        if (response.status === 'not-found') {
             return null
         }
-
-        return {
-            sharedListEntryId: sharedListEntry.reference.id.toString(),
-            localListId: opts.needLocalListd
-                ? (personalList as PersonalList).localId
-                : undefined,
-            hasAnnotationsFromOthers: opts.needAnnotsFlag
-                ? annotationListEntries[remoteListId].some(
-                      (entry) => entry.creator.id !== user.id,
-                  )
-                : undefined,
-        }
+        return response.data
     }
 
     fetchSharedListDataWithPageAnnotations: RemoteCollectionsInterface['fetchSharedListDataWithPageAnnotations'] = async ({
         normalizedPageUrl,
         remoteListId,
     }) => {
-        const { contentSharing } = this.options.serverStorage
-        const listReference: SharedListReference = {
-            id: remoteListId,
-            type: 'shared-list-reference',
-        }
-        const sharedList = await contentSharing.getListByReference(
-            listReference,
+        const response = await this.options.contentSharingBackend.loadCollectionDetails(
+            {
+                listId: remoteListId,
+                normalizedPageUrl,
+            },
         )
 
-        if (sharedList == null) {
+        if (response.status === 'permission-denied') {
+            throw new Error(
+                'Cannot get user data from server when unauthorized',
+            )
+        }
+        if (response.status === 'not-found') {
             return null
         }
-
-        const {
-            [normalizedPageUrl]: annotations,
-        } = await contentSharing.getAnnotationsForPagesInList({
-            listReference,
-            normalizedPageUrls: [normalizedPageUrl],
-        })
-
-        if (!annotations) {
-            return {
-                ...sharedList,
-                sharedAnnotations: undefined,
-            }
-        }
-
         return {
-            ...sharedList,
-            sharedAnnotations: annotations.map(({ annotation }) => ({
-                ...annotation,
-                creator: { type: 'user-reference', id: annotation.creator },
-                reference: {
-                    type: 'shared-annotation-reference',
-                    id: annotation.id,
-                },
-            })),
+            ...response.data.retrievedList.sharedList,
+            sharedAnnotations: Object.values(response.data.annotations ?? {}),
         }
     }
 
@@ -454,38 +174,28 @@ export default class CustomListBackground {
             return null
         }
 
-        const { contentSharing } = this.options.serverStorage
-        const sharedList = await contentSharing.getListByReference({
-            id: remoteListId,
-            type: 'shared-list-reference',
-        })
-        if (sharedList == null) {
+        const response = await this.options.contentSharingBackend.loadCollectionDetails(
+            {
+                listId: remoteListId,
+            },
+        )
+        if (response.status === 'permission-denied') {
+            throw new Error(
+                'Cannot get user data from server when unauthorized',
+            )
+        }
+        if (response.status === 'not-found') {
             return null
         }
+        const sharedList = response.data.retrievedList.sharedList
 
         return {
             name: sharedList.title,
             id: sharedList.createdWhen,
-            remoteId: sharedList.reference.id as string,
+            remoteId: sharedList.reference.id.toString(),
             createdAt: new Date(sharedList.createdWhen),
             isOwned: sharedList.creator.id === currentUser.id,
         }
-    }
-
-    fetchAllFollowedLists: RemoteCollectionsInterface['fetchAllFollowedLists'] = async ({
-        skip = 0,
-        limit = 20,
-    }) => {
-        const sharedListReferences = await this.fetchFollowedListReferences()
-        return this.fetchListsFromReferences(sharedListReferences)
-    }
-
-    fetchCollaborativeLists: RemoteCollectionsInterface['fetchCollaborativeLists'] = async ({
-        skip = 0,
-        limit = 20,
-    }) => {
-        const collabListReferences = await this.fetchCollaborativeListReferences()
-        return this.fetchListsFromReferences(collabListReferences)
     }
 
     fetchAllLists: RemoteCollectionsInterface['fetchAllLists'] = async ({
@@ -550,10 +260,6 @@ export default class CustomListBackground {
         return this.storage.fetchPageListEntriesByUrl({
             normalizedPageUrl: normalizeUrl(url),
         })
-    }
-
-    fetchListIdsByUrl = async ({ url }: { url: string }) => {
-        return this.storage.fetchListIdsByUrl(normalizeUrl(url))
     }
 
     fetchPageLists = async ({ url }: { url: string }): Promise<number[]> => {
@@ -728,61 +434,6 @@ export default class CustomListBackground {
             listId: id,
             pageUrl: normalizeUrl(url),
         })
-    }
-
-    fetchInitialListSuggestions: RemoteCollectionsInterface['fetchInitialListSuggestions'] = async ({
-        extraListIds,
-    } = {}): Promise<Pick<UnifiedList, 'localId' | 'name' | 'remoteId'>[]> => {
-        const suggestionIds = await this.localStorage.get('suggestionIds')
-        const listToDisplayEntry = (
-            l: PageList,
-        ): Pick<UnifiedList, 'localId' | 'name' | 'remoteId'> => ({
-            localId: l.id,
-            name: l.name,
-            remoteId: null,
-        })
-
-        if (suggestionIds) {
-            const lists = await this.storage.fetchListByIds([
-                ...suggestionIds,
-                ...(extraListIds ?? []),
-            ])
-            return lists.map(listToDisplayEntry)
-        }
-
-        const lists = await this.fetchAllLists({
-            limit: limitSuggestionsStorageLength - (extraListIds?.length ?? 0),
-            skipSpecialLists: true,
-        })
-
-        if (extraListIds?.length) {
-            const extraLists = await this.storage.fetchListByIds(extraListIds)
-            lists.push(...extraLists)
-        }
-
-        await this.localStorage.set(
-            'suggestionIds',
-            lists.map((l) => l.id),
-        )
-        return lists.map(listToDisplayEntry)
-    }
-
-    fetchListIgnoreCase = async ({ name }: { name: string }) => {
-        return this.storage.fetchListIgnoreCase({
-            name,
-        })
-    }
-
-    searchForListSuggestions = async (args: {
-        query: string
-        limit?: number
-    }): Promise<Array<Omit<PageList, 'createdAt'> & { createdAt: number }>> => {
-        const suggestions = await this.storage.suggestLists(args)
-
-        return suggestions.map((s) => ({
-            ...s,
-            createdAt: s.createdAt.getTime(),
-        }))
     }
 
     addOpenTabsToList = async (args: {
