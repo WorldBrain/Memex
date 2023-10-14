@@ -1108,6 +1108,22 @@ export class SidebarContainerLogic extends UILogic<
         return listData
     }
 
+    setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
+        const { annotationsCache, contentSharingBG } = this.options
+        const list = annotationsCache.lists.byId[event.unifiedListId]
+        if (list?.localId == null) {
+            throw new Error('Tried to set privacy for non-cached list')
+        }
+        annotationsCache.updateList({
+            unifiedId: event.unifiedListId,
+            isPrivate: event.isPrivate,
+        })
+        await contentSharingBG.updateListPrivacy({
+            localListId: list.localId,
+            isPrivate: event.isPrivate,
+        })
+    }
+
     editListName: EventHandler<'editListName'> = async ({ event }) => {
         const newName = event.newName.trim()
         const listData = this.__getListDataByLocalId(
@@ -1941,7 +1957,7 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             }),
             async () => {
-                const annotationRefsByList = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
+                const response = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
                     {
                         normalizedPageUrl: normalizeUrl(state.fullPageUrl),
                         sharedListIds: lists.map((list) => list.remoteId!),
@@ -1953,10 +1969,13 @@ export class SidebarContainerLogic extends UILogic<
                 > = {}
 
                 for (const { unifiedId, remoteId } of lists) {
-                    mutation[unifiedId] = {
-                        sharedAnnotationReferences: {
-                            $set: annotationRefsByList[remoteId] ?? [],
-                        },
+                    const result = response[remoteId]
+                    if (result?.status === 'success') {
+                        mutation[unifiedId] = {
+                            sharedAnnotationReferences: { $set: result.data },
+                        }
+                    } else {
+                        // TODO: Handle non-success cases in UI
                     }
                 }
 
@@ -3188,6 +3207,7 @@ export class SidebarContainerLogic extends UILogic<
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
+                isPrivate: false,
             }
             this.emitMutation({
                 pageListDataForCurrentPage: { $set: cacheListData },

@@ -1192,6 +1192,12 @@ export class AnnotationsSidebarContainer<
                                             oldName: listData.name,
                                         })
                                     }}
+                                    onSetSpacePrivate={(isPrivate) =>
+                                        this.processEvent('setListPrivacy', {
+                                            unifiedListId: listData.unifiedId,
+                                            isPrivate,
+                                        })
+                                    }
                                     onSpaceShare={(
                                         remoteListId,
                                         annotationLocalToRemoteIdsDict,
@@ -1212,7 +1218,6 @@ export class AnnotationsSidebarContainer<
                                         })
                                     }
                                     analyticsBG={this.props.analyticsBG}
-                                    currentUser={this.props.getCurrentUser().id}
                                 />
                             )}
                             renderPageLinkMenuForList={(listData) => (

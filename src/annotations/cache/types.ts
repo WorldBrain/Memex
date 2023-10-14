@@ -70,6 +70,7 @@ export interface PageAnnotationsCacheInterface {
                     | 'normalizedPageUrl'
                     | 'hasRemoteAnnotationsToLoad'
                     | 'sharedListEntryId'
+                    | 'isPrivate'
                 >
             >,
     ) => void
@@ -133,6 +134,7 @@ type CoreUnifiedList<T> = {
     remoteId?: string
     collabKey?: string
     name: string
+    isPrivate?: boolean
     description?: string
     creator?: UserReference
     hasRemoteAnnotationsToLoad: boolean

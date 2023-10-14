@@ -371,6 +371,10 @@ interface SidebarEvents {
         remoteListId: AutoPk
         annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
     }
+    setListPrivacy: {
+        unifiedListId: UnifiedList['unifiedId']
+        isPrivate: boolean
+    }
 
     goToAnnotationInNewTab: {
         unifiedAnnotationId: UnifiedAnnotation['unifiedId']

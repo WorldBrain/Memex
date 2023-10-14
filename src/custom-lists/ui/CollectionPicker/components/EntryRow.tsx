@@ -15,7 +15,9 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onUnfocus: () => void
     onPressActOnAll?: () => void
     onContextMenuBtnPress?: () => void
+    onEditMenuBtnPress?: () => void
     index: number
+    shareState: 'private' | 'shared'
     id?: string
     removeTooltipText?: string
     actOnAllTooltipText?: string
@@ -47,6 +49,12 @@ class EntryRow extends React.Component<Props> {
         e.stopPropagation()
         return false
     }
+    private handleEditMenuBtnPress: React.MouseEventHandler = (e) => {
+        this.props.onEditMenuBtnPress()
+        e.preventDefault()
+        e.stopPropagation()
+        return false
+    }
 
     private resultEntryRef = createRef<HTMLDivElement>()
     private pressAllButtonRef = createRef<HTMLDivElement>()
@@ -56,7 +64,6 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
-        console.log('ref', this.props.goToButtonRef?.current)
         if (!e.shiftKey) {
             if (
                 this.props.contextMenuBtnRef?.current.contains(
@@ -111,6 +118,7 @@ class EntryRow extends React.Component<Props> {
             contextMenuBtnRef,
             goToButtonRef,
             keyboardNavActive,
+            shareState,
         } = this.props
 
         let cleanID = parseInt(id.split('ListKeyName-')[1])
@@ -136,7 +144,7 @@ class EntryRow extends React.Component<Props> {
             >
                 <NameWrapper>
                     {resultItem}
-                    {remoteId != null && (
+                    {shareState === 'shared' && (
                         <TooltipBox
                             tooltipText={'Shared Space'}
                             placement="bottom"
@@ -155,7 +163,20 @@ class EntryRow extends React.Component<Props> {
                     {focused && this.props.onContextMenuBtnPress != null && (
                         <>
                             <TooltipBox
-                                tooltipText={'Share & Edit Space'}
+                                tooltipText={'Edit Space'}
+                                placement="bottom"
+                                targetElementRef={contextMenuBtnRef?.current}
+                            >
+                                <ButtonContainer ref={contextMenuBtnRef}>
+                                    <Icon
+                                        filePath={icons.edit}
+                                        heightAndWidth="20px"
+                                        onClick={this.handleEditMenuBtnPress}
+                                    />
+                                </ButtonContainer>
+                            </TooltipBox>
+                            <TooltipBox
+                                tooltipText={'Share Space'}
                                 placement="bottom"
                                 targetElementRef={contextMenuBtnRef?.current}
                             >
