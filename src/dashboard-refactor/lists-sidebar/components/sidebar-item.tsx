@@ -9,6 +9,7 @@ export interface Props {
     name: string
     isSelected: boolean
     isPrivate?: boolean
+    isShared?: boolean
     alwaysShowRightSideIcon?: boolean
     dropReceivingState?: DropReceivingState
     onClick: React.MouseEventHandler
@@ -45,6 +46,7 @@ export default class ListsSidebarItem extends React.PureComponent<
     }
 
     render() {
+        console.log('isshsared', this.props.isShared)
         return (
             <Container>
                 <SidebarItem
@@ -69,7 +71,7 @@ export default class ListsSidebarItem extends React.PureComponent<
                     <TitleBox>
                         <ListTitle>
                             <Name>{this.props.name}</Name>
-                            {!this.props.isPrivate && (
+                            {this.props.isShared && (
                                 <TooltipBox
                                     tooltipText="Shared Space"
                                     placement="bottom"

@@ -150,6 +150,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     list.unifiedId,
                                 )}
                                 isPrivate={list.isPrivate}
+                                isShared={
+                                    list.remoteId != null && !list.isPrivate
+                                }
                                 areAnyMenusDisplayed={
                                     this.props.showMoreMenuListId ===
                                         list.unifiedId ||
@@ -243,7 +246,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 dropReceivingState={this.props.initDropReceivingState(
                                     list.unifiedId,
                                 )}
-                                isPrivate
+                                isPrivate={list.isPrivate}
+                                isShared={
+                                    list.remoteId != null && !list.isPrivate
+                                }
                             />
                         ))}
                     </ListsSidebarGroup>

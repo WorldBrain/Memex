@@ -292,6 +292,10 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 shareResult.annotationLocalToRemoteIdsDict,
             )
 
+            if (event.privacyStatus === 'private') {
+                await this.dependencies.onSetSpacePrivate(true)
+            }
+
             this.emitMutation({
                 showSuccessMsg: { $set: true },
                 inviteLinks: { $set: shareResult.links },
@@ -309,10 +313,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 localListId: listData.localId,
             })
         })
-
-        if (event.privacyStatus === 'private') {
-            await this.dependencies.onSetSpacePrivate(true)
-        }
 
         setTimeout(
             () => this.emitMutation({ showSuccessMsg: { $set: false } }),
