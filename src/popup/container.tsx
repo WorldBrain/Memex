@@ -375,7 +375,9 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     <ButtonContainer>
                         <Icon
                             onClick={() =>
-                                window.open('https://worldbrain.io/tutorials')
+                                window.open(
+                                    'https://tutorials.memex.garden/tutorials',
+                                )
                             }
                             filePath={icons.helpIcon}
                             heightAndWidth={'20px'}
