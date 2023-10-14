@@ -443,7 +443,9 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG && options.dontTrack == null) {
             try {
-                trackSpaceCreate(this.options.analyticsBG, { type: 'shared' })
+                await trackSpaceCreate(this.options.analyticsBG, {
+                    type: 'shared',
+                })
             } catch (error) {
                 console.error(`Error tracking space share event', ${error}`)
             }
@@ -492,7 +494,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackSharedAnnotation(this.options.analyticsBG, {
+                await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'bulk',
                 })
             } catch (error) {
@@ -523,7 +525,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackSharedAnnotation(this.options.analyticsBG, {
+                await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'autoShared',
                 })
             } catch (error) {
@@ -628,7 +630,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackUnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'autoShared',
                 })
             } catch (error) {
@@ -653,7 +655,7 @@ export default class ContentSharingBackground {
         )
         if (this.options.analyticsBG) {
             try {
-                trackSharedAnnotation(this.options.analyticsBG, {
+                await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'shared',
                 })
             } catch (error) {
@@ -676,7 +678,7 @@ export default class ContentSharingBackground {
         )
         if (this.options.analyticsBG) {
             try {
-                trackUnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'shared',
                 })
             } catch (error) {
@@ -721,7 +723,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackUnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'bulk',
                 })
             } catch (error) {
@@ -798,7 +800,7 @@ export default class ContentSharingBackground {
         ) {
             if (this.options.analyticsBG) {
                 try {
-                    trackSharedAnnotation(this.options.analyticsBG, {
+                    await trackSharedAnnotation(this.options.analyticsBG, {
                         type: 'autoShared',
                     })
                 } catch (error) {
@@ -1044,7 +1046,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackPageLinkCreate(this.options.analyticsBG, {
+                await trackPageLinkCreate(this.options.analyticsBG, {
                     source: 'extension',
                 })
             } catch (error) {

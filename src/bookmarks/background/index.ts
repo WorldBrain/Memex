@@ -115,7 +115,7 @@ export default class BookmarksBackground {
 
         await this.storage.createBookmarkIfNeeded(fullUrl, params.timestamp)
 
-        trackBookmarkCreate(this.options.analyticsBG)
+        await trackBookmarkCreate(this.options.analyticsBG)
     }
 
     delPageBookmark = async ({ url }: { url: string }) => {

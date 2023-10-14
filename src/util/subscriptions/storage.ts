@@ -231,7 +231,7 @@ export async function pageActionAllowed(analyticsBG) {
     } else {
         if (analyticsBG) {
             try {
-                trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+                await trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
             } catch (error) {
                 console.error(
                     `Error tracking space Entry create event', ${error}`,
@@ -260,7 +260,7 @@ export async function AIActionAllowed(analyticsBG) {
     } else {
         if (analyticsBG) {
             try {
-                trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+                await trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
             } catch (error) {
                 console.error(
                     `Error tracking space Entry create event', ${error}`,
