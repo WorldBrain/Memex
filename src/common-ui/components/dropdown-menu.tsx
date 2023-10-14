@@ -109,6 +109,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                     isSelected={true}
                     backgroundColor={this.props.backgroundColor}
                     elementHeight={this.props.elementHeight}
+                    isOpened={this.state.isOpened}
                 >
                     <MenuItemName isSelected={true}>
                         <MenuItemBox>
@@ -138,6 +139,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                             isSelected={this.state.selected === i}
                             backgroundColor={this.props.backgroundColor}
                             elementHeight={this.props.elementHeight}
+                            isOpened={this.state.isOpened}
                         >
                             <MenuItemName
                                 isSelected={this.state.selected === i}
@@ -205,6 +207,7 @@ const MenuItem = styled.div<{
     isSelected
     backgroundColor
     elementHeight: string
+    isOpened: boolean
 }>`
     background: ${(props) =>
         props.backgroundColor && props.theme.colors[props.backgroundColor]};
@@ -217,7 +220,7 @@ const MenuItem = styled.div<{
     justify-content: center;
     white-space: nowrap;
     border-radius: 6px;
-    cursor: ${(props) => !props.isSelected && 'pointer'};
+    cursor: ${(props) => !props.isSelected && !props.isOpened && 'pointer'};
     height: ${(props) => (props.elementHeight ? props.elementHeight : '60px')};
 
     ${(props) =>
