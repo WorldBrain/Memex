@@ -387,7 +387,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         const isPageLink = this.props.listData.type === 'page-link'
         const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
 
-        console.log('listdata', this.props.listData.isPrivate)
         return (
             <ContextMenuContainer>
                 {this.props.isCreator && this.props.listData.remoteId != null && (

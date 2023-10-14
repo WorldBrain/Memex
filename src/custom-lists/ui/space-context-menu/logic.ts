@@ -122,7 +122,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         let state = previousState
         await loadInitial(this, async () => {
             if (this.dependencies.listData.remoteId == null) {
-                console.log('execute share')
                 await this.processUIEvent('shareSpace', {
                     event: { privacyStatus: 'private' },
                     previousState,
@@ -139,11 +138,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             if (this.dependencies.loadOwnershipData) {
                 state = await this.loadSpaceOwnership(previousState)
             }
-
-            // If my own list, load collab links and potential email invite links
-
-            //await this.processUIEvent('shareSpace', null)
-            console.log('afterinit')
         })
     }
 
@@ -272,7 +266,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     }
 
     shareSpace: EventHandler<'shareSpace'> = async ({ event }) => {
-        console.log('call share')
         const {
             listData,
             onSpaceShare,

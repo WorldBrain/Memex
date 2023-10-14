@@ -64,7 +64,6 @@ class EntryRow extends React.Component<Props> {
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
-        console.log('ref', this.props.goToButtonRef?.current)
         if (!e.shiftKey) {
             if (
                 this.props.contextMenuBtnRef?.current.contains(

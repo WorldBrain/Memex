@@ -46,7 +46,6 @@ export default class ListsSidebarItem extends React.PureComponent<
     }
 
     render() {
-        console.log('isshsared', this.props.isShared)
         return (
             <Container>
                 <SidebarItem

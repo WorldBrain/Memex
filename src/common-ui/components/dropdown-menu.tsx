@@ -83,7 +83,6 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
         props: MenuItemProps,
         index: number,
     ) => React.MouseEventHandler = (props, index) => (e) => {
-        console.log('handleItemClick')
         if (props.isDisabled) {
             e.preventDefault()
             return
