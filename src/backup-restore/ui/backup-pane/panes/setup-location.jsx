@@ -97,12 +97,12 @@ export default class SetupLocation extends React.Component {
                     <span>
                         Download & start the app. Make sure to move it into your
                         application folder. Then click on "I'm ready!"
-                        <a
+                        {/* <a
                             target="_blank"
                             href="https://links.memex.garden/tutorials/backups"
                         >
                             Learn more ▸
-                        </a>
+                        </a> */}
                     </span>
                 }
             >
@@ -168,12 +168,12 @@ export default class SetupLocation extends React.Component {
                 description={
                     <span>
                         Select a folder to put your backup into.
-                        <a
+                        {/* <a
                             target="_blank"
-                            href="https://worldbrain.io/tutorials/backups"
+                            href="https://tutorials.memex.garden/tutorials/backups"
                         >
                             &nbsp; Learn more ▸
-                        </a>
+                        </a> */}
                     </span>
                 }
             >

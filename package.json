@@ -1,7 +1,7 @@
 {
     "name": "worldbrain-extension",
     "version": "3.8.0",
-    "homepage": "https://worldbrain.io",
+    "homepage": "https://memex.garden",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
         "build": "npm run build:clean && webpack",
