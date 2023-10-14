@@ -111,6 +111,20 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         // If we don't have this, events will bubble up into the page!
         e.stopPropagation()
     }
+    private handleAddInviteInputKeyDown: React.KeyboardEventHandler = async (
+        e,
+    ) => {
+        if (e.key === 'Enter') {
+            if (this.state.emailInviteInputValue.trim().length > 0) {
+                e.preventDefault()
+                e.stopPropagation()
+                await this.processEvent('inviteViaEmail', {})
+            }
+        }
+
+        // If we don't have this, events will bubble up into the page!
+        e.stopPropagation()
+    }
 
     private renderLoadingSpinner = () => (
         <LoadingContainer>
@@ -255,7 +269,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         disabled={this.props.disableWriteOps}
                         placeholder="Add email address"
                         icon="mail"
-                        // onKeyDown={this.handleNameEditInputKeyDown}
+                        onKeyDown={this.handleAddInviteInputKeyDown}
                     />
 
                     {this.shouldShowInviteBtn && (
