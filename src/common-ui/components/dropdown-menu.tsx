@@ -220,7 +220,7 @@ const MenuItem = styled.div<{
     justify-content: center;
     white-space: nowrap;
     border-radius: 6px;
-    cursor: ${(props) => !props.isSelected && !props.isOpened && 'pointer'};
+    cursor: pointer;
     height: ${(props) => (props.elementHeight ? props.elementHeight : '60px')};
 
     ${(props) =>
@@ -228,6 +228,17 @@ const MenuItem = styled.div<{
         css`
             cursor: pointer;
 
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+            }
+
+            & * {
+                cursor: pointer;
+            }
+        `};
+    ${(props) =>
+        !props.isOpened &&
+        css`
             &:hover {
                 outline: 1px solid ${(props) => props.theme.colors.greyScale3};
             }
