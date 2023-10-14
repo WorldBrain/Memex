@@ -507,7 +507,7 @@ export async function main(
             await inPageUI.hideTooltip()
             if (analyticsBG) {
                 try {
-                    trackAnnotationCreate(analyticsBG, {
+                    await trackAnnotationCreate(analyticsBG, {
                         annotationType: 'highlight',
                     })
                 } catch (error) {
@@ -623,7 +623,7 @@ export async function main(
             if (analyticsBG) {
                 // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
                 try {
-                    trackAnnotationCreate(analyticsBG, {
+                    await trackAnnotationCreate(analyticsBG, {
                         annotationType: 'highlight',
                     })
                 } catch (error) {
@@ -1138,7 +1138,7 @@ export async function main(
 
     if (analyticsBG && hasActivity) {
         try {
-            trackPageActivityIndicatorHit(analyticsBG)
+            await trackPageActivityIndicatorHit(analyticsBG)
         } catch (error) {
             console.error(`Error tracking space create event', ${error}`)
         }

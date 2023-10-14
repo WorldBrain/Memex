@@ -264,6 +264,12 @@ export default class Ribbon extends Component<Props, State> {
 
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
+        const center = this.props.ribbonPosition === 'centerRight'
+        const sidebarOpen = this.props.sidebar.isSidebarOpen
+
+        const condition1 = (topRight || bottomRight) && !sidebarOpen
+        const condition2 = center && !sidebarOpen
+        const condition3 = sidebarOpen
 
         return (
             <PopoutBox
@@ -276,17 +282,9 @@ export default class Ribbon extends Component<Props, State> {
                         : 'left-start'
                 }
                 offsetX={
-                    (topRight || bottomRight) &&
-                    !this.props.sidebar.isSidebarOpen
-                        ? 10
-                        : 10
+                    condition1 ? 10 : condition2 ? 10 : condition3 ? 10 : 0
                 }
-                offsetY={
-                    (topRight || bottomRight) &&
-                    !this.props.sidebar.isSidebarOpen
-                        ? 20
-                        : 0
-                }
+                offsetY={condition1 ? 20 : condition2 ? 0 : condition3 ? 0 : 0}
                 closeComponent={this.hideListPicker}
             >
                 <CollectionPicker

@@ -77,7 +77,7 @@ export default class SummarizeBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackQueryAI(this.options.analyticsBG)
+                await trackQueryAI(this.options.analyticsBG)
             } catch (error) {
                 console.error(`Error tracking space create event', ${error}`)
             }
@@ -123,7 +123,7 @@ export default class SummarizeBackground {
         )
         if (this.options.analyticsBG) {
             try {
-                trackQueryAI(this.options.analyticsBG)
+                await trackQueryAI(this.options.analyticsBG)
             } catch (error) {
                 console.error(`Error tracking space create event', ${error}`)
             }
