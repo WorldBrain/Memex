@@ -325,61 +325,64 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         normalizedStateToArray(this.state.emailInvites).length >
                             0 && (
                             <EmailListContainer>
-                                {normalizedStateToArray(
-                                    this.state.emailInvites,
-                                ).map((invite) => (
-                                    <InviteItemContainer
-                                        onMouseEnter={() => {
-                                            this.processEvent(
-                                                'setEmailInvitesHoverState',
-                                                { id: invite.id },
-                                            )
-                                        }}
-                                        onMouseLeave={() => {
-                                            this.processEvent(
-                                                'setEmailInvitesHoverState',
-                                                { id: null },
-                                            )
-                                        }}
-                                        key={invite.id}
-                                    >
-                                        <InvitedBox>
-                                            <InvitedEmail>
-                                                {invite.email}
-                                            </InvitedEmail>
-                                        </InvitedBox>
-                                        {this.state.emailInvitesHoverState ===
-                                        invite.id ? (
-                                            <PrimaryAction
-                                                onClick={() =>
-                                                    this.processEvent(
-                                                        'deleteEmailInvite',
-                                                        {
-                                                            key: invite.sharedListKey.toString(),
-                                                        },
-                                                    )
-                                                }
-                                                /* sharedListKey will be missing between when the user creates an invite and when the server-side write actually completes. */
-                                                disabled={
-                                                    invite.sharedListKey == null
-                                                }
-                                                type="tertiary"
-                                                label="Remove"
-                                                icon={'removeX'}
-                                                fontSize="12px"
-                                                iconSize="16px"
-                                                iconColor="greyScale5"
-                                                padding="0px 5px 0px 0px"
-                                            />
-                                        ) : (
-                                            <InvitedPermission>
-                                                {sharedListRoleIDToString(
-                                                    invite.roleID,
-                                                )}
-                                            </InvitedPermission>
-                                        )}
-                                    </InviteItemContainer>
-                                ))}
+                                {normalizedStateToArray(this.state.emailInvites)
+                                    .slice()
+                                    .reverse()
+                                    .map((invite) => (
+                                        <InviteItemContainer
+                                            onMouseEnter={() => {
+                                                this.processEvent(
+                                                    'setEmailInvitesHoverState',
+                                                    { id: invite.id },
+                                                )
+                                            }}
+                                            onMouseLeave={() => {
+                                                this.processEvent(
+                                                    'setEmailInvitesHoverState',
+                                                    { id: null },
+                                                )
+                                            }}
+                                            key={invite.id}
+                                        >
+                                            <InvitedBox>
+                                                <InvitedEmail>
+                                                    {invite.email}
+                                                </InvitedEmail>
+                                            </InvitedBox>
+                                            {this.state
+                                                .emailInvitesHoverState ===
+                                            invite.id ? (
+                                                <PrimaryAction
+                                                    onClick={() =>
+                                                        this.processEvent(
+                                                            'deleteEmailInvite',
+                                                            {
+                                                                key: invite.sharedListKey.toString(),
+                                                            },
+                                                        )
+                                                    }
+                                                    /* sharedListKey will be missing between when the user creates an invite and when the server-side write actually completes. */
+                                                    disabled={
+                                                        invite.sharedListKey ==
+                                                        null
+                                                    }
+                                                    type="tertiary"
+                                                    label="Remove"
+                                                    icon={'removeX'}
+                                                    fontSize="12px"
+                                                    iconSize="16px"
+                                                    iconColor="greyScale5"
+                                                    padding="0px 5px 0px 0px"
+                                                />
+                                            ) : (
+                                                <InvitedPermission>
+                                                    {sharedListRoleIDToString(
+                                                        invite.roleID,
+                                                    )}
+                                                </InvitedPermission>
+                                            )}
+                                        </InviteItemContainer>
+                                    ))}
                             </EmailListContainer>
                         )}
                 </Container>
@@ -453,7 +456,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
 const EmailListContainer = styled.div`
     width: fill-available;
-    display: flex;
+    display: block;
     flex-direction: column;
     align-items: flex-start;
     max-height: 150px;
