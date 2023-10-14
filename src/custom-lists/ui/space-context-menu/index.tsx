@@ -305,7 +305,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         </>
                     )}
 
-                    {this.state.emailInvitesLoadState === 'success' &&
+                    {(this.state.emailInvitesLoadState === 'success' ||
+                        this.state.emailInvitesLoadState === 'pristine') &&
+                        !this.shouldShowInviteBtn &&
                         normalizedStateToArray(this.state.emailInvites).length >
                             0 && (
                             <EmailListContainer>

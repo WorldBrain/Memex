@@ -62,7 +62,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                 >
                     <Icon
                         onClick={(e) => this.toggleMenu(e)}
-                        heightAndWidth="14px"
+                        heightAndWidth="18px"
                         filePath={icons.invite}
                         active={this.props.isMenuDisplayed}
                         containerRef={this.spaceContextMenuButton}

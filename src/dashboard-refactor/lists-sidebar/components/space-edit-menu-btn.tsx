@@ -61,13 +61,13 @@ export default class SpaceEditMenuBtn extends PureComponent<Props> {
                 >
                     <Icon
                         onClick={(e) => this.toggleEditMenu(e)}
-                        heightAndWidth="14px"
+                        heightAndWidth="18px"
                         filePath={icons.edit}
                         active={this.props.isMenuDisplayed}
                         containerRef={this.spaceEditMenuButton}
                     />
+                    {this.renderContextMenu()}
                 </TooltipBox>
-                {this.renderContextMenu()}
             </>
         )
     }

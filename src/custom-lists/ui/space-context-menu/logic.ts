@@ -121,6 +121,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         let state = previousState
         await loadInitial(this, async () => {
+            console.log('init', this.dependencies.listData)
             if (this.dependencies.listData.remoteId == null) {
                 await this.processUIEvent('shareSpace', {
                     event: { privacyStatus: 'private' },
@@ -302,6 +303,9 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
 
         await executeUITask(this, 'listShareLoadState', async () => {
+            if (event.privacyStatus === 'private') {
+                await this.dependencies.onSetSpacePrivate(true)
+            }
             await contentSharingBG.waitForListShare({
                 localListId: listData.localId,
             })
@@ -414,12 +418,22 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             },
         })
         await executeUITask(this, 'emailInvitesCreateState', async () => {
+            let remoteId = this.dependencies.listData.remoteId
+
+            if (remoteId == null) {
+                remoteId = await this.dependencies.contentSharingBG.getRemoteListId(
+                    {
+                        localListId: this.dependencies.listData.localId,
+                    },
+                )
+            }
+
             const result = await this.dependencies.contentSharingBG.createListEmailInvite(
                 {
                     now,
                     email,
                     roleID,
-                    listId: this.dependencies.listData.remoteId,
+                    listId: remoteId,
                 },
             )
             if (result.status === 'success') {

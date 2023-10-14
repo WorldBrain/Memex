@@ -3207,6 +3207,7 @@ export class SidebarContainerLogic extends UILogic<
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
+                isPrivate: false,
             }
             this.emitMutation({
                 pageListDataForCurrentPage: { $set: cacheListData },
