@@ -41,7 +41,6 @@ export interface ListsSidebarProps extends ListsSidebarState {
         SpaceContextMenuBtnProps,
         'isMenuDisplayed' | 'errorMessage' | 'listData' | 'isCreator'
     >
-    initEditMenuBtnProps: (listId: string) => SpaceEditMenuBtnProps
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup
     joinedListsGroup: ListGroup

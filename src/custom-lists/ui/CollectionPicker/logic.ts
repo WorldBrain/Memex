@@ -151,6 +151,7 @@ export default class SpacePickerLogic extends UILogic<
         contextMenuPositionY: 0,
         keyboardNavActive: false,
         addedToAllIds: [],
+        editMenuListId: null,
     })
 
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState']

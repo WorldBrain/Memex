@@ -75,6 +75,7 @@ class SpacePicker extends StatefulUIElement<
 
     private displayListRef = React.createRef<HTMLDivElement>()
     private contextMenuRef = React.createRef<SpaceContextMenu>()
+    private editMenuRef = React.createRef<SpaceEditMenu>()
     private contextMenuBtnRef = React.createRef<HTMLDivElement>()
     private goToButtonRef = React.createRef<HTMLDivElement>()
 
@@ -465,7 +466,7 @@ class SpacePicker extends StatefulUIElement<
                             list.creator?.id === this.state.currentUser?.id
                         }
                         listData={list}
-                        ref={this.contextMenuRef}
+                        ref={this.editMenuRef}
                         contentSharingBG={this.props.contentSharingBG}
                         analyticsBG={this.props.analyticsBG}
                         spacesBG={this.props.spacesBG}
