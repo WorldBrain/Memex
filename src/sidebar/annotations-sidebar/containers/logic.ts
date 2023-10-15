@@ -260,6 +260,7 @@ export class SidebarContainerLogic extends UILogic<
             selectedListId: null,
             spaceTitleEditValue: '',
             activeListContextMenuId: null,
+            activeListEditMenuId: null,
 
             commentBox: { ...INIT_FORM_STATE },
 
@@ -518,6 +519,11 @@ export class SidebarContainerLogic extends UILogic<
             runtimeAPI,
         } = this.options
 
+        const userReference = await this.options.getCurrentUser()
+        this.emitMutation({
+            currentUserReference: { $set: userReference ?? null },
+        })
+
         this.setupRemoteEventListeners()
         annotationsCache.events.addListener(
             'newAnnotationsState',
@@ -534,11 +540,6 @@ export class SidebarContainerLogic extends UILogic<
         // Set initial state, based on what's in the cache (assuming it already has been hydrated)
         this.cacheAnnotationsSubscription(annotationsCache.annotations)
         this.cacheListsSubscription(annotationsCache.lists)
-
-        const userReference = this.options.getCurrentUser()
-        this.emitMutation({
-            currentUserReference: { $set: userReference ?? null },
-        })
 
         this.sidebar = document
             .getElementById('memex-sidebar-container')
@@ -1051,6 +1052,24 @@ export class SidebarContainerLogic extends UILogic<
                 : event.unifiedListId
 
         this.emitMutation({ activeListContextMenuId: { $set: nextActiveId } })
+    }
+    openEditMenuForList: EventHandler<'openEditMenuForList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listInstance = previousState.listInstances[event.unifiedListId]
+        if (!listInstance) {
+            throw new Error(
+                'Could not find list instance to open context menu for',
+            )
+        }
+
+        const nextActiveId =
+            previousState.activeListEditMenuId === event.unifiedListId
+                ? null
+                : event.unifiedListId
+
+        this.emitMutation({ activeListEditMenuId: { $set: nextActiveId } })
     }
 
     openPageListMenuForList: EventHandler<'openPageListMenuForList'> = async ({

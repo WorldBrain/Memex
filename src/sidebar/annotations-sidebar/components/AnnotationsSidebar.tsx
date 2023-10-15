@@ -136,6 +136,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
+    renderEditMenuForList: (listData: UnifiedList) => JSX.Element
     renderPageLinkMenuForList: (listData: UnifiedList) => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
@@ -164,6 +165,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     isDataLoading: boolean
     theme: Partial<SidebarTheme>
     openContextMenuForList: (
+        unifiedListId: UnifiedList['unifiedId'] | null,
+    ) => void
+    openEditMenuForList: (
         unifiedListId: UnifiedList['unifiedId'] | null,
     ) => void
     openPageListMenuForList: () => void
@@ -258,8 +262,12 @@ export class AnnotationsSidebar extends React.Component<
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
     private editPageLinkButtonRef = React.createRef<HTMLDivElement>()
     private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
+    private shareInviteButtonRef = React.createRef<HTMLDivElement>()
     private spaceTitleEditFieldRef = React.createRef<HTMLInputElement>()
     private spaceContextBtnRefs: {
+        [unifiedListId: string]: React.RefObject<HTMLDivElement>
+    } = {}
+    private spaceEditBtnRefs: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
     private spaceUnfoldButtonRef: {
@@ -298,6 +306,14 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
         this.spaceContextBtnRefs[unifiedId] = React.createRef()
+    }
+    private maybeCreateEditBtnRef({
+        unifiedId,
+    }: Pick<UnifiedList, 'unifiedId'>): void {
+        if (this.spaceEditBtnRefs[unifiedId]) {
+            return
+        }
+        this.spaceEditBtnRefs[unifiedId] = React.createRef()
     }
     private maybeCreatespaceUnfoldButtonRef({
         unifiedId,
@@ -943,28 +959,43 @@ export class AnnotationsSidebar extends React.Component<
         listInstance: ListInstance,
     ) {
         const title = listData.name
+        let keepHovered = false
+
+        if (
+            this.props.activeListContextMenuId === listData.unifiedId ||
+            this.props.activeListEditMenuId === listData.unifiedId
+        ) {
+            keepHovered = true
+        } else {
+            keepHovered = false
+        }
+
         return (
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
                 key={listData.unifiedId}
                 top="5px"
-                onMouseOver={() =>
+                onMouseOver={() => {
                     this.setState({
                         hoveredListId: listData.unifiedId,
                     })
-                }
+                }}
                 onMouseLeave={() => {
                     this.setState({
                         hoveredListId: null,
                     })
                 }}
-                isHovered={this.state.hoveredListId === listData.unifiedId}
+                isHovered={
+                    keepHovered ||
+                    this.state.hoveredListId === listData.unifiedId
+                }
             >
                 <FollowedListRow
                     onClick={() =>
                         this.props.onUnifiedListSelect(listData.unifiedId)
                     }
                     zIndex={listData.unifiedId}
+                    keepHovered={keepHovered}
                 >
                     <FollowedListTitleContainer>
                         <TooltipBox
@@ -1022,41 +1053,97 @@ export class AnnotationsSidebar extends React.Component<
                             {listData.localId != null &&
                                 listData.creator?.id ===
                                     this.props.currentUser?.id && (
-                                    <TooltipBox
-                                        tooltipText="Share Space"
-                                        placement="bottom-end"
-                                    >
-                                        <Icon
-                                            icon="invite"
-                                            height="20px"
-                                            onClick={(e) => {
-                                                e.stopPropagation()
-                                                this.props.openContextMenuForList(
-                                                    listData.unifiedId,
-                                                )
-                                            }}
-                                            containerRef={
-                                                this.spaceContextBtnRefs[
+                                    <>
+                                        <TooltipBox
+                                            tooltipText="Edit Space"
+                                            placement="bottom"
+                                        >
+                                            <Icon
+                                                icon="edit"
+                                                height="20px"
+                                                onClick={(e) => {
+                                                    e.stopPropagation()
+                                                    this.props.openEditMenuForList(
+                                                        listData.unifiedId,
+                                                    )
+                                                }}
+                                                containerRef={
+                                                    this.spaceEditBtnRefs[
+                                                        listData.unifiedId
+                                                    ]
+                                                }
+                                                background={
+                                                    this.props
+                                                        .activeListEditMenuId ===
                                                     listData.unifiedId
-                                                ]
-                                            }
-                                        />
-                                    </TooltipBox>
+                                                        ? 'greyScale2'
+                                                        : null
+                                                }
+                                            />
+                                        </TooltipBox>
+                                        {!listData.isPrivate ? (
+                                            <TooltipBox
+                                                tooltipText="Space is Shared"
+                                                placement="bottom-end"
+                                            >
+                                                <Icon
+                                                    filePath="peopleFine"
+                                                    heightAndWidth="22px"
+                                                    color="white"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        this.props.openContextMenuForList(
+                                                            listData.unifiedId,
+                                                        )
+                                                    }}
+                                                    containerRef={
+                                                        this
+                                                            .spaceContextBtnRefs[
+                                                            listData.unifiedId
+                                                        ]
+                                                    }
+                                                    background={
+                                                        this.props
+                                                            .activeListContextMenuId ===
+                                                        listData.unifiedId
+                                                            ? 'greyScale2'
+                                                            : null
+                                                    }
+                                                />
+                                            </TooltipBox>
+                                        ) : (
+                                            <TooltipBox
+                                                tooltipText="Share Space"
+                                                placement="bottom-end"
+                                            >
+                                                <Icon
+                                                    icon="invite"
+                                                    height="20px"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        this.props.openContextMenuForList(
+                                                            listData.unifiedId,
+                                                        )
+                                                    }}
+                                                    containerRef={
+                                                        this
+                                                            .spaceContextBtnRefs[
+                                                            listData.unifiedId
+                                                        ]
+                                                    }
+                                                    background={
+                                                        this.props
+                                                            .activeListContextMenuId ===
+                                                        listData.unifiedId
+                                                            ? 'greyScale2'
+                                                            : null
+                                                    }
+                                                />
+                                            </TooltipBox>
+                                        )}
+                                    </>
                                 )}
                         </ActionButtons>
-                        {listData.creator?.id === this.props.currentUser?.id &&
-                            !listData.isPrivate && (
-                                <TooltipBox
-                                    tooltipText="Space is Shared"
-                                    placement="bottom-end"
-                                >
-                                    <Icon
-                                        hoverOff
-                                        filePath="peopleFine"
-                                        heightAndWidth="20px"
-                                    />
-                                </TooltipBox>
-                            )}
                         {listInstance.annotationRefsLoadState === 'running' ? (
                             this.renderLoader(undefined, 20)
                         ) : listData.hasRemoteAnnotationsToLoad ? (
@@ -1081,12 +1168,37 @@ export class AnnotationsSidebar extends React.Component<
                     listData,
                     this.spaceContextBtnRefs[listData.unifiedId],
                 )}
+                {this.renderEditMenu(
+                    listData,
+                    this.spaceEditBtnRefs[listData.unifiedId],
+                )}
             </FollowedListNotesContainer>
         )
     }
 
     private renderContextMenu(listData: UnifiedList, ref: any) {
         if (this.props.activeListContextMenuId !== listData.unifiedId) {
+            return
+        }
+        const refObject = ref
+
+        return (
+            <PopoutBox
+                strategy="fixed"
+                placement="bottom-end"
+                offsetX={10}
+                offsetY={0}
+                targetElementRef={refObject?.current}
+                closeComponent={() => {
+                    this.props.openContextMenuForList(listData.unifiedId)
+                }}
+            >
+                {this.props.renderContextMenuForList(listData)}
+            </PopoutBox>
+        )
+    }
+    private renderEditMenu(listData: UnifiedList, ref: any) {
+        if (this.props.activeListEditMenuId !== listData.unifiedId) {
             return
         }
         const refObject = ref
@@ -1099,10 +1211,10 @@ export class AnnotationsSidebar extends React.Component<
                 targetElementRef={refObject?.current}
                 closeComponent={() => {
                     this.props.setSpaceTitleEditValue(listData.name)
-                    this.props.openContextMenuForList(listData.unifiedId)
+                    this.props.openEditMenuForList(listData.unifiedId)
                 }}
             >
-                {this.props.renderContextMenuForList(listData)}
+                {this.props.renderEditMenuForList(listData)}
             </PopoutBox>
         )
     }
@@ -1194,6 +1306,7 @@ export class AnnotationsSidebar extends React.Component<
                         <SpaceTypeSectionContainer>
                             {pageLinkLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
+                                this.maybeCreateEditBtnRef(listData)
                                 this.maybeCreatespaceUnfoldButtonRef(listData)
                                 return this.renderSpacesItem(
                                     listData,
@@ -1212,6 +1325,7 @@ export class AnnotationsSidebar extends React.Component<
                         <SpaceTypeSectionContainer>
                             {myLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
+                                this.maybeCreateEditBtnRef(listData)
                                 return this.renderSpacesItem(
                                     listData,
                                     listInstances[listData.unifiedId],
@@ -2255,15 +2369,34 @@ export class AnnotationsSidebar extends React.Component<
                     <RightSideButtonsTopBar>
                         {this.renderContextMenu(
                             selectedList,
+                            this.shareInviteButtonRef,
+                        )}
+                        {this.renderEditMenu(
+                            selectedList,
                             this.editPageLinkButtonRef,
                         )}
+                        <TooltipBox
+                            tooltipText={'Edit Space'}
+                            placement="bottom"
+                        >
+                            <Icon
+                                icon="edit"
+                                containerRef={this.editPageLinkButtonRef}
+                                onClick={() =>
+                                    this.props.openEditMenuForList(
+                                        selectedList.unifiedId,
+                                    )
+                                }
+                                heightAndWidth="20px"
+                            />
+                        </TooltipBox>
                         <TooltipBox
                             tooltipText={'Copy Invite Links'}
                             placement="bottom"
                         >
                             <Icon
                                 icon="invite"
-                                containerRef={this.editPageLinkButtonRef}
+                                containerRef={this.shareInviteButtonRef}
                                 onClick={() =>
                                     this.props.openContextMenuForList(
                                         selectedList.unifiedId,
@@ -3540,6 +3673,7 @@ const FollowedListRow = styled(Margin)<{
     key: number
     context: string
     zIndex?: number
+    keepHovered?: boolean
 }>`
     display: flex;
     flex-direction: row;
@@ -3560,6 +3694,14 @@ const FollowedListRow = styled(Margin)<{
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     }
+
+    ${(props) =>
+        props.keepHovered &&
+        css`
+            ${ActionButtons} {
+                visibility: visible;
+            }
+        `}
 
     &:hover ${ActionButtons} {
         visibility: visible;

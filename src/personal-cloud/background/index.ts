@@ -505,10 +505,10 @@ export class PersonalCloudBackground {
     processPersonalCloudAction: ActionExecutor<PersonalCloudAction> = async ({
         action,
     }) => {
-        if (!this.deviceId || !(await this.options.getUserId())) {
-            // console.warn(
-            //     'Tried to execute action without deviceId, so pausing the action queue',
-            // )
+        if (this.deviceId == null || (await this.options.getUserId()) == null) {
+            this._debugLog(
+                'Tried to execute action without deviceId, so pausing the action queue',
+            )
             return { pauseAndRetry: true }
         }
         this._debugLog('Executing action', action)

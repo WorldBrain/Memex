@@ -1,7 +1,7 @@
 import type Storex from '@worldbrain/storex'
 import type { Windows, Tabs, Storage } from 'webextension-polyfill'
-import { isFullUrl } from '@worldbrain/memex-url-utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/utils'
 
 import CustomListStorage from './storage'
 import type { SearchIndex } from 'src/search'
@@ -72,7 +72,6 @@ export default class CustomListBackground {
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
-            removeList: this.removeList,
             removePageFromList: this.removePageFromList,
             fetchAllLists: this.fetchAllLists,
             fetchListById: this.fetchListById,
@@ -419,12 +418,6 @@ export default class CustomListBackground {
         })
 
         return retVal
-    }
-
-    removeList = async ({ id }: { id: number }) => {
-        return this.storage.removeList({
-            id,
-        })
     }
 
     removePageFromList = async ({ id, url }: { id: number; url: string }) => {

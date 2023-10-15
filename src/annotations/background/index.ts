@@ -30,7 +30,6 @@ import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/ev
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
-import { browser } from 'webextension-polyfill-ts'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -285,7 +284,7 @@ export default class DirectLinkingBackground {
             normalizedPageUrl = await this.lookupSocialId(normalizedPageUrl)
         }
 
-        const activeTab = await browser.tabs.query({
+        const activeTab = await this.options.browserAPIs.tabs.query({
             active: true,
             currentWindow: true,
         })
