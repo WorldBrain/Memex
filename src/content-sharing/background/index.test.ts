@@ -80,8 +80,8 @@ async function setupTest(options: {
         'expiresWhen' | 'roleID'
     > & {
         email: string
-        keyString: string
         spaceName: string
+        spaceURLwithKey: string
     } = null
 
     contentSharing.options.backend[
