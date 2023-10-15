@@ -387,6 +387,11 @@ export class DashboardLogic extends UILogic<State, Events> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { annotationsCache, authBG } = this.options
         this.setupRemoteEventListeners()
+        const user = await authBG.getCurrentUser()
+        this.emitMutation({
+            currentUser: { $set: user },
+        })
+
         const searchParams = this.getURLSearchParams()
         const spacesQuery = searchParams.get('spaces')
         const selectedSpaceQuery = searchParams.get('selectedSpace')
@@ -425,7 +430,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     listsSidebar: { listLoadState: { $set: taskState } },
                 }),
                 async () => {
-                    const user = await authBG.getCurrentUser()
                     await hydrateCacheForListUsage({
                         cache: annotationsCache,
                         user: user
@@ -3194,6 +3198,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     localId: localListId,
                     unifiedAnnotationIds: [],
                     hasRemoteAnnotationsToLoad: false,
+                    isPrivate: true,
                     creator:
                         previousState.currentUser != null
                             ? {
@@ -3703,7 +3708,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 })
-                await this.options.listsBG.removeList({ id: listData.localId! })
+                await this.options.contentShareBG.deleteListAndAllAssociatedData(
+                    { localListId: listData.localId! },
+                )
             },
         )
     }

@@ -162,6 +162,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     activeAnnotationId: UnifiedAnnotation['unifiedId'] | null
     activeListContextMenuId: UnifiedList['unifiedId'] | null
+    activeListEditMenuId: UnifiedList['unifiedId'] | null
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
@@ -358,6 +359,7 @@ interface SidebarEvents {
     }
 
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
+    openEditMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     openPageListMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     editListName: {
         unifiedListId: UnifiedList['unifiedId']

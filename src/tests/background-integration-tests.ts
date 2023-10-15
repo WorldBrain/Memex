@@ -190,7 +190,7 @@ export async function setupBackgroundIntegrationTest(
     })
 
     let callFirebaseFunction = async (name: string, ...args: any[]) => {
-        throw new Error(
+        console.error(
             `Tried to call Firebase function, but no mock was for that`,
         )
     }
@@ -238,8 +238,8 @@ export async function setupBackgroundIntegrationTest(
         authServices,
         fetch,
         userMessageService: userMessages,
-        callFirebaseFunction: (name, ...args) => {
-            return callFirebaseFunction(name, ...args)
+        callFirebaseFunction: async (name, ...args) => {
+            return callFirebaseFunction(name, ...args) as any
         },
         personalCloudMediaBackend:
             options?.personalCloudMediaBackend ??

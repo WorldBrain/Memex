@@ -476,12 +476,6 @@ class SpacePicker extends StatefulUIElement<
                             })
                         }
                         errorMessage={this.state.renameListErrorMessage}
-                        onSetSpacePrivate={(isPrivate) =>
-                            this.processEvent('setListPrivacy', {
-                                listId: list.localId,
-                                isPrivate,
-                            })
-                        }
                         onConfirmSpaceNameEdit={(name) => {
                             this.processEvent('renameList', {
                                 listId: list.localId,
@@ -491,16 +485,6 @@ class SpacePicker extends StatefulUIElement<
                         onCancelEdit={this.handleSpaceContextMenuClose(
                             list.localId,
                         )}
-                        onSpaceShare={(
-                            remoteListId,
-                            annotationLocalToRemoteIdsDict,
-                        ) =>
-                            this.processEvent('setListRemoteId', {
-                                annotationLocalToRemoteIdsDict,
-                                localListId: list.localId,
-                                remoteListId,
-                            })
-                        }
                     />
                 </>
             )

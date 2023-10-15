@@ -12,6 +12,7 @@ export interface Props extends Omit<SpaceContextMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean
     toggleMenu: React.MouseEventHandler
     toggleEditMenu: React.MouseEventHandler
+    isShared: boolean
 }
 
 export default class SpaceContextMenuButton extends PureComponent<Props> {
@@ -53,23 +54,45 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
     }
 
     render() {
-        return (
-            <>
-                <TooltipBox
-                    tooltipText={'Share Space'}
-                    placement={'bottom'}
-                    strategy={'fixed'}
-                >
-                    <Icon
-                        onClick={(e) => this.toggleMenu(e)}
-                        heightAndWidth="18px"
-                        filePath={icons.invite}
-                        active={this.props.isMenuDisplayed}
-                        containerRef={this.spaceContextMenuButton}
-                    />
-                </TooltipBox>
-                {this.renderContextMenu()}
-            </>
-        )
+        if (this.props.isShared) {
+            return (
+                <>
+                    <TooltipBox
+                        tooltipText={'Shared Space'}
+                        placement={'bottom'}
+                        strategy={'fixed'}
+                    >
+                        <Icon
+                            onClick={(e) => this.toggleMenu(e)}
+                            heightAndWidth="20px"
+                            filePath={icons.peopleFine}
+                            color={'white'}
+                            active={this.props.isMenuDisplayed}
+                            containerRef={this.spaceContextMenuButton}
+                        />
+                    </TooltipBox>
+                    {this.renderContextMenu()}
+                </>
+            )
+        } else {
+            return (
+                <>
+                    <TooltipBox
+                        tooltipText={'Share Space'}
+                        placement={'bottom'}
+                        strategy={'fixed'}
+                    >
+                        <Icon
+                            onClick={(e) => this.toggleMenu(e)}
+                            heightAndWidth="18px"
+                            filePath={icons.invite}
+                            active={this.props.isMenuDisplayed}
+                            containerRef={this.spaceContextMenuButton}
+                        />
+                    </TooltipBox>
+                    {this.renderContextMenu()}
+                </>
+            )
+        }
     }
 }

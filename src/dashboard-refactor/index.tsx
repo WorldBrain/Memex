@@ -164,7 +164,7 @@ export class DashboardContainer extends StatefulUIElement<
         const listData = this.props.annotationsCache.getListByLocalId(id)
         return {
             name: listData?.name,
-            isShared: listData?.remoteId != null,
+            isShared: listData?.remoteId != null && !listData?.isPrivate,
             type: listData?.type,
         }
     }
@@ -1520,7 +1520,7 @@ export class DashboardContainer extends StatefulUIElement<
                             getCurrentUser={() =>
                                 this.state.currentUser
                                     ? {
-                                          id: this.state.currentUser.id,
+                                          id: this.state.currentUser?.id,
                                           type: 'user-reference',
                                       }
                                     : null

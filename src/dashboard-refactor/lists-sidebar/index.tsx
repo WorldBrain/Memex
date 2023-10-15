@@ -135,9 +135,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 errorMessage={this.props.addListErrorMessage}
                             />
                         )}
-                        {this.props.ownListsGroup.listData.map((list) => (
+                        {this.props.ownListsGroup.listData.map((list, i) => (
                             <DropTargetSidebarItem
                                 key={list.unifiedId}
+                                zIndex={10000000 - i}
                                 name={list.name}
                                 isSelected={
                                     this.props.selectedListId === list.unifiedId
@@ -157,31 +158,40 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         list.unifiedId ||
                                     this.props.editMenuListId === list.unifiedId
                                 }
-                                renderRightSideIcon={() => (
-                                    <SpaceContextMenuBtn
-                                        {...this.props.initContextMenuBtnProps(
-                                            list.unifiedId,
-                                        )}
-                                        listData={list}
-                                        isCreator={
-                                            list.creator?.id ===
-                                            this.props.currentUser?.id
-                                        }
-                                        isMenuDisplayed={
-                                            this.props.showMoreMenuListId ===
-                                            list.unifiedId
-                                        }
-                                        errorMessage={
-                                            this.props.editListErrorMessage
-                                        }
-                                        onConfirmSpaceNameEdit={(newName) => {
-                                            this.props.onConfirmListEdit(
+                                renderRightSideIcon={() => {
+                                    return (
+                                        <SpaceContextMenuBtn
+                                            {...this.props.initContextMenuBtnProps(
                                                 list.unifiedId,
+                                            )}
+                                            listData={list}
+                                            isCreator={
+                                                list.creator?.id ===
+                                                this.props.currentUser?.id
+                                            }
+                                            isMenuDisplayed={
+                                                this.props
+                                                    .showMoreMenuListId ===
+                                                list.unifiedId
+                                            }
+                                            errorMessage={
+                                                this.props.editListErrorMessage
+                                            }
+                                            onConfirmSpaceNameEdit={(
                                                 newName,
-                                            )
-                                        }}
-                                    />
-                                )}
+                                            ) => {
+                                                this.props.onConfirmListEdit(
+                                                    list.unifiedId,
+                                                    newName,
+                                                )
+                                            }}
+                                            isShared={
+                                                list.remoteId != null &&
+                                                list.isPrivate === false
+                                            }
+                                        />
+                                    )
+                                }}
                                 renderEditIcon={() => (
                                     <SpaceEditMenuBtn
                                         {...this.props.initContextMenuBtnProps(

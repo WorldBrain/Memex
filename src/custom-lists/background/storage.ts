@@ -193,9 +193,9 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'deleteObjects',
                     args: { listId: '$listId:pk', pageUrl: '$pageUrl:string' },
                 },
-                deleteListDescription: {
+                deleteListDescriptions: {
                     collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
-                    operation: 'deleteObject',
+                    operation: 'deleteObjects',
                     args: { listId: '$listId:pk' },
                 },
                 [SuggestPlugin.SUGGEST_OBJS_OP_ID]: {
@@ -497,12 +497,13 @@ export default class CustomListStorage extends StorageModule {
         )
     }
 
+    async removeListAssociatedData({ listId }: { listId: number }) {
+        await this.operation('deleteListEntriesByListId', { listId })
+        await this.deleteListDescriptions({ listId })
+    }
+
     async removeList({ id }: { id: number }) {
-        const pages = await this.operation('deleteListEntriesByListId', {
-            listId: id,
-        })
-        const list = await this.operation('deleteList', { id })
-        return { list, pages }
+        await this.operation('deleteList', { id })
     }
 
     async insertPageToList({
@@ -582,8 +583,12 @@ export default class CustomListStorage extends StorageModule {
         return this.operation('deleteListEntriesById', { listId, pageUrl })
     }
 
-    async deleteListDescription({ listId }: { listId: number }): Promise<void> {
-        await this.operation('deleteListDescription', { listId })
+    async deleteListDescriptions({
+        listId,
+    }: {
+        listId: number
+    }): Promise<void> {
+        await this.operation('deleteListDescriptions', { listId })
     }
 
     async suggestLists({

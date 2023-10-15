@@ -1,22 +1,20 @@
-import CustomListBackground from './'
 import * as DATA from './storage.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { SearchIndex } from 'src/search'
-import Storex from '@worldbrain/storex'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     SPECIAL_LIST_NAMES,
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
+import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
 
 async function insertTestData({
-    customLists,
+    backgroundModules: { customLists, contentSharing },
     storageManager,
-}: {
-    customLists: CustomListBackground
-    storageManager: Storex
-}) {
+}: Pick<
+    BackgroundIntegrationTestSetup,
+    'backgroundModules' | 'storageManager'
+>) {
     // Insert some test data for all tests to use
     await customLists.createCustomList(DATA.LIST_1)
     await customLists.createCustomList(DATA.LIST_2)
@@ -55,15 +53,15 @@ async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
     } = await setupBackgroundIntegrationTest({
         // includePostSyncProcessor: true,
     })
-    const customLists: CustomListBackground = backgroundModules.customLists
-    const searchIndex: SearchIndex = backgroundModules.search.searchIndex
+    const customLists = backgroundModules.customLists
+    const searchIndex = backgroundModules.search.searchIndex
 
     // NOTE: Each test starts creating lists at ID `1`
     let fakeListCount = 0
     customLists.generateListId = () => ++fakeListCount
 
     if (!skipTestData) {
-        await insertTestData({ customLists, storageManager })
+        await insertTestData({ backgroundModules, storageManager })
     }
 
     return {
@@ -533,15 +531,174 @@ describe('Custom List Integrations', () => {
     })
 
     describe('delete ops', () => {
-        test('delete list along with associated pages', async () => {
-            const { customLists } = await setupTest()
+        test('delete list along with associated data', async () => {
+            const {
+                auth,
+                customLists,
+                contentSharing,
+                directLinking,
+                storageManager,
+            } = await setupTest()
+            await auth.authService.loginWithEmailAndPassword(
+                TEST_USER.email,
+                'password',
+            )
 
-            const lists = await customLists.removeList({ id: 3 })
-            checkDefined(lists)
+            const annotId = 'test.com/#12345678'
+            const remoteListId = 'test-remote-list-nnn'
+            const listDescription = 'test descr'
+            await directLinking.createAnnotation(
+                { tab: null },
+                {
+                    url: annotId,
+                    pageUrl: 'https://test.com',
+                    comment: 'test',
+                },
+            )
+            await contentSharing['listSharingService'].shareList({
+                localListId: DATA.LIST_1.id,
+                annotationLocalToRemoteIdsDict: {},
+                remoteListId,
+            })
+            await customLists.updateListDescription({
+                listId: DATA.LIST_1.id,
+                description: listDescription,
+            })
+            await directLinking.annotationStorage.insertAnnotToList({
+                listId: DATA.LIST_1.id,
+                url: annotId,
+            })
+            await customLists.insertPageToList({
+                url: 'https://test.com',
+                id: DATA.LIST_1.id,
+            })
 
-            const list = await customLists.fetchListById({ id: 3 })
-            // No of pages and list deleted by
-            expect(list).toBeNull()
+            // Create some dummy followedList data assoc. with the list to ensure it deletes
+            const followedList = {
+                sharedList: remoteListId,
+                name: DATA.LIST_1.name,
+                creator: TEST_USER.id,
+            }
+            const followedListEntry = {
+                id: 1,
+                creator: TEST_USER.id,
+                followedList: remoteListId,
+                entryTitle: 'test page',
+                sharedListEntry: 'test',
+                normalizedPageUrl: 'test.com',
+                hasAnnotationsFromOthers: false,
+                updatedWhen: new Date(),
+                createdWhen: new Date(),
+            }
+            await storageManager
+                .collection('followedList')
+                .createObject(followedList)
+            await storageManager
+                .collection('followedListEntry')
+                .createObject(followedListEntry)
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findObject({ id: DATA.LIST_1.id }),
+            ).toEqual({
+                ...DATA.LIST_1,
+                nameTerms: expect.anything(),
+                searchableName: DATA.LIST_1.name,
+            })
+            expect(
+                await storageManager
+                    .collection('pageListEntries')
+                    .findObjects({ listId: DATA.LIST_1.id }),
+            ).toEqual([
+                {
+                    fullUrl: 'https://test.com',
+                    pageUrl: 'test.com',
+                    listId: DATA.LIST_1.id,
+                    createdAt: expect.anything(),
+                },
+            ])
+            expect(
+                await storageManager
+                    .collection('customListDescriptions')
+                    .findAllObjects({}),
+            ).toEqual([
+                {
+                    listId: DATA.LIST_1.id,
+                    description: listDescription,
+                },
+            ])
+            expect(
+                await storageManager
+                    .collection('sharedListMetadata')
+                    .findAllObjects({}),
+            ).toEqual([
+                {
+                    localId: DATA.LIST_1.id,
+                    remoteId: remoteListId,
+                },
+            ])
+            expect(
+                await storageManager
+                    .collection('annotListEntries')
+                    .findAllObjects({}),
+            ).toEqual([
+                {
+                    url: annotId,
+                    listId: DATA.LIST_1.id,
+                    createdAt: expect.anything(),
+                },
+            ])
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual([followedList])
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([followedListEntry])
+
+            await contentSharing.deleteListAndAllAssociatedData({
+                localListId: DATA.LIST_1.id,
+            })
+
+            expect(
+                await storageManager
+                    .collection('customLists')
+                    .findObject({ id: DATA.LIST_1.id }),
+            ).toEqual(null)
+            expect(
+                await storageManager
+                    .collection('pageListEntries')
+                    .findObjects({ id: DATA.LIST_1.id }),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('customListDescriptions')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('sharedListMetadata')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('annotListEntries')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('followedList')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('followedListEntry')
+                    .findAllObjects({}),
+            ).toEqual([])
         })
 
         test('Remove page from list', async () => {

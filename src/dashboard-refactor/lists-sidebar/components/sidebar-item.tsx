@@ -17,17 +17,19 @@ export interface Props {
     renderRightSideIcon?: () => JSX.Element
     renderEditIcon?: () => JSX.Element
     areAnyMenusDisplayed?: boolean
+    zIndex?: number
 }
 
 export interface State {
     isHovering: boolean
+    canDisableHover: boolean
 }
 
 export default class ListsSidebarItem extends React.PureComponent<
     Props,
     State
 > {
-    state: State = { isHovering: false }
+    state: State = { isHovering: false, canDisableHover: false }
 
     private handleDragEnter: React.DragEventHandler = (e) => {
         e.preventDefault()
@@ -46,8 +48,12 @@ export default class ListsSidebarItem extends React.PureComponent<
     }
 
     render() {
+        if (!this.props.areAnyMenusDisplayed && this.state.canDisableHover) {
+            this.setState({ isHovering: false, canDisableHover: false })
+        }
+
         return (
-            <Container>
+            <Container zIndex={this.props.zIndex}>
                 <SidebarItem
                     onClick={this.props.onClick}
                     onDragEnter={this.handleDragEnter}
@@ -60,42 +66,38 @@ export default class ListsSidebarItem extends React.PureComponent<
                     }} // Needed to allow the `onDrop` event to fire
                     onDrop={this.handleDrop}
                     onMouseEnter={() => this.setState({ isHovering: true })}
-                    onMouseOver={() => this.setState({ isHovering: true })}
-                    onMouseLeave={() =>
-                        !this.props.areAnyMenusDisplayed &&
-                        this.setState({ isHovering: false })
-                    }
+                    onMouseLeave={() => {
+                        if (!this.props.areAnyMenusDisplayed) {
+                            this.setState({
+                                isHovering: false,
+                                canDisableHover: true,
+                            })
+                        }
+                        this.setState({
+                            canDisableHover: true,
+                        })
+                    }}
                 >
                     {this.props.renderLeftSideIcon?.()}
                     <TitleBox>
                         <ListTitle>
                             <Name>{this.props.name}</Name>
-                            {this.props.isShared && (
-                                <TooltipBox
-                                    tooltipText="Shared Space"
-                                    placement="bottom"
-                                >
-                                    <Icon
-                                        heightAndWidth="18px"
-                                        icon="peopleFine"
-                                        hoverOff
-                                    />
-                                </TooltipBox>
-                            )}
                         </ListTitle>
                     </TitleBox>
                     <IconBox {...this.props} {...this.state}>
                         {this.props.renderEditIcon?.()}
-                        {this.props.renderRightSideIcon?.()}
                     </IconBox>
+                    {(this.props.isShared || this.state.isHovering) &&
+                        this.props.renderRightSideIcon?.()}
                 </SidebarItem>
             </Container>
         )
     }
 }
 
-const Container = styled.div`
+const Container = styled.div<Props>`
     position: relative;
+    z-index: ${(props) => props.zIndex};
 `
 
 const Name = styled.div`
@@ -108,7 +110,7 @@ const Name = styled.div`
 const TitleBox = styled.div<Props>`
     display: flex;
     flex: 0 1 100%;
-    width: 91%;
+    width: 65%;
     height: 100%;
     padding-left: 14px;
     align-items: center;
@@ -121,8 +123,10 @@ const SidebarItem = styled.div<Props>`
     border-radius: 5px;
     display: flex;
     flex-direction: row;
+    padding-right: 5px;
     justify-content: space-between;
     align-items: center;
+    z-index: ${(props) => props.zIndex};
     background-color: ${(props) =>
         props.dropReceivingState?.isDraggedOver
             ? props.theme.colors.greyScale1
@@ -130,7 +134,7 @@ const SidebarItem = styled.div<Props>`
 
 
     &:hover ${TitleBox} {
-        width: 70%;
+        width: 65%;
     }
 
     ${({ isSelected }: Props) =>
