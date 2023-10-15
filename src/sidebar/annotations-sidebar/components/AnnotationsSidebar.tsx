@@ -959,28 +959,43 @@ export class AnnotationsSidebar extends React.Component<
         listInstance: ListInstance,
     ) {
         const title = listData.name
+        let keepHovered = false
+
+        if (
+            this.props.activeListContextMenuId === listData.unifiedId ||
+            this.props.activeListEditMenuId === listData.unifiedId
+        ) {
+            keepHovered = true
+        } else {
+            keepHovered = false
+        }
+
         return (
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
                 key={listData.unifiedId}
                 top="5px"
-                onMouseOver={() =>
+                onMouseOver={() => {
                     this.setState({
                         hoveredListId: listData.unifiedId,
                     })
-                }
+                }}
                 onMouseLeave={() => {
                     this.setState({
                         hoveredListId: null,
                     })
                 }}
-                isHovered={this.state.hoveredListId === listData.unifiedId}
+                isHovered={
+                    keepHovered ||
+                    this.state.hoveredListId === listData.unifiedId
+                }
             >
                 <FollowedListRow
                     onClick={() =>
                         this.props.onUnifiedListSelect(listData.unifiedId)
                     }
                     zIndex={listData.unifiedId}
+                    keepHovered={keepHovered}
                 >
                     <FollowedListTitleContainer>
                         <TooltipBox
@@ -1057,44 +1072,78 @@ export class AnnotationsSidebar extends React.Component<
                                                         listData.unifiedId
                                                     ]
                                                 }
-                                            />
-                                        </TooltipBox>
-                                        <TooltipBox
-                                            tooltipText="Share Space"
-                                            placement="bottom-end"
-                                        >
-                                            <Icon
-                                                icon="invite"
-                                                height="20px"
-                                                onClick={(e) => {
-                                                    e.stopPropagation()
-                                                    this.props.openContextMenuForList(
-                                                        listData.unifiedId,
-                                                    )
-                                                }}
-                                                containerRef={
-                                                    this.spaceContextBtnRefs[
-                                                        listData.unifiedId
-                                                    ]
+                                                background={
+                                                    this.props
+                                                        .activeListEditMenuId ===
+                                                    listData.unifiedId
+                                                        ? 'greyScale2'
+                                                        : null
                                                 }
                                             />
                                         </TooltipBox>
+                                        {!listData.isPrivate ? (
+                                            <TooltipBox
+                                                tooltipText="Space is Shared"
+                                                placement="bottom-end"
+                                            >
+                                                <Icon
+                                                    filePath="peopleFine"
+                                                    heightAndWidth="22px"
+                                                    color="white"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        this.props.openContextMenuForList(
+                                                            listData.unifiedId,
+                                                        )
+                                                    }}
+                                                    containerRef={
+                                                        this
+                                                            .spaceContextBtnRefs[
+                                                            listData.unifiedId
+                                                        ]
+                                                    }
+                                                    background={
+                                                        this.props
+                                                            .activeListContextMenuId ===
+                                                        listData.unifiedId
+                                                            ? 'greyScale2'
+                                                            : null
+                                                    }
+                                                />
+                                            </TooltipBox>
+                                        ) : (
+                                            <TooltipBox
+                                                tooltipText="Share Space"
+                                                placement="bottom-end"
+                                            >
+                                                <Icon
+                                                    icon="invite"
+                                                    height="20px"
+                                                    onClick={(e) => {
+                                                        e.stopPropagation()
+                                                        this.props.openContextMenuForList(
+                                                            listData.unifiedId,
+                                                        )
+                                                    }}
+                                                    containerRef={
+                                                        this
+                                                            .spaceContextBtnRefs[
+                                                            listData.unifiedId
+                                                        ]
+                                                    }
+                                                    background={
+                                                        this.props
+                                                            .activeListContextMenuId ===
+                                                        listData.unifiedId
+                                                            ? 'greyScale2'
+                                                            : null
+                                                    }
+                                                />
+                                            </TooltipBox>
+                                        )}
                                     </>
                                 )}
                         </ActionButtons>
-                        {listData.creator?.id === this.props.currentUser?.id &&
-                            !listData.isPrivate && (
-                                <TooltipBox
-                                    tooltipText="Space is Shared"
-                                    placement="bottom-end"
-                                >
-                                    <Icon
-                                        hoverOff
-                                        filePath="peopleFine"
-                                        heightAndWidth="20px"
-                                    />
-                                </TooltipBox>
-                            )}
                         {listInstance.annotationRefsLoadState === 'running' ? (
                             this.renderLoader(undefined, 20)
                         ) : listData.hasRemoteAnnotationsToLoad ? (
@@ -3624,6 +3673,7 @@ const FollowedListRow = styled(Margin)<{
     key: number
     context: string
     zIndex?: number
+    keepHovered?: boolean
 }>`
     display: flex;
     flex-direction: row;
@@ -3644,6 +3694,14 @@ const FollowedListRow = styled(Margin)<{
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     }
+
+    ${(props) =>
+        props.keepHovered &&
+        css`
+            ${ActionButtons} {
+                visibility: visible;
+            }
+        `}
 
     &:hover ${ActionButtons} {
         visibility: visible;

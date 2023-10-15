@@ -44,7 +44,6 @@ export type Event = UIEvent<{
     updateSpaceName: { name: string }
     updateEmailInviteInputValue: { value: string }
     updateEmailInviteInputRole: { role: SharedListRoleID }
-    updateSpacePrivacy: { isPrivate: boolean }
     inviteViaEmail: { now?: number }
     deleteEmailInvite: { key: string }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
@@ -347,18 +346,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             )
         }
         this.emitMutation({ emailInviteInputRole: { $set: event.role } })
-    }
-
-    updateSpacePrivacy: EventHandler<'updateSpacePrivacy'> = async ({
-        event,
-        previousState,
-    }) => {
-        await Promise.all([
-            event.isPrivate &&
-            previousState.emailInvitesLoadState === 'pristine'
-                ? this.loadEmailInvites()
-                : Promise.resolve(),
-        ])
     }
 
     inviteViaEmail: EventHandler<'inviteViaEmail'> = async ({
