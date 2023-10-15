@@ -39,7 +39,11 @@ export interface ListsSidebarProps extends ListsSidebarState {
         listId: string,
     ) => Omit<
         SpaceContextMenuBtnProps,
-        'isMenuDisplayed' | 'errorMessage' | 'listData' | 'isCreator'
+        | 'isMenuDisplayed'
+        | 'errorMessage'
+        | 'listData'
+        | 'isCreator'
+        | 'isShared'
     >
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup

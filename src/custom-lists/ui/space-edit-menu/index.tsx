@@ -47,9 +47,6 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
     constructor(props: Props) {
         super(props, new Logic(props))
         this.processEvent('shareSpace', null)
-        this.processEvent('updateSpacePrivacy', {
-            isPrivate: true,
-        })
     }
 
     private get shouldShowInviteBtn(): boolean {
