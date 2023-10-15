@@ -1081,7 +1081,9 @@ export class AnnotationsSidebar extends React.Component<
                                                 }
                                             />
                                         </TooltipBox>
-                                        {listData.isPrivate && (
+                                        {((!listData.isPrivate &&
+                                            !listData.remoteId) ||
+                                            listData.isPrivate) && (
                                             <TooltipBox
                                                 tooltipText="Share Space"
                                                 placement="bottom-end"
