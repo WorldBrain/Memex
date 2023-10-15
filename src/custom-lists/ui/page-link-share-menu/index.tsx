@@ -15,7 +15,7 @@ import {
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { TaskState } from 'ui-logic-core/lib/types'
+import { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -39,6 +39,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
     State,
     Event
 > {
+    private previousPageListDataForCurrentPage
     static defaultProps: Pick<Props, 'copyToClipboard'> = {
         copyToClipboard,
     }
@@ -48,9 +49,13 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-        if (prevProps.listData !== this.props.listData) {
+        if (
+            this.previousPageListDataForCurrentPage !==
+            this.props.pageListDataForCurrentPage
+        ) {
+            this.previousPageListDataForCurrentPage = this.props.pageListDataForCurrentPage
             this.processEvent('reloadInviteLinks', {
-                listData: this.props.listData,
+                listData: this.props.pageListDataForCurrentPage,
             })
         }
     }
@@ -69,23 +74,6 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
     }
 
     private renderShareLinks(isPageLink: boolean) {
-        if (!this.state.inviteLinks.length) {
-            return (
-                <ShareSectionContainer onClick={wrapClick}>
-                    <PrimaryAction
-                        icon={'link'}
-                        label={'Share Space'}
-                        onClick={wrapClick((e) =>
-                            this.processEvent('shareSpace', null),
-                        )}
-                        size={'medium'}
-                        type={'secondary'}
-                        fullWidth
-                    />
-                </ShareSectionContainer>
-            )
-        }
-
         return (
             <ShareSectionContainer onClick={wrapClick}>
                 {this.state.inviteLinks.map(
@@ -243,7 +231,8 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                 icon={'globe'}
                                 onClick={() =>
                                     window.open(
-                                        this.state.inviteLinks[0].link,
+                                        this.state.inviteLinks[0].link +
+                                            '?noAutoOpen=true',
                                         '_blank',
                                     )
                                 }

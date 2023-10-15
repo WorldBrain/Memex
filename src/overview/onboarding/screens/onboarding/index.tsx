@@ -181,12 +181,12 @@ export default class OnboardingScreen extends StatefulUIElement<
                     <>
                         <OnboardingContainer>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     this.props.navToGuidedTutorial()
 
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'interactive',
@@ -212,14 +212,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     this.processEvent(
                                         'showOnboardingVideo',
                                         null,
                                     )
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'video',
@@ -242,14 +242,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     window.open(
                                         'https://tutorials.memex.garden/tutorials',
                                         '_blank',
                                     )
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'docs',
@@ -272,14 +272,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 />
                             </OnboardingOptionBox>
                             <OnboardingOptionBox
-                                onClick={() => {
+                                onClick={async () => {
                                     window.open(
                                         'https://calendly.com/worldbrain/memex-onboarding-call',
                                         '_blank',
                                     )
                                     if (this.props.analyticsBG) {
                                         try {
-                                            trackOnboardingPath(
+                                            await trackOnboardingPath(
                                                 this.props.analyticsBG,
                                                 {
                                                     type: 'onboardingCall',
@@ -305,11 +305,11 @@ export default class OnboardingScreen extends StatefulUIElement<
                         <PrimaryAction
                             type="tertiary"
                             label="I'll just start by playing around"
-                            onClick={() => {
+                            onClick={async () => {
                                 this.props.navToDashboard()
                                 if (this.props.analyticsBG) {
                                     try {
-                                        trackOnboardingPath(
+                                        await trackOnboardingPath(
                                             this.props.analyticsBG,
                                             {
                                                 type: 'skip',

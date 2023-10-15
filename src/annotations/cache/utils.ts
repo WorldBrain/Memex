@@ -20,6 +20,7 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
+import type { SharedListMetadata } from 'src/content-sharing/background/types'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -219,18 +220,18 @@ export async function hydrateCacheForPageAnnotations(
         const localListsData = await args.bgModules.customLists.fetchAllLists(
             {},
         )
-        const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds(
+        const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
             {
                 localListIds: localListsData.map((list) => list.id),
             },
         )
         const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
             args.fullPageUrl,
-            Object.values(remoteListIds),
+            Object.values(listMetadata).map((metadata) => metadata.remoteId),
         )
 
         await hydrateCacheLists({
-            remoteListIds,
+            listMetadata,
             localListsData,
             followedListsData,
             ...args,
@@ -305,15 +306,17 @@ export async function hydrateCacheForListUsage(
         includeDescriptions: true,
         skipSpecialLists: true,
     })
-    const remoteListIds = await args.bgModules.contentSharing.getRemoteListIds({
-        localListIds: localListsData.map((list) => list.id),
-    })
     const followedListsData = await args.bgModules.pageActivityIndicator.getAllFollowedLists()
+    const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
+        {
+            localListIds: localListsData.map((list) => list.id),
+        },
+    )
 
     await hydrateCacheLists({
-        remoteListIds,
-        localListsData,
+        listMetadata,
         followedListsData,
+        localListsData,
         ...args,
     })
 }
@@ -321,7 +324,7 @@ export async function hydrateCacheForListUsage(
 async function hydrateCacheLists(
     args: {
         localListsData: PageList[]
-        remoteListIds: { [localListId: number]: string }
+        listMetadata: { [localListId: number]: SharedListMetadata }
         followedListsData: {
             [remoteListId: string]: Pick<
                 FollowedList,
@@ -341,9 +344,9 @@ async function hydrateCacheLists(
         }
     }
     for (const list of args.localListsData) {
-        const remoteId = args.remoteListIds[list.id]
-        if (remoteId != null && list.type === 'page-link') {
-            pageLinkListIds.add(remoteId)
+        const metadata = args.listMetadata[list.id]
+        if (metadata?.remoteId != null && list.type === 'page-link') {
+            pageLinkListIds.add(metadata.remoteId)
         }
     }
 
@@ -373,18 +376,24 @@ async function hydrateCacheLists(
     const listsToCache = args.localListsData.map((list) => {
         let creator = args.user
         let hasRemoteAnnotations = false
-        const remoteId = args.remoteListIds[list.id]
+        const metadata = args.listMetadata[list.id]
         const sharedListEntryData =
             list.type === 'page-link'
-                ? sharedListEntryMap.get(remoteId) ?? undefined
+                ? sharedListEntryMap.get(metadata?.remoteId) ?? undefined
                 : undefined
-        if (remoteId != null && args.followedListsData[remoteId]) {
-            seenFollowedLists.add(args.followedListsData[remoteId].sharedList)
+        if (
+            metadata?.remoteId != null &&
+            args.followedListsData[metadata.remoteId]
+        ) {
+            seenFollowedLists.add(
+                args.followedListsData[metadata.remoteId].sharedList,
+            )
             hasRemoteAnnotations =
-                args.followedListsData[remoteId].hasAnnotationsFromOthers
+                args.followedListsData[metadata.remoteId]
+                    .hasAnnotationsFromOthers
             creator = {
                 type: 'user-reference',
-                id: args.followedListsData[remoteId].creator,
+                id: args.followedListsData[metadata.remoteId].creator,
             }
         }
         return reshapeLocalListForCache(list, {
@@ -392,7 +401,8 @@ async function hydrateCacheLists(
             extraData: {
                 normalizedPageUrl: sharedListEntryData?.normalizedUrl,
                 sharedListEntryId: sharedListEntryData?.id,
-                remoteId,
+                isPrivate: metadata?.private ?? false,
+                remoteId: metadata?.remoteId,
                 creator,
             },
         })

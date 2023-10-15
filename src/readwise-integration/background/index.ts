@@ -35,6 +35,7 @@ export class ReadwiseBackground {
     remoteFunctions: ReadwiseInterface<'provider'>
     readwiseAPI: ReadwiseAPI
     private _apiKey: string | null = null
+    private _syncOnlyHighlights: boolean | null = null
 
     constructor(
         private options: {
@@ -54,6 +55,12 @@ export class ReadwiseBackground {
             validateAPIKey: remoteFunctionWithoutExtraArgs(this.validateAPIKey),
             getAPIKey: remoteFunctionWithoutExtraArgs(this.getAPIKey),
             setAPIKey: remoteFunctionWithoutExtraArgs(this.setAPIKey),
+            setOnlyHighlightsSetting: remoteFunctionWithoutExtraArgs(
+                this.setOnlyHighlightsSetting,
+            ),
+            getOnlyHighlightsSetting: remoteFunctionWithoutExtraArgs(
+                this.getOnlyHighlightsSetting,
+            ),
             uploadAllAnnotations: remoteFunctionWithoutExtraArgs(
                 this.uploadAllAnnotations,
             ),
@@ -107,6 +114,22 @@ export class ReadwiseBackground {
         await this.options.settingsStore.set('apiKey', validatedKey)
         this._apiKey = validatedKey
     }
+    setOnlyHighlightsSetting: ReadwiseInterfaceMethod<
+        'setOnlyHighlightsSetting'
+    > = async ({ setting }) => {
+        await this.options.settingsStore.set('onlyHighlightsSetting', setting)
+        this._syncOnlyHighlights = setting
+    }
+
+    getOnlyHighlightsSetting: ReadwiseInterfaceMethod<
+        'getOnlyHighlightsSetting'
+    > = async () => {
+        const onlyHighlightSetting = await this.options.settingsStore.get(
+            'onlyHighlightsSetting',
+        )
+        this._syncOnlyHighlights = onlyHighlightSetting ?? false
+        return onlyHighlightSetting
+    }
 
     private async *streamAnnotations(): AsyncIterableIterator<Annotation> {
         yield* await this.options.storageManager.operation(
@@ -153,6 +176,14 @@ export class ReadwiseBackground {
                         const pageData = await getFullPageUrl(
                             annotation.pageUrl,
                         )
+
+                        if (
+                            !annotation.body &&
+                            (await this.getOnlyHighlightsSetting())
+                        ) {
+                            return null
+                        }
+
                         return annotationToReadwise(annotation, {
                             pageData,
                         })
@@ -171,10 +202,10 @@ export class ReadwiseBackground {
     }
 }
 
-function annotationToReadwise(
+async function annotationToReadwise(
     annotation: Omit<Annotation, 'pageTitle'> & { listNames: string[] },
     options: { pageData: PageData },
-): ReadwiseHighlight {
+): Promise<ReadwiseHighlight> {
     return {
         title: options.pageData.fullTitle ?? options.pageData.url,
         source_url: options.pageData.fullUrl,

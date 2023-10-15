@@ -269,11 +269,6 @@ export default class ContentSharingBackground {
                     localId: callOptions.localListId,
                 })
             },
-            getRemoteListIds: async (callOptions) => {
-                return this.storage.getRemoteListIds({
-                    localIds: callOptions.localListIds,
-                })
-            },
             getRemoteAnnotationIds: async (callOptions) => {
                 return this.storage.getRemoteAnnotationIds({
                     localIds: callOptions.annotationUrls,
@@ -284,8 +279,27 @@ export default class ContentSharingBackground {
                     localIds: callOptions.annotationUrls,
                 })
             },
+            getListShareMetadata: async (params) => {
+                return this.storage.getListShareMetadata({
+                    localIds: params.localListIds,
+                })
+            },
+            updateListPrivacy: async (params) => {
+                return this.storage.updateListPrivacy({
+                    localId: params.localListId,
+                    private: params.isPrivate,
+                })
+            },
             getAnnotationSharingState: this.getAnnotationSharingState,
             getAnnotationSharingStates: this.getAnnotationSharingStates,
+            createListEmailInvite: (params) =>
+                this.options.backend.createListEmailInvite(params),
+            deleteListEmailInvite: (params) =>
+                this.options.backend.deleteListEmailInvite(params),
+            acceptListEmailInvite: (params) =>
+                this.options.backend.acceptListEmailInvite(params),
+            loadListEmailInvites: (params) =>
+                this.options.backend.loadListEmailInvites(params),
             // The following are all old RPCs that aren't used anymore, though their implementations still exist
             // shareAnnotationsToAllLists: this.shareAnnotationsToAllLists,
             // unshareAnnotationsFromAllLists: this.unshareAnnotationsFromAllLists,
@@ -459,7 +473,9 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG && options.dontTrack == null) {
             try {
-                trackSpaceCreate(this.options.analyticsBG, { type: 'shared' })
+                await trackSpaceCreate(this.options.analyticsBG, {
+                    type: 'shared',
+                })
             } catch (error) {
                 console.error(`Error tracking space share event', ${error}`)
             }
@@ -508,7 +524,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackSharedAnnotation(this.options.analyticsBG, {
+                await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'bulk',
                 })
             } catch (error) {
@@ -539,7 +555,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackSharedAnnotation(this.options.analyticsBG, {
+                await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'autoShared',
                 })
             } catch (error) {
@@ -644,7 +660,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackUnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'autoShared',
                 })
             } catch (error) {
@@ -669,7 +685,7 @@ export default class ContentSharingBackground {
         )
         if (this.options.analyticsBG) {
             try {
-                trackSharedAnnotation(this.options.analyticsBG, {
+                await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'shared',
                 })
             } catch (error) {
@@ -692,7 +708,7 @@ export default class ContentSharingBackground {
         )
         if (this.options.analyticsBG) {
             try {
-                trackUnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'shared',
                 })
             } catch (error) {
@@ -737,7 +753,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackUnSharedAnnotation(this.options.analyticsBG, {
+                await trackUnSharedAnnotation(this.options.analyticsBG, {
                     type: 'bulk',
                 })
             } catch (error) {
@@ -814,7 +830,7 @@ export default class ContentSharingBackground {
         ) {
             if (this.options.analyticsBG) {
                 try {
-                    trackSharedAnnotation(this.options.analyticsBG, {
+                    await trackSharedAnnotation(this.options.analyticsBG, {
                         type: 'autoShared',
                     })
                 } catch (error) {
@@ -877,39 +893,6 @@ export default class ContentSharingBackground {
             }
         }
         return suggestions
-    }
-
-    canWriteToSharedListRemoteId: __DeprecatedContentSharingInterface['canWriteToSharedListRemoteId'] = async ({
-        remoteId,
-    }) => {
-        // const remoteId = await this.storage.getRemoteListId({localId: params.localId,})
-        const currentUser = await this.options
-            .getBgModules()
-            .auth.authService.getCurrentUser()
-        const listRole = await this.options.serverStorage.contentSharing.getListRole(
-            {
-                listReference: { type: 'shared-list-reference', id: remoteId },
-                userReference: {
-                    type: 'user-reference',
-                    id: currentUser?.id,
-                },
-            },
-        )
-        const canWrite = [
-            SharedListRoleID.AddOnly,
-            SharedListRoleID.ReadWrite,
-            SharedListRoleID.Owner,
-            SharedListRoleID.Admin,
-        ].includes(listRole?.roleID)
-        return canWrite
-    }
-    canWriteToSharedList: __DeprecatedContentSharingInterface['canWriteToSharedList'] = async (
-        params,
-    ) => {
-        const remoteId = await this.storage.getRemoteListId({
-            localId: params.localId,
-        })
-        return await this.canWriteToSharedListRemoteId({ remoteId })
     }
 
     async handlePostStorageChange(
@@ -1093,7 +1076,7 @@ export default class ContentSharingBackground {
 
         if (this.options.analyticsBG) {
             try {
-                trackPageLinkCreate(this.options.analyticsBG, {
+                await trackPageLinkCreate(this.options.analyticsBG, {
                     source: 'extension',
                 })
             } catch (error) {

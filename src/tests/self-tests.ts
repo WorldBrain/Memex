@@ -475,14 +475,6 @@ export function createSelfTests(options: {
                         },
                     },
                 )
-                console.log(
-                    await backgroundModules.customLists.fetchFollowedListsWithAnnotations(
-                        {
-                            normalizedPageUrl:
-                                primaryPdfIndentifier.normalizedUrl,
-                        },
-                    ),
-                )
             }
 
             if (shouldTest('lots-of-data', { needsExplicitInclusion: true })) {

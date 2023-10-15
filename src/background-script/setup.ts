@@ -377,14 +377,15 @@ export function createBackgroundModules(options: {
         })
     }
     const userMessages = options.userMessageService
+    const contentSharingBackend =
+        options.contentSharingBackend ??
+        firebaseService<ContentSharingBackend>(
+            'contentSharing',
+            callFirebaseFunction,
+        )
 
     const contentSharing = new ContentSharingBackground({
-        backend:
-            options.contentSharingBackend ??
-            firebaseService<ContentSharingBackend>(
-                'contentSharing',
-                callFirebaseFunction,
-            ),
+        backend: contentSharingBackend,
         remoteEmitter: createRemoteEventEmitter('contentSharing', {
             broadcastToTabs: true,
         }),
@@ -402,11 +403,10 @@ export function createBackgroundModules(options: {
         generateServerId,
         getBgModules: () => ({
             auth,
+            pages,
             customLists,
             directLinking,
             pageActivityIndicator,
-            pages,
-            contentSharing,
         }),
     })
 
@@ -415,12 +415,12 @@ export function createBackgroundModules(options: {
         storageManager,
         tabManagement,
         contentSharing,
+        contentSharingBackend,
         queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
         windows: options.browserAPIs.windows,
         searchIndex: search.searchIndex,
         pages,
         localBrowserStorage: options.browserAPIs.storage.local,
-        serverStorage: options.serverStorage.modules,
         authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
             directLinking,
@@ -477,7 +477,7 @@ export function createBackgroundModules(options: {
         fetch,
         storageManager,
         getCurrentUserId,
-        serverStorage: options.serverStorage.modules,
+        contentSharingBackend,
         jobScheduler: jobScheduler.scheduler,
     })
     const summarizeBG = new SummarizeBackground({

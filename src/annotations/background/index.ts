@@ -328,7 +328,7 @@ export default class DirectLinkingBackground {
 
         try {
             if (toCreate.comment && !toCreate.body) {
-                trackAnnotationCreate(this.options.analyticsBG, {
+                await trackAnnotationCreate(this.options.analyticsBG, {
                     annotationType: 'note',
                 })
             }

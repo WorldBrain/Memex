@@ -1,3 +1,4 @@
+import type { LoadPageAnnotationRefsForListsResult } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
 import type {
     SharedAnnotation,
@@ -41,13 +42,6 @@ export type SharedListWithAnnotations = SharedList & {
 export interface ListDescription {
     listId: number
     description: string
-}
-
-export interface SharedAnnotationList {
-    id: string
-    name: string
-    creatorReference: UserReference
-    sharedAnnotationReferences: SharedAnnotationReference[]
 }
 
 export interface Tab {
@@ -97,10 +91,6 @@ export interface RemoteCollectionsInterface {
         description: string
     }): Promise<void>
     removePageFromList(args: { id: number; url: string }): Promise<void>
-    fetchAllFollowedLists(args: {
-        skip?: number
-        limit?: number
-    }): Promise<PageList[]>
     fetchSharedListDataWithOwnership(args: {
         remoteListId: string
     }): Promise<PageList | null>
@@ -120,19 +110,10 @@ export interface RemoteCollectionsInterface {
         localListId?: number
         sharedListEntryId: string
     } | null>
-    fetchCollaborativeLists(args: {
-        skip?: number
-        limit?: number
-    }): Promise<PageList[]>
     fetchAnnotationRefsForRemoteListsOnPage(args: {
         sharedListIds: string[]
         normalizedPageUrl: string
-    }): Promise<{
-        [sharedListId: string]: SharedAnnotationReference[]
-    }>
-    fetchFollowedListsWithAnnotations(args: {
-        normalizedPageUrl: string
-    }): Promise<SharedAnnotationList[]>
+    }): Promise<LoadPageAnnotationRefsForListsResult>
     fetchAllLists(args: {
         skip?: number
         limit?: number
@@ -140,21 +121,9 @@ export interface RemoteCollectionsInterface {
         includeDescriptions?: boolean
     }): Promise<PageList[]>
     fetchListById(args: { id: number }): Promise<PageList>
-    fetchListByName(args: { name: string }): Promise<PageList>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
     fetchPageListEntriesByUrl(args: { url: string }): Promise<PageListEntry[]>
-    fetchInitialListSuggestions(args?: {
-        /** Set this to factor in fetching of extra entries that might not be in the recently used suggestion store. */
-        extraListIds?: number[]
-    }): Promise<Pick<UnifiedList, 'localId' | 'name' | 'remoteId'>[]>
-    fetchListPagesById(args: { id: number }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<number[]>
-    fetchListIdsByUrl(args: { url: string }): Promise<number[]>
-    fetchListIgnoreCase(args: { name: string }): Promise<PageList[]>
-    searchForListSuggestions(args: {
-        query: string
-        limit?: number
-    }): Promise<Array<Omit<PageList, 'createdAt'> & { createdAt: number }>>
     addOpenTabsToList(args: { listId: number; time?: number }): Promise<void>
     removeOpenTabsFromList(args: { listId: number }): Promise<void>
     updateListForPage(args: {

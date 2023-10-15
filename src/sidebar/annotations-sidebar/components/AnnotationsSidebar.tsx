@@ -1023,11 +1023,11 @@ export class AnnotationsSidebar extends React.Component<
                                 listData.creator?.id ===
                                     this.props.currentUser?.id && (
                                     <TooltipBox
-                                        tooltipText="Share & Edit"
-                                        placement="bottom"
+                                        tooltipText="Share Space"
+                                        placement="bottom-end"
                                     >
                                         <Icon
-                                            icon="dots"
+                                            icon="invite"
                                             height="20px"
                                             onClick={(e) => {
                                                 e.stopPropagation()
@@ -1045,7 +1045,7 @@ export class AnnotationsSidebar extends React.Component<
                                 )}
                         </ActionButtons>
                         {listData.creator?.id === this.props.currentUser?.id &&
-                            listData.remoteId != null && (
+                            !listData.isPrivate && (
                                 <TooltipBox
                                     tooltipText="Space is Shared"
                                     placement="bottom-end"
@@ -2262,7 +2262,7 @@ export class AnnotationsSidebar extends React.Component<
                             placement="bottom"
                         >
                             <Icon
-                                icon="link"
+                                icon="invite"
                                 containerRef={this.editPageLinkButtonRef}
                                 onClick={() =>
                                     this.props.openContextMenuForList(
@@ -2293,7 +2293,8 @@ export class AnnotationsSidebar extends React.Component<
                                           })
 
                                     if (webUIUrl.includes('?') && isPageLink) {
-                                        webUIUrl = webUIUrl + '&noAutoOpen=true'
+                                        webUIUrl =
+                                            webUIUrl + '&´noAutoOpen=true'
                                     } else if (isPageLink) {
                                         webUIUrl = webUIUrl + '?noAutoOpen=true'
                                     }

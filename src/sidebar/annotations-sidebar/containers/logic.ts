@@ -116,6 +116,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     imageSupport?: ImageSupportInterface<'caller'>
     pkmSyncBG?: PkmSyncInterface
     bgScriptBG?: RemoteBGScriptInterface
+    spacesBG?: SpacePickerDependencies['spacesBG']
 }
 
 type EventHandler<
@@ -318,6 +319,7 @@ export class SidebarContainerLogic extends UILogic<
             renameListErrorMessage: null,
             sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
+            pageListDataForCurrentPage: null,
         }
     }
 
@@ -1104,6 +1106,22 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         return listData
+    }
+
+    setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
+        const { annotationsCache, contentSharingBG } = this.options
+        const list = annotationsCache.lists.byId[event.unifiedListId]
+        if (list?.localId == null) {
+            throw new Error('Tried to set privacy for non-cached list')
+        }
+        annotationsCache.updateList({
+            unifiedId: event.unifiedListId,
+            isPrivate: event.isPrivate,
+        })
+        await contentSharingBG.updateListPrivacy({
+            localListId: list.localId,
+            isPrivate: event.isPrivate,
+        })
     }
 
     editListName: EventHandler<'editListName'> = async ({ event }) => {
@@ -1939,7 +1957,7 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             }),
             async () => {
-                const annotationRefsByList = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
+                const response = await this.options.customListsBG.fetchAnnotationRefsForRemoteListsOnPage(
                     {
                         normalizedPageUrl: normalizeUrl(state.fullPageUrl),
                         sharedListIds: lists.map((list) => list.remoteId!),
@@ -1951,10 +1969,13 @@ export class SidebarContainerLogic extends UILogic<
                 > = {}
 
                 for (const { unifiedId, remoteId } of lists) {
-                    mutation[unifiedId] = {
-                        sharedAnnotationReferences: {
-                            $set: annotationRefsByList[remoteId] ?? [],
-                        },
+                    const result = response[remoteId]
+                    if (result?.status === 'success') {
+                        mutation[unifiedId] = {
+                            sharedAnnotationReferences: { $set: result.data },
+                        }
+                    } else {
+                        // TODO: Handle non-success cases in UI
                     }
                 }
 
@@ -3134,13 +3155,26 @@ export class SidebarContainerLogic extends UILogic<
             normalizeUrl(fullPageUrl),
         )
 
-        if (existingPageLink.length > 0) {
+        let listsOfPageData = null
+        for (const list of existingPageLink) {
+            let listData = await this.options.annotationsCache.lists.byId[list]
+
+            if (
+                listData.type === 'page-link' &&
+                (listData?.localId > listsOfPageData?.localId ||
+                    listsOfPageData == null)
+            ) {
+                listsOfPageData = listData
+            }
+        }
+
+        if (listsOfPageData) {
             this.emitMutation({
                 showSharePageTooltip: { $set: true },
             })
             this.emitMutation({
                 selectedListForShareMenu: {
-                    $set: existingPageLink[existingPageLink.length - 1],
+                    $set: listsOfPageData.unifiedId,
                 },
             })
             if (!event.forceCreate) {
@@ -3173,7 +3207,11 @@ export class SidebarContainerLogic extends UILogic<
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
+                isPrivate: false,
             }
+            this.emitMutation({
+                pageListDataForCurrentPage: { $set: cacheListData },
+            })
             const { unifiedId } = this.options.annotationsCache.addList(
                 cacheListData,
             )

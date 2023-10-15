@@ -4,7 +4,11 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
-import type { UnifiedList } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedList,
+    UnifiedListForCache,
+} from 'src/annotations/cache/types'
 import {
     getListShareUrl,
     getSinglePageShareUrl,
@@ -23,12 +27,14 @@ export interface Dependencies {
     copyToClipboard: (text: string) => Promise<boolean>
     analyticsBG: AnalyticsCoreInterface
     pageLinkCreateState?: TaskState
+    annotationsCache?: PageAnnotationsCacheInterface
+    pageListDataForCurrentPage: UnifiedListForCache<'page-link'> | null
 }
 
 export type Event = UIEvent<{
     shareSpace: null
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
-    reloadInviteLinks: { listData: UnifiedList }
+    reloadInviteLinks: { listData: UnifiedListForCache<'page-link'> | null }
 }>
 
 export interface State {
@@ -41,6 +47,7 @@ export interface State {
     mode: 'confirm-space-delete' | 'followed-space' | null
     nameValue: string
     showSaveButton: boolean
+    pageListDataForCurrentPage: UnifiedList | null
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -66,17 +73,52 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         showSuccessMsg: false,
         mode: null,
         showSaveButton: false,
+        pageListDataForCurrentPage: null,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         let state = previousState
+
         await loadInitial(this, async () => {
-            if (this.dependencies.loadOwnershipData) {
-                state = await this.loadSpaceOwnership(previousState)
+            // this.emitMutation({ inviteLinksLoadState: { $set: 'running' } })
+
+            const listsOfPage = await this.dependencies.spacesBG.fetchListPagesByUrl(
+                {
+                    url: window.location.href,
+                },
+            )
+
+            const listsOfPageIds = listsOfPage.map((list) => list.id)
+
+            let listsOfPageData = null
+            for (const list of listsOfPageIds) {
+                let listData = await this.dependencies.annotationsCache.getListByLocalId(
+                    list,
+                )
+
+                if (
+                    listData.type === 'page-link' &&
+                    (listData?.localId > listsOfPageData?.localId ||
+                        listsOfPageData == null)
+                ) {
+                    listsOfPageData = listData
+                }
             }
 
-            if (state.mode !== 'followed-space') {
-                await this.loadInviteLinks()
+            if (listsOfPageData) {
+                this.emitMutation({
+                    pageListDataForCurrentPage: { $set: listsOfPageData },
+                })
+
+                await this.loadInviteLinks(listsOfPageData)
+
+                if (this.dependencies.loadOwnershipData) {
+                    state = await this.loadSpaceOwnership(previousState)
+                }
+
+                // if (state.mode !== 'followed-space') {
+                //     await this.loadInviteLinks(listsOfPageData[0])
+                // }
             }
         })
     }
@@ -110,26 +152,18 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         return this.withMutation(previousState, mutation)
     }
 
-    private async loadInviteLinks(listDataNew?: UnifiedList) {
+    private async loadInviteLinks(
+        listData?: UnifiedListForCache<'page-link'> | null,
+    ) {
         const { contentSharingBG } = this.dependencies
 
-        let listData = this.dependencies.listData
-
-        if (listDataNew) {
-            listData = listDataNew
-        }
-
         const createListLink = (collaborationKey?: string): string =>
-            listData.type === 'page-link'
-                ? getSinglePageShareUrl({
-                      collaborationKey,
-                      remoteListId: listData.remoteId,
-                      remoteListEntryId: listData.sharedListEntryId,
-                  })
-                : getListShareUrl({
-                      collaborationKey,
-                      remoteListId: listData.remoteId,
-                  })
+            listData.type === 'page-link' &&
+            getSinglePageShareUrl({
+                collaborationKey,
+                remoteListId: listData.remoteId,
+                remoteListEntryId: listData.sharedListEntryId,
+            })
 
         await executeUITask(this, 'inviteLinksLoadState', async () => {
             if (listData.remoteId == null) {
@@ -254,7 +288,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
 
         if (this.dependencies.analyticsBG) {
             try {
-                trackCopyInviteLink(this.dependencies.analyticsBG, {
+                await trackCopyInviteLink(this.dependencies.analyticsBG, {
                     inviteType:
                         event.linkIndex === 0 ? 'reader' : 'contributer',
                     linkType:

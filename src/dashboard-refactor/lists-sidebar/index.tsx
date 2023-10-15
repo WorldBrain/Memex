@@ -10,6 +10,9 @@ import ListsSidebarSearchBar, {
 import SpaceContextMenuBtn, {
     Props as SpaceContextMenuBtnProps,
 } from './components/space-context-menu-btn'
+import SpaceEditMenuBtn, {
+    Props as SpaceEditMenuBtnProps,
+} from './components/space-edit-menu-btn'
 import DropTargetSidebarItem from './components/drop-target-sidebar-item'
 import FollowedListSidebarItem from './components/followed-list-sidebar-item'
 import StaticSidebarItem from './components/static-sidebar-item'
@@ -36,7 +39,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
         listId: string,
     ) => Omit<
         SpaceContextMenuBtnProps,
-        'isMenuDisplayed' | 'errorMessage' | 'listData'
+        'isMenuDisplayed' | 'errorMessage' | 'listData' | 'isCreator'
     >
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup
@@ -145,13 +148,25 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 dropReceivingState={this.props.initDropReceivingState(
                                     list.unifiedId,
                                 )}
-                                isCollaborative={list.remoteId != null}
+                                isPrivate={list.isPrivate}
+                                isShared={
+                                    list.remoteId != null && !list.isPrivate
+                                }
+                                areAnyMenusDisplayed={
+                                    this.props.showMoreMenuListId ===
+                                        list.unifiedId ||
+                                    this.props.editMenuListId === list.unifiedId
+                                }
                                 renderRightSideIcon={() => (
                                     <SpaceContextMenuBtn
                                         {...this.props.initContextMenuBtnProps(
                                             list.unifiedId,
                                         )}
                                         listData={list}
+                                        isCreator={
+                                            list.creator?.id ===
+                                            this.props.currentUser?.id
+                                        }
                                         isMenuDisplayed={
                                             this.props.showMoreMenuListId ===
                                             list.unifiedId
@@ -165,7 +180,31 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 newName,
                                             )
                                         }}
-                                        currentUser={this.props.currentUser?.id}
+                                    />
+                                )}
+                                renderEditIcon={() => (
+                                    <SpaceEditMenuBtn
+                                        {...this.props.initContextMenuBtnProps(
+                                            list.unifiedId,
+                                        )}
+                                        listData={list}
+                                        isCreator={
+                                            list.creator?.id ===
+                                            this.props.currentUser?.id
+                                        }
+                                        isMenuDisplayed={
+                                            this.props.editMenuListId ===
+                                            list.unifiedId
+                                        }
+                                        errorMessage={
+                                            this.props.editListErrorMessage
+                                        }
+                                        onConfirmSpaceNameEdit={(newName) => {
+                                            this.props.onConfirmListEdit(
+                                                list.unifiedId,
+                                                newName,
+                                            )
+                                        }}
                                     />
                                 )}
                             />
@@ -206,7 +245,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 dropReceivingState={this.props.initDropReceivingState(
                                     list.unifiedId,
                                 )}
-                                isCollaborative
+                                isPrivate={list.isPrivate}
+                                isShared={
+                                    list.remoteId != null && !list.isPrivate
+                                }
                             />
                         ))}
                     </ListsSidebarGroup>

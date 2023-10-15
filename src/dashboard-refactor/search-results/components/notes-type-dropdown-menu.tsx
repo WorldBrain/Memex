@@ -2,7 +2,7 @@ import React, { PureComponent } from 'react'
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 
-import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu-btn'
+import { SelectionMenuBtn } from 'src/common-ui/components/selection-menu-btn'
 import { NotesType } from '../types'
 import { notesTypeToString, stringToNotesType } from '../util'
 
@@ -14,7 +14,7 @@ export interface Props {
 export default class NotesTypeDropdownMenu extends PureComponent<Props> {
     render() {
         return (
-            <DropdownMenuBtn
+            <SelectionMenuBtn
                 keepSelectedState
                 initSelectedIndex={0}
                 onMenuItemClick={({ name }) =>

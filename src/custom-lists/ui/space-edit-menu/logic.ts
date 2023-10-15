@@ -43,7 +43,7 @@ export interface Dependencies {
 }
 
 export type Event = UIEvent<{
-    shareSpace: { privacyStatus: 'private' | 'shared' }
+    shareSpace: null
     cancelSpaceNameEdit: null
     confirmSpaceNameEdit: null
     updateSpaceName: { name: string }
@@ -56,7 +56,6 @@ export type Event = UIEvent<{
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
     cancelDeleteSpace: null
-    setEmailInvitesHoverState: { id: AutoPk }
 }>
 
 export interface State {
@@ -78,7 +77,6 @@ export interface State {
             roleID: SharedListRoleID
         }
     >
-    emailInvitesHoverState: AutoPk | null
     inviteLinks: InviteLink[]
     showSuccessMsg: boolean
     mode: 'confirm-space-delete' | 'followed-space' | null
@@ -115,27 +113,29 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         showSuccessMsg: false,
         mode: null,
         showSaveButton: false,
-        emailInvitesHoverState: null,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         let state = previousState
         await loadInitial(this, async () => {
-            if (this.dependencies.listData.remoteId == null) {
-                await this.processUIEvent('shareSpace', {
-                    event: { privacyStatus: 'private' },
-                    previousState,
-                })
-            }
-            if (state == null || state.mode !== 'followed-space') {
+            console.log('beforeinit')
+            if (state.mode !== 'followed-space') {
                 await Promise.all([
                     this.loadInviteLinks(),
-                    this.loadEmailInvites(),
+                    this.dependencies.listData.isPrivate
+                        ? this.loadEmailInvites()
+                        : Promise.resolve(),
                 ])
             }
+            console.log('init')
             if (this.dependencies.loadOwnershipData) {
                 state = await this.loadSpaceOwnership(previousState)
             }
+
+            // If my own list, load collab links and potential email invite links
+
+            //await this.processUIEvent('shareSpace', null)
+            console.log('afterinit')
         })
     }
 
@@ -263,7 +263,8 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
     }
 
-    shareSpace: EventHandler<'shareSpace'> = async ({ event }) => {
+    shareSpace: EventHandler<'shareSpace'> = async ({}) => {
+        console.log('sharespace')
         const {
             listData,
             onSpaceShare,
@@ -283,10 +284,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 shareResult.annotationLocalToRemoteIdsDict,
             )
 
-            if (event.privacyStatus === 'private') {
-                await this.dependencies.onSetSpacePrivate(true)
-            }
-
             this.emitMutation({
                 showSuccessMsg: { $set: true },
                 inviteLinks: { $set: shareResult.links },
@@ -300,9 +297,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
 
         await executeUITask(this, 'listShareLoadState', async () => {
-            if (event.privacyStatus === 'private') {
-                await this.dependencies.onSetSpacePrivate(true)
-            }
             await contentSharingBG.waitForListShare({
                 localListId: listData.localId,
             })
@@ -325,13 +319,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         await this.dependencies.contentSharingBG.deleteListAndAllAssociatedData(
             { localListId: listData.localId },
         )
-    }
-    setEmailInvitesHoverState: EventHandler<
-        'setEmailInvitesHoverState'
-    > = async ({ event }) => {
-        this.emitMutation({
-            emailInvitesHoverState: { $set: event.id },
-        })
     }
 
     intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
@@ -417,22 +404,12 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             },
         })
         await executeUITask(this, 'emailInvitesCreateState', async () => {
-            let remoteId = this.dependencies.listData.remoteId
-
-            if (remoteId == null) {
-                remoteId = await this.dependencies.contentSharingBG.getRemoteListId(
-                    {
-                        localListId: this.dependencies.listData.localId,
-                    },
-                )
-            }
-
             const result = await this.dependencies.contentSharingBG.createListEmailInvite(
                 {
                     now,
                     email,
                     roleID,
-                    listId: remoteId,
+                    listId: this.dependencies.listData.remoteId,
                 },
             )
             if (result.status === 'success') {
@@ -545,7 +522,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
         if (this.dependencies.analyticsBG) {
             try {
-                await trackCopyInviteLink(this.dependencies.analyticsBG, {
+                trackCopyInviteLink(this.dependencies.analyticsBG, {
                     inviteType:
                         event.linkIndex === 0 ? 'reader' : 'contributer',
                     linkType:

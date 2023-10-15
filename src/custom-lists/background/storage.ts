@@ -458,7 +458,7 @@ export default class CustomListStorage extends StorageModule {
 
         if (analyticsBG && dontTrack == null) {
             try {
-                trackSpaceCreate(analyticsBG, { type: 'private' })
+                await trackSpaceCreate(analyticsBG, { type: 'private' })
             } catch (error) {
                 console.error(`Error tracking space create event', ${error}`)
             }
@@ -528,18 +528,17 @@ export default class CustomListStorage extends StorageModule {
         const list = await this.fetchListById(listId)
         const idExists = Boolean(list)
 
-        if (
-            idExists &&
-            listId !== SPECIAL_LIST_IDS.INBOX &&
-            listId != SPECIAL_LIST_IDS.MOBILE
-        ) {
-            if (analyticsBG && dontTrack == null) {
+        if (idExists) {
+            if (
+                analyticsBG &&
+                dontTrack == null &&
+                listId !== SPECIAL_LIST_IDS.INBOX &&
+                listId !== SPECIAL_LIST_IDS.MOBILE
+            ) {
                 try {
-                    if (isShared) {
-                        trackSpaceEntryCreate(analyticsBG, { type: 'shared' })
-                    } else {
-                        trackSpaceEntryCreate(analyticsBG, { type: 'private' })
-                    }
+                    await trackSpaceEntryCreate(analyticsBG, {
+                        type: isShared ? 'shared' : 'private',
+                    })
                 } catch (error) {
                     console.error(
                         `Error tracking space Entry create event', ${error}`,
@@ -558,7 +557,7 @@ export default class CustomListStorage extends StorageModule {
                         pageTitle: pageToSave.fullTitle,
                         pkmSyncType: 'page',
                         pageSpaces: list.name,
-                        createdAt: pageToSave.createdAt,
+                        createdWhen: Date.now(),
                     }
 
                     sharePageWithPKM(dataToSave, this.options.pkmSyncBG)

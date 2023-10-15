@@ -511,6 +511,7 @@ export default class AnnotationStorage extends StorageModule {
                     comment: comment,
                     createdWhen: createdWhen,
                     pageCreatedWhen: pageDate,
+                    pageUrl: pageUrl,
                 }
 
                 shareAnnotationWithPKM(
@@ -558,6 +559,7 @@ export default class AnnotationStorage extends StorageModule {
                     createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
                     comment,
                     pageCreatedWhen: pageDate,
+                    pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
                 }
 
                 shareAnnotationWithPKM(

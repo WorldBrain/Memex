@@ -10,6 +10,8 @@ import type {
     RemoteFunction,
     RemoteFunctionRole,
 } from 'src/util/webextensionRPC'
+import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
+import type { SharedListMetadata } from './types'
 
 export interface ContentSharingInterface
     extends Pick<
@@ -22,6 +24,13 @@ export interface ContentSharingInterface
             | 'setAnnotationPrivacyLevel'
             | 'getAnnotationSharingState'
             | 'getAnnotationSharingStates'
+        >,
+        Pick<
+            ContentSharingBackendInterface,
+            | 'createListEmailInvite'
+            | 'deleteListEmailInvite'
+            | 'acceptListEmailInvite'
+            | 'loadListEmailInvites'
         > {
     scheduleListShare(params: {
         localListId: number
@@ -49,9 +58,9 @@ export interface ContentSharingInterface
     }): Promise<string | null>
     generateRemoteAnnotationId(): Promise<string>
     getRemoteListId(options: { localListId: number }): Promise<string | null>
-    getRemoteListIds(options: {
+    getListShareMetadata(options: {
         localListIds: number[]
-    }): Promise<{ [localListId: number]: string | null }>
+    }): Promise<{ [localListId: number]: SharedListMetadata }>
     getRemoteAnnotationIds(params: {
         annotationUrls: string[]
     }): Promise<{ [localId: string]: string | number }>
@@ -80,6 +89,10 @@ export interface ContentSharingInterface
     }): Promise<{
         [annotationUrl: string]: AnnotationPrivacyLevels
     }>
+    updateListPrivacy(args: {
+        localListId: number
+        isPrivate: boolean
+    }): Promise<void>
 }
 
 export interface RemoteContentSharingByTabsInterface<
@@ -127,8 +140,6 @@ export interface __DeprecatedContentSharingInterface {
             createdAt: number
         }>
     >
-    canWriteToSharedList(params: { localId: number }): Promise<boolean>
-    canWriteToSharedListRemoteId(params: { remoteId: string }): Promise<boolean>
     unshareAnnotationsFromAllLists(options: {
         annotationUrls: string[]
         setBulkShareProtected?: boolean

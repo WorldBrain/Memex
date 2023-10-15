@@ -23,13 +23,13 @@ export const getExtURL = (location) =>
     browser.runtime ? browser.runtime.getURL(location) : location
 
 export const getTooltipState: () => Promise<boolean> = async () =>
-    getLocalStorage(
+    await getLocalStorage(
         constants.TOOLTIP_STORAGE_NAME,
         constants.TOOLTIP_DEFAULT_OPTION,
     )
 
 export const getHighlightsState: () => Promise<boolean> = async () =>
-    getLocalStorage(
+    await getLocalStorage(
         constants.HIGHLIGHTS_STORAGE_NAME,
         constants.HIGHLIGHTS_DEFAULT_OPTION,
     )

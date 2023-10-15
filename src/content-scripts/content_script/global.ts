@@ -1,5 +1,4 @@
 import 'core-js'
-import hexToRgb from 'hex-to-rgb'
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
@@ -268,11 +267,9 @@ export async function main(
             browser.storage.local.set({
                 [UNDO_HISTORY]: undoHistory,
             }),
-        getHighlightColorRGB: async () => {
+        getHighlightColor: async () => {
             const storage = await browser.storage.local.get(HIGHLIGHT_COLOR_KEY)
-            return hexToRgb(
-                storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR,
-            )
+            return storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR
         },
         onHighlightColorChange: (cb) => {
             browser.storage.onChanged.addListener((changes) => {
@@ -510,7 +507,7 @@ export async function main(
             await inPageUI.hideTooltip()
             if (analyticsBG) {
                 try {
-                    trackAnnotationCreate(analyticsBG, {
+                    await trackAnnotationCreate(analyticsBG, {
                         annotationType: 'highlight',
                     })
                 } catch (error) {
@@ -626,7 +623,7 @@ export async function main(
             if (analyticsBG) {
                 // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
                 try {
-                    trackAnnotationCreate(analyticsBG, {
+                    await trackAnnotationCreate(analyticsBG, {
                         annotationType: 'highlight',
                     })
                 } catch (error) {
@@ -922,6 +919,10 @@ export async function main(
             resetKeyboardShortcuts()
         },
         handleHistoryStateUpdate: async (tabId) => {
+            if (isPdfViewerRunning) {
+                return
+            }
+
             await inPageUI.hideRibbon()
 
             if (window.location.href.includes('web.telegram.org/')) {
@@ -979,7 +980,9 @@ export async function main(
                 await inPageUI.removeTooltip()
                 await inPageUI.removeRibbon()
             } else {
-                await inPageUI.reloadComponent('tooltip')
+                if (await tooltipUtils.getTooltipState()) {
+                    await inPageUI.reloadComponent('tooltip')
+                }
                 await inPageUI.reloadRibbon()
             }
 
@@ -1135,7 +1138,7 @@ export async function main(
 
     if (analyticsBG && hasActivity) {
         try {
-            trackPageActivityIndicatorHit(analyticsBG)
+            await trackPageActivityIndicatorHit(analyticsBG)
         } catch (error) {
             console.error(`Error tracking space create event', ${error}`)
         }
