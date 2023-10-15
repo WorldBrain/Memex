@@ -1052,6 +1052,24 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({ activeListContextMenuId: { $set: nextActiveId } })
     }
+    openEditMenuForList: EventHandler<'openEditMenuForList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const listInstance = previousState.listInstances[event.unifiedListId]
+        if (!listInstance) {
+            throw new Error(
+                'Could not find list instance to open context menu for',
+            )
+        }
+
+        const nextActiveId =
+            previousState.activeListEditMenuId === event.unifiedListId
+                ? null
+                : event.unifiedListId
+
+        this.emitMutation({ activeListEditMenuId: { $set: nextActiveId } })
+    }
 
     openPageListMenuForList: EventHandler<'openPageListMenuForList'> = async ({
         event,
