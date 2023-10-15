@@ -1520,7 +1520,7 @@ export class DashboardContainer extends StatefulUIElement<
                             getCurrentUser={() =>
                                 this.state.currentUser
                                     ? {
-                                          id: this.state.currentUser.id,
+                                          id: this.state.currentUser?.id,
                                           type: 'user-reference',
                                       }
                                     : null

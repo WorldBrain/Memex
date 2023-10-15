@@ -29,14 +29,9 @@ export interface Dependencies {
     errorMessage?: string
     loadOwnershipData?: boolean
     onCancelEdit?: () => void
-    onSpaceShare?: (
-        remoteListId: AutoPk,
-        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk },
-    ) => void
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
     onConfirmSpaceNameEdit: (name: string) => void
-    onSetSpacePrivate: (isPrivate: boolean) => Promise<void>
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
     analyticsBG: AnalyticsCoreInterface
@@ -118,7 +113,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         let state = previousState
         await loadInitial(this, async () => {
-            console.log('beforeinit')
             if (state.mode !== 'followed-space') {
                 await Promise.all([
                     this.loadInviteLinks(),
@@ -127,7 +121,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                         : Promise.resolve(),
                 ])
             }
-            console.log('init')
             if (this.dependencies.loadOwnershipData) {
                 state = await this.loadSpaceOwnership(previousState)
             }
@@ -135,7 +128,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             // If my own list, load collab links and potential email invite links
 
             //await this.processUIEvent('shareSpace', null)
-            console.log('afterinit')
         })
     }
 
@@ -264,10 +256,8 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     }
 
     shareSpace: EventHandler<'shareSpace'> = async ({}) => {
-        console.log('sharespace')
         const {
             listData,
-            onSpaceShare,
             copyToClipboard,
             contentSharingBG,
         } = this.dependencies
@@ -279,10 +269,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 localListId: listData.localId,
             })
             remoteListId = shareResult.remoteListId
-            onSpaceShare?.(
-                remoteListId,
-                shareResult.annotationLocalToRemoteIdsDict,
-            )
 
             this.emitMutation({
                 showSuccessMsg: { $set: true },
@@ -372,7 +358,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             previousState.emailInvitesLoadState === 'pristine'
                 ? this.loadEmailInvites()
                 : Promise.resolve(),
-            this.dependencies.onSetSpacePrivate(event.isPrivate),
         ])
     }
 

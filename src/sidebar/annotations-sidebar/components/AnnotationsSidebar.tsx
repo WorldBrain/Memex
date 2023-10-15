@@ -1132,6 +1132,7 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
         const refObject = ref
+
         return (
             <PopoutBox
                 strategy="fixed"
@@ -1140,7 +1141,6 @@ export class AnnotationsSidebar extends React.Component<
                 offsetY={0}
                 targetElementRef={refObject?.current}
                 closeComponent={() => {
-                    this.props.setSpaceTitleEditValue(listData.name)
                     this.props.openContextMenuForList(listData.unifiedId)
                 }}
             >

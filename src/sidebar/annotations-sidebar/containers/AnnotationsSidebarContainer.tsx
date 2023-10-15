@@ -1176,106 +1176,101 @@ export class AnnotationsSidebarContainer<
                             renderShareMenuForAnnotation={
                                 this.renderShareMenuForAnnotation
                             }
-                            renderContextMenuForList={(listData) => (
-                                <SpaceContextMenu
-                                    isCreator={
-                                        listData.creator.id ===
-                                        this.state.currentUserReference.id
-                                    }
-                                    contentSharingBG={
-                                        this.props.contentSharingBG
-                                    }
-                                    spacesBG={this.props.customListsBG}
-                                    listData={listData}
-                                    disableWriteOps={
-                                        this.state.hasListDataBeenManuallyPulled
-                                    }
-                                    onConfirmSpaceNameEdit={(newName) => {
-                                        this.processEvent('editListName', {
-                                            unifiedListId: listData.unifiedId,
-                                            localId: listData.localId,
-                                            newName,
-                                            oldName: listData.name,
-                                        })
-                                    }}
-                                    onSetSpacePrivate={(isPrivate) =>
-                                        this.processEvent('setListPrivacy', {
-                                            unifiedListId: listData.unifiedId,
-                                            isPrivate,
-                                        })
-                                    }
-                                    onSpaceShare={(
-                                        remoteListId,
-                                        annotationLocalToRemoteIdsDict,
-                                    ) => {
-                                        this.processEvent('shareList', {
+                            renderContextMenuForList={(listData) => {
+                                return (
+                                    <SpaceContextMenu
+                                        isCreator={
+                                            listData.creator.id ===
+                                            this.props.getCurrentUser()?.id
+                                        }
+                                        contentSharingBG={
+                                            this.props.contentSharingBG
+                                        }
+                                        spacesBG={this.props.customListsBG}
+                                        listData={listData}
+                                        disableWriteOps={
+                                            this.state
+                                                .hasListDataBeenManuallyPulled
+                                        }
+                                        onConfirmSpaceNameEdit={(newName) => {
+                                            this.processEvent('editListName', {
+                                                unifiedListId:
+                                                    listData.unifiedId,
+                                                localId: listData.localId,
+                                                newName,
+                                                oldName: listData.name,
+                                            })
+                                        }}
+                                        onSetSpacePrivate={(isPrivate) =>
+                                            this.processEvent(
+                                                'setListPrivacy',
+                                                {
+                                                    unifiedListId:
+                                                        listData.unifiedId,
+                                                    isPrivate,
+                                                },
+                                            )
+                                        }
+                                        onSpaceShare={(
                                             remoteListId,
                                             annotationLocalToRemoteIdsDict,
-                                            unifiedListId: listData.unifiedId,
-                                        })
-                                        this.processEvent(
-                                            'setSharingTutorialVisibility',
-                                            null,
-                                        )
-                                    }}
-                                    onDeleteSpaceConfirm={() =>
-                                        this.processEvent('deleteList', {
-                                            unifiedListId: listData.unifiedId,
-                                        })
-                                    }
-                                    analyticsBG={this.props.analyticsBG}
-                                />
-                            )}
-                            renderEditMenuForList={(listData) => (
-                                <SpaceEditMenuContainer
-                                    isCreator={
-                                        listData.creator.id ===
-                                        this.state.currentUserReference.id
-                                    }
-                                    contentSharingBG={
-                                        this.props.contentSharingBG
-                                    }
-                                    spacesBG={this.props.customListsBG}
-                                    listData={listData}
-                                    disableWriteOps={
-                                        this.state.hasListDataBeenManuallyPulled
-                                    }
-                                    onConfirmSpaceNameEdit={(newName) => {
-                                        this.processEvent('editListName', {
-                                            unifiedListId: listData.unifiedId,
-                                            localId: listData.localId,
-                                            newName,
-                                            oldName: listData.name,
-                                        })
-                                    }}
-                                    onSetSpacePrivate={(isPrivate) =>
-                                        this.processEvent('setListPrivacy', {
-                                            unifiedListId: listData.unifiedId,
-                                            isPrivate,
-                                        })
-                                    }
-                                    onSpaceShare={(
-                                        remoteListId,
-                                        annotationLocalToRemoteIdsDict,
-                                    ) => {
-                                        this.processEvent('shareList', {
-                                            remoteListId,
-                                            annotationLocalToRemoteIdsDict,
-                                            unifiedListId: listData.unifiedId,
-                                        })
-                                        this.processEvent(
-                                            'setSharingTutorialVisibility',
-                                            null,
-                                        )
-                                    }}
-                                    onDeleteSpaceConfirm={() =>
-                                        this.processEvent('deleteList', {
-                                            unifiedListId: listData.unifiedId,
-                                        })
-                                    }
-                                    analyticsBG={this.props.analyticsBG}
-                                />
-                            )}
+                                        ) => {
+                                            this.processEvent('shareList', {
+                                                remoteListId,
+                                                annotationLocalToRemoteIdsDict,
+                                                unifiedListId:
+                                                    listData.unifiedId,
+                                            })
+                                            this.processEvent(
+                                                'setSharingTutorialVisibility',
+                                                null,
+                                            )
+                                        }}
+                                        onDeleteSpaceConfirm={() =>
+                                            this.processEvent('deleteList', {
+                                                unifiedListId:
+                                                    listData.unifiedId,
+                                            })
+                                        }
+                                        analyticsBG={this.props.analyticsBG}
+                                    />
+                                )
+                            }}
+                            renderEditMenuForList={(listData) => {
+                                return (
+                                    <SpaceEditMenuContainer
+                                        isCreator={
+                                            listData.creator.id ===
+                                            this.props.getCurrentUser()?.id
+                                        }
+                                        contentSharingBG={
+                                            this.props.contentSharingBG
+                                        }
+                                        spacesBG={this.props.customListsBG}
+                                        listData={listData}
+                                        disableWriteOps={
+                                            this.state
+                                                .hasListDataBeenManuallyPulled
+                                        }
+                                        onConfirmSpaceNameEdit={(newName) => {
+                                            this.processEvent('editListName', {
+                                                unifiedListId:
+                                                    listData.unifiedId,
+                                                localId: listData.localId,
+                                                newName,
+                                                oldName: listData.name,
+                                            })
+                                        }}
+                                        onDeleteSpaceConfirm={() =>
+                                            this.processEvent('deleteList', {
+                                                unifiedListId:
+                                                    listData.unifiedId,
+                                            })
+                                        }
+                                        analyticsBG={this.props.analyticsBG}
+                                    />
+                                )
+                            }}
                             renderPageLinkMenuForList={(listData) => (
                                 <PageLinkMenu
                                     contentSharingBG={
