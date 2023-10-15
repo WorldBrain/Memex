@@ -158,6 +158,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'deleteObjects',
                 args: { listId: '$listId:int', url: '$url:string' },
             },
+            deleteAnnotationEntriesByList: {
+                collection: AnnotationStorage.LIST_ENTRIES_COLL,
+                operation: 'deleteObjects',
+                args: { listId: '$listId:int' },
+            },
             deleteListEntriesByUrl: {
                 collection: AnnotationStorage.LIST_ENTRIES_COLL,
                 operation: 'deleteObjects',
@@ -370,6 +375,12 @@ export default class AnnotationStorage extends StorageModule {
         if (!existing) {
             await this.insertAnnotToList({ listId, url }, opts)
         }
+    }
+
+    async removeAnnotsFromList(params: { listId: number }): Promise<void> {
+        await this.operation('deleteAnnotationEntriesByList', {
+            listId: params.listId,
+        })
     }
 
     async removeAnnotFromList({ listId, url }: AnnotListEntry) {

@@ -276,9 +276,8 @@ export async function setupSyncBackgroundTest(
         deviceCount: number
         debugStorageOperations?: boolean
         superuser?: boolean
-        serverChangeWatchSettings?: Omit<
-            ChangeWatchMiddlewareSettings,
-            'storageManager'
+        serverChangeWatchSettings?: Array<
+            Omit<ChangeWatchMiddlewareSettings, 'storageManager'>
         >
         sqlChangeWatchSettings?: Omit<
             ChangeWatchMiddlewareSettings,
@@ -290,19 +289,29 @@ export async function setupSyncBackgroundTest(
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
-    const userId = TEST_USER.id
-
     const translationLayerTestBackend =
         process.env.TRANSLATION_LAYER_TEST_BACKEND
+
+    const changeWatchSettings = !!translationLayerTestBackend
+        ? options.serverChangeWatchSettings
+        : (options.serverChangeWatchSettings ?? []).map((settings) =>
+              mergeChangeWatchSettings([
+                  settings,
+                  options.sqlChangeWatchSettings,
+              ]),
+          )
+
     const serverStorage =
         (await options.testInstance?.getSetupOptions?.())?.serverStorage ??
         (await createTestServerStorage({
-            changeWatchSettings: !!translationLayerTestBackend
-                ? options.serverChangeWatchSettings
-                : mergeChangeWatchSettings([
-                      options.serverChangeWatchSettings,
-                      options.sqlChangeWatchSettings,
-                  ]),
+            setupMiddleware: (storageManager) =>
+                changeWatchSettings.map(
+                    (settings) =>
+                        new ChangeWatchMiddleware({
+                            ...settings,
+                            storageManager,
+                        }),
+                ),
         }))
     const cloudHub = new PersonalCloudHub()
 
@@ -366,6 +375,10 @@ export async function setupSyncBackgroundTest(
             serverStorage,
             authService: authServices.auth,
         })
+        const getUserId = async () => {
+            const currentUser = await authServices.auth.getCurrentUser()
+            return currentUser?.id ?? null
+        }
         const personalCloudBackend = new StorexPersonalCloudBackend({
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
@@ -377,7 +390,7 @@ export async function setupSyncBackgroundTest(
             },
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,
-            getUserId: async () => userId,
+            getUserId,
             getNow,
             useDownloadTranslationLayer:
                 options.useDownloadTranslationLayer ?? true,
@@ -388,8 +401,8 @@ export async function setupSyncBackgroundTest(
         })
         const personalCloudMediaBackend = new StorexPersonalCloudMediaBackend({
             getNow,
+            getUserId,
             view: cloudHub.getView(),
-            getUserId: async () => userId,
             storageManager: serverStorage.manager,
         })
 
@@ -407,6 +420,10 @@ export async function setupSyncBackgroundTest(
         setup.backgroundModules.personalCloud.actionQueue.forceQueueSkip = true
         setup.backgroundModules.personalCloud.strictErrorReporting = true
         setup.authService.setUser({ ...TEST_USER })
+        await setup.backgroundModules.personalCloud.options.settingStore.set(
+            'deviceId',
+            i + 1,
+        )
         setups.push(setup)
     }
 
@@ -430,7 +447,6 @@ export async function setupSyncBackgroundTest(
     }
 
     return {
-        userId,
         setups,
         sync,
         serverStorage,

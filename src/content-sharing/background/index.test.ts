@@ -43,6 +43,7 @@ import { getSinglePageShareUrl } from '../utils'
 import { buildBaseLocatorUrl } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { OpenGraphSiteLookupResponse } from '@worldbrain/memex-common/lib/opengraph/types'
 import { LIST_EMAIL_INVITE_VALIDITY_MS } from '@worldbrain/memex-common/lib/content-sharing/constants'
+import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher/lib/index'
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -8355,7 +8356,12 @@ function makeAnnotationFromWebUiTest(options: {
         > => {
             storageHooksChangeWatcher = new StorageHooksChangeWatcher()
             const serverStorage = await createMemoryServerStorage({
-                changeWatchSettings: storageHooksChangeWatcher,
+                setupMiddleware: (storageManager) => [
+                    new ChangeWatchMiddleware({
+                        storageManager,
+                        ...storageHooksChangeWatcher,
+                    }),
+                ],
             })
             return { serverStorage }
         },

@@ -34,7 +34,6 @@ async function setupTest(opts: {
     testTweetData?: TweetData
 }) {
     const {
-        userId,
         serverStorage,
         setups: [context],
     } = await setupSyncBackgroundTest({ deviceCount: 1 })
@@ -47,6 +46,7 @@ async function setupTest(opts: {
     // await twitterAPI.setupAuth('test-key', 'test-secret')
 
     const getNow = () => Date.now()
+    const userId = (await context.authService.getCurrentUser())?.id
     const processor = new DataFetchActionProcessor({
         fetch: context.fetch as any,
         openGraphIOAppId: 'some-app-id',
