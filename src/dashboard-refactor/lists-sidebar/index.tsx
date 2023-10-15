@@ -135,9 +135,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 errorMessage={this.props.addListErrorMessage}
                             />
                         )}
-                        {this.props.ownListsGroup.listData.map((list) => (
+                        {this.props.ownListsGroup.listData.map((list, i) => (
                             <DropTargetSidebarItem
                                 key={list.unifiedId}
+                                zIndex={10000000 - i}
                                 name={list.name}
                                 isSelected={
                                     this.props.selectedListId === list.unifiedId
@@ -184,6 +185,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     newName,
                                                 )
                                             }}
+                                            isShared={
+                                                list.remoteId != null &&
+                                                list.isPrivate === false
+                                            }
                                         />
                                     )
                                 }}
