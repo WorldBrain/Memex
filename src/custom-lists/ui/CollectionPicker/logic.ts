@@ -868,6 +868,7 @@ export default class SpacePickerLogic extends UILogic<
             type: 'user-list',
             unifiedAnnotationIds: [],
             creator: previousState.currentUser ?? undefined,
+            isPrivate: true,
         })
 
         this.localListIdsMRU.unshift(localListId)

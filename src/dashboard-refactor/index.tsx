@@ -164,7 +164,7 @@ export class DashboardContainer extends StatefulUIElement<
         const listData = this.props.annotationsCache.getListByLocalId(id)
         return {
             name: listData?.name,
-            isShared: listData?.remoteId != null,
+            isShared: listData?.remoteId != null && !listData?.isPrivate,
             type: listData?.type,
         }
     }

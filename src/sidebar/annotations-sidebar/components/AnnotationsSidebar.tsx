@@ -1081,37 +1081,7 @@ export class AnnotationsSidebar extends React.Component<
                                                 }
                                             />
                                         </TooltipBox>
-                                        {!listData.isPrivate ? (
-                                            <TooltipBox
-                                                tooltipText="Space is Shared"
-                                                placement="bottom-end"
-                                            >
-                                                <Icon
-                                                    filePath="peopleFine"
-                                                    heightAndWidth="22px"
-                                                    color="white"
-                                                    onClick={(e) => {
-                                                        e.stopPropagation()
-                                                        this.props.openContextMenuForList(
-                                                            listData.unifiedId,
-                                                        )
-                                                    }}
-                                                    containerRef={
-                                                        this
-                                                            .spaceContextBtnRefs[
-                                                            listData.unifiedId
-                                                        ]
-                                                    }
-                                                    background={
-                                                        this.props
-                                                            .activeListContextMenuId ===
-                                                        listData.unifiedId
-                                                            ? 'greyScale2'
-                                                            : null
-                                                    }
-                                                />
-                                            </TooltipBox>
-                                        ) : (
+                                        {listData.isPrivate && (
                                             <TooltipBox
                                                 tooltipText="Share Space"
                                                 placement="bottom-end"
@@ -1144,6 +1114,39 @@ export class AnnotationsSidebar extends React.Component<
                                     </>
                                 )}
                         </ActionButtons>
+                        {listData.localId != null &&
+                            listData.creator?.id ===
+                                this.props.currentUser?.id &&
+                            listData.isPrivate === false && (
+                                <TooltipBox
+                                    tooltipText="Space is Shared"
+                                    placement="bottom-end"
+                                >
+                                    <Icon
+                                        filePath="peopleFine"
+                                        heightAndWidth="22px"
+                                        color="white"
+                                        onClick={(e) => {
+                                            e.stopPropagation()
+                                            this.props.openContextMenuForList(
+                                                listData.unifiedId,
+                                            )
+                                        }}
+                                        containerRef={
+                                            this.spaceContextBtnRefs[
+                                                listData.unifiedId
+                                            ]
+                                        }
+                                        background={
+                                            this.props
+                                                .activeListContextMenuId ===
+                                            listData.unifiedId
+                                                ? 'greyScale2'
+                                                : null
+                                        }
+                                    />
+                                </TooltipBox>
+                            )}
                         {listInstance.annotationRefsLoadState === 'running' ? (
                             this.renderLoader(undefined, 20)
                         ) : listData.hasRemoteAnnotationsToLoad ? (

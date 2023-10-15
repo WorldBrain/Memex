@@ -21,13 +21,14 @@ export interface Props {
 
 export interface State {
     isHovering: boolean
+    canDisableHover: boolean
 }
 
 export default class ListsSidebarItem extends React.PureComponent<
     Props,
     State
 > {
-    state: State = { isHovering: false }
+    state: State = { isHovering: false, canDisableHover: false }
 
     private handleDragEnter: React.DragEventHandler = (e) => {
         e.preventDefault()
@@ -46,6 +47,10 @@ export default class ListsSidebarItem extends React.PureComponent<
     }
 
     render() {
+        if (this.props.areAnyMenusDisplayed && this.state.canDisableHover) {
+            this.setState({ isHovering: true, canDisableHover: false })
+        }
+
         return (
             <Container>
                 <SidebarItem
@@ -60,11 +65,17 @@ export default class ListsSidebarItem extends React.PureComponent<
                     }} // Needed to allow the `onDrop` event to fire
                     onDrop={this.handleDrop}
                     onMouseEnter={() => this.setState({ isHovering: true })}
-                    onMouseOver={() => this.setState({ isHovering: true })}
-                    onMouseLeave={() =>
-                        !this.props.areAnyMenusDisplayed &&
-                        this.setState({ isHovering: false })
-                    }
+                    onMouseLeave={() => {
+                        if (!this.props.areAnyMenusDisplayed) {
+                            this.setState({
+                                isHovering: false,
+                                canDisableHover: true,
+                            })
+                        }
+                        this.setState({
+                            canDisableHover: true,
+                        })
+                    }}
                 >
                     {this.props.renderLeftSideIcon?.()}
                     <TitleBox>

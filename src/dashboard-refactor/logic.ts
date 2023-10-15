@@ -3198,6 +3198,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     localId: localListId,
                     unifiedAnnotationIds: [],
                     hasRemoteAnnotationsToLoad: false,
+                    isPrivate: true,
                     creator:
                         previousState.currentUser != null
                             ? {

@@ -157,31 +157,36 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         list.unifiedId ||
                                     this.props.editMenuListId === list.unifiedId
                                 }
-                                renderRightSideIcon={() => (
-                                    <SpaceContextMenuBtn
-                                        {...this.props.initContextMenuBtnProps(
-                                            list.unifiedId,
-                                        )}
-                                        listData={list}
-                                        isCreator={
-                                            list.creator?.id ===
-                                            this.props.currentUser?.id
-                                        }
-                                        isMenuDisplayed={
-                                            this.props.showMoreMenuListId ===
-                                            list.unifiedId
-                                        }
-                                        errorMessage={
-                                            this.props.editListErrorMessage
-                                        }
-                                        onConfirmSpaceNameEdit={(newName) => {
-                                            this.props.onConfirmListEdit(
+                                renderRightSideIcon={() => {
+                                    return (
+                                        <SpaceContextMenuBtn
+                                            {...this.props.initContextMenuBtnProps(
                                                 list.unifiedId,
+                                            )}
+                                            listData={list}
+                                            isCreator={
+                                                list.creator?.id ===
+                                                this.props.currentUser?.id
+                                            }
+                                            isMenuDisplayed={
+                                                this.props
+                                                    .showMoreMenuListId ===
+                                                list.unifiedId
+                                            }
+                                            errorMessage={
+                                                this.props.editListErrorMessage
+                                            }
+                                            onConfirmSpaceNameEdit={(
                                                 newName,
-                                            )
-                                        }}
-                                    />
-                                )}
+                                            ) => {
+                                                this.props.onConfirmListEdit(
+                                                    list.unifiedId,
+                                                    newName,
+                                                )
+                                            }}
+                                        />
+                                    )
+                                }}
                                 renderEditIcon={() => (
                                     <SpaceEditMenuBtn
                                         {...this.props.initContextMenuBtnProps(
