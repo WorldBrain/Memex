@@ -401,7 +401,7 @@ async function hydrateCacheLists(
             extraData: {
                 normalizedPageUrl: sharedListEntryData?.normalizedUrl,
                 sharedListEntryId: sharedListEntryData?.id,
-                isPrivate: metadata?.private ?? null,
+                isPrivate: metadata?.private ?? true,
                 remoteId: metadata?.remoteId,
                 creator,
             },
