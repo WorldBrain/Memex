@@ -425,17 +425,20 @@ async function hydrateCacheLists(
                       undefined
                     : undefined
             listsToCache.push(
-                reshapeFollowedListForCache(list, {
-                    hasRemoteAnnotations: list.hasAnnotationsFromOthers,
-                    extraData: {
-                        normalizedPageUrl: sharedListEntryData?.normalizedUrl,
-                        sharedListEntryId: sharedListEntryData?.id,
-                    },
-                }),
+                Promise.resolve(
+                    reshapeFollowedListForCache(list, {
+                        hasRemoteAnnotations: list.hasAnnotationsFromOthers,
+                        extraData: {
+                            normalizedPageUrl:
+                                sharedListEntryData?.normalizedUrl,
+                            sharedListEntryId: sharedListEntryData?.id,
+                        },
+                    }),
+                ),
             )
         })
 
-    args.cache.setLists(listsToCache)
+    await Promise.all(listsToCache).then(args.cache.setLists)
 }
 
 export function deriveListOwnershipStatus(
