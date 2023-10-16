@@ -21,7 +21,16 @@ export class PKMSyncBackgroundModule {
 
         this.remoteFunctions = {
             pushPKMSyncUpdate: async (item) => {
-                await this.processChanges(item)
+                if (await this.backendNew.isConnected()) {
+                    const bufferedItems = await this.getBufferedItems()
+                    bufferedItems.push(item)
+
+                    for (const item of bufferedItems) {
+                        await this.processChanges(item)
+                    }
+                } else {
+                    await this.bufferPKMSyncItems(item)
+                }
             },
         }
     }
@@ -30,6 +39,34 @@ export class PKMSyncBackgroundModule {
         makeRemotelyCallable({
             ...this.remoteFunctions,
         })
+    }
+
+    async bufferPKMSyncItems(itemToBuffer) {
+        // Get the current buffer from browser.storage.local
+        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        const currentBuffer = data.PKMSYNCbufferedItems || []
+
+        if (currentBuffer.length > 2000) {
+            await browser.storage.local.set({ PKMSYNCbufferMaxReached: true })
+            return
+        }
+
+        // Append the new item to the buffer
+        currentBuffer.push(itemToBuffer)
+
+        // Save the updated buffer back to browser.storage.local
+        await browser.storage.local.set({ PKMSYNCbufferedItems: currentBuffer })
+    }
+
+    async getBufferedItems() {
+        // Check for buffered items in browser.storage.local
+        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        const bufferedItems = data.PKMSYNCbufferedItems || []
+
+        // After retrieving the buffered items, delete them from local storage
+        await browser.storage.local.remove('PKMSYNCbufferedItems')
+
+        return bufferedItems
     }
 
     private async getValidFolders() {

@@ -60,8 +60,6 @@ export class MemexLocalBackend {
         fileContent: string,
         pkmType: string,
     ): Promise<any> {
-        const serverReachable = await this.isConnected()
-
         const syncKey = await getPkmSyncKey()
 
         const body = JSON.stringify({
@@ -71,43 +69,22 @@ export class MemexLocalBackend {
             syncKey: syncKey,
         })
 
-        const syncWasSetupBefore = await browser.storage.local.get(
-            'PKMSYNCsyncWasSetupBefore',
-        )
-        const syncExists = syncWasSetupBefore.PKMSYNCsyncWasSetupBefore
-            ? true
-            : false
+        const response = await fetch(`${this.url}/update-file`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
 
-        if (!serverReachable && syncExists) {
-            await this.bufferPKMSyncItems(body)
-        } else {
-            const bufferedItems = await this.getBufferedItems()
+        if (response.ok) {
+            await browser.storage.local.set({
+                PKMSYNCsyncWasSetupBefore: true,
+            })
+        }
 
-            // Add the current "body" item to the end of the buffered items array
-            bufferedItems.push(body)
-
-            // Work off the buffered items one-by-one
-
-            for (const item of bufferedItems) {
-                const response = await fetch(`${this.url}/update-file`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: item,
-                })
-
-                if (response.ok) {
-                    await browser.storage.local.set({
-                        PKMSYNCsyncWasSetupBefore: true,
-                    })
-                }
-
-                if (!response.ok) {
-                    await this.bufferPKMSyncItems(body)
-                    throw new Error(`HTTP error! status: ${response.status}`)
-                }
-            }
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`)
         }
     }
 
