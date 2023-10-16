@@ -99,6 +99,9 @@ export class PKMSyncBackgroundModule {
             const customTagsLogseq = await browser.storage.local.get(
                 'PKMSYNCcustomTagsLogseq',
             )
+
+            item.data.pageTitle = this.cleanFileName(item.data.pageTitle, true)
+
             try {
                 await this.createPageUpdate(
                     item,
@@ -128,6 +131,9 @@ export class PKMSyncBackgroundModule {
             const customTagsObsidian = await browser.storage.local.get(
                 'PKMSYNCcustomTagsObsidian',
             )
+
+            item.data.pageTitle = this.cleanFileName(item.data.pageTitle, true)
+
             try {
                 await this.createPageUpdate(
                     item,
@@ -142,10 +148,27 @@ export class PKMSyncBackgroundModule {
         }
     }
 
+    cleanFileName(fileNameInput, onlyParenthesisRemoval) {
+        let fileName = fileNameInput
+
+        // Remove any () and its encapsulated content from the string
+        fileName = fileName.replace(/\(.*?\)/g, '')
+
+        if (!onlyParenthesisRemoval) {
+            // Remove any characters that are not allowed in filenames and replace them with hyphens
+            const illegalCharacters = /[#%&{}\\<>?/$!'"@+`|=]/g
+            fileName = fileName.replace(illegalCharacters, '-')
+        }
+        fileName = fileName.trim()
+
+        return fileName
+    }
+
     processPageTitleFormat(pageTitleFormat, pageTitle, pageCreatedWhen) {
         let finalTitle = pageTitleFormat
 
         finalTitle = finalTitle.replace('{{{PageTitle}}}', pageTitle)
+        finalTitle = this.cleanFileName(finalTitle, false)
 
         const datePattern = /{{{Date: "(.*?)"}}}/
         const match = finalTitle.match(datePattern)
@@ -170,6 +193,7 @@ export class PKMSyncBackgroundModule {
             item.data.pageTitle,
             item.data.pageCreatedWhen,
         )
+
         let [pageHeader, annotationsSection] = [null, null]
         let fileContent = ''
 
