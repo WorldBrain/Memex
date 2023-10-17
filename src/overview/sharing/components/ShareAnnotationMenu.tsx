@@ -181,6 +181,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                     // isDisabled={!this.state.shortcutsEnabled}
                                     name={'Copy link when creating highlight'}
                                     label={'Copy link when creating highlight'}
+                                    fontSize={14}
                                     size={14}
                                     isLoading={
                                         this.props.autoCreateLinkState ===
@@ -231,6 +232,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                         // isDisabled={!this.state.shortcutsEnabled}
                                         name={'Auto Share'}
                                         label={'Auto Share'}
+                                        fontSize={14}
                                         size={14}
                                         isLoading={
                                             this.props.autoShareState ===

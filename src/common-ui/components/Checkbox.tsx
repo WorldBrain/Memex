@@ -6,6 +6,7 @@ const styles = require('./Checkbox.css')
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type CheckboxToggle = (
     event: React.SyntheticEvent<HTMLInputElement>,
@@ -28,6 +29,7 @@ export interface Props {
     zIndex?: number
     isLoading?: boolean
     fontSize?: number
+    checkBoxColor?: ColorThemeKeys
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -63,6 +65,7 @@ class Checkbox extends React.PureComponent<Props> {
                             size={this.props.size}
                             mode={this.props.mode}
                             isChecked={this.props.isChecked}
+                            checkBoxColor={this.props.checkBoxColor}
                         >
                             {this.props.isChecked && (
                                 <Icon
@@ -102,7 +105,7 @@ const LabelContentBox = styled.div`
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    margin-left: 10px;
+    margin-left: 8px;
 `
 const LabelTitle = styled.div<{ fontSize: number }>`
     color: ${(props) => props.theme.colors.greyScale6};
@@ -161,17 +164,17 @@ const LabelText = styled.span<{ fontSize }>`
     }
 `
 
-const LabelCheck = styled.span<{ isChecked; mode; size }>`
+const LabelCheck = styled.span<{ isChecked; mode; size; checkBoxColor }>`
     border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '5px')};
     border: 2px solid
         ${(props) =>
             props.isChecked
                 ? props.theme.colors.white
-                : props.theme.colors.greyScale2};
+                : props.theme.colors[props.checkBoxColor ?? 'greyScale2']};
     background: ${(props) =>
         props.isChecked
             ? props.theme.colors.white
-            : props.theme.colors.greyScale2};
+            : props.theme.colors[props.checkBoxColor ?? 'greyScale2']};
     vertical-align: middle;
     width: ${(props) => (props.size ? props.size + 'px' : '24px')};
     height: ${(props) => (props.size ? props.size + 'px' : '24px')};
