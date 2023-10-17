@@ -28,22 +28,18 @@ const ProgressRow = ({
         </InfoBlock>
         <InfoBlock>
             <Number>{fail}</Number>
-            <SubTitle>
-                Failed (
-                <a target="_blank" href="https://worldbrain.io/import_bug">
-                    ?
-                </a>
-                )
-            </SubTitle>
+            <SubTitle>Failed</SubTitle>
         </InfoBlock>
-        <ViewFailedItems onClick={changeShowDetails}>
-            View Failed Items
-            <Icon
-                filePath={icons.arrowDown}
-                rotation={!showDownloadDetails ? '-90' : '0'}
-                heightAndWidth={'16px'}
-            />
-        </ViewFailedItems>
+        {fail > 0 && (
+            <ViewFailedItems onClick={changeShowDetails}>
+                View Failed Items
+                <Icon
+                    filePath={icons.arrowDown}
+                    rotation={!showDownloadDetails ? '-90' : '0'}
+                    heightAndWidth={'16px'}
+                />
+            </ViewFailedItems>
+        )}
     </ProgressRowContainer>
 )
 
@@ -132,17 +128,19 @@ const Progress = styled.div`
     display: grid;
     grid-auto-flow: column;
     grid-gap: 3px;
-    align-items: center;
+    align-items: flex-end;
 `
 
 const Number = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 22px;
     font-weight: bold;
+    width: 0px;
+    line-height: 28px;
 `
 
 const NumberSmall = styled.div`
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 18px;
     font-weight: bold;
 `
