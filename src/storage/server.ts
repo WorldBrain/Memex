@@ -15,7 +15,7 @@ import { createClientApplicationLayer } from '@worldbrain/memex-common/lib/fireb
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
-import { ServerStorage } from './types'
+import type { ServerStorage } from './types'
 import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
@@ -144,29 +144,7 @@ export function createMemoryServerStorage(options?: {
     })
 }
 
-export async function createTestServerStorage(options: {
-    firebaseProjectId?: string
-    withTestUser?: { uid: string } | boolean
-    // superuser?: boolean
-    setupMiddleware?: (storageMan: StorageManager) => StorageMiddleware[]
-}): Promise<ServerStorage> {
-    if (process.env.TEST_SERVER_STORAGE === 'firebase-emulator') {
-        const {
-            createFirestoreEmulatorStorageBackend,
-        } = require('./fb-emulator-storage.ts')
-        const backend = await createFirestoreEmulatorStorageBackend(options)
-        const storageManager = createStorageManager(backend, options)
-
-        return createServerStorage(storageManager, {
-            autoPkType: 'string',
-            skipApplicationLayer: true,
-        })
-    } else {
-        return createMemoryServerStorage(options)
-    }
-}
-
-function createStorageManager(
+export function createStorageManager(
     backend: StorageBackend,
     options?: {
         setupMiddleware?(manager: StorageManager): StorageMiddleware[]

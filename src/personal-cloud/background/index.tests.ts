@@ -13,7 +13,7 @@ import {
     BackgroundIntegrationTestSetupOpts,
 } from 'src/tests/background-integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { createTestServerStorage } from 'src/storage/server'
+import { createTestServerStorage } from 'src/storage/server.tests'
 import {
     PersonalCloudHub,
     StorexPersonalCloudBackend,

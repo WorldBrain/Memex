@@ -1,7 +1,15 @@
-import { initializeTestEnvironment } from '@firebase/rules-unit-testing'
+import type StorageManager from '@worldbrain/storex'
+import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
+import { initializeTestEnvironment } from '@firebase/rules-unit-testing'
+import type { ServerStorage } from './types'
+import {
+    createMemoryServerStorage,
+    createStorageManager,
+    createServerStorage,
+} from './server'
 
-export async function createFirestoreEmulatorStorageBackend(options: {
+async function createFirestoreEmulatorStorageBackend(options: {
     firebaseProjectId?: string
     withTestUser?: { uid: string } | boolean
     firestoreEmulatorConf?: { host: string; port: number }
@@ -48,4 +56,23 @@ service cloud.firestore {
         firebase: { firestore: context.firestore } as any,
         firestore: context.firestore() as any,
     })
+}
+
+export async function createTestServerStorage(options: {
+    firebaseProjectId?: string
+    withTestUser?: { uid: string } | boolean
+    // superuser?: boolean
+    setupMiddleware?: (storageMan: StorageManager) => StorageMiddleware[]
+}): Promise<ServerStorage> {
+    if (process.env.TEST_SERVER_STORAGE === 'firebase-emulator') {
+        const backend = await createFirestoreEmulatorStorageBackend(options)
+        const storageManager = createStorageManager(backend, options)
+
+        return createServerStorage(storageManager, {
+            autoPkType: 'string',
+            skipApplicationLayer: true,
+        })
+    } else {
+        return createMemoryServerStorage(options)
+    }
 }
