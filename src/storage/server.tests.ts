@@ -2,6 +2,7 @@ import type StorageManager from '@worldbrain/storex'
 import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing'
+import { documentId, Timestamp, serverTimestamp } from '@firebase/firestore'
 import type { ServerStorage } from './types'
 import {
     createMemoryServerStorage,
@@ -53,7 +54,11 @@ service cloud.firestore {
             : testEnv.unauthenticatedContext()
 
     return new FirestoreStorageBackend({
-        firebase: { firestore: context.firestore } as any,
+        firebaseModules: {
+            documentId,
+            serverTimestamp,
+            fromMillis: Timestamp.fromMillis,
+        },
         firestore: context.firestore() as any,
     })
 }

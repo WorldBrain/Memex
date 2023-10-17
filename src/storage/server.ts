@@ -33,8 +33,12 @@ export function createServerStorageManager(options?: {
 }) {
     const firebase = getFirebase()
     const serverStorageBackend = new FirestoreStorageBackend({
-        firebase: firebase as any,
         firestore: firebase.firestore() as any,
+        firebaseModules: {
+            serverTimestamp: firebase.firestore.FieldValue.serverTimestamp,
+            documentId: firebase.firestore.FieldPath.documentId,
+            fromMillis: firebase.firestore.Timestamp.fromMillis,
+        },
     })
     return createStorageManager(serverStorageBackend, options)
 }
