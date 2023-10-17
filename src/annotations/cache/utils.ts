@@ -381,6 +381,8 @@ async function hydrateCacheLists(
             list.type === 'page-link'
                 ? sharedListEntryMap.get(metadata?.remoteId) ?? undefined
                 : undefined
+
+        //TODO: remove again in a few weeks
         if (metadata && metadata.remoteId && metadata.private == null) {
             await args.bgModules.contentSharing.updateListPrivacy({
                 localListId: list.id,
