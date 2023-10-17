@@ -154,7 +154,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     list.unifiedId,
                                 )}
                                 isPrivate={list.isPrivate}
-                                isShared={list.remoteId != null}
+                                isShared={!list.isPrivate}
                                 areAnyMenusDisplayed={
                                     this.props.showMoreMenuListId ===
                                         list.unifiedId ||
@@ -187,7 +187,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     newName,
                                                 )
                                             }}
-                                            isShared={list.remoteId != null}
+                                            isShared={!list.isPrivate}
                                         />
                                     )
                                 }}
@@ -255,7 +255,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     list.unifiedId,
                                 )}
                                 isPrivate={list.isPrivate}
-                                isShared={list.remoteId != null}
+                                isShared={!list.isPrivate}
                             />
                         ))}
                     </ListsSidebarGroup>

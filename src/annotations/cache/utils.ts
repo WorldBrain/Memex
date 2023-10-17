@@ -373,7 +373,7 @@ async function hydrateCacheLists(
 
     const seenFollowedLists = new Set<AutoPk>()
 
-    const listsToCache = args.localListsData.map((list) => {
+    const listsToCache = args.localListsData.map(async (list) => {
         let creator = args.user
         let hasRemoteAnnotations = false
         const metadata = args.listMetadata[list.id]
@@ -381,6 +381,13 @@ async function hydrateCacheLists(
             list.type === 'page-link'
                 ? sharedListEntryMap.get(metadata?.remoteId) ?? undefined
                 : undefined
+        if (metadata && metadata.remoteId && metadata.private == null) {
+            await args.bgModules.contentSharing.updateListPrivacy({
+                localListId: list.id,
+                isPrivate: false,
+            })
+            metadata.private = false
+        }
         if (
             metadata?.remoteId != null &&
             args.followedListsData[metadata.remoteId]
@@ -401,7 +408,7 @@ async function hydrateCacheLists(
             extraData: {
                 normalizedPageUrl: sharedListEntryData?.normalizedUrl,
                 sharedListEntryId: sharedListEntryData?.id,
-                isPrivate: metadata?.private ?? false,
+                isPrivate: metadata?.private ?? true,
                 remoteId: metadata?.remoteId,
                 creator,
             },
@@ -418,17 +425,20 @@ async function hydrateCacheLists(
                       undefined
                     : undefined
             listsToCache.push(
-                reshapeFollowedListForCache(list, {
-                    hasRemoteAnnotations: list.hasAnnotationsFromOthers,
-                    extraData: {
-                        normalizedPageUrl: sharedListEntryData?.normalizedUrl,
-                        sharedListEntryId: sharedListEntryData?.id,
-                    },
-                }),
+                Promise.resolve(
+                    reshapeFollowedListForCache(list, {
+                        hasRemoteAnnotations: list.hasAnnotationsFromOthers,
+                        extraData: {
+                            normalizedPageUrl:
+                                sharedListEntryData?.normalizedUrl,
+                            sharedListEntryId: sharedListEntryData?.id,
+                        },
+                    }),
+                ),
             )
         })
 
-    args.cache.setLists(listsToCache)
+    await Promise.all(listsToCache).then(args.cache.setLists)
 }
 
 export function deriveListOwnershipStatus(
