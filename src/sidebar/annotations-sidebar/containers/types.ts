@@ -193,6 +193,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showLengthError?: boolean
     youtubeTranscriptSummary?: string
     youtubeTranscriptSummaryloadState: TaskState
+    fetchLocalHTML: boolean
 
     // Search result props
     shouldShowCount: boolean
@@ -357,6 +358,8 @@ interface SidebarEvents {
         sharedListId: string
         manuallyPullLocalListData?: boolean
     }
+
+    changeFetchLocalHTML: { shouldFetch: boolean }
 
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     openEditMenuForList: { unifiedListId: UnifiedList['unifiedId'] }

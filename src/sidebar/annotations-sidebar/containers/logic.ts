@@ -261,6 +261,7 @@ export class SidebarContainerLogic extends UILogic<
             spaceTitleEditValue: '',
             activeListContextMenuId: null,
             activeListEditMenuId: null,
+            fetchLocalHTML: false,
 
             commentBox: { ...INIT_FORM_STATE },
 
@@ -2078,6 +2079,10 @@ export class SidebarContainerLogic extends UILogic<
             ? highlightedText
             : undefined
 
+        if (previousState.fetchLocalHTML) {
+            textToAnalyse = document.title + document.body.innerText
+        }
+
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl: isPagePDF
                 ? undefined
@@ -2823,6 +2828,18 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         this.emitMutation({})
+    }
+    changeFetchLocalHTML: EventHandler<'changeFetchLocalHTML'> = async ({
+        event,
+        previousState,
+    }) => {
+        // TODO : this is a hack to stop users clicking on space pills before the followed lists have been loaded
+        //  Because shit breaks down if they're not loaded and everything's too much of a mess to untangle right now.
+        //  Should become much less of a problem once we load followed lists from local DB
+        // if (previousState.followedListLoadState !== 'success') {
+        //     return
+        // }
+        this.emitMutation({ fetchLocalHTML: { $set: event.shouldFetch } })
     }
 
     setSelectedListFromWebUI: EventHandler<
