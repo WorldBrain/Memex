@@ -185,7 +185,7 @@
         "@babel/preset-env": "^7.9.0",
         "@babel/preset-react": "^7.9.4",
         "@babel/register": "^7.9.0",
-        "@firebase/testing": "^0.20.11",
+        "@firebase/rules-unit-testing": "^3.0.1",
         "@sentry/webpack-plugin": "^1.11.1",
         "@testing-library/dom": "^7.2.2",
         "@testing-library/jest-dom": "^5.1.1",
