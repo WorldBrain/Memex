@@ -1384,6 +1384,12 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             spaceTitleEditValue={this.state.spaceTitleEditValue}
+                            changeFetchLocalHTML={(value) =>
+                                this.processEvent('changeFetchLocalHTML', {
+                                    shouldFetch: value,
+                                })
+                            }
+                            fetchLocalHTML={this.state.fetchLocalHTML}
                         />
                     </Rnd>
                 </ContainerStyled>
