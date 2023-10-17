@@ -291,6 +291,10 @@ class Import extends React.PureComponent<Props> {
     }
 
     private renderLogSeqIntegration() {
+        if (!this.props.shouldRenderEsts) {
+            return
+        }
+
         return (
             <div>
                 <SettingSection
@@ -596,6 +600,10 @@ class Import extends React.PureComponent<Props> {
     }
 
     private renderObsidianIntegration() {
+        if (!this.props.shouldRenderEsts) {
+            return
+        }
+
         return (
             <div>
                 <SettingSection

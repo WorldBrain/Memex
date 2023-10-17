@@ -23,14 +23,16 @@ const StatusReport = ({
                 <Number>{failCount}</Number>
                 <SubTitle>Failed</SubTitle>
             </InfoBlock>
-            <ViewFailedItems onClick={changeShowDetails}>
-                View Failed Items
-                <Icon
-                    filePath={icons.arrowDown}
-                    rotation={!showDownloadDetails ? '-90' : '0'}
-                    heightAndWidth={'16px'}
-                />
-            </ViewFailedItems>
+            {failCount > 0 && (
+                <ViewFailedItems onClick={changeShowDetails}>
+                    View Failed Items
+                    <Icon
+                        filePath={icons.arrowDown}
+                        rotation={!showDownloadDetails ? '-90' : '0'}
+                        heightAndWidth={'16px'}
+                    />
+                </ViewFailedItems>
+            )}
         </ProgressRowContainer>
 
         {/* <div className={localStyles.reportDetails}>
@@ -98,7 +100,7 @@ const Progress = styled.div`
 `
 
 const Number = styled.div`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.white};
     font-size: 22px;
     font-weight: bold;
 `

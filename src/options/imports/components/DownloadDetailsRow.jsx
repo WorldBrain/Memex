@@ -26,12 +26,12 @@ const Container = styled.tr`
     cursor: pointer;
 
     &:nth-child(2n + 2) {
-        background: ${(props) => props.theme.colors.black};
+        background: ${(props) => props.theme.colors.greyScale2};
     }
 `
 
 const UrlCol = styled.span`
-    color: ${(props) => props.theme.colors.darkerText};
+    color: ${(props) => props.theme.colors.greyScale7};
     font-size: 14px;
     font-weight: 500;
 `
