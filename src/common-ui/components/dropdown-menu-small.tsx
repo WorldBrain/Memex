@@ -274,6 +274,7 @@ const MenuItemName = styled.div<{ isSelected; isOpened }>`
             ? props.theme.colors.greyScale5
             : props.theme.colors.white};
     font-size: 12px;
+    font-weight: 400;
     display: flex;
     align-items: center;
     grid-gap: 5px;
@@ -282,8 +283,8 @@ const MenuItemName = styled.div<{ isSelected; isOpened }>`
 `
 
 const MenuItemInfo = styled.div`
-    font-weight: 400;
-    font-size: 11px;
+    font-weight: 300;
+    font-size: 12px;
     color: ${(props) => props.theme.colors.greyScale5};
 `
 
