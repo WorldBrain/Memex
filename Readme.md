@@ -33,11 +33,6 @@ Add notes to websites as a whole and to individual components (e.g. text, images
 Add bookmarks, tags or sort websites into lists on the fly.
 ![](https://user-images.githubusercontent.com/7870039/75158720-a786a800-570e-11ea-9891-0ef26f7066f3.gif)
 
-## All Data Stored Locally
-
-All personal data is stored and processed on your own computer and will **never** leave your computer without you either sharing, syncing or backing it up to an external cloud.
-For more details please see our [privacy policy](https://worldbrain.io/privacy)
-
 ## Mobile Apps for iOS & Android + Encrypted Sync
 
 With [Memex Go](https://getmemex.com) you can save & organise content on the go.
