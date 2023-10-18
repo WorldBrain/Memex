@@ -14,7 +14,6 @@ import {
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
-import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -36,7 +35,6 @@ export const handleIncomingData = (deps: {
     updates,
     where,
 }: IncomingDataInfo): Promise<void> => {
-    console.log('arrives here', storageType, collection, updates, where)
     const incomingStorageManager =
         storageType === PersonalCloudClientStorageType.Persistent
             ? deps.persistentStorageManager
@@ -129,15 +127,11 @@ async function handleSyncedDataForPKMSync(
         url: string
         listNames: string[]
     }): Promise<boolean> {
-        console.log('arrives here', url, listNames)
-        console.log('deps', customListsBG)
         const listEntries = await storageManager.backend.operation(
             'findObjects',
             'annotListEntries',
             { url: url },
         )
-
-        console.log('listEntries', listEntries)
 
         if (listEntries.length === 0) {
             return false
@@ -153,8 +147,6 @@ async function handleSyncedDataForPKMSync(
             )
             const listName = listData.name
 
-            console.log('listName', listName)
-
             if (listNames.includes(listName)) {
                 return true
             }
@@ -167,7 +159,7 @@ async function handleSyncedDataForPKMSync(
         url: string
         listNames: string[]
     }): Promise<boolean> {
-        const listEntries = await storageManager.backend.operation(
+        let listEntries = await storageManager.backend.operation(
             'findObjects',
             'pageListEntries',
             { pageUrl: url },
@@ -176,6 +168,8 @@ async function handleSyncedDataForPKMSync(
         if (listEntries.length === 0) {
             return false
         }
+
+        listEntries = listEntries.filter((item) => item != 20201014)
 
         for (const listEntry of listEntries) {
             const listData = await storageManager.backend.operation(
@@ -314,8 +308,6 @@ async function handleSyncedDataForPKMSync(
                     pageUrl: updates.fullUrl,
                     pageSpaces: listData.name,
                 }
-
-                console.log('here')
 
                 await sharePageWithPKM(
                     pageData,

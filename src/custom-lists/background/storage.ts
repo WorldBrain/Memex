@@ -506,6 +506,33 @@ export default class CustomListStorage extends StorageModule {
         await this.operation('deleteList', { id })
     }
 
+    async checkIfPageInfilteredList({
+        url,
+        listNames,
+    }: {
+        url: string
+        listNames: string[]
+    }): Promise<boolean> {
+        let listEntries = await this.fetchListIdsByUrl(normalizeUrl(url))
+
+        if (listEntries?.length === 0) {
+            return false
+        }
+
+        listEntries = listEntries.filter((item) => item != 20201014)
+
+        for (const listEntry of listEntries) {
+            const listData = await this.operation('findListById', {
+                id: listEntry,
+            })
+            const listName = listData.name
+
+            if (listNames.includes(listName)) {
+                return true
+            }
+        }
+    }
+
     async insertPageToList({
         listId,
         pageUrl,
@@ -560,7 +587,15 @@ export default class CustomListStorage extends StorageModule {
                         createdWhen: Date.now(),
                     }
 
-                    sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
+                    sharePageWithPKM(
+                        dataToSave,
+                        this.options.pkmSyncBG,
+                        async (url, listNames) =>
+                            await this.checkIfPageInfilteredList({
+                                url: url,
+                                listNames: listNames,
+                            }),
+                    )
                 } catch (error) {}
             }
 

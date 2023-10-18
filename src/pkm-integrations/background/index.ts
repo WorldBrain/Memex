@@ -49,14 +49,15 @@ export class PKMSyncBackgroundModule {
             )
             if (
                 spaces &&
-                filterTagsObsidian.PKMSYNCfilterTagsObsidian.includes(spaces)
+                filterTagsObsidian.PKMSYNCfilterTagsObsidian?.includes(spaces)
             ) {
                 return true
             }
 
+            console.log('here')
             if (
                 checkForFilteredSpaces &&
-                filterTagsObsidian.PKMSYNCfilterTagsObsidian.length > 0 &&
+                filterTagsObsidian.PKMSYNCfilterTagsObsidian?.length > 0 &&
                 !(await checkForFilteredSpaces(
                     item.type === 'annotation'
                         ? item.data.annotationId
@@ -64,11 +65,12 @@ export class PKMSyncBackgroundModule {
                     filterTagsObsidian.PKMSYNCfilterTagsObsidian,
                 ))
             ) {
+                console.log('false')
                 return false
             }
             if (
                 checkForFilteredSpaces == null &&
-                filterTagsObsidian.PKMSYNCfilterTagsObsidian.length > 0
+                filterTagsObsidian.PKMSYNCfilterTagsObsidian?.length > 0
             ) {
                 return false
             }
@@ -89,7 +91,7 @@ export class PKMSyncBackgroundModule {
 
             if (
                 checkForFilteredSpaces &&
-                filterTagsLogseq.PKMSYNCfilterTagsLogseq.length > 0 &&
+                filterTagsLogseq.PKMSYNCfilterTagsLogseq?.length > 0 &&
                 !(await checkForFilteredSpaces(
                     item.type === 'annotation'
                         ? item.data.annotationId
@@ -102,7 +104,7 @@ export class PKMSyncBackgroundModule {
 
             if (
                 checkForFilteredSpaces == null &&
-                filterTagsLogseq.PKMSYNCfilterTagsObsidian.length > 0
+                filterTagsLogseq.PKMSYNCfilterTagsObsidian?.length > 0
             ) {
                 return false
             }
@@ -115,7 +117,7 @@ export class PKMSyncBackgroundModule {
         const data = await browser.storage.local.get('PKMSYNCbufferedItems')
         const currentBuffer = data.PKMSYNCbufferedItems || []
 
-        if (currentBuffer.length > 2000) {
+        if (currentBuffer?.length > 2000) {
             await browser.storage.local.set({ PKMSYNCbufferMaxReached: true })
             return
         }
@@ -429,7 +431,7 @@ export class PKMSyncBackgroundModule {
                     annotationsSection.slice(0, annotationStartIndex) +
                     newAnnotationContent +
                     annotationsSection.slice(
-                        annotationEndIndex + annotationEndLine.length,
+                        annotationEndIndex + annotationEndLine?.length,
                     )
                 )
             }
@@ -464,7 +466,7 @@ export class PKMSyncBackgroundModule {
                     annotationsSection.slice(0, annotationStartIndex) +
                     newAnnotationContent +
                     annotationsSection.slice(
-                        annotationEndIndex + annotationEndLine.length,
+                        annotationEndIndex + annotationEndLine?.length,
                     )
                 )
             }
@@ -527,7 +529,7 @@ export class PKMSyncBackgroundModule {
                 annotationNoteEndIndex !== -1
             ) {
                 annotationNoteContent = annotation.slice(
-                    annotationNoteStartIndex + noteStartString.length,
+                    annotationNoteStartIndex + noteStartString?.length,
                     annotationNoteEndIndex,
                 )
             }
@@ -661,7 +663,7 @@ export class PKMSyncBackgroundModule {
             let spaces = []
 
             if (spacesStartIndex !== -1) {
-                for (let i = spacesStartIndex + 1; i < lines.length; i++) {
+                for (let i = spacesStartIndex + 1; i < lines?.length; i++) {
                     let line = lines[i]
                     let match = line.match(/^ - "\[\[(.+)\]\]"$/)
                     if (match) {

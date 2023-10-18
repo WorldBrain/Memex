@@ -567,12 +567,9 @@ export default class AnnotationStorage extends StorageModule {
         url: string
         listNames: string[]
     }): Promise<boolean> {
-        console.log('arrives here', url, listNames)
         const listEntries = await this.operation('findListEntriesByUrl', {
             url: url,
         })
-
-        console.log('listEntries', listEntries)
 
         if (listEntries.length === 0) {
             return false
@@ -583,8 +580,6 @@ export default class AnnotationStorage extends StorageModule {
                 id: listEntry.listId,
             })
             const listName = listData.name
-
-            console.log('listName', listName)
 
             if (listNames.includes(listName)) {
                 return true
@@ -618,12 +613,6 @@ export default class AnnotationStorage extends StorageModule {
                             annotationDataForPKMSyncUpdate.pageUrl,
                         ),
                     })
-
-                console.log(
-                    'pageDate',
-                    url,
-                    annotationDataForPKMSyncUpdate.pageUrl,
-                )
 
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
