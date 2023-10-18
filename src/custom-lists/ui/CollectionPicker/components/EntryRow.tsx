@@ -23,6 +23,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     actOnAllTooltipText?: string
     resultItem: React.ReactNode
     contextMenuBtnRef?: React.RefObject<HTMLDivElement>
+    editMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
     allTabsButtonPressed?: string
     focused?: boolean
@@ -69,7 +70,8 @@ class EntryRow extends React.Component<Props> {
                 this.props.contextMenuBtnRef?.current.contains(
                     e.target as Node,
                 ) ||
-                this.props.goToButtonRef?.current.contains(e.target as Node)
+                this.props.goToButtonRef?.current.contains(e.target as Node) ||
+                this.props.editMenuBtnRef?.current.contains(e.target as Node)
             ) {
                 return
             }
@@ -165,9 +167,13 @@ class EntryRow extends React.Component<Props> {
                             <TooltipBox
                                 tooltipText={'Edit Space'}
                                 placement="bottom"
-                                targetElementRef={contextMenuBtnRef?.current}
+                                targetElementRef={
+                                    this.props.editMenuBtnRef?.current
+                                }
                             >
-                                <ButtonContainer ref={contextMenuBtnRef}>
+                                <ButtonContainer
+                                    ref={this.props.editMenuBtnRef}
+                                >
                                     <Icon
                                         filePath={icons.edit}
                                         heightAndWidth="20px"

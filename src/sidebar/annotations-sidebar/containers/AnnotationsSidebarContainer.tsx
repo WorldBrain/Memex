@@ -155,7 +155,7 @@ export class AnnotationsSidebarContainer<
         const list = this.props.annotationsCache.getListByLocalId(listId)
         return {
             name: list?.name ?? 'Missing list',
-            isShared: list?.remoteId != null,
+            isShared: list?.remoteId != null && !list?.isPrivate,
             description: list?.description,
             type: list?.type ?? null,
         }

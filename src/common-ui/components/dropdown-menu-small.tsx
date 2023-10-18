@@ -184,7 +184,9 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         isOpened={this.state.isOpened}
                     >
                         <MenuItemName isSelected={true}>
-                            <MenuItemBox>{selectedMenuItem.name}</MenuItemBox>
+                            <MenuItemBox isOpened={false}>
+                                {selectedMenuItem.name}
+                            </MenuItemBox>
                             <Icon
                                 filePath="arrowDown"
                                 color="greyScale7"
@@ -200,12 +202,16 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 }
 
-const MenuItemBox = styled.div`
+const MenuItemBox = styled.div<{ isOpened }>`
     display: flex;
     align-items: flex-start;
     justify-content: center;
     flex-direction: column;
     grid-gap: 5px;
+    color: ${(props) =>
+        !props.isOpened
+            ? props.theme.colors.greyScale6
+            : props.theme.colors.white};
 `
 
 const MenuItem = styled.div<{
@@ -262,8 +268,11 @@ const MenuTitle = styled.div`
     font-size: 14px;
 `
 
-const MenuItemName = styled.div<{ isSelected }>`
-    color: ${(props) => props.theme.colors.white};
+const MenuItemName = styled.div<{ isSelected; isOpened }>`
+    color: ${(props) =>
+        props.isOpened
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.white};
     font-size: 12px;
     display: flex;
     align-items: center;
