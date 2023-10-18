@@ -163,7 +163,6 @@ const LOCAL_LISTS_V24 = {
         createdAt: new Date(1619414286452),
         isDeletable: true,
         isNestable: true,
-        type: null,
     },
     second: {
         id: 1619414286456,
@@ -172,7 +171,6 @@ const LOCAL_LISTS_V24 = {
         createdAt: new Date(1619414286456),
         isDeletable: true,
         isNestable: true,
-        type: null,
     },
 }
 
@@ -180,10 +178,12 @@ const LOCAL_SHARED_LIST_METADATA_V24 = {
     first: {
         localId: LOCAL_LISTS_V24.first.id,
         remoteId: 'test-1',
+        private: false,
     },
     second: {
         localId: LOCAL_LISTS_V24.second.id,
         remoteId: 'test-2',
+        private: false,
     },
 }
 
@@ -1036,8 +1036,9 @@ export const REMOTE_TEST_DATA_V24 = {
             id: 1,
             personalList: REMOTE_LISTS_V24.first.id,
             remoteId: LOCAL_SHARED_LIST_METADATA_V24.first.remoteId,
-            user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            private: false,
             createdWhen: 565,
             updatedWhen: 565,
         },
@@ -1045,8 +1046,9 @@ export const REMOTE_TEST_DATA_V24 = {
             id: 2,
             personalList: REMOTE_LISTS_V24.second.id,
             remoteId: LOCAL_SHARED_LIST_METADATA_V24.second.remoteId,
-            user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            private: false,
             createdWhen: 565,
             updatedWhen: 565,
         },
