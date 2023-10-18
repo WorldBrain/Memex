@@ -487,48 +487,34 @@ class Import extends React.PureComponent<Props> {
                                                 />
                                             </SettingsValueBox>
                                         </SettingsEntry>
-                                        <TooltipBox
-                                            tooltipText={
-                                                <span>
-                                                    Add custom tags like the
-                                                    initial default "Memex Sync"
-                                                    to <br />
-                                                    make entries more filterable
-                                                    in Logseq.
-                                                </span>
-                                            }
-                                            placement="bottom"
-                                        >
-                                            <SettingsEntry>
-                                                <SettingsLabel>
-                                                    Only sync pages &
-                                                    annotations that have these
-                                                    Spaces (separate by comma,
-                                                    can include spaces){' '}
-                                                </SettingsLabel>
-                                                <SettingsValueBox>
-                                                    <TextField
-                                                        value={
-                                                            this.state
-                                                                .filterTagsLogseq
-                                                        }
-                                                        onChange={(event) => {
-                                                            this.setState({
-                                                                filterTagsLogseq: (event.target as HTMLInputElement)
+                                        <SettingsEntry>
+                                            <SettingsLabel>
+                                                Only sync pages & annotations
+                                                that have these Spaces (separate
+                                                by comma, can include spaces){' '}
+                                            </SettingsLabel>
+                                            <SettingsValueBox>
+                                                <TextField
+                                                    value={
+                                                        this.state
+                                                            .filterTagsLogseq
+                                                    }
+                                                    onChange={(event) => {
+                                                        this.setState({
+                                                            filterTagsLogseq: (event.target as HTMLInputElement)
+                                                                .value,
+                                                        })
+                                                        browser.storage.local.set(
+                                                            {
+                                                                PKMSYNCfilterTagsLogseq: (event.target as HTMLInputElement)
                                                                     .value,
-                                                            })
-                                                            browser.storage.local.set(
-                                                                {
-                                                                    PKMSYNCfilterTagsLogseq: (event.target as HTMLInputElement)
-                                                                        .value,
-                                                                },
-                                                            )
-                                                        }}
-                                                        width={'300px'}
-                                                    />
-                                                </SettingsValueBox>
-                                            </SettingsEntry>
-                                        </TooltipBox>
+                                                            },
+                                                        )
+                                                    }}
+                                                    width={'300px'}
+                                                />
+                                            </SettingsValueBox>
+                                        </SettingsEntry>
                                         <SettingsEntry>
                                             <SettingsLabel>
                                                 Date format{' '}
@@ -869,48 +855,34 @@ class Import extends React.PureComponent<Props> {
                                                 />
                                             </SettingsValueBox>
                                         </SettingsEntry>
-                                        <TooltipBox
-                                            tooltipText={
-                                                <span>
-                                                    Add custom tags like the
-                                                    initial default "Memex Sync"
-                                                    to <br />
-                                                    make entries more filterable
-                                                    in Obsidian.
-                                                </span>
-                                            }
-                                            placement="bottom"
-                                        >
-                                            <SettingsEntry>
-                                                <SettingsLabel>
-                                                    Only sync pages &
-                                                    annotations that have these
-                                                    Spaces (separate by comma,
-                                                    can include spaces){' '}
-                                                </SettingsLabel>
-                                                <SettingsValueBox>
-                                                    <TextField
-                                                        value={
-                                                            this.state
-                                                                .filterTagsObsidian
-                                                        }
-                                                        onChange={(event) => {
-                                                            this.setState({
-                                                                filterTagsObsidian: (event.target as HTMLInputElement)
+                                        <SettingsEntry>
+                                            <SettingsLabel>
+                                                Only sync pages & annotations
+                                                that have these Spaces (separate
+                                                by comma, can include spaces){' '}
+                                            </SettingsLabel>
+                                            <SettingsValueBox>
+                                                <TextField
+                                                    value={
+                                                        this.state
+                                                            .filterTagsObsidian
+                                                    }
+                                                    onChange={(event) => {
+                                                        this.setState({
+                                                            filterTagsObsidian: (event.target as HTMLInputElement)
+                                                                .value,
+                                                        })
+                                                        browser.storage.local.set(
+                                                            {
+                                                                PKMSYNCfilterTagsObsidian: (event.target as HTMLInputElement)
                                                                     .value,
-                                                            })
-                                                            browser.storage.local.set(
-                                                                {
-                                                                    PKMSYNCfilterTagsObsidian: (event.target as HTMLInputElement)
-                                                                        .value,
-                                                                },
-                                                            )
-                                                        }}
-                                                        width={'300px'}
-                                                    />
-                                                </SettingsValueBox>
-                                            </SettingsEntry>
-                                        </TooltipBox>
+                                                            },
+                                                        )
+                                                    }}
+                                                    width={'300px'}
+                                                />
+                                            </SettingsValueBox>
+                                        </SettingsEntry>
                                         <TooltipBox
                                             tooltipText={
                                                 <span>
