@@ -580,6 +580,25 @@ export default class CustomListStorage extends StorageModule {
         listId: number
         pageUrl: string
     }) {
+        if (isPkmSyncEnabled()) {
+            try {
+                const list = await this.fetchListById(listId)
+                const pageToSave = await this.operation('findPageByUrl', {
+                    url: normalizeUrl(pageUrl),
+                })
+
+                const dataToSave = {
+                    pageUrl: pageUrl,
+                    pageTitle: pageToSave.fullTitle,
+                    pkmSyncType: 'page',
+                    pageSpaces: list.name,
+                    createdWhen: Date.now(),
+                }
+
+                sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
+            } catch (error) {}
+        }
+
         return this.operation('deleteListEntriesById', { listId, pageUrl })
     }
 

@@ -5,6 +5,7 @@ export async function shareAnnotationWithPKM(
     annotationData,
     pkmSyncBG,
     imageSupport,
+    checkForFilteredSpaces?,
 ) {
     let item = {
         type: 'annotation',
@@ -19,15 +20,19 @@ export async function shareAnnotationWithPKM(
         )
     }
 
-    await pkmSyncBG.pushPKMSyncUpdate(item)
+    await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
 }
-export async function sharePageWithPKM(pageData, pkmSyncBG) {
+export async function sharePageWithPKM(
+    pageData,
+    pkmSyncBG,
+    checkForFilteredSpaces?,
+) {
     let item = {
         type: 'page',
         data: pageData,
     }
 
-    await pkmSyncBG.pushPKMSyncUpdate(item)
+    await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
 }
 
 export async function getPkmSyncKey() {

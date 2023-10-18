@@ -341,27 +341,45 @@ export default class AnnotationStorage extends StorageModule {
                     .findOneObject<{ id: number; name: string }>({ id: listId })
                 const listName = listData.name
 
-                const pageDataStorage = await this.options.storageManager
+                const pageVisitStorage = await this.options.storageManager
                     .collection('visits')
                     .findOneObject<{ time: string }>({
                         url: normalizeUrl(
                             annotationDataForPKMSyncUpdate.pageUrl,
                         ),
                     })
-                const pageDate = pageDataStorage.time
+                const pageDate = pageVisitStorage.time
+
+                const pageDataStorage = await this.options.storageManager
+                    .collection('pages')
+                    .findOneObject<{ fullUrl: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
 
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
-                    pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
+                    pageUrl:
+                        pageDataStorage.fullUrl ??
+                        'https://' + annotationDataForPKMSyncUpdate.pageUrl,
                     annotationSpaces: listName,
                     pageCreatedWhen: pageDate,
+                    body: annotationsData[0]?.body,
+                    comment: annotationsData[0]?.comment,
+                    createdWhen: annotationsData[0]?.createdWhen,
                 }
 
                 shareAnnotationWithPKM(
                     annotationData,
                     this.options.pkmSyncBG,
                     this.options.imageSupport,
+                    async (url, listNames) =>
+                        await this.checkIfAnnotationInfilteredList({
+                            url: url,
+                            listNames: listNames,
+                        }),
                 )
             } catch (e) {}
         }
@@ -412,6 +430,9 @@ export default class AnnotationStorage extends StorageModule {
                     pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
                     annotationSpaces: listName,
                     pageCreatedWhen: pageDate,
+                    body: annotationsData[0]?.body,
+                    comment: annotationsData[0]?.comment,
+                    createdWhen: annotationsData[0]?.createdWhen,
                 }
 
                 shareAnnotationWithPKM(
@@ -497,12 +518,18 @@ export default class AnnotationStorage extends StorageModule {
         }
         if (await isPkmSyncEnabled()) {
             try {
-                const pageDataStorage = await this.options.storageManager
+                const pageVisitStorage = await this.options.storageManager
                     .collection('visits')
                     .findOneObject<{ time: string }>({
-                        url: normalizeUrl(pageUrl),
+                        url: normalizeUrl(url),
                     })
-                const pageDate = pageDataStorage.time
+                const pageDate = pageVisitStorage.time
+
+                const pageDataStorage = await this.options.storageManager
+                    .collection('pages')
+                    .findOneObject<{ fullUrl: string }>({
+                        url: normalizeUrl(url),
+                    })
 
                 const annotationData = {
                     annotationId: url,
@@ -511,7 +538,7 @@ export default class AnnotationStorage extends StorageModule {
                     comment: comment,
                     createdWhen: createdWhen,
                     pageCreatedWhen: pageDate,
-                    pageUrl: pageUrl,
+                    pageUrl: pageDataStorage.fullUrl ?? pageUrl,
                 }
 
                 shareAnnotationWithPKM(
@@ -533,6 +560,38 @@ export default class AnnotationStorage extends StorageModule {
         })
     }
 
+    async checkIfAnnotationInfilteredList({
+        url,
+        listNames,
+    }: {
+        url: string
+        listNames: string[]
+    }): Promise<boolean> {
+        console.log('arrives here', url, listNames)
+        const listEntries = await this.operation('findListEntriesByUrl', {
+            url: url,
+        })
+
+        console.log('listEntries', listEntries)
+
+        if (listEntries.length === 0) {
+            return false
+        }
+
+        for (const listEntry of listEntries) {
+            const listData = await this.operation('findListById', {
+                id: listEntry.listId,
+            })
+            const listName = listData.name
+
+            console.log('listName', listName)
+
+            if (listNames.includes(listName)) {
+                return true
+            }
+        }
+    }
+
     async editAnnotation(
         url: string,
         comment: string,
@@ -543,14 +602,28 @@ export default class AnnotationStorage extends StorageModule {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
 
-                const pageDataStorage = await this.options.storageManager
+                const pageVisitStorage = await this.options.storageManager
                     .collection('visits')
                     .findOneObject<{ time: string }>({
                         url: normalizeUrl(
                             annotationDataForPKMSyncUpdate.pageUrl,
                         ),
                     })
-                const pageDate = pageDataStorage.time
+                const pageDate = pageVisitStorage.time
+
+                const pageDataStorage = await this.options.storageManager
+                    .collection('pages')
+                    .findOneObject<{ fullUrl: string }>({
+                        url: normalizeUrl(
+                            annotationDataForPKMSyncUpdate.pageUrl,
+                        ),
+                    })
+
+                console.log(
+                    'pageDate',
+                    url,
+                    annotationDataForPKMSyncUpdate.pageUrl,
+                )
 
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
@@ -559,13 +632,20 @@ export default class AnnotationStorage extends StorageModule {
                     createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
                     comment,
                     pageCreatedWhen: pageDate,
-                    pageUrl: annotationDataForPKMSyncUpdate.pageUrl,
+                    pageUrl:
+                        pageDataStorage.fullUrl ??
+                        'https://' + annotationDataForPKMSyncUpdate.pageUrl,
                 }
 
                 shareAnnotationWithPKM(
                     annotationData,
                     this.options.pkmSyncBG,
                     this.options.imageSupport,
+                    async (url, listNames) =>
+                        await this.checkIfAnnotationInfilteredList({
+                            url: url,
+                            listNames: listNames,
+                        }),
                 )
             } catch (e) {}
         }
