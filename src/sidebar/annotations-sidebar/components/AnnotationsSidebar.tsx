@@ -1871,7 +1871,7 @@ export class AnnotationsSidebar extends React.Component<
                                         label={'Use Local Content'}
                                         size={12}
                                         fontSize={12}
-                                        checkBoxColor="greyScale1"
+                                        checkBoxColor="black"
                                     />
                                 </TooltipBox>
                             </OptionsContainerLeft>
