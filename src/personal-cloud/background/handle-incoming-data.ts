@@ -98,14 +98,17 @@ export const handleIncomingData = (deps: {
             { text: processed },
         )
     }
-    handleSyncedDataForPKMSync(
-        deps.pkmSyncBG,
-        collection,
-        updates,
-        where,
-        deps.storageManager,
-        deps.imageSupport,
-    )
+    try {
+        await handleSyncedDataForPKMSync(
+            deps.pkmSyncBG,
+            collection,
+            updates,
+            where,
+            deps.storageManager,
+            deps.imageSupport,
+            deps.customListsBG,
+        )
+    } catch (e) {}
 }
 
 async function handleSyncedDataForPKMSync(
@@ -115,7 +118,75 @@ async function handleSyncedDataForPKMSync(
     where,
     storageManager: StorageManager,
     imageSupport: ImageSupportInterface,
+    customListsBG: CustomListBackground,
 ) {
+    async function checkIfAnnotationInfilteredList({
+        url,
+        listNames,
+    }: {
+        url: string
+        listNames: string[]
+    }): Promise<boolean> {
+        const listEntries = await storageManager.backend.operation(
+            'findObjects',
+            'annotListEntries',
+            { url: url },
+        )
+
+        if (listEntries.length === 0) {
+            return false
+        }
+
+        for (const listEntry of listEntries) {
+            const listData = await storageManager.backend.operation(
+                'findObject',
+                'customLists',
+                {
+                    id: listEntry.listId,
+                },
+            )
+            const listName = listData.name
+
+            if (listNames.includes(listName)) {
+                return true
+            }
+        }
+    }
+    async function checkIfPageInfilteredList({
+        url,
+        listNames,
+    }: {
+        url: string
+        listNames: string[]
+    }): Promise<boolean> {
+        let listEntries = await storageManager.backend.operation(
+            'findObjects',
+            'pageListEntries',
+            { pageUrl: url },
+        )
+
+        if (listEntries.length === 0) {
+            return false
+        }
+
+        listEntries = listEntries.filter((item) => item != 20201014)
+
+        for (const listEntry of listEntries) {
+            const listData = await storageManager.backend.operation(
+                'findObject',
+                'customLists',
+                {
+                    id: listEntry.listId,
+                },
+            )
+            const listName = listData.name
+
+            if (listNames.includes(listName)) {
+                return true
+            }
+        }
+    }
+
     if (await isPkmSyncEnabled()) {
         try {
             if (collection === 'annotations') {
@@ -138,6 +209,7 @@ async function handleSyncedDataForPKMSync(
                 const annotationData = {
                     annotationId: updates.url,
                     pageTitle: updates.pageTitle,
+                    pageUrl: pageDataStorage.fullUrl,
                     body: updates.body,
                     comment: updates.comment,
                     createdWhen: updates.createdWhen,
@@ -148,6 +220,11 @@ async function handleSyncedDataForPKMSync(
                     annotationData,
                     pkmSyncBG,
                     imageSupport,
+                    async (url, listNames) =>
+                        await checkIfAnnotationInfilteredList({
+                            url: url,
+                            listNames: listNames,
+                        }),
                 )
             }
 
@@ -166,6 +243,15 @@ async function handleSyncedDataForPKMSync(
                     }>({
                         url: updates.url.split('/#')[0],
                     })
+                const annotationDataStorage = await storageManager
+                    .collection('annotations')
+                    .findOneObject<{
+                        body: string
+                        comment: string
+                        createdWhen: string
+                    }>({
+                        url: updates.url,
+                    })
                 const visitsStorage = await storageManager
                     .collection('visits')
                     .findOneObject<{ time: string }>({
@@ -174,17 +260,25 @@ async function handleSyncedDataForPKMSync(
                 const pageDate = visitsStorage.time
 
                 const annotationData = {
-                    pageTitle: pageDataStorage.fullTitle,
                     annotationId: updates.url,
+                    pageTitle: pageDataStorage.fullTitle,
                     pageUrl: pageDataStorage.fullUrl,
-                    annotationSpaces: listData.name,
+                    annotationSpaces: listData?.name,
                     pageCreatedWhen: pageDate,
+                    body: annotationDataStorage.body,
+                    comment: annotationDataStorage.comment,
+                    createdWhen: annotationDataStorage.createdWhen,
                 }
 
                 await shareAnnotationWithPKM(
                     annotationData,
                     pkmSyncBG,
                     imageSupport,
+                    async (url, listNames) =>
+                        await checkIfAnnotationInfilteredList({
+                            url: url,
+                            listNames: listNames,
+                        }),
                 )
             }
             if (collection === 'pages') {
@@ -210,12 +304,20 @@ async function handleSyncedDataForPKMSync(
 
                 const pageData = {
                     pageTitle: pageDataStorage.fullTitle,
-                    createdWhen: updates.createdAt,
+                    createdWhen: Date.now(),
                     pageUrl: updates.fullUrl,
                     pageSpaces: listData.name,
                 }
 
-                await sharePageWithPKM(pageData, pkmSyncBG)
+                await sharePageWithPKM(
+                    pageData,
+                    pkmSyncBG,
+                    async (url, listNames) =>
+                        await checkIfPageInfilteredList({
+                            url: normalizeUrl(url),
+                            listNames: listNames,
+                        }),
+                )
             }
         } catch (e) {
             console.error(e)

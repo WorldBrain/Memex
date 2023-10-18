@@ -20,13 +20,13 @@ export class PKMSyncBackgroundModule {
         })
 
         this.remoteFunctions = {
-            pushPKMSyncUpdate: async (item) => {
+            pushPKMSyncUpdate: async (item, checkForFilteredSpaces) => {
                 if (await this.backendNew.isConnected()) {
                     const bufferedItems = await this.getBufferedItems()
                     bufferedItems.push(item)
 
                     for (const item of bufferedItems) {
-                        await this.processChanges(item)
+                        await this.processChanges(item, checkForFilteredSpaces)
                     }
                 } else {
                     await this.bufferPKMSyncItems(item)
@@ -41,12 +41,83 @@ export class PKMSyncBackgroundModule {
         })
     }
 
+    async applySyncFilters(pkmType, item, checkForFilteredSpaces) {
+        const spaces = item.data.annotationSpaces || item.data.pageSpaces
+        if (pkmType === 'obsidian') {
+            const filterTagsObsidian = await browser.storage.local.get(
+                'PKMSYNCfilterTagsObsidian',
+            )
+            if (
+                spaces &&
+                filterTagsObsidian.PKMSYNCfilterTagsObsidian?.includes(spaces)
+            ) {
+                return true
+            }
+
+            console.log('here')
+            if (
+                checkForFilteredSpaces &&
+                filterTagsObsidian.PKMSYNCfilterTagsObsidian?.length > 0 &&
+                !(await checkForFilteredSpaces(
+                    item.type === 'annotation'
+                        ? item.data.annotationId
+                        : item.data.pageUrl,
+                    filterTagsObsidian.PKMSYNCfilterTagsObsidian,
+                ))
+            ) {
+                console.log('false')
+                return false
+            }
+            if (
+                checkForFilteredSpaces == null &&
+                filterTagsObsidian.PKMSYNCfilterTagsObsidian?.length > 0
+            ) {
+                return false
+            }
+            return true
+        }
+
+        if (pkmType === 'logseq') {
+            const filterTagsLogseq = await browser.storage.local.get(
+                'PKMSYNCfilterTagsLogseq',
+            )
+
+            if (
+                spaces &&
+                filterTagsLogseq.PKMSYNCfilterTagsLogseq.includes(spaces)
+            ) {
+                return true
+            }
+
+            if (
+                checkForFilteredSpaces &&
+                filterTagsLogseq.PKMSYNCfilterTagsLogseq?.length > 0 &&
+                !(await checkForFilteredSpaces(
+                    item.type === 'annotation'
+                        ? item.data.annotationId
+                        : item.data.pageUrl,
+                    filterTagsLogseq.PKMSYNCfilterTagsLogseq,
+                ))
+            ) {
+                return false
+            }
+
+            if (
+                checkForFilteredSpaces == null &&
+                filterTagsLogseq.PKMSYNCfilterTagsObsidian?.length > 0
+            ) {
+                return false
+            }
+            return true
+        }
+    }
+
     async bufferPKMSyncItems(itemToBuffer) {
         // Get the current buffer from browser.storage.local
         const data = await browser.storage.local.get('PKMSYNCbufferedItems')
         const currentBuffer = data.PKMSYNCbufferedItems || []
 
-        if (currentBuffer.length > 2000) {
+        if (currentBuffer?.length > 2000) {
             await browser.storage.local.set({ PKMSYNCbufferMaxReached: true })
             return
         }
@@ -81,11 +152,20 @@ export class PKMSyncBackgroundModule {
         return validFolders
     }
 
-    async processChanges(item) {
+    async processChanges(item, checkForFilteredSpaces) {
         const validFolders = await this.getValidFolders()
 
         // Process for LogSeq if valid
         if (validFolders.logSeq) {
+            if (
+                !(await this.applySyncFilters(
+                    'logseq',
+                    item,
+                    checkForFilteredSpaces,
+                ))
+            ) {
+                return
+            }
             // let syncOnlyAnnotatedPagesLogseq = await browser.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
             // )
@@ -119,6 +199,15 @@ export class PKMSyncBackgroundModule {
 
         // Process for Obsidian if valid
         if (validFolders.obsidian) {
+            if (
+                !(await this.applySyncFilters(
+                    'obsidian',
+                    item,
+                    checkForFilteredSpaces,
+                ))
+            ) {
+                return
+            }
             // let syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
             // )
@@ -212,7 +301,7 @@ export class PKMSyncBackgroundModule {
                             item.data.pageTitle,
                             item.data.pageUrl,
                             item.data.pageSpaces || null,
-                            item.data.createdWhen,
+                            item.data.pageCreatedWhen ?? item.data.createdWhen,
                             item.data.type,
                             pkmType,
                             syncDateFormat,
@@ -221,7 +310,7 @@ export class PKMSyncBackgroundModule {
                     item.data.pageTitle || null,
                     item.data.pageURL || null,
                     item.data.pageSpaces || null,
-                    item.data.creationDate || null,
+                    item.data.pageCreatedWhen ?? item.data.createdWhen,
                     item.data.type || null,
                     pkmType,
                     syncDateFormat,
@@ -240,10 +329,21 @@ export class PKMSyncBackgroundModule {
             let spaces = []
             let spacesString = ''
             if (customTags) {
-                customTags.split(',').map((tag) => spaces.push(tag.trim()))
+                if (customTags.includes(',')) {
+                    customTags.split(',').map((tag) => spaces.push(tag.trim()))
+                } else {
+                    spaces.push(customTags)
+                }
             }
 
-            if (pkmType === 'obsidian') {
+            if (item.data.pageSpaces) {
+                spaces.push(item.data.pageSpaces)
+            }
+            if (item.data.annotationSpaces) {
+                spaces.push(item.data.annotationSpaces)
+            }
+
+            if (pkmType === 'obsidian' && item.type === 'page') {
                 spacesString = spaces
                     .map((space) => ` - "[[${space}]]"\n`)
                     .join('')
@@ -251,18 +351,22 @@ export class PKMSyncBackgroundModule {
             if (pkmType === 'logseq') {
                 spacesString = spaces.map((space) => `[[${space}]]`).join(' ')
             }
+            if (pkmType === 'obsidian' && item.type === 'annotation') {
+                spacesString = spaces.map((space) => `[[${space}]]`).join(', ')
+            }
 
             pageHeader = this.pageObjectDefault(
                 item.data.pageTitle,
                 item.data.pageUrl,
-                (item.type === 'page' && item.data.spaces) || spacesString,
-                item.data.createdWhen,
+                item.type === 'page' ? spacesString : null,
+                item.data.pageCreatedWhen || item.data.createdWhen,
                 item.data.type,
                 pkmType,
                 syncDateFormat,
                 pageTitleFormat,
             )
 
+            console.log('spacesstring', spacesString)
             if (item.type === 'annotation' || item.type === 'note') {
                 annotationsSection = this.annotationObjectDefault(
                     item.data.annotationId,
@@ -270,8 +374,7 @@ export class PKMSyncBackgroundModule {
                         ? convertHTMLintoMarkdown(item.data.body)
                         : '',
                     item.data.comment,
-                    (item === 'annotation' && item.data.annotationSpaces) ||
-                        null,
+                    spacesString,
                     moment(item.data.createdWhen).format(
                         `${syncDateFormat} hh:mma`,
                     ),
@@ -329,7 +432,7 @@ export class PKMSyncBackgroundModule {
                     annotationsSection.slice(0, annotationStartIndex) +
                     newAnnotationContent +
                     annotationsSection.slice(
-                        annotationEndIndex + annotationEndLine.length,
+                        annotationEndIndex + annotationEndLine?.length,
                     )
                 )
             }
@@ -364,18 +467,21 @@ export class PKMSyncBackgroundModule {
                     annotationsSection.slice(0, annotationStartIndex) +
                     newAnnotationContent +
                     annotationsSection.slice(
-                        annotationEndIndex + annotationEndLine.length,
+                        annotationEndIndex + annotationEndLine?.length,
                     )
                 )
             }
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
+            console.log('ad', item.data.annotationSpaces)
             const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
                 item.data.comment,
-                item.data.annotationSpaces,
+                item.data.annotationSpaces
+                    ? `[[${item.data.annotationSpaces}]]`
+                    : null,
                 moment(item.data.createdWhen).format(
                     `${syncDateFormat} hh:mma`,
                 ),
@@ -427,7 +533,7 @@ export class PKMSyncBackgroundModule {
                 annotationNoteEndIndex !== -1
             ) {
                 annotationNoteContent = annotation.slice(
-                    annotationNoteStartIndex + noteStartString.length,
+                    annotationNoteStartIndex + noteStartString?.length,
                     annotationNoteEndIndex,
                 )
             }
@@ -461,6 +567,7 @@ export class PKMSyncBackgroundModule {
                     existingSpaces.push(annotationSpaces)
                 }
             }
+
             const formattedSpaces = existingSpaces
                 .map((space) => `[[${space}]]`)
                 .join(', ')
@@ -514,6 +621,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(' ')
 
+            console.log('formattedSpaces', formattedSpaces)
             updatedAnnotation = this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
@@ -561,7 +669,7 @@ export class PKMSyncBackgroundModule {
             let spaces = []
 
             if (spacesStartIndex !== -1) {
-                for (let i = spacesStartIndex + 1; i < lines.length; i++) {
+                for (let i = spacesStartIndex + 1; i < lines?.length; i++) {
                     let line = lines[i]
                     let match = line.match(/^ - "\[\[(.+)\]\]"$/)
                     if (match) {
@@ -630,6 +738,17 @@ export class PKMSyncBackgroundModule {
                 if (spacesMatch) {
                     spaces = spacesMatch.map((space) => space.slice(2, -2))
                 }
+            }
+
+            let tagsArray = []
+            if (customTags) {
+                tagsArray = customTags.split(',')
+                let tagsArrayTrimmed = tagsArray.map((tag) => tag.trim())
+                tagsArrayTrimmed.forEach((tag) => {
+                    if (spaces.indexOf(tag) === -1) {
+                        spaces.push(tag)
+                    }
+                })
             }
 
             // Step 2: Check if "pageSpaces" value is inside this array
@@ -707,10 +826,12 @@ export class PKMSyncBackgroundModule {
                 warning
             )
         }
+
         if (pkmType === 'logseq') {
             urlLine = `pageurl:: ${pageURL}\n`
             titleLine = `pagetitle:: ${pageTitle}\n`
             creationDateLine = `createdat:: ${createdWhen}\n`
+
             spacesLine = pageSpaces ? `spaces:: ${pageSpaces}\n` : ''
             warning =
                 '- ```\n❗️You can edit this file, though be aware that updates via Memex to an individual highlight will overwrite the changes you made to it in here. For feedback, go to memex.garden/chatSupport.\n```\n'
@@ -738,7 +859,7 @@ export class PKMSyncBackgroundModule {
                   )}\n<div id="end"/>\n\r`
                 : ''
             const highlightSpacesLine = annotationSpaces
-                ? `<!-- Spaces -->\n${annotationSpaces}\n\n`
+                ? `<!-- Spaces -->\n${`${annotationSpaces}`}\n\n`
                 : ''
             const creationDateLine = `<!-- Created at -->\n${creationDate}\n`
             const annotationEndLine = `\r<span class="annotationEndLine" id="${annotationId}"> --- </span>\n`
@@ -753,6 +874,7 @@ export class PKMSyncBackgroundModule {
             )
         }
         if (pkmType === 'logseq') {
+            console.log('annotationSpaces', annotationSpaces)
             let highlightTextLine = ''
             const separatedLine = `- <!-- NoteStartLine ${annotationId} -->---\n`
             highlightTextLine = body ? ` - > ${body}\n` : ''

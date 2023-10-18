@@ -75,6 +75,8 @@ class Import extends React.PureComponent<Props> {
         // syncOnlyAnnotatedPagesObsidian false,
         customTagsLogseq: 'Memex Sync',
         customTagsObsidian: 'Memex Sync',
+        filterTagsLogseq: '',
+        filterTagsObsidian: '',
     }
 
     async componentDidMount(): Promise<void> {
@@ -183,19 +185,46 @@ class Import extends React.PureComponent<Props> {
             })
         }
 
+        // fetch and store filter tags
+
+        const filterTagsObsidian = await browser.storage.local.get(
+            'PKMSYNCfilterTagsObsidian',
+        )
+        const filterTagsLogseq = await browser.storage.local.get(
+            'PKMSYNCfilterTagsLogseq',
+        )
+
+        let PKMSYNCfilterTagsLogseq = await browser.storage.local.get(
+            'PKMSYNCfilterTagsLogseq',
+        )
+        let PKMSYNCfilterTagsObsidian = await browser.storage.local.get(
+            'PKMSYNCfilterTagsObsidian',
+        )
+
+        if (PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq == null) {
+            PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq = this.state.filterTagsLogseq
+            await browser.storage.local.set({
+                PKMSYNCfilterTagsLogseq:
+                    PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq,
+            })
+        }
+
+        // Store the current state of the customTagsObsidian to the local storage if it returns null
+        if (PKMSYNCfilterTagsObsidian.PKMSYNCfilterTagsObsidian == null) {
+            PKMSYNCfilterTagsObsidian.PKMSYNCfilterTagsObsidian = this.state.filterTagsObsidian
+            await browser.storage.local.set({
+                PKMSYNCfilterTagsObsidian:
+                    PKMSYNCfilterTagsObsidian.PKMSYNCfilterTagsObsidian,
+            })
+        }
+
+        // fetch and store customSync Tags
         const customTagsObsidian = await browser.storage.local.get(
             'PKMSYNCcustomTagsObsidian',
         )
         const customTagsLogseq = await browser.storage.local.get(
             'PKMSYNCcustomTagsLogseq',
         )
-
-        // const syncOnlyAnnotatedPagesLogseq = await browser.storage.local.get(
-        //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
-        // )
-        // const syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
-        //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
-        // )
 
         let PKMSYNCcustomTagsLogseq = await browser.storage.local.get(
             'PKMSYNCcustomTagsLogseq',
@@ -240,6 +269,8 @@ class Import extends React.PureComponent<Props> {
                     : this.state.titleformatObsidian,
             customTagsObsidian: customTagsObsidian.PKMSYNCcustomTagsObsidian,
             customTagsLogseq: customTagsLogseq.PKMSYNCcustomTagsLogseq,
+            filterTagsObsidian: filterTagsObsidian.PKMSYNCfilterTagsObsidian,
+            filterTagsLogseq: filterTagsLogseq.PKMSYNCfilterTagsLogseq,
             // syncOnlyAnnotatedPagesLogseq:
             //     syncOnlyAnnotatedPagesLogseq.PKMSYNCsyncOnlyAnnotatedPagesLogseq,
             // syncOnlyAnnotatedPagesObsidian:
@@ -456,6 +487,48 @@ class Import extends React.PureComponent<Props> {
                                                 />
                                             </SettingsValueBox>
                                         </SettingsEntry>
+                                        <TooltipBox
+                                            tooltipText={
+                                                <span>
+                                                    Add custom tags like the
+                                                    initial default "Memex Sync"
+                                                    to <br />
+                                                    make entries more filterable
+                                                    in Logseq.
+                                                </span>
+                                            }
+                                            placement="bottom"
+                                        >
+                                            <SettingsEntry>
+                                                <SettingsLabel>
+                                                    Only sync pages &
+                                                    annotations that have these
+                                                    Spaces (separate by comma,
+                                                    can include spaces){' '}
+                                                </SettingsLabel>
+                                                <SettingsValueBox>
+                                                    <TextField
+                                                        value={
+                                                            this.state
+                                                                .filterTagsLogseq
+                                                        }
+                                                        onChange={(event) => {
+                                                            this.setState({
+                                                                filterTagsLogseq: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            })
+                                                            browser.storage.local.set(
+                                                                {
+                                                                    PKMSYNCfilterTagsLogseq: (event.target as HTMLInputElement)
+                                                                        .value,
+                                                                },
+                                                            )
+                                                        }}
+                                                        width={'300px'}
+                                                    />
+                                                </SettingsValueBox>
+                                            </SettingsEntry>
+                                        </TooltipBox>
                                         <SettingsEntry>
                                             <SettingsLabel>
                                                 Date format{' '}
@@ -796,6 +869,48 @@ class Import extends React.PureComponent<Props> {
                                                 />
                                             </SettingsValueBox>
                                         </SettingsEntry>
+                                        <TooltipBox
+                                            tooltipText={
+                                                <span>
+                                                    Add custom tags like the
+                                                    initial default "Memex Sync"
+                                                    to <br />
+                                                    make entries more filterable
+                                                    in Obsidian.
+                                                </span>
+                                            }
+                                            placement="bottom"
+                                        >
+                                            <SettingsEntry>
+                                                <SettingsLabel>
+                                                    Only sync pages &
+                                                    annotations that have these
+                                                    Spaces (separate by comma,
+                                                    can include spaces){' '}
+                                                </SettingsLabel>
+                                                <SettingsValueBox>
+                                                    <TextField
+                                                        value={
+                                                            this.state
+                                                                .filterTagsObsidian
+                                                        }
+                                                        onChange={(event) => {
+                                                            this.setState({
+                                                                filterTagsObsidian: (event.target as HTMLInputElement)
+                                                                    .value,
+                                                            })
+                                                            browser.storage.local.set(
+                                                                {
+                                                                    PKMSYNCfilterTagsObsidian: (event.target as HTMLInputElement)
+                                                                        .value,
+                                                                },
+                                                            )
+                                                        }}
+                                                        width={'300px'}
+                                                    />
+                                                </SettingsValueBox>
+                                            </SettingsEntry>
+                                        </TooltipBox>
                                         <TooltipBox
                                             tooltipText={
                                                 <span>

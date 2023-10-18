@@ -77,6 +77,7 @@ class SpacePicker extends StatefulUIElement<
     private contextMenuRef = React.createRef<SpaceContextMenu>()
     private editMenuRef = React.createRef<SpaceEditMenu>()
     private contextMenuBtnRef = React.createRef<HTMLDivElement>()
+    private editMenuBtnRef = React.createRef<HTMLDivElement>()
     private goToButtonRef = React.createRef<HTMLDivElement>()
 
     constructor(props: Props) {
@@ -279,6 +280,7 @@ class SpacePicker extends StatefulUIElement<
                 }
                 contextMenuBtnRef={this.contextMenuBtnRef}
                 goToButtonRef={this.goToButtonRef}
+                editMenuBtnRef={this.editMenuBtnRef}
                 onContextMenuBtnPress={
                     entry.creator?.id === this.state.currentUser?.id
                         ? () =>
