@@ -1,4 +1,5 @@
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
+// TODO: Refactor this so it's not importing and using the browser global
 import { browser } from 'webextension-polyfill-ts'
 
 export async function shareAnnotationWithPKM(
@@ -50,7 +51,7 @@ export async function getPkmSyncKey() {
 
 export async function isPkmSyncEnabled() {
     try {
-        let data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
         if (
             data.PKMSYNCpkmFolders &&
             (data.PKMSYNCpkmFolders.obsidianFolder?.length > 0 ||
@@ -61,7 +62,7 @@ export async function isPkmSyncEnabled() {
 
         return false
     } catch (e) {
-        console.error(e)
+        return false
     }
 }
 
