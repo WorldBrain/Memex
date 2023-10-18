@@ -17,7 +17,6 @@ import { acts as searchBarActs } from 'src/overview/search-bar'
 import { OPTIONS_URL } from 'src/constants'
 import AdvSettings from '../imports/components/AdvSettingsContainer'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import styled from 'styled-components'
@@ -113,25 +112,23 @@ class ImportContainer extends Component {
         setTimeout(() => this.props.recalcEsts(), 500)
     }
 
-    renderCancelButton = () => (
-        <SecondaryAction
-            onClick={this.handleCancelBtnClick}
-            isHidden={!this.props.shouldRenderProgress}
-            label={
-                <ButtonContent>
-                    <Icon
-                        filePath={icons.stop}
-                        heightAndWidth="14px"
-                        color="prime1"
-                        hoverOff
-                    />
-                    {this.state.waitingOnCancelConfirm
-                        ? 'Confirm Cancel'
-                        : 'Cancel'}
-                </ButtonContent>
-            }
-        />
-    )
+    renderCancelButton() {
+        if (this.props.shouldRenderProgress) {
+            return (
+                <PrimaryAction
+                    icon="removeX"
+                    type="tertiary"
+                    size="medium"
+                    label={
+                        this.state.waitingOnCancelConfirm
+                            ? 'Confirm Cancel'
+                            : 'Cancel'
+                    }
+                    onClick={this.handleCancelBtnClick}
+                />
+            )
+        }
+    }
 
     renderImportButton() {
         const {
@@ -181,7 +178,7 @@ class ImportContainer extends Component {
                         label={'Start new import'}
                         type={'forth'}
                         size={'medium'}
-                        icon={'redo'}
+                        icon={'reload'}
                     />
                     <PrimaryAction
                         onClick={() => window.open(`${OPTIONS_URL}#/overview`)}
@@ -408,14 +405,6 @@ const FinishBntContainer = styled.div`
     grid-auto-flow: column;
     grid-gap: 5px;
     align-items: center;
-`
-
-const ButtonContent = styled.div`
-    display: grid;
-    grid-auto-flow: column;
-    grid-gap: 5px;
-    align-items: center;
-    justify-content: center;
 `
 
 const SectionTitleSmall = styled.div`

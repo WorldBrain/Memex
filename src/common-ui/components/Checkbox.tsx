@@ -76,7 +76,9 @@ class Checkbox extends React.PureComponent<Props> {
                     )}
                     {this.props.label && (
                         <LabelContentBox>
-                            <LabelTitle>{this.props.label}</LabelTitle>
+                            <LabelTitle fontSize={this.props.fontSize}>
+                                {this.props.label}
+                            </LabelTitle>
                             <SubLabel>{this.props.subLabel}</SubLabel>
                         </LabelContentBox>
                     )}
@@ -102,7 +104,7 @@ const LabelContentBox = styled.div`
     justify-content: center;
     margin-left: 10px;
 `
-const LabelTitle = styled.div`
+const LabelTitle = styled.div<{ fontSize: number }>`
     color: ${(props) => props.theme.colors.greyScale6};
     font-weight: 300;
     font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '16px')};

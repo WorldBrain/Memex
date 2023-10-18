@@ -80,6 +80,8 @@ import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/s
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { Checkbox } from 'src/common-ui/components'
+import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -223,6 +225,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     ) => RepliesProps['getReplyEditProps']
     imageSupport: ImageSupportInterface<'caller'>
     bgScriptBG: RemoteBGScriptInterface
+    fetchLocalHTML: boolean
+    changeFetchLocalHTML: (value) => void
 }
 
 interface AnnotationsSidebarState {
@@ -1718,7 +1722,50 @@ export class AnnotationsSidebar extends React.Component<
                     {!this.props.selectedTextAIPreview && (
                         <OptionsContainer>
                             <OptionsContainerLeft>
-                                <TooltipBox
+                                <DropdownMenuBtnSmall
+                                    elementHeight="fit-content"
+                                    hideDescriptionInPreview
+                                    menuItems={[
+                                        {
+                                            id: 'Quick-glance',
+                                            name: 'Quick Glance (Faster)',
+                                            info:
+                                                'Include first few paragraphs or 6 min of video',
+                                        },
+                                        {
+                                            id: 'full-page',
+                                            name: 'Full Length (Slower)',
+                                            info: 'Uses entire content',
+                                        },
+                                        {
+                                            id: 'Question',
+                                            name: 'General Question',
+                                            info: 'Unrelated to the content',
+                                        },
+                                    ]}
+                                    onMenuItemClick={async (props, index) => {
+                                        let queryMode
+                                        if (index === 0) {
+                                            queryMode = 'glanceSummary'
+                                        }
+                                        if (index === 1) {
+                                            queryMode = 'summarize'
+                                        }
+                                        if (index === 2) {
+                                            queryMode = 'question'
+                                        }
+                                        this.props.setQueryMode(queryMode)
+
+                                        if (index !== 2) {
+                                            await this.props.queryAIwithPrompt(
+                                                this.props.prompt,
+                                            )
+                                        }
+                                    }}
+                                    initSelectedIndex={0}
+                                    keepSelectedState
+                                />
+                                {/* <TooltipBox
                                     tooltipText={
                                         <>
                                             Just takes the first few paragraphs
@@ -1791,6 +1838,40 @@ export class AnnotationsSidebar extends React.Component<
                                     >
                                         General Question
                                     </SelectionPill>
+                                </TooltipBox> */}
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            For performance we usually fetch the
+                                            text via our servers but sometimes
+                                            we can't reach it. E.g. if you are
+                                            behind a paywall.
+                                            <br /> Use this to fetch the content
+                                            from here.
+                                        </>
+                                    }
+                                    placement="bottom"
+                                    width="150px"
+                                >
+                                    <Checkbox
+                                        key={1}
+                                        id={'1'}
+                                        isChecked={this.props.fetchLocalHTML}
+                                        handleChange={() =>
+                                            this.props.fetchLocalHTML
+                                                ? this.props.changeFetchLocalHTML(
+                                                      false,
+                                                  )
+                                                : this.props.changeFetchLocalHTML(
+                                                      true,
+                                                  )
+                                        }
+                                        // isDisabled={!this.state.shortcutsEnabled}
+                                        name={'Use Local Content'}
+                                        label={'Use Local Content'}
+                                        size={12}
+                                        fontSize={12}
+                                    />
                                 </TooltipBox>
                             </OptionsContainerLeft>
                             <OptionsContainerRight>
@@ -2834,7 +2915,7 @@ const OptionsContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 5px 15px 10px 15px;
+    padding: 0px 15px 10px 15px;
     z-index: 100;
     height: 24px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
