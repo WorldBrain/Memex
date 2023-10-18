@@ -62,6 +62,7 @@ class EntryRow extends React.Component<Props> {
 
     state = {
         checkBoxHover: false,
+        mouseOverItem: false,
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
@@ -137,6 +138,10 @@ class EntryRow extends React.Component<Props> {
                     if (!keyboardNavActive) {
                         this.props.onFocus()
                     }
+                    this.setState({ mouseOverItem: true })
+                }}
+                onMouseLeave={() => {
+                    this.setState({ mouseOverItem: false })
                 }}
                 // onMouseLeave={!keyboardNavActive && this.props.onUnfocus}
                 isFocused={focused}
@@ -162,55 +167,65 @@ class EntryRow extends React.Component<Props> {
                     )}
                 </NameWrapper>
                 <IconStyleWrapper>
-                    {focused && this.props.onContextMenuBtnPress != null && (
-                        <>
-                            <TooltipBox
-                                tooltipText={'Edit Space'}
-                                placement="bottom"
-                                targetElementRef={
-                                    this.props.editMenuBtnRef?.current
-                                }
-                            >
-                                <ButtonContainer
-                                    ref={this.props.editMenuBtnRef}
+                    {focused &&
+                        this.state.mouseOverItem &&
+                        this.props.onContextMenuBtnPress != null && (
+                            <>
+                                <TooltipBox
+                                    tooltipText={'Edit Space'}
+                                    placement="bottom"
+                                    targetElementRef={
+                                        this.props.editMenuBtnRef?.current
+                                    }
                                 >
-                                    <Icon
-                                        filePath={icons.edit}
-                                        heightAndWidth="20px"
-                                        onClick={this.handleEditMenuBtnPress}
-                                    />
-                                </ButtonContainer>
-                            </TooltipBox>
-                            <TooltipBox
-                                tooltipText={'Share Space'}
-                                placement="bottom"
-                                targetElementRef={contextMenuBtnRef?.current}
-                            >
-                                <ButtonContainer ref={contextMenuBtnRef}>
-                                    <Icon
-                                        filePath={icons.invite}
-                                        heightAndWidth="20px"
-                                        onClick={this.handleContextMenuBtnPress}
-                                    />
-                                </ButtonContainer>
-                            </TooltipBox>
+                                    <ButtonContainer
+                                        ref={this.props.editMenuBtnRef}
+                                    >
+                                        <Icon
+                                            filePath={icons.edit}
+                                            heightAndWidth="20px"
+                                            onClick={
+                                                this.handleEditMenuBtnPress
+                                            }
+                                        />
+                                    </ButtonContainer>
+                                </TooltipBox>
+                                <TooltipBox
+                                    tooltipText={'Share Space'}
+                                    placement="bottom"
+                                    targetElementRef={
+                                        contextMenuBtnRef?.current
+                                    }
+                                >
+                                    <ButtonContainer ref={contextMenuBtnRef}>
+                                        <Icon
+                                            filePath={icons.invite}
+                                            heightAndWidth="20px"
+                                            onClick={
+                                                this.handleContextMenuBtnPress
+                                            }
+                                        />
+                                    </ButtonContainer>
+                                </TooltipBox>
 
-                            <TooltipBox
-                                tooltipText={'Go to Space'}
-                                placement="bottom"
-                                targetElementRef={goToButtonRef?.current}
-                            >
-                                <ButtonContainer ref={goToButtonRef}>
-                                    <Icon
-                                        filePath={icons.goTo}
-                                        heightAndWidth="20px"
-                                        onClick={this.handleOpenSpaceFromPicker}
-                                    />
-                                </ButtonContainer>
-                            </TooltipBox>
-                        </>
-                    )}
-                    {focused && onPressActOnAll && (
+                                <TooltipBox
+                                    tooltipText={'Go to Space'}
+                                    placement="bottom"
+                                    targetElementRef={goToButtonRef?.current}
+                                >
+                                    <ButtonContainer ref={goToButtonRef}>
+                                        <Icon
+                                            filePath={icons.goTo}
+                                            heightAndWidth="20px"
+                                            onClick={
+                                                this.handleOpenSpaceFromPicker
+                                            }
+                                        />
+                                    </ButtonContainer>
+                                </TooltipBox>
+                            </>
+                        )}
+                    {focused && this.state.mouseOverItem && onPressActOnAll && (
                         <ButtonContainer>
                             {this.props.addedToAllIds.includes(cleanID) ? (
                                 <TooltipBox
@@ -270,7 +285,7 @@ class EntryRow extends React.Component<Props> {
                             </SelectionBox>
                         </ButtonContainer>
                     )} */}
-                    {selected && (
+                    {selected && this.state.mouseOverItem && (
                         <ButtonContainer selected={selected}>
                             <SelectionBox
                                 onMouseEnter={() =>
