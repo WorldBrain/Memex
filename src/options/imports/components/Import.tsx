@@ -27,6 +27,8 @@ import { Checkbox } from 'src/common-ui/components'
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
 
+const customSyncTagDefault = 'Memex Sync'
+
 interface Props {
     isLoading: boolean
     loadingMsg?: string
@@ -68,13 +70,13 @@ class Import extends React.PureComponent<Props> {
         bufferLimitReached: false,
         hasSyncEverBeenRunning: false,
         dateformatLogseq: 'MMM Do, YYYY',
-        dateformatObsidian: 'YYYY-DD-MM',
+        dateformatObsidian: 'YYYY-MM-DD',
         titleformatLogseq: '{{{PageTitle}}}',
         titleformatObsidian: '{{{PageTitle}}}',
         // syncOnlyAnnotatedPagesLogseq: false,
         // syncOnlyAnnotatedPagesObsidian false,
-        customTagsLogseq: 'Memex Sync',
-        customTagsObsidian: 'Memex Sync',
+        customTagsLogseq: '',
+        customTagsObsidian: '',
         filterTagsLogseq: '',
         filterTagsObsidian: '',
     }
@@ -204,8 +206,7 @@ class Import extends React.PureComponent<Props> {
         if (PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq == null) {
             PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq = this.state.filterTagsLogseq
             await browser.storage.local.set({
-                PKMSYNCfilterTagsLogseq:
-                    PKMSYNCfilterTagsLogseq.PKMSYNCfilterTagsLogseq,
+                PKMSYNCfilterTagsLogseq: this.state.filterTagsLogseq,
             })
         }
 
@@ -234,19 +235,15 @@ class Import extends React.PureComponent<Props> {
         )
 
         if (PKMSYNCcustomTagsLogseq.PKMSYNCcustomTagsLogseq == null) {
-            PKMSYNCcustomTagsLogseq.PKMSYNCcustomTagsLogseq = this.state.customTagsLogseq
             await browser.storage.local.set({
-                PKMSYNCcustomTagsLogseq:
-                    PKMSYNCcustomTagsLogseq.PKMSYNCcustomTagsLogseq,
+                PKMSYNCcustomTagsLogseq: customSyncTagDefault,
             })
         }
 
         // Store the current state of the customTagsObsidian to the local storage if it returns null
         if (PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian == null) {
-            PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian = this.state.customTagsObsidian
             await browser.storage.local.set({
-                PKMSYNCcustomTagsObsidian:
-                    PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian,
+                PKMSYNCcustomTagsObsidian: customSyncTagDefault,
             })
         }
 
@@ -267,8 +264,12 @@ class Import extends React.PureComponent<Props> {
                 PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian != null
                     ? PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian
                     : this.state.titleformatObsidian,
-            customTagsObsidian: customTagsObsidian.PKMSYNCcustomTagsObsidian,
-            customTagsLogseq: customTagsLogseq.PKMSYNCcustomTagsLogseq,
+            customTagsObsidian:
+                customTagsObsidian.PKMSYNCcustomTagsObsidian ??
+                customSyncTagDefault,
+            customTagsLogseq:
+                customTagsLogseq.PKMSYNCcustomTagsLogseq ??
+                customSyncTagDefault,
             filterTagsObsidian: filterTagsObsidian.PKMSYNCfilterTagsObsidian,
             filterTagsLogseq: filterTagsLogseq.PKMSYNCfilterTagsLogseq,
             // syncOnlyAnnotatedPagesLogseq:
