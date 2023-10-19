@@ -942,10 +942,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dataArray.push(data)
             }
         }
-        console.log('dataaray2', dataArray)
 
         let selectedUrls = previousState.bulkSelectedUrls
-        console.log('selectedUrls', selectedUrls)
         for (let item of selection) {
             let selectedUrls = previousState.bulkSelectedUrls
             for (let item of selection) {

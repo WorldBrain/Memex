@@ -109,10 +109,12 @@ export default class PageResultView extends PureComponent<Props> {
         isShared: boolean
         type: 'page-link' | 'user-list' | 'special-list'
     }> {
-        return this.props.lists.map((id) => ({
-            id,
-            ...this.props.getListDetailsById(id),
-        }))
+        return this.props.lists
+            .map((id) => ({
+                id,
+                ...this.props.getListDetailsById(id),
+            }))
+            .filter((list) => list.type !== 'page-link')
     }
 
     private get listPickerBtnClickHandler() {
