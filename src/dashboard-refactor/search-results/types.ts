@@ -296,6 +296,7 @@ export type Events = UIEvent<{
     confirmPageDelete: null
     cancelPageDelete: null
 
+    bulkDeleteItem: { pageId: string }
     // Page result state mutations (*specific to each* occurrence of the page in different days)
     clickPageResult: PageEventArgs & { synthEvent: React.MouseEvent }
     setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
@@ -313,6 +314,13 @@ export type Events = UIEvent<{
     setPageHover: PageEventArgs & { hover: ResultHoverState }
     removePageFromList: PageEventArgs
     clearInbox: null
+    bulkSelectItems: {
+        item: {
+            title: string
+            url: string
+        }
+        remove?: boolean
+    }
     dragPage: PageEventArgs & { dataTransfer: DataTransfer }
     dropPage: PageEventArgs
     updatePageNotesShareInfo: PageEventArgs & {

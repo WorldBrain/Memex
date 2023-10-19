@@ -59,6 +59,9 @@ export interface RootState {
     showDropArea: boolean
     activePageID?: string
     activeDay?: number
+    multiSelectResults?: any[]
+    bulkDeleteLoadingState?: TaskState
+    bulkSelectedUrls: string[]
 }
 
 export type Events = UIEvent<
@@ -151,6 +154,8 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
     setSpaceSidebarWidth: { width: number }
+    selectAllCurrentItems: null
+    clearBulkSelection: null
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']

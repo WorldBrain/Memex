@@ -58,6 +58,12 @@ import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { browser } from 'webextension-polyfill-ts'
+import {
+    clearBulkEditItems,
+    getBulkEditItems,
+    setBulkEdit,
+} from 'src/bulk-edit/utils'
+import { BULK_SELECT_STORAGE_KEY } from 'src/bulk-edit/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -284,7 +290,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 MISSING_PDF_QUERY_PARAM,
             ),
             themeVariant: null,
-
+            bulkSelectedUrls: null,
+            bulkDeleteLoadingState: 'pristine',
             modals: {
                 showLogin: false,
                 showSubscription: false,
@@ -448,6 +455,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
 
+            const bulkSelectedItems = await getBulkEditItems()
+
+            let selectedUrls = []
+            for (let item of bulkSelectedItems) {
+                selectedUrls.push(item.url)
+            }
+
+            this.emitMutation({
+                bulkSelectedUrls: { $set: selectedUrls },
+            })
             if (
                 spacesArray.length > 0 ||
                 selectedSpace ||
@@ -473,9 +490,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             } else {
                 await this.runSearch(nextState)
             }
+
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
+
+            const themeVariant = await this.initThemeVariant()
+
+            this.emitMutation({
+                themeVariant: { $set: themeVariant },
+            })
         })
+    }
+
+    async initThemeVariant() {
+        const variantStorage = await browser.storage.local.get('themeVariant')
+        const variant = variantStorage['themeVariant']
+        return variant ?? 'dark'
     }
 
     cleanup: EventHandler<'cleanup'> = async ({}) => {
@@ -883,6 +913,77 @@ export class DashboardLogic extends UILogic<State, Events> {
         },
         200,
     )
+
+    selectAllCurrentItems: EventHandler<'selectAllCurrentItems'> = async ({
+        previousState,
+        event,
+    }) => {
+        let searchPosition = 0
+        let searchFilters: UIMutation<State['searchFilters']> = {
+            skip: { $set: searchPosition },
+        }
+        let searchState = this.withMutation(previousState, {
+            searchFilters,
+        })
+        let selection = []
+        let result = await this.options.searchBG.searchPages(
+            stateToSearchParams(searchState, this.options.annotationsCache),
+        )
+        selection.push(...result.docs)
+        while (!result.resultsExhausted) {
+            searchPosition += 10
+            searchFilters = {
+                skip: { $set: searchPosition },
+            }
+            searchState = this.withMutation(previousState, {
+                searchFilters,
+            })
+            result = await this.options.searchBG.searchPages(
+                stateToSearchParams(searchState, this.options.annotationsCache),
+            )
+            selection.push(...result.docs)
+        }
+
+        let dataArray = await getBulkEditItems()
+        for (let item of selection) {
+            if (!dataArray.some((data) => data.url === item.url)) {
+                const data = {
+                    title: item.title,
+                    url: item.url,
+                }
+                dataArray.push(data)
+            }
+        }
+
+        let selectedUrls = previousState.bulkSelectedUrls
+        for (let item of selection) {
+            let selectedUrls = previousState.bulkSelectedUrls
+            for (let item of selection) {
+                if (!selectedUrls.includes(item.url)) {
+                    selectedUrls.push(item.url)
+                }
+            }
+        }
+        this.emitMutation({
+            bulkSelectedUrls: { $set: selectedUrls },
+        })
+
+        await setBulkEdit(dataArray, false)
+
+        // this.emitMutation({
+        //     multiSelectResults: { $set: selection },
+        // })
+    }
+
+    clearBulkSelection: EventHandler<'clearBulkSelection'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            bulkSelectedUrls: { $set: [] },
+        })
+        await clearBulkEditItems()
+    }
 
     // leaving this here for now in order to finalise the feature for handling the race condition rendering
 
@@ -1540,6 +1641,120 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         )
     }
+
+    bulkSelectItems: EventHandler<'bulkSelectItems'> = async ({
+        event,
+        previousState,
+    }) => {
+        let selectedUrls = previousState.bulkSelectedUrls ?? []
+        if (event.remove) {
+            selectedUrls = selectedUrls.filter((url) => url !== event.item.url)
+        } else {
+            if (!selectedUrls.includes(event.item.url)) {
+                selectedUrls.push(event.item.url)
+            }
+        }
+
+        this.emitMutation({
+            bulkSelectedUrls: { $set: selectedUrls },
+        })
+
+        await setBulkEdit([event.item], event.remove)
+    }
+
+    bulkDeleteItem: EventHandler<'bulkDeleteItem'> = async ({
+        event,
+        previousState,
+    }) => {
+        await executeUITask(
+            this,
+            (taskState) => ({
+                bulkDeleteLoadingState: { $set: taskState },
+                searchResults: { searchState: { $set: taskState } },
+            }),
+            async () => {
+                try {
+                    const itemsInStorage = await getBulkEditItems()
+
+                    let itemsToProcess = []
+                    let itemsForStorage = []
+
+                    for (let item of itemsInStorage) {
+                        itemsToProcess.push(item.url)
+                        itemsForStorage.push({ url: item.url })
+                    }
+
+                    const chunkSize = 100
+                    const numChunksItemsDelete = Math.ceil(
+                        itemsToProcess.length / chunkSize,
+                    )
+
+                    for (let i = 0; i < numChunksItemsDelete; i++) {
+                        const start = i * chunkSize
+                        const end = start + chunkSize
+                        const chunk = itemsToProcess.slice(start, end)
+                        const chunkStorage = itemsForStorage.slice(start, end)
+
+                        await this.options.searchBG.delPages(chunk)
+                        await setBulkEdit(chunkStorage, true)
+                    }
+                    window.location.reload()
+                } catch (e) {
+                    console.log('eerorr', e)
+                }
+            },
+        )
+    }
+
+    // bulkDeleteNote: EventHandler<'bulkDeleteNote'> = async ({
+    //     previousState: { modals, searchResults },
+    // }) => {
+    //     const { noteId, pageId, day } = modals.deletingNoteArgs
+    //     const pageResult = searchResults.results[day].pages.byId[pageId]
+    //     const pageResultNoteIds = pageResult.noteIds[
+    //         pageResult.notesType
+    //     ].filter((id) => id !== noteId)
+    //     const notesAllIds = searchResults.noteData.allIds.filter(
+    //         (id) => id !== noteId,
+    //     )
+
+    //     await executeUITask(
+    //         this,
+    //         (taskState) => ({
+    //             searchResults: { noteDeleteState: { $set: taskState } },
+    //         }),
+    //         async () => {
+    //             await this.options.annotationsBG.deleteAnnotation(noteId)
+
+    //             this.emitMutation({
+    //                 modals: {
+    //                     deletingNoteArgs: { $set: undefined },
+    //                 },
+    //                 searchResults: {
+    //                     results: {
+    //                         [day]: {
+    //                             pages: {
+    //                                 byId: {
+    //                                     [pageId]: {
+    //                                         noteIds: {
+    //                                             [pageResult.notesType]: {
+    //                                                 $set: pageResultNoteIds,
+    //                                             },
+    //                                         },
+    //                                     },
+    //                                 },
+    //                             },
+    //                         },
+    //                     },
+    //                     noteData: {
+    //                         allIds: { $set: notesAllIds },
+    //                         byId: { $unset: [noteId] },
+    //                     },
+    //                 },
+    //             })
+    //         },
+    //     )
+    // }
 
     setPageCopyPasterShown: EventHandler<'setPageCopyPasterShown'> = ({
         event,
