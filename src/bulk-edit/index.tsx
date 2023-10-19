@@ -1,0 +1,287 @@
+import React from 'react'
+import styled, { css } from 'styled-components'
+import Logic, { Dependencies, State, Event } from './logic'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { StatefulUIElement } from 'src/util/ui-logic'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { TaskState } from 'firebase/storage'
+
+export interface Props extends Dependencies {
+    disableWriteOps?: boolean
+}
+
+// NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
+//  from opening when you use the context menu in the dashboard.
+//  __If you add new click handlers to this component, ensure you wrap them with this!__
+const wrapClick = (
+    handler: React.MouseEventHandler,
+): React.MouseEventHandler => (e) => {
+    e.preventDefault()
+    e.stopPropagation()
+    return handler(e)
+}
+
+export default class BulkEditWidget extends StatefulUIElement<
+    Props,
+    State,
+    Event
+> {
+    constructor(props: Props) {
+        super(props, new Logic(props))
+    }
+
+    private bulkEditWidgetBtnRef = React.createRef<HTMLDivElement>()
+
+    private renderLoadingSpinner = () => <LoadingIndicator size={30} />
+
+    renderBulkSelectItem(item) {
+        return (
+            <BulkSelectItemBox>
+                <BulkSelectItemTitle>{item.title}</BulkSelectItemTitle>
+            </BulkSelectItemBox>
+        )
+    }
+
+    renderBulkEditSelectionBox = () => {
+        if (this.state.showBulkEditSelectionBox) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.bulkEditWidgetBtnRef.current}
+                    placement={'top'}
+                    offsetX={10}
+                    offsetY={-10}
+                    closeComponent={(e) => {
+                        this.processEvent('showBulkEditSelectionBox', {
+                            isShown: false,
+                        })
+                    }}
+                    strategy={'fixed'}
+                    width={'200px'}
+                >
+                    <BulkSelectListContainer>
+                        {this.state.bulkSelectedItems.map((item) =>
+                            this.renderBulkSelectItem(item),
+                        )}
+                    </BulkSelectListContainer>
+                </PopoutBox>
+            )
+        }
+    }
+
+    render() {
+        if (this.state.itemCounter > 0) {
+            if (this.props.bulkDeleteLoadingState === 'running') {
+                return (
+                    <BulkEditWidgetContainer
+                        bulkDeleteLoadingState={
+                            this.props.bulkDeleteLoadingState
+                        }
+                    >
+                        <ProgressInfoBox>
+                            <LoadingIndicator size={30} />
+                            {this.state.itemCounter} left to process
+                        </ProgressInfoBox>
+                    </BulkEditWidgetContainer>
+                )
+            } else {
+                return (
+                    <BulkEditWidgetContainer
+                        bulkDeleteLoadingState={
+                            this.props.bulkDeleteLoadingState
+                        }
+                    >
+                        {this.renderBulkEditSelectionBox()}
+                        <BulkEditWidgetBox ref={this.bulkEditWidgetBtnRef}>
+                            {!this.state.showConfirmBulkDeletion && (
+                                <>
+                                    <CounterBox>
+                                        <Counter>
+                                            {this.state.itemCounter}
+                                        </Counter>
+                                        Selected
+                                    </CounterBox>
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'showBulkEditSelectionBox',
+                                                {
+                                                    isShown: !this.state
+                                                        .showBulkEditSelectionBox,
+                                                },
+                                            )
+                                        }
+                                        label={`Show Selected`}
+                                        type={'tertiary'}
+                                        size={'small'}
+                                        icon={'arrowRight'}
+                                        padding={'0px 8px 0 3px'}
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'selectAllPages',
+                                                null,
+                                            )
+                                        }
+                                        label={`Select All`}
+                                        type={'forth'}
+                                        size={'small'}
+                                        icon={'multiEdit'}
+                                        padding={'0px 8px 0 3px'}
+                                    />
+                                    <PrimaryAction
+                                        onClick={async () =>
+                                            await this.props.clearBulkSelection()
+                                        }
+                                        label={`Clear Selection`}
+                                        type={'forth'}
+                                        size={'small'}
+                                        icon={'removeX'}
+                                        padding={'0px 8px 0 3px'}
+                                    />
+                                </>
+                            )}
+                            {this.state.showConfirmBulkDeletion ? (
+                                <DeleteConfirmBox>
+                                    Action cannot be undone. Are you sure?
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'promptConfirmDeleteBulkSelection',
+                                                { isShown: false },
+                                            )
+                                        }
+                                        label={`Cancel`}
+                                        type={'forth'}
+                                        size={'small'}
+                                        icon={'removeX'}
+                                        padding={'0px 8px 0 3px'}
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'deleteBulkSelection',
+                                                null,
+                                            )
+                                        }
+                                        label={`Confirm`}
+                                        type={'secondary'}
+                                        size={'small'}
+                                        icon={'trash'}
+                                        padding={'0px 8px 0 3px'}
+                                    />{' '}
+                                </DeleteConfirmBox>
+                            ) : (
+                                <PrimaryAction
+                                    onClick={() =>
+                                        this.processEvent(
+                                            'promptConfirmDeleteBulkSelection',
+                                            { isShown: true },
+                                        )
+                                    }
+                                    label={`Delete`}
+                                    type={'secondary'}
+                                    size={'small'}
+                                    icon={'trash'}
+                                    padding={'0px 8px 0 3px'}
+                                />
+                            )}
+                        </BulkEditWidgetBox>
+                    </BulkEditWidgetContainer>
+                )
+            }
+        } else {
+            return null
+        }
+    }
+}
+
+const BulkEditWidgetContainer = styled.div<{
+    bulkDeleteLoadingState: TaskState
+}>`
+    position: fixed;
+    bottom: 0;
+    height: 44px;
+    background-color: ${(props) => props.theme.colors.black}80;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    z-index: 1000000;
+
+    ${(props) =>
+        props.bulkDeleteLoadingState === 'running' &&
+        css`
+            height: 100%;
+        `}
+`
+
+const BulkEditWidgetBox = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+    justify-content: center;
+`
+
+const ProgressInfoBox = styled.div`
+    display: flex;
+    grid-gap: 15px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-weight: 300;
+    font-size: 16px;
+`
+
+const BulkSelectListContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    max-height: 400px;
+    overflow: scroll;
+    padding: 10px;
+`
+
+const BulkSelectItemBox = styled.div`
+    display: flex;
+    max-width: 300px;
+`
+const BulkSelectItemTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    padding: 10px;
+    white-space: nowrap;
+    overflow: hidden;
+    display: block;
+    align-items: center;
+    height: 20px;
+    text-overflow: ellipsis;
+`
+
+const CounterBox = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    align-items: center;
+    justify-content: center;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 16px;
+    font-weight: 300;
+`
+
+const Counter = styled.div`
+    color: ${(props) => props.theme.colors.prime1};
+    font-size: 16px;
+    font-weight: 700;
+`
+
+const DeleteConfirmBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    font-weight: 300;
+`

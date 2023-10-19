@@ -126,6 +126,8 @@ export type Props = RootState &
         clearInbox: () => void
         filterByList: (localListId: number) => void
         imageSupport: ImageSupportInterface<'caller'>
+        onBulkSelect: (itemData, remove) => Promise<void>
+        selectedItems: string[]
     }
 
 export interface State {
@@ -572,6 +574,11 @@ export default class SearchResultsContainer extends React.Component<
                             showPopoutsForResultBox: show,
                         })
                     }
+                    selectItem={this.props.onBulkSelect}
+                    shiftSelectItem={() => this.shiftSelectItems(order)}
+                    isBulkSelected={this.props.selectedItems?.includes(
+                        page.normalizedUrl,
+                    )}
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     shareMenuProps={{
@@ -817,6 +824,40 @@ export default class SearchResultsContainer extends React.Component<
                 </>
             )
         }
+    }
+
+    shiftSelectItems = (selectedIndex) => {
+        let currentIndex = selectedIndex
+        const pages = Object.values(this.props.results)
+        console.log('pages', pages)
+        let pagesArray = Object.values(this.props.results)
+        let pageId = pages[0].pages.allIds[currentIndex]
+        console.log('pageId', pageId)
+        let pageData = this.props.pageData.byId[pageId]
+
+        console.log('pagesdata', pageData)
+
+        while (!this.props.selectedItems.includes(pageData.normalizedUrl)) {
+            if (pageData == null) {
+                return
+            }
+            console.log('doc', currentIndex, pageId, pageData)
+
+            const data = {
+                title: pageData.fullTitle,
+                url: pageData.normalizedUrl,
+                type: 'pages',
+            }
+
+            this.props.onBulkSelect(data)
+            currentIndex = currentIndex - 1
+            pageId = this.props.pageData.allIds[currentIndex]
+            pageData = this.props.pageData.byId[pageId]
+        }
+
+        // while () {
+        //     currentIndex = currentIndex - 1
+        // }
     }
 
     private renderResultsByDay() {

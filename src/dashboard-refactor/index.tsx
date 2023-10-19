@@ -66,6 +66,7 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import BulkEditWidget from 'src/bulk-edit'
 
 const memexIconDarkMode = browser.runtime.getURL('img/memexIconDarkMode.svg')
 const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
@@ -656,6 +657,13 @@ export class DashboardContainer extends StatefulUIElement<
                         listId: listData.unifiedId,
                     })
                 }}
+                onBulkSelect={(itemData, remove) =>
+                    this.processEvent('bulkSelectItems', {
+                        item: itemData,
+                        remove: remove,
+                    })
+                }
+                selectedItems={this.state.bulkSelectedUrls}
                 analyticsBG={this.props.analyticsBG}
                 clearInbox={() => this.processEvent('clearInbox', null)}
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
@@ -1572,6 +1580,20 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                     />
                     {this.props.renderUpdateNotifBanner()}
+                    <BulkEditWidget
+                        deleteBulkSelection={(pageId) =>
+                            this.processEvent('bulkDeleteItem', null)
+                        }
+                        selectAllPages={() =>
+                            this.processEvent('selectAllCurrentItems', null)
+                        }
+                        clearBulkSelection={() =>
+                            this.processEvent('clearBulkSelection', null)
+                        }
+                        bulkDeleteLoadingState={
+                            this.state.bulkDeleteLoadingState
+                        }
+                    />
                 </MainContainer>
             </Container>
         )
