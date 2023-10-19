@@ -1,13 +1,13 @@
 import type { Storage } from 'webextension-polyfill-ts'
 import type StorageManager from '@worldbrain/storex'
-import { BackgroundModules } from 'src/background-script/setup'
+import type { BackgroundModules } from 'src/background-script/setup'
 import type { ServerStorage } from 'src/storage/types'
 import type { WorldbrainAuthService } from '@worldbrain/memex-common/lib/authentication/worldbrain'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SYNCED_SETTING_KEYS } from '@worldbrain/memex-common/lib/synced-settings/constants'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 type CloudSendTest =
     | 'bookmark'
@@ -56,6 +56,38 @@ function matchTest<Test extends string>(
     }
 
     return true
+}
+
+const personalCloudGetWhere = (
+    serverStorage: ServerStorage,
+    userId: AutoPk,
+) => async (collectionName: string) => {
+    if (!collectionName.startsWith('personal')) {
+        return null
+    }
+    if (
+        collectionName === 'personalBlockStats' ||
+        collectionName === 'personalCloudError' ||
+        collectionName === 'personalReadwiseAction' ||
+        collectionName === 'personalUsageEntry' ||
+        collectionName === 'personalAnalyticEvent' ||
+        collectionName === 'personalAnalyticsStats'
+    ) {
+        return null
+    }
+    const objects = (await serverStorage.manager
+        .collection(collectionName)
+        .findObjects({
+            user: userId,
+        })) as any[]
+    if (!objects.length) {
+        return null
+    }
+    const where = {
+        user: userId,
+        id: { $in: objects.map((object) => object.id) },
+    }
+    return where
 }
 
 export function createSelfTests(options: {
@@ -116,44 +148,19 @@ export function createSelfTests(options: {
                 await clearDb(options.storageManager)
                 await clearDb(options.persistentStorageManager)
                 console.log('Cleared local databases')
+                await personalCloud.options.settingStore.set('deviceId', null)
 
                 const user = await ensureTestUser()
-                console.log('Self test user:', user.id)
+                console.log('Self test user:', user)
 
-                console.log('server storage:', options.serverStorage)
                 await clearDb(options.serverStorage.manager, {
-                    getWhere: async (collectionName) => {
-                        if (!collectionName.startsWith('personal')) {
-                            return null
-                        }
-                        if (
-                            collectionName === 'personalBlockStats' ||
-                            collectionName === 'personalCloudError' ||
-                            collectionName === 'personalReadwiseAction' ||
-                            collectionName === 'personalUsageEntry' ||
-                            collectionName === 'personalAnalyticEvent' ||
-                            collectionName === 'personalAnalyticsStats'
-                        ) {
-                            return null
-                        }
-                        const objects = (await options.serverStorage.manager
-                            .collection(collectionName)
-                            .findObjects({
-                                user: user.id,
-                            })) as any[]
-                        if (!objects.length) {
-                            return null
-                        }
-                        const where = {
-                            user: user.id,
-                            id: { $in: objects.map((object) => object.id) },
-                        }
-                        return where
-                    },
+                    getWhere: personalCloudGetWhere(
+                        options.serverStorage,
+                        user.id,
+                    ),
                 })
                 console.log('Cleared Firestore personal cloud collections')
 
-                await personalCloud.options.settingStore.set('deviceId', null)
                 await personalCloud.startSync()
                 console.log('Generated device ID:', personalCloud.deviceId!)
 
@@ -527,9 +534,7 @@ export function createSelfTests(options: {
                     }
                 }
 
-                await options.localStorage.set({
-                    [CLOUD_STORAGE_KEYS.isSetUp]: true,
-                })
+                await personalCloud.enableSync()
                 console.log('End of self test')
             } catch (err) {
                 console.log('Self test encountered an error:')
@@ -541,14 +546,21 @@ export function createSelfTests(options: {
         },
         cloudReceive: async () => {
             await clearDb(options.storageManager)
-            console.log('Cleared local database')
-
-            await ensureTestUser()
+            await clearDb(options.persistentStorageManager)
+            console.log('Cleared local databases')
             await personalCloud.options.settingStore.set('deviceId', null)
+
+            const user = await ensureTestUser()
+            console.log('Self test user:', user)
+
             await personalCloud.startSync()
-            await options.localStorage.set({
-                [CLOUD_STORAGE_KEYS.isSetUp]: true,
-            })
+            console.log('Generated device ID:', personalCloud.deviceId!)
+
+            await personalCloud.waitForSync()
+            console.log('Sync complete')
+
+            await personalCloud.enableSync()
+            console.log('End of self test')
         },
         ensureTestUser: async (email = 'test@test.com') => {
             await ensureTestUser(email)
