@@ -234,7 +234,7 @@ export class RibbonContainerLogic extends UILogic<
     async initThemeVariant() {
         const variantStorage = await browser.storage.local.get('themeVariant')
         const variant = variantStorage['themeVariant']
-        return variant
+        return variant ?? 'dark'
     }
 
     async initReadingViewListeners() {

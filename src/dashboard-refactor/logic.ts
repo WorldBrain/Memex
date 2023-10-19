@@ -493,7 +493,19 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
+
+            const themeVariant = await this.initThemeVariant()
+
+            this.emitMutation({
+                themeVariant: { $set: themeVariant },
+            })
         })
+    }
+
+    async initThemeVariant() {
+        const variantStorage = await browser.storage.local.get('themeVariant')
+        const variant = variantStorage['themeVariant']
+        return variant ?? 'dark'
     }
 
     cleanup: EventHandler<'cleanup'> = async ({}) => {
