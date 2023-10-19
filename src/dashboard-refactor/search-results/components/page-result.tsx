@@ -255,34 +255,32 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         return (
-            <TooltipBox tooltipText={'Select'} placement="bottom">
-                <BulkSelectButtonBox>
-                    <Checkbox
-                        isChecked={this.props.isBulkSelected}
-                        handleChange={(
-                            event: React.KeyboardEvent<HTMLInputElement>,
-                        ) => {
-                            console.log('event', event.nativeEvent.shiftKey)
-                            if (event.nativeEvent.shiftKey) {
-                                this.props.shiftSelectItem()
-                            } else {
-                                const itemData = {
-                                    url: this.props.normalizedUrl,
-                                    title: this.props.fullTitle,
-                                    type: 'page',
-                                }
-                                if (this.props.isBulkSelected) {
-                                    this.props.selectItem(itemData, true)
-                                } else {
-                                    this.props.selectItem(itemData, false)
-                                }
-                                event.preventDefault()
+            <BulkSelectButtonBox>
+                <Checkbox
+                    isChecked={this.props.isBulkSelected}
+                    handleChange={(
+                        event: React.KeyboardEvent<HTMLInputElement>,
+                    ) => {
+                        if (event.nativeEvent.shiftKey) {
+                            this.props.shiftSelectItem()
+                        } else {
+                            const itemData = {
+                                url: this.props.normalizedUrl,
+                                title: this.props.fullTitle,
+                                type: 'page',
                             }
-                        }}
-                        size={18}
-                    />
-                </BulkSelectButtonBox>
-                {/* <Icon
+                            if (this.props.isBulkSelected) {
+                                this.props.selectItem(itemData, true)
+                            } else {
+                                this.props.selectItem(itemData, false)
+                            }
+                            event.preventDefault()
+                        }
+                    }}
+                    size={18}
+                />
+            </BulkSelectButtonBox>
+            /* <Icon
                     heightAndWidth="22px"
                     filePath={
                         this.props.isBulkSelected
@@ -301,8 +299,7 @@ export default class PageResultView extends PureComponent<Props> {
                             event.preventDefault()
                         }
                     }}
-                /> */}
-            </TooltipBox>
+                /> */
         )
     }
 

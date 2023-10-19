@@ -54,7 +54,6 @@ export class PKMSyncBackgroundModule {
                 return true
             }
 
-            console.log('here')
             if (
                 checkForFilteredSpaces &&
                 filterTagsObsidian.PKMSYNCfilterTagsObsidian?.length > 0 &&
@@ -65,7 +64,6 @@ export class PKMSyncBackgroundModule {
                     filterTagsObsidian.PKMSYNCfilterTagsObsidian,
                 ))
             ) {
-                console.log('false')
                 return false
             }
             if (
@@ -366,7 +364,6 @@ export class PKMSyncBackgroundModule {
                 pageTitleFormat,
             )
 
-            console.log('spacesstring', spacesString)
             if (item.type === 'annotation' || item.type === 'note') {
                 annotationsSection = this.annotationObjectDefault(
                     item.data.annotationId,
@@ -474,7 +471,6 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
-            console.log('ad', item.data.annotationSpaces)
             const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
@@ -621,7 +617,6 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(' ')
 
-            console.log('formattedSpaces', formattedSpaces)
             updatedAnnotation = this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
@@ -874,7 +869,6 @@ export class PKMSyncBackgroundModule {
             )
         }
         if (pkmType === 'logseq') {
-            console.log('annotationSpaces', annotationSpaces)
             let highlightTextLine = ''
             const separatedLine = `- <!-- NoteStartLine ${annotationId} -->---\n`
             highlightTextLine = body ? ` - > ${body}\n` : ''

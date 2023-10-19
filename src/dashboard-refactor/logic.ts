@@ -462,8 +462,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 selectedUrls.push(item.url)
             }
 
-            console.log('startselectedUrls', selectedUrls)
-
             this.emitMutation({
                 bulkSelectedUrls: { $set: selectedUrls },
             })
@@ -935,7 +933,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         let dataArray = await getBulkEditItems()
-        console.log('dataaray', dataArray)
         for (let item of selection) {
             if (!dataArray.some((data) => data.url === item.url)) {
                 const data = {
@@ -1655,22 +1652,43 @@ export class DashboardLogic extends UILogic<State, Events> {
         await setBulkEdit([event.item], event.remove)
     }
 
-    bulkDeleteItem: EventHandler<'bulkDeleteItem'> = async ({ event }) => {
+    bulkDeleteItem: EventHandler<'bulkDeleteItem'> = async ({
+        event,
+        previousState,
+    }) => {
         await executeUITask(
             this,
             (taskState) => ({
                 bulkDeleteLoadingState: { $set: taskState },
+                searchResults: { searchState: { $set: taskState } },
             }),
             async () => {
                 try {
                     const itemsInStorage = await getBulkEditItems()
 
                     let itemsToProcess = []
+                    let itemsForStorage = []
 
                     for (let item of itemsInStorage) {
                         itemsToProcess.push(item.url)
+                        itemsForStorage.push({ url: item.url })
                     }
-                    await this.options.searchBG.delPages(itemsToProcess)
+
+                    const chunkSize = 100
+                    const numChunksItemsDelete = Math.ceil(
+                        itemsToProcess.length / chunkSize,
+                    )
+
+                    for (let i = 0; i < numChunksItemsDelete; i++) {
+                        const start = i * chunkSize
+                        const end = start + chunkSize
+                        const chunk = itemsToProcess.slice(start, end)
+                        const chunkStorage = itemsForStorage.slice(start, end)
+
+                        await this.options.searchBG.delPages(chunk)
+                        await setBulkEdit(chunkStorage, true)
+                    }
+                    window.location.reload()
                 } catch (e) {
                     console.log('eerorr', e)
                 }

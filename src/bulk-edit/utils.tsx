@@ -26,7 +26,6 @@ export async function getBulkEditItems() {
     const data = await browser.storage.local.get(BULK_SELECT_STORAGE_KEY)
     const currentData = data[BULK_SELECT_STORAGE_KEY]
 
-    console.log('currentData', currentData)
     return currentData ? currentData : []
 }
 export async function clearBulkEditItems() {

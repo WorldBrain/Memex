@@ -6,6 +6,7 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { TaskState } from 'firebase/storage'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -39,6 +40,22 @@ export default class BulkEditWidget extends StatefulUIElement<
         return (
             <BulkSelectItemBox>
                 <BulkSelectItemTitle>{item.title}</BulkSelectItemTitle>
+                <RemoveIconBox>
+                    <Icon
+                        icon={'removeX'}
+                        heightAndWidth={'16px'}
+                        color={'white'}
+                        background="greyScale1"
+                        onClick={() => {
+                            const itemData = {
+                                type: item.type,
+                                url: item.url,
+                                title: item.title,
+                            }
+                            this.props.removeIndividualSelection(itemData)
+                        }}
+                    />
+                </RemoveIconBox>
             </BulkSelectItemBox>
         )
     }
@@ -58,6 +75,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                     }}
                     strategy={'fixed'}
                     width={'200px'}
+                    instaClose
                 >
                     <BulkSelectListContainer>
                         {this.state.bulkSelectedItems.map((item) =>
@@ -236,6 +254,12 @@ const ProgressInfoBox = styled.div`
     font-size: 16px;
 `
 
+const RemoveIconBox = styled.div`
+    display: none;
+    position: absolute;
+    right: 0px;
+`
+
 const BulkSelectListContainer = styled.div`
     display: flex;
     flex-direction: column;
@@ -247,6 +271,16 @@ const BulkSelectListContainer = styled.div`
 const BulkSelectItemBox = styled.div`
     display: flex;
     max-width: 300px;
+    justify-content: space-between;
+    grid-gap: 5px;
+    align-items: center;
+    position: relative;
+
+    &:hover ${RemoveIconBox} {
+        display: flex;
+        position: absolute;
+        right: 0px;
+    }
 `
 const BulkSelectItemTitle = styled.div`
     color: ${(props) => props.theme.colors.greyScale6};
@@ -258,6 +292,8 @@ const BulkSelectItemTitle = styled.div`
     align-items: center;
     height: 20px;
     text-overflow: ellipsis;
+    flex: 1;
+    min-width: 50px;
 `
 
 const CounterBox = styled.div`

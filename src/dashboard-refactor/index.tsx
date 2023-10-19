@@ -1590,6 +1590,12 @@ export class DashboardContainer extends StatefulUIElement<
                         clearBulkSelection={() =>
                             this.processEvent('clearBulkSelection', null)
                         }
+                        removeIndividualSelection={(itemData) =>
+                            this.processEvent('bulkSelectItems', {
+                                item: itemData,
+                                remove: true,
+                            })
+                        }
                         bulkDeleteLoadingState={
                             this.state.bulkDeleteLoadingState
                         }

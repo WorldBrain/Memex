@@ -16,6 +16,7 @@ export interface Dependencies {
     selectAllPages: () => Promise<void>
     clearBulkSelection: () => Promise<void>
     bulkDeleteLoadingState: TaskState
+    removeIndividualSelection: (itemData) => Promise<void>
 }
 
 export type Event = UIEvent<{
@@ -100,6 +101,9 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         event,
     }) => {
         await deleteBulkEdit(this.dependencies.deleteBulkSelection)
+        this.emitMutation({
+            showConfirmBulkDeletion: { $set: false },
+        })
     }
     selectAllPages: EventHandler<'selectAllPages'> = async ({
         previousState,

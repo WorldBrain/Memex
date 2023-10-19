@@ -1,7 +1,6 @@
 import React from 'react'
 import styled, { css } from 'styled-components'
 import Logic, { Dependencies, State, Event } from './logic'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -10,12 +9,8 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import {
-    getListShareUrl,
-    getSinglePageShareUrl,
-} from 'src/content-sharing/utils'
+import { getSinglePageShareUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { UnifiedList } from 'src/annotations/cache/types'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -433,7 +428,7 @@ const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
     border-radius: 12px;
-    width: 330px;
+    width: 340px;
     min-height: 180px;
 `
 
