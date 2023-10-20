@@ -1615,7 +1615,6 @@ export class DashboardContainer extends StatefulUIElement<
                                         this.props.pageActivityIndicatorBG
                                     }
                                     selectEntry={async (listId) => {
-                                        console.log('select')
                                         await this.processEvent(
                                             'setBulkEditSpace',
                                             { listId: listId },
@@ -1640,11 +1639,11 @@ export class DashboardContainer extends StatefulUIElement<
                                                 type: 'user-list',
                                             },
                                         )
-                                        console.log('listId2', listId)
                                         await this.processEvent(
                                             'setBulkEditSpace',
                                             { listId: listId },
                                         )
+                                        return listId
                                     }}
                                     width={'300px'}
                                     autoFocus={false}

@@ -995,7 +995,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const selectedItems = await getBulkEditItems()
 
-        console.log('selectedItems', selectedItems)
         for (let item of selectedItems) {
             await this.options.listsBG.updateListForPage({
                 url: 'https://' + item.url,
