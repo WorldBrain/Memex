@@ -1839,41 +1839,46 @@ export class AnnotationsSidebar extends React.Component<
                                         General Question
                                     </SelectionPill>
                                 </TooltipBox> */}
-                                <TooltipBox
-                                    tooltipText={
-                                        <>
-                                            For performance we usually fetch the
-                                            text via our servers but sometimes
-                                            we can't reach it. E.g. if you are
-                                            behind a paywall.
-                                            <br /> Use this to fetch the content
-                                            from here.
-                                        </>
-                                    }
-                                    placement="bottom"
-                                    width="150px"
-                                >
-                                    <Checkbox
-                                        key={1}
-                                        id={'1'}
-                                        isChecked={this.props.fetchLocalHTML}
-                                        handleChange={() =>
-                                            this.props.fetchLocalHTML
-                                                ? this.props.changeFetchLocalHTML(
-                                                      false,
-                                                  )
-                                                : this.props.changeFetchLocalHTML(
-                                                      true,
-                                                  )
+                                {this.props.sidebarContext === 'in-page' && (
+                                    <TooltipBox
+                                        tooltipText={
+                                            <>
+                                                For performance we usually fetch
+                                                the text via our servers but
+                                                sometimes we can't reach it.
+                                                E.g. if you are behind a
+                                                paywall.
+                                                <br /> Use this to fetch the
+                                                content from here.
+                                            </>
                                         }
-                                        // isDisabled={!this.state.shortcutsEnabled}
-                                        name={'Use Local Content'}
-                                        label={'Use Local Content'}
-                                        size={12}
-                                        fontSize={12}
-                                        checkBoxColor="black"
-                                    />
-                                </TooltipBox>
+                                        placement="bottom"
+                                        width="150px"
+                                    >
+                                        <Checkbox
+                                            key={1}
+                                            id={'1'}
+                                            isChecked={
+                                                this.props.fetchLocalHTML
+                                            }
+                                            handleChange={() =>
+                                                this.props.fetchLocalHTML
+                                                    ? this.props.changeFetchLocalHTML(
+                                                          false,
+                                                      )
+                                                    : this.props.changeFetchLocalHTML(
+                                                          true,
+                                                      )
+                                            }
+                                            // isDisabled={!this.state.shortcutsEnabled}
+                                            name={'Use Local Content'}
+                                            label={'Use Local Content'}
+                                            size={12}
+                                            fontSize={12}
+                                            checkBoxColor="black"
+                                        />
+                                    </TooltipBox>
+                                )}
                             </OptionsContainerLeft>
                             <OptionsContainerRight>
                                 {this.props.pageSummary.length > 0 && (
