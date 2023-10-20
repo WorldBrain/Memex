@@ -3484,10 +3484,14 @@ const TopAreaContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
-    z-index: 20;
+    z-index: 1;
     padding-top: 5px;
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
+
+    &:hover{
+        z-index: 19;
+    }
 `
 
 const AnnotationActions = styled.div`
