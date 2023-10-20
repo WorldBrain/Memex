@@ -33,6 +33,7 @@ export default class BulkEditWidget extends StatefulUIElement<
     }
 
     private bulkEditWidgetBtnRef = React.createRef<HTMLDivElement>()
+    private spacePickerBtnRef = React.createRef<HTMLDivElement>()
 
     private renderLoadingSpinner = () => <LoadingIndicator size={30} />
 
@@ -86,6 +87,28 @@ export default class BulkEditWidget extends StatefulUIElement<
             )
         }
     }
+    renderSpacePicker = () => {
+        if (this.state.showSpacePicker) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.spacePickerBtnRef.current}
+                    placement={'top'}
+                    offsetX={10}
+                    offsetY={-10}
+                    closeComponent={(e) => {
+                        this.processEvent('showSpacePicker', {
+                            isShown: false,
+                        })
+                    }}
+                    strategy={'fixed'}
+                    width={'200px'}
+                    instaClose
+                >
+                    {this.props.spacePicker()}
+                </PopoutBox>
+            )
+        }
+    }
 
     render() {
         if (this.state.itemCounter > 0) {
@@ -110,7 +133,8 @@ export default class BulkEditWidget extends StatefulUIElement<
                         }
                     >
                         {this.renderBulkEditSelectionBox()}
-                        <BulkEditWidgetBox ref={this.bulkEditWidgetBtnRef}>
+                        {this.renderSpacePicker()}
+                        <BulkEditWidgetBox>
                             {!this.state.showConfirmBulkDeletion && (
                                 <>
                                     <CounterBox>
@@ -134,6 +158,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                                         size={'small'}
                                         icon={'arrowRight'}
                                         padding={'0px 8px 0 3px'}
+                                        innerRef={this.bulkEditWidgetBtnRef}
                                     />
                                     <PrimaryAction
                                         onClick={() =>
@@ -205,6 +230,19 @@ export default class BulkEditWidget extends StatefulUIElement<
                                     padding={'0px 8px 0 3px'}
                                 />
                             )}
+                            <PrimaryAction
+                                onClick={() =>
+                                    this.processEvent('showSpacePicker', {
+                                        isShown: true,
+                                    })
+                                }
+                                label={`Add to Space`}
+                                type={'secondary'}
+                                size={'small'}
+                                icon={'plus'}
+                                padding={'0px 8px 0 3px'}
+                                innerRef={this.spacePickerBtnRef}
+                            />
                         </BulkEditWidgetBox>
                     </BulkEditWidgetContainer>
                 )

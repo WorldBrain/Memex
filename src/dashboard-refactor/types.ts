@@ -156,6 +156,7 @@ export type DashboardModalsEvents = UIEvent<{
     setSpaceSidebarWidth: { width: number }
     selectAllCurrentItems: null
     clearBulkSelection: null
+    setBulkEditSpace: { listId: number }
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']
