@@ -7,6 +7,7 @@ import { deleteBulkEdit, getBulkEditItems } from './utils'
 import { browser } from 'webextension-polyfill-ts'
 import { SearchInterface } from 'src/search/background/types'
 import { BULK_SELECT_STORAGE_KEY } from './constants'
+import { sleepPromise } from 'src/util/promises'
 
 export interface Dependencies {
     // contentSharingBG: ContentSharingInterface
@@ -35,6 +36,7 @@ export interface State {
     itemCounter: number
     showConfirmBulkDeletion: boolean
     showSpacePicker: boolean
+    selectAllLoadingState: TaskState
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -58,6 +60,7 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         itemCounter: null,
         showConfirmBulkDeletion: false,
         showSpacePicker: false,
+        selectAllLoadingState: 'pristine',
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
@@ -121,6 +124,13 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         previousState,
         event,
     }) => {
+        this.emitMutation({
+            selectAllLoadingState: { $set: 'running' },
+        })
+
         await this.dependencies.selectAllPages()
+        this.emitMutation({
+            selectAllLoadingState: { $set: 'pristine' },
+        })
     }
 }

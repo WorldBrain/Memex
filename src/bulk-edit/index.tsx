@@ -161,13 +161,31 @@ export default class BulkEditWidget extends StatefulUIElement<
                                         innerRef={this.bulkEditWidgetBtnRef}
                                     />
                                     <PrimaryAction
-                                        onClick={() =>
-                                            this.processEvent(
-                                                'selectAllPages',
-                                                null,
+                                        width="120px"
+                                        onClick={() => {
+                                            if (
+                                                this.state
+                                                    .selectAllLoadingState !==
+                                                'running'
+                                            ) {
+                                                this.processEvent(
+                                                    'selectAllPages',
+                                                    null,
+                                                )
+                                            }
+                                        }}
+                                        label={
+                                            this.state.selectAllLoadingState ===
+                                            'running' ? (
+                                                <LoadingStateButton>
+                                                    <LoadingIndicator
+                                                        size={16}
+                                                    />
+                                                </LoadingStateButton>
+                                            ) : (
+                                                'Select All'
                                             )
                                         }
-                                        label={`Select All`}
                                         type={'forth'}
                                         size={'small'}
                                         icon={'multiEdit'}
@@ -277,6 +295,13 @@ const BulkEditWidgetContainer = styled.div<{
 const BulkEditWidgetBox = styled.div`
     display: flex;
     grid-gap: 10px;
+    align-items: center;
+    justify-content: center;
+`
+
+const LoadingStateButton = styled.div`
+    width: 55px;
+    display: flex;
     align-items: center;
     justify-content: center;
 `
