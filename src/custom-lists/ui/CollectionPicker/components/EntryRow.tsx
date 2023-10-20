@@ -285,7 +285,7 @@ class EntryRow extends React.Component<Props> {
                             </SelectionBox>
                         </ButtonContainer>
                     )} */}
-                    {selected && this.state.mouseOverItem && (
+                    {selected && (
                         <ButtonContainer selected={selected}>
                             <SelectionBox
                                 onMouseEnter={() =>
