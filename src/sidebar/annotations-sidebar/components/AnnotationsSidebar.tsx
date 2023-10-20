@@ -375,7 +375,7 @@ export class AnnotationsSidebar extends React.Component<
         if (
             this.props.lists.byId[this.props.selectedListId].name !==
                 this.props.spaceTitleEditValue &&
-            this.props.spaceTitleEditValue.length > 0
+            this.props.spaceTitleEditValue?.length > 0
         ) {
             this.props.updateListName(
                 this.props.lists.byId[this.props.selectedListId].unifiedId,
@@ -585,10 +585,10 @@ export class AnnotationsSidebar extends React.Component<
 
         let othersCounter = annotationsData.filter((annotation) => {
             return annotation.creator?.id !== this.props.currentUser?.id
-        }).length
+        })?.length
         let ownCounter = annotationsData.filter((annotation) => {
             return annotation.creator?.id === this.props.currentUser?.id
-        }).length
+        })?.length
 
         let allCounter = othersCounter + ownCounter
 
@@ -617,7 +617,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         let listAnnotations: JSX.Element | JSX.Element[]
-        if (!annotationsData.length) {
+        if (!annotationsData?.length) {
             listAnnotations = (
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
@@ -668,7 +668,7 @@ export class AnnotationsSidebar extends React.Component<
                 )
                 const hasReplies =
                     conversation?.thread != null ||
-                    conversation?.replies.length > 0
+                    conversation?.replies?.length > 0
 
                 // If annot is owned by the current user (locally available), we allow a whole bunch of other functionality
                 const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
@@ -730,7 +730,7 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.activeShareMenuNoteId ===
                             annotation.unifiedId
                                 ? 10000
-                                : this.props.annotations.allIds.length - i
+                                : this.props.annotations.allIds?.length - i
                         }
                         className={'AnnotationBox'}
                         id={annotation.unifiedId}
@@ -1270,7 +1270,7 @@ export class AnnotationsSidebar extends React.Component<
             : undefined
         const allLists = normalizedStateToArray(lists).filter(
             (listData) =>
-                listData.unifiedAnnotationIds.length > 0 ||
+                listData.unifiedAnnotationIds?.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
                 (listData.type === 'page-link' &&
                     listData.normalizedPageUrl === normalizedPageUrl) ||
@@ -1278,7 +1278,7 @@ export class AnnotationsSidebar extends React.Component<
                 pageActiveListIds.includes(listData.unifiedId),
         )
 
-        if (allLists.length === 0) {
+        if (allLists?.length === 0) {
             return (
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
@@ -1309,9 +1309,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Page Links{' '}
-                        <SpacesCounter>{pageLinkLists.length}</SpacesCounter>
+                        <SpacesCounter>{pageLinkLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {pageLinkLists.length > 0 && (
+                    {pageLinkLists?.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {pageLinkLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
@@ -1328,9 +1328,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         My Spaces{' '}
-                        <SpacesCounter>{myLists.length}</SpacesCounter>
+                        <SpacesCounter>{myLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {myLists.length > 0 ? (
+                    {myLists?.length > 0 ? (
                         <SpaceTypeSectionContainer>
                             {myLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
@@ -1347,9 +1347,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Followed Spaces{' '}
-                        <SpacesCounter>{followedLists.length}</SpacesCounter>
+                        <SpacesCounter>{followedLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {followedLists.length > 0 ? (
+                    {followedLists?.length > 0 ? (
                         <SpaceTypeSectionContainer>
                             {followedLists.map((listData) =>
                                 this.renderSpacesItem(
@@ -1364,9 +1364,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Joined Spaces{' '}
-                        <SpacesCounter>{joinedLists.length}</SpacesCounter>
+                        <SpacesCounter>{joinedLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {joinedLists.length > 0 ? (
+                    {joinedLists?.length > 0 ? (
                         <SpaceTypeSectionContainer>
                             {joinedLists.map((listData) =>
                                 this.renderSpacesItem(
@@ -1660,7 +1660,7 @@ export class AnnotationsSidebar extends React.Component<
                     <QueryContainer
                         AIDropDownShown={
                             this.props.showAISuggestionsDropDown &&
-                            this.props.AIsuggestions.length > 0
+                            this.props.AIsuggestions?.length > 0
                         }
                     >
                         <TextField
@@ -1709,13 +1709,13 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             actionButton={
                                 this.props.prompt &&
-                                this.props.prompt.length > 0 &&
+                                this.props.prompt?.length > 0 &&
                                 addPromptButton(this.props.prompt)
                             }
                             autoFocus={this.props.activeTab === 'summary'}
                         />
                         {this.props.showAISuggestionsDropDown &&
-                            this.props.AIsuggestions.length > 0 && (
+                            this.props.AIsuggestions?.length > 0 && (
                                 <SuggestionsList {...this.props} />
                             )}
                     </QueryContainer>
@@ -1881,7 +1881,7 @@ export class AnnotationsSidebar extends React.Component<
                                 )}
                             </OptionsContainerLeft>
                             <OptionsContainerRight>
-                                {this.props.pageSummary.length > 0 && (
+                                {this.props.pageSummary?.length > 0 && (
                                     <TooltipBox
                                         tooltipText={
                                             <>
@@ -2119,7 +2119,7 @@ export class AnnotationsSidebar extends React.Component<
                         zIndex={
                             this.props.activeShareMenuNoteId === annot.unifiedId
                                 ? 10000
-                                : this.props.annotations.allIds.length - i
+                                : this.props.annotations.allIds?.length - i
                         }
                         className={'AnnotationBox'}
                         id={annot.unifiedId}
@@ -2254,14 +2254,14 @@ export class AnnotationsSidebar extends React.Component<
                             <NewAnnotationBoxMyAnnotations>
                                 {this.renderNewAnnotation()}
                             </NewAnnotationBoxMyAnnotations>
-                            {annots.length > 1 && (
+                            {annots?.length > 1 && (
                                 <AnnotationActions>
                                     {this.renderTopBarActionButtons()}
                                 </AnnotationActions>
                             )}
                         </TopAreaContainer>
                         {this.props.noteCreateState === 'running' ||
-                        annotations.length > 0 ? (
+                        annotations?.length > 0 ? (
                             <AnnotationContainer>
                                 {this.renderAnnotationDropdowns()}
                                 {annots}
@@ -2411,7 +2411,7 @@ export class AnnotationsSidebar extends React.Component<
 
         event.stopPropagation()
         if (
-            (event.target as HTMLInputElement).value.length != null &&
+            (event.target as HTMLInputElement).value?.length != null &&
             event.key === 'Enter'
         ) {
             // this blurring is tracked and will automatically save it
