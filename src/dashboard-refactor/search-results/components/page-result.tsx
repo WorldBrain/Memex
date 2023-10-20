@@ -28,6 +28,7 @@ import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { browser } from 'webextension-polyfill-ts'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { Checkbox } from 'src/common-ui/components'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -50,6 +51,9 @@ export interface Props
     analyticsBG: AnalyticsCoreInterface
     index: number
     showPopoutsForResultBox: (index: number) => void
+    selectItem: (itemData: any, remove: boolean) => void
+    isBulkSelected: boolean
+    shiftSelectItem: () => void
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -105,10 +109,12 @@ export default class PageResultView extends PureComponent<Props> {
         isShared: boolean
         type: 'page-link' | 'user-list' | 'special-list'
     }> {
-        return this.props.lists.map((id) => ({
-            id,
-            ...this.props.getListDetailsById(id),
-        }))
+        return this.props.lists
+            .map((id) => ({
+                id,
+                ...this.props.getListDetailsById(id),
+            }))
+            .filter((list) => list.type !== 'page-link')
     }
 
     private get listPickerBtnClickHandler() {
@@ -245,6 +251,59 @@ export default class PageResultView extends PureComponent<Props> {
             </TooltipBox>
         )
     }
+    private renderBulkSelectBtn(): JSX.Element {
+        if (this.props.hoverState == null && !this.props.isBulkSelected) {
+            return undefined
+        }
+
+        return (
+            <BulkSelectButtonBox>
+                <Checkbox
+                    isChecked={this.props.isBulkSelected}
+                    handleChange={(
+                        event: React.KeyboardEvent<HTMLInputElement>,
+                    ) => {
+                        if (event.nativeEvent.shiftKey) {
+                            this.props.shiftSelectItem()
+                        } else {
+                            const itemData = {
+                                url: this.props.normalizedUrl,
+                                title: this.props.fullTitle,
+                                type: 'page',
+                            }
+                            if (this.props.isBulkSelected) {
+                                this.props.selectItem(itemData, true)
+                            } else {
+                                this.props.selectItem(itemData, false)
+                            }
+                            event.preventDefault()
+                        }
+                    }}
+                    size={18}
+                />
+            </BulkSelectButtonBox>
+            /* <Icon
+                    heightAndWidth="22px"
+                    filePath={
+                        this.props.isBulkSelected
+                            ? icons.checkRound
+                            : icons.clock
+                    }
+                    darkBackground
+                    onClick={(event) => {
+                        {
+                            const itemData = {
+                                url: this.props.normalizedUrl,
+                                title: this.props.fullTitle,
+                                type: 'page',
+                            }
+                            this.props.selectItem(itemData)
+                            event.preventDefault()
+                        }
+                    }}
+                /> */
+        )
+    }
 
     private calcFooterActions(): ItemBoxBottomAction[] {
         if (this.props.hoverState === null) {
@@ -365,6 +424,7 @@ export default class PageResultView extends PureComponent<Props> {
                             favIcon={this.props.favIconURI}
                             youtubeService={this.props.youtubeService}
                             removeFromList={this.renderRemoveFromListBtn()}
+                            bulkSelect={this.renderBulkSelectBtn()}
                             mainContentHover={
                                 this.props.hoverState != null
                                     ? this.props.hoverState
@@ -405,6 +465,14 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
+
+const BulkSelectButtonBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+`
 
 const StyledPageResult = styled.div`
     display: flex;
