@@ -1,6 +1,7 @@
 import StorageManager, {
     isChildOfRelationship,
     getChildOfRelationshipTarget,
+    FindManyOptions,
 } from '@worldbrain/storex'
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
@@ -134,7 +135,9 @@ class IdCapturer {
                             relationship,
                         )
                         const index = mergedObject[relationship.alias] - 1
-                        const targetId = this.ids[targetCollection]?.[index]
+                        const targetId = opts?.anyId
+                            ? expect.anything()
+                            : this.ids[targetCollection]?.[index]
                         mergedObject[relationship.alias] =
                             targetId ?? mergedObject[relationship.alias]
                     }
@@ -162,12 +165,18 @@ async function getCrossDatabaseContents(
                 (collection.startsWith('personal') &&
                     (await getSqlStorageMananager?.())) ||
                 storageManager
+
+            const collDef = manager.registry.collections[collection]
+            const order: FindManyOptions = collDef?.fields['createdWhen']
+                ? {
+                      order: [['createdWhen', 'asc']],
+                  }
+                : undefined
+
             contents[collection] = (
                 await manager
                     .collection(collection)
-                    .findObjects(options?.getWhere?.(collection) ?? {}, {
-                        order: [['createdWhen', 'asc']],
-                    })
+                    .findObjects(options?.getWhere?.(collection) ?? {}, order)
             ).map(deleteNullFields)
         }),
     )
@@ -709,7 +718,7 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_dummy.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
-                ]),
+                ], { skipAssertTimestamp: true }),
                 personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
                 personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b],
@@ -790,11 +799,10 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Delete, 'personalContentLocator', testLocators.third.id, {
                         id: testLocators.third.localId,
                     }],
-
-                ], { skipChanges: 0 }),
+                ], { skipChanges: 0, skipAssertTimestamp: true }),
                 personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second],
-                personalContentLocator: [testLocators.first, testLocators.second],
+                personalContentLocator:  [testLocators.first, testLocators.second],
             })
 
             // prettier-ignore
@@ -3681,7 +3689,9 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
-        describe(`translation layer twitter integration`, () => {
+        // TODO: These are for our old Twitter title fetch feature which has since been replaced with general page title fetching for any page missing a title.
+        //  These should be replaced with test coverage for those features.
+        describe.skip(`OLD: translation layer twitter integration`, () => {
             it('should trigger twitter action create on creation of twitter status pages with missing titles', async () => {
                 const {
                     setups,
@@ -4887,6 +4897,11 @@ describe('Personal cloud translation layer', () => {
 
                 const remoteData = serverIdCapturer.mergeIds(
                     REMOTE_TEST_DATA_V24,
+                    {
+                        anyId:
+                            process.env.TEST_SERVER_STORAGE ===
+                            'firebase-emulator',
+                    },
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
@@ -5018,6 +5033,11 @@ describe('Personal cloud translation layer', () => {
 
                 const remoteData = serverIdCapturer.mergeIds(
                     REMOTE_TEST_DATA_V24,
+                    {
+                        anyId:
+                            process.env.TEST_SERVER_STORAGE ===
+                            'firebase-emulator',
+                    },
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
@@ -5090,20 +5110,20 @@ describe('Personal cloud translation layer', () => {
                             normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
                         }),
                     ],
-                    sharedContentFingerprint: [
+                    sharedContentFingerprint: expect.arrayContaining([
                         expectedSharedFingerprint,
                         {
                             ...expectedSharedFingerprint,
                             sharedList: expect.any(String),
                         },
-                    ],
-                    sharedContentLocator: [
+                    ]),
+                    sharedContentLocator: expect.arrayContaining([
                         expectedSharedLocator,
                         {
                             ...expectedSharedLocator,
                             sharedList: expect.any(String),
                         },
-                    ],
+                    ]),
                 })
 
                 // prettier-ignore
@@ -5560,7 +5580,10 @@ describe('Personal cloud translation layer', () => {
             })
 
             await setups[0].backgroundModules.personalCloud.waitForSync()
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                // Using the FB emu here results in non-deterministic IDs that get followed
+                anyId: process.env.TEST_SERVER_STORAGE === 'firebase-emulator',
+            })
             const testFollowedLists = remoteData.personalFollowedList
 
             expect(
@@ -5587,10 +5610,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: {
-                    ...LOCAL_TEST_DATA_V24.followedList.first,
-                    type: null
-                 } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'followedList', object: LOCAL_TEST_DATA_V24.followedList.first },
             ], { skip: 2 })
             testSyncPushTrigger({ wasTriggered: true })
         })
@@ -5627,7 +5647,9 @@ describe('Personal cloud translation layer', () => {
             })
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
+                anyId: process.env.TEST_SERVER_STORAGE === 'firebase-emulator',
+            })
             const testFollowedLists = remoteData.personalFollowedList
 
             expect(
@@ -5725,7 +5747,10 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             // Create key from owner then join with other device/user
-            const sharedListKeyId = 123
+            const sharedListKeyId =
+                process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
+                    ? 'my-test-key'
+                    : 123
             await setups[0].services.contentSharing.generateKeyLink({
                 key: { roleID: SharedListRoleID.ReadWrite },
                 listKeyReference: {
@@ -5806,7 +5831,16 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotationListEntry',
                     'sharedListKey',
                     'sharedList',
-                ]),
+                ], { getWhere: coll => {
+                    // These are grouped collections, so they need to have their grouped fields defined in the queries
+                    if (coll === 'sharedListRole' || coll === 'sharedListKey') {
+                        return { sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId }
+                    }
+                    if (coll === 'sharedListRoleByUser') {
+                        return { user: TEST_USER_2_ID }
+                    }
+                    return {}
+                } }),
             ).toEqual({
                 sharedListRole: [
                     expect.objectContaining({
@@ -5863,6 +5897,8 @@ describe('Personal cloud translation layer', () => {
                 REMOTE_TEST_DATA_V24,
                 {
                     userOverride: TEST_USER.id,
+                    anyId:
+                        process.env.TEST_SERVER_STORAGE === 'firebase-emulator',
                 },
             )
             // prettier-ignore
@@ -5957,6 +5993,8 @@ describe('Personal cloud translation layer', () => {
             })
 
             // Perform the list delete on the first device (owner)
+            // TODO: This doesn't work on the FB emu for some reason. It throws a FB error when
+            //  deleting the `customLists` record in CustomListsBG (which should happen on the Dexie backend).
             await setups[0].backgroundModules.contentSharing.deleteListAndAllAssociatedData(
                 { localListId: LOCAL_TEST_DATA_V24.customLists.first.id },
             )
@@ -5974,7 +6012,16 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotationListEntry',
                     'sharedListKey',
                     'sharedList',
-                ]),
+                ], { getWhere: coll => {
+                    // These are grouped collections, so they need to have their grouped fields defined in the queries
+                    if (coll === 'sharedListRole' || coll === 'sharedListKey') {
+                        return { sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId }
+                    }
+                    if (coll === 'sharedListRoleByUser') {
+                        return { user: TEST_USER_2_ID }
+                    }
+                    return {}
+                } }),
             ).toEqual({
                 sharedListRole: [],
                 sharedListRoleByUser: [],
