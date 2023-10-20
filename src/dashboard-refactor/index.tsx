@@ -1625,20 +1625,20 @@ export class DashboardContainer extends StatefulUIElement<
                                         const listId = await this.createNewListViaPicker(
                                             name,
                                         )
-                                        await this.props.annotationsCache.addList(
-                                            {
-                                                name,
-                                                localId: listId,
-                                                unifiedAnnotationIds: [],
-                                                hasRemoteAnnotationsToLoad: false,
-                                                creator: {
-                                                    id: this.state.currentUser
-                                                        .id,
-                                                    type: 'user-reference',
-                                                },
-                                                type: 'user-list',
-                                            },
-                                        )
+                                        // await this.props.annotationsCache.addList(
+                                        //     {
+                                        //         name,
+                                        //         localId: listId,
+                                        //         unifiedAnnotationIds: [],
+                                        //         hasRemoteAnnotationsToLoad: false,
+                                        //         creator: {
+                                        //             id: this.state.currentUser
+                                        //                 .id,
+                                        //             type: 'user-reference',
+                                        //         },
+                                        //         type: 'user-list',
+                                        //     },
+                                        // )
                                         await this.processEvent(
                                             'setBulkEditSpace',
                                             { listId: listId },
