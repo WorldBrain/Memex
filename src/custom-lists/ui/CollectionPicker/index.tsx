@@ -34,7 +34,7 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean

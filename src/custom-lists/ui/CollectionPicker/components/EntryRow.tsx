@@ -68,18 +68,18 @@ class EntryRow extends React.Component<Props> {
     private handleResultPress: React.MouseEventHandler = (e) => {
         if (!e.shiftKey) {
             if (
-                this.props.contextMenuBtnRef?.current.contains(
+                this.props.contextMenuBtnRef?.current?.contains(
                     e.target as Node,
                 ) ||
-                this.props.goToButtonRef?.current.contains(e.target as Node) ||
-                this.props.editMenuBtnRef?.current.contains(e.target as Node)
+                this.props.goToButtonRef?.current?.contains(e.target as Node) ||
+                this.props.editMenuBtnRef?.current?.contains(e.target as Node)
             ) {
                 return
             }
             if (
                 this.props.onPressActOnAll &&
                 this.pressAllButtonRef != null &&
-                this.pressAllButtonRef?.current.contains(e.target as Node)
+                this.pressAllButtonRef.current?.contains(e.target as Node)
             ) {
                 return
             }
@@ -260,7 +260,7 @@ class EntryRow extends React.Component<Props> {
                             )}
                         </ButtonContainer>
                     )}
-                    {/* 
+                    {/*
                     {selected && !focused && (
                         <ButtonContainer selected={selected}>
                             <SelectionBox
@@ -285,7 +285,7 @@ class EntryRow extends React.Component<Props> {
                             </SelectionBox>
                         </ButtonContainer>
                     )} */}
-                    {selected && this.state.mouseOverItem && (
+                    {selected && (
                         <ButtonContainer selected={selected}>
                             <SelectionBox
                                 onMouseEnter={() =>
