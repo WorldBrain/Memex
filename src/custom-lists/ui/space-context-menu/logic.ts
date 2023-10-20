@@ -80,21 +80,17 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        let state = previousState
         await loadInitial(this, async () => {
             if (this.dependencies.listData.remoteId == null) {
-                await this.processUIEvent('shareSpace', {
-                    event: { privacyStatus: 'private' },
-                    previousState,
-                })
+                await this._shareSpace('private')
             }
             if (this.dependencies.loadOwnershipData) {
-                state = await this.loadSpaceOwnership(previousState)
+                await this.loadSpaceOwnership()
             }
         })
     }
 
-    private async loadSpaceOwnership(previousState: State): Promise<State> {
+    private async loadSpaceOwnership() {
         const { listData, spacesBG } = this.dependencies
         const mutation: UIMutation<State> = {}
 
@@ -120,10 +116,13 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
 
         this.emitMutation(mutation)
-        return this.withMutation(previousState, mutation)
     }
 
     shareSpace: EventHandler<'shareSpace'> = async ({ event }) => {
+        await this._shareSpace(event.privacyStatus)
+    }
+
+    private async _shareSpace(privacyStatus: 'private' | 'shared') {
         const {
             listData,
             onSpaceShare,
@@ -143,7 +142,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 shareResult.annotationLocalToRemoteIdsDict,
             )
 
-            if (event.privacyStatus === 'private') {
+            if (privacyStatus === 'private') {
                 await this.dependencies.onSetSpacePrivate(true)
             }
 
@@ -160,7 +159,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
 
         await executeUITask(this, 'listShareLoadState', async () => {
-            if (event.privacyStatus === 'private') {
+            if (privacyStatus === 'private') {
                 await this.dependencies.onSetSpacePrivate(true)
             }
             await contentSharingBG.waitForListShare({

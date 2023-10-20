@@ -25,6 +25,14 @@ export interface Dependencies {
     analyticsBG: AnalyticsCoreInterface
     contentSharingBG: ContentSharingInterface
     copyToClipboard: (text: string) => Promise<boolean>
+    /**
+     * If defined will override this component's ability to fetch links from storage.
+     * TODO: Remove this once list auto-share is moved to BG
+     */
+    inviteLinksState?: {
+        links: InviteLink[]
+        loadState: TaskState
+    }
 }
 
 export interface State {
@@ -85,7 +93,12 @@ export default class SpaceInviteLinksLogic extends UILogic<State, Event> {
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial(this, async () => {
-            await Promise.all([this.loadInviteLinks(), this.loadEmailInvites()])
+            await Promise.all([
+                this.dependencies.inviteLinksState
+                    ? Promise.resolve()
+                    : this.loadInviteLinks(),
+                this.loadEmailInvites(),
+            ])
         })
     }
 

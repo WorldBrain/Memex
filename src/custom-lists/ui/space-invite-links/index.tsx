@@ -14,6 +14,8 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
 import { __wrapClick } from '../utils'
+import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -46,6 +48,17 @@ export default class SpaceInviteLinks extends StatefulUIElement<
         return !alreadyInvited
     }
 
+    private get inviteLinks(): InviteLink[] {
+        return this.props.inviteLinksState?.links ?? this.state.inviteLinks
+    }
+
+    private get inviteLinksLoadingState(): TaskState {
+        return (
+            this.props.inviteLinksState?.loadState ??
+            this.state.inviteLinksLoadState
+        )
+    }
+
     private handleInviteInputChange: React.KeyboardEventHandler = async (
         event,
     ) => {
@@ -69,7 +82,7 @@ export default class SpaceInviteLinks extends StatefulUIElement<
     }
 
     private renderShareLinks(isPageLink: boolean) {
-        if (!this.state.inviteLinks.length) {
+        if (this.inviteLinksLoadingState === 'running') {
             return (
                 <ShareSectionContainer onClick={__wrapClick}>
                     <LoadingIndicator size={20} />
@@ -79,7 +92,7 @@ export default class SpaceInviteLinks extends StatefulUIElement<
 
         return (
             <ShareSectionContainer onClick={__wrapClick}>
-                {this.state.inviteLinks.map(
+                {this.inviteLinks.map(
                     ({ link, showCopyMsg, roleID }, linkIndex) => (
                         <ListItem zIndex={10 - linkIndex}>
                             <TooltipBox

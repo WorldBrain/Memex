@@ -22,8 +22,17 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         copyToClipboard,
     }
 
+    /**
+     * This only exists as we're awkwardly doing the list share from this component's stateful logic on load if remoteId == null
+     *  and SpaceInviteLinks logic tries to load them from the DB. Though in this case they're not ready and should instead be passed
+     *  down from this comp once sharing is complete.
+     *  TODO: Ideally we move sharing to happen in the BG then we can write the UI assuming lists are always already shared.
+     */
+    private isFirstOpenOnNewList = false
+
     constructor(props: Props) {
         super(props, new Logic(props))
+        this.isFirstOpenOnNewList = props.listData.remoteId == null
     }
 
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
@@ -113,7 +122,17 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 {this.props.listData.remoteId != null && (
                     <SectionTitle>Invite Links</SectionTitle>
                 )}
-                <SpaceInviteLinks {...this.props} />
+                <SpaceInviteLinks
+                    inviteLinksState={
+                        this.isFirstOpenOnNewList
+                            ? {
+                                  links: this.state.inviteLinks,
+                                  loadState: this.state.inviteLinksLoadState,
+                              }
+                            : undefined
+                    }
+                    {...this.props}
+                />
             </ContextMenuContainer>
         )
     }
