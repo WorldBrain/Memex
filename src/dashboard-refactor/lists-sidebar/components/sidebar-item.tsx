@@ -18,6 +18,7 @@ export interface Props {
     renderEditIcon?: () => JSX.Element
     areAnyMenusDisplayed?: boolean
     zIndex?: number
+    forceRightSidePermanentDisplay?: boolean
 }
 
 export interface State {
@@ -87,7 +88,9 @@ export default class ListsSidebarItem extends React.PureComponent<
                     <IconBox {...this.props} {...this.state}>
                         {this.props.renderEditIcon?.()}
                     </IconBox>
-                    {(this.props.isShared || this.state.isHovering) &&
+                    {(this.props.isShared ||
+                        this.state.isHovering ||
+                        this.props.forceRightSidePermanentDisplay) &&
                         this.props.renderRightSideIcon?.()}
                 </SidebarItem>
             </Container>
