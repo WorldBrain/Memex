@@ -62,6 +62,7 @@ export interface RootState {
     multiSelectResults?: any[]
     bulkDeleteLoadingState?: TaskState
     bulkSelectedUrls: string[]
+    bulkEditSpacesLoadingState?: TaskState
 }
 
 export type Events = UIEvent<

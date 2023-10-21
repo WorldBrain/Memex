@@ -292,6 +292,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             themeVariant: null,
             bulkSelectedUrls: null,
             bulkDeleteLoadingState: 'pristine',
+            bulkEditSpacesLoadingState: 'pristine',
             modals: {
                 showLogin: false,
                 showSubscription: false,
@@ -993,6 +994,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         //     source: 'setPageLists',
         // })
 
+        this.emitMutation({
+            bulkEditSpacesLoadingState: { $set: 'running' },
+        })
+
         const selectedItems = await getBulkEditItems()
 
         for (let item of selectedItems) {
@@ -1032,6 +1037,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
             } catch (e) {}
         }
+
+        this.emitMutation({
+            bulkEditSpacesLoadingState: { $set: 'pristine' },
+        })
 
         // await this.options.listsBG.updateListForPage({
         //     url: event.fullPageUrl,

@@ -1600,6 +1600,9 @@ export class DashboardContainer extends StatefulUIElement<
                         bulkDeleteLoadingState={
                             this.state.bulkDeleteLoadingState
                         }
+                        bulkEditSpacesLoadingState={
+                            this.state.bulkEditSpacesLoadingState
+                        }
                         spacePicker={() => {
                             return (
                                 <SpacePicker

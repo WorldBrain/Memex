@@ -254,7 +254,16 @@ export default class BulkEditWidget extends StatefulUIElement<
                                         isShown: true,
                                     })
                                 }
-                                label={`Add to Space`}
+                                label={
+                                    this.props.bulkEditSpacesLoadingState ===
+                                    'running' ? (
+                                        <LoadingStateButton>
+                                            <LoadingIndicator size={16} />
+                                        </LoadingStateButton>
+                                    ) : (
+                                        'Add to Spaces'
+                                    )
+                                }
                                 type={'secondary'}
                                 size={'small'}
                                 icon={'plus'}
