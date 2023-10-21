@@ -160,7 +160,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             }
 
             mutation.mode = {
-                $set: listDataWithOwnership.isOwned ? null : 'followed-space',
+                $set: listDataWithOwnership?.isOwned ? null : 'followed-space',
             }
         })
 

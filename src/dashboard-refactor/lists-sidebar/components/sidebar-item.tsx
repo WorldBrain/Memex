@@ -56,7 +56,6 @@ export default class ListsSidebarItem extends React.PureComponent<
         return (
             <Container zIndex={this.props.zIndex}>
                 <SidebarItem
-                    onClick={this.props.onClick}
                     onDragEnter={this.handleDragEnter}
                     isSelected={this.props.isSelected}
                     dropReceivingState={this.props.dropReceivingState}
@@ -79,15 +78,18 @@ export default class ListsSidebarItem extends React.PureComponent<
                         })
                     }}
                 >
-                    {this.props.renderLeftSideIcon?.()}
-                    <TitleBox>
-                        <ListTitle>
-                            <Name>{this.props.name}</Name>
-                        </ListTitle>
-                    </TitleBox>
+                    <SidebarItemClickContainer onClick={this.props.onClick}>
+                        {this.props.renderLeftSideIcon?.()}
+                        <TitleBox>
+                            <ListTitle>
+                                <Name>{this.props.name}</Name>
+                            </ListTitle>
+                        </TitleBox>
+                    </SidebarItemClickContainer>
                     <IconBox {...this.props} {...this.state}>
                         {this.props.renderEditIcon?.()}
                     </IconBox>
+
                     {(this.props.isShared ||
                         this.state.isHovering ||
                         this.props.forceRightSidePermanentDisplay) &&
@@ -97,6 +99,22 @@ export default class ListsSidebarItem extends React.PureComponent<
         )
     }
 }
+
+const SidebarItemClickContainer = styled.div`
+    display: flex;
+    flex: 1;
+    height: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    padding-left: 10px;
+    padding-right: 10px;
+    grid-gap: 10px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    cursor: pointer;
+    z-index: 1;
+`
 
 const Container = styled.div<Props>`
     position: relative;
