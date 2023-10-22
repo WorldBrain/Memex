@@ -243,7 +243,7 @@ export class PKMSyncBackgroundModule {
 
         if (!onlyParenthesisRemoval) {
             // Remove any characters that are not allowed in filenames and replace them with hyphens
-            const illegalCharacters = /[#%&{}\\<>?/$!'"@+`|=]/g
+            const illegalCharacters = /[#%&{}\\<>?:/$!'"@+`|=]/g
             fileName = fileName.replace(illegalCharacters, '-')
         }
         fileName = fileName.trim()

@@ -922,17 +922,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         let searchPosition = 0
         let searchFilters: UIMutation<State['searchFilters']> = {
             skip: { $set: searchPosition },
+            limit: { $set: 100 },
         }
         let searchState = this.withMutation(previousState, {
             searchFilters,
         })
+
         let selection = []
         let result = await this.options.searchBG.searchPages(
             stateToSearchParams(searchState, this.options.annotationsCache),
         )
         selection.push(...result.docs)
         while (!result.resultsExhausted) {
-            searchPosition += 10
+            searchPosition += 100
             searchFilters = {
                 skip: { $set: searchPosition },
             }
