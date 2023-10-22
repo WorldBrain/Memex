@@ -46,8 +46,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
     constructor(props: Props) {
         super(props, new Logic(props))
-        console.log('props', props)
-        console.log('state', this.state)
         // if (props.listData.remoteId == null) {
         //     this.processEvent('shareSpace', { privacyStatus: 'private' })
         // }

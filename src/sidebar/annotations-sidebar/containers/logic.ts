@@ -101,6 +101,7 @@ import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { marked } from 'marked'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -1544,10 +1545,11 @@ export class SidebarContainerLogic extends UILogic<
     createNewNoteFromAISummary: EventHandler<
         'createNewNoteFromAISummary'
     > = async ({ event }) => {
+        const comment = '<div>' + marked.parse(event.comment) + '</div>'
         this.emitMutation({
             activeTab: { $set: 'annotations' },
             commentBox: {
-                commentText: { $set: event.comment },
+                commentText: { $set: comment },
             },
         })
         this.options.focusCreateForm()
