@@ -1894,8 +1894,6 @@ export class AnnotationsSidebar extends React.Component<
                                         <Icon
                                             icon={'commentAdd'}
                                             onClick={() => {
-                                                let summary = `# AI Summary\n\n ## Prompt:\n  ${this.props.prompt}\n\n ## Answer: \n ${this.props.pageSummary}`
-
                                                 this.props.createNewNoteFromAISummary(
                                                     this.props.pageSummary,
                                                 )

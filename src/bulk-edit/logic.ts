@@ -17,6 +17,7 @@ export interface Dependencies {
     selectAllPages: () => Promise<void>
     clearBulkSelection: () => Promise<void>
     bulkDeleteLoadingState: TaskState
+    bulkEditSpacesLoadingState: TaskState
     removeIndividualSelection: (itemData) => Promise<void>
     spacePicker: () => JSX.Element
 }
