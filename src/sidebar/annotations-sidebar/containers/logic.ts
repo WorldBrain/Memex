@@ -316,9 +316,8 @@ export class SidebarContainerLogic extends UILogic<
             AIsuggestions: [],
             isTrial: false,
             signupDate: null,
-            showSharePageTooltip: false,
             firstTimeSharingPageLink: false,
-            selectedListForShareMenu: null,
+            selectedShareMenuPageLinkList: null,
             renameListErrorMessage: null,
             sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
@@ -1074,13 +1073,11 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ activeListEditMenuId: { $set: nextActiveId } })
     }
 
-    openPageListMenuForList: EventHandler<'openPageListMenuForList'> = async ({
+    closePageLinkShareMenu: EventHandler<'closePageLinkShareMenu'> = async ({
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            showSharePageTooltip: { $set: !previousState.showSharePageTooltip },
-        })
+        this.emitMutation({ selectedShareMenuPageLinkList: { $set: null } })
     }
 
     validateSpaceName(name: string, listIdToSkip?: number) {
@@ -1178,6 +1175,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     shareList: EventHandler<'shareList'> = async ({ event }) => {
+        const sharingTutorialP = this.showSharingTutorial()
         this.options.annotationsCache.updateList({
             unifiedId: event.unifiedListId,
             remoteId: event.remoteListId.toString(),
@@ -1198,6 +1196,7 @@ export class SidebarContainerLogic extends UILogic<
                 ].toString(),
             })
         }
+        await sharingTutorialP
     }
 
     deleteList: EventHandler<'deleteList'> = async ({ event }) => {
@@ -3086,6 +3085,10 @@ export class SidebarContainerLogic extends UILogic<
     setSharingTutorialVisibility: EventHandler<
         'setSharingTutorialVisibility'
     > = async ({ previousState, event }) => {
+        await this.showSharingTutorial()
+    }
+
+    async showSharingTutorial() {
         const hasEverSharedPageLink = await browser.storage.local.get(
             'hasEverSharedPageLink',
         )
@@ -3178,44 +3181,40 @@ export class SidebarContainerLogic extends UILogic<
         if (!currentUser) {
             throw new Error('Cannot create page link - User not logged in')
         }
+        const sharingTutorialP = this.showSharingTutorial()
 
-        let title
+        let title: string
 
         if (window.location.href.includes('web.telegram.org')) {
             title = getTelegramUserDisplayName(document, window.location.href)
         }
 
-        this.emitMutation({
-            showSharePageTooltip: { $set: true },
-        })
-
-        const existingPageLink = this.options.annotationsCache.getSharedPageListIds(
+        const sharedPageListIds = this.options.annotationsCache.getSharedPageListIds(
             normalizeUrl(fullPageUrl),
         )
 
-        let listsOfPageData = null
-        for (const list of existingPageLink) {
-            let listData = await this.options.annotationsCache.lists.byId[list]
+        let chosenPageLinkList: UnifiedList<'page-link'> = null
+        for (const listId of sharedPageListIds) {
+            let listData = this.options.annotationsCache.lists.byId[listId]
 
+            // Get the latest page-link list
             if (
-                listData.type === 'page-link' &&
-                (listData?.localId > listsOfPageData?.localId ||
-                    listsOfPageData == null)
+                listData?.type === 'page-link' &&
+                (listData?.localId > chosenPageLinkList?.localId ||
+                    chosenPageLinkList == null)
             ) {
-                listsOfPageData = listData
+                chosenPageLinkList = listData
             }
         }
 
-        if (listsOfPageData) {
+        if (chosenPageLinkList) {
             this.emitMutation({
-                showSharePageTooltip: { $set: true },
-            })
-            this.emitMutation({
-                selectedListForShareMenu: {
-                    $set: listsOfPageData.unifiedId,
+                selectedShareMenuPageLinkList: {
+                    $set: chosenPageLinkList.unifiedId,
                 },
             })
             if (!event.forceCreate) {
+                await sharingTutorialP
                 return
             }
         }
@@ -3255,7 +3254,7 @@ export class SidebarContainerLogic extends UILogic<
             )
 
             this.emitMutation({
-                selectedListForShareMenu: { $set: unifiedId },
+                selectedShareMenuPageLinkList: { $set: unifiedId },
             })
 
             await Promise.all([
@@ -3278,5 +3277,6 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             ])
         })
+        await sharingTutorialP
     }
 }

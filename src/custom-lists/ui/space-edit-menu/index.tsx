@@ -46,37 +46,11 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
 
     constructor(props: Props) {
         super(props, new Logic(props))
-        this.processEvent('shareSpace', null)
-    }
-
-    private get shouldShowInviteBtn(): boolean {
-        const inputValue = this.state.emailInviteInputValue.trim()
-        if (!inputValue.length) {
-            return false
-        }
-        if (!isValidEmail(inputValue)) {
-            return false
-        }
-        let alreadyInvited = false
-        for (const invite of normalizedStateToArray(this.state.emailInvites)) {
-            if (invite.email === inputValue) {
-                alreadyInvited = true
-                break
-            }
-        }
-        return !alreadyInvited
     }
 
     private handleNameChange: React.KeyboardEventHandler = async (event) => {
         const name = (event.target as HTMLInputElement).value
         await this.processEvent('updateSpaceName', { name })
-    }
-
-    private handleInviteInputChange: React.KeyboardEventHandler = async (
-        event,
-    ) => {
-        const value = (event.target as HTMLInputElement).value
-        await this.processEvent('updateEmailInviteInputValue', { value })
     }
 
     private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
@@ -102,12 +76,6 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
         // If we don't have this, events will bubble up into the page!
         e.stopPropagation()
     }
-
-    private renderLoadingSpinner = () => (
-        <LoadingContainer>
-            <LoadingIndicator size={30} />
-        </LoadingContainer>
-    )
 
     private renderMainContent() {
         if (
@@ -145,19 +113,7 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
             )
         }
 
-        // if (
-        //     this.state.loadState === 'running' ||
-        //     this.state.inviteLinksLoadState === 'running'
-        // ) {
-        //     return (
-        //         <ContextMenuContainer>
-        //             {this.renderLoadingSpinner()}
-        //         </ContextMenuContainer>
-        //     )
-        // }
-
         const isPageLink = this.props.listData.type === 'page-link'
-        const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
         return (
             <ContextMenuContainer>
                 {this.props.listData.type !== 'special-list' &&
@@ -239,43 +195,6 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
     }
 }
 
-const EmailListContainer = styled.div`
-    width: fill-available;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    max-height: 150px;
-    overflow-y: scroll;
-`
-
-const InviteItemContainer = styled.div`
-    padding: 5px 0px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    grid-gap: 5px;
-    width: fill-available;
-    width: -moz-available;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
-`
-
-const InvitedBox = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    grid-gap: 3px;
-`
-
-const InvitedEmail = styled.div`
-    color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 14px;
-`
-
-const InvitedPermission = styled.div`
-    color: ${(props) => props.theme.colors.greyScale4};
-    font-size: 12px;
-`
-
 const ButtonBox = styled.div`
     width: fill-available;
     display: flex;
@@ -322,34 +241,10 @@ const DeleteBox = styled.div`
     padding: 15px;
 `
 
-const PermissionArea = styled.div`
-    z-index: 31;
-    position: relative;
-`
-
 const EditArea = styled.div`
     color: ${(props) => props.theme.colors.white};
     width: fill-available;
     margin-bottom: 3px;
-`
-
-const IconContainer = styled.div`
-    display: none;
-`
-
-const LoadingContainer = styled.div`
-    display: flex;
-    height: 150px;
-    justify-content: center;
-    align-items: center;
-    width: fill-available;
-    justify-self: center;
-    min-width: 250px;
-`
-
-const ShareSectionContainer = styled.div`
-    margin-bottom: 10px;
-    width: fill-available;
 `
 
 const MenuContainer = styled.div`
@@ -370,85 +265,6 @@ const TitleBox = styled.div`
     font-size: 16px;
 `
 
-const LinkAndRoleBox = styled.div<{
-    viewportBreakpoint: string
-    zIndex: number
-}>`
-    width: fill-available;
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    margin-bottom: 5px;
-    grid-gap: 5px;
-    // z-index: ${(props) => props['zIndex']};
-    height: 40px;
-    margin: 0 -10px 5px -10px;
-    padding: 0px 5px;
-
-
-    ${(props) =>
-        (props.viewportBreakpoint === 'small' ||
-            props.viewportBreakpoint === 'mobile') &&
-        css`
-            display: flex;
-            flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
-        `}
-
-    &:hover ${IconContainer} {
-            height: fit-content;
-            width: fit-content;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            grid-gap: 5px;
-            grid-auto-flow: row;
-            border-radius: 6px;
-        }
-
-`
-
-const LinkBox = styled(Margin)`
-    width: fill-available;
-    display: flex;
-    font-size: 14px;
-    border-radius: 3px;
-    text-align: left;
-    height: 40px;
-    cursor: pointer;
-    color: ${(props) => props.theme.colors.white};
-    justify-content: space-between;
-    padding-right: 10px;
-
-    &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-    }
-`
-
-const Link = styled.span`
-    display: flex;
-    flex-direction: row;
-    width: 100%;
-    padding: 5px 10px;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-    overflow-x: scroll;
-    scrollbar-width: none;
-    justify-content: space-between;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-`
-
-const CopyLinkBox = styled.div`
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    width: 100%;
-`
-
 const DetailsText = styled.span`
     opacity: 0.8;
     font-size: 14px;
@@ -459,27 +275,6 @@ const DetailsText = styled.span`
     margin-bottom: 5px;
     margin-top: -5px;
     text-align: center;
-`
-
-const PermissionText = styled.span<{
-    viewportBreakpoint: string
-}>`
-    color: ${(props) => props.theme.colors.white};
-    opacity: 0.8;
-    display: flex;
-    flex-direction: row;
-    white-space: nowrap;
-    justify-content: flex-end;
-    font-size: 12px;
-    z-index: 30;
-    margin-bottom: 2px;
-
-    ${(props) =>
-        (props.viewportBreakpoint === 'small' ||
-            props.viewportBreakpoint === 'mobile') &&
-        css`
-            padding-left: 0px;
-        `}
 `
 
 const EditableTextField = styled(TextField)`
@@ -513,11 +308,4 @@ const Container = styled.div`
     align-items: flex-start;
     background-color: transparent;
     grid-gap: 2px;
-`
-
-const ListItem = styled.div<{ zIndex }>`
-    display: flex;
-    position: relative;
-    z-index: ${(props) => props.zIndex};
-    width: 100%;
 `
