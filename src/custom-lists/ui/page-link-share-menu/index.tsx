@@ -57,8 +57,6 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
             )
         }
 
-        // console.log('listadaaaa', this.props.listData)
-
         return (
             <ContextMenuContainer>
                 {this.props.pageLinkCreateState === 'running' ? (
@@ -114,10 +112,12 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                             sharing context.
                                         </span>
                                     }
+                                    placement="bottom"
+                                    width="140px"
                                 >
                                     <Icon
                                         icon={helpIcon}
-                                        heightAndWidth={'12px'}
+                                        heightAndWidth={'16px'}
                                         hoverOff
                                     />
                                 </TooltipBox>
