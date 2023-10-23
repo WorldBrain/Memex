@@ -45,8 +45,9 @@ export type Event = UIEvent<{
     updateEmailInviteInputValue: { value: string }
     setEmailInvitesHoverState: { id: AutoPk }
     deleteEmailInvite: { key: string }
-    inviteViaEmail: { now?: number }
+    inviteViaEmail: { state?: State; remoteId?: string }
     reloadEmailInvites: { remoteListId: string }
+    updateProps: { props: Dependencies }
 }>
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -78,6 +79,10 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
             this._loadEmailInvites(this.dependencies.listData.remoteId)
         })
     }
+    updateProps: EventHandler<'updateProps'> = async ({ event }) => {
+        this.dependencies = event.props
+        this._loadEmailInvites(this.dependencies.listData.remoteId)
+    }
 
     reloadEmailInvites: EventHandler<'reloadEmailInvites'> = async ({
         previousState,
@@ -88,7 +93,6 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
     }
 
     private async _loadEmailInvites(remoteListId?: string) {
-        console.log('loading email invites')
         await executeUITask(this, 'emailInvitesLoadState', async () => {
             if (remoteListId == null) {
                 return
@@ -148,11 +152,11 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
         event,
         previousState,
     }) => {
-        const now = event.now ?? Date.now()
-        const email = previousState.emailInviteInputValue.trim()
-        const roleID = previousState.emailInviteInputRole
+        const now = Date.now()
+        const email = event.state.emailInviteInputValue.trim()
+        const roleID = event.state.emailInviteInputRole
 
-        const prevInviteCount = previousState.emailInvites.allIds.length
+        const prevInviteCount = event.state.emailInvites.allIds.length
         const tmpId = `tmp-invite-id-${prevInviteCount}`
         this.emitMutation({
             emailInviteInputValue: { $set: '' },
@@ -172,9 +176,9 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
             },
         })
         await executeUITask(this, 'emailInvitesCreateState', async () => {
-            let remoteId = this.dependencies.listData.remoteId
+            let remoteId = this.dependencies.listData?.remoteId ?? null
 
-            if (remoteId == null) {
+            while (remoteId == null) {
                 remoteId = await this.dependencies.contentSharingBG.getRemoteListId(
                     {
                         localListId: this.dependencies.listData.localId,
@@ -210,6 +214,7 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                             },
                         },
                     },
+                    emailInvitesLoadState: { $set: 'success' },
                 })
             } else if (result.status === 'permission-denied') {
                 this.emitMutation({
@@ -220,6 +225,7 @@ export default class SpaceEmailInvitesLogic extends UILogic<State, Event> {
                                 prev.filter((ids) => ids !== tmpId),
                         },
                     },
+                    emailInvitesLoadState: { $set: 'pristine' },
                 })
                 throw new Error('Email invite encountered an error')
             }

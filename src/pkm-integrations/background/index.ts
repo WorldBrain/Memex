@@ -25,12 +25,10 @@ export class PKMSyncBackgroundModule {
                 if (await this.backendNew.isConnected()) {
                     const bufferedItems = await this.getBufferedItems()
                     bufferedItems.push(item)
-                    console.log('componentDidMount')
                     const PKMSYNCremovewarning = await browser.storage.local.get(
                         'PKMSYNCremovewarning',
                     )
 
-                    console.log('showWarning', PKMSYNCremovewarning)
                     this.PKMSYNCremovewarning =
                         PKMSYNCremovewarning.PKMSYNCremovewarning
 

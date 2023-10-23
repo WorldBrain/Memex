@@ -25,6 +25,18 @@ export default class SpaceEmailInvites extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
+    async componentDidUpdate(prevProps: Readonly<Props>) {
+        if (
+            prevProps.listData.unifiedId !== this.props.listData.unifiedId &&
+            this.props.listData.remoteId != null
+        ) {
+            await this.processEvent('reloadEmailInvites', {
+                remoteListId: this.props.listData.remoteId!,
+            })
+            this.processEvent('updateProps', { props: this.props })
+        }
+    }
+
     private get shouldShowInviteBtn(): boolean {
         const inputValue = this.state.emailInviteInputValue.trim()
         if (!inputValue.length) {
@@ -43,17 +55,6 @@ export default class SpaceEmailInvites extends StatefulUIElement<
         return !alreadyInvited
     }
 
-    async componentDidUpdate(prevProps: Readonly<Props>) {
-        if (
-            prevProps.listData.unifiedId !== this.props.listData.unifiedId &&
-            this.props.listData.remoteId != null
-        ) {
-            await this.processEvent('reloadEmailInvites', {
-                remoteListId: this.props.listData.remoteId!,
-            })
-        }
-    }
-
     private handleInviteInputChange: React.KeyboardEventHandler = async (
         event,
     ) => {
@@ -68,7 +69,10 @@ export default class SpaceEmailInvites extends StatefulUIElement<
             if (this.state.emailInviteInputValue.trim().length > 0) {
                 e.preventDefault()
                 e.stopPropagation()
-                await this.processEvent('inviteViaEmail', {})
+                await this.processEvent('inviteViaEmail', {
+                    state: this.state,
+                    remoteId: this.props.listData.remoteId,
+                })
             }
         }
 
@@ -141,7 +145,10 @@ export default class SpaceEmailInvites extends StatefulUIElement<
                             />
                             <PrimaryAction
                                 onClick={() =>
-                                    this.processEvent('inviteViaEmail', {})
+                                    this.processEvent('inviteViaEmail', {
+                                        state: this.state,
+                                        remoteId: this.props.listData.remoteId,
+                                    })
                                 }
                                 label="Invite"
                                 type="secondary"

@@ -86,7 +86,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         }
 
         const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
-
         return (
             <ContextMenuContainer>
                 {this.props.isCreator && this.props.listData.remoteId != null && (

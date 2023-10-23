@@ -12,6 +12,7 @@ import { getSinglePageShareUrl } from 'src/content-sharing/utils'
 import SpaceEmailInvites from '../space-email-invites'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import SpaceLinks from '../space-links'
+import { helpIcon } from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends Dependencies {
     pageLinkCreateState?: TaskState
@@ -45,19 +46,6 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
         }
     }
 
-    private handleWebViewOpen: React.MouseEventHandler = (e) => {
-        const { listData } = this.props
-        if (listData.remoteId != null) {
-            window.open(
-                getSinglePageShareUrl({
-                    remoteListId: listData.remoteId,
-                    remoteListEntryId: listData.remoteId,
-                }),
-                '_blank',
-            )
-        }
-    }
-
     private renderMainContent() {
         if (this.state.loadState === 'running') {
             return (
@@ -68,6 +56,8 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                 </ContextMenuContainer>
             )
         }
+
+        // console.log('listadaaaa', this.props.listData)
 
         return (
             <ContextMenuContainer>
@@ -116,6 +106,21 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                         <SectionTopbar>
                             <SectionTitle>
                                 Invite Links (Most Recent)
+                                <TooltipBox
+                                    tooltipText={
+                                        <span>
+                                            You can create multiple invite links
+                                            for a page that each create a new
+                                            sharing context.
+                                        </span>
+                                    }
+                                >
+                                    <Icon
+                                        icon={helpIcon}
+                                        heightAndWidth={'12px'}
+                                        hoverOff
+                                    />
+                                </TooltipBox>
                             </SectionTitle>
                             <TooltipBox
                                 tooltipText={
@@ -141,6 +146,15 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                     padding={'0px 6px 0 0'}
                                 />
                             </TooltipBox>
+                            <PrimaryAction
+                                label={'All'}
+                                size="small"
+                                type="forth"
+                                icon={'arrowRight'}
+                                onClick={() => {
+                                    this.props.showSpacesTab()
+                                }}
+                            />
                         </SectionTopbar>
                     )}
                     <SpaceLinks
@@ -152,25 +166,15 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                         }
                         isPageLink={this.props.listData.type === 'page-link'}
                     />
-                    <SpaceEmailInvites {...this.props} />
-                    <PrimaryAction
-                        label={'View All'}
-                        size="medium"
-                        width="100%"
-                        type="forth"
-                        icon={'longArrowRight'}
-                        onClick={() => {
-                            this.props.showSpacesTab()
-                        }}
-                    />
+                    {this.props.pageLinkCreateState !== 'running' && (
+                        <SpaceEmailInvites {...this.props} />
+                    )}
                 </BottomSection>
             </ContextMenuContainer>
         )
     }
 
     render() {
-        console.log('props:', { ...this.props })
-        console.log('state:', { ...this.state })
         return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
@@ -233,6 +237,7 @@ const SectionTopbar = styled.div`
     align-items: center;
     width: 100%;
     z-index: 11;
+    grid-gap: 5px;
 `
 
 const ButtonBox = styled.div`
@@ -253,11 +258,11 @@ const ButtonRow = styled.div`
 
 const ContextMenuContainer = styled.div`
     display: flex;
-    grid-gap: 5px;
+    grid-gap: 0px;
     flex-direction: column;
     width: fill-available;
     min-height: 180px;
-    min-width: 330px;
+    min-width: 340px;
     height: fit-content;
     width: fit-content;
     justify-content: center;
@@ -270,13 +275,13 @@ const SectionTitle = styled.div`
     color: ${(props) =>
         props.theme.variant === 'light'
             ? props.theme.colors.greyScale5
-            : props.theme.colors.greyScale7};
-    font-weight: 500;
+            : props.theme.colors.greyScale5};
+    font-weight: 400;
     width: 100%;
     display: flex;
-    padding-left: 5px;
     justify-content: flex-start;
     letter-spacing: 0.6px;
+    align-items: center;
 `
 
 const DeleteBox = styled.div`
@@ -313,7 +318,6 @@ const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
     border-radius: 12px;
-    width: 340px;
     min-height: 180px;
 `
 
