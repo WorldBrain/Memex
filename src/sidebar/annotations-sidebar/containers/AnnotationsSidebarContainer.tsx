@@ -944,8 +944,8 @@ export class AnnotationsSidebarContainer<
                                     { state },
                                 )
                             }
-                            selectedListForShareMenu={
-                                this.state.selectedListForShareMenu
+                            selectedShareMenuPageLinkList={
+                                this.state.selectedShareMenuPageLinkList
                             }
                             setShareMenuAnnotationInstance={(instanceId) =>
                                 this.processEvent(
@@ -963,15 +963,8 @@ export class AnnotationsSidebarContainer<
                             clickFeedActivityIndicator={() =>
                                 this.processEvent('markFeedAsRead', null)
                             }
-                            clickCreatePageLinkBtn={() => {
+                            clickCreatePageLinkBtn={() =>
                                 this.processEvent('createPageLink', null)
-                                this.processEvent(
-                                    'setSharingTutorialVisibility',
-                                    null,
-                                )
-                            }}
-                            showSharePageTooltip={
-                                this.state.showSharePageTooltip
                             }
                             selectedListId={this.state.selectedListId}
                             currentUser={this.props.getCurrentUser()}
@@ -1015,9 +1008,9 @@ export class AnnotationsSidebarContainer<
                                     unifiedListId,
                                 })
                             }
-                            openPageListMenuForList={() =>
+                            closePageLinkShareMenu={() =>
                                 this.processEvent(
-                                    'openPageListMenuForList',
+                                    'closePageLinkShareMenu',
                                     null,
                                 )
                             }
@@ -1214,18 +1207,14 @@ export class AnnotationsSidebarContainer<
                                         onSpaceShare={(
                                             remoteListId,
                                             annotationLocalToRemoteIdsDict,
-                                        ) => {
+                                        ) =>
                                             this.processEvent('shareList', {
                                                 remoteListId,
                                                 annotationLocalToRemoteIdsDict,
                                                 unifiedListId:
                                                     listData.unifiedId,
                                             })
-                                            this.processEvent(
-                                                'setSharingTutorialVisibility',
-                                                null,
-                                            )
-                                        }}
+                                        }
                                         onDeleteSpaceConfirm={() =>
                                             this.processEvent('deleteList', {
                                                 unifiedListId:
@@ -1287,21 +1276,17 @@ export class AnnotationsSidebarContainer<
                                     pageListDataForCurrentPage={
                                         this.state.pageListDataForCurrentPage
                                     }
-                                    onSpaceShare={() => {
+                                    onSpaceShare={() =>
                                         this.processEvent('createPageLink', {
                                             forceCreate: true,
                                         })
-                                        this.processEvent(
-                                            'setSharingTutorialVisibility',
-                                            null,
-                                        )
-                                    }}
+                                    }
                                     pageLinkCreateState={
                                         this.state.pageLinkCreateState
                                     }
                                     showSpacesTab={() => {
                                         this.processEvent(
-                                            'openPageListMenuForList',
+                                            'closePageLinkShareMenu',
                                             null,
                                         )
                                         this.processEvent(

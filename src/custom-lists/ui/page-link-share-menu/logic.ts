@@ -23,17 +23,15 @@ export interface Dependencies {
     listData: UnifiedList
     errorMessage?: string
     loadOwnershipData?: boolean
-    onSpaceShare?: (remoteListId: string) => void
+    onSpaceShare: () => Promise<void>
     copyToClipboard: (text: string) => Promise<boolean>
     analyticsBG: AnalyticsCoreInterface
-    pageLinkCreateState?: TaskState
     annotationsCache?: PageAnnotationsCacheInterface
     pageListDataForCurrentPage: UnifiedListForCache<'page-link'> | null
 }
 
 export type Event = UIEvent<{
-    shareSpace: null
-    copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
+    copyInviteLink: { link: string }
     reloadInviteLinks: { listData: UnifiedListForCache<'page-link'> | null }
 }>
 
@@ -92,7 +90,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
 
             let listsOfPageData = null
             for (const list of listsOfPageIds) {
-                let listData = await this.dependencies.annotationsCache.getListByLocalId(
+                let listData = this.dependencies.annotationsCache.getListByLocalId(
                     list,
                 )
 
@@ -223,88 +221,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         await this.loadInviteLinks(event.listData)
     }
 
-    shareSpace: EventHandler<'shareSpace'> = async ({}) => {
-        const {
-            listData,
-            onSpaceShare,
-            copyToClipboard,
-            contentSharingBG,
-        } = this.dependencies
-
-        let remoteListId = listData.remoteId
-
-        await executeUITask(this, 'inviteLinksLoadState', async () => {
-            const shareResult = await contentSharingBG.scheduleListShare({
-                localListId: listData.localId,
-            })
-            remoteListId = shareResult.remoteListId
-            onSpaceShare?.(remoteListId)
-
-            this.emitMutation({
-                showSuccessMsg: { $set: true },
-                inviteLinks: { $set: shareResult.links },
-            })
-
-            const linkToCopy =
-                shareResult.links[1]?.link ?? shareResult.links[0]?.link
-            if (linkToCopy != null) {
-                await copyToClipboard(linkToCopy)
-            }
-        })
-
-        await executeUITask(this, 'listShareLoadState', async () => {
-            await contentSharingBG.waitForListShare({
-                localListId: listData.localId,
-            })
-        })
-
-        setTimeout(
-            () => this.emitMutation({ showSuccessMsg: { $set: false } }),
-            PageLinkShareMenu.MSG_TIMEOUT,
-        )
-    }
-
-    copyInviteLink: EventHandler<'copyInviteLink'> = async ({
-        previousState,
-        event,
-    }) => {
-        const inviteLink = previousState.inviteLinks[event.linkIndex]
-        if (inviteLink == null) {
-            throw new Error('Link to copy does not exist - cannot copy')
-        }
-
-        await this.dependencies.copyToClipboard(inviteLink.link)
-
-        const showInviteLinkCopyMsg = (showCopyMsg: boolean) =>
-            this.emitMutation({
-                inviteLinks: {
-                    [event.linkIndex]: {
-                        showCopyMsg: { $set: showCopyMsg },
-                    },
-                },
-            })
-
-        showInviteLinkCopyMsg(true)
-
-        if (this.dependencies.analyticsBG) {
-            try {
-                await trackCopyInviteLink(this.dependencies.analyticsBG, {
-                    inviteType:
-                        event.linkIndex === 0 ? 'reader' : 'contributer',
-                    linkType:
-                        event.linkType === 'page-link'
-                            ? 'page-link'
-                            : 'space-link',
-                    source: 'extension',
-                })
-            } catch (error) {
-                console.error(`Error tracking space create event', ${error}`)
-            }
-        }
-
-        setTimeout(
-            () => showInviteLinkCopyMsg(false),
-            PageLinkShareMenu.MSG_TIMEOUT,
-        )
+    copyInviteLink: EventHandler<'copyInviteLink'> = async ({ event }) => {
+        await this.dependencies.copyToClipboard(event.link)
     }
 }

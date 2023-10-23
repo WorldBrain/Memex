@@ -4,29 +4,19 @@ import Logic, { Dependencies, State, Event } from './logic'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Margin from 'src/dashboard-refactor/components/Margin'
-import { sharedListRoleIDToString } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/util'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getSinglePageShareUrl } from 'src/content-sharing/utils'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import SpaceEmailInvites from '../space-email-invites'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import SpaceLinks from '../space-links'
 
 export interface Props extends Dependencies {
+    pageLinkCreateState?: TaskState
     disableWriteOps?: boolean
-    onSpaceShare: () => void
     showSpacesTab: () => void
-}
-
-// NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
-//  from opening when you use the context menu in the dashboard.
-//  __If you add new click handlers to this component, ensure you wrap them with this!__
-const wrapClick = (
-    handler: React.MouseEventHandler,
-): React.MouseEventHandler => (e) => {
-    e.preventDefault()
-    e.stopPropagation()
-    return handler(e)
 }
 
 export default class PageLinkShareMenuContainer extends StatefulUIElement<
@@ -68,121 +58,8 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
         }
     }
 
-    private renderShareLinks(isPageLink: boolean) {
-        return (
-            <ShareSectionContainer onClick={wrapClick}>
-                {this.state.inviteLinks.map(
-                    ({ link, showCopyMsg, roleID }, linkIndex) => (
-                        <ListItem zIndex={10 - linkIndex}>
-                            {}
-                            <TooltipBox
-                                placement={'bottom'}
-                                tooltipText={
-                                    roleID === SharedListRoleID.ReadWrite ? (
-                                        <span>
-                                            Permission to add highlights,
-                                            <br /> pages & replies
-                                        </span>
-                                    ) : (
-                                        <span>
-                                            Permission to read & reply <br />
-                                            to highlights & pages
-                                        </span>
-                                    )
-                                }
-                                fullWidthTarget
-                            >
-                                <LinkAndRoleBox
-                                    key={roleID}
-                                    viewportBreakpoint="normal"
-                                >
-                                    <CopyLinkBox>
-                                        <LinkBox
-                                            left="small"
-                                            onClick={wrapClick((e) =>
-                                                this.processEvent(
-                                                    'copyInviteLink',
-                                                    {
-                                                        linkIndex,
-                                                        linkType: isPageLink
-                                                            ? 'page-link'
-                                                            : 'space-link',
-                                                    },
-                                                ),
-                                            )}
-                                        >
-                                            <Icon
-                                                hoverOff
-                                                icon="link"
-                                                heightAndWidth="18px"
-                                            />
-                                            <Link>
-                                                {showCopyMsg
-                                                    ? 'Copied to clipboard'
-                                                    : sharedListRoleIDToString(
-                                                          roleID,
-                                                      )}
-                                            </Link>
-
-                                            <IconContainer id={'iconContainer'}>
-                                                <Icon
-                                                    heightAndWidth="20px"
-                                                    filePath={'copy'}
-                                                    onClick={wrapClick(() =>
-                                                        this.processEvent(
-                                                            'copyInviteLink',
-                                                            {
-                                                                linkIndex,
-                                                                linkType: isPageLink
-                                                                    ? 'page-link'
-                                                                    : 'space-link',
-                                                            },
-                                                        ),
-                                                    )}
-                                                />
-                                                <Icon
-                                                    heightAndWidth="20px"
-                                                    filePath={'goTo'}
-                                                    onClick={wrapClick(() => {
-                                                        let webUIUrl = link
-
-                                                        if (
-                                                            webUIUrl.includes(
-                                                                '?',
-                                                            ) &&
-                                                            isPageLink
-                                                        ) {
-                                                            webUIUrl =
-                                                                webUIUrl +
-                                                                '&noAutoOpen=true'
-                                                        } else if (isPageLink) {
-                                                            webUIUrl =
-                                                                webUIUrl +
-                                                                '?noAutoOpen=true'
-                                                        }
-                                                        window.open(
-                                                            webUIUrl,
-                                                            '_blank',
-                                                        )
-                                                    })}
-                                                />
-                                            </IconContainer>
-                                        </LinkBox>
-                                    </CopyLinkBox>
-                                </LinkAndRoleBox>
-                            </TooltipBox>
-                        </ListItem>
-                    ),
-                )}
-            </ShareSectionContainer>
-        )
-    }
-
     private renderMainContent() {
-        if (
-            this.state.loadState === 'running' ||
-            this.state.inviteLinksLoadState === 'running'
-        ) {
+        if (this.state.loadState === 'running') {
             return (
                 <ContextMenuContainer>
                     <LoadingContainer>
@@ -192,11 +69,9 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
             )
         }
 
-        const isPageLink = this.props.listData.type === 'page-link'
-
         return (
             <ContextMenuContainer>
-                {this.props.pageLinkCreateState === 'running' && (
+                {this.props.pageLinkCreateState === 'running' ? (
                     <LoadingStatusContainer>
                         <LoadingIndicator size={24} />
                         <LoadingStatusTextBox>
@@ -208,8 +83,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                             </LoadingStatusSubtitle>
                         </LoadingStatusTextBox>
                     </LoadingStatusContainer>
-                )}
-                {this.props.pageLinkCreateState === 'success' && (
+                ) : (
                     <LoadingStatusContainer padding={'10px 10px'}>
                         <Icon
                             icon={'check'}
@@ -221,7 +95,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                             <LoadingStatusTitle>
                                 Page available online
                             </LoadingStatusTitle>
-                            <PrimaryAction
+                            {/* <PrimaryAction
                                 label={'Open'}
                                 icon={'globe'}
                                 onClick={() =>
@@ -233,7 +107,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                 }
                                 size="small"
                                 type="secondary"
-                            />
+                            /> */}
                         </LoadingSuccessBox>
                     </LoadingStatusContainer>
                 )}
@@ -269,7 +143,16 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                             </TooltipBox>
                         </SectionTopbar>
                     )}
-                    {this.renderShareLinks(isPageLink)}
+                    <SpaceLinks
+                        analyticsBG={this.props.analyticsBG}
+                        inviteLinks={this.state.inviteLinks}
+                        loadState={this.state.inviteLinksLoadState}
+                        copyLink={(link) =>
+                            this.processEvent('copyInviteLink', { link })
+                        }
+                        isPageLink={this.props.listData.type === 'page-link'}
+                    />
+                    <SpaceEmailInvites {...this.props} />
                     <PrimaryAction
                         label={'View All'}
                         size="medium"
@@ -286,6 +169,8 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
     }
 
     render() {
+        console.log('props:', { ...this.props })
+        console.log('state:', { ...this.state })
         return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
