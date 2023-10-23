@@ -125,7 +125,6 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
-    selectedListForShareMenu: UnifiedList['unifiedId']
     renderAICounter: (position) => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
@@ -172,7 +171,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     openEditMenuForList: (
         unifiedListId: UnifiedList['unifiedId'] | null,
     ) => void
-    openPageListMenuForList: () => void
+    closePageLinkShareMenu: () => void
     openWebUIPage: (unifiedListId: UnifiedList['unifiedId']) => void
     onShareAllNotesClick: () => void
     onCopyBtnClick: () => void
@@ -218,7 +217,6 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     ) => void
     setSpaceTitleEditValue: (value) => void
     createNewNoteFromAISummary: (summary) => void
-    showSharePageTooltip: boolean
     events: AnnotationsSidebarInPageEventEmitter
     initGetReplyEditProps: (
         sharedListReference: SharedListReference,
@@ -1206,6 +1204,7 @@ export class AnnotationsSidebar extends React.Component<
             </PopoutBox>
         )
     }
+
     private renderEditMenu(listData: UnifiedList, ref: any) {
         if (this.props.activeListEditMenuId !== listData.unifiedId) {
             return
@@ -1227,13 +1226,19 @@ export class AnnotationsSidebar extends React.Component<
             </PopoutBox>
         )
     }
-    private renderPageLinkMenu(listData: UnifiedList) {
-        let selectedList
-        if (this.props.selectedListForShareMenu != null) {
-            selectedList = this.props.annotationsCache.lists.byId[
-                this.props.selectedListForShareMenu
-            ]
+
+    private renderPageLinkMenu() {
+        if (this.props.selectedShareMenuPageLinkList == null) {
+            console.warn(
+                'Attempted to open page link share menu for unselected list',
+            )
+            return false
         }
+
+        const selectedList = this.props.annotationsCache.lists.byId[
+            this.props.selectedShareMenuPageLinkList
+        ]
+
         return (
             <PopoutBox
                 strategy="fixed"
@@ -1241,11 +1246,9 @@ export class AnnotationsSidebar extends React.Component<
                 offsetX={10}
                 offsetY={0}
                 targetElementRef={this.sharePageLinkButtonRef.current}
-                closeComponent={() => {
-                    this.props.openPageListMenuForList()
-                }}
+                closeComponent={this.props.closePageLinkShareMenu}
             >
-                {!this.props.selectedListForShareMenu || !selectedList ? (
+                {!this.props.selectedShareMenuPageLinkList || !selectedList ? (
                     <LoadingIndicatorContainer height="180px" width="330px">
                         <LoadingIndicatorStyled size={20} />
                     </LoadingIndicatorContainer>
@@ -2283,8 +2286,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderTopBarSwitcher() {
-        const listData = this.props.lists.byId[this.props.selectedListId]
-
         return (
             <TopBarContainer>
                 <TopBarTabsContainer>
@@ -2376,7 +2377,9 @@ export class AnnotationsSidebar extends React.Component<
                         iconColor="prime1"
                         fontColor="white"
                         size="medium"
-                        active={this.props.showSharePageTooltip}
+                        active={
+                            this.props.selectedShareMenuPageLinkList != null
+                        }
                         icon={
                             this.props.pageLinkCreateState === 'running' ? (
                                 <LoadingIndicator
@@ -2390,8 +2393,8 @@ export class AnnotationsSidebar extends React.Component<
                         padding={'0px 12px 0 6px'}
                         height={'30px'}
                     />
-                    {this.props.showSharePageTooltip &&
-                        this.renderPageLinkMenu(listData ?? null)}
+                    {this.props.selectedShareMenuPageLinkList != null &&
+                        this.renderPageLinkMenu()}
                 </TopBarBtnsContainer>
             </TopBarContainer>
         )
