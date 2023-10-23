@@ -7,6 +7,11 @@ import type { UnifiedList } from 'src/annotations/cache/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
+import {
+    getListShareUrl,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -37,11 +42,11 @@ export type Event = UIEvent<{
     updateSpacePrivacy: { isPrivate: boolean }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
+    copyInviteLink: { link: string }
     cancelDeleteSpace: null
 }>
 
 export interface State {
-    // TODO: Change the way share on open happens so these gets passed down to <SpaceInviteLinks>
     inviteLinks: InviteLink[]
     inviteLinksLoadState: TaskState
 
@@ -84,6 +89,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             if (this.dependencies.listData.remoteId == null) {
                 await this._shareSpace('private')
             }
+            await this.loadInviteLinks()
             if (this.dependencies.loadOwnershipData) {
                 await this.loadSpaceOwnership()
             }
@@ -116,6 +122,80 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
 
         this.emitMutation(mutation)
+    }
+
+    private async loadInviteLinks() {
+        const { listData, contentSharingBG } = this.dependencies
+
+        const createListLink = (collaborationKey?: string): string =>
+            listData.type === 'page-link'
+                ? getSinglePageShareUrl({
+                      collaborationKey,
+                      remoteListId: listData.remoteId,
+                      remoteListEntryId: listData.sharedListEntryId,
+                  })
+                : getListShareUrl({
+                      collaborationKey,
+                      remoteListId: listData.remoteId,
+                  })
+
+        await executeUITask(this, 'inviteLinksLoadState', async () => {
+            if (listData.remoteId == null) {
+                return
+            }
+
+            if (listData.collabKey != null) {
+                this.emitMutation({
+                    inviteLinks: {
+                        $set: [
+                            {
+                                roleID: SharedListRoleID.Commenter,
+                                link: createListLink(),
+                            },
+                            {
+                                roleID: SharedListRoleID.ReadWrite,
+                                link: createListLink(listData.collabKey),
+                            },
+                        ],
+                    },
+                })
+                return
+            }
+
+            // TODO: Remove all this logic once full support for list's `collabKey` is in the cache
+            const { links } = await contentSharingBG.getExistingKeyLinksForList(
+                {
+                    listReference: {
+                        id: listData.remoteId,
+                        type: 'shared-list-reference',
+                    },
+                },
+            )
+
+            const contribLink = links.find((link) => link.keyString != null)
+
+            const inviteLinks: InviteLink[] = [
+                {
+                    roleID: SharedListRoleID.Commenter,
+                    link: createListLink(),
+                },
+            ]
+            if (contribLink) {
+                inviteLinks.push({
+                    roleID: SharedListRoleID.ReadWrite,
+                    link: createListLink(contribLink.keyString),
+                })
+            }
+
+            this.emitMutation({ inviteLinks: { $set: inviteLinks } })
+        })
+    }
+
+    copyInviteLink: EventHandler<'copyInviteLink'> = async ({
+        previousState,
+        event,
+    }) => {
+        await this.dependencies.copyToClipboard(event.link)
     }
 
     shareSpace: EventHandler<'shareSpace'> = async ({ event }) => {

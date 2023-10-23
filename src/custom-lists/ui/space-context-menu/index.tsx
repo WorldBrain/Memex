@@ -6,8 +6,9 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getListShareUrl } from 'src/content-sharing/utils'
 import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu'
-import SpaceInviteLinks from '../space-invite-links'
+import SpaceEmailInvites from '../space-email-invites'
 import { __wrapClick } from '../utils'
+import SpaceLinks from '../space-links'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -122,17 +123,16 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                 {this.props.listData.remoteId != null && (
                     <SectionTitle>Invite Links</SectionTitle>
                 )}
-                <SpaceInviteLinks
-                    inviteLinksState={
-                        this.isFirstOpenOnNewList
-                            ? {
-                                  links: this.state.inviteLinks,
-                                  loadState: this.state.inviteLinksLoadState,
-                              }
-                            : undefined
+                <SpaceLinks
+                    analyticsBG={this.props.analyticsBG}
+                    inviteLinks={this.state.inviteLinks}
+                    loadState={this.state.inviteLinksLoadState}
+                    copyLink={(link) =>
+                        this.processEvent('copyInviteLink', { link })
                     }
-                    {...this.props}
+                    isPageLink={this.props.listData.type === 'page-link'}
                 />
+                <SpaceEmailInvites {...this.props} />
             </ContextMenuContainer>
         )
     }
