@@ -34,7 +34,7 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
@@ -78,6 +78,7 @@ class SpacePicker extends StatefulUIElement<
     private editMenuRef = React.createRef<SpaceEditMenu>()
     private contextMenuBtnRef = React.createRef<HTMLDivElement>()
     private editMenuBtnRef = React.createRef<HTMLDivElement>()
+    private extraMenuBtnRef = React.createRef<HTMLDivElement>()
     private goToButtonRef = React.createRef<HTMLDivElement>()
 
     constructor(props: Props) {
@@ -281,6 +282,7 @@ class SpacePicker extends StatefulUIElement<
                 contextMenuBtnRef={this.contextMenuBtnRef}
                 goToButtonRef={this.goToButtonRef}
                 editMenuBtnRef={this.editMenuBtnRef}
+                extraMenuBtnRef={this.extraMenuBtnRef}
                 onContextMenuBtnPress={
                     entry.creator?.id === this.state.currentUser?.id
                         ? () =>

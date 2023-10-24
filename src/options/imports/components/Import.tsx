@@ -79,6 +79,7 @@ class Import extends React.PureComponent<Props> {
         customTagsObsidian: '',
         filterTagsLogseq: '',
         filterTagsObsidian: '',
+        PKMSYNCremovewarning: false,
     }
 
     async componentDidMount(): Promise<void> {
@@ -239,6 +240,15 @@ class Import extends React.PureComponent<Props> {
                 PKMSYNCcustomTagsLogseq: customSyncTagDefault,
             })
         }
+        let PKMSYNCremovewarning = await browser.storage.local.get(
+            'PKMSYNCremovewarning',
+        )
+
+        if (PKMSYNCremovewarning.PKMSYNCremovewarning == null) {
+            await browser.storage.local.set({
+                PKMSYNCremovewarning: false,
+            })
+        }
 
         // Store the current state of the customTagsObsidian to the local storage if it returns null
         if (PKMSYNCcustomTagsObsidian.PKMSYNCcustomTagsObsidian == null) {
@@ -267,6 +277,8 @@ class Import extends React.PureComponent<Props> {
             customTagsObsidian:
                 customTagsObsidian.PKMSYNCcustomTagsObsidian ??
                 customSyncTagDefault,
+            PKMSYNCremovewarning:
+                PKMSYNCremovewarning.PKMSYNCremovewarning ?? true,
             customTagsLogseq:
                 customTagsLogseq.PKMSYNCcustomTagsLogseq ??
                 customSyncTagDefault,
@@ -590,25 +602,25 @@ class Import extends React.PureComponent<Props> {
                                                 </SettingsValueBox>
                                             </SettingsEntry>
                                         </TooltipBox>
-                                        {/* <SettingsEntry>
+                                        <SettingsEntry>
                                             <Checkbox
-                                                label="Sync only annotated pages"
+                                                label="Remove warning block"
                                                 isChecked={
-                                                    this.state
-                                                        .syncOnlyAnnotatedPagesLogseq
+                                                    !this.state
+                                                        .PKMSYNCremovewarning
                                                 }
                                                 handleChange={async (event) => {
                                                     this.setState({
-                                                        syncOnlyAnnotatedPagesLogseq: (event.target as HTMLInputElement)
+                                                        PKMSYNCremovewarning: !(event.target as HTMLInputElement)
                                                             .checked,
                                                     })
                                                     browser.storage.local.set({
-                                                        PKMSYNCsyncOnlyAnnotatedPagesLogseq: (event.target as HTMLInputElement)
+                                                        PKMSYNCremovewarning: !(event.target as HTMLInputElement)
                                                             .checked,
                                                     })
                                                 }}
                                             />
-                                        </SettingsEntry> */}
+                                        </SettingsEntry>
                                     </SettingsContainer>
                                 </>
                             ) : this.state.serverOnline ? (
@@ -925,25 +937,25 @@ class Import extends React.PureComponent<Props> {
                                                 </SettingsValueBox>
                                             </SettingsEntry>
                                         </TooltipBox>
-                                        {/* <SettingsEntry>
+                                        <SettingsEntry>
                                             <Checkbox
-                                                label="Sync only annotated pages"
+                                                label="Remove warning block"
                                                 isChecked={
                                                     this.state
-                                                        .syncOnlyAnnotatedPagesObsidian
+                                                        .PKMSYNCremovewarning
                                                 }
                                                 handleChange={async (event) => {
                                                     this.setState({
-                                                        syncOnlyAnnotatedPagesObsidian: (event.target as HTMLInputElement)
+                                                        PKMSYNCremovewarning: (event.target as HTMLInputElement)
                                                             .checked,
                                                     })
                                                     browser.storage.local.set({
-                                                        PKMSYNCsyncOnlyAnnotatedPagesObsidian: (event.target as HTMLInputElement)
+                                                        PKMSYNCremovewarning: (event.target as HTMLInputElement)
                                                             .checked,
                                                     })
                                                 }}
                                             />
-                                        </SettingsEntry> */}
+                                        </SettingsEntry>
                                     </SettingsContainer>
                                 </>
                             ) : this.state.serverOnline ? (

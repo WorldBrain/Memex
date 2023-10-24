@@ -13,6 +13,7 @@ export class PKMSyncBackgroundModule {
     remoteFunctions: PkmSyncInterface
 
     backendNew: MemexLocalBackend
+    PKMSYNCremovewarning = true
 
     constructor() {
         this.backendNew = new MemexLocalBackend({
@@ -24,6 +25,12 @@ export class PKMSyncBackgroundModule {
                 if (await this.backendNew.isConnected()) {
                     const bufferedItems = await this.getBufferedItems()
                     bufferedItems.push(item)
+                    const PKMSYNCremovewarning = await browser.storage.local.get(
+                        'PKMSYNCremovewarning',
+                    )
+
+                    this.PKMSYNCremovewarning =
+                        PKMSYNCremovewarning.PKMSYNCremovewarning
 
                     for (const item of bufferedItems) {
                         await this.processChanges(item, checkForFilteredSpaces)
@@ -243,7 +250,7 @@ export class PKMSyncBackgroundModule {
 
         if (!onlyParenthesisRemoval) {
             // Remove any characters that are not allowed in filenames and replace them with hyphens
-            const illegalCharacters = /[#%&{}\\<>?/$!'"@+`|=]/g
+            const illegalCharacters = /[#%&{}\\<>?:/$!'"@+`|=]/g
             fileName = fileName.replace(illegalCharacters, '-')
         }
         fileName = fileName.trim()
@@ -809,8 +816,9 @@ export class PKMSyncBackgroundModule {
             creationDateLine = `Created at: ${createdWhen}\n`
             spacesLine = pageSpaces ? `Spaces: \n${pageSpaces}` : ''
             pageSeparator = '---\n'
-            warning =
-                '```\n❗️You can edit this file, though be aware that updates via Memex to an individual highlight will overwrite the changes you made to it in here. For feedback, go to memex.garden/chatSupport.\n```\n'
+            warning = !this.PKMSYNCremovewarning
+                ? '```\n❗️You can edit this file, though be aware that updates via Memex to an individual highlight will overwrite the changes you made to it in here. For feedback, go to memex.garden/chatSupport.\n```\n'
+                : ''
             return (
                 pageSeparator +
                 titleLine +
@@ -828,8 +836,9 @@ export class PKMSyncBackgroundModule {
             creationDateLine = `createdat:: ${createdWhen}\n`
 
             spacesLine = pageSpaces ? `spaces:: ${pageSpaces}\n` : ''
-            warning =
-                '- ```\n❗️You can edit this file, though be aware that updates via Memex to an individual highlight will overwrite the changes you made to it in here. For feedback, go to memex.garden/chatSupport.\n```\n'
+            warning = !this.PKMSYNCremovewarning
+                ? '- ```\n❗️You can edit this file, though be aware that updates via Memex to an individual highlight will overwrite the changes you made to it in here. For feedback, go to memex.garden/chatSupport.\n```\n'
+                : ''
 
             return titleLine + urlLine + creationDateLine + spacesLine + warning
         }

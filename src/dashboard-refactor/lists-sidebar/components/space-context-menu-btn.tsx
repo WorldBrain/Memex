@@ -22,6 +22,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
     private toggleMenu = (e) => {
         this.props.toggleMenu(e)
         e.stopPropagation()
+        e.preventDefault()
 
         return
     }

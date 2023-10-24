@@ -215,8 +215,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     immediatelyShareNotes: boolean
     pageHasNetworkAnnotations: boolean
     hasFeedActivity?: boolean
-    showSharePageTooltip: boolean
-    selectedListForShareMenu: UnifiedList['unifiedId'] | null
+    selectedShareMenuPageLinkList: UnifiedList['unifiedId'] | null
     /**
      * In the case of a page being opened from the web UI for a page link, data
      * may need to be manually pulled as sync might not have finished by the time the
@@ -363,7 +362,7 @@ interface SidebarEvents {
 
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     openEditMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
-    openPageListMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
+    closePageLinkShareMenu: null
     editListName: {
         unifiedListId: UnifiedList['unifiedId']
         localId: number

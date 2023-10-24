@@ -200,12 +200,12 @@ const LabelCheck = styled.span<{ isChecked; mode; size; checkBoxColor }>`
         css<any>`
             background-color: ${(props) =>
                 props.isChecked
-                    ? props.theme.colors.greyScale4
-                    : props.theme.colors.greyScale3};
+                    ? props.theme.colors.greyScale5
+                    : props.theme.colors.greyScale4};
             border-color: ${(props) =>
                 props.isChecked
-                    ? props.theme.colors.greyScale4
-                    : props.theme.colors.greyScale3};
+                    ? props.theme.colors.greyScale5
+                    : props.theme.colors.greyScale4};
         `};
 `
 

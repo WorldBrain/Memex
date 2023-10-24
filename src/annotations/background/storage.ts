@@ -523,7 +523,7 @@ export default class AnnotationStorage extends StorageModule {
                     .findOneObject<{ time: string }>({
                         url: normalizeUrl(url),
                     })
-                const pageDate = pageVisitStorage.time
+                const pageDate = pageVisitStorage?.time ?? createdWhen
 
                 const pageDataStorage = await this.options.storageManager
                     .collection('pages')
@@ -534,11 +534,11 @@ export default class AnnotationStorage extends StorageModule {
                 const annotationData = {
                     annotationId: url,
                     pageTitle: pageTitle,
-                    body: body,
-                    comment: comment,
+                    body: body ?? '',
+                    comment: comment ?? '',
                     createdWhen: createdWhen,
                     pageCreatedWhen: pageDate,
-                    pageUrl: pageDataStorage.fullUrl ?? pageUrl,
+                    pageUrl: pageDataStorage?.fullUrl ?? pageUrl,
                 }
 
                 shareAnnotationWithPKM(
