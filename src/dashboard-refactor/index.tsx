@@ -67,6 +67,7 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import BulkEditWidget from 'src/bulk-edit'
+import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 
 const memexIconDarkMode = browser.runtime.getURL('img/memexIconDarkMode.svg')
 const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
@@ -1599,6 +1600,59 @@ export class DashboardContainer extends StatefulUIElement<
                         bulkDeleteLoadingState={
                             this.state.bulkDeleteLoadingState
                         }
+                        bulkEditSpacesLoadingState={
+                            this.state.bulkEditSpacesLoadingState
+                        }
+                        spacePicker={() => {
+                            return (
+                                <SpacePicker
+                                    authBG={this.props.authBG}
+                                    spacesBG={this.props.listsBG}
+                                    localStorageAPI={this.props.localStorage}
+                                    contentSharingBG={this.props.contentShareBG}
+                                    analyticsBG={this.props.analyticsBG}
+                                    annotationsCache={
+                                        this.props.annotationsCache
+                                    }
+                                    pageActivityIndicatorBG={
+                                        this.props.pageActivityIndicatorBG
+                                    }
+                                    selectEntry={async (listId) => {
+                                        await this.processEvent(
+                                            'setBulkEditSpace',
+                                            { listId: listId },
+                                        )
+                                    }}
+                                    unselectEntry={null}
+                                    createNewEntry={async (name) => {
+                                        const listId = await this.createNewListViaPicker(
+                                            name,
+                                        )
+                                        // await this.props.annotationsCache.addList(
+                                        //     {
+                                        //         name,
+                                        //         localId: listId,
+                                        //         unifiedAnnotationIds: [],
+                                        //         hasRemoteAnnotationsToLoad: false,
+                                        //         creator: {
+                                        //             id: this.state.currentUser
+                                        //                 .id,
+                                        //             type: 'user-reference',
+                                        //         },
+                                        //         type: 'user-list',
+                                        //     },
+                                        // )
+                                        await this.processEvent(
+                                            'setBulkEditSpace',
+                                            { listId: listId },
+                                        )
+                                        return listId
+                                    }}
+                                    width={'300px'}
+                                    autoFocus={false}
+                                />
+                            )
+                        }}
                     />
                 </MainContainer>
             </Container>

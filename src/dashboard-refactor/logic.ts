@@ -292,6 +292,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             themeVariant: null,
             bulkSelectedUrls: null,
             bulkDeleteLoadingState: 'pristine',
+            bulkEditSpacesLoadingState: 'pristine',
             modals: {
                 showLogin: false,
                 showSubscription: false,
@@ -921,17 +922,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         let searchPosition = 0
         let searchFilters: UIMutation<State['searchFilters']> = {
             skip: { $set: searchPosition },
+            limit: { $set: 100 },
         }
         let searchState = this.withMutation(previousState, {
             searchFilters,
         })
+
         let selection = []
         let result = await this.options.searchBG.searchPages(
             stateToSearchParams(searchState, this.options.annotationsCache),
         )
         selection.push(...result.docs)
         while (!result.resultsExhausted) {
-            searchPosition += 10
+            searchPosition += 100
             searchFilters = {
                 skip: { $set: searchPosition },
             }
@@ -983,6 +986,70 @@ export class DashboardLogic extends UILogic<State, Events> {
             bulkSelectedUrls: { $set: [] },
         })
         await clearBulkEditItems()
+    }
+    setBulkEditSpace: EventHandler<'setBulkEditSpace'> = async ({
+        previousState,
+        event,
+    }) => {
+        // const listData = getListData(event.listId, previousState, {
+        //     mustBeLocal: true,
+        //     source: 'setPageLists',
+        // })
+
+        this.emitMutation({
+            bulkEditSpacesLoadingState: { $set: 'running' },
+        })
+
+        const selectedItems = await getBulkEditItems()
+
+        for (let item of selectedItems) {
+            await this.options.listsBG.updateListForPage({
+                url: 'https://' + item.url,
+                added: event.listId,
+                skipPageIndexing: true,
+            })
+
+            try {
+                const unifiedListId = this.options.annotationsCache.getListByLocalId(
+                    event.listId,
+                )
+
+                const calcNextLists = updatePickerValues({
+                    added: unifiedListId.unifiedId,
+                })
+                const nextPageListIds = calcNextLists(
+                    previousState.searchResults.pageData.byId[item.url].lists,
+                )
+
+                await this.options.annotationsCache.setPageData(
+                    item.url,
+                    nextPageListIds,
+                )
+
+                this.emitMutation({
+                    searchResults: {
+                        pageData: {
+                            byId: {
+                                [item.url]: {
+                                    lists: { $set: nextPageListIds },
+                                },
+                            },
+                        },
+                    },
+                })
+            } catch (e) {}
+        }
+
+        this.emitMutation({
+            bulkEditSpacesLoadingState: { $set: 'pristine' },
+        })
+
+        // await this.options.listsBG.updateListForPage({
+        //     url: event.fullPageUrl,
+        //     added: event.added && listData.localId,
+        //     deleted: event.deleted && listData.localId,
+        //     skipPageIndexing: true,
+        // })
     }
 
     // leaving this here for now in order to finalise the feature for handling the race condition rendering

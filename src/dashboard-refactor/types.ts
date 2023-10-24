@@ -62,6 +62,7 @@ export interface RootState {
     multiSelectResults?: any[]
     bulkDeleteLoadingState?: TaskState
     bulkSelectedUrls: string[]
+    bulkEditSpacesLoadingState?: TaskState
 }
 
 export type Events = UIEvent<
@@ -156,6 +157,7 @@ export type DashboardModalsEvents = UIEvent<{
     setSpaceSidebarWidth: { width: number }
     selectAllCurrentItems: null
     clearBulkSelection: null
+    setBulkEditSpace: { listId: number }
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']

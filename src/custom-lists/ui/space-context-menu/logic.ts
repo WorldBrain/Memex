@@ -2,24 +2,16 @@ import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { TaskState } from 'ui-logic-core/lib/types'
-import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
 import {
     getListShareUrl,
     getSinglePageShareUrl,
 } from 'src/content-sharing/utils'
-import {
-    SharedListEmailInvite,
-    SharedListRoleID,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
-import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import {
-    NormalizedState,
-    initNormalizedState,
-} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 export interface Dependencies {
     contentSharingBG: ContentSharingInterface
@@ -47,43 +39,24 @@ export type Event = UIEvent<{
     cancelSpaceNameEdit: null
     confirmSpaceNameEdit: null
     updateSpaceName: { name: string }
-    updateEmailInviteInputValue: { value: string }
-    updateEmailInviteInputRole: { role: SharedListRoleID }
     updateSpacePrivacy: { isPrivate: boolean }
-    inviteViaEmail: { now?: number }
-    deleteEmailInvite: { key: string }
-    copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
     confirmSpaceDelete: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
+    copyInviteLink: { link: string }
     cancelDeleteSpace: null
-    setEmailInvitesHoverState: { id: AutoPk }
 }>
 
 export interface State {
+    inviteLinks: InviteLink[]
+    inviteLinksLoadState: TaskState
+
     loadState: TaskState
     ownershipLoadState: TaskState
     listShareLoadState: TaskState
-    inviteLinksLoadState: TaskState
-    emailInvitesLoadState: TaskState
-    emailInvitesCreateState: TaskState
-    emailInvitesDeleteState: TaskState
-    emailInviteInputRole:
-        | SharedListRoleID.Commenter
-        | SharedListRoleID.ReadWrite
-    emailInviteInputValue: string
-    emailInvites: NormalizedState<
-        SharedListEmailInvite & {
-            id: AutoPk
-            sharedListKey: AutoPk
-            roleID: SharedListRoleID
-        }
-    >
-    emailInvitesHoverState: AutoPk | null
-    inviteLinks: InviteLink[]
     showSuccessMsg: boolean
-    mode: 'confirm-space-delete' | 'followed-space' | null
-    nameValue: string
     showSaveButton: boolean
+    nameValue: string
+    mode: 'confirm-space-delete' | 'followed-space' | null
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -104,42 +77,26 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         ownershipLoadState: 'pristine',
         listShareLoadState: 'pristine',
         inviteLinksLoadState: 'pristine',
-        emailInvitesLoadState: 'pristine',
-        emailInvitesCreateState: 'pristine',
-        emailInvitesDeleteState: 'pristine',
-        emailInviteInputRole: SharedListRoleID.Commenter,
-        emailInviteInputValue: '',
-        emailInvites: initNormalizedState(),
         inviteLinks: [],
         nameValue: this.dependencies.listData.name,
         showSuccessMsg: false,
         mode: null,
         showSaveButton: false,
-        emailInvitesHoverState: null,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        let state = previousState
         await loadInitial(this, async () => {
             if (this.dependencies.listData.remoteId == null) {
-                await this.processUIEvent('shareSpace', {
-                    event: { privacyStatus: 'private' },
-                    previousState,
-                })
+                await this._shareSpace('private')
             }
-            if (state == null || state.mode !== 'followed-space') {
-                await Promise.all([
-                    this.loadInviteLinks(),
-                    this.loadEmailInvites(),
-                ])
-            }
+            await this.loadInviteLinks()
             if (this.dependencies.loadOwnershipData) {
-                state = await this.loadSpaceOwnership(previousState)
+                await this.loadSpaceOwnership()
             }
         })
     }
 
-    private async loadSpaceOwnership(previousState: State): Promise<State> {
+    private async loadSpaceOwnership() {
         const { listData, spacesBG } = this.dependencies
         const mutation: UIMutation<State> = {}
 
@@ -160,40 +117,11 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             }
 
             mutation.mode = {
-                $set: listDataWithOwnership.isOwned ? null : 'followed-space',
+                $set: listDataWithOwnership?.isOwned ? null : 'followed-space',
             }
         })
 
         this.emitMutation(mutation)
-        return this.withMutation(previousState, mutation)
-    }
-
-    private async loadEmailInvites() {
-        const { listData, contentSharingBG } = this.dependencies
-
-        await executeUITask(this, 'emailInvitesLoadState', async () => {
-            if (listData.remoteId == null) {
-                return
-            }
-
-            const emailInvites = await contentSharingBG.loadListEmailInvites({
-                listReference: {
-                    type: 'shared-list-reference',
-                    id: listData.remoteId,
-                },
-            })
-            if (emailInvites.status !== 'success') {
-                throw new Error('Failed to load email invites for list')
-            }
-            this.emitMutation({
-                emailInvites: {
-                    $set: initNormalizedState({
-                        seedData: emailInvites.data,
-                        getId: (invite) => invite.sharedListKey.toString(),
-                    }),
-                },
-            })
-        })
     }
 
     private async loadInviteLinks() {
@@ -263,7 +191,18 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
     }
 
+    copyInviteLink: EventHandler<'copyInviteLink'> = async ({
+        previousState,
+        event,
+    }) => {
+        await this.dependencies.copyToClipboard(event.link)
+    }
+
     shareSpace: EventHandler<'shareSpace'> = async ({ event }) => {
+        await this._shareSpace(event.privacyStatus)
+    }
+
+    private async _shareSpace(privacyStatus: 'private' | 'shared') {
         const {
             listData,
             onSpaceShare,
@@ -283,7 +222,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 shareResult.annotationLocalToRemoteIdsDict,
             )
 
-            if (event.privacyStatus === 'private') {
+            if (privacyStatus === 'private') {
                 await this.dependencies.onSetSpacePrivate(true)
             }
 
@@ -300,7 +239,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
 
         await executeUITask(this, 'listShareLoadState', async () => {
-            if (event.privacyStatus === 'private') {
+            if (privacyStatus === 'private') {
                 await this.dependencies.onSetSpacePrivate(true)
             }
             await contentSharingBG.waitForListShare({
@@ -326,13 +265,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
             { localListId: listData.localId },
         )
     }
-    setEmailInvitesHoverState: EventHandler<
-        'setEmailInvitesHoverState'
-    > = async ({ event }) => {
-        this.emitMutation({
-            emailInvitesHoverState: { $set: event.id },
-        })
-    }
 
     intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
         event,
@@ -356,152 +288,11 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         })
     }
 
-    updateEmailInviteInputValue: EventHandler<
-        'updateEmailInviteInputValue'
-    > = async ({ event }) => {
-        this.emitMutation({ emailInviteInputValue: { $set: event.value } })
-    }
-
-    updateEmailInviteInputRole: EventHandler<
-        'updateEmailInviteInputRole'
-    > = async ({ event }) => {
-        if (
-            event.role !== SharedListRoleID.Commenter &&
-            event.role !== SharedListRoleID.ReadWrite
-        ) {
-            throw new Error(
-                'Cannot set invite role other than Commenter and ReadWrite',
-            )
-        }
-        this.emitMutation({ emailInviteInputRole: { $set: event.role } })
-    }
-
     updateSpacePrivacy: EventHandler<'updateSpacePrivacy'> = async ({
         event,
         previousState,
     }) => {
-        await Promise.all([
-            event.isPrivate &&
-            previousState.emailInvitesLoadState === 'pristine'
-                ? this.loadEmailInvites()
-                : Promise.resolve(),
-            this.dependencies.onSetSpacePrivate(event.isPrivate),
-        ])
-    }
-
-    inviteViaEmail: EventHandler<'inviteViaEmail'> = async ({
-        event,
-        previousState,
-    }) => {
-        const now = event.now ?? Date.now()
-        const email = previousState.emailInviteInputValue.trim()
-        const roleID = previousState.emailInviteInputRole
-
-        const prevInviteCount = previousState.emailInvites.allIds.length
-        const tmpId = `tmp-invite-id-${prevInviteCount}`
-        this.emitMutation({
-            emailInviteInputValue: { $set: '' },
-            emailInvites: {
-                allIds: { $push: [tmpId] },
-                byId: {
-                    [tmpId]: {
-                        $set: {
-                            email,
-                            roleID,
-                            id: tmpId,
-                            createdWhen: now,
-                            sharedListKey: null,
-                        },
-                    },
-                },
-            },
-        })
-        await executeUITask(this, 'emailInvitesCreateState', async () => {
-            let remoteId = this.dependencies.listData.remoteId
-
-            if (remoteId == null) {
-                remoteId = await this.dependencies.contentSharingBG.getRemoteListId(
-                    {
-                        localListId: this.dependencies.listData.localId,
-                    },
-                )
-            }
-
-            const result = await this.dependencies.contentSharingBG.createListEmailInvite(
-                {
-                    now,
-                    email,
-                    roleID,
-                    listId: remoteId,
-                },
-            )
-            if (result.status === 'success') {
-                // Replace temp emailInvites state with the full one
-                this.emitMutation({
-                    emailInvites: {
-                        allIds: {
-                            [prevInviteCount]: { $set: result.keyString },
-                        },
-                        byId: {
-                            $unset: [tmpId],
-                            [result.keyString]: {
-                                $set: {
-                                    email,
-                                    roleID,
-                                    createdWhen: now,
-                                    id: result.keyString,
-                                    sharedListKey: result.keyString,
-                                },
-                            },
-                        },
-                    },
-                })
-            } else if (result.status === 'permission-denied') {
-                this.emitMutation({
-                    emailInvites: {
-                        byId: { $unset: [tmpId] },
-                        allIds: {
-                            $apply: (prev) =>
-                                prev.filter((ids) => ids !== tmpId),
-                        },
-                    },
-                })
-                throw new Error('Email invite encountered an error')
-            }
-        })
-    }
-
-    deleteEmailInvite: EventHandler<'deleteEmailInvite'> = async ({
-        event,
-        previousState,
-    }) => {
-        await executeUITask(this, 'emailInvitesDeleteState', async () => {
-            if (previousState.emailInvites.byId[event.key] == null) {
-                throw new Error(
-                    'Attempted to delete email invite that is not in state',
-                )
-            }
-
-            this.emitMutation({
-                emailInvites: {
-                    byId: { $unset: [event.key] },
-                    allIds: {
-                        $apply: (prev) =>
-                            prev.filter((ids) => ids !== event.key),
-                    },
-                },
-            })
-            const result = await this.dependencies.contentSharingBG.deleteListEmailInvite(
-                {
-                    keyString: event.key,
-                },
-            )
-            if (result.status !== 'success') {
-                throw new Error(
-                    'Email invite deletion encountered a server-side error',
-                )
-            }
-        })
+        await this.dependencies.onSetSpacePrivate(event.isPrivate)
     }
 
     cancelSpaceNameEdit: EventHandler<'cancelSpaceNameEdit'> = async ({}) => {
@@ -519,49 +310,5 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         if (newName.length && newName !== oldName) {
             this.dependencies.onConfirmSpaceNameEdit(newName)
         }
-    }
-
-    copyInviteLink: EventHandler<'copyInviteLink'> = async ({
-        previousState,
-        event,
-    }) => {
-        const inviteLink = previousState.inviteLinks[event.linkIndex]
-        if (inviteLink == null) {
-            throw new Error('Link to copy does not exist - cannot copy')
-        }
-
-        await this.dependencies.copyToClipboard(inviteLink.link)
-
-        const showInviteLinkCopyMsg = (showCopyMsg: boolean) =>
-            this.emitMutation({
-                inviteLinks: {
-                    [event.linkIndex]: {
-                        showCopyMsg: { $set: showCopyMsg },
-                    },
-                },
-            })
-
-        showInviteLinkCopyMsg(true)
-
-        if (this.dependencies.analyticsBG) {
-            try {
-                await trackCopyInviteLink(this.dependencies.analyticsBG, {
-                    inviteType:
-                        event.linkIndex === 0 ? 'reader' : 'contributer',
-                    linkType:
-                        event.linkType === 'page-link'
-                            ? 'page-link'
-                            : 'space-link',
-                    source: 'extension',
-                })
-            } catch (error) {
-                console.error(`Error tracking space create event', ${error}`)
-            }
-        }
-
-        setTimeout(
-            () => showInviteLinkCopyMsg(false),
-            SpaceContextMenuLogic.MSG_TIMEOUT,
-        )
     }
 }

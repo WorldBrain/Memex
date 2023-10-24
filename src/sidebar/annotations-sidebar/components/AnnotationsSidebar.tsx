@@ -125,7 +125,6 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
-    selectedListForShareMenu: UnifiedList['unifiedId']
     renderAICounter: (position) => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
@@ -172,7 +171,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     openEditMenuForList: (
         unifiedListId: UnifiedList['unifiedId'] | null,
     ) => void
-    openPageListMenuForList: () => void
+    closePageLinkShareMenu: () => void
     openWebUIPage: (unifiedListId: UnifiedList['unifiedId']) => void
     onShareAllNotesClick: () => void
     onCopyBtnClick: () => void
@@ -218,7 +217,6 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     ) => void
     setSpaceTitleEditValue: (value) => void
     createNewNoteFromAISummary: (summary) => void
-    showSharePageTooltip: boolean
     events: AnnotationsSidebarInPageEventEmitter
     initGetReplyEditProps: (
         sharedListReference: SharedListReference,
@@ -375,7 +373,7 @@ export class AnnotationsSidebar extends React.Component<
         if (
             this.props.lists.byId[this.props.selectedListId].name !==
                 this.props.spaceTitleEditValue &&
-            this.props.spaceTitleEditValue.length > 0
+            this.props.spaceTitleEditValue?.length > 0
         ) {
             this.props.updateListName(
                 this.props.lists.byId[this.props.selectedListId].unifiedId,
@@ -585,10 +583,10 @@ export class AnnotationsSidebar extends React.Component<
 
         let othersCounter = annotationsData.filter((annotation) => {
             return annotation.creator?.id !== this.props.currentUser?.id
-        }).length
+        })?.length
         let ownCounter = annotationsData.filter((annotation) => {
             return annotation.creator?.id === this.props.currentUser?.id
-        }).length
+        })?.length
 
         let allCounter = othersCounter + ownCounter
 
@@ -617,7 +615,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         let listAnnotations: JSX.Element | JSX.Element[]
-        if (!annotationsData.length) {
+        if (!annotationsData?.length) {
             listAnnotations = (
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
@@ -668,7 +666,7 @@ export class AnnotationsSidebar extends React.Component<
                 )
                 const hasReplies =
                     conversation?.thread != null ||
-                    conversation?.replies.length > 0
+                    conversation?.replies?.length > 0
 
                 // If annot is owned by the current user (locally available), we allow a whole bunch of other functionality
                 const ownAnnotationProps: Partial<AnnotationEditableProps> = {}
@@ -730,7 +728,7 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.activeShareMenuNoteId ===
                             annotation.unifiedId
                                 ? 10000
-                                : this.props.annotations.allIds.length - i
+                                : this.props.annotations.allIds?.length - i
                         }
                         className={'AnnotationBox'}
                         id={annotation.unifiedId}
@@ -1206,6 +1204,7 @@ export class AnnotationsSidebar extends React.Component<
             </PopoutBox>
         )
     }
+
     private renderEditMenu(listData: UnifiedList, ref: any) {
         if (this.props.activeListEditMenuId !== listData.unifiedId) {
             return
@@ -1227,13 +1226,19 @@ export class AnnotationsSidebar extends React.Component<
             </PopoutBox>
         )
     }
-    private renderPageLinkMenu(listData: UnifiedList) {
-        let selectedList
-        if (this.props.selectedListForShareMenu != null) {
-            selectedList = this.props.annotationsCache.lists.byId[
-                this.props.selectedListForShareMenu
-            ]
+
+    private renderPageLinkMenu() {
+        if (this.props.selectedShareMenuPageLinkList == null) {
+            console.warn(
+                'Attempted to open page link share menu for unselected list',
+            )
+            return false
         }
+
+        const selectedList = this.props.annotationsCache.lists.byId[
+            this.props.selectedShareMenuPageLinkList
+        ]
+
         return (
             <PopoutBox
                 strategy="fixed"
@@ -1241,11 +1246,9 @@ export class AnnotationsSidebar extends React.Component<
                 offsetX={10}
                 offsetY={0}
                 targetElementRef={this.sharePageLinkButtonRef.current}
-                closeComponent={() => {
-                    this.props.openPageListMenuForList()
-                }}
+                closeComponent={this.props.closePageLinkShareMenu}
             >
-                {!this.props.selectedListForShareMenu || !selectedList ? (
+                {!this.props.selectedShareMenuPageLinkList || !selectedList ? (
                     <LoadingIndicatorContainer height="180px" width="330px">
                         <LoadingIndicatorStyled size={20} />
                     </LoadingIndicatorContainer>
@@ -1270,7 +1273,7 @@ export class AnnotationsSidebar extends React.Component<
             : undefined
         const allLists = normalizedStateToArray(lists).filter(
             (listData) =>
-                listData.unifiedAnnotationIds.length > 0 ||
+                listData.unifiedAnnotationIds?.length > 0 ||
                 listData.hasRemoteAnnotationsToLoad ||
                 (listData.type === 'page-link' &&
                     listData.normalizedPageUrl === normalizedPageUrl) ||
@@ -1278,7 +1281,7 @@ export class AnnotationsSidebar extends React.Component<
                 pageActiveListIds.includes(listData.unifiedId),
         )
 
-        if (allLists.length === 0) {
+        if (allLists?.length === 0) {
             return (
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
@@ -1309,9 +1312,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Page Links{' '}
-                        <SpacesCounter>{pageLinkLists.length}</SpacesCounter>
+                        <SpacesCounter>{pageLinkLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {pageLinkLists.length > 0 && (
+                    {pageLinkLists?.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {pageLinkLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
@@ -1328,9 +1331,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         My Spaces{' '}
-                        <SpacesCounter>{myLists.length}</SpacesCounter>
+                        <SpacesCounter>{myLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {myLists.length > 0 ? (
+                    {myLists?.length > 0 ? (
                         <SpaceTypeSectionContainer>
                             {myLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
@@ -1347,9 +1350,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Followed Spaces{' '}
-                        <SpacesCounter>{followedLists.length}</SpacesCounter>
+                        <SpacesCounter>{followedLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {followedLists.length > 0 ? (
+                    {followedLists?.length > 0 ? (
                         <SpaceTypeSectionContainer>
                             {followedLists.map((listData) =>
                                 this.renderSpacesItem(
@@ -1364,9 +1367,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Joined Spaces{' '}
-                        <SpacesCounter>{joinedLists.length}</SpacesCounter>
+                        <SpacesCounter>{joinedLists?.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {joinedLists.length > 0 ? (
+                    {joinedLists?.length > 0 ? (
                         <SpaceTypeSectionContainer>
                             {joinedLists.map((listData) =>
                                 this.renderSpacesItem(
@@ -1660,7 +1663,7 @@ export class AnnotationsSidebar extends React.Component<
                     <QueryContainer
                         AIDropDownShown={
                             this.props.showAISuggestionsDropDown &&
-                            this.props.AIsuggestions.length > 0
+                            this.props.AIsuggestions?.length > 0
                         }
                     >
                         <TextField
@@ -1709,13 +1712,13 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             actionButton={
                                 this.props.prompt &&
-                                this.props.prompt.length > 0 &&
+                                this.props.prompt?.length > 0 &&
                                 addPromptButton(this.props.prompt)
                             }
                             autoFocus={this.props.activeTab === 'summary'}
                         />
                         {this.props.showAISuggestionsDropDown &&
-                            this.props.AIsuggestions.length > 0 && (
+                            this.props.AIsuggestions?.length > 0 && (
                                 <SuggestionsList {...this.props} />
                             )}
                     </QueryContainer>
@@ -1839,44 +1842,49 @@ export class AnnotationsSidebar extends React.Component<
                                         General Question
                                     </SelectionPill>
                                 </TooltipBox> */}
-                                <TooltipBox
-                                    tooltipText={
-                                        <>
-                                            For performance we usually fetch the
-                                            text via our servers but sometimes
-                                            we can't reach it. E.g. if you are
-                                            behind a paywall.
-                                            <br /> Use this to fetch the content
-                                            from here.
-                                        </>
-                                    }
-                                    placement="bottom"
-                                    width="150px"
-                                >
-                                    <Checkbox
-                                        key={1}
-                                        id={'1'}
-                                        isChecked={this.props.fetchLocalHTML}
-                                        handleChange={() =>
-                                            this.props.fetchLocalHTML
-                                                ? this.props.changeFetchLocalHTML(
-                                                      false,
-                                                  )
-                                                : this.props.changeFetchLocalHTML(
-                                                      true,
-                                                  )
+                                {this.props.sidebarContext === 'in-page' && (
+                                    <TooltipBox
+                                        tooltipText={
+                                            <>
+                                                For performance we usually fetch
+                                                the text via our servers but
+                                                sometimes we can't reach it.
+                                                E.g. if you are behind a
+                                                paywall.
+                                                <br /> Use this to fetch the
+                                                content from here.
+                                            </>
                                         }
-                                        // isDisabled={!this.state.shortcutsEnabled}
-                                        name={'Use Local Content'}
-                                        label={'Use Local Content'}
-                                        size={12}
-                                        fontSize={12}
-                                        checkBoxColor="black"
-                                    />
-                                </TooltipBox>
+                                        placement="bottom"
+                                        width="150px"
+                                    >
+                                        <Checkbox
+                                            key={1}
+                                            id={'1'}
+                                            isChecked={
+                                                this.props.fetchLocalHTML
+                                            }
+                                            handleChange={() =>
+                                                this.props.fetchLocalHTML
+                                                    ? this.props.changeFetchLocalHTML(
+                                                          false,
+                                                      )
+                                                    : this.props.changeFetchLocalHTML(
+                                                          true,
+                                                      )
+                                            }
+                                            // isDisabled={!this.state.shortcutsEnabled}
+                                            name={'Use Local Content'}
+                                            label={'Use Local Content'}
+                                            size={12}
+                                            fontSize={12}
+                                            checkBoxColor="black"
+                                        />
+                                    </TooltipBox>
+                                )}
                             </OptionsContainerLeft>
                             <OptionsContainerRight>
-                                {this.props.pageSummary.length > 0 && (
+                                {this.props.pageSummary?.length > 0 && (
                                     <TooltipBox
                                         tooltipText={
                                             <>
@@ -1889,8 +1897,6 @@ export class AnnotationsSidebar extends React.Component<
                                         <Icon
                                             icon={'commentAdd'}
                                             onClick={() => {
-                                                let summary = `# AI Summary\n\n ## Prompt:\n  ${this.props.prompt}\n\n ## Answer: \n ${this.props.pageSummary}`
-
                                                 this.props.createNewNoteFromAISummary(
                                                     this.props.pageSummary,
                                                 )
@@ -2114,7 +2120,7 @@ export class AnnotationsSidebar extends React.Component<
                         zIndex={
                             this.props.activeShareMenuNoteId === annot.unifiedId
                                 ? 10000
-                                : this.props.annotations.allIds.length - i
+                                : this.props.annotations.allIds?.length - i
                         }
                         className={'AnnotationBox'}
                         id={annot.unifiedId}
@@ -2249,14 +2255,14 @@ export class AnnotationsSidebar extends React.Component<
                             <NewAnnotationBoxMyAnnotations>
                                 {this.renderNewAnnotation()}
                             </NewAnnotationBoxMyAnnotations>
-                            {annots.length > 1 && (
+                            {annots?.length > 1 && (
                                 <AnnotationActions>
                                     {this.renderTopBarActionButtons()}
                                 </AnnotationActions>
                             )}
                         </TopAreaContainer>
                         {this.props.noteCreateState === 'running' ||
-                        annotations.length > 0 ? (
+                        annotations?.length > 0 ? (
                             <AnnotationContainer>
                                 {this.renderAnnotationDropdowns()}
                                 {annots}
@@ -2283,8 +2289,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderTopBarSwitcher() {
-        const listData = this.props.lists.byId[this.props.selectedListId]
-
         return (
             <TopBarContainer>
                 <TopBarTabsContainer>
@@ -2376,7 +2380,9 @@ export class AnnotationsSidebar extends React.Component<
                         iconColor="prime1"
                         fontColor="white"
                         size="medium"
-                        active={this.props.showSharePageTooltip}
+                        active={
+                            this.props.selectedShareMenuPageLinkList != null
+                        }
                         icon={
                             this.props.pageLinkCreateState === 'running' ? (
                                 <LoadingIndicator
@@ -2390,8 +2396,8 @@ export class AnnotationsSidebar extends React.Component<
                         padding={'0px 12px 0 6px'}
                         height={'30px'}
                     />
-                    {this.props.showSharePageTooltip &&
-                        this.renderPageLinkMenu(listData ?? null)}
+                    {this.props.selectedShareMenuPageLinkList != null &&
+                        this.renderPageLinkMenu()}
                 </TopBarBtnsContainer>
             </TopBarContainer>
         )
@@ -2406,7 +2412,7 @@ export class AnnotationsSidebar extends React.Component<
 
         event.stopPropagation()
         if (
-            (event.target as HTMLInputElement).value.length != null &&
+            (event.target as HTMLInputElement).value?.length != null &&
             event.key === 'Enter'
         ) {
             // this blurring is tracked and will automatically save it
@@ -3479,10 +3485,14 @@ const TopAreaContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
-    z-index: 20;
+    z-index: 1;
     padding-top: 5px;
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
+
+    &:hover{
+        z-index: 19;
+    }
 `
 
 const AnnotationActions = styled.div`

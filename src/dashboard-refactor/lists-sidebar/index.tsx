@@ -79,6 +79,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     ? () => <ActivityBeacon />
                                     : null
                             }
+                            forceRightSidePermanentDisplay
                         />
                         <StaticSidebarItem
                             icon="heartEmpty"
@@ -109,6 +110,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                       )
                                     : null
                             }
+                            forceRightSidePermanentDisplay
                         />
                         <StaticSidebarItem
                             icon="phone"

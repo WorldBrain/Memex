@@ -171,3 +171,4 @@ export const memexIconLightMode = browser.runtime.getURL(
 export const obsidianLogo = browser.runtime.getURL('/img/obsidianLogo.svg')
 export const logseqLogo = browser.runtime.getURL('/img/logseqLogo.svg')
 export const rectangleDraw = browser.runtime.getURL('/img/rectangleDraw.svg')
+export const local = browser.runtime.getURL('/img/local.svg')
