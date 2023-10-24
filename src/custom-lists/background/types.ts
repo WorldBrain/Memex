@@ -6,7 +6,6 @@ import type {
     SharedList,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { UnifiedList } from 'src/annotations/cache/types'
 
 export interface PageList {
     id: number
@@ -27,6 +26,16 @@ export interface PageListEntry {
     createdAt: Date
     listId: number
     fullUrl: string
+}
+
+export interface ListTree {
+    listId: number
+    /** A materialized path, containing IDs of all ancestors of this tree delimited by comma in order from oldest to youngest. e.g., "a,b,c" */
+    path: string
+    parentId: number | null
+    order: number
+    createdWhen: number
+    updatedWhen: number
 }
 
 export type SharedListWithAnnotations = SharedList & {

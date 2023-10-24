@@ -31,6 +31,7 @@ export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
     static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
+    static LIST_TREES_COLL = COLLECTION_NAMES.listTrees
 
     static filterOutSpecialListEntries = (entry: { listId: number }) =>
         !Object.values<number>(SPECIAL_LIST_IDS).includes(entry.listId)
@@ -63,6 +64,10 @@ export default class CustomListStorage extends StorageModule {
                 },
                 createListDescription: {
                     collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
+                    operation: 'createObject',
+                },
+                createListTree: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
                     operation: 'createObject',
                 },
                 countListEntries: {
