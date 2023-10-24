@@ -1697,10 +1697,8 @@ describe('Personal cloud translation layer', () => {
             const {
                 setups,
                 serverIdCapturer,
-                serverStorageManager,
                 getPersonalWhere,
                 personalDataChanges,
-                personalBlockStats,
                 getDatabaseContents,
                 testDownload,
                 testSyncPushTrigger,
@@ -1711,6 +1709,12 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('customLists')
                 .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.third)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1728,15 +1732,19 @@ describe('Personal cloud translation layer', () => {
                 ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalList', testLists.first.id],
                     [DataChangeType.Create, 'personalList', testLists.second.id],
+                    [DataChangeType.Create, 'personalList', testLists.third.id],
+                    [DataChangeType.Create, 'personalList', testLists.fourth.id],
                 ], { skipChanges: 0 }),
                 personalBlockStats: [],
-                personalList: [testLists.first, testLists.second],
+                personalList: [testLists.first, testLists.second, testLists.third, testLists.fourth],
             })
 
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.fourth },
             ], { skip: 0 })
             testSyncPushTrigger({ wasTriggered: true })
         })
@@ -1803,6 +1811,77 @@ describe('Personal cloud translation layer', () => {
                 ],
                 { skip: 2 },
             )
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should create custom list trees', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.third)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.second)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.third)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListTrees = remoteData.personalListTree
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalList',
+                    'personalListTree',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
+                    [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
+                    [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
+                    [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
+                ], { skipChanges: 4 }),
+                personalBlockStats: [],
+                personalList: [testLists.first, testLists.second, testLists.third, testLists.fourth],
+                personalListTree: [testListTrees.first, testListTrees.second, testListTrees.third, testListTrees.fourth],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.fourth },
+            ], { skip: 4 })
             testSyncPushTrigger({ wasTriggered: true })
         })
 
