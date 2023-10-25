@@ -2678,6 +2678,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {
                                             localId: localListId,
                                             remoteId: remoteListId,
+                                            private: false
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([
@@ -2901,6 +2902,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         personalList: personalListsA[0].id,
                                         remoteId: remoteListId,
                                         user: userId,
+                                        private: false,
                                         createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
@@ -4696,6 +4698,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         {
                                             localId: localListId,
                                             remoteId: remoteListId,
+                                            private: false
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([
@@ -5011,6 +5014,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         personalList: personalListsA[0].id,
                                         remoteId: remoteListId,
                                         user: userId,
+                                        private: false,
                                         createdByDevice: data.DEVICE_ID_A,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
