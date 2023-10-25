@@ -9,7 +9,7 @@ import {
     ContentLocatorFormat,
     FingerprintSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { buildMaterializedPath } from 'src/custom-lists/background/utils'
+import { buildMaterializedPath } from '@worldbrain/memex-common/lib/content-sharing/utils'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -377,8 +377,8 @@ export const LOCAL_TEST_DATA_V24 = {
         second: {
             id: 2,
             listId: LOCAL_LISTS_V24.second.id,
-            parentId: 1,
-            path: buildMaterializedPath(1),
+            parentId: LOCAL_LISTS_V24.first.id,
+            path: buildMaterializedPath(LOCAL_LISTS_V24.first.id),
             order: 2,
             createdWhen: 1698124786131,
             updatedWhen: 1698124786131,
@@ -386,8 +386,8 @@ export const LOCAL_TEST_DATA_V24 = {
         third: {
             id: 3,
             listId: LOCAL_LISTS_V24.third.id,
-            parentId: 1,
-            path: buildMaterializedPath(1),
+            parentId: LOCAL_LISTS_V24.first.id,
+            path: buildMaterializedPath(LOCAL_LISTS_V24.first.id),
             order: 3,
             createdWhen: 1698124786131,
             updatedWhen: 1698124786131,
@@ -395,8 +395,11 @@ export const LOCAL_TEST_DATA_V24 = {
         fourth: {
             id: 4,
             listId: LOCAL_LISTS_V24.fourth.id,
-            parentId: 3,
-            path: buildMaterializedPath(1, 3),
+            parentId: LOCAL_LISTS_V24.third.id,
+            path: buildMaterializedPath(
+                LOCAL_LISTS_V24.first.id,
+                LOCAL_LISTS_V24.third.id,
+            ),
             order: 4,
             createdWhen: 1698124786131,
             updatedWhen: 1698124786131,
@@ -1092,8 +1095,11 @@ export const REMOTE_TEST_DATA_V24 = {
             personalList: REMOTE_LISTS_V24.first.id,
             parentId: null,
             path: null,
-            order: LOCAL_TEST_DATA_V24.customListTrees.first.order,
             localId: LOCAL_TEST_DATA_V24.customListTrees.first.id,
+            localPath: LOCAL_TEST_DATA_V24.customListTrees.first.path,
+            localListId: LOCAL_TEST_DATA_V24.customListTrees.first.listId,
+            localParentId: LOCAL_TEST_DATA_V24.customListTrees.first.parentId,
+            order: LOCAL_TEST_DATA_V24.customListTrees.first.order,
             user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: LOCAL_TEST_DATA_V24.customListTrees.first.createdWhen,
@@ -1102,10 +1108,13 @@ export const REMOTE_TEST_DATA_V24 = {
         second: {
             id: 2,
             personalList: REMOTE_LISTS_V24.second.id,
-            parentId: 1,
-            path: buildMaterializedPath(1),
-            order: LOCAL_TEST_DATA_V24.customListTrees.second.order,
+            parentId: REMOTE_LISTS_V24.first.id,
+            path: buildMaterializedPath(REMOTE_LISTS_V24.first.id),
             localId: LOCAL_TEST_DATA_V24.customListTrees.second.id,
+            localPath: LOCAL_TEST_DATA_V24.customListTrees.second.path,
+            localListId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+            localParentId: LOCAL_TEST_DATA_V24.customListTrees.second.parentId,
+            order: LOCAL_TEST_DATA_V24.customListTrees.second.order,
             user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: LOCAL_TEST_DATA_V24.customListTrees.second.createdWhen,
@@ -1114,10 +1123,13 @@ export const REMOTE_TEST_DATA_V24 = {
         third: {
             id: 3,
             personalList: REMOTE_LISTS_V24.third.id,
-            parentId: 1,
-            path: buildMaterializedPath(1),
-            order: LOCAL_TEST_DATA_V24.customListTrees.third.order,
+            parentId: REMOTE_LISTS_V24.first.id,
+            path: buildMaterializedPath(REMOTE_LISTS_V24.first.id),
             localId: LOCAL_TEST_DATA_V24.customListTrees.third.id,
+            localPath: LOCAL_TEST_DATA_V24.customListTrees.third.path,
+            localListId: LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+            localParentId: LOCAL_TEST_DATA_V24.customListTrees.third.parentId,
+            order: LOCAL_TEST_DATA_V24.customListTrees.third.order,
             user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: LOCAL_TEST_DATA_V24.customListTrees.third.createdWhen,
@@ -1126,10 +1138,16 @@ export const REMOTE_TEST_DATA_V24 = {
         fourth: {
             id: 4,
             personalList: REMOTE_LISTS_V24.fourth.id,
-            parentId: 3,
-            path: buildMaterializedPath(1, 3),
-            order: LOCAL_TEST_DATA_V24.customListTrees.fourth.order,
+            parentId: REMOTE_LISTS_V24.third.id,
+            path: buildMaterializedPath(
+                REMOTE_LISTS_V24.first.id,
+                REMOTE_LISTS_V24.third.id,
+            ),
             localId: LOCAL_TEST_DATA_V24.customListTrees.fourth.id,
+            localPath: LOCAL_TEST_DATA_V24.customListTrees.fourth.path,
+            localListId: LOCAL_TEST_DATA_V24.customListTrees.fourth.listId,
+            localParentId: LOCAL_TEST_DATA_V24.customListTrees.fourth.parentId,
+            order: LOCAL_TEST_DATA_V24.customListTrees.fourth.order,
             user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             createdWhen: LOCAL_TEST_DATA_V24.customListTrees.fourth.createdWhen,
