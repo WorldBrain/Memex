@@ -6,7 +6,7 @@ import type {
     SharedList,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
-import type { UnifiedList } from 'src/annotations/cache/types'
+import type { ListShareResult } from 'src/content-sharing/background/types'
 
 export interface PageList {
     id: number
@@ -69,7 +69,11 @@ export interface RemoteCollectionsInterface {
         type?: 'page-link'
         createdAt?: Date
         dontTrack?: boolean
-    }): Promise<number>
+    }): Promise<
+        ListShareResult & {
+            localListId: number
+        }
+    >
     insertPageToList(args: {
         id: number
         url: string

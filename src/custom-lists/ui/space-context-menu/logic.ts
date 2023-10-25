@@ -5,7 +5,6 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
 import {
     getListShareUrl,
@@ -21,10 +20,6 @@ export interface Dependencies {
     errorMessage?: string
     loadOwnershipData?: boolean
     onCancelEdit?: () => void
-    onSpaceShare?: (
-        remoteListId: AutoPk,
-        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk },
-    ) => void
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
     onConfirmSpaceNameEdit: (name: string) => void
@@ -86,9 +81,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         await loadInitial(this, async () => {
-            if (this.dependencies.listData.remoteId == null) {
-                await this._shareSpace('private')
-            }
             await this.loadInviteLinks()
             if (this.dependencies.loadOwnershipData) {
                 await this.loadSpaceOwnership()
@@ -196,61 +188,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         event,
     }) => {
         await this.dependencies.copyToClipboard(event.link)
-    }
-
-    shareSpace: EventHandler<'shareSpace'> = async ({ event }) => {
-        await this._shareSpace(event.privacyStatus)
-    }
-
-    private async _shareSpace(privacyStatus: 'private' | 'shared') {
-        const {
-            listData,
-            onSpaceShare,
-            copyToClipboard,
-            contentSharingBG,
-        } = this.dependencies
-
-        let remoteListId = listData.remoteId
-
-        await executeUITask(this, 'inviteLinksLoadState', async () => {
-            const shareResult = await contentSharingBG.scheduleListShare({
-                localListId: listData.localId,
-            })
-            remoteListId = shareResult.remoteListId
-            onSpaceShare?.(
-                remoteListId,
-                shareResult.annotationLocalToRemoteIdsDict,
-            )
-
-            if (privacyStatus === 'private') {
-                await this.dependencies.onSetSpacePrivate(true)
-            }
-
-            this.emitMutation({
-                showSuccessMsg: { $set: true },
-                inviteLinks: { $set: shareResult.links },
-            })
-
-            const linkToCopy =
-                shareResult.links[1]?.link ?? shareResult.links[0]?.link
-            if (linkToCopy != null) {
-                await copyToClipboard(linkToCopy)
-            }
-        })
-
-        await executeUITask(this, 'listShareLoadState', async () => {
-            if (privacyStatus === 'private') {
-                await this.dependencies.onSetSpacePrivate(true)
-            }
-            await contentSharingBG.waitForListShare({
-                localListId: listData.localId,
-            })
-        })
-
-        setTimeout(
-            () => this.emitMutation({ showSuccessMsg: { $set: false } }),
-            SpaceContextMenuLogic.MSG_TIMEOUT,
-        )
     }
 
     confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({

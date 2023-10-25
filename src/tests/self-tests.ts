@@ -287,18 +287,20 @@ export function createSelfTests(options: {
                     shouldTest('share') ||
                     shouldTest('pdf.online.share')
                 ) {
-                    testListId1 = await backgroundModules.customLists.createCustomList(
+                    const res1 = await backgroundModules.customLists.createCustomList(
                         {
                             name: 'My test list #1',
                             id: Date.now(),
                         },
                     )
-                    testListId2 = await backgroundModules.customLists.createCustomList(
+                    const res2 = await backgroundModules.customLists.createCustomList(
                         {
                             name: 'My test list #2',
                             id: Date.now(),
                         },
                     )
+                    testListId1 = res1.localListId
+                    testListId2 = res2.localListId
                     await backgroundModules.customLists.insertPageToList({
                         id: testListId1,
                         url: testPageUrl,

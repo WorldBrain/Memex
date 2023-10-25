@@ -50,13 +50,18 @@ export class SharingTestHelper {
         options: { id: number; share?: boolean },
     ) {
         const name = `list ${++this.counts.lists}`
-        const localId = await setup.backgroundModules.customLists.createCustomList(
-            {
-                name,
-                id: Date.now(),
-            },
-        )
-        this.lists[options.id] = { localId, name }
+        const {
+            localListId,
+            remoteListId,
+        } = await setup.backgroundModules.customLists.createCustomList({
+            name,
+            id: Date.now(),
+        })
+        this.lists[options.id] = {
+            name,
+            localId: localListId,
+            remoteId: remoteListId,
+        }
         this.entries[options.id] = {}
         if (options.share) {
             await this.shareList(setup, options)

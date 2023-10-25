@@ -65,10 +65,7 @@ class SpacePicker extends StatefulUIElement<
         localStorageAPI: browser.storage.local,
         pageActivityIndicatorBG: pageActivityIndicator,
         annotationsCache: new PageAnnotationsCache({}),
-        createNewEntry: async (name) =>
-            collections.createCustomList({
-                name,
-            }),
+        createNewEntry: (name) => collections.createCustomList({ name }),
     }
 
     static MOD_KEY = getKeyName({ key: 'mod' })
@@ -431,16 +428,6 @@ class SpacePicker extends StatefulUIElement<
                         onCancelEdit={this.handleSpaceContextMenuClose(
                             list.localId,
                         )}
-                        onSpaceShare={(
-                            remoteListId,
-                            annotationLocalToRemoteIdsDict,
-                        ) =>
-                            this.processEvent('setListRemoteId', {
-                                annotationLocalToRemoteIdsDict,
-                                localListId: list.localId,
-                                remoteListId,
-                            })
-                        }
                     />
                 </>
             )

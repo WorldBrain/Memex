@@ -17,6 +17,7 @@ import {
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { UnifiedList } from 'src/annotations/cache/types'
+import { SpacePickerDependencies } from './types'
 
 async function insertTestData({
     storageManager,
@@ -64,7 +65,7 @@ const setupLogicHelper = async ({
 }: {
     device: UILogicTestDevice
     shouldHydrateCacheOnInit?: boolean
-    createNewEntry?: (name: string) => Promise<number>
+    createNewEntry?: SpacePickerDependencies['createNewEntry']
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
     queryEntries?: (query: string) => Promise<UnifiedList[]>
@@ -84,7 +85,9 @@ const setupLogicHelper = async ({
         annotationsCache,
         localStorageAPI: device.browserAPIs.storage.local,
         shouldHydrateCacheOnInit: shouldHydrateCacheOnInit ?? true,
-        createNewEntry: args.createNewEntry ?? (async (name) => generatedIds++),
+        createNewEntry:
+            args.createNewEntry ??
+            (async (name) => ({ localListId: generatedIds++ } as any)),
         selectEntry: args.selectEntry ?? (async (id) => {}),
         unselectEntry: args.unselectEntry ?? (async (id) => {}),
         initialSelectedListIds: async () => initialSelectedListIds ?? [],
@@ -844,7 +847,7 @@ describe('SpacePickerLogic', () => {
             device,
             createNewEntry: async (entryName) => {
                 newEntryName = entryName
-                return newEntryId
+                return { localListId: newEntryId } as any
             },
             selectEntry: async (entryId) => {
                 selectedEntry = entryId
@@ -912,7 +915,7 @@ describe('SpacePickerLogic', () => {
             device,
             createNewEntry: async (entryName) => {
                 newEntryName = entryName
-                return newEntryId
+                return { localListId: newEntryId } as any
             },
         })
 

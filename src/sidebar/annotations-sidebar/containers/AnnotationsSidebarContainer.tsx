@@ -134,21 +134,10 @@ export class AnnotationsSidebarContainer<
         annotationId?: UnifiedAnnotation['unifiedId'],
     ) => async (name: string) => {
         const listId = Date.now()
-
-        // this.props.annotationsCache.addList({
-        //     name,
-        //     localId: listId,
-        //     unifiedAnnotationIds: annotationId ? [annotationId] : [],
-        //     hasRemoteAnnotationsToLoad: false,
-        //     creator: this.props.getCurrentUser(),
-        //     type: 'user-list',
-        // })
-        await this.props.customListsBG.createCustomList({
+        return this.props.customListsBG.createCustomList({
             name: name,
             id: listId,
         })
-
-        return listId
     }
 
     private getListDetailsById: ListDetailsGetter = (listId) => {
@@ -1203,17 +1192,6 @@ export class AnnotationsSidebarContainer<
                                                     isPrivate,
                                                 },
                                             )
-                                        }
-                                        onSpaceShare={(
-                                            remoteListId,
-                                            annotationLocalToRemoteIdsDict,
-                                        ) =>
-                                            this.processEvent('shareList', {
-                                                remoteListId,
-                                                annotationLocalToRemoteIdsDict,
-                                                unifiedListId:
-                                                    listData.unifiedId,
-                                            })
                                         }
                                         onDeleteSpaceConfirm={() =>
                                             this.processEvent('deleteList', {

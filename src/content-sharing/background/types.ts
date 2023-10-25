@@ -13,6 +13,13 @@ import type {
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedListMetadata } from './types'
 
+export type ListShareResult = Omit<
+    SharedListData,
+    'annotationSharingStatesPromise'
+> & {
+    annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
+}
+
 export interface ContentSharingInterface
     extends Pick<
             ListKeysServiceInterface,
@@ -32,13 +39,7 @@ export interface ContentSharingInterface
             | 'acceptListEmailInvite'
             | 'loadListEmailInvites'
         > {
-    scheduleListShare(params: {
-        localListId: number
-    }): Promise<
-        Omit<SharedListData, 'annotationSharingStatesPromise'> & {
-            annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
-        }
-    >
+    scheduleListShare(params: { localListId: number }): Promise<ListShareResult>
     waitForListShare(params: { localListId: number }): Promise<void>
     deleteListAndAllAssociatedData(params: {
         localListId: number
