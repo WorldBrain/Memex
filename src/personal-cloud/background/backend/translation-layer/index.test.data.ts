@@ -202,6 +202,16 @@ const LOCAL_SHARED_LIST_METADATA_V24 = {
         remoteId: 'test-2',
         private: false,
     },
+    third: {
+        localId: LOCAL_LISTS_V24.third.id,
+        remoteId: 'test-3',
+        private: false,
+    },
+    fourth: {
+        localId: LOCAL_LISTS_V24.fourth.id,
+        remoteId: 'test-4',
+        private: false,
+    },
 }
 
 export const LOCAL_TEST_DATA_V24 = {
@@ -1191,6 +1201,26 @@ export const REMOTE_TEST_DATA_V24 = {
             id: 2,
             personalList: REMOTE_LISTS_V24.second.id,
             remoteId: LOCAL_SHARED_LIST_METADATA_V24.second.remoteId,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            private: false,
+            createdWhen: 565,
+            updatedWhen: 565,
+        },
+        third: {
+            id: 3,
+            personalList: REMOTE_LISTS_V24.third.id,
+            remoteId: LOCAL_SHARED_LIST_METADATA_V24.third.remoteId,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            private: false,
+            createdWhen: 565,
+            updatedWhen: 565,
+        },
+        fourth: {
+            id: 4,
+            personalList: REMOTE_LISTS_V24.fourth.id,
+            remoteId: LOCAL_SHARED_LIST_METADATA_V24.fourth.remoteId,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             user: TEST_USER.id,
             private: false,

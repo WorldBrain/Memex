@@ -41,6 +41,7 @@ import type { MockPushMessagingService } from 'src/tests/push-messaging'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher/lib/index'
+import { buildMaterializedPath } from 'src/content-sharing/utils'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -1837,6 +1838,18 @@ describe('Personal cloud translation layer', () => {
                 .collection('customLists')
                 .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
             await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.third)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.fourth)
+            await setups[0].storageManager
                 .collection('customListTrees')
                 .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
             await setups[0].storageManager
@@ -1853,6 +1866,7 @@ describe('Personal cloud translation layer', () => {
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
             const testLists = remoteData.personalList
             const testListTrees = remoteData.personalListTree
+            const testListShares = remoteData.personalListShare
 
             // prettier-ignore
             expect(
@@ -1862,6 +1876,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalList',
                     'personalListTree',
+                    'sharedListTree',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...personalDataChanges(remoteData, [
@@ -1869,10 +1884,38 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
                     [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
                     [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
-                ], { skipChanges: 4 }),
+                ], { skipChanges: 8 }),
                 personalBlockStats: [],
                 personalList: [testLists.first, testLists.second, testLists.third, testLists.fourth],
                 personalListTree: [testListTrees.first, testListTrees.second, testListTrees.third, testListTrees.fourth],
+                sharedListTree: [
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTrees.first.order,
+                        sharedList: testListShares.first.remoteId,
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTrees.second.order,
+                        sharedList: testListShares.second.remoteId,
+                        parentId:testListShares.first.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId),
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTrees.third.order,
+                        sharedList: testListShares.third.remoteId,
+                        parentId:testListShares.first.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId),
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTrees.fourth.order,
+                        sharedList: testListShares.fourth.remoteId,
+                        parentId:testListShares.third.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId, testListShares.third.remoteId),
+                    }),
+                ],
             })
 
             // prettier-ignore
@@ -1881,7 +1924,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.second },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.third },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.fourth },
-            ], { skip: 4 })
+            ], { skip: 8 })
             testSyncPushTrigger({ wasTriggered: true })
         })
 
