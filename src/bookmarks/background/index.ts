@@ -101,11 +101,15 @@ export default class BookmarksBackground {
             )
         }
 
+        const [activeTab] = await this.options.browserAPIs.tabs.query({
+            active: true,
+        })
+
         if (!params.skipIndexing) {
             await this.options.pages.indexPage(
                 {
                     fullUrl,
-                    tabId: params.tabId,
+                    tabId: activeTab.id ?? params.tabId,
                     visitTime: params.timestamp || '$now',
                     metaData: params.metaData,
                 },
