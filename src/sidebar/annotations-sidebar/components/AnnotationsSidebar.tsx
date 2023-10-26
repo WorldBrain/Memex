@@ -1713,6 +1713,9 @@ export class AnnotationsSidebar extends React.Component<
                                 }
                                 event.stopPropagation()
                             }}
+                            onKeyUp={async (event) => {
+                                event.stopPropagation()
+                            }}
                             onClick={() =>
                                 this.props.toggleAISuggestionsDropDown()
                             }
