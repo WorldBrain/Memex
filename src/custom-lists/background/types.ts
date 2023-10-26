@@ -63,13 +63,24 @@ export interface CollectionsCacheInterface {
 }
 
 export interface RemoteCollectionsInterface {
-    createCustomList(args: {
-        name: string
-        id?: number
-        type?: 'page-link'
-        createdAt?: Date
-        dontTrack?: boolean
-    }): Promise<
+    createCustomList(
+        args: {
+            name: string
+            id?: number
+            createdAt?: Date
+            dontTrack?: boolean
+        } & (
+            | {
+                  type?: never
+              }
+            | {
+                  /** If set, list + key IDs are expected to be pre-generated and supplied. */
+                  type: 'page-link'
+                  collabKey: string
+                  remoteListId: string
+              }
+        ),
+    ): Promise<
         ListShareResult & {
             localListId: number
         }

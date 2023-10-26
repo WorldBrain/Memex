@@ -318,6 +318,7 @@ export default class CustomListBackground {
         type,
         createdAt,
         dontTrack,
+        ...preGeneratedIds
     }) => {
         const id = _id ?? this.generateListId()
         const localListId = await this.storage.insertCustomList({
@@ -330,7 +331,7 @@ export default class CustomListBackground {
         })
         await this.updateListSuggestionsCache({ added: id })
         const listShareResult = await this.options.contentSharing.scheduleListShare(
-            { localListId },
+            { localListId, ...preGeneratedIds },
         )
 
         return { ...listShareResult, localListId }

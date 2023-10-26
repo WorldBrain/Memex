@@ -398,6 +398,7 @@ export default class ContentSharingBackground {
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({
         localListId,
+        ...preGeneratedIds
     }) => {
         if (this.listSharePromises[localListId]) {
             throw new Error(
@@ -405,12 +406,12 @@ export default class ContentSharingBackground {
             )
         }
 
-        const remoteListId = this.options
-            .generateServerId('sharedList')
-            .toString()
-        const collabKey = this.options
-            .generateServerId('sharedListKey')
-            .toString()
+        const remoteListId =
+            preGeneratedIds.remoteListId ??
+            this.options.generateServerId('sharedList').toString()
+        const collabKey =
+            preGeneratedIds.collabKey ??
+            this.options.generateServerId('sharedListKey').toString()
 
         const annotationLocalToRemoteIdsDict = await this.listSharingService.ensureRemoteAnnotationIdsExistForList(
             localListId,
@@ -1016,13 +1017,13 @@ export default class ContentSharingBackground {
         await bgModules.customLists.createCustomList({
             id: localListId,
             name: listTitle,
-            type: 'page-link',
             createdAt: new Date(now),
             dontTrack: true,
+            type: 'page-link',
+            remoteListId,
+            collabKey,
         })
-        const annotationLocalToRemoteIdsDict = await this.listSharingService.ensureRemoteAnnotationIdsExistForList(
-            localListId,
-        )
+        await this.waitForListShare({ localListId })
         await bgModules.customLists.insertPageToList({
             id: localListId,
             url: indexedPage.fullUrl,
@@ -1030,14 +1031,7 @@ export default class ContentSharingBackground {
             skipPageIndexing: true,
             suppressInboxEntry: true,
             suppressVisitCreation: true,
-            pageTitle: pageTitle,
-            dontTrack: true,
-        })
-        await this.performListShare({
-            annotationLocalToRemoteIdsDict,
-            remoteListId,
-            localListId,
-            collabKey,
+            pageTitle,
             dontTrack: true,
         })
 

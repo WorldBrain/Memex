@@ -39,7 +39,11 @@ export interface ContentSharingInterface
             | 'acceptListEmailInvite'
             | 'loadListEmailInvites'
         > {
-    scheduleListShare(params: { localListId: number }): Promise<ListShareResult>
+    scheduleListShare(params: {
+        localListId: number
+        remoteListId?: string
+        collabKey?: string
+    }): Promise<ListShareResult>
     waitForListShare(params: { localListId: number }): Promise<void>
     deleteListAndAllAssociatedData(params: {
         localListId: number

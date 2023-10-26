@@ -24,11 +24,16 @@ async function insertTestData({
     backgroundModules,
 }: UILogicTestDevice) {
     for (const list of DATA.TEST_LISTS) {
+        const sharedListMetadata = DATA.TEST_LIST_METADATA.find(
+            (meta) => meta.localId === list.id,
+        )
         await backgroundModules.customLists.createCustomList({
             createdAt: list.createdAt,
             type: list.type,
             name: list.name,
             id: list.id,
+            collabKey: sharedListMetadata?.remoteId,
+            remoteListId: sharedListMetadata?.remoteId,
         })
     }
 
