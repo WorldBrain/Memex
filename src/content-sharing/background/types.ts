@@ -41,6 +41,7 @@ export interface ContentSharingInterface
         > {
     scheduleListShare(params: {
         localListId: number
+        isPrivate?: boolean
         remoteListId?: string
         collabKey?: string
     }): Promise<ListShareResult>

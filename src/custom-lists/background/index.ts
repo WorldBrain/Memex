@@ -331,7 +331,11 @@ export default class CustomListBackground {
         })
         await this.updateListSuggestionsCache({ added: id })
         const listShareResult = await this.options.contentSharing.scheduleListShare(
-            { localListId, ...preGeneratedIds },
+            {
+                localListId,
+                isPrivate: type !== 'page-link',
+                ...preGeneratedIds,
+            },
         )
 
         return { ...listShareResult, localListId }

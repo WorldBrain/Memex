@@ -397,6 +397,7 @@ export default class ContentSharingBackground {
     }
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({
+        isPrivate,
         localListId,
         ...preGeneratedIds
     }) => {
@@ -419,6 +420,7 @@ export default class ContentSharingBackground {
 
         this.listSharePromises[localListId] = this.performListShare({
             collabKey,
+            isPrivate,
             localListId,
             remoteListId,
             annotationLocalToRemoteIdsDict,
@@ -459,6 +461,7 @@ export default class ContentSharingBackground {
         localListId: number
         collabKey: string
         dontTrack?: boolean
+        isPrivate?: boolean
         annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
     }): Promise<void> {
         const {
