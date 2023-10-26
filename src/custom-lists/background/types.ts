@@ -79,6 +79,12 @@ export interface RemoteCollectionsInterface {
         createdAt?: Date
         dontTrack?: boolean
     }): Promise<number>
+    createListTree(args: {
+        localListId: number
+        parentId?: number
+        now?: number
+    }): Promise<{ treeId: number }>
+    deleteListTree(args: { treeId: number }): Promise<void>
     insertPageToList(args: {
         id: number
         url: string

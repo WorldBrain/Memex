@@ -63,6 +63,7 @@ export default class CustomListBackground {
 
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
+            createListTree: this.createListTree,
             insertPageToList: async (params) => {
                 const currentTab = await this.options.queryTabs?.({
                     active: true,
@@ -331,6 +332,29 @@ export default class CustomListBackground {
         await this.updateListSuggestionsCache({ added: id })
 
         return inserted
+    }
+
+    createListTree: RemoteCollectionsInterface['createListTree'] = async ({
+        localListId,
+        parentId,
+        now,
+    }) => {
+        const pathIds = await this.storage.getMaterializedPathIdsFromTree({
+            id: parentId,
+        })
+        const treeId = await this.storage.createListTree({
+            localListId,
+            parentId,
+            pathIds,
+            now,
+        })
+        return { treeId }
+    }
+
+    deleteListTree: RemoteCollectionsInterface['deleteListTree'] = async ({
+        treeId,
+    }) => {
+        await this.storage.deleteListTree({ treeId })
     }
 
     updateList = async ({

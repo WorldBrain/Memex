@@ -13,7 +13,12 @@ import {
 
 import { SuggestPlugin } from 'src/search/plugins'
 import type { SuggestResult } from 'src/search/types'
-import type { PageList, PageListEntry, ListDescription } from './types'
+import type {
+    PageList,
+    PageListEntry,
+    ListDescription,
+    ListTree,
+} from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 import {
@@ -26,6 +31,7 @@ import {
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { buildMaterializedPath } from 'src/content-sharing/utils'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -74,6 +80,11 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'countObjects',
                     args: { listId: '$listId:int' },
+                },
+                findListTreeById: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'findObject',
+                    args: { id: '$id:int' },
                 },
                 findListsIncluding: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -202,6 +213,11 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
                     operation: 'deleteObjects',
                     args: { listId: '$listId:pk' },
+                },
+                deleteListTreeById: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'deleteObject',
+                    args: { id: '$id:int' },
                 },
                 [SuggestPlugin.SUGGEST_OBJS_OP_ID]: {
                     operation: SuggestPlugin.SUGGEST_OBJS_OP_ID,
@@ -470,6 +486,54 @@ export default class CustomListStorage extends StorageModule {
         }
 
         return object.id
+    }
+
+    async createListTree(params: {
+        localListId: number
+        parentId?: number
+        pathIds?: number[]
+        now?: number
+    }): Promise<number> {
+        const now = params.now ?? Date.now()
+        const { object } = await this.operation('createListTree', {
+            listId: params.localListId,
+            parentId: params.parentId ?? null,
+            path: params.pathIds
+                ? buildMaterializedPath(...params.pathIds)
+                : null,
+            order: 1, // TODO: Work out how to set initial order
+            createdWhen: now,
+            updatedWhen: now,
+        })
+
+        return object.id
+    }
+
+    /**
+     * Climbs up from the given node to the tree root to build an array of customListTree IDs,
+     * in order from root to parent of the given noe.
+     */
+    async getMaterializedPathIdsFromTree(params: {
+        id?: number
+    }): Promise<number[]> {
+        const pathIds: number[] = []
+        let parentId = params.id
+        while (true) {
+            const currentNode: ListTree = await this.operation(
+                'findListTreeById',
+                { id: parentId },
+            )
+            parentId = currentNode?.parentId
+            if (parentId == null) {
+                break
+            }
+            pathIds.unshift(parentId)
+        }
+        return pathIds
+    }
+
+    async deleteListTree(params: { treeId: number }): Promise<void> {
+        await this.operation('deleteListTreeById', { id: params.treeId })
     }
 
     async updateListName({
