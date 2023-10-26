@@ -390,8 +390,8 @@ export const LOCAL_TEST_DATA_V24 = {
             parentId: LOCAL_LISTS_V24.first.id,
             path: buildMaterializedPath(LOCAL_LISTS_V24.first.id),
             order: 2,
-            createdWhen: 1698124786131,
-            updatedWhen: 1698124786131,
+            createdWhen: 1698124786132,
+            updatedWhen: 1698124786132,
         },
         third: {
             id: 3,
@@ -399,8 +399,8 @@ export const LOCAL_TEST_DATA_V24 = {
             parentId: LOCAL_LISTS_V24.first.id,
             path: buildMaterializedPath(LOCAL_LISTS_V24.first.id),
             order: 3,
-            createdWhen: 1698124786131,
-            updatedWhen: 1698124786131,
+            createdWhen: 1698124786133,
+            updatedWhen: 1698124786133,
         },
         fourth: {
             id: 4,
@@ -411,8 +411,8 @@ export const LOCAL_TEST_DATA_V24 = {
                 LOCAL_LISTS_V24.third.id,
             ),
             order: 4,
-            createdWhen: 1698124786131,
-            updatedWhen: 1698124786131,
+            createdWhen: 1698124786134,
+            updatedWhen: 1698124786134,
         },
     },
     customListDescriptions: {

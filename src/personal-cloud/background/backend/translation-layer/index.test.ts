@@ -41,7 +41,10 @@ import type { MockPushMessagingService } from 'src/tests/push-messaging'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher/lib/index'
-import { buildMaterializedPath } from 'src/content-sharing/utils'
+import {
+    buildMaterializedPath,
+    extractMaterializedPathIds,
+} from 'src/content-sharing/utils'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -142,6 +145,19 @@ class IdCapturer {
                         mergedObject[relationship.alias] =
                             targetId ?? mergedObject[relationship.alias]
                     }
+                }
+                if (
+                    collectionDefinition.name === 'personalListTree' &&
+                    mergedObject['path'] != null
+                ) {
+                    const pathIds = extractMaterializedPathIds(
+                        mergedObject.path,
+                        'number',
+                    ) as number[]
+                    const fixedPathIds = pathIds.map(
+                        (id) => this.ids['personalList'][id - 1],
+                    )
+                    mergedObject.path = buildMaterializedPath(...fixedPathIds)
                 }
                 mergedObjects[objectName] = mergedObject
             }
