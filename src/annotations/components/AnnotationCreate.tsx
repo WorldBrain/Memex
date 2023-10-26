@@ -284,6 +284,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         //     e.preventDefault()
         //     uninsertTab({ el: this.textAreaRef.current })
         // }
+        e.stopPropagation()
     }
 
     private toggleSpacePicker() {

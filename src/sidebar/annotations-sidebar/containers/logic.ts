@@ -430,6 +430,16 @@ export class SidebarContainerLogic extends UILogic<
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
+        // this.options.events.on('triggerListenerRestart', () => {
+        //     console.log('triggerListenerRestart')
+        //     this.summarisePageEvents.removeListener('newSummaryToken', null)
+        //     this.summarisePageEvents.removeListener(
+        //         'newSummaryTokenEditor',
+        //         null,
+        //     )
+        //     this.setupRemoteEventListeners()
+        // })
+
         let isPageSummaryEmpty = true
         this.summarisePageEvents.on('newSummaryToken', ({ token }) => {
             let newToken = token
@@ -2784,7 +2794,7 @@ export class SidebarContainerLogic extends UILogic<
         const combinedText = filteredSegments.map((item) => item.text).join(' ')
 
         let prompt =
-            'The following text an excerpt of an auto-generated video transcript. Please refer to it as "video sections" or "video" and not as text when talking about it. Also, the transcript will contain transcription errors. Please correct and output it as much as possible and keep it in its original meaning. Try to be short and conscise as the purpose of this summary is to help people to mark a video section and what it was saying. Do not use any lists as outputs: '
+            'Summarise this transcript of a Youtube video. Summarize it by talking abstractly about its content and aim for brevity in your summary. The primary purpose of your summar is to help users identify video sections and their content. When referring to it, please use the terms "video sections" or "video" rather than "text" or "transcript" and . The transcript may contain errors; kindly correct them while retaining the original intent. Avoid using list formats. Here is the excerpt for your review'
 
         await this.queryAI(
             undefined,

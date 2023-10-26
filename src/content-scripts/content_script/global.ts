@@ -996,7 +996,6 @@ export async function main(
             await pageInfo.refreshIfNeeded()
         },
     })
-
     // 6. Setup other interactions with this page (things that always run)
     // setupScrollReporter()
 
@@ -1182,6 +1181,7 @@ class PageInfo {
     _href?: string
     _identifier?: ContentIdentifier
     private normalizedTwitterFullUrl?: string
+    private normalizedGmailFullUrl?: string
 
     constructor(
         public options?: { getContentFingerprints?: GetContentFingerprints },
@@ -1268,6 +1268,18 @@ class PageInfo {
             }
         }
     }
+    normalizeGmailFullURL = async (url) => {
+        let fullUrl = url
+
+        if (url.includes('#search') || url.includes('#inbox')) {
+            const parts = url.split('/')
+            const mailId = parts[parts.length - 1]
+            fullUrl = `https://mail.google.com/mail/#inbox/${mailId}`
+            return fullUrl
+        } else {
+            return fullUrl
+        }
+    }
 
     setTwitterFullUrl = async (url) => {
         this.normalizedTwitterFullUrl = url
@@ -1285,7 +1297,9 @@ class PageInfo {
         if (window.location.href.includes('twitter.com/messages')) {
             fullUrl = await this.normalizeTwitterCurrentFullURL()
             return fullUrl
-        } else {
+        } else if (window.location.href.includes('mail.google.com/mail'))
+            return (fullUrl = await this.normalizeGmailFullURL(fullUrl))
+        else {
             return fullUrl
         }
     }

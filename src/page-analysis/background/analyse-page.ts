@@ -63,6 +63,7 @@ const analysePage: PageAnalyzer = async (options) => {
         content = pdfContent
     } else {
         content = extractPageMetadataFromRawContent(rawContent)
+        // content.title = document.title ?? null
     }
 
     if (options.includeContent === 'metadata-with-full-text') {
