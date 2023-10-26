@@ -119,6 +119,10 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     private async loadInviteLinks() {
         const { listData, contentSharingBG } = this.dependencies
 
+        while (listData.remoteId == null) {
+            await new Promise((resolve) => setTimeout(resolve, 50))
+        }
+
         const createListLink = (collaborationKey?: string): string =>
             listData.type === 'page-link'
                 ? getSinglePageShareUrl({
@@ -132,11 +136,11 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                   })
 
         await executeUITask(this, 'inviteLinksLoadState', async () => {
-            if (listData.remoteId == null) {
+            if (listData?.remoteId == null) {
                 return
             }
 
-            if (listData.collabKey != null) {
+            if (listData?.collabKey != null) {
                 this.emitMutation({
                     inviteLinks: {
                         $set: [
