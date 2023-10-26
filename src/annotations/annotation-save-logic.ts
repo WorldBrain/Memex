@@ -5,13 +5,11 @@ import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
 import { shareOptsToPrivacyLvl } from './utils'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import { SyncSettingsBackground } from 'src/sync-settings/background'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
-import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -46,7 +44,6 @@ export interface SaveAnnotationParams<
     skipListExistenceCheck?: boolean
     privacyLevelOverride?: AnnotationPrivacyLevels
     syncSettingsBG?: RemoteSyncSettingsInterface
-    pkmSyncBG?: PkmSyncInterface
 }
 
 export interface SaveAnnotationReturnValue {
@@ -79,7 +76,6 @@ export async function createAnnotation({
     annotationData,
     annotationsBG,
     contentSharingBG,
-    pkmSyncBG,
     syncSettingsBG,
     skipPageIndexing,
     skipListExistenceCheck,
@@ -172,7 +168,6 @@ export async function updateAnnotation({
     contentSharingBG,
     shareOpts,
     keepListsIfUnsharing,
-    pkmSyncBG,
 }: SaveAnnotationParams<AnnotationUpdateData>): Promise<
     SaveAnnotationReturnValue
 > {

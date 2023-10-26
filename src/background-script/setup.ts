@@ -13,7 +13,7 @@ import CustomListBackground from 'src/custom-lists/background'
 import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
-import * as pkmSync from '../pkm-integrations/background'
+import { PKMSyncBackgroundModule } from '../pkm-integrations/background'
 import { getAuth } from 'firebase/auth'
 import {
     getStorage,
@@ -129,7 +129,7 @@ export interface BackgroundModules {
     tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
-    pkmSyncModule: pkmSync.PKMSyncBackgroundModule
+    pkmSyncModule: PKMSyncBackgroundModule
     syncSettings: SyncSettingsBackground
     bgScript: BackgroundScript
     contentScripts: ContentScriptsBackground
@@ -260,6 +260,8 @@ export function createBackgroundModules(options: {
     const getCurrentUserId = async (): Promise<AutoPk | null> =>
         (await auth.authService.getCurrentUser())?.id ?? null
 
+    const pkmSyncBG = new PKMSyncBackgroundModule()
+
     const pages = new PageIndexingBackground({
         persistentStorageManager: options.persistentStorageManager,
         pageIndexingSettingsStore: new BrowserSettingsStore(
@@ -273,7 +275,7 @@ export function createBackgroundModules(options: {
         tabManagement,
         getNow,
         authBG: auth.remoteFunctions,
-        pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
+        pkmSyncBG,
     })
     tabManagement.events.on('tabRemoved', async (event) => {
         await pages.handleTabClose(event)
@@ -334,7 +336,7 @@ export function createBackgroundModules(options: {
         pages,
         analytics,
         analyticsBG,
-        pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
+        pkmSyncBG,
         serverStorage: options.serverStorage.modules,
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
@@ -426,7 +428,7 @@ export function createBackgroundModules(options: {
             directLinking,
         ),
         analyticsBG,
-        pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
+        pkmSyncBG,
     })
     const readwiseSettingsStore = new BrowserSettingsStore<ReadwiseSettings>(
         syncSettings,
@@ -556,7 +558,7 @@ export function createBackgroundModules(options: {
             pageActivityIndicatorBG: pageActivityIndicator,
             persistentStorageManager: options.persistentStorageManager,
             storageManager: options.storageManager,
-            pkmSyncBG: new pkmSync.PKMSyncBackgroundModule().remoteFunctions,
+            pkmSyncBG,
             imageSupport: new ImageSupportBackground({
                 backend: options.imageSupportBackend,
                 storageManager: options.storageManager,
@@ -639,7 +641,7 @@ export function createBackgroundModules(options: {
             checkAuthorizedForAutoBackup: async () =>
                 auth.remoteFunctions.isAuthorizedForFeature('backup'),
         }),
-        pkmSyncModule: new pkmSync.PKMSyncBackgroundModule(),
+        pkmSyncModule: pkmSyncBG,
         storexHub: new StorexHubBackground({
             storageManager,
             localBrowserStorage: options.browserAPIs.storage.local,

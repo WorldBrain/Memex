@@ -62,9 +62,7 @@ import {
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { AuthBackground } from 'src/authentication/background'
-import { AuthServices } from 'src/services/types'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -108,7 +106,7 @@ export class PageIndexingBackground {
             fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
-            pkmSyncBG?: PkmSyncInterface
+            pkmSyncBG: PKMSyncBackgroundModule
         },
     ) {
         this.storage = new PageStorage({

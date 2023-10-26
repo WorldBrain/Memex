@@ -62,7 +62,6 @@ import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
 
@@ -74,7 +73,6 @@ export interface Props extends SidebarContainerOptions {
     youtubeService?: YoutubeService
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
-    pkmSyncBG?: PkmSyncInterface
     bgScriptBG?: RemoteBGScriptInterface
 }
 
@@ -110,7 +108,6 @@ export class AnnotationsSidebarContainer<
                     )
                 },
                 imageSupport: props.imageSupport,
-                pkmSyncBG: props.pkmSyncBG,
                 bgScriptBG: props.bgScriptBG,
             }),
         )

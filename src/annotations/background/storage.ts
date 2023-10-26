@@ -17,7 +17,7 @@ import { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
@@ -35,7 +35,7 @@ export default class AnnotationStorage extends StorageModule {
     constructor(
         private options: {
             storageManager: Storex
-            pkmSyncBG: PkmSyncInterface
+            pkmSyncBG: PKMSyncBackgroundModule
             imageSupport?: ImageSupportInterface
         },
     ) {
