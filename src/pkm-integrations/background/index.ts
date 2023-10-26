@@ -185,7 +185,11 @@ export class PKMSyncBackgroundModule {
                 'PKMSYNCcustomTagsLogseq',
             )
 
-            item.data.pageTitle = this.cleanFileName(item.data.pageTitle, true)
+            item.data.pageTitle = this.cleanFileName(
+                item.data.pageTitle,
+                false,
+                true,
+            )
 
             try {
                 await this.createPageUpdate(
@@ -226,7 +230,11 @@ export class PKMSyncBackgroundModule {
                 'PKMSYNCcustomTagsObsidian',
             )
 
-            item.data.pageTitle = this.cleanFileName(item.data.pageTitle, true)
+            item.data.pageTitle = this.cleanFileName(
+                item.data.pageTitle,
+                false,
+                true,
+            )
 
             try {
                 await this.createPageUpdate(
@@ -242,16 +250,20 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    cleanFileName(fileNameInput, onlyParenthesisRemoval) {
+    cleanFileName(fileNameInput, onlyParenthesisRemoval, onlyRemoveColon) {
         let fileName = fileNameInput
 
         // Remove any () and its encapsulated content from the string
         fileName = fileName.replace(/\(.*?\)/g, '')
 
-        if (!onlyParenthesisRemoval) {
-            // Remove any characters that are not allowed in filenames and replace them with hyphens
-            const illegalCharacters = /[#%&{}\\<>?:/$!'"@+`|=]/g
-            fileName = fileName.replace(illegalCharacters, '-')
+        if (onlyRemoveColon) {
+            fileName = fileName.replace(/:/g, ' ')
+        } else {
+            if (!onlyParenthesisRemoval) {
+                // Remove any characters that are not allowed in filenames and replace them with hyphens
+                const illegalCharacters = /[#%&{}\\<>?:/$!'"@+`|=]/g
+                fileName = fileName.replace(illegalCharacters, '-')
+            }
         }
         fileName = fileName.trim()
 
@@ -262,7 +274,7 @@ export class PKMSyncBackgroundModule {
         let finalTitle = pageTitleFormat
 
         finalTitle = finalTitle.replace('{{{PageTitle}}}', pageTitle)
-        finalTitle = this.cleanFileName(finalTitle, false)
+        finalTitle = this.cleanFileName(finalTitle, false, false)
 
         const datePattern = /{{{Date: "(.*?)"}}}/
         const match = finalTitle.match(datePattern)

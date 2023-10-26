@@ -1023,25 +1023,23 @@ export default class ContentSharingBackground {
         const annotationLocalToRemoteIdsDict = await this.listSharingService.ensureRemoteAnnotationIdsExistForList(
             localListId,
         )
-        await Promise.all([
-            bgModules.customLists.insertPageToList({
-                id: localListId,
-                url: indexedPage.fullUrl,
-                createdAt: new Date(now),
-                skipPageIndexing: true,
-                suppressInboxEntry: true,
-                suppressVisitCreation: true,
-                pageTitle: pageTitle,
-                dontTrack: true,
-            }),
-            this.performListShare({
-                annotationLocalToRemoteIdsDict,
-                remoteListId,
-                localListId,
-                collabKey,
-                dontTrack: true,
-            }),
-        ])
+        await bgModules.customLists.insertPageToList({
+            id: localListId,
+            url: indexedPage.fullUrl,
+            createdAt: new Date(now),
+            skipPageIndexing: true,
+            suppressInboxEntry: true,
+            suppressVisitCreation: true,
+            pageTitle: pageTitle,
+            dontTrack: true,
+        })
+        await this.performListShare({
+            annotationLocalToRemoteIdsDict,
+            remoteListId,
+            localListId,
+            collabKey,
+            dontTrack: true,
+        })
 
         // NOTE: These calls to create followList and followedListEntry docs should trigger personal cloud sync upload
         await bgModules.pageActivityIndicator.createFollowedList(
