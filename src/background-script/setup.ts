@@ -274,7 +274,7 @@ export function createBackgroundModules(options: {
         storageManager,
         tabManagement,
         getNow,
-        authBG: auth.remoteFunctions,
+        authBG: auth,
         pkmSyncBG,
     })
     tabManagement.events.on('tabRemoved', async (event) => {
