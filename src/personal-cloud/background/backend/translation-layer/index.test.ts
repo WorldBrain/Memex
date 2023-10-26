@@ -1944,6 +1944,101 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
+        it('should delete custom list trees', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.third)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.third)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.second)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.third)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // Delete 2 tree nodes
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .deleteOneObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .deleteOneObject(LOCAL_TEST_DATA_V24.customListTrees.third)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListTrees = remoteData.personalListTree
+            const testListShares = remoteData.personalListShare
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalList',
+                    'personalListTree',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
+                    [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
+                    [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
+                    [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
+                    [DataChangeType.Delete, 'personalListTree', testListTrees.fourth.id, { id: LOCAL_TEST_DATA_V24.customListTrees.fourth.id }],
+                    [DataChangeType.Delete, 'personalListTree', testListTrees.third.id, { id: LOCAL_TEST_DATA_V24.customListTrees.third.id }],
+                ], { skipChanges: 8 }),
+                personalBlockStats: [],
+                personalList: [testLists.first, testLists.second, testLists.third, testLists.fourth],
+                personalListTree: [testListTrees.first, testListTrees.second],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.second },
+                { type: PersonalCloudUpdateType.Delete, collection: 'customListTrees', where: { id: LOCAL_TEST_DATA_V24.customListTrees.fourth.id } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'customListTrees', where: { id: LOCAL_TEST_DATA_V24.customListTrees.third.id } },
+            ], { skip: 8 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
         it('should create custom list descriptions', async () => {
             const {
                 setups,
