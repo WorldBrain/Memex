@@ -16,6 +16,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         args: { text: string; showLoadingSpinner?: boolean },
         callback,
     ) => void
+    triggerListenerRestart: () => void
     addImageToEditor: (args: { imageData: string }, callback) => void
     // No longer used, as of the sidebar refactor
     // removeTemporaryHighlights: () => void
