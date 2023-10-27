@@ -3385,6 +3385,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        if (previousState.listsSidebar.isSidebarLocked) {
+            return
+        }
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })

@@ -58,10 +58,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     render() {
         return (
             <Container
-                onMouseOver={
-                    !this.props.isSidebarLocked &&
-                    this.props.setSidebarPeekState(true)
-                }
+                onMouseOver={this.props.setSidebarPeekState(true)}
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
             >
                 <GlobalStyle />

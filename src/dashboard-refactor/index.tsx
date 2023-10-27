@@ -1397,7 +1397,7 @@ export class DashboardContainer extends StatefulUIElement<
                             }}
                             peeking={
                                 listsSidebar.isSidebarPeeking
-                                    ? listsSidebar.isSidebarPeeking
+                                    ? listsSidebar.isSidebarPeeking.toString()
                                     : undefined
                             }
                             position={{
