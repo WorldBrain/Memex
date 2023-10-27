@@ -22,6 +22,7 @@ import type { RootState as ListsSidebarState } from './types'
 import type { DropReceivingState } from '../types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -44,7 +45,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
         | 'listData'
         | 'isCreator'
         | 'isShared'
-    >
+    > & { spacesBG: RemoteCollectionsInterface }
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup
     joinedListsGroup: ListGroup
@@ -181,14 +182,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             errorMessage={
                                                 this.props.editListErrorMessage
                                             }
-                                            onConfirmSpaceNameEdit={(
-                                                newName,
-                                            ) => {
-                                                this.props.onConfirmListEdit(
-                                                    list.unifiedId,
-                                                    newName,
-                                                )
-                                            }}
                                             isShared={!list.isPrivate}
                                         />
                                     )

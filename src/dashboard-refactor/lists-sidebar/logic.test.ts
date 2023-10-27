@@ -738,37 +738,4 @@ describe('Dashboard lists sidebar logic', () => {
             }),
         )
     })
-
-    it('should be able to share a list, setting its remoteId state', async ({
-        device,
-    }) => {
-        for (const listData of DATA.LISTS_1) {
-            await device.storageManager.collection('customLists').createObject({
-                id: listData.id,
-                name: listData.name,
-            })
-        }
-
-        const localListId = DATA.LISTS_1[1].id
-        const { searchResults, annotationsCache } = await setupTest(device, {
-            seedData: setPageSearchResult(DATA.PAGE_SEARCH_RESULT_3),
-            runInitLogic: true,
-        })
-
-        const listData = annotationsCache.getListByLocalId(localListId)
-
-        expect(
-            annotationsCache.lists.byId[listData.unifiedId].remoteId,
-        ).toBeUndefined()
-
-        await searchResults.processEvent('handleListShare', {
-            listId: listData.unifiedId,
-            remoteListId: DATA.LISTS_1[1].remoteId,
-            annotationLocalToRemoteIdsDict: {},
-        })
-
-        expect(annotationsCache.lists.byId[listData.unifiedId].remoteId).toBe(
-            DATA.LISTS_1[1].remoteId,
-        )
-    })
 })

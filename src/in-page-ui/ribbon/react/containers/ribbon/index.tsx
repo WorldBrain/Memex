@@ -288,11 +288,10 @@ export default class RibbonContainer extends StatefulUIElement<
                                 selected: [],
                             },
                         })
-                        await this.props.customLists.createCustomList({
+                        return this.props.customLists.createCustomList({
                             name: name,
                             id: listId,
                         })
-                        return listId
                     },
                 }}
                 search={{

@@ -41,10 +41,11 @@ export async function insertIntegrationTestData(
     let listId: number
     const includeLists = includeCollection('customLists')
     if (includeLists) {
-        listId = await backgroundModules.customLists.createCustomList({
+        const res = await backgroundModules.customLists.createCustomList({
             name: 'My list',
             id: Date.now(),
         })
+        listId = res.localListId
         if (includeCollection('pageListEntries')) {
             await backgroundModules.customLists.insertPageToList({
                 id: listId,

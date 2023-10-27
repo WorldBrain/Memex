@@ -40,7 +40,6 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                 offsetY={-10}
                 closeComponent={(e) => {
                     this.toggleMenu(e)
-                    this.props.onCancelEdit()
                 }}
                 strategy={'fixed'}
                 width={'300px'}

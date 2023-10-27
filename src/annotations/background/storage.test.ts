@@ -51,11 +51,11 @@ async function insertTestData({
     await annotationStorage.toggleAnnotBookmark({ url: DATA.hybrid.url })
 
     // Insert collections + collection entries
-    const coll1Id = await customLists.createCustomList({
+    const { localListId: coll1Id } = await customLists.createCustomList({
         name: DATA.coll1,
         id: Date.now(),
     })
-    const coll2Id = await customLists.createCustomList({
+    const { localListId: coll2Id } = await customLists.createCustomList({
         name: DATA.coll2,
         id: Date.now(),
     })

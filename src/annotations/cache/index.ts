@@ -588,6 +588,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             ...previousList,
             name: updates.name ?? previousList.name,
             remoteId: updates.remoteId ?? previousList.remoteId,
+            collabKey: updates.collabKey ?? previousList.collabKey,
             isPrivate: updates.isPrivate ?? previousList.isPrivate,
             description: updates.description ?? previousList.description,
         }

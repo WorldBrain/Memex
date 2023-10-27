@@ -1184,31 +1184,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    shareList: EventHandler<'shareList'> = async ({ event }) => {
-        const sharingTutorialP = this.showSharingTutorial()
-        this.options.annotationsCache.updateList({
-            unifiedId: event.unifiedListId,
-            remoteId: event.remoteListId.toString(),
-        })
-
-        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
-            const annotData = this.options.annotationsCache.getAnnotationByLocalId(
-                localAnnotId,
-            )
-            if (!annotData) {
-                continue
-            }
-            this.options.annotationsCache.updateAnnotation({
-                unifiedId: annotData.unifiedId,
-                ...annotData,
-                remoteId: event.annotationLocalToRemoteIdsDict[
-                    localAnnotId
-                ].toString(),
-            })
-        }
-        await sharingTutorialP
-    }
-
     deleteList: EventHandler<'deleteList'> = async ({ event }) => {
         this.options.annotationsCache.removeList({
             unifiedId: event.unifiedListId,

@@ -318,9 +318,10 @@ export default class CustomListBackground {
         type,
         createdAt,
         dontTrack,
+        ...preGeneratedIds
     }) => {
         const id = _id ?? this.generateListId()
-        const inserted = await this.storage.insertCustomList({
+        const localListId = await this.storage.insertCustomList({
             id,
             type,
             name,
@@ -329,8 +330,15 @@ export default class CustomListBackground {
             dontTrack,
         })
         await this.updateListSuggestionsCache({ added: id })
+        const listShareResult = await this.options.contentSharing.scheduleListShare(
+            {
+                localListId,
+                isPrivate: type !== 'page-link',
+                ...preGeneratedIds,
+            },
+        )
 
-        return inserted
+        return { ...listShareResult, localListId }
     }
 
     updateList = async ({

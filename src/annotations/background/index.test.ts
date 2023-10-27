@@ -689,10 +689,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 {},
                                 { tag: DATA.TAG_1, url: annotUrl },
                             )
-                            listId = await customLists(setup).createCustomList({
+                            const res = await customLists(
+                                setup,
+                            ).createCustomList({
                                 name: 'test',
                                 id: Date.now(),
                             })
+                            listId = res.localListId
                             // await directLinking(setup).insertAnnotToList(
                             //     {},
                             //     {
@@ -936,10 +939,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                     createAnnotationStep(),
                     {
                         execute: async ({ setup }) => {
-                            listId = await customLists(setup).createCustomList({
+                            const res = await customLists(
+                                setup,
+                            ).createCustomList({
                                 name: 'test',
                                 id: Date.now(),
                             })
+                            listId = res.localListId
                             await customLists(setup).insertPageToList({
                                 id: listId,
                                 url: DATA.PAGE_1.fullUrl,
