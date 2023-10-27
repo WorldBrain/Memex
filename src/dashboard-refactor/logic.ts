@@ -63,7 +63,6 @@ import {
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
-import { BULK_SELECT_STORAGE_KEY } from 'src/bulk-edit/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -3386,6 +3385,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        if (previousState.listsSidebar.isSidebarLocked) {
+            return
+        }
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })
@@ -3498,9 +3500,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                         addListErrorMessage: { $set: null },
                     },
                 })
-                await this.options.listsBG.createCustomList({
+                const {
+                    collabKey,
+                    remoteListId,
+                } = await this.options.listsBG.createCustomList({
                     name: newListName,
                     id: localListId,
+                })
+                this.options.annotationsCache.updateList({
+                    unifiedId,
+                    collabKey,
+                    remoteId: remoteListId,
                 })
             },
         )
@@ -3695,85 +3705,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     firstItem?.type === 'application/pdf',
             },
         })
-    }
-
-    setListRemoteId: EventHandler<'setListRemoteId'> = async ({
-        event,
-        previousState,
-    }) => {
-        // Should trigger state update on `newListsState` cache event
-        this.options.annotationsCache.updateList({
-            unifiedId: event.listId,
-            remoteId: event.remoteListId,
-        })
-    }
-
-    handleListShare: EventHandler<'handleListShare'> = async ({
-        event,
-        previousState,
-    }) => {
-        const memberAnnotParentPageIds = new Set<string>()
-        const memberPrivateAnnotIds = new Set<string>()
-        for (const noteData of Object.values(
-            previousState.searchResults.noteData.byId,
-        )) {
-            if (noteData.lists.includes(event.listId)) {
-                memberAnnotParentPageIds.add(noteData.pageUrl)
-
-                if (!noteData.isShared && !noteData.isBulkShareProtected) {
-                    memberPrivateAnnotIds.add(noteData.url)
-                }
-            }
-        }
-
-        const mutation: UIMutation<State['searchResults']> = {
-            pageData: { byId: {} },
-            noteData: { byId: {} },
-        }
-
-        for (const pageId of memberAnnotParentPageIds) {
-            mutation.pageData = {
-                ...mutation.pageData,
-                byId: {
-                    ...(mutation.pageData as any).byId,
-                    [pageId]: { lists: { $push: [event.listId] } },
-                },
-            }
-        }
-
-        for (const noteId of memberPrivateAnnotIds) {
-            mutation.noteData = {
-                ...mutation.noteData,
-                byId: {
-                    ...(mutation.noteData as any).byId,
-                    [noteId]: { isBulkShareProtected: { $set: true } },
-                },
-            }
-        }
-
-        // Should trigger state update on `newListsState` cache event
-        this.options.annotationsCache.updateList({
-            unifiedId: event.listId,
-            remoteId: event.remoteListId.toString(),
-        })
-
-        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
-            const annotData = this.options.annotationsCache.getAnnotationByLocalId(
-                localAnnotId,
-            )
-            if (!annotData) {
-                continue
-            }
-            this.options.annotationsCache.updateAnnotation({
-                unifiedId: annotData.unifiedId,
-                ...annotData,
-                remoteId: event.annotationLocalToRemoteIdsDict[
-                    localAnnotId
-                ].toString(),
-            })
-        }
-
-        this.emitMutation({ searchResults: mutation })
     }
 
     setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {

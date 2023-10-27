@@ -6,6 +6,7 @@ import type {
     SharedList,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import type { ListShareResult } from 'src/content-sharing/background/types'
 
 export interface PageList {
     id: number
@@ -72,19 +73,34 @@ export interface CollectionsCacheInterface {
 }
 
 export interface RemoteCollectionsInterface {
-    createCustomList(args: {
-        name: string
-        id?: number
-        type?: 'page-link'
-        createdAt?: Date
-        dontTrack?: boolean
-    }): Promise<number>
     createListTree(args: {
         localListId: number
         parentId?: number
         now?: number
     }): Promise<{ treeId: number }>
     deleteListTree(args: { treeId: number }): Promise<void>
+    createCustomList(
+        args: {
+            name: string
+            id?: number
+            createdAt?: Date
+            dontTrack?: boolean
+        } & (
+            | {
+                  type?: never
+              }
+            | {
+                  /** If set, list + key IDs are expected to be pre-generated and supplied. */
+                  type: 'page-link'
+                  collabKey: string
+                  remoteListId: string
+              }
+        ),
+    ): Promise<
+        ListShareResult & {
+            localListId: number
+        }
+    >
     insertPageToList(args: {
         id: number
         url: string

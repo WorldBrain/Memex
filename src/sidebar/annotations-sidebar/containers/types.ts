@@ -370,11 +370,6 @@ interface SidebarEvents {
         oldName: string
     }
     deleteList: { unifiedListId: UnifiedList['unifiedId'] }
-    shareList: {
-        unifiedListId: UnifiedList['unifiedId']
-        remoteListId: AutoPk
-        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
-    }
     setListPrivacy: {
         unifiedListId: UnifiedList['unifiedId']
         isPrivate: boolean

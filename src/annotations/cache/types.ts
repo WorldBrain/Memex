@@ -67,6 +67,7 @@ export interface PageAnnotationsCacheInterface {
                     | 'remoteId'
                     | 'description'
                     | 'name'
+                    | 'collabKey'
                     | 'normalizedPageUrl'
                     | 'hasRemoteAnnotationsToLoad'
                     | 'sharedListEntryId'
@@ -131,7 +132,7 @@ type CoreUnifiedList<T> = {
     // Core list data
     unifiedId: string
     localId?: number
-    remoteId?: string
+    remoteId?: string // TODO: Make this non-optional and update all usages
     collabKey?: string
     name: string
     isPrivate?: boolean

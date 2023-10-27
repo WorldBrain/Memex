@@ -565,7 +565,7 @@ export class PageIndexingBackground {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
                 props.tabId = foundTabId
-            } else {
+            } else if (!props.fullUrl.includes('mail.google.com/mail')) {
                 delete props.tabId
             }
         }

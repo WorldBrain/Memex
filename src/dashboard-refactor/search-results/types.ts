@@ -26,7 +26,13 @@ export interface CommonInteractionProps {
 
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
-    createNewList: (name: string) => Promise<number>
+    createNewList: (
+        name: string,
+    ) => Promise<{
+        localListId: number
+        remoteListId: string
+        collabKey: string
+    }>
 }
 
 export type PageInteractionProps = Omit<

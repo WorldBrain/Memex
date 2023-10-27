@@ -1492,7 +1492,13 @@ export class AnnotationsSidebar extends React.Component<
                         )}
                     {this.props.pageSummary?.length > 0 ? (
                         <SummaryText ref={this.pageSummaryText}>
-                            {this.props.pageSummary}
+                            <Markdown
+                                getYoutubePlayer={this.props.getYoutubePlayer}
+                                contextLocation={this.props.sidebarContext}
+                                isStream={true}
+                            >
+                                {this.props.pageSummary.trim()}
+                            </Markdown>
                         </SummaryText>
                     ) : (
                         <AIContainerNotif>
@@ -1705,6 +1711,9 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.navigateFocusInList('down')
                                     focus()
                                 }
+                                event.stopPropagation()
+                            }}
+                            onKeyUp={async (event) => {
                                 event.stopPropagation()
                             }}
                             onClick={() =>

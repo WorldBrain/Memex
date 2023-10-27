@@ -64,6 +64,7 @@ export default class CustomListBackground {
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
             createListTree: this.createListTree,
+            deleteListTree: this.deleteListTree,
             insertPageToList: async (params) => {
                 const currentTab = await this.options.queryTabs?.({
                     active: true,
@@ -319,9 +320,10 @@ export default class CustomListBackground {
         type,
         createdAt,
         dontTrack,
+        ...preGeneratedIds
     }) => {
         const id = _id ?? this.generateListId()
-        const inserted = await this.storage.insertCustomList({
+        const localListId = await this.storage.insertCustomList({
             id,
             type,
             name,
@@ -330,8 +332,15 @@ export default class CustomListBackground {
             dontTrack,
         })
         await this.updateListSuggestionsCache({ added: id })
+        const listShareResult = await this.options.contentSharing.scheduleListShare(
+            {
+                localListId,
+                isPrivate: type !== 'page-link',
+                ...preGeneratedIds,
+            },
+        )
 
-        return inserted
+        return { ...listShareResult, localListId }
     }
 
     createListTree: RemoteCollectionsInterface['createListTree'] = async ({
