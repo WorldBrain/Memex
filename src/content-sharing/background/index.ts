@@ -427,6 +427,7 @@ export default class ContentSharingBackground {
         })
 
         return {
+            collabKey,
             remoteListId,
             annotationLocalToRemoteIdsDict,
             links: [

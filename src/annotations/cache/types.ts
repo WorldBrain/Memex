@@ -67,6 +67,7 @@ export interface PageAnnotationsCacheInterface {
                     | 'remoteId'
                     | 'description'
                     | 'name'
+                    | 'collabKey'
                     | 'normalizedPageUrl'
                     | 'hasRemoteAnnotationsToLoad'
                     | 'sharedListEntryId'

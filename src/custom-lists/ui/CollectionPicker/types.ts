@@ -81,6 +81,7 @@ export interface SpacePickerDependencies {
     ) => Promise<{
         localListId: number
         remoteListId: string
+        collabKey: string
     }>
     selectEntry: (
         listId: number,

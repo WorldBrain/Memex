@@ -17,6 +17,7 @@ export type ListShareResult = Omit<
     SharedListData,
     'annotationSharingStatesPromise'
 > & {
+    collabKey: string
     annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
 }
 

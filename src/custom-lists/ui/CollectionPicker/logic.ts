@@ -830,11 +830,13 @@ export default class SpacePickerLogic extends UILogic<
         previousState: SpacePickerState,
     ): Promise<number> {
         const {
+            collabKey,
             localListId,
             remoteListId,
         } = await this.dependencies.createNewEntry(name)
         this.dependencies.annotationsCache.addList({
             name,
+            collabKey,
             localId: localListId,
             remoteId: remoteListId,
             hasRemoteAnnotationsToLoad: false,

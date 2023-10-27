@@ -3498,6 +3498,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 })
                 const {
+                    collabKey,
                     remoteListId,
                 } = await this.options.listsBG.createCustomList({
                     name: newListName,
@@ -3505,6 +3506,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
                 this.options.annotationsCache.updateList({
                     unifiedId,
+                    collabKey,
                     remoteId: remoteListId,
                 })
             },

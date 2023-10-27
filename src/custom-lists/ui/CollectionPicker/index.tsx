@@ -55,7 +55,6 @@ class SpacePicker extends StatefulUIElement<
         | 'pageActivityIndicatorBG'
         | 'annotationsCache'
         | 'localStorageAPI'
-        | 'createNewEntry'
         | 'analyticsBG'
     > = {
         authBG: auth,
@@ -65,7 +64,6 @@ class SpacePicker extends StatefulUIElement<
         localStorageAPI: browser.storage.local,
         pageActivityIndicatorBG: pageActivityIndicator,
         annotationsCache: new PageAnnotationsCache({}),
-        createNewEntry: (name) => collections.createCustomList({ name }),
     }
 
     static MOD_KEY = getKeyName({ key: 'mod' })
