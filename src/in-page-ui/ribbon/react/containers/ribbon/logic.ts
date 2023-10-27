@@ -609,7 +609,7 @@ export class RibbonContainerLogic extends UILogic<
 
             const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
 
-            let title: string = null
+            let title: string = document.title
 
             if (window.location.href.includes('web.telegram.org')) {
                 title = getTelegramUserDisplayName(
