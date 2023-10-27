@@ -31,7 +31,6 @@ import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
-import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends ContainerProps {
@@ -39,7 +38,6 @@ export interface Props extends ContainerProps {
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
     imageSupport?: ImageSupportInterface<'caller'>
-    pkmSyncBG: PkmSyncInterface
     bgScriptBG?: RemoteBGScriptInterface
 }
 

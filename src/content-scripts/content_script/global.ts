@@ -91,7 +91,6 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
@@ -203,7 +202,6 @@ export async function main(
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
-    const pkmSyncBG = runInBackground<PkmSyncInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
@@ -349,7 +347,6 @@ export async function main(
                     },
                     annotationsBG,
                     contentSharingBG,
-                    pkmSyncBG: pkmSyncBG,
                     skipPageIndexing: false,
                     syncSettingsBG: syncSettingsBG,
                     privacyLevelOverride: privacyLevel,
@@ -839,7 +836,6 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
-                pkmSyncBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },

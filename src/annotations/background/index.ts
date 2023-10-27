@@ -28,7 +28,7 @@ import { ServerStorageModules } from 'src/storage/types'
 import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
 import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 
 interface TabArg {
@@ -48,7 +48,7 @@ export default class DirectLinkingBackground {
             analyticsBG: AnalyticsCoreInterface
             pages: PageIndexingBackground
             socialBg: SocialBG
-            pkmSyncBG: PkmSyncInterface
+            pkmSyncBG: PKMSyncBackgroundModule
             normalizeUrl?: URLNormalizer
             analytics: Analytics
             serverStorage: Pick<

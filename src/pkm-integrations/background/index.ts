@@ -1,13 +1,14 @@
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { checkServerStatus } from '../../backup-restore/ui/utils'
 import { MemexLocalBackend } from '../background/backend'
-import { PkmSyncInterface } from './types'
 import { marked } from 'marked'
 import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
 import { pageTitle } from 'src/sidebar-overlay/sidebar/selectors'
+import type { PkmSyncInterface } from './types'
+
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
     remoteFunctions: PkmSyncInterface
@@ -19,33 +20,31 @@ export class PKMSyncBackgroundModule {
         this.backendNew = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
-
-        this.remoteFunctions = {
-            pushPKMSyncUpdate: async (item, checkForFilteredSpaces) => {
-                if (await this.backendNew.isConnected()) {
-                    const bufferedItems = await this.getBufferedItems()
-                    bufferedItems.push(item)
-                    const PKMSYNCremovewarning = await browser.storage.local.get(
-                        'PKMSYNCremovewarning',
-                    )
-
-                    this.PKMSYNCremovewarning =
-                        PKMSYNCremovewarning.PKMSYNCremovewarning
-
-                    for (const item of bufferedItems) {
-                        await this.processChanges(item, checkForFilteredSpaces)
-                    }
-                } else {
-                    await this.bufferPKMSyncItems(item)
-                }
-            },
-        }
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable({
             ...this.remoteFunctions,
         })
+    }
+
+    async pushPKMSyncUpdate(item, checkForFilteredSpaces) {
+        if (await this.backendNew.isConnected()) {
+            const bufferedItems = await this.getBufferedItems()
+            bufferedItems.push(item)
+            const PKMSYNCremovewarning = await browser.storage.local.get(
+                'PKMSYNCremovewarning',
+            )
+
+            this.PKMSYNCremovewarning =
+                PKMSYNCremovewarning.PKMSYNCremovewarning
+
+            for (const item of bufferedItems) {
+                await this.processChanges(item, checkForFilteredSpaces)
+            }
+        } else {
+            await this.bufferPKMSyncItems(item)
+        }
     }
 
     async applySyncFilters(pkmType, item, checkForFilteredSpaces) {
