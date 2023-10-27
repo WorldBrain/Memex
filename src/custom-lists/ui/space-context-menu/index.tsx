@@ -10,9 +10,9 @@ import SpaceEmailInvites from '../space-email-invites'
 import { __wrapClick } from '../utils'
 import SpaceLinks from '../space-links'
 
-export interface Props extends Dependencies {
-    disableWriteOps?: boolean
-}
+export interface Props extends Dependencies {}
+
+const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
 
 export default class SpaceContextMenuContainer extends StatefulUIElement<
     Props,
@@ -23,17 +23,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         copyToClipboard,
     }
 
-    /**
-     * This only exists as we're awkwardly doing the list share from this component's stateful logic on load if remoteId == null
-     *  and SpaceInviteLinks logic tries to load them from the DB. Though in this case they're not ready and should instead be passed
-     *  down from this comp once sharing is complete.
-     *  TODO: Ideally we move sharing to happen in the BG then we can write the UI assuming lists are always already shared.
-     */
-    private isFirstOpenOnNewList = false
-
     constructor(props: Props) {
         super(props, new Logic(props))
-        this.isFirstOpenOnNewList = props.listData.remoteId == null
+    }
+
+    private get isFollowedSpace(): boolean {
+        return this.props.listData.localId == null
     }
 
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
@@ -43,37 +38,8 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         }
     }
 
-    private handleNameChange: React.KeyboardEventHandler = async (event) => {
-        const name = (event.target as HTMLInputElement).value
-        await this.processEvent('updateSpaceName', { name })
-    }
-
-    private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
-        e,
-    ) => {
-        if (e.key === 'Escape') {
-            // Allow escape keydown to bubble up to close the sidebar only if no input state
-            if (this.state.nameValue.trim().length) {
-                e.stopPropagation()
-            }
-            await this.processEvent('cancelSpaceNameEdit', null)
-            return
-        }
-
-        if (e.key === 'Enter') {
-            if (this.state.nameValue.trim().length > 0) {
-                e.preventDefault()
-                e.stopPropagation()
-                await this.processEvent('confirmSpaceNameEdit', null)
-            }
-        }
-
-        // If we don't have this, events will bubble up into the page!
-        e.stopPropagation()
-    }
-
     private renderMainContent() {
-        if (this.state.mode === 'followed-space') {
+        if (this.isFollowedSpace) {
             return (
                 <DeleteBox>
                     <PrimaryAction
@@ -85,7 +51,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             )
         }
 
-        const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
         return (
             <ContextMenuContainer>
                 {this.props.isCreator && this.props.listData.remoteId != null && (

@@ -342,7 +342,7 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private handleSpaceContextMenuClose = (listId: number) => async () => {
-        const name = this.contextMenuRef?.current?.state.nameValue
+        const name = this.props.annotationsCache.getListByLocalId(listId)?.name
         if (name != null) {
             await this.processEvent('renameList', {
                 listId,
@@ -398,7 +398,6 @@ class SpacePicker extends StatefulUIElement<
                         )}
                     </PrimaryActionBox>
                     <SpaceContextMenu
-                        loadOwnershipData
                         isCreator={
                             list.creator?.id === this.state.currentUser?.id
                         }
@@ -406,12 +405,6 @@ class SpacePicker extends StatefulUIElement<
                         ref={this.contextMenuRef}
                         contentSharingBG={this.props.contentSharingBG}
                         analyticsBG={this.props.analyticsBG}
-                        spacesBG={this.props.spacesBG}
-                        onDeleteSpaceConfirm={() =>
-                            this.processEvent('deleteList', {
-                                listId: list.localId,
-                            })
-                        }
                         errorMessage={this.state.renameListErrorMessage}
                         onSetSpacePrivate={(isPrivate) =>
                             this.processEvent('setListPrivacy', {
@@ -419,15 +412,6 @@ class SpacePicker extends StatefulUIElement<
                                 isPrivate,
                             })
                         }
-                        onConfirmSpaceNameEdit={(name) => {
-                            this.processEvent('renameList', {
-                                listId: list.localId,
-                                name,
-                            })
-                        }}
-                        onCancelEdit={this.handleSpaceContextMenuClose(
-                            list.localId,
-                        )}
                     />
                 </>
             )

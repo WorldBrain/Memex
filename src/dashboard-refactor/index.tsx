@@ -538,29 +538,18 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 currentUser={this.state.currentUser}
                 initContextMenuBtnProps={(listId) => ({
-                    loadOwnershipData: true,
-                    spacesBG: this.props.listsBG,
                     contentSharingBG: this.props.contentShareBG,
-                    onCancelEdit: () =>
-                        this.processEvent('cancelListEdit', null),
-                    onConfirmSpaceNameEdit: (value) =>
-                        this.processEvent('confirmListEdit', {
-                            value,
-                            listId,
-                            skipDBOps: true,
-                        }),
+                    analyticsBG: this.props.analyticsBG,
+                    spacesBG: this.props.listsBG,
                     onSetSpacePrivate: (isPrivate) =>
                         this.processEvent('setListPrivacy', {
                             listId,
                             isPrivate,
                         }),
-                    onDeleteSpaceIntent: () =>
-                        this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
                     toggleEditMenu: () =>
                         this.processEvent('setEditMenuListId', { listId }),
-                    analyticsBG: this.props.analyticsBG,
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {

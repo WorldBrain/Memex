@@ -1168,21 +1168,7 @@ export class AnnotationsSidebarContainer<
                                         contentSharingBG={
                                             this.props.contentSharingBG
                                         }
-                                        spacesBG={this.props.customListsBG}
                                         listData={listData}
-                                        disableWriteOps={
-                                            this.state
-                                                .hasListDataBeenManuallyPulled
-                                        }
-                                        onConfirmSpaceNameEdit={(newName) => {
-                                            this.processEvent('editListName', {
-                                                unifiedListId:
-                                                    listData.unifiedId,
-                                                localId: listData.localId,
-                                                newName,
-                                                oldName: listData.name,
-                                            })
-                                        }}
                                         onSetSpacePrivate={(isPrivate) =>
                                             this.processEvent(
                                                 'setListPrivacy',
@@ -1192,12 +1178,6 @@ export class AnnotationsSidebarContainer<
                                                     isPrivate,
                                                 },
                                             )
-                                        }
-                                        onDeleteSpaceConfirm={() =>
-                                            this.processEvent('deleteList', {
-                                                unifiedListId:
-                                                    listData.unifiedId,
-                                            })
                                         }
                                         analyticsBG={this.props.analyticsBG}
                                     />
