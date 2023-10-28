@@ -24,6 +24,7 @@ export type InPageUISidebarAction =
     | 'show_transcript'
     | 'create_youtube_timestamp_with_AI_summary'
     | 'create_youtube_timestamp_with_screenshot'
+    | 'open_chapter_summary'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
@@ -52,7 +53,7 @@ export interface SidebarActionOptions {
     highlightedText?: string
     commentText?: string
     listId?: number
-    timeStampANDSummaryJSON?: string[]
+    videoRangeTimestamps?: number[]
     imageData?: string
 }
 

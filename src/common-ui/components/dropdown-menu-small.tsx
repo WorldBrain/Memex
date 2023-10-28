@@ -26,6 +26,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     theme?: ThemeProps
     keepSelectedState?: boolean
     initSelectedIndex?: number
+    selectedState?: number
     btnId?: string
     menuTitle?: string
     width?: string
@@ -100,6 +101,12 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 
     private renderMenuItems() {
+        if (this.props.selectedState === 1) {
+            this.setState({
+                selected: 1,
+            })
+        }
+
         return (
             <MenuItemContainerUnfolded isOpen={this.state.isOpened}>
                 {this.props.menuItems.map((props, i) => (
@@ -152,7 +159,9 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const selectedMenuItem = this.props.menuItems[this.state.selected]
+        const selectedMenuItem = this.props.menuItems[
+            this.props.selectedState || this.state.selected
+        ]
 
         return (
             <ThemeProvider theme={this.theme}>
