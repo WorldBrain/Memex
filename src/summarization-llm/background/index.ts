@@ -17,7 +17,6 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             textToProcess?: string
             queryPrompt?: string
             apiKey?: string
-            shortSummary?: boolean
             outputLocation?: 'editor' | 'summaryContainer' | 'chapterSummary'
             chapterSummaryIndex?: number
         }
@@ -70,7 +69,6 @@ export default class SummarizeBackground {
             textToProcess,
             queryPrompt,
             apiKey,
-            shortSummary,
             outputLocation,
             chapterSummaryIndex,
         },
@@ -91,7 +89,6 @@ export default class SummarizeBackground {
             queryPrompt,
             apiKey,
             undefined,
-            shortSummary,
         )) {
             const token = result?.t
             if (token?.length > 0) {

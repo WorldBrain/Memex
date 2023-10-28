@@ -310,7 +310,7 @@ export class SidebarContainerLogic extends UILogic<
             activeShareMenuNoteId: undefined,
             immediatelyShareNotes: false,
             pageHasNetworkAnnotations: false,
-            queryMode: 'glanceSummary',
+            queryMode: 'summarize',
             showLengthError: false,
             showAISuggestionsDropDown: false,
             showAICounter: false,
@@ -1371,7 +1371,6 @@ export class SidebarContainerLogic extends UILogic<
                 event.fullPageUrl,
                 undefined,
                 undefined,
-                true,
                 previousState,
                 undefined,
             )
@@ -2114,7 +2113,6 @@ export class SidebarContainerLogic extends UILogic<
         fullPageUrl,
         highlightedText,
         prompt?,
-        shortSummary?: boolean,
         previousState?: SidebarContainerState,
         textAsAlternative?: string,
         outputLocation?:
@@ -2126,11 +2124,6 @@ export class SidebarContainerLogic extends UILogic<
     ) {
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
-        const maxLength = 200000
-        const articleLengthTooMuch =
-            ((textAsAlternative && textAsAlternative.length > maxLength) ||
-                document.body.innerText.length > maxLength) &&
-            previousState.queryMode === 'summarize'
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
 
@@ -2154,7 +2147,7 @@ export class SidebarContainerLogic extends UILogic<
             : 'text'
 
         let queryPrompt = prompt
-            ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}": \n\n`
+            ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}". Do not introduce your summary, just output the summary. \n\n`
             : undefined
 
         if (!previousState.isTrial) {
@@ -2178,21 +2171,6 @@ export class SidebarContainerLogic extends UILogic<
             showAICounter: { $set: true },
         })
 
-        if (
-            (!highlightedText && articleLengthTooMuch) ||
-            (textAsAlternative && articleLengthTooMuch)
-        ) {
-            this.emitMutation({
-                showLengthError: { $set: true },
-                loadState: { $set: 'success' },
-            })
-            return
-        } else {
-            this.emitMutation({
-                showLengthError: { $set: false },
-            })
-        }
-
         let textToAnalyse = textAsAlternative
             ? textAsAlternative
             : highlightedText
@@ -2202,6 +2180,8 @@ export class SidebarContainerLogic extends UILogic<
         if (previousState.fetchLocalHTML) {
             textToAnalyse = document.title + document.body.innerText
         }
+
+        console.log('text', textToAnalyse)
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
@@ -2213,7 +2193,6 @@ export class SidebarContainerLogic extends UILogic<
             textToProcess: textToAnalyse,
             queryPrompt: queryPrompt,
             apiKey: openAIKey ? openAIKey : undefined,
-            shortSummary: shortSummary,
             outputLocation: outputLocation ?? null,
             chapterSummaryIndex: chapterSummaryIndex ?? null,
         })
@@ -2410,6 +2389,8 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        console.log('event', event.highlightedText)
+
         this.emitMutation({
             prompt: { $set: event.prompt },
             showAISuggestionsDropDown: {
@@ -2437,33 +2418,26 @@ export class SidebarContainerLogic extends UILogic<
                 loadState: { $set: 'running' },
             })
 
-            if (previousState.queryMode === 'question') {
+            if (
+                event.queryMode === 'question' ||
+                previousState.queryMode === 'question'
+            ) {
                 this.queryAI(
                     undefined,
-                    event.highlightedText ||
-                        previousState.selectedTextAIPreview,
+                    null,
                     event.prompt ? event.prompt : previousState.prompt,
-                    false,
                     previousState,
                     undefined,
                 )
-            } else if (previousState.queryMode === 'summarize') {
+            } else if (
+                event.queryMode === 'summarize' ||
+                previousState.queryMode === 'summarize'
+            ) {
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
                     event.highlightedText ||
                         previousState.selectedTextAIPreview,
                     event.prompt ? event.prompt : previousState.prompt,
-                    false,
-                    previousState,
-                    isPagePDF ? fullTextToProcess : undefined,
-                )
-            } else if (previousState.queryMode === 'glanceSummary') {
-                this.queryAI(
-                    isPagePDF ? undefined : previousState.fullPageUrl,
-                    event.highlightedText ||
-                        previousState.selectedTextAIPreview,
-                    event.prompt ? event.prompt : previousState.prompt,
-                    true,
                     previousState,
                     isPagePDF ? fullTextToProcess : undefined,
                 )
@@ -2516,8 +2490,13 @@ export class SidebarContainerLogic extends UILogic<
 
         let prompt = 'Summarise this for me: '
 
+        console.log('hihglihted', event.textToProcess)
         await this.processUIEvent('queryAIwithPrompt', {
-            event: { prompt: prompt, highlightedText: event.textToProcess },
+            event: {
+                prompt: prompt,
+                highlightedText: event.textToProcess,
+                queryMode: 'summarize',
+            },
             previousState,
         })
 
@@ -2580,7 +2559,6 @@ export class SidebarContainerLogic extends UILogic<
                         undefined,
                         event.textToProcess,
                         undefined,
-                        undefined,
                         previousState,
                     )
                 } else {
@@ -2592,9 +2570,6 @@ export class SidebarContainerLogic extends UILogic<
                         isPagePDF ? undefined : previousState.fullPageUrl,
                         undefined,
                         undefined,
-                        previousState.queryMode === 'glanceSummary'
-                            ? true
-                            : false,
                         previousState,
                         isPagePDF ? fullTextToProcess : undefined,
                     )
@@ -2999,7 +2974,6 @@ export class SidebarContainerLogic extends UILogic<
             undefined,
             textToSummarise,
             prompt,
-            undefined,
             previousState,
             null,
             'chapterSummary',
@@ -3109,7 +3083,6 @@ export class SidebarContainerLogic extends UILogic<
             undefined,
             combinedText,
             prompt,
-            undefined,
             previousState,
             null,
             'editor',

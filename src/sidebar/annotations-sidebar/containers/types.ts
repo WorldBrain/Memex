@@ -298,6 +298,7 @@ interface SidebarEvents {
     queryAIwithPrompt: {
         prompt: string
         highlightedText?: string
+        queryMode?: string
     }
     setQueryMode: {
         mode: string

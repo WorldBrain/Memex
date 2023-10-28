@@ -1862,6 +1862,8 @@ export class AnnotationsSidebar extends React.Component<
                                         if (index === 2) {
                                             await this.props.queryAIwithPrompt(
                                                 this.props.prompt,
+                                                undefined,
+                                                queryMode,
                                             )
                                         }
                                     }}
@@ -3232,7 +3234,8 @@ const SelectedTextBoxBar = styled.div`
 const SelectedAIText = styled.div<{ fullHeight: boolean }>`
     color: ${(props) => props.theme.colors.white};
     flex: 1;
-    font-size: 16px;
+    font-size: 14px;
+    line-height: 22px;
     flex-wrap: wrap;
     display: flex;
     overflow: scroll
