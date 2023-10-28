@@ -196,6 +196,7 @@ export default class CustomListBackground {
             remoteId: sharedList.reference.id.toString(),
             createdAt: new Date(sharedList.createdWhen),
             isOwned: sharedList.creator.id === currentUser.id,
+            parentListId: null,
         }
     }
 
@@ -203,14 +204,26 @@ export default class CustomListBackground {
         skip = 0,
         limit = 2000,
         skipSpecialLists = false,
+        includeTreeData,
         includeDescriptions,
     }): Promise<PageList[]> => {
-        return this.storage.fetchAllLists({
+        const lists = await this.storage.fetchAllLists({
             includeDescriptions,
             skipSpecialLists,
             limit,
             skip,
         })
+
+        const treeDataByList = includeTreeData
+            ? await this.storage.getTreeDataForLists({
+                  localListIds: lists.map((list) => list.id),
+              })
+            : {}
+
+        return lists.map((list) => ({
+            ...list,
+            parentListId: treeDataByList[list.id]?.parentId ?? null,
+        }))
     }
 
     fetchListById = async ({ id }: { id: number }) => {

@@ -687,6 +687,7 @@ describe('Page annotations cache tests', () => {
             name: 'new shared list',
             unifiedAnnotationIds: [],
             hasRemoteAnnotationsToLoad: false,
+            parentLocalId: null,
         })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
@@ -856,6 +857,7 @@ describe('Page annotations cache tests', () => {
             remoteId: 'remote-list-id-2000',
             collabKey: 'test-collab-key-1',
             localId: 2000,
+            parentLocalId: null,
         }
 
         expect(cache.getListByLocalId(testList.localId)).toEqual(null)

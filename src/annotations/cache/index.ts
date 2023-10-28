@@ -392,7 +392,23 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.localListIdsToCacheIds.clear()
         this.remoteListIdsToCacheIds.clear()
 
-        const seedData = [...lists].map(this.prepareListForCaching)
+        const localToCacheId = new Map<number, string>()
+        const seedData = [...lists].map((list) => {
+            const prepared = this.prepareListForCaching(list)
+            if (list.localId) {
+                localToCacheId.set(list.localId, prepared.unifiedId)
+            }
+            return prepared
+        })
+
+        // Go over prepared lists once more to fix parent cache IDs
+        for (const list of seedData) {
+            if (list.parentLocalId != null) {
+                list.parentUnifiedId =
+                    localToCacheId.get(list.parentLocalId) ?? null
+            }
+        }
+
         this.lists = initNormalizedState({
             seedData,
             getId: (list) => list.unifiedId,
@@ -473,6 +489,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     addList: PageAnnotationsCacheInterface['addList'] = (list) => {
         const nextList = this.prepareListForCaching(list)
+
+        if (nextList.parentLocalId != null) {
+            nextList.parentUnifiedId =
+                this.getListByLocalId(nextList.parentLocalId)?.unifiedId ?? null
+        }
+
         this.lists.allIds = [nextList.unifiedId, ...this.lists.allIds]
         this.lists.byId = {
             ...this.lists.byId,

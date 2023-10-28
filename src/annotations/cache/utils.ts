@@ -132,6 +132,8 @@ export const reshapeLocalListForCache = (
         description: list.description,
         unifiedAnnotationIds: [],
         hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
+        parentUnifiedId: null, // NOTE: this will be derived inside cache add logic
+        parentLocalId: list.parentListId,
         ...(opts.extraData ?? {}),
     }
 }
@@ -152,6 +154,8 @@ export const reshapeFollowedListForCache = (
     description: undefined,
     unifiedAnnotationIds: [],
     hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
+    parentUnifiedId: null,
+    parentLocalId: null,
     ...(opts.extraData ?? {}),
 })
 
@@ -217,9 +221,9 @@ export async function hydrateCacheForPageAnnotations(
     },
 ): Promise<void> {
     if (!args.skipListHydration) {
-        const localListsData = await args.bgModules.customLists.fetchAllLists(
-            {},
-        )
+        const localListsData = await args.bgModules.customLists.fetchAllLists({
+            includeTreeData: true,
+        })
         const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
             {
                 localListIds: localListsData.map((list) => list.id),
@@ -305,6 +309,7 @@ export async function hydrateCacheForListUsage(
     const localListsData = await args.bgModules.customLists.fetchAllLists({
         includeDescriptions: true,
         skipSpecialLists: true,
+        includeTreeData: true,
     })
     const followedListsData = await args.bgModules.pageActivityIndicator.getAllFollowedLists()
     const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(

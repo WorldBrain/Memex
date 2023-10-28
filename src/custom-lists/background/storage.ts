@@ -32,6 +32,8 @@ import {
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { buildMaterializedPath } from 'src/content-sharing/utils'
+import type { CustomListTree } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import fromPairs from 'lodash/fromPairs'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -85,6 +87,11 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_TREES_COLL,
                     operation: 'findObject',
                     args: { id: '$id:int' },
+                },
+                findListTreesByLocalListIds: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'findObjects',
+                    args: { listId: { $in: '$ids:int[]' } },
                 },
                 findListsIncluding: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -498,7 +505,7 @@ export default class CustomListStorage extends StorageModule {
         const { object } = await this.operation('createListTree', {
             listId: params.localListId,
             parentId: params.parentId ?? null,
-            path: params.pathIds
+            path: params.pathIds.length
                 ? buildMaterializedPath(...params.pathIds)
                 : null,
             order: 1, // TODO: Work out how to set initial order
@@ -530,6 +537,16 @@ export default class CustomListStorage extends StorageModule {
             pathIds.unshift(parentId)
         }
         return pathIds
+    }
+
+    async getTreeDataForLists(params: {
+        localListIds: number[]
+    }): Promise<{ [localListId: number]: CustomListTree | null }> {
+        const listTrees: CustomListTree[] = await this.operation(
+            'findListTreesByLocalListIds',
+            { ids: params.localListIds },
+        )
+        return fromPairs(listTrees.map((tree) => [tree.listId, tree]))
     }
 
     async deleteListTree(params: { treeId: number }): Promise<void> {

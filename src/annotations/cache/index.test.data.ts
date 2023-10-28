@@ -87,6 +87,8 @@ export function LISTS(): UnifiedList[] {
             name: 'test local list',
             hasRemoteAnnotationsToLoad: false,
             creator: USER_1,
+            parentLocalId: null,
+            parentUnifiedId: null,
             unifiedAnnotationIds: [ANNOTATION_IDS[0], ANNOTATION_IDS[1]],
         },
         {
@@ -98,6 +100,8 @@ export function LISTS(): UnifiedList[] {
             hasRemoteAnnotationsToLoad: false,
             description: 'test list description 1',
             creator: USER_1,
+            parentLocalId: null,
+            parentUnifiedId: null,
             unifiedAnnotationIds: [
                 ANNOTATION_IDS[0],
                 ANNOTATION_IDS[2],
@@ -111,6 +115,8 @@ export function LISTS(): UnifiedList[] {
             name: 'test followed list',
             hasRemoteAnnotationsToLoad: false,
             creator: USER_2,
+            parentLocalId: null,
+            parentUnifiedId: null,
             unifiedAnnotationIds: [ANNOTATION_IDS[3]],
         },
         {
@@ -123,6 +129,8 @@ export function LISTS(): UnifiedList[] {
             normalizedPageUrl: NORMALIZED_PAGE_URL_2,
             hasRemoteAnnotationsToLoad: true,
             creator: USER_2,
+            parentLocalId: null,
+            parentUnifiedId: null,
             unifiedAnnotationIds: [ANNOTATION_IDS[3]],
         },
     ]

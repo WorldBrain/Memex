@@ -843,6 +843,7 @@ export default class SpacePickerLogic extends UILogic<
             type: 'user-list',
             unifiedAnnotationIds: [],
             creator: previousState.currentUser ?? undefined,
+            parentLocalId: null,
             isPrivate: true,
         })
 

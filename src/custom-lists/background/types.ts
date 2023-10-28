@@ -15,6 +15,7 @@ export interface PageList {
     description?: string
     pages?: string[]
     createdAt: Date
+    parentListId: number | null
     isNestable?: boolean
     isDeletable?: boolean
     isOwned?: boolean
@@ -148,6 +149,7 @@ export interface RemoteCollectionsInterface {
     fetchAllLists(args: {
         skip?: number
         limit?: number
+        includeTreeData?: boolean
         skipSpecialLists?: boolean
         includeDescriptions?: boolean
     }): Promise<PageList[]>

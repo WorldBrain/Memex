@@ -166,6 +166,7 @@ export const LOCAL_LISTS: PageList[] = [
         name: 'List 1 - remote shared list',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-19'),
     },
     {
@@ -173,6 +174,7 @@ export const LOCAL_LISTS: PageList[] = [
         name: 'List 2 - remote shared list',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-18'),
     },
     {
@@ -180,6 +182,7 @@ export const LOCAL_LISTS: PageList[] = [
         name: 'List 3 - remote joined list',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-17'),
     },
     {
@@ -187,6 +190,7 @@ export const LOCAL_LISTS: PageList[] = [
         name: 'List 4',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-16'),
     },
     {
@@ -194,6 +198,7 @@ export const LOCAL_LISTS: PageList[] = [
         name: 'List 5',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-15'),
     },
     {
@@ -201,6 +206,7 @@ export const LOCAL_LISTS: PageList[] = [
         name: 'List 6 - not in suggestions',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2022-05-27'),
     },
     {
@@ -208,6 +214,7 @@ export const LOCAL_LISTS: PageList[] = [
         name: createPageLinkListTitle(new Date('2023-05-01')),
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         type: SharedCollectionType.PageLink,
         createdAt: new Date('2023-05-01'),
     },

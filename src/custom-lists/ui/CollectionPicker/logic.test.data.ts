@@ -31,6 +31,7 @@ export const TEST_LISTS: PageList[] = [
         name: 'List 1 test',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-19'),
     },
     {
@@ -38,6 +39,7 @@ export const TEST_LISTS: PageList[] = [
         name: 'List 2',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-18'),
     },
     {
@@ -45,6 +47,7 @@ export const TEST_LISTS: PageList[] = [
         name: 'List 3',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-17'),
     },
     {
@@ -52,6 +55,7 @@ export const TEST_LISTS: PageList[] = [
         name: 'List 4',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-16'),
     },
     {
@@ -59,6 +63,7 @@ export const TEST_LISTS: PageList[] = [
         name: 'List 5',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2021-01-15'),
     },
     {
@@ -66,6 +71,7 @@ export const TEST_LISTS: PageList[] = [
         name: 'List 6 diff',
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         createdAt: new Date('2022-05-27'),
     },
     {
@@ -73,6 +79,7 @@ export const TEST_LISTS: PageList[] = [
         name: createPageLinkListTitle(new Date('2023-05-10')),
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         type: SharedCollectionType.PageLink,
         createdAt: new Date('2023-05-10'),
     },
@@ -81,6 +88,7 @@ export const TEST_LISTS: PageList[] = [
         name: createPageLinkListTitle(new Date('2023-05-11')),
         isNestable: true,
         isDeletable: true,
+        parentListId: null,
         type: SharedCollectionType.PageLink,
         createdAt: new Date('2023-05-11'),
     },
@@ -151,12 +159,13 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
 
 const testListToSuggestion = (
     list: PageList,
-    extra: Pick<UnifiedList, 'unifiedId' | 'type'> & {
-        sharedListEntryId?: string
-        normalizedPageUrl?: string
-        creator?: UserReference
-        pageTitle?: string
-    },
+    extra: Pick<UnifiedList, 'unifiedId' | 'type'> &
+        Partial<Pick<UnifiedList, 'parentLocalId' | 'parentUnifiedId'>> & {
+            sharedListEntryId?: string
+            normalizedPageUrl?: string
+            creator?: UserReference
+            pageTitle?: string
+        },
 ): UnifiedList => ({
     type: extra.type,
     unifiedId: extra.unifiedId,
@@ -170,6 +179,8 @@ const testListToSuggestion = (
     creator: extra.creator,
     normalizedPageUrl: extra.normalizedPageUrl,
     sharedListEntryId: extra.sharedListEntryId,
+    parentUnifiedId: extra.parentUnifiedId ?? null,
+    parentLocalId: extra.parentLocalId ?? null,
 })
 
 export const TEST_USER_LIST_SUGGESTIONS = TEST_LISTS.slice(

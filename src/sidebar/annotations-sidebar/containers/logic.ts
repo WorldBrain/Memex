@@ -3229,6 +3229,7 @@ export class SidebarContainerLogic extends UILogic<
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
+                parentLocalId: null,
                 isPrivate: false,
             }
             this.emitMutation({

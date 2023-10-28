@@ -77,6 +77,8 @@ export const getListData = (
         return {
             name,
             type: 'special-list',
+            parentLocalId: null,
+            parentUnifiedId: null,
             hasRemoteAnnotationsToLoad: false,
             unifiedAnnotationIds: [],
             unifiedId: listsSidebar.selectedListId,

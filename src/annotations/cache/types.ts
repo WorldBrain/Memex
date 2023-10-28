@@ -146,6 +146,9 @@ type CoreUnifiedList<T> = {
 
     // Misc list feature state
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
+    /** Set to the `unifiedId` of another list if this list is in a tree and not the root. */
+    parentUnifiedId: string | null
+    parentLocalId: number | null
 }
 
 export type UnifiedListType = 'user-list' | 'special-list' | 'page-link'
@@ -162,4 +165,6 @@ export type UnifiedList<
 
 export type UnifiedListForCache<
     T extends UnifiedListType = UnifiedListType
-> = Omit<UnifiedList<T>, 'unifiedId'>
+> = Omit<UnifiedList<T>, 'unifiedId' | 'parentUnifiedId' | 'parentLocalId'> & {
+    parentLocalId?: number | null
+}
