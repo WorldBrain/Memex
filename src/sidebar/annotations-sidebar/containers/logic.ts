@@ -101,6 +101,7 @@ import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
+import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -160,6 +161,7 @@ export class SidebarContainerLogic extends UILogic<
     // NOTE: this mirrors the state key of the same name. Only really exists as the cache's `updatedPageData` event listener can't access state :/
     private fullPageUrl: string
     private youtubeTranscriptSummary: string = ''
+    private chapterSummaries
     private editor = null
 
     constructor(private options: SidebarLogicOptions) {
@@ -247,6 +249,7 @@ export class SidebarContainerLogic extends UILogic<
             users: {},
             currentUserReference: null,
             pillVisibility: 'unhover',
+            videoDetails: null,
 
             isWidthLocked: false,
             isLocked: false,
@@ -320,6 +323,10 @@ export class SidebarContainerLogic extends UILogic<
             sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
             pageListDataForCurrentPage: null,
+            youtubeTranscriptJSON: null,
+            showChapters: false,
+            chapterSummaries: [],
+            chapterList: [],
         }
     }
 
@@ -428,16 +435,6 @@ export class SidebarContainerLogic extends UILogic<
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
-        // this.options.events.on('triggerListenerRestart', () => {
-        //     console.log('triggerListenerRestart')
-        //     this.summarisePageEvents.removeListener('newSummaryToken', null)
-        //     this.summarisePageEvents.removeListener(
-        //         'newSummaryTokenEditor',
-        //         null,
-        //     )
-        //     this.setupRemoteEventListeners()
-        // })
-
         let isPageSummaryEmpty = true
         this.summarisePageEvents.on('newSummaryToken', ({ token }) => {
             let newToken = token
@@ -458,6 +455,7 @@ export class SidebarContainerLogic extends UILogic<
 
         this.summarisePageEvents.on('newSummaryTokenEditor', ({ token }) => {
             let newToken = token
+
             if (isPageSummaryEmpty) {
                 newToken = newToken.trimStart() // Remove the first two characters
             }
@@ -480,6 +478,27 @@ export class SidebarContainerLogic extends UILogic<
                 },
             )
         })
+        this.summarisePageEvents.on(
+            'newChapterSummaryToken',
+            ({ token, chapterSummaryIndex }) => {
+                let newToken = token
+                if (this.chapterSummaries[chapterSummaryIndex] == null) {
+                    newToken = newToken.trimStart() // Remove the first two characters
+                }
+
+                this.emitMutation({
+                    chapterSummaries: {
+                        [chapterSummaryIndex]: {
+                            chapterIndex: { $set: chapterSummaryIndex },
+                            summary: {
+                                $apply: (prev) => (prev || '') + newToken,
+                            },
+                            loadingState: { $set: 'success' },
+                        },
+                    },
+                })
+            },
+        )
     }
 
     /** Should only be used for state initialization. */
@@ -851,6 +870,83 @@ export class SidebarContainerLogic extends UILogic<
 
             document.body.style.width = readingWidth
         }
+    }
+
+    private async getYoutubeDetails(url) {
+        const videoId = new URL(url).searchParams.get('v')
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+
+        const normalisedYoutubeURL =
+            'https://www.youtube.com/watch?v=' + videoId
+
+        const response = await fetch(baseUrl + '/youtube-details', {
+            method: 'POST',
+            body: JSON.stringify({
+                originalUrl: normalisedYoutubeURL,
+                getRawTranscript: true,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+
+        let responseContent = await response.text()
+
+        return responseContent
+    }
+    private async getTranscriptSection(
+        transcriptJSON,
+        startTimeSecs,
+        endTimeSecs,
+    ) {
+        const relevantTranscriptItems = transcriptJSON.filter((item) => {
+            const flooredStart = Math.floor(item.start)
+            const flooredEnd = Math.floor(item.end)
+
+            return (
+                (flooredStart >= startTimeSecs &&
+                    flooredStart <= endTimeSecs) ||
+                (flooredEnd >= startTimeSecs && flooredEnd <= endTimeSecs)
+            )
+        })
+
+        return relevantTranscriptItems
+    }
+    private async getYoutubeTranscript(url) {
+        const videoId = new URL(url).searchParams.get('v')
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+
+        const normalisedYoutubeURL =
+            'https://www.youtube.com/watch?v=' + videoId
+
+        const response = await fetch(baseUrl + '/youtube-transcripts', {
+            method: 'POST',
+            body: JSON.stringify({
+                originalUrl: normalisedYoutubeURL,
+                getRawTranscript: true,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+
+        let responseContent = await response.text()
+
+        const transcriptJSON = JSON.parse(responseContent).transcriptText
+
+        if (transcriptJSON === null) {
+            return null
+        }
+
+        return transcriptJSON
     }
 
     sortAnnotations: EventHandler<'sortAnnotations'> = ({
@@ -2021,15 +2117,19 @@ export class SidebarContainerLogic extends UILogic<
         shortSummary?: boolean,
         previousState?: SidebarContainerState,
         textAsAlternative?: string,
-        outputLocation?: 'editor' | 'summaryContainer' | null,
+        outputLocation?:
+            | 'editor'
+            | 'summaryContainer'
+            | 'chapterSummary'
+            | null,
+        chapterSummaryIndex?: number,
     ) {
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
-        const maxLength = 50000
+        const maxLength = 200000
         const articleLengthTooMuch =
             ((textAsAlternative && textAsAlternative.length > maxLength) ||
                 document.body.innerText.length > maxLength) &&
-            !fullPageUrl?.startsWith('https://www.youtube.com/watch') &&
             previousState.queryMode === 'summarize'
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
@@ -2049,19 +2149,32 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
 
-        let queryPrompt = prompt ? prompt : undefined
+        let contentType = fullPageUrl?.includes('youtube.com/watch')
+            ? 'video'
+            : 'text'
+
+        let queryPrompt = prompt
+            ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}": \n\n`
+            : undefined
 
         if (!previousState.isTrial) {
             await updateAICounter()
         }
         this.emitMutation({
             selectedTextAIPreview: {
-                $set: highlightedText ? highlightedText : '',
+                $set:
+                    highlightedText && outputLocation !== 'chapterSummary'
+                        ? highlightedText
+                        : '',
             },
             loadState: {
-                $set: outputLocation != 'editor' ? 'running' : 'pristine',
+                $set:
+                    outputLocation !== 'editor' &&
+                    outputLocation !== 'chapterSummary'
+                        ? 'running'
+                        : 'pristine',
             },
-            prompt: { $set: queryPrompt },
+            prompt: { $set: outputLocation !== 'chapterSummary' && prompt },
             showAICounter: { $set: true },
         })
 
@@ -2091,16 +2204,18 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
-            fullPageUrl: isPagePDF
-                ? undefined
-                : fullPageUrl && fullPageUrl
-                ? fullPageUrl
-                : undefined,
+            fullPageUrl:
+                isPagePDF || previousState.fetchLocalHTML
+                    ? undefined
+                    : fullPageUrl && fullPageUrl
+                    ? fullPageUrl
+                    : undefined,
             textToProcess: textToAnalyse,
             queryPrompt: queryPrompt,
             apiKey: openAIKey ? openAIKey : undefined,
             shortSummary: shortSummary,
             outputLocation: outputLocation ?? null,
+            chapterSummaryIndex: chapterSummaryIndex ?? null,
         })
 
         return response
@@ -2284,12 +2399,32 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (event.prompt == null) {
+            this.emitMutation({
+                showAISuggestionsDropDown: {
+                    $set: false,
+                },
+                showChapters: { $set: false },
+                loadState: { $set: 'success' },
+            })
+            return
+        }
+
         this.emitMutation({
             prompt: { $set: event.prompt },
             showAISuggestionsDropDown: {
                 $set: false,
             },
+            showChapters: { $set: false },
+            loadState: { $set: 'running' },
         })
+
+        if (event.prompt.length === 0) {
+            this.emitMutation({
+                loadState: { $set: 'success' },
+            })
+            return
+        }
 
         if (event.prompt?.length > 0 || previousState.prompt?.length > 0) {
             let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
@@ -2297,6 +2432,10 @@ export class SidebarContainerLogic extends UILogic<
             if (isPagePDF) {
                 fullTextToProcess = document.body.innerText
             }
+
+            this.emitMutation({
+                loadState: { $set: 'running' },
+            })
 
             if (previousState.queryMode === 'question') {
                 this.queryAI(
@@ -2375,7 +2514,7 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        let prompt = 'Summarise this in 2-3 paragraphs'
+        let prompt = 'Summarise this for me: '
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: { prompt: prompt, highlightedText: event.textToProcess },
@@ -2386,7 +2525,7 @@ export class SidebarContainerLogic extends UILogic<
             pageSummary: { $set: '' },
             selectedTextAIPreview: { $set: event.textToProcess },
             prompt: {
-                $set: 'Summarise this in 2-3 paragraphs',
+                $set: prompt,
             },
         })
     }
@@ -2435,6 +2574,7 @@ export class SidebarContainerLogic extends UILogic<
                 if (event.textToProcess) {
                     this.emitMutation({
                         prompt: { $set: '' },
+                        loadState: { $set: 'running' },
                     })
                     await this.queryAI(
                         undefined,
@@ -2446,6 +2586,7 @@ export class SidebarContainerLogic extends UILogic<
                 } else {
                     this.emitMutation({
                         prompt: { $set: event.prompt },
+                        loadState: { $set: 'running' },
                     })
                     await this.queryAI(
                         isPagePDF ? undefined : previousState.fullPageUrl,
@@ -2744,9 +2885,171 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    getVideoChapters: EventHandler<'getVideoChapters'> = async ({
+        previousState,
+    }) => {
+        this.emitMutation({
+            loadState: { $set: 'running' },
+            queryMode: { $set: 'chapterSummary' },
+        })
+        let videoDetails = null
+        if (previousState.videoDetails == null) {
+            videoDetails = JSON.parse(
+                await this.getYoutubeDetails(window.location.href),
+            )
+            if (videoDetails.details.chapters.length === 0) {
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                    showChapters: { $set: true },
+                    videoDetails: { $set: null },
+                })
+                return
+            } else {
+                this.emitMutation({
+                    videoDetails: { $set: videoDetails },
+                })
+            }
+        } else {
+            videoDetails = previousState.videoDetails
+        }
+
+        const chapters = videoDetails.details.chapters
+
+        let chapterListClean = []
+        chapters.map((chapter) => {
+            const chapterStart = chapter.startingMs / 1000
+            const chapterTitle = chapter.title
+
+            const timestampElementsReadable = this.secondsToHMS(chapterStart)
+
+            const videoURLWithTime = constructVideoURLwithTimeStamp(
+                window.location.href,
+                chapterStart,
+            )
+
+            chapterListClean.push({
+                start: chapterStart,
+                humanReadableTimestamp: timestampElementsReadable,
+                linktoSection: videoURLWithTime,
+                title: chapterTitle,
+            })
+        })
+
+        this.emitMutation({
+            chapterList: { $set: chapterListClean },
+            showChapters: { $set: true },
+            loadState: { $set: 'success' },
+        })
+    }
+
+    summariseChapter: EventHandler<'summariseChapter'> = async ({
+        previousState,
+        event,
+    }) => {
+        let chapterSummaries =
+            previousState.chapterSummaries ??
+            previousState.chapterList.map((item, i) => {
+                return null
+            })
+
+        chapterSummaries[event.chapterIndex] = {
+            chapterIndex: event.chapterIndex,
+            summary: '',
+            loadingState: 'running',
+        }
+
+        this.chapterSummaries = chapterSummaries
+
+        this.emitMutation({
+            chapterSummaries: {
+                $set: chapterSummaries,
+            },
+        })
+        let transcript = null
+        if (previousState.youtubeTranscriptJSON == null) {
+            transcript = await this.getYoutubeTranscript(window.location.href)
+            this.emitMutation({
+                youtubeTranscriptJSON: { $set: transcript },
+            })
+        } else {
+            transcript = previousState.youtubeTranscriptJSON
+        }
+
+        let transcriptChunkedByChapter = []
+        let chapters = previousState.chapterList
+        if (chapters) {
+            let currentChapterStart = chapters[event.chapterIndex]?.start
+            let nextChapterStart = chapters[event.chapterIndex + 1].start
+            let chapterTranscript = transcript.filter(
+                (item) =>
+                    item.start >= currentChapterStart - 2 &&
+                    item.start < nextChapterStart,
+            )
+            transcriptChunkedByChapter.push(chapterTranscript)
+        }
+
+        const chapterToSummarise = transcriptChunkedByChapter[0]
+
+        const textToSummarise = this.chapterGroupPrepare(chapterToSummarise)
+
+        let prompt =
+            'You are given the content of a in a YouTube video. Provide a concise summary and do not introduce the summary by referring to it as "video sections", "text", "transcript", or "content". Ensure your answer is complete sentences. Here is the excerpt for your review:'
+
+        await this.queryAI(
+            undefined,
+            textToSummarise,
+            prompt,
+            undefined,
+            previousState,
+            null,
+            'chapterSummary',
+            event.chapterIndex,
+        )
+    }
+
+    chapterGroupPrepare(jsonArray: Object[]) {
+        const text = jsonArray
+            .map((item: any) => item.text)
+            .join(' ')
+            .replace(/<[^>]+>/g, '') // Remove HTML tags
+            .replace(/&#39;/g, "'") // Replace &#39; with an apostrophe
+            .replace(/\n/g, ' ') // Remove new lines
+            .trim()
+
+        return text
+    }
+
+    secondsToHMS(seconds: number) {
+        const hrs = Math.floor(seconds / 3600)
+        const mins = Math.floor((seconds % 3600) / 60)
+        const secs = Math.floor(seconds % 60)
+
+        const formattedHrs = hrs > 0 ? String(hrs).padStart(2, '0') + ':' : ''
+        const formattedMins =
+            mins > 0 || hrs > 0 ? String(mins).padStart(2, '0') + ':' : '00:'
+        const formattedSecs = String(secs).padStart(2, '0')
+
+        return formattedHrs + formattedMins + formattedSecs
+    }
+
     createYoutubeTimestampWithAISummary: EventHandler<
         'createYoutubeTimestampWithAISummary'
     > = async ({ previousState, event }) => {
+        let transcript = null
+        if (previousState.youtubeTranscriptJSON == null) {
+            transcript = await this.getYoutubeTranscript(window.location.href)
+            this.emitMutation({
+                youtubeTranscriptJSON: { $set: transcript },
+            })
+        } else {
+            transcript = previousState.youtubeTranscriptJSON
+        }
+
+        const filteredTranscript = await this.getTranscriptSection(
+            transcript,
+            event.videoRangeTimestamps.startTimeSecs,
+            event.videoRangeTimestamps.endTimeSecs,
+        )
         this.emitMutation({
             loadState: { $set: 'success' },
             activeTab: { $set: 'annotations' },
@@ -2762,17 +3065,27 @@ export class SidebarContainerLogic extends UILogic<
         // is here bc for some reason else the timestamps will not be pushed, seems like a race condition
 
         await sleepPromise(0)
-        const timestampToInsert = event.timeStampANDSummaryJSON[0]
 
         const maxRetries = 30
         let handledSuccessfully = false
+
+        const humanTimestamp = `${Math.floor(
+            event.videoRangeTimestamps.startTimeSecs / 60,
+        )}:${(event.videoRangeTimestamps.startTimeSecs % 60)
+            .toString()
+            .padStart(2, '0')}`
+
+        const videoURLWithTime = constructVideoURLwithTimeStamp(
+            window.location.href,
+            event.videoRangeTimestamps.startTimeSecs,
+        )
 
         for (let i = 0; i < maxRetries; i++) {
             if (
                 this.options.events.emit(
                     'triggerYoutubeTimestampSummary',
                     {
-                        text: timestampToInsert + ' ',
+                        text: `[${humanTimestamp}](${videoURLWithTime}) `,
                         showLoadingSpinner: true,
                     },
                     (success) => {
@@ -2785,12 +3098,12 @@ export class SidebarContainerLogic extends UILogic<
             await sleepPromise(50) // wait for half a second before trying again
         }
 
-        const filteredSegments = JSON.parse(event.timeStampANDSummaryJSON[1])
-
-        const combinedText = filteredSegments.map((item) => item.text).join(' ')
+        const combinedText = filteredTranscript
+            .map((item) => item.text)
+            .join(' ')
 
         let prompt =
-            'Summarise this transcript of a Youtube video. Summarize it by talking abstractly about its content and aim for brevity in your summary. The primary purpose of your summar is to help users identify video sections and their content. When referring to it, please use the terms "video sections" or "video" rather than "text" or "transcript" and . The transcript may contain errors; kindly correct them while retaining the original intent. Avoid using list formats. Here is the excerpt for your review'
+            'You are given a text snippet that is from a transcript of a section of a video. Summarize it by talking abstractly about its content and aim for brevity in your summary. The primary purpose of your summary is to help users identify video sections and their content. Do not refer to it as "video sections" or "text" or "transcript", just talk about the content abstractly. Also do not include the prompt in the summary. The transcript may contain errors; kindly correct them while retaining the original intent. Avoid using list formats. Here is the excerpt for your review:'
 
         await this.queryAI(
             undefined,

@@ -838,6 +838,20 @@ export class AnnotationsSidebarContainer<
                         <AnnotationsSidebar
                             {...this.state}
                             imageSupport={this.props.imageSupport}
+                            getVideoChapters={() => {
+                                this.processEvent('getVideoChapters', null)
+                            }}
+                            summariseChapter={(chapterIndex) => {
+                                this.processEvent(
+                                    'summariseChapter',
+                                    chapterIndex,
+                                )
+                            }}
+                            loadState={this.state.loadState}
+                            showChapters={this.state.showChapters}
+                            chapterList={this.state.chapterList}
+                            chapterSummaries={this.state.chapterSummaries}
+                            videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,

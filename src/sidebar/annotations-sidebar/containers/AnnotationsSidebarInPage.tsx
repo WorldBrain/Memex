@@ -345,8 +345,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
 
             this.processEvent('createYoutubeTimestampWithAISummary', {
-                timeStampANDSummaryJSON: event.timeStampANDSummaryJSON,
+                videoRangeTimestamps: {
+                    startTimeSecs: event.videoRangeTimestamps[0],
+                    endTimeSecs: event.videoRangeTimestamps[1],
+                },
             })
+            return true
+        } else if (event.action === 'open_chapter_summary') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('getVideoChapters', null)
             return true
         } else if (
             event.action === 'create_youtube_timestamp_with_screenshot'

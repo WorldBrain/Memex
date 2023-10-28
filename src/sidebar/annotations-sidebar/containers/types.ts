@@ -121,8 +121,10 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showAISuggestionsDropDown: boolean
     showAICounter: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
+    youtubeTranscriptJSON: string
 
     activeTab: SidebarTab
+    showChapters: boolean
     pillVisibility: string
     renameListErrorMessage: string | null
 
@@ -224,6 +226,20 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     hasListDataBeenManuallyPulled?: boolean
     annotationCreateEditorRef?: any
     pageListDataForCurrentPage: UnifiedListForCache<'page-link'> | null
+    videoDetails: null
+    chapterList: {
+        start: number
+        humanReadableTimestamp: string
+        videoURLWithTime: string
+        title: string
+    }[]
+    chapterSummaries: {
+        [chapterIndex: number]: {
+            chapterIndex: number
+            summary: string
+            loadingState: TaskState
+        }
+    }
 }
 
 export type AnnotationEvent<T> = {
@@ -251,10 +267,18 @@ interface SidebarEvents {
     setSharingTutorialVisibility: null
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
-        timeStampANDSummaryJSON: string[]
+        videoRangeTimestamps: {
+            startTimeSecs: number
+            endTimeSecs: number
+        }
     }
+    youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
         imageData: string
+    }
+    getVideoChapters: null
+    summariseChapter: {
+        chapterIndex: number
     }
 
     createNewNoteFromAISummary: { comment: string }
