@@ -87,6 +87,9 @@ export interface PageAnnotationsCacheInterface {
     getAnnotationByRemoteId: (remoteId: string) => UnifiedAnnotation | null
     getListByLocalId: (localId: number) => UnifiedList | null
     getListByRemoteId: (remoteId: string) => UnifiedList | null
+    getListsByParentId: (
+        unifiedId: UnifiedList['unifiedId'] | null,
+    ) => UnifiedList[]
 
     readonly isEmpty: boolean
     readonly events: TypedEventEmitter<PageAnnotationsCacheEvents>

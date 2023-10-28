@@ -63,6 +63,7 @@ import {
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
+import { mapTree } from 'src/custom-lists/tree-utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -449,6 +450,41 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 .pageActivityIndicatorBG,
                         },
                     })
+
+                    const rootNodes = annotationsCache.getListsByParentId(null)
+                    console.log('root nodes:', rootNodes)
+
+                    for (const root of rootNodes) {
+                        const treeDfs = mapTree({
+                            root,
+                            strategy: 'dfs',
+                            cb: (node) => {
+                                console.log('DFS node:', node)
+                                return node
+                            },
+                            getChildren: (node) =>
+                                annotationsCache
+                                    .getListsByParentId(node.unifiedId)
+                                    .reverse(),
+                        })
+                        console.log(' ======== ')
+                        const treeBfs = mapTree({
+                            root,
+                            strategy: 'bfs',
+                            cb: (node) => {
+                                console.log('BFS node:', node)
+                                return node
+                            },
+                            getChildren: (node) =>
+                                annotationsCache.getListsByParentId(
+                                    node.unifiedId,
+                                ),
+                        })
+                        console.log(' ======== ')
+
+                        console.log('DFS total:', treeDfs)
+                        console.log('BFS total:', treeBfs)
+                    }
                 },
             )
 

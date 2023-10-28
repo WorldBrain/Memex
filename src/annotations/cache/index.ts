@@ -118,6 +118,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         return this.lists.byId[unifiedListId] ?? null
     }
 
+    getListsByParentId: PageAnnotationsCacheInterface['getListsByParentId'] = (
+        unifiedId,
+    ) => {
+        return normalizedStateToArray(this.lists).filter(
+            (list) => list.parentUnifiedId === unifiedId,
+        )
+    }
+
     private prepareListForCaching = (
         list: UnifiedListForCache,
     ): UnifiedList => {
@@ -152,7 +160,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             cachedAnnot.unifiedListIds.unshift(unifiedId)
         })
 
-        return { ...list, unifiedId } as UnifiedList
+        return {
+            ...list,
+            pathLocalIds: [],
+            pathUnifiedIds: [],
+            unifiedId,
+        } as UnifiedList
     }
 
     private prepareAnnotationForCaching = (
