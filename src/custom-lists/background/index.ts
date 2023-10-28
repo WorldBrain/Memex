@@ -348,9 +348,12 @@ export default class CustomListBackground {
         parentId,
         now,
     }) => {
-        const pathIds = await this.storage.getMaterializedPathIdsFromTree({
-            id: parentId,
-        })
+        const pathIds =
+            parentId != null
+                ? await this.storage.getMaterializedPathIdsFromTree({
+                      id: parentId,
+                  })
+                : []
         const treeId = await this.storage.createListTree({
             localListId,
             parentId,

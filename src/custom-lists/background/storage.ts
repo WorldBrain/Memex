@@ -514,9 +514,9 @@ export default class CustomListStorage extends StorageModule {
      * in order from root to parent of the given noe.
      */
     async getMaterializedPathIdsFromTree(params: {
-        id?: number
+        id: number
     }): Promise<number[]> {
-        const pathIds: number[] = []
+        const pathIds: number[] = [params.id]
         let parentId = params.id
         while (true) {
             const currentNode: ListTree = await this.operation(
