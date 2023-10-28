@@ -77,6 +77,8 @@ export const getListData = (
         return {
             name,
             type: 'special-list',
+            pathLocalIds: [],
+            pathUnifiedIds: [],
             parentLocalId: null,
             parentUnifiedId: null,
             hasRemoteAnnotationsToLoad: false,

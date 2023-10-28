@@ -32,6 +32,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-19'),
     },
     {
@@ -40,6 +41,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-18'),
     },
     {
@@ -48,6 +50,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-17'),
     },
     {
@@ -56,6 +59,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-16'),
     },
     {
@@ -64,6 +68,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-15'),
     },
     {
@@ -72,6 +77,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2022-05-27'),
     },
     {
@@ -80,6 +86,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         type: SharedCollectionType.PageLink,
         createdAt: new Date('2023-05-10'),
     },
@@ -89,6 +96,7 @@ export const TEST_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         type: SharedCollectionType.PageLink,
         createdAt: new Date('2023-05-11'),
     },
@@ -160,7 +168,15 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
 const testListToSuggestion = (
     list: PageList,
     extra: Pick<UnifiedList, 'unifiedId' | 'type'> &
-        Partial<Pick<UnifiedList, 'parentLocalId' | 'parentUnifiedId'>> & {
+        Partial<
+            Pick<
+                UnifiedList,
+                | 'parentLocalId'
+                | 'parentUnifiedId'
+                | 'pathLocalIds'
+                | 'pathUnifiedIds'
+            >
+        > & {
             sharedListEntryId?: string
             normalizedPageUrl?: string
             creator?: UserReference
@@ -181,6 +197,8 @@ const testListToSuggestion = (
     sharedListEntryId: extra.sharedListEntryId,
     parentUnifiedId: extra.parentUnifiedId ?? null,
     parentLocalId: extra.parentLocalId ?? null,
+    pathUnifiedIds: extra.pathUnifiedIds ?? [],
+    pathLocalIds: extra.pathLocalIds ?? [],
 })
 
 export const TEST_USER_LIST_SUGGESTIONS = TEST_LISTS.slice(

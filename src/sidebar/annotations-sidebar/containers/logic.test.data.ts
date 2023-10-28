@@ -167,6 +167,7 @@ export const LOCAL_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-19'),
     },
     {
@@ -175,6 +176,7 @@ export const LOCAL_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-18'),
     },
     {
@@ -183,6 +185,7 @@ export const LOCAL_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-17'),
     },
     {
@@ -191,6 +194,7 @@ export const LOCAL_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-16'),
     },
     {
@@ -199,6 +203,7 @@ export const LOCAL_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2021-01-15'),
     },
     {
@@ -207,6 +212,7 @@ export const LOCAL_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         createdAt: new Date('2022-05-27'),
     },
     {
@@ -215,6 +221,7 @@ export const LOCAL_LISTS: PageList[] = [
         isNestable: true,
         isDeletable: true,
         parentListId: null,
+        pathListIds: [],
         type: SharedCollectionType.PageLink,
         createdAt: new Date('2023-05-01'),
     },

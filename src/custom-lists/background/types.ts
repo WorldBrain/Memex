@@ -15,6 +15,7 @@ export interface PageList {
     description?: string
     pages?: string[]
     createdAt: Date
+    pathListIds: number[]
     parentListId: number | null
     isNestable?: boolean
     isDeletable?: boolean

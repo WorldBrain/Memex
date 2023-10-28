@@ -134,6 +134,7 @@ export const reshapeLocalListForCache = (
         hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
         parentUnifiedId: null, // NOTE: this will be derived inside cache add logic
         parentLocalId: list.parentListId,
+        pathLocalIds: list.pathListIds,
         ...(opts.extraData ?? {}),
     }
 }

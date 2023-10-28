@@ -24,6 +24,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
+import { extractMaterializedPathIds } from 'src/content-sharing/utils'
 
 const limitSuggestionsStorageLength = 25
 
@@ -197,6 +198,7 @@ export default class CustomListBackground {
             createdAt: new Date(sharedList.createdWhen),
             isOwned: sharedList.creator.id === currentUser.id,
             parentListId: null,
+            pathListIds: [],
         }
     }
 
@@ -223,6 +225,10 @@ export default class CustomListBackground {
         return lists.map((list) => ({
             ...list,
             parentListId: treeDataByList[list.id]?.parentId ?? null,
+            pathListIds: extractMaterializedPathIds(
+                treeDataByList[list.id]?.path ?? '',
+                'number',
+            ) as number[],
         }))
     }
 
