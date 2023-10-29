@@ -83,10 +83,10 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'countObjects',
                     args: { listId: '$listId:int' },
                 },
-                findListTreeById: {
+                findListTreeByListId: {
                     collection: CustomListStorage.LIST_TREES_COLL,
                     operation: 'findObject',
-                    args: { id: '$id:int' },
+                    args: { listId: '$id:int' },
                 },
                 findListTreesByLocalListIds: {
                     collection: CustomListStorage.LIST_TREES_COLL,
@@ -527,7 +527,7 @@ export default class CustomListStorage extends StorageModule {
         let parentId = params.id
         while (true) {
             const currentNode: ListTree = await this.operation(
-                'findListTreeById',
+                'findListTreeByListId',
                 { id: parentId },
             )
             parentId = currentNode?.parentId

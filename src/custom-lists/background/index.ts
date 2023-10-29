@@ -208,7 +208,7 @@ export default class CustomListBackground {
         skipSpecialLists = false,
         includeTreeData,
         includeDescriptions,
-    }): Promise<PageList[]> => {
+    }) => {
         const lists = await this.storage.fetchAllLists({
             includeDescriptions,
             skipSpecialLists,
