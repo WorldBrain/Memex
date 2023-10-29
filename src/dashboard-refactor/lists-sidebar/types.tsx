@@ -4,10 +4,13 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<UnifiedList & { wasPageDropped?: boolean }>
+    listTrees: NormalizedState<{
+        isTreeToggled: boolean
+        newNestedListValue: string
+    }>
     filteredListIds: UnifiedList['unifiedId'][]
     areLocalListsExpanded: boolean
     areFollowedListsExpanded: boolean
@@ -59,6 +62,11 @@ export type Events = UIEvent<{
     setShowMoreMenuListId: { listId: string }
     setEditMenuListId: { listId: string }
     dropPageOnListItem: { listId: string; dataTransfer: DataTransfer }
+
+    // Tree-related events
+    toggleListTreeShow: { listId: string }
+    setListTreeNewValue: { listId: string; value: string }
+    createNewListTree: { parentListId: string }
 
     confirmListDelete: null
     cancelListDelete: null

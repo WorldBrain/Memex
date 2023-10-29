@@ -162,8 +162,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         return {
             ...list,
-            pathLocalIds: [],
-            pathUnifiedIds: [],
+            pathLocalIds: list.pathLocalIds ?? [],
             unifiedId,
         } as UnifiedList
     }

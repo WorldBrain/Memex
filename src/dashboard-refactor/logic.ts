@@ -8,7 +8,6 @@ import { RootState as State, DashboardDependencies, Events } from './types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
-import chrono from 'chrono-node'
 
 import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
@@ -63,7 +62,6 @@ import {
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
-import { mapTree } from 'src/custom-lists/tree-utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -365,6 +363,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 inboxUnreadCount: 0,
                 searchQuery: '',
                 lists: initNormalizedState(),
+                listTrees: initNormalizedState(),
                 filteredListIds: [],
                 isAddListInputShown: false,
                 areLocalListsExpanded: true,
@@ -385,7 +384,28 @@ export class DashboardLogic extends UILogic<State, Events> {
     private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
         nextLists,
     ) => {
-        this.emitMutation({ listsSidebar: { lists: { $set: nextLists } } })
+        this.emitMutation({
+            listsSidebar: {
+                lists: { $set: nextLists },
+                listTrees: {
+                    $apply: (prev) =>
+                        initNormalizedState({
+                            getId: (state) => state.unifiedId,
+                            seedData: normalizedStateToArray(nextLists).map(
+                                (list) => ({
+                                    unifiedId: list.unifiedId,
+                                    isTreeToggled:
+                                        prev.byId[list.unifiedId]
+                                            ?.isTreeToggled ?? false,
+                                    newNestedListValue:
+                                        prev.byId[list.unifiedId]
+                                            ?.newNestedListValue ?? '',
+                                }),
+                            ),
+                        }),
+                },
+            },
+        })
     }
 
     private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
@@ -450,41 +470,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                                 .pageActivityIndicatorBG,
                         },
                     })
-
-                    const rootNodes = annotationsCache.getListsByParentId(null)
-                    console.log('root nodes:', rootNodes)
-
-                    for (const root of rootNodes) {
-                        const treeDfs = mapTree({
-                            root,
-                            strategy: 'dfs',
-                            cb: (node) => {
-                                console.log('DFS node:', node)
-                                return node
-                            },
-                            getChildren: (node) =>
-                                annotationsCache
-                                    .getListsByParentId(node.unifiedId)
-                                    .reverse(),
-                        })
-                        console.log(' ======== ')
-                        const treeBfs = mapTree({
-                            root,
-                            strategy: 'bfs',
-                            cb: (node) => {
-                                console.log('BFS node:', node)
-                                return node
-                            },
-                            getChildren: (node) =>
-                                annotationsCache.getListsByParentId(
-                                    node.unifiedId,
-                                ),
-                        })
-                        console.log(' ======== ')
-
-                        console.log('DFS total:', treeDfs)
-                        console.log('BFS total:', treeBfs)
-                    }
                 },
             )
 
@@ -3918,6 +3903,44 @@ export class DashboardLogic extends UILogic<State, Events> {
             description: event.description,
             listId: listData.localId!,
         })
+    }
+
+    toggleListTreeShow: EventHandler<'toggleListTreeShow'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                listTrees: {
+                    byId: {
+                        [event.listId]: {
+                            isTreeToggled: { $apply: (prev) => !prev },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    setListTreeNewValue: EventHandler<'setListTreeNewValue'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                listTrees: {
+                    byId: {
+                        [event.listId]: {
+                            newNestedListValue: { $set: event.value },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    createNewListTree: EventHandler<'createNewListTree'> = async ({
+        event,
+    }) => {
+        throw new Error('Not yet implemented')
     }
 
     cancelListDelete: EventHandler<'cancelListDelete'> = async ({ event }) => {
