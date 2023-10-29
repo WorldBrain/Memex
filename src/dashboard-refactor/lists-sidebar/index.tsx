@@ -23,6 +23,8 @@ import type { DropReceivingState } from '../types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { mapTree } from 'src/custom-lists/tree-utils'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -33,6 +35,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onListSelection: (id: string | null) => void
     openRemoteListPage: (remoteListId: string) => void
     onCancelAddList: () => void
+    onTreeToggle: (listId: string) => void
     onConfirmAddList: (value: string) => void
     setSidebarPeekState: (isPeeking: boolean) => () => void
     initDropReceivingState: (listId: string) => DropReceivingState
@@ -55,6 +58,113 @@ export interface ListsSidebarProps extends ListsSidebarState {
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
+    private renderListTrees() {
+        const rootLists = this.props.ownListsGroup.listData.filter(
+            (list) => list.parentUnifiedId == null,
+        )
+        return rootLists
+            .map((root) =>
+                mapTree({
+                    root,
+                    strategy: 'dfs',
+                    getChildren: (list) =>
+                        this.props.ownListsGroup.listData
+                            .filter(
+                                (_list) =>
+                                    _list.parentUnifiedId === list.unifiedId,
+                            )
+                            .reverse(),
+                    cb: (list) => (
+                        <DropTargetSidebarItem
+                            key={list.unifiedId}
+                            // zIndex={10000000 - i}
+                            name={`${list.pathUnifiedIds.length}: ${list.name}`}
+                            isSelected={
+                                this.props.selectedListId === list.unifiedId
+                            }
+                            onClick={() =>
+                                this.props.onListSelection(list.unifiedId)
+                            }
+                            dropReceivingState={this.props.initDropReceivingState(
+                                list.unifiedId,
+                            )}
+                            isPrivate={list.isPrivate}
+                            isShared={!list.isPrivate}
+                            areAnyMenusDisplayed={
+                                this.props.showMoreMenuListId ===
+                                    list.unifiedId ||
+                                this.props.editMenuListId === list.unifiedId
+                            }
+                            renderLeftSideIcon={() => (
+                                <Icon
+                                    icon={
+                                        this.props.listTrees.byId[
+                                            list.unifiedId
+                                        ]?.isTreeToggled
+                                            ? 'arrowDown'
+                                            : 'arrowRight'
+                                    }
+                                    heightAndWidth="20px"
+                                    onClick={(event) => {
+                                        event.stopPropagation()
+                                        this.props.onTreeToggle(list.unifiedId)
+                                    }}
+                                />
+                            )}
+                            renderRightSideIcon={() => {
+                                return (
+                                    <SpaceContextMenuBtn
+                                        {...this.props.initContextMenuBtnProps(
+                                            list.unifiedId,
+                                        )}
+                                        listData={list}
+                                        isCreator={
+                                            list.creator?.id ===
+                                            this.props.currentUser?.id
+                                        }
+                                        isMenuDisplayed={
+                                            this.props.showMoreMenuListId ===
+                                            list.unifiedId
+                                        }
+                                        errorMessage={
+                                            this.props.editListErrorMessage
+                                        }
+                                        isShared={!list.isPrivate}
+                                    />
+                                )
+                            }}
+                            renderEditIcon={() => (
+                                <SpaceEditMenuBtn
+                                    {...this.props.initContextMenuBtnProps(
+                                        list.unifiedId,
+                                    )}
+                                    listData={list}
+                                    isCreator={
+                                        list.creator?.id ===
+                                        this.props.currentUser?.id
+                                    }
+                                    isMenuDisplayed={
+                                        this.props.editMenuListId ===
+                                        list.unifiedId
+                                    }
+                                    errorMessage={
+                                        this.props.editListErrorMessage
+                                    }
+                                    onConfirmSpaceNameEdit={(newName) => {
+                                        this.props.onConfirmListEdit(
+                                            list.unifiedId,
+                                            newName,
+                                        )
+                                    }}
+                                />
+                            )}
+                        />
+                    ),
+                }),
+            )
+            .flat()
+    }
+
     render() {
         return (
             <Container
@@ -139,77 +249,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 errorMessage={this.props.addListErrorMessage}
                             />
                         )}
-                        {this.props.ownListsGroup.listData.map((list, i) => (
-                            <DropTargetSidebarItem
-                                key={list.unifiedId}
-                                zIndex={10000000 - i}
-                                name={list.name}
-                                isSelected={
-                                    this.props.selectedListId === list.unifiedId
-                                }
-                                onClick={() =>
-                                    this.props.onListSelection(list.unifiedId)
-                                }
-                                dropReceivingState={this.props.initDropReceivingState(
-                                    list.unifiedId,
-                                )}
-                                isPrivate={list.isPrivate}
-                                isShared={!list.isPrivate}
-                                areAnyMenusDisplayed={
-                                    this.props.showMoreMenuListId ===
-                                        list.unifiedId ||
-                                    this.props.editMenuListId === list.unifiedId
-                                }
-                                renderRightSideIcon={() => {
-                                    return (
-                                        <SpaceContextMenuBtn
-                                            {...this.props.initContextMenuBtnProps(
-                                                list.unifiedId,
-                                            )}
-                                            listData={list}
-                                            isCreator={
-                                                list.creator?.id ===
-                                                this.props.currentUser?.id
-                                            }
-                                            isMenuDisplayed={
-                                                this.props
-                                                    .showMoreMenuListId ===
-                                                list.unifiedId
-                                            }
-                                            errorMessage={
-                                                this.props.editListErrorMessage
-                                            }
-                                            isShared={!list.isPrivate}
-                                        />
-                                    )
-                                }}
-                                renderEditIcon={() => (
-                                    <SpaceEditMenuBtn
-                                        {...this.props.initContextMenuBtnProps(
-                                            list.unifiedId,
-                                        )}
-                                        listData={list}
-                                        isCreator={
-                                            list.creator?.id ===
-                                            this.props.currentUser?.id
-                                        }
-                                        isMenuDisplayed={
-                                            this.props.editMenuListId ===
-                                            list.unifiedId
-                                        }
-                                        errorMessage={
-                                            this.props.editListErrorMessage
-                                        }
-                                        onConfirmSpaceNameEdit={(newName) => {
-                                            this.props.onConfirmListEdit(
-                                                list.unifiedId,
-                                                newName,
-                                            )
-                                        }}
-                                    />
-                                )}
-                            />
-                        ))}
+                        {this.renderListTrees()}
                     </ListsSidebarGroup>
                     <ListsSidebarGroup
                         {...this.props.followedListsGroup}

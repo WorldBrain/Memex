@@ -466,6 +466,9 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                onTreeToggle={(listId) =>
+                    this.processEvent('toggleListTreeShow', { listId })
+                }
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 openRemoteListPage={(remoteListId) =>
                     this.props.openCollectionPage(remoteListId)

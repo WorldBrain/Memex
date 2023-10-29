@@ -3,7 +3,7 @@ import SidebarItem, { Props as SidebarItemProps } from './sidebar-item'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props
-    extends Omit<SidebarItemProps, 'renderLeftSideIcon' | 'dropReceivingState'>,
+    extends Omit<SidebarItemProps, 'dropReceivingState'>,
         Required<Pick<SidebarItemProps, 'dropReceivingState'>> {}
 
 const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
