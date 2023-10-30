@@ -2167,7 +2167,12 @@ export class SidebarContainerLogic extends UILogic<
                         ? 'running'
                         : 'pristine',
             },
-            prompt: { $set: outputLocation !== 'chapterSummary' && prompt },
+            prompt: {
+                $set:
+                    outputLocation !== 'chapterSummary'
+                        ? previousState.prompt
+                        : prompt,
+            },
             showAICounter: { $set: true },
         })
 
@@ -2389,7 +2394,16 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        console.log('event', event.highlightedText)
+        if (previousState.queryMode === 'chapterSummary') {
+            this.emitMutation({
+                prompt: { $set: event.prompt },
+                showAISuggestionsDropDown: {
+                    $set: false,
+                },
+                showChapters: { $set: true },
+            })
+            return
+        }
 
         this.emitMutation({
             prompt: { $set: event.prompt },
@@ -2967,13 +2981,15 @@ export class SidebarContainerLogic extends UILogic<
 
         const textToSummarise = this.chapterGroupPrepare(chapterToSummarise)
 
-        let prompt =
-            'You are given the content of a in a YouTube video. Provide a concise summary and do not introduce the summary by referring to it as "video sections", "text", "transcript", or "content". Ensure your answer is complete sentences. Here is the excerpt for your review:'
+        let userPrompt =
+            previousState.prompt ?? 'Summarise this concisely and briefly'
+
+        let prompt = `You are given the content of a in a YouTube video. Provide a concise summary and do not introduce the summary by referring to it as "video sections", "text", "transcript", or "content". Ensure your answer is complete sentences. Please apply the prompt "${userPrompt}". Here is the excerpt for your review:`
 
         await this.queryAI(
             undefined,
             textToSummarise,
-            prompt,
+            userPrompt,
             previousState,
             null,
             'chapterSummary',

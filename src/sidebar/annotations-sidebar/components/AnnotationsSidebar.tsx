@@ -1600,7 +1600,16 @@ export class AnnotationsSidebar extends React.Component<
                                         .loadingState === 'running' ? (
                                         <LoadingIndicator size={20} />
                                     ) : (
-                                        <ChapterSummaryText>
+                                        <ChapterSummaryText
+                                            getYoutubePlayer={
+                                                this.props.getYoutubePlayer
+                                            }
+                                            contextLocation={
+                                                this.props.sidebarContext
+                                            }
+                                            isStream={true}
+                                            textColor={'greyScale6'}
+                                        >
                                             {
                                                 this.props.chapterSummaries[i]
                                                     .summary
@@ -2935,7 +2944,7 @@ const ChapterTitleContent = styled.div`
     width: 100%;
 `
 
-const ChapterSummaryText = styled.div`
+const ChapterSummaryText = styled(Markdown)`
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     line-height: 24px;
