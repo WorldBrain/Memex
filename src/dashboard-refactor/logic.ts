@@ -392,15 +392,19 @@ export class DashboardLogic extends UILogic<State, Events> {
                         initNormalizedState({
                             getId: (state) => state.unifiedId,
                             seedData: normalizedStateToArray(nextLists).map(
-                                (list) => ({
-                                    unifiedId: list.unifiedId,
-                                    isTreeToggled:
-                                        prev.byId[list.unifiedId]
-                                            ?.isTreeToggled ?? false,
-                                    newNestedListValue:
-                                        prev.byId[list.unifiedId]
-                                            ?.newNestedListValue ?? '',
-                                }),
+                                (list) => {
+                                    const prevState = prev.byId[list.unifiedId]
+                                    return {
+                                        unifiedId: list.unifiedId,
+                                        isTreeToggled:
+                                            prevState?.isTreeToggled ?? false,
+                                        isNestedListInputShown:
+                                            prevState?.isNestedListInputShown ??
+                                            false,
+                                        newNestedListValue:
+                                            prevState?.newNestedListValue ?? '',
+                                    }
+                                },
                             ),
                         }),
                 },
@@ -3921,7 +3925,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setListTreeNewValue: EventHandler<'setListTreeNewValue'> = async ({
+    setNewNestedListValue: EventHandler<'setNewNestedListValue'> = async ({
         event,
     }) => {
         this.emitMutation({
@@ -3937,7 +3941,33 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    createNewListTree: EventHandler<'createNewListTree'> = async ({
+    toggleNestedListInputShow: EventHandler<
+        'toggleNestedListInputShow'
+    > = async ({ event, previousState }) => {
+        const prevTreeState =
+            previousState.listsSidebar.listTrees.byId[event.listId]
+        this.emitMutation({
+            listsSidebar: {
+                listTrees: {
+                    byId: {
+                        [event.listId]: {
+                            isNestedListInputShown: {
+                                $set: !prevTreeState.isNestedListInputShown,
+                            },
+                            // Couple tree toggle state to this. If not open, open it. Else leave it
+                            isTreeToggled: {
+                                $set: !prevTreeState.isNestedListInputShown
+                                    ? true
+                                    : prevTreeState.isTreeToggled,
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+
+    createdNestedList: EventHandler<'createdNestedList'> = async ({
         event,
     }) => {
         throw new Error('Not yet implemented')

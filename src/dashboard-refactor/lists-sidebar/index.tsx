@@ -36,6 +36,8 @@ export interface ListsSidebarProps extends ListsSidebarState {
     openRemoteListPage: (remoteListId: string) => void
     onCancelAddList: () => void
     onTreeToggle: (listId: string) => void
+    onNestedListInputToggle: (listId: string) => void
+    setNestedListInputValue: (listId: string, value: string) => void
     onConfirmAddList: (value: string) => void
     setSidebarPeekState: (isPeeking: boolean) => () => void
     initDropReceivingState: (listId: string) => DropReceivingState
@@ -58,122 +60,144 @@ export interface ListsSidebarProps extends ListsSidebarState {
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
+    private renderListTreeNode = (list: UnifiedList) => (
+        <DropTargetSidebarItem
+            key={list.unifiedId}
+            indentSteps={list.pathUnifiedIds.length}
+            // zIndex={10000000 - i}
+            name={`${list.pathUnifiedIds.length}: ${list.name}`}
+            isSelected={this.props.selectedListId === list.unifiedId}
+            onClick={() => this.props.onListSelection(list.unifiedId)}
+            dropReceivingState={this.props.initDropReceivingState(
+                list.unifiedId,
+            )}
+            isPrivate={list.isPrivate}
+            isShared={!list.isPrivate}
+            areAnyMenusDisplayed={
+                this.props.showMoreMenuListId === list.unifiedId ||
+                this.props.editMenuListId === list.unifiedId
+            }
+            renderLeftSideIcon={() => (
+                <Icon
+                    icon={
+                        this.props.listTrees.byId[list.unifiedId]?.isTreeToggled
+                            ? 'arrowDown'
+                            : 'arrowRight'
+                    }
+                    heightAndWidth="20px"
+                    onClick={(event) => {
+                        event.stopPropagation()
+                        this.props.onTreeToggle(list.unifiedId)
+                    }}
+                />
+            )}
+            renderRightSideIcon={() => {
+                return (
+                    <>
+                        <Icon
+                            icon="plus"
+                            heightAndWidth="20px"
+                            onClick={(event) => {
+                                event.stopPropagation()
+                                this.props.onNestedListInputToggle(
+                                    list.unifiedId,
+                                )
+                            }}
+                        />
+                        <SpaceContextMenuBtn
+                            {...this.props.initContextMenuBtnProps(
+                                list.unifiedId,
+                            )}
+                            listData={list}
+                            isCreator={
+                                list.creator?.id === this.props.currentUser?.id
+                            }
+                            isMenuDisplayed={
+                                this.props.showMoreMenuListId === list.unifiedId
+                            }
+                            errorMessage={this.props.editListErrorMessage}
+                            isShared={!list.isPrivate}
+                        />
+                    </>
+                )
+            }}
+            renderEditIcon={() => (
+                <SpaceEditMenuBtn
+                    {...this.props.initContextMenuBtnProps(list.unifiedId)}
+                    listData={list}
+                    isCreator={list.creator?.id === this.props.currentUser?.id}
+                    isMenuDisplayed={
+                        this.props.editMenuListId === list.unifiedId
+                    }
+                    errorMessage={this.props.editListErrorMessage}
+                    onConfirmSpaceNameEdit={(newName) => {
+                        this.props.onConfirmListEdit(list.unifiedId, newName)
+                    }}
+                />
+            )}
+        />
+    )
+
     private renderListTrees() {
         const rootLists = this.props.ownListsGroup.listData.filter(
             (list) => list.parentUnifiedId == null,
         )
+
         return rootLists
             .map((root) =>
                 mapTree({
                     root,
                     strategy: 'dfs',
                     getChildren: (list) =>
-                        this.props.ownListsGroup.listData
-                            .filter(
-                                (_list) =>
-                                    _list.parentUnifiedId === list.unifiedId,
-                            )
-                            .reverse(),
+                        this.props.ownListsGroup.listData.filter(
+                            (_list) => _list.parentUnifiedId === list.unifiedId,
+                        ),
                     cb: (list) => {
+                        const parentListTreeState = this.props.listTrees.byId[
+                            list.parentUnifiedId
+                        ]
+                        const currentListTreeState = this.props.listTrees.byId[
+                            list.unifiedId
+                        ]
+
                         const isParentListToggled =
                             list.parentUnifiedId != null
-                                ? this.props.listTrees.byId[
-                                      list.parentUnifiedId
-                                  ]?.isTreeToggled
+                                ? parentListTreeState?.isTreeToggled
                                 : true
 
                         if (!isParentListToggled) {
                             return null
                         }
-                        return (
-                            <DropTargetSidebarItem
-                                key={list.unifiedId}
-                                indentSteps={list.pathUnifiedIds.length}
-                                // zIndex={10000000 - i}
-                                name={`${list.pathUnifiedIds.length}: ${list.name}`}
-                                isSelected={
-                                    this.props.selectedListId === list.unifiedId
-                                }
-                                onClick={() =>
-                                    this.props.onListSelection(list.unifiedId)
-                                }
-                                dropReceivingState={this.props.initDropReceivingState(
-                                    list.unifiedId,
-                                )}
-                                isPrivate={list.isPrivate}
-                                isShared={!list.isPrivate}
-                                areAnyMenusDisplayed={
-                                    this.props.showMoreMenuListId ===
-                                        list.unifiedId ||
-                                    this.props.editMenuListId === list.unifiedId
-                                }
-                                renderLeftSideIcon={() => (
-                                    <Icon
-                                        icon={
-                                            this.props.listTrees.byId[
-                                                list.unifiedId
-                                            ]?.isTreeToggled
-                                                ? 'arrowDown'
-                                                : 'arrowRight'
-                                        }
-                                        heightAndWidth="20px"
-                                        onClick={(event) => {
-                                            event.stopPropagation()
-                                            this.props.onTreeToggle(
-                                                list.unifiedId,
-                                            )
-                                        }}
-                                    />
-                                )}
-                                renderRightSideIcon={() => {
-                                    return (
-                                        <SpaceContextMenuBtn
-                                            {...this.props.initContextMenuBtnProps(
-                                                list.unifiedId,
-                                            )}
-                                            listData={list}
-                                            isCreator={
-                                                list.creator?.id ===
-                                                this.props.currentUser?.id
-                                            }
-                                            isMenuDisplayed={
-                                                this.props
-                                                    .showMoreMenuListId ===
-                                                list.unifiedId
-                                            }
-                                            errorMessage={
-                                                this.props.editListErrorMessage
-                                            }
-                                            isShared={!list.isPrivate}
-                                        />
-                                    )
-                                }}
-                                renderEditIcon={() => (
-                                    <SpaceEditMenuBtn
-                                        {...this.props.initContextMenuBtnProps(
+
+                        // TODO: This renders the new list input directly under the list. It's meant to be rendered after all the list's children.
+                        //  With the current state shape that's quite difficult to do. Maybe need to change to recursive rendering of a node's children type thing
+                        let nestedListInput: JSX.Element = null
+                        if (
+                            currentListTreeState.isTreeToggled &&
+                            currentListTreeState.isNestedListInputShown
+                        ) {
+                            nestedListInput = (
+                                <NestedListInput
+                                    type="text"
+                                    indentSteps={list.pathUnifiedIds.length}
+                                    placeholder="+ add new subspace"
+                                    value={
+                                        currentListTreeState.newNestedListValue
+                                    }
+                                    onChange={(event) =>
+                                        this.props.setNestedListInputValue(
                                             list.unifiedId,
-                                        )}
-                                        listData={list}
-                                        isCreator={
-                                            list.creator?.id ===
-                                            this.props.currentUser?.id
-                                        }
-                                        isMenuDisplayed={
-                                            this.props.editMenuListId ===
-                                            list.unifiedId
-                                        }
-                                        errorMessage={
-                                            this.props.editListErrorMessage
-                                        }
-                                        onConfirmSpaceNameEdit={(newName) => {
-                                            this.props.onConfirmListEdit(
-                                                list.unifiedId,
-                                                newName,
-                                            )
-                                        }}
-                                    />
-                                )}
-                            />
+                                            event.target.value,
+                                        )
+                                    }
+                                />
+                            )
+                        }
+                        return (
+                            <>
+                                {this.renderListTreeNode(list)}
+                                {nestedListInput}
+                            </>
                         )
                     },
                 }),
@@ -455,4 +479,8 @@ const NewItemsCountInnerDiv = styled.div`
     font-size: 12px;
     line-height: 14px;
     padding: 2px 0px;
+`
+
+const NestedListInput = styled.input`
+    margin-left: ${(props) => props.indentSteps * 20}px;
 `

@@ -9,6 +9,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     lists: NormalizedState<UnifiedList & { wasPageDropped?: boolean }>
     listTrees: NormalizedState<{
         isTreeToggled: boolean
+        isNestedListInputShown: boolean
         newNestedListValue: string
     }>
     filteredListIds: UnifiedList['unifiedId'][]
@@ -65,8 +66,9 @@ export type Events = UIEvent<{
 
     // Tree-related events
     toggleListTreeShow: { listId: string }
-    setListTreeNewValue: { listId: string; value: string }
-    createNewListTree: { parentListId: string }
+    toggleNestedListInputShow: { listId: string }
+    setNewNestedListValue: { listId: string; value: string }
+    createdNestedList: { parentListId: string }
 
     confirmListDelete: null
     cancelListDelete: null

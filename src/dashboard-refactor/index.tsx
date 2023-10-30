@@ -469,6 +469,15 @@ export class DashboardContainer extends StatefulUIElement<
                 onTreeToggle={(listId) =>
                     this.processEvent('toggleListTreeShow', { listId })
                 }
+                onNestedListInputToggle={(listId) =>
+                    this.processEvent('toggleNestedListInputShow', { listId })
+                }
+                setNestedListInputValue={(listId, value) =>
+                    this.processEvent('setNewNestedListValue', {
+                        listId,
+                        value,
+                    })
+                }
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 openRemoteListPage={(remoteListId) =>
                     this.props.openCollectionPage(remoteListId)
