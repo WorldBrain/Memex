@@ -478,6 +478,9 @@ export class DashboardContainer extends StatefulUIElement<
                         value,
                     })
                 }
+                onConfirmNestedListCreate={(parentListId) =>
+                    this.processEvent('createdNestedList', { parentListId })
+                }
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 openRemoteListPage={(remoteListId) =>
                     this.props.openCollectionPage(remoteListId)

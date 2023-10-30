@@ -38,6 +38,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onTreeToggle: (listId: string) => void
     onNestedListInputToggle: (listId: string) => void
     setNestedListInputValue: (listId: string, value: string) => void
+    onConfirmNestedListCreate: (parentListId: string) => Promise<void>
     onConfirmAddList: (value: string) => void
     setSidebarPeekState: (isPeeking: boolean) => () => void
     initDropReceivingState: (listId: string) => DropReceivingState
@@ -181,9 +182,29 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     type="text"
                                     indentSteps={list.pathUnifiedIds.length}
                                     placeholder="+ add new subspace"
+                                    autoFocus
+                                    disabled={
+                                        currentListTreeState.newNestedListCreateState ===
+                                        'running'
+                                    }
                                     value={
                                         currentListTreeState.newNestedListValue
                                     }
+                                    onKeyDown={async (event) => {
+                                        const metaKeyPressed =
+                                            navigator.platform === 'MacIntel'
+                                                ? event.metaKey
+                                                : event.ctrlKey
+                                        // TODO: Make confirm method more intuitive
+                                        if (
+                                            event.key === 'Enter' &&
+                                            metaKeyPressed
+                                        ) {
+                                            await this.props.onConfirmNestedListCreate(
+                                                list.unifiedId,
+                                            )
+                                        }
+                                    }}
                                     onChange={(event) =>
                                         this.props.setNestedListInputValue(
                                             list.unifiedId,

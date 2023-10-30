@@ -403,6 +403,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             false,
                                         newNestedListValue:
                                             prevState?.newNestedListValue ?? '',
+                                        newNestedListCreateState:
+                                            prevState?.newNestedListCreateState ??
+                                            'pristine',
                                     }
                                 },
                             ),
@@ -3969,8 +3972,74 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     createdNestedList: EventHandler<'createdNestedList'> = async ({
         event,
+        previousState,
     }) => {
-        throw new Error('Not yet implemented')
+        const { annotationsCache, listsBG, authBG } = this.options
+        const parentList = annotationsCache.lists.byId[event.parentListId]
+        const newListName = previousState.listsSidebar.listTrees.byId[
+            event.parentListId
+        ].newNestedListValue.trim()
+        if (!newListName.length || !parentList?.localId) {
+            return
+        }
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: {
+                    listTrees: {
+                        byId: {
+                            [event.parentListId]: {
+                                newNestedListCreateState: { $set: taskState },
+                            },
+                        },
+                    },
+                },
+            }),
+            async () => {
+                const {
+                    localListId,
+                    remoteListId,
+                    collabKey,
+                } = await listsBG.createCustomList({
+                    name: newListName,
+                })
+                const user = await authBG.getCurrentUser()
+                annotationsCache.addList({
+                    type: 'user-list',
+                    name: newListName,
+                    localId: localListId,
+                    collabKey: collabKey,
+                    remoteId: remoteListId,
+                    creator: { type: 'user-reference', id: user.id },
+                    unifiedAnnotationIds: [],
+                    hasRemoteAnnotationsToLoad: false,
+                    parentLocalId: parentList.localId!,
+                    pathLocalIds: [
+                        ...parentList.pathLocalIds,
+                        parentList.localId!,
+                    ],
+                    isPrivate: true,
+                })
+                await listsBG.createListTree({
+                    localListId,
+                    parentId: parentList.localId!,
+                })
+
+                this.emitMutation({
+                    listsSidebar: {
+                        listTrees: {
+                            byId: {
+                                [event.parentListId]: {
+                                    newNestedListValue: { $set: '' },
+                                    isNestedListInputShown: { $set: false },
+                                },
+                            },
+                        },
+                    },
+                })
+            },
+        )
     }
 
     cancelListDelete: EventHandler<'cancelListDelete'> = async ({ event }) => {
