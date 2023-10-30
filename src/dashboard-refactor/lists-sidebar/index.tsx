@@ -74,46 +74,82 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     _list.parentUnifiedId === list.unifiedId,
                             )
                             .reverse(),
-                    cb: (list) => (
-                        <DropTargetSidebarItem
-                            key={list.unifiedId}
-                            // zIndex={10000000 - i}
-                            name={`${list.pathUnifiedIds.length}: ${list.name}`}
-                            isSelected={
-                                this.props.selectedListId === list.unifiedId
-                            }
-                            onClick={() =>
-                                this.props.onListSelection(list.unifiedId)
-                            }
-                            dropReceivingState={this.props.initDropReceivingState(
-                                list.unifiedId,
-                            )}
-                            isPrivate={list.isPrivate}
-                            isShared={!list.isPrivate}
-                            areAnyMenusDisplayed={
-                                this.props.showMoreMenuListId ===
-                                    list.unifiedId ||
-                                this.props.editMenuListId === list.unifiedId
-                            }
-                            renderLeftSideIcon={() => (
-                                <Icon
-                                    icon={
-                                        this.props.listTrees.byId[
-                                            list.unifiedId
-                                        ]?.isTreeToggled
-                                            ? 'arrowDown'
-                                            : 'arrowRight'
-                                    }
-                                    heightAndWidth="20px"
-                                    onClick={(event) => {
-                                        event.stopPropagation()
-                                        this.props.onTreeToggle(list.unifiedId)
-                                    }}
-                                />
-                            )}
-                            renderRightSideIcon={() => {
-                                return (
-                                    <SpaceContextMenuBtn
+                    cb: (list) => {
+                        const isParentListToggled =
+                            list.parentUnifiedId != null
+                                ? this.props.listTrees.byId[
+                                      list.parentUnifiedId
+                                  ]?.isTreeToggled
+                                : true
+
+                        if (!isParentListToggled) {
+                            return null
+                        }
+                        return (
+                            <DropTargetSidebarItem
+                                key={list.unifiedId}
+                                indentSteps={list.pathUnifiedIds.length}
+                                // zIndex={10000000 - i}
+                                name={`${list.pathUnifiedIds.length}: ${list.name}`}
+                                isSelected={
+                                    this.props.selectedListId === list.unifiedId
+                                }
+                                onClick={() =>
+                                    this.props.onListSelection(list.unifiedId)
+                                }
+                                dropReceivingState={this.props.initDropReceivingState(
+                                    list.unifiedId,
+                                )}
+                                isPrivate={list.isPrivate}
+                                isShared={!list.isPrivate}
+                                areAnyMenusDisplayed={
+                                    this.props.showMoreMenuListId ===
+                                        list.unifiedId ||
+                                    this.props.editMenuListId === list.unifiedId
+                                }
+                                renderLeftSideIcon={() => (
+                                    <Icon
+                                        icon={
+                                            this.props.listTrees.byId[
+                                                list.unifiedId
+                                            ]?.isTreeToggled
+                                                ? 'arrowDown'
+                                                : 'arrowRight'
+                                        }
+                                        heightAndWidth="20px"
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            this.props.onTreeToggle(
+                                                list.unifiedId,
+                                            )
+                                        }}
+                                    />
+                                )}
+                                renderRightSideIcon={() => {
+                                    return (
+                                        <SpaceContextMenuBtn
+                                            {...this.props.initContextMenuBtnProps(
+                                                list.unifiedId,
+                                            )}
+                                            listData={list}
+                                            isCreator={
+                                                list.creator?.id ===
+                                                this.props.currentUser?.id
+                                            }
+                                            isMenuDisplayed={
+                                                this.props
+                                                    .showMoreMenuListId ===
+                                                list.unifiedId
+                                            }
+                                            errorMessage={
+                                                this.props.editListErrorMessage
+                                            }
+                                            isShared={!list.isPrivate}
+                                        />
+                                    )
+                                }}
+                                renderEditIcon={() => (
+                                    <SpaceEditMenuBtn
                                         {...this.props.initContextMenuBtnProps(
                                             list.unifiedId,
                                         )}
@@ -123,43 +159,23 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             this.props.currentUser?.id
                                         }
                                         isMenuDisplayed={
-                                            this.props.showMoreMenuListId ===
+                                            this.props.editMenuListId ===
                                             list.unifiedId
                                         }
                                         errorMessage={
                                             this.props.editListErrorMessage
                                         }
-                                        isShared={!list.isPrivate}
+                                        onConfirmSpaceNameEdit={(newName) => {
+                                            this.props.onConfirmListEdit(
+                                                list.unifiedId,
+                                                newName,
+                                            )
+                                        }}
                                     />
-                                )
-                            }}
-                            renderEditIcon={() => (
-                                <SpaceEditMenuBtn
-                                    {...this.props.initContextMenuBtnProps(
-                                        list.unifiedId,
-                                    )}
-                                    listData={list}
-                                    isCreator={
-                                        list.creator?.id ===
-                                        this.props.currentUser?.id
-                                    }
-                                    isMenuDisplayed={
-                                        this.props.editMenuListId ===
-                                        list.unifiedId
-                                    }
-                                    errorMessage={
-                                        this.props.editListErrorMessage
-                                    }
-                                    onConfirmSpaceNameEdit={(newName) => {
-                                        this.props.onConfirmListEdit(
-                                            list.unifiedId,
-                                            newName,
-                                        )
-                                    }}
-                                />
-                            )}
-                        />
-                    ),
+                                )}
+                            />
+                        )
+                    },
                 }),
             )
             .flat()

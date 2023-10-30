@@ -10,6 +10,7 @@ export interface Props {
     isSelected: boolean
     isPrivate?: boolean
     isShared?: boolean
+    indentSteps?: number
     alwaysShowRightSideIcon?: boolean
     dropReceivingState?: DropReceivingState
     onClick: React.MouseEventHandler
@@ -56,6 +57,7 @@ export default class ListsSidebarItem extends React.PureComponent<
         return (
             <Container zIndex={this.props.zIndex}>
                 <SidebarItem
+                    indentSteps={this.props.indentSteps ?? 0}
                     onDragEnter={this.handleDragEnter}
                     isSelected={this.props.isSelected}
                     dropReceivingState={this.props.dropReceivingState}
@@ -141,6 +143,7 @@ const TitleBox = styled.div<Props>`
 const SidebarItem = styled.div<Props>`
     height: 40px;
     margin: 5px 12px;
+    margin-left: ${({ indentSteps }: Props) => indentSteps * 10}px;
     border-radius: 5px;
     display: flex;
     flex-direction: row;
