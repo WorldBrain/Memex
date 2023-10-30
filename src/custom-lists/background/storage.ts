@@ -221,9 +221,14 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'deleteObjects',
                     args: { listId: '$listId:pk' },
                 },
+                deleteListTreeByListId: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'deleteObjects',
+                    args: { listId: '$listId:int' },
+                },
                 deleteListTreeById: {
                     collection: CustomListStorage.LIST_TREES_COLL,
-                    operation: 'deleteObject',
+                    operation: 'deleteObjects',
                     args: { id: '$id:int' },
                 },
                 [SuggestPlugin.SUGGEST_OBJS_OP_ID]: {
@@ -583,8 +588,18 @@ export default class CustomListStorage extends StorageModule {
         )
     }
 
+    async deleteListSubtree(params: {
+        rootLocalListId: number
+    }): Promise<void> {
+        // TODO: Delete all descendent nodes
+        await this.operation('deleteListTreeByListId', {
+            listId: params.rootLocalListId,
+        })
+    }
+
     async removeListAssociatedData({ listId }: { listId: number }) {
         await this.operation('deleteListEntriesByListId', { listId })
+        await this.deleteListSubtree({ rootLocalListId: listId })
         await this.deleteListDescriptions({ listId })
     }
 

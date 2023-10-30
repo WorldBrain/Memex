@@ -154,9 +154,9 @@ class IdCapturer {
                         mergedObject.path,
                         'number',
                     ) as number[]
-                    const fixedPathIds = pathIds.map(
-                        (id) => this.ids['personalList'][id - 1],
-                    )
+                    const fixedPathIds = pathIds
+                        .map((id) => this.ids['personalList']?.[id - 1] ?? null)
+                        .filter((id) => id != null)
                     mergedObject.path = buildMaterializedPath(...fixedPathIds)
                 }
                 mergedObjects[objectName] = mergedObject
@@ -5958,6 +5958,9 @@ describe('Personal cloud translation layer', () => {
                 .collection('sharedListMetadata')
                 .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
             await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
+            await setups[0].storageManager
                 .collection('pages')
                 .createObject(LOCAL_TEST_DATA_V24.pages.first)
             await setups[0].storageManager
@@ -6064,6 +6067,7 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotationListEntry',
                     'sharedListKey',
                     'sharedList',
+                    'sharedListTree',
                 ], { getWhere: coll => {
                     // These are grouped collections, so they need to have their grouped fields defined in the queries
                     if (coll === 'sharedListRole' || coll === 'sharedListKey') {
@@ -6109,6 +6113,11 @@ describe('Personal cloud translation layer', () => {
                         title: LOCAL_TEST_DATA_V24.customLists.first.name,
                     }),
                 ],
+                sharedListTree: [
+                    expect.objectContaining({
+                        sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                    }),
+                ],
                 sharedAnnotation: [
                     expect.objectContaining({
                         id: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first.remoteId,
@@ -6138,6 +6147,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents([
                     'personalList',
+                    'personalListTree',
                     'personalListShare',
                     'personalFollowedList',
                     'personalListEntry',
@@ -6152,6 +6162,7 @@ describe('Personal cloud translation layer', () => {
                 }),
             ).toEqual({
                 personalList: [remoteDataA.personalList.first],
+                personalListTree: [remoteDataA.personalListTree.first],
                 personalListShare: [remoteDataA.personalListShare.first],
                 personalListEntry: [remoteDataA.personalListEntry.first],
                 personalAnnotationListEntry: [remoteDataA.personalAnnotationListEntry.first],
@@ -6178,6 +6189,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents([
                     'personalList',
+                    // 'personalListTree',
                     'personalListShare',
                     'personalFollowedList',
                     'personalListEntry',
@@ -6196,6 +6208,11 @@ describe('Personal cloud translation layer', () => {
                     localId: syncedList.localId,
                     createdByDevice: undefined, // This is created via a storage hook, thus no device
                 }],
+                // personalListTree: [{
+                //     ...remoteDataA.personalListTree.first,
+                //     localId: syncedList.localId,
+                //     createdByDevice: undefined, // This is created via a storage hook, thus no device
+                // }],
                 personalListShare: [{
                     ...remoteDataB.personalListShare.first,
                     personalList: syncedList.id,
@@ -6245,6 +6262,7 @@ describe('Personal cloud translation layer', () => {
                     'sharedAnnotationListEntry',
                     'sharedListKey',
                     'sharedList',
+                    'sharedListTree',
                 ], { getWhere: coll => {
                     // These are grouped collections, so they need to have their grouped fields defined in the queries
                     if (coll === 'sharedListRole' || coll === 'sharedListKey') {
@@ -6261,6 +6279,7 @@ describe('Personal cloud translation layer', () => {
                 sharedListEntry: [],
                 sharedListKey: [],
                 sharedList: [],
+                sharedListTree: [],
                 sharedAnnotation: [
                     expect.objectContaining({
                         id: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first.remoteId,
@@ -6276,6 +6295,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents([
                     'personalList',
+                    'personalListTree',
                     'personalListShare',
                     'personalFollowedList',
                     'personalListEntry',
@@ -6290,6 +6310,7 @@ describe('Personal cloud translation layer', () => {
                 }),
             ).toEqual({
                 personalList: [],
+                personalListTree: [],
                 personalListShare: [],
                 personalListEntry: [],
                 personalAnnotationListEntry: [],
@@ -6313,6 +6334,9 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Delete, collection: 'pageListEntries', where: {
                     listId: syncedList.localId,
                  } },
+                // { type: PersonalCloudUpdateType.Delete, collection: 'customListTrees', where: {
+                //     listId: syncedList.localId,
+                //  } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'sharedListMetadata', where: {
                     localId: syncedList.localId,
                  } },
@@ -6326,6 +6350,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents([
                     'personalList',
+                    'personalListTree',
                     'personalListShare',
                     'personalFollowedList',
                     'personalListEntry',
@@ -6340,6 +6365,7 @@ describe('Personal cloud translation layer', () => {
                 }),
             ).toEqual({
                 personalList: [],
+                personalListTree: [],
                 personalListShare: [],
                 personalListEntry: [],
                 personalAnnotationListEntry: [],
