@@ -71,6 +71,7 @@ export interface PageAnnotationsCacheInterface {
                     | 'normalizedPageUrl'
                     | 'hasRemoteAnnotationsToLoad'
                     | 'sharedListEntryId'
+                    | 'parentUnifiedId'
                     | 'isPrivate'
                 >
             >,

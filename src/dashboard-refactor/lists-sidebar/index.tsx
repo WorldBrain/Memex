@@ -40,6 +40,8 @@ export interface ListsSidebarProps extends ListsSidebarState {
     setNestedListInputValue: (listId: string, value: string) => void
     onConfirmNestedListCreate: (parentListId: string) => Promise<void>
     onConfirmAddList: (value: string) => void
+    onListDragStart: (listId: string) => React.DragEventHandler
+    onListDragEnd: (listId: string) => React.DragEventHandler
     setSidebarPeekState: (isPeeking: boolean) => () => void
     initDropReceivingState: (listId: string) => DropReceivingState
     initContextMenuBtnProps: (
@@ -65,6 +67,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         <DropTargetSidebarItem
             key={list.unifiedId}
             indentSteps={list.pathUnifiedIds.length}
+            onDragStart={this.props.onListDragStart(list.unifiedId)}
+            onDragEnd={this.props.onListDragEnd(list.unifiedId)}
             // zIndex={10000000 - i}
             name={`${list.pathUnifiedIds.length}: ${list.name}`}
             isSelected={this.props.selectedListId === list.unifiedId}

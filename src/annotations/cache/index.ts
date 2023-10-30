@@ -18,6 +18,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
+import { forEachTree } from 'src/custom-lists/tree-utils'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -637,6 +638,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             collabKey: updates.collabKey ?? previousList.collabKey,
             isPrivate: updates.isPrivate ?? previousList.isPrivate,
             description: updates.description ?? previousList.description,
+            parentUnifiedId:
+                updates.parentUnifiedId ?? previousList.parentUnifiedId,
         }
 
         if (
@@ -650,6 +653,39 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             nextList.hasRemoteAnnotationsToLoad =
                 updates.hasRemoteAnnotationsToLoad ??
                 previousList.hasRemoteAnnotationsToLoad
+        }
+
+        // If the parent has changed, this plus all descendent lists must update ancestor references
+        if (previousList.parentUnifiedId !== nextList.parentUnifiedId) {
+            const nextParent = this.lists.byId[nextList.parentUnifiedId]
+            nextList.parentLocalId = nextParent.localId ?? null
+            nextList.pathLocalIds = [
+                ...(nextParent.pathLocalIds ?? []),
+                nextParent.localId,
+            ]
+            nextList.pathUnifiedIds = [
+                ...(nextParent.pathUnifiedIds ?? []),
+                nextParent.unifiedId,
+            ]
+
+            // TODO: Cascade parent/path updates down through descendents
+            // forEachTree({
+            //     root: nextList,
+            //     getChildren: (node) => this.getListsByParentId(node.unifiedId),
+            //     cb: (node) => {
+            //         const nodeParent = this.lists.byId[node.unifiedId]
+            //         node.parentUnifiedId = nodeParent.unifiedId
+            //         node.parentLocalId = nodeParent.localId ?? null
+            //         node.pathUnifiedIds = [
+            //             ...(nodeParent.pathUnifiedIds ?? []),
+            //             nodeParent.unifiedId,
+            //         ]
+            //         node.pathLocalIds = [
+            //             ...(nodeParent.pathLocalIds ?? []),
+            //             nodeParent.localId,
+            //         ].filter((id) => id != null)
+            //     },
+            // })
         }
 
         // If list was shared, set up reverse ref from remote->cached ID

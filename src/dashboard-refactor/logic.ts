@@ -62,6 +62,7 @@ import {
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
+import { DragToListAction } from './lists-sidebar/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -371,6 +372,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 areJoinedListsExpanded: true,
                 selectedListId: null,
                 themeVariant: null,
+                draggedListId: null,
             },
             syncMenu: {
                 isDisplayed: false,
@@ -1495,30 +1497,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     > = async ({ event }) => {
         this.emitMutation({
             modals: { confirmSelectNoteSpaceArgs: { $set: event } },
-        })
-    }
-
-    dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
-        const crt = this.options.document.getElementById(DRAG_EL_ID)
-        crt.style.display = 'block'
-        event.dataTransfer.setDragImage(crt, 0, 0)
-
-        const page = previousState.searchResults.pageData.byId[event.pageId]
-        event.dataTransfer.setData(
-            'text/plain',
-            JSON.stringify({
-                fullPageUrl: page.fullUrl,
-                normalizedPageUrl: page.normalizedUrl,
-            }),
-        )
-        this.emitMutation({
-            searchResults: { draggedPageId: { $set: event.pageId } },
-        })
-    }
-
-    dropPage: EventHandler<'dropPage'> = async () => {
-        this.emitMutation({
-            searchResults: { draggedPageId: { $set: undefined } },
         })
     }
 
@@ -3610,21 +3588,155 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    dropPageOnListItem: EventHandler<'dropPageOnListItem'> = async ({
+    dragList: EventHandler<'dragList'> = async ({ event, previousState }) => {
+        const crt = this.options.document.getElementById(DRAG_EL_ID)
+        crt.style.display = 'block'
+        event.dataTransfer.setDragImage(crt, 0, 0)
+
+        const list = this.options.annotationsCache.lists.byId[event.listId]
+        const action: DragToListAction<'list'> = {
+            type: 'list',
+            listId: list.unifiedId,
+        }
+        event.dataTransfer.setData('text/plain', JSON.stringify(action))
+        this.emitMutation({
+            listsSidebar: { draggedListId: { $set: event.listId } },
+        })
+    }
+
+    dropList: EventHandler<'dropList'> = async () => {
+        this.emitMutation({
+            listsSidebar: { draggedListId: { $set: null } },
+        })
+    }
+
+    dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
+        const crt = this.options.document.getElementById(DRAG_EL_ID)
+        crt.style.display = 'block'
+        event.dataTransfer.setDragImage(crt, 0, 0)
+
+        const page = previousState.searchResults.pageData.byId[event.pageId]
+        const action: DragToListAction<'page'> = {
+            type: 'page',
+            fullPageUrl: page.fullUrl,
+            normalizedPageUrl: page.normalizedUrl,
+        }
+        event.dataTransfer.setData('text/plain', JSON.stringify(action))
+        this.emitMutation({
+            searchResults: { draggedPageId: { $set: event.pageId } },
+        })
+    }
+
+    dropPage: EventHandler<'dropPage'> = async () => {
+        this.emitMutation({
+            searchResults: { draggedPageId: { $set: undefined } },
+        })
+    }
+
+    dropOnListItem: EventHandler<'dropOnListItem'> = async ({
         event,
         previousState,
     }) => {
-        const { fullPageUrl, normalizedPageUrl } = JSON.parse(
-            event.dataTransfer.getData('text/plain'),
-        ) as { fullPageUrl: string; normalizedPageUrl: string }
-
-        if (!fullPageUrl || !normalizedPageUrl) {
+        let action: DragToListAction<any>
+        try {
+            action = JSON.parse(event.dataTransfer.getData('text/plain'))
+            if (!['page', 'list'].includes(action?.type)) {
+                throw new Error('Unexpected data received')
+            }
+        } catch (err) {
+            console.error('Error parsing ondrop event data transfer data:', err)
             return
         }
 
-        const listData = getListData(event.listId, previousState, {
+        if (action.type === 'page') {
+            return this.handleDropPageOnListItem(
+                event.listId,
+                action,
+                previousState,
+            )
+        }
+        return this.handleDropListOnListItem(
+            event.listId,
+            action,
+            previousState,
+        )
+    }
+
+    private async handleDropListOnListItem(
+        dropTargetListId: string,
+        { listId }: DragToListAction<'list'>,
+        previousState: State,
+    ): Promise<void> {
+        if (listId == null) {
+            return
+        }
+
+        const listData = getListData(listId, previousState, {
             mustBeLocal: true,
-            source: 'dropPageOnListItem',
+            source: 'dropOnListItem',
+        })
+        const dropTargetListData = getListData(
+            dropTargetListId,
+            previousState,
+            {
+                mustBeLocal: true,
+                source: 'dropOnListItem',
+            },
+        )
+        if (listData.localId == null || dropTargetListData.localId == null) {
+            return
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                dragOverListId: { $set: undefined },
+                lists: {
+                    byId: {
+                        [dropTargetListId]: {
+                            wasListDropped: { $set: true },
+                        },
+                    },
+                },
+            },
+        })
+
+        this.options.annotationsCache.updateList({
+            unifiedId: listId,
+            parentUnifiedId: dropTargetListId,
+        })
+
+        setTimeout(() => {
+            this.emitMutation({
+                listsSidebar: {
+                    lists: {
+                        byId: {
+                            [dropTargetListId]: {
+                                wasListDropped: { $set: false },
+                            },
+                        },
+                    },
+                },
+            })
+        }, 2000)
+
+        await this.options.listsBG.updateListTreeParent({
+            localListId: listData.localId!,
+            parentId: dropTargetListData.localId!,
+        })
+    }
+
+    private async handleDropPageOnListItem(
+        dropTargetListId: string,
+        { fullPageUrl, normalizedPageUrl }: DragToListAction<'page'>,
+        previousState: State,
+    ): Promise<void> {
+        if (fullPageUrl == null || normalizedPageUrl == null) {
+            return
+        }
+
+        const listData = getListData(dropTargetListId, previousState, {
+            mustBeLocal: true,
+            source: 'dropOnListItem',
         })
 
         this.options.analytics.trackEvent({
@@ -3637,7 +3749,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dragOverListId: { $set: undefined },
                 lists: {
                     byId: {
-                        [event.listId]: {
+                        [dropTargetListId]: {
                             wasPageDropped: { $set: true },
                         },
                     },
@@ -3649,9 +3761,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         [normalizedPageUrl]: {
                             lists: {
                                 $apply: (lists: string[]) =>
-                                    lists.includes(event.listId)
+                                    lists.includes(dropTargetListId)
                                         ? lists
-                                        : [...lists, event.listId],
+                                        : [...lists, dropTargetListId],
                             },
                         },
                     },
@@ -3659,29 +3771,25 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        await Promise.all([
-            this.options.listsBG.insertPageToList({
-                id: listData.localId!,
-                url: fullPageUrl,
-                skipPageIndexing: true,
-            }),
-            new Promise<void>((resolve) =>
-                setTimeout(() => {
-                    this.emitMutation({
-                        listsSidebar: {
-                            lists: {
-                                byId: {
-                                    [event.listId]: {
-                                        wasPageDropped: { $set: false },
-                                    },
-                                },
+        setTimeout(() => {
+            this.emitMutation({
+                listsSidebar: {
+                    lists: {
+                        byId: {
+                            [dropTargetListId]: {
+                                wasPageDropped: { $set: false },
                             },
                         },
-                    })
-                    resolve()
-                }, 2000),
-            ),
-        ])
+                    },
+                },
+            })
+        }, 2000)
+
+        await this.options.listsBG.insertPageToList({
+            id: listData.localId!,
+            url: fullPageUrl,
+            skipPageIndexing: true,
+        })
     }
 
     clickPageResult: EventHandler<'clickPageResult'> = async ({

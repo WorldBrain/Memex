@@ -66,6 +66,7 @@ export default class CustomListBackground {
             createCustomList: this.createCustomList,
             createListTree: this.createListTree,
             deleteListTree: this.deleteListTree,
+            updateListTreeParent: this.updateListTreeParent,
             insertPageToList: async (params) => {
                 const currentTab = await this.options.queryTabs?.({
                     active: true,
@@ -380,6 +381,14 @@ export default class CustomListBackground {
             now,
         })
         return { treeId }
+    }
+
+    updateListTreeParent: RemoteCollectionsInterface['updateListTreeParent'] = async ({
+        localListId,
+        parentId,
+        now,
+    }) => {
+        throw new Error('TODO: Implement list tree parent updates')
     }
 
     deleteListTree: RemoteCollectionsInterface['deleteListTree'] = async ({

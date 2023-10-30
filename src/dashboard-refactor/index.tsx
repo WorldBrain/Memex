@@ -566,6 +566,13 @@ export class DashboardContainer extends StatefulUIElement<
                     toggleEditMenu: () =>
                         this.processEvent('setEditMenuListId', { listId }),
                 })}
+                onListDragStart={(listId) => (e) =>
+                    this.processEvent('dragList', {
+                        listId,
+                        dataTransfer: e.dataTransfer,
+                    })}
+                onListDragEnd={(listId) => (e) =>
+                    this.processEvent('dropList', { listId })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
                         this.processEvent('setDragOverListId', { listId })
@@ -575,7 +582,7 @@ export class DashboardContainer extends StatefulUIElement<
                             listId: undefined,
                         }),
                     onDrop: (dataTransfer: DataTransfer) => {
-                        this.processEvent('dropPageOnListItem', {
+                        this.processEvent('dropOnListItem', {
                             listId,
                             dataTransfer,
                         })

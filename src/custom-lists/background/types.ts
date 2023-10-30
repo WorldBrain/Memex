@@ -80,6 +80,11 @@ export interface RemoteCollectionsInterface {
         parentId?: number
         now?: number
     }): Promise<{ treeId: number }>
+    updateListTreeParent(args: {
+        localListId: number
+        parentId: number
+        now?: number
+    }): Promise<void>
     deleteListTree(args: { treeId: number }): Promise<void>
     createCustomList(
         args: {

@@ -13,6 +13,8 @@ export interface Props {
     indentSteps?: number
     alwaysShowRightSideIcon?: boolean
     dropReceivingState?: DropReceivingState
+    onDragStart?: React.DragEventHandler
+    onDragEnd?: React.DragEventHandler
     onClick: React.MouseEventHandler
     renderLeftSideIcon?: () => JSX.Element
     renderRightSideIcon?: () => JSX.Element
@@ -82,7 +84,11 @@ export default class ListsSidebarItem extends React.PureComponent<
                 >
                     <SidebarItemClickContainer onClick={this.props.onClick}>
                         {this.props.renderLeftSideIcon?.()}
-                        <TitleBox>
+                        <TitleBox
+                            onDragStart={this.props.onDragStart}
+                            onDragEnd={this.props.onDragEnd}
+                            draggable
+                        >
                             <ListTitle>
                                 <Name>{this.props.name}</Name>
                             </ListTitle>

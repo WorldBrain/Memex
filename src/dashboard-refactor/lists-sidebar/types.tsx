@@ -6,7 +6,12 @@ import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/uti
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
-    lists: NormalizedState<UnifiedList & { wasPageDropped?: boolean }>
+    lists: NormalizedState<
+        UnifiedList & {
+            wasPageDropped?: boolean
+            wasListDropped?: boolean
+        }
+    >
     listTrees: NormalizedState<{
         isTreeToggled: boolean
         isNestedListInputShown: boolean
@@ -20,6 +25,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     isAddListInputShown: boolean
     spaceSidebarWidth: number
 
+    draggedListId: string | null
     inboxUnreadCount: number
     dragOverListId?: string
     editingListId?: string
@@ -63,7 +69,9 @@ export type Events = UIEvent<{
     setSelectedListId: { listId: string }
     setShowMoreMenuListId: { listId: string }
     setEditMenuListId: { listId: string }
-    dropPageOnListItem: { listId: string; dataTransfer: DataTransfer }
+    dropOnListItem: { listId: string; dataTransfer: DataTransfer }
+    dragList: { listId: string; dataTransfer: DataTransfer }
+    dropList: { listId: string }
 
     // Tree-related events
     toggleListTreeShow: { listId: string }
@@ -78,5 +86,16 @@ export type Events = UIEvent<{
     toggleTheme: { themeVariant: MemexThemeVariant }
     switchToFeed: null
 }>
+
+export type DragToListAction<T extends 'page' | 'list'> = T extends 'page'
+    ? {
+          type: 'page'
+          fullPageUrl: string
+          normalizedPageUrl: string
+      }
+    : {
+          type: 'list'
+          listId: string
+      }
 
 export type ListNameHighlightIndices = [number, number]
