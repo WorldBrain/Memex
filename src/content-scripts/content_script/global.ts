@@ -1662,9 +1662,8 @@ function renderSpacesBar(
 export function loadYoutubeButtons(annotationsFunctions) {
     const below = document.querySelector('#below')
     const player = document.querySelector('#player')
-    const videoPath =
-        new URL(window.location.href).pathname +
-        new URL(window.location.href).search
+    const url = new URL(window.location.href)
+    const videoPath = url.pathname + '?v=' + url.searchParams.get('v')
     const selector = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
     const chapterContainer = document.querySelectorAll(selector)
     let hasChapterContainer = chapterContainer.length > 0
@@ -1712,58 +1711,71 @@ export function loadYoutubeButtons(annotationsFunctions) {
                     if (!hasChapterContainer) {
                         if (node instanceof HTMLElement) {
                             // Check if the "below" element is in the added node or its descendants
-                            if (node.querySelector(selector)) {
-                                const videoPath =
-                                    new URL(window.location.href).pathname +
-                                    new URL(window.location.href).search
-
-                                const chapterTimestamps = document.querySelectorAll(
-                                    selector,
+                            if (
+                                node.classList.contains(
+                                    'yt-core-attributed-string__link',
                                 )
-                                const chapterBlocks = []
-                                hasChapterContainer = true
-                                Array.from(chapterTimestamps).forEach(
-                                    (block, i) => {
-                                        const chapteblock = block.parentElement
-                                        chapterBlocks.push(chapteblock)
-                                    },
-                                )
+                            ) {
+                                if (
+                                    node
+                                        .getAttribute('href')
+                                        .startsWith(videoPath)
+                                ) {
+                                    const selector2 = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
+                                    const chapterTimestamps = document.querySelectorAll(
+                                        selector2,
+                                    )
+                                    const chapterBlocks = []
+                                    hasChapterContainer = true
+                                    Array.from(chapterTimestamps).forEach(
+                                        (block, i) => {
+                                            const chapteblock =
+                                                block.parentElement
+                                            chapterBlocks.push(chapteblock)
+                                        },
+                                    )
 
-                                const firstBlock = chapterBlocks[0]
+                                    const firstBlock = chapterBlocks[0]
 
-                                const buttonIcon = runtime.getURL(
-                                    '/img/memex-icon.svg',
-                                )
+                                    const buttonIcon = runtime.getURL(
+                                        '/img/memex-icon.svg',
+                                    )
 
-                                const newBlock = document.createElement('div')
-                                newBlock.style.display = 'flex'
-                                newBlock.style.alignItems = 'center'
-                                newBlock.style.marginTop = '10px'
-                                newBlock.style.marginBottom = '10px'
-                                newBlock.style.flexWrap = 'wrap'
-                                newBlock.style.gap = '15px'
-                                newBlock.style.width = 'fit-content'
-                                newBlock.style.height = 'fit-content'
-                                newBlock.style.padding = '10px 16px 10px 16px'
-                                newBlock.style.borderRadius = '5px'
-                                newBlock.style.backgroundColor = '#12131B'
-                                newBlock.style.color = '#C6F0D4'
-                                newBlock.style.fontSize = '14px'
-                                newBlock.style.fontFamily = 'Arial'
-                                newBlock.style.cursor = 'pointer'
-                                newBlock.onclick = () => {
-                                    annotationsFunctions.openChapterSummary()
-                                }
-                                newBlock.innerHTML = `<img src=${buttonIcon} style="height: 23px; padding-left: 2px; display: flex; grid-gap:5px; width: auto"/> <div style="white-space: nowrap">Summarize Chapters</div>`
+                                    const newBlock = document.createElement(
+                                        'div',
+                                    )
+                                    newBlock.style.display = 'flex'
+                                    newBlock.style.alignItems = 'center'
+                                    newBlock.style.marginTop = '10px'
+                                    newBlock.style.marginBottom = '10px'
+                                    newBlock.style.flexWrap = 'wrap'
+                                    newBlock.style.gap = '15px'
+                                    newBlock.style.width = 'fit-content'
+                                    newBlock.style.height = 'fit-content'
+                                    newBlock.style.padding =
+                                        '10px 16px 10px 16px'
+                                    newBlock.style.borderRadius = '5px'
+                                    newBlock.style.backgroundColor = '#12131B'
+                                    newBlock.style.color = '#C6F0D4'
+                                    newBlock.style.fontSize = '14px'
+                                    newBlock.style.fontFamily = 'Arial'
+                                    newBlock.style.cursor = 'pointer'
+                                    newBlock.onclick = () => {
+                                        annotationsFunctions.openChapterSummary()
+                                    }
+                                    newBlock.innerHTML = `<img src=${buttonIcon} style="height: 23px; padding-left: 2px; display: flex; grid-gap:5px; width: auto"/> <div style="white-space: nowrap">Summarize Chapters</div>`
 
-                                firstBlock.insertAdjacentElement(
-                                    'beforebegin',
-                                    newBlock,
-                                )
-                                injectYoutubeButtonMenu(annotationsFunctions)
+                                    firstBlock.insertAdjacentElement(
+                                        'beforebegin',
+                                        newBlock,
+                                    )
+                                    injectYoutubeButtonMenu(
+                                        annotationsFunctions,
+                                    )
 
-                                if (below && player && chapterContainer) {
-                                    observer.disconnect()
+                                    if (below && player && chapterContainer) {
+                                        observer.disconnect()
+                                    }
                                 }
                             }
                         }
