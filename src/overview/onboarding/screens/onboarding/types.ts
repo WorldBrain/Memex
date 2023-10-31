@@ -44,6 +44,6 @@ export type Event = UIEvent<{
     onUserLogIn: { newSignUp?: boolean }
     setAuthDialogMode: { mode: AuthDialogMode }
     showOnboardingVideo: null
-    goToNextOnboardingStep: null
+    goToNextOnboardingStep: { step: string }
     enableNudges: null
 }>

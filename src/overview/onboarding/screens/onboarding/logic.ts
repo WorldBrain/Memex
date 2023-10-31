@@ -276,21 +276,29 @@ export default class Logic extends UILogic<State, Event> {
         previousState,
         event,
     }) => {
-        if (previousState.welcomeStep === 'start') {
-            this.emitMutation({
-                welcomeStep: { $set: 'basicIntro' },
-            })
+        this.emitMutation({
+            welcomeStep: { $set: event.step },
+        })
+
+        if (event.step === 'finish') {
+            this.dependencies.navToDashboard()
         }
-        if (previousState.welcomeStep === 'nudges') {
-            this.emitMutation({
-                welcomeStep: { $set: 'basicIntro' },
-            })
-        }
-        if (previousState.welcomeStep === 'basicIntro') {
-            this.emitMutation({
-                welcomeStep: { $set: 'login' },
-            })
-        }
+
+        // if (previousState.welcomeStep === 'start') {
+        //     this.emitMutation({
+        //         welcomeStep: { $set: 'login' },
+        //     })
+        // }
+        // if (previousState.welcomeStep === 'nudges') {
+        //     this.emitMutation({
+        //         welcomeStep: { $set: 'basicIntro' },
+        //     })
+        // }
+        // if (previousState.welcomeStep === 'login') {
+        //     this.emitMutation({
+        //         welcomeStep: { $set: 'finish' },
+        //     })
+        // }
     }
     enableNudges: EventHandler<'enableNudges'> = async ({
         previousState,

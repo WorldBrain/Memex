@@ -105,7 +105,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                 label={'Continue'}
                 icon={'longArrowRight'}
                 onClick={() =>
-                    this.processEvent('goToNextOnboardingStep', null)
+                    this.processEvent('goToNextOnboardingStep', {
+                        step: 'login',
+                    })
                 }
                 type="primary"
                 size={'large'}
@@ -133,7 +135,9 @@ export default class OnboardingScreen extends StatefulUIElement<
                 label={'Continue'}
                 icon={'longArrowRight'}
                 onClick={() =>
-                    this.processEvent('goToNextOnboardingStep', null)
+                    this.processEvent('goToNextOnboardingStep', {
+                        step: 'nudges',
+                    })
                 }
                 type="primary"
                 size={'large'}
@@ -152,10 +156,12 @@ export default class OnboardingScreen extends StatefulUIElement<
             </DescriptionText>
             <MemexActionButtonIntro src={'img/memexActionButtonIntro.png'} />
             <PrimaryAction
-                label={'Continue'}
+                label={'Finish'}
                 icon={'longArrowRight'}
                 onClick={() =>
-                    this.processEvent('goToNextOnboardingStep', null)
+                    this.processEvent('goToNextOnboardingStep', {
+                        step: 'finish',
+                    })
                 }
                 type="primary"
                 size={'large'}
@@ -239,7 +245,8 @@ export default class OnboardingScreen extends StatefulUIElement<
 
         return (
             <OnboardingOptionsContainer>
-                <Title> How would you like to get started?</Title>
+                <Title>If you want </Title>
+                <DescriptionText>Don't forget the spam folder!</DescriptionText>
                 {this.state.showOnboardingVideo ? (
                     <>
                         {' '}
@@ -313,36 +320,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 <OnboardingTitle>Watch a Video</OnboardingTitle>
                                 <Icon
                                     icon={OnboardingIcons[1]}
-                                    heightAndWidth="40px"
-                                    color="prime1"
-                                    hoverOff
-                                />
-                            </OnboardingOptionBox>
-                            <OnboardingOptionBox
-                                onClick={async () => {
-                                    window.open(
-                                        'https://tutorials.memex.garden/tutorials',
-                                        '_blank',
-                                    )
-                                    if (this.props.analyticsBG) {
-                                        try {
-                                            await trackOnboardingPath(
-                                                this.props.analyticsBG,
-                                                {
-                                                    type: 'docs',
-                                                },
-                                            )
-                                        } catch (error) {
-                                            console.error(
-                                                `Error tracking onboarding tutorial', ${error}`,
-                                            )
-                                        }
-                                    }
-                                }}
-                            >
-                                <OnboardingTitle>Read Docs</OnboardingTitle>
-                                <Icon
-                                    icon={OnboardingIcons[2]}
                                     heightAndWidth="40px"
                                     color="prime1"
                                     hoverOff
@@ -431,9 +408,11 @@ export default class OnboardingScreen extends StatefulUIElement<
                     {this.state.welcomeStep === 'nudges' && this.renderNudges()}
                     {this.state.welcomeStep === 'basicIntro' &&
                         this.renderBasicIntro()}
-                    {this.state.showSyncNotification && this.renderSyncNotif()}
+                    {this.state.showSyncNotification &&
+                        this.state.welcomeStep === 'finish' &&
+                        this.renderSyncNotif()}
                     {this.state.showOnboardingSelection &&
-                        this.renderOnboardingSelection()}
+                        this.renderBasicIntro()}
                     {!this.state.showOnboardingSelection &&
                         !this.state.showSyncNotification &&
                         this.state.welcomeStep === 'login' &&
@@ -454,7 +433,9 @@ const MemexActionButtonIntro = styled.img`
     height: 450px;
     width: auto;
     border-radius: 8px;
-    margin-top: -35px;
+    margin-top: -250px;
+    z-index: -1;
+    margin-bottom: 30px;
 `
 
 const CheckBoxContainer = styled.div`
@@ -495,7 +476,7 @@ const BetaButton = styled.div`
 
 const BetaButtonInner = styled.div`
     display: flex;
-    background: ${(props) => props.theme.colors.greyScale1};
+    background: ${(props) => props.theme.colors.black};
     color: #0a4bca;
     font-size: 20px;
     letter-spacing: 1px;
