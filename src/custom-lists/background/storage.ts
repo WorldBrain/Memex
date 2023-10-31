@@ -640,16 +640,26 @@ export default class CustomListStorage extends StorageModule {
                 localListId: params.parentListId,
                 now: params.now,
             })
-            treeCache.set(params.localListId, newListTree)
+            treeCache.set(params.parentListId, newListTree)
         }
+
         const nodeToChange = await getTreeByListId(params.localListId)
+        // If the node to change doesn't have list tree data, then it's old pre-nested lists data, which is guaranteed to have no descendants
         if (!nodeToChange) {
-            const newListTree = await this.createListTree({
+            const pathIds =
+                params.parentListId != null
+                    ? await this.getMaterializedPathIdsFromTree({
+                          id: params.parentListId,
+                      })
+                    : null
+
+            await this.createListTree({
                 localListId: params.localListId,
                 parentListId: params.parentListId,
                 now: params.now,
+                pathIds,
             })
-            return // Should only get here in the case of old data, which is guaranteed to have no descendants - thus we can exit early here
+            return
         }
 
         // Go through entire subtree that starts from the node we need to change and update each node's ancestor references
