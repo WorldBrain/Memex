@@ -31,6 +31,7 @@ export interface Props {
     fontSize?: number
     checkBoxColor?: ColorThemeKeys
     borderColor?: ColorThemeKeys
+    width?: string
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -49,7 +50,11 @@ class Checkbox extends React.PureComponent<Props> {
 
     render() {
         return (
-            <LabelContainer zIndex={this.props.zIndex} htmlFor={this.props.id}>
+            <LabelContainer
+                width={this.props.width}
+                zIndex={this.props.zIndex}
+                htmlFor={this.props.id}
+            >
                 <LabelText>
                     <InputContainer
                         type="checkbox"
@@ -137,10 +142,10 @@ const ChildrenBox = styled.span<{ mode }>`
     }
 `
 
-const LabelContainer = styled.label<{ zIndex?: number }>`
+const LabelContainer = styled.label<{ zIndex?: number; width: boolean }>`
     display: flex;
     align-items: center;
-    width: 100%;
+    width: ${(props) => (props.width ? props.width : '100%')};
     cursor: pointer;
     z-index: ${(props) => props.zIndex};
 `
@@ -174,7 +179,11 @@ const LabelCheck = styled.span<{
     borderColor
 }>`
     border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '5px')};
-    border: 2px solid ${(props) => props.isChecked && props.theme.colors.white};
+    border: 2px solid
+        ${(props) =>
+            props.isChecked
+                ? props.theme.colors.white
+                : props.theme.colors.greyScale3};
     background: ${(props) =>
         props.isChecked
             ? props.theme.colors.white
