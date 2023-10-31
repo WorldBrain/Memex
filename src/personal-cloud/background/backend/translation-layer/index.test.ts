@@ -1944,6 +1944,327 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
+        it('should reorder custom list trees', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                testSyncPushTrigger,
+                getDatabaseContents,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.third)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.third)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.second)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.third)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const nowA = Date.now()
+
+            const assertExpectedLocalTreeData = async () =>
+                expect(
+                    await setups[0].storageManager
+                        .collection('customListTrees')
+                        .findAllObjects({}),
+                ).toEqual([
+                    LOCAL_TEST_DATA_V24.customListTrees.first,
+                    LOCAL_TEST_DATA_V24.customListTrees.second,
+                    LOCAL_TEST_DATA_V24.customListTrees.third,
+                    LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                ])
+
+            await assertExpectedLocalTreeData()
+
+            // Move a subtree (with child) to be the child of its sibling - should update both subtree root and child ancestor refs
+            await setups[0].backgroundModules.customLists.updateListTreeParent({
+                localListId: LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                parentListId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                now: nowA,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // Update test data to have expected post-reordering values
+            LOCAL_TEST_DATA_V24.customListTrees.third = {
+                ...LOCAL_TEST_DATA_V24.customListTrees.third,
+                updatedWhen: nowA,
+                parentId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                path: buildMaterializedPath(
+                    LOCAL_TEST_DATA_V24.customListTrees.first.listId,
+                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                ),
+            }
+            LOCAL_TEST_DATA_V24.customListTrees.fourth = {
+                ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                updatedWhen: nowA,
+                parentId: LOCAL_TEST_DATA_V24.customListTrees.third.listId, // Unchanged
+                path: buildMaterializedPath(
+                    LOCAL_TEST_DATA_V24.customListTrees.first.listId,
+                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                    LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                ),
+            }
+            await assertExpectedLocalTreeData()
+
+            const remoteDataA = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListTreesA = remoteDataA.personalListTree
+            const testListSharesA = remoteDataA.personalListShare
+
+            // TODO: Fix this once sync support
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'personalDataChange', // TODO: Figure out how these change
+                    'personalListTree',
+                    'sharedListTree',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                // ...personalDataChanges(remoteData, [
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
+                // ], { skipChanges: 8 }),
+                personalListTree: [
+                    testListTreesA.first,
+                    testListTreesA.second,
+                    {
+                        ...testListTreesA.third,
+                        updatedWhen: nowA,
+                        path: buildMaterializedPath(
+                            testListTreesA.first.personalList,
+                            testListTreesA.second.personalList,
+                        ),
+                        parentId: testListTreesA.second.personalList,
+                        localPath: LOCAL_TEST_DATA_V24.customListTrees.third.path,
+                        localParentId: LOCAL_TEST_DATA_V24.customListTrees.third.parentId,
+                    },
+                    {
+                        ...testListTreesA.fourth,
+                        updatedWhen: nowA,
+                        path: buildMaterializedPath(
+                            testListTreesA.first.personalList,
+                            testListTreesA.second.personalList,
+                            testListTreesA.third.personalList,
+                        ),
+                        localPath: LOCAL_TEST_DATA_V24.customListTrees.fourth.path,
+                    },
+                ],
+                sharedListTree: [
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesA.first.order,
+                        sharedList: testListSharesA.first.remoteId,
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesA.second.order,
+                        sharedList: testListSharesA.second.remoteId,
+                        parentId: testListSharesA.first.remoteId,
+                        path: buildMaterializedPath(testListSharesA.first.remoteId),
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesA.third.order,
+                        sharedList: testListSharesA.third.remoteId,
+                        parentId: testListSharesA.second.remoteId,
+                        path: buildMaterializedPath(
+                            testListSharesA.first.remoteId,
+                            testListSharesA.second.remoteId,
+                        ),
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesA.fourth.order,
+                        sharedList: testListSharesA.fourth.remoteId,
+                        parentId: testListSharesA.third.remoteId,
+                        path: buildMaterializedPath(
+                            testListSharesA.first.remoteId,
+                            testListSharesA.second.remoteId,
+                            testListSharesA.third.remoteId,
+                        ),
+                    }),
+                ],
+            })
+
+            const nowB = Date.now()
+            // Move new parent of subtree from prev call to be tree of its own - should affect everything but the root of the old tree
+            await setups[0].backgroundModules.customLists.updateListTreeParent({
+                localListId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                parentListId: null,
+                now: nowB,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // Update test data to have expected post-reordering values
+            LOCAL_TEST_DATA_V24.customListTrees.second = {
+                ...LOCAL_TEST_DATA_V24.customListTrees.second,
+                updatedWhen: nowB,
+                parentId: null,
+                path: null,
+            }
+            LOCAL_TEST_DATA_V24.customListTrees.third = {
+                ...LOCAL_TEST_DATA_V24.customListTrees.third,
+                updatedWhen: nowB,
+                parentId: LOCAL_TEST_DATA_V24.customListTrees.second.listId, // Unchanged
+                path: buildMaterializedPath(
+                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                ),
+            }
+            LOCAL_TEST_DATA_V24.customListTrees.fourth = {
+                ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                updatedWhen: nowB,
+                parentId: LOCAL_TEST_DATA_V24.customListTrees.third.listId, // Unchanged
+                path: buildMaterializedPath(
+                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                    LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                ),
+            }
+            await assertExpectedLocalTreeData()
+
+            const remoteDataB = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListTreesB = remoteDataB.personalListTree
+            const testListSharesB = remoteDataB.personalListShare
+
+            // TODO: Fix this once sync support
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'personalDataChange', // TODO: Figure out how these change
+                    'personalListTree',
+                    'sharedListTree',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                // ...personalDataChanges(remoteData, [
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
+                //     [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
+                // ], { skipChanges: 8 }),
+                personalListTree: [
+                    testListTreesB.first,
+                    {
+                        ...testListTreesB.second,
+                        updatedWhen: nowB,
+                        path: null,
+                        parentId: null,
+                        localPath: LOCAL_TEST_DATA_V24.customListTrees.second.path,
+                        localParentId: LOCAL_TEST_DATA_V24.customListTrees.second.parentId,
+                    },
+                    {
+                        ...testListTreesB.third,
+                        updatedWhen: nowB,
+                        path: buildMaterializedPath(testListTreesB.second.personalList),
+                        parentId: testListTreesB.second.personalList,
+                        localPath: LOCAL_TEST_DATA_V24.customListTrees.third.path,
+                        localParentId: LOCAL_TEST_DATA_V24.customListTrees.third.parentId,
+                    },
+                    {
+                        ...testListTreesB.fourth,
+                        updatedWhen: nowB,
+                        parentId: testListTreesB.third.personalList,
+                        path: buildMaterializedPath(
+                            testListTreesB.second.personalList,
+                            testListTreesB.third.personalList,
+                        ),
+                        localPath: LOCAL_TEST_DATA_V24.customListTrees.fourth.path,
+                    },
+                ],
+                sharedListTree: [
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesB.first.order,
+                        sharedList: testListSharesB.first.remoteId,
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesB.second.order,
+                        sharedList: testListSharesB.second.remoteId,
+                        parentId: null,
+                        path: null,
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesB.third.order,
+                        sharedList: testListSharesB.third.remoteId,
+                        parentId: testListSharesB.second.remoteId,
+                        path: buildMaterializedPath(testListSharesB.second.remoteId),
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTreesB.fourth.order,
+                        sharedList: testListSharesB.fourth.remoteId,
+                        parentId: testListSharesB.third.remoteId,
+                        path: buildMaterializedPath(
+                            testListSharesB.second.remoteId,
+                            testListSharesB.third.remoteId,
+                        ),
+                    }),
+                ],
+            })
+
+            // TODO: Figure expected DL out
+            // prettier - ignore
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: LOCAL_TEST_DATA_V24.customListTrees.first,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: LOCAL_TEST_DATA_V24.customListTrees.second,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: LOCAL_TEST_DATA_V24.customListTrees.third,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                    },
+                ],
+                { skip: 8 },
+            )
+
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
         it('should delete custom list trees', async () => {
             const {
                 setups,

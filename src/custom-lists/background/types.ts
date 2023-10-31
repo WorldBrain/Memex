@@ -32,6 +32,7 @@ export interface PageListEntry {
 }
 
 export interface ListTree {
+    id: number
     listId: number
     /** A materialized path, containing IDs of all ancestors of this tree delimited by comma in order from oldest to youngest. e.g., "a,b,c" */
     path: string
@@ -77,12 +78,12 @@ export interface CollectionsCacheInterface {
 export interface RemoteCollectionsInterface {
     createListTree(args: {
         localListId: number
-        parentId?: number
+        parentListId?: number
         now?: number
     }): Promise<{ treeId: number }>
     updateListTreeParent(args: {
         localListId: number
-        parentId: number
+        parentListId: number
         now?: number
     }): Promise<void>
     deleteListTree(args: { treeId: number }): Promise<void>

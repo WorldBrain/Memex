@@ -25,6 +25,7 @@ import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
+import { mapTreeAsync } from '../tree-utils'
 
 const limitSuggestionsStorageLength = 25
 
@@ -365,18 +366,18 @@ export default class CustomListBackground {
 
     createListTree: RemoteCollectionsInterface['createListTree'] = async ({
         localListId,
-        parentId,
+        parentListId,
         now,
     }) => {
         const pathIds =
-            parentId != null
+            parentListId != null
                 ? await this.storage.getMaterializedPathIdsFromTree({
-                      id: parentId,
+                      id: parentListId,
                   })
                 : []
-        const treeId = await this.storage.createListTree({
+        const { id: treeId } = await this.storage.createListTree({
             localListId,
-            parentId,
+            parentListId,
             pathIds,
             now,
         })
@@ -385,10 +386,14 @@ export default class CustomListBackground {
 
     updateListTreeParent: RemoteCollectionsInterface['updateListTreeParent'] = async ({
         localListId,
-        parentId,
+        parentListId,
         now,
     }) => {
-        throw new Error('TODO: Implement list tree parent updates')
+        await this.storage.updateListTreeParent({
+            localListId,
+            parentListId,
+            now,
+        })
     }
 
     deleteListTree: RemoteCollectionsInterface['deleteListTree'] = async ({

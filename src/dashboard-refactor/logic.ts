@@ -3721,7 +3721,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.options.listsBG.updateListTreeParent({
             localListId: listData.localId!,
-            parentId: dropTargetListData.localId!,
+            parentListId: dropTargetListData.localId!,
         })
     }
 
@@ -4131,7 +4131,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
                 await listsBG.createListTree({
                     localListId,
-                    parentId: parentList.localId!,
+                    parentListId: parentList.localId!,
                 })
 
                 this.emitMutation({
