@@ -657,35 +657,27 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         // If the parent has changed, this plus all descendent lists must update ancestor references
         if (previousList.parentUnifiedId !== nextList.parentUnifiedId) {
-            const nextParent = this.lists.byId[nextList.parentUnifiedId]
-            nextList.parentLocalId = nextParent.localId ?? null
-            nextList.pathLocalIds = [
-                ...(nextParent.pathLocalIds ?? []),
-                nextParent.localId,
-            ]
-            nextList.pathUnifiedIds = [
-                ...(nextParent.pathUnifiedIds ?? []),
-                nextParent.unifiedId,
-            ]
+            forEachTree({
+                root: nextList,
+                getChildren: (node) => this.getListsByParentId(node.unifiedId),
+                cb: (node) => {
+                    const nodeParent = this.lists.byId[node.parentUnifiedId]
+                    if (!nodeParent) {
+                        return
+                    }
 
-            // TODO: Cascade parent/path updates down through descendents
-            // forEachTree({
-            //     root: nextList,
-            //     getChildren: (node) => this.getListsByParentId(node.unifiedId),
-            //     cb: (node) => {
-            //         const nodeParent = this.lists.byId[node.unifiedId]
-            //         node.parentUnifiedId = nodeParent.unifiedId
-            //         node.parentLocalId = nodeParent.localId ?? null
-            //         node.pathUnifiedIds = [
-            //             ...(nodeParent.pathUnifiedIds ?? []),
-            //             nodeParent.unifiedId,
-            //         ]
-            //         node.pathLocalIds = [
-            //             ...(nodeParent.pathLocalIds ?? []),
-            //             nodeParent.localId,
-            //         ].filter((id) => id != null)
-            //     },
-            // })
+                    node.parentUnifiedId = nodeParent.unifiedId
+                    node.parentLocalId = nodeParent.localId ?? null
+                    node.pathUnifiedIds = [
+                        ...(nodeParent.pathUnifiedIds ?? []),
+                        nodeParent.unifiedId,
+                    ]
+                    node.pathLocalIds = [
+                        ...(nodeParent.pathLocalIds ?? []),
+                        nodeParent.localId,
+                    ].filter((id) => id != null)
+                },
+            })
         }
 
         // If list was shared, set up reverse ref from remote->cached ID
