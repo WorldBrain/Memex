@@ -62,7 +62,8 @@ import {
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
-import { DragToListAction } from './lists-sidebar/types'
+import type { DragToListAction } from './lists-sidebar/types'
+import { forEachTreeClimb } from 'src/custom-lists/tree-utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -354,6 +355,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 addListErrorMessage: null,
                 editListErrorMessage: null,
                 listShareLoadingState: 'pristine',
+                listDropReceiveState: 'pristine',
                 listCreateState: 'pristine',
                 listDeleteState: 'pristine',
                 listEditState: 'pristine',
@@ -3648,17 +3650,26 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        if (action.type === 'page') {
-            return this.handleDropPageOnListItem(
-                event.listId,
-                action,
-                previousState,
-            )
-        }
-        return this.handleDropListOnListItem(
-            event.listId,
-            action,
-            previousState,
+        await executeUITask(
+            this,
+            (taskState) => ({
+                listsSidebar: { listDropReceiveState: { $set: taskState } },
+            }),
+            async () => {
+                if (action.type === 'page') {
+                    await this.handleDropPageOnListItem(
+                        event.listId,
+                        action,
+                        previousState,
+                    )
+                    return
+                }
+                await this.handleDropListOnListItem(
+                    event.listId,
+                    action,
+                    previousState,
+                )
+            },
         )
     }
 
@@ -3685,6 +3696,26 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
         if (listData.localId == null || dropTargetListData.localId == null) {
             return
+        }
+
+        // Block any attempts at adding ancestor as child
+        let isListAncestorOfTargetList = false
+        forEachTreeClimb({
+            startingNode: dropTargetListData,
+            getParent: (node) =>
+                this.options.annotationsCache.lists.byId[
+                    node.parentUnifiedId
+                ] ?? null,
+            cb: (node, i) => {
+                isListAncestorOfTargetList =
+                    isListAncestorOfTargetList || node.unifiedId === listId
+            },
+        })
+        if (isListAncestorOfTargetList) {
+            console.log('lllll')
+            throw new Error(
+                'Cannot make list a child of a descendent - this would result in a cycle',
+            )
         }
 
         this.emitMutation({

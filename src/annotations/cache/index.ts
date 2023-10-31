@@ -18,7 +18,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
-import { forEachTree } from 'src/custom-lists/tree-utils'
+import { forEachTreeTraverse } from 'src/custom-lists/tree-utils'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -657,7 +657,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         // If the parent has changed, this plus all descendent lists must update ancestor references
         if (previousList.parentUnifiedId !== nextList.parentUnifiedId) {
-            forEachTree({
+            forEachTreeTraverse({
                 root: nextList,
                 getChildren: (node) => this.getListsByParentId(node.unifiedId),
                 cb: (node) => {

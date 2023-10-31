@@ -13,11 +13,41 @@ type TreeTraverseAsyncArgs<T, CBReturn> = Omit<
     concurrent?: boolean
 }
 
-export function forEachTree<T>(args: TreeTraverseArgs<T, void>): void {
-    mapTree(args)
+type TreeClimbArgs<T, CBReturn> = {
+    startingNode: T
+    cb: (node: T, distance: number) => CBReturn
+    getParent: (node: T) => T | null
 }
 
-export function mapTree<T, Return>({
+export function forEachTreeClimb<T, Return>(
+    params: TreeClimbArgs<T, Return>,
+): void {
+    mapTreeClimb(params)
+}
+
+export function mapTreeClimb<T, Return>({
+    cb,
+    getParent,
+    startingNode,
+}: TreeClimbArgs<T, Return>): Return[] {
+    const returnVal: Return[] = []
+
+    let distance = 0
+    let currentNode = startingNode
+
+    do {
+        cb(currentNode, distance++)
+        currentNode = getParent(currentNode)
+    } while (currentNode != null)
+
+    return returnVal
+}
+
+export function forEachTreeTraverse<T>(args: TreeTraverseArgs<T, void>): void {
+    mapTreeTraverse(args)
+}
+
+export function mapTreeTraverse<T, Return>({
     cb,
     root,
     getChildren,

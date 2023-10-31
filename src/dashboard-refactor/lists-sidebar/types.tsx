@@ -43,6 +43,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     listEditState: TaskState
     listDeleteState: TaskState
     listCreateState: TaskState
+    listDropReceiveState: TaskState
     listShareLoadingState: TaskState
     themeVariant: MemexThemeVariant
 }

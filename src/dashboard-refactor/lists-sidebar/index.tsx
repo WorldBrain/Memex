@@ -23,7 +23,7 @@ import type { DropReceivingState } from '../types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { mapTree } from 'src/custom-lists/tree-utils'
+import { mapTreeTraverse } from 'src/custom-lists/tree-utils'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
@@ -153,7 +153,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
 
         return rootLists
             .map((root) =>
-                mapTree({
+                mapTreeTraverse({
                     root,
                     strategy: 'dfs',
                     getChildren: (list) =>
