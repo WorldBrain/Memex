@@ -726,7 +726,7 @@ const DisplayNameContainer = styled.div`
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    text-align: left;
+    text-align: center;
 `
 
 const FeatureInfoBox = styled.div`

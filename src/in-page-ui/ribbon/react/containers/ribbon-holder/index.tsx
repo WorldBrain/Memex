@@ -236,6 +236,17 @@ export default class RibbonHolder extends StatefulUIElement<
                             }
                         />
                     )}
+                {/* {this.props.setUpOptions.showNudges &&
+                    !this.state.isSidebarOpen && (
+                        <NudgesContainer
+                            onClose={() =>
+                                this.processEvent('closeNudge', null)
+                            }
+                            onRemove={() =>
+                                this.processEvent('removeNudges', null)
+                            }
+                        />
+                    )} */}
                 {this.inPageErrorType && (
                     <InPageError>
                         <b>Error saving annotation</b>
