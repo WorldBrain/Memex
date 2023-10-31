@@ -82,6 +82,7 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { Checkbox } from 'src/common-ui/components'
 import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
+import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/interceptVideoLinks'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -189,13 +190,17 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     annotationsShareAll: any
     copyPageLink: any
     queryAIwithPrompt: any
+    getVideoChapters: any
+    chapterList: any
+    videoDetails: any
+    summariseChapter: any
+    chapterSummaries: any
     selectAISuggestion: any
     setQueryMode: (mode) => void
     updatePromptState: any
     postBulkShareHook: (shareState: AnnotationSharingStates) => void
     sidebarContext: 'dashboard' | 'in-page' | 'pdf-viewer'
     toggleAISuggestionsDropDown: () => void
-
     //postShareHook: (shareInfo) => void
     //postShareHook: (shareInfo) => void+
     setPopoutsActive: (popoutsOpen: boolean) => void
@@ -1532,6 +1537,92 @@ export class AnnotationsSidebar extends React.Component<
             </SummarySection>
         )
     }
+    private showChapterList() {
+        if (this.props.videoDetails == null) {
+            return (
+                <AIContainerNotif>
+                    <AIContainerNotifTitle>
+                        No chapters available for this video
+                    </AIContainerNotifTitle>
+                </AIContainerNotif>
+            )
+        }
+
+        return (
+            <ChapterSection>
+                <ChapterContainer>
+                    {this.props.chapterList?.map((chapter, i) => {
+                        const hasSummary =
+                            this.props.chapterSummaries != null &&
+                            this.props.chapterSummaries[i] != null &&
+                            this.props.chapterSummaries[i]?.summary.length > 0
+                        return (
+                            <ChapterItem showButtons={hasSummary}>
+                                <ChapterItemTopBox>
+                                    <ChapterTitleContent>
+                                        <ChapterTitle hasSummary={hasSummary}>
+                                            {chapter.title}
+                                        </ChapterTitle>
+                                        <ChapterTimestamp
+                                            onClick={(event) => {
+                                                interceptLinks(
+                                                    event,
+                                                    this.props.sidebarContext,
+                                                    this.props.getYoutubePlayer,
+                                                )
+                                            }}
+                                            href={
+                                                this.props.fullPageUrl +
+                                                `&t=${chapter.start}`
+                                            }
+                                        >
+                                            {chapter.humanReadableTimestamp}
+                                        </ChapterTimestamp>
+                                    </ChapterTitleContent>
+                                    <ActionButton>
+                                        <PrimaryAction
+                                            size={'small'}
+                                            label={'Summarize'}
+                                            icon={'feed'}
+                                            type="tertiary"
+                                            onClick={() => {
+                                                this.props.summariseChapter({
+                                                    chapterIndex: i,
+                                                })
+                                            }}
+                                            padding={'4px 6px 4px 2px'}
+                                        />
+                                    </ActionButton>
+                                </ChapterItemTopBox>
+                                {this.props.chapterSummaries != null &&
+                                    this.props.chapterSummaries[i] != null &&
+                                    (this.props.chapterSummaries[i]
+                                        .loadingState === 'running' ? (
+                                        <LoadingIndicator size={20} />
+                                    ) : (
+                                        <ChapterSummaryText
+                                            getYoutubePlayer={
+                                                this.props.getYoutubePlayer
+                                            }
+                                            contextLocation={
+                                                this.props.sidebarContext
+                                            }
+                                            isStream={true}
+                                            textColor={'greyScale6'}
+                                        >
+                                            {
+                                                this.props.chapterSummaries[i]
+                                                    .summary
+                                            }
+                                        </ChapterSummaryText>
+                                    ))}
+                            </ChapterItem>
+                        )
+                    })}
+                </ChapterContainer>
+            </ChapterSection>
+        )
+    }
 
     private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
@@ -1739,15 +1830,15 @@ export class AnnotationsSidebar extends React.Component<
                                     hideDescriptionInPreview
                                     menuItems={[
                                         {
-                                            id: 'Quick-glance',
-                                            name: 'Quick Glance (Faster)',
-                                            info:
-                                                'Include first few paragraphs or 6 min of video',
+                                            id: 'summarize',
+                                            name: 'Summarize',
+                                            info: 'Best for summarisations',
                                         },
                                         {
-                                            id: 'full-page',
-                                            name: 'Full Length (Slower)',
-                                            info: 'Uses entire content',
+                                            id: 'chapters',
+                                            name: 'Chapters',
+                                            info:
+                                                'Get chapter overview and summaries',
                                         },
                                         {
                                             id: 'Question',
@@ -1758,139 +1849,92 @@ export class AnnotationsSidebar extends React.Component<
                                     onMenuItemClick={async (props, index) => {
                                         let queryMode
                                         if (index === 0) {
-                                            queryMode = 'glanceSummary'
+                                            queryMode = 'summarize'
                                         }
                                         if (index === 1) {
-                                            queryMode = 'summarize'
+                                            queryMode = 'chapterSummary'
                                         }
                                         if (index === 2) {
                                             queryMode = 'question'
                                         }
                                         this.props.setQueryMode(queryMode)
 
-                                        if (index !== 2) {
+                                        if (index === 0) {
                                             await this.props.queryAIwithPrompt(
                                                 this.props.prompt,
+                                            )
+                                        }
+                                        if (index === 1) {
+                                            await this.props.getVideoChapters()
+                                        }
+
+                                        if (index === 2) {
+                                            await this.props.queryAIwithPrompt(
+                                                this.props.prompt,
+                                                undefined,
+                                                queryMode,
                                             )
                                         }
                                     }}
-                                    initSelectedIndex={0}
+                                    initSelectedIndex={
+                                        this.props.queryMode ===
+                                        'chapterSummary'
+                                            ? 1
+                                            : 0
+                                    }
+                                    selectedState={
+                                        this.props.queryMode ===
+                                            'chapterSummary' && 1
+                                    }
                                     keepSelectedState
                                 />
-                                {/* <TooltipBox
-                                    tooltipText={
-                                        <>
-                                            Just takes the first few paragraphs
-                                            or roughly the first 10 minutes of a
-                                            video for the summary. Much faster.
-                                        </>
-                                    }
-                                    placement="bottom"
-                                    width="150px"
-                                >
-                                    <SelectionPill
-                                        onClick={async () => {
-                                            this.props.setQueryMode(
-                                                'glanceSummary',
-                                            )
-                                            await this.props.queryAIwithPrompt(
-                                                this.props.prompt,
-                                            )
-                                        }}
-                                        selected={
-                                            this.props.queryMode ===
-                                            'glanceSummary'
-                                        }
-                                    >
-                                        Quick Glance
-                                    </SelectionPill>
-                                </TooltipBox>
-                                <TooltipBox
-                                    tooltipText={
-                                        <>
-                                            Takes in the whole article or video.
-                                            Much slower.
-                                        </>
-                                    }
-                                    placement="bottom"
-                                    width="150px"
-                                >
-                                    <SelectionPill
-                                        onClick={async () => {
-                                            this.props.setQueryMode('summarize')
-                                            await this.props.queryAIwithPrompt(
-                                                this.props.prompt,
-                                            )
-                                        }}
-                                        selected={
-                                            this.props.queryMode === 'summarize'
-                                        }
-                                    >
-                                        Full Page
-                                    </SelectionPill>
-                                </TooltipBox>
-                                <TooltipBox
-                                    tooltipText={
-                                        <>
-                                            This mode is ideal for general
-                                            questions that are not specific to
-                                            this page
-                                        </>
-                                    }
-                                    placement="bottom"
-                                    width="150px"
-                                >
-                                    <SelectionPill
-                                        onClick={() =>
-                                            this.props.setQueryMode('question')
-                                        }
-                                        selected={
-                                            this.props.queryMode === 'question'
-                                        }
-                                    >
-                                        General Question
-                                    </SelectionPill>
-                                </TooltipBox> */}
-                                {this.props.sidebarContext === 'in-page' && (
-                                    <TooltipBox
-                                        tooltipText={
-                                            <>
-                                                For performance we usually fetch
-                                                the text via our servers but
-                                                sometimes we can't reach it.
-                                                E.g. if you are behind a
-                                                paywall.
-                                                <br /> Use this to fetch the
-                                                content from here.
-                                            </>
-                                        }
-                                        placement="bottom"
-                                        width="150px"
-                                    >
-                                        <Checkbox
-                                            key={1}
-                                            id={'1'}
-                                            isChecked={
-                                                this.props.fetchLocalHTML
+
+                                {!this.props.fullPageUrl.includes(
+                                    'youtube.com/watch',
+                                ) &&
+                                    (this.props.sidebarContext === 'in-page' ||
+                                        this.props.queryMode !==
+                                            'question') && (
+                                        <TooltipBox
+                                            tooltipText={
+                                                <>
+                                                    For performance we usually
+                                                    fetch the text via our
+                                                    servers but sometimes we
+                                                    can't reach it. E.g. if you
+                                                    are behind a paywall.
+                                                    <br /> Use this to fetch the
+                                                    content from here.
+                                                </>
                                             }
-                                            handleChange={() =>
-                                                this.props.fetchLocalHTML
-                                                    ? this.props.changeFetchLocalHTML(
-                                                          false,
-                                                      )
-                                                    : this.props.changeFetchLocalHTML(
-                                                          true,
-                                                      )
-                                            }
-                                            // isDisabled={!this.state.shortcutsEnabled}
-                                            name={'Use Local Content'}
-                                            label={'Use Local Content'}
-                                            size={12}
-                                            fontSize={12}
-                                            checkBoxColor="black"
-                                        />
-                                    </TooltipBox>
-                                )}
+                                            placement="bottom"
+                                            width="150px"
+                                        >
+                                            <Checkbox
+                                                key={1}
+                                                id={'1'}
+                                                isChecked={
+                                                    this.props.fetchLocalHTML
+                                                }
+                                                handleChange={() =>
+                                                    this.props.fetchLocalHTML
+                                                        ? this.props.changeFetchLocalHTML(
+                                                              false,
+                                                          )
+                                                        : this.props.changeFetchLocalHTML(
+                                                              true,
+                                                          )
+                                                }
+                                                // isDisabled={!this.state.shortcutsEnabled}
+                                                name={'Use Local Content'}
+                                                label={'Use Local Content'}
+                                                size={14}
+                                                fontSize={12}
+                                                checkBoxColor="black"
+                                                borderColor="greyScale3"
+                                            />
+                                        </TooltipBox>
+                                    )}
                             </OptionsContainerLeft>
                             <OptionsContainerRight>
                                 {this.props.pageSummary?.length > 0 && (
@@ -1923,6 +1967,8 @@ export class AnnotationsSidebar extends React.Component<
                         <LoaderBoxInSummary>
                             {this.renderLoader()}
                         </LoaderBoxInSummary>
+                    ) : this.props.showChapters ? (
+                        this.showChapterList()
                     ) : (
                         this.showSummary()
                     )}
@@ -2872,6 +2918,90 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const ActionButton = styled.div`
+    display: none;
+    justify-self: flex-start;
+    margin-left: -7px;
+    margin-bottom: -7px;
+`
+
+const ChapterItemTopBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-gap: 10px;
+    justify-content: space-between;
+    position: relative;
+    width: 100%;
+`
+
+const ChapterTitleContent = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    justify-content: space-between;
+    grid-gap: 10px;
+    width: 100%;
+`
+
+const ChapterSummaryText = styled(Markdown)`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    line-height: 24px;
+    margin-bottom: 20px;
+`
+
+const ChapterTitle = styled.div<{ hasSummary }>`
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.white
+            : props.theme.colors.greyScale7};
+    font-size: 14px;
+    flex: 1;
+    font-weight: ${(props) => (props.hasSummary ? 500 : 400)};
+`
+
+const ChapterItem = styled.div<{
+    showButtons: boolean
+}>`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 15px;
+    grid-gap: 15px;
+    width: fill-available;
+    border-radius: 8px;
+    justify-content: flex-start;
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    }
+    &:hover ${ActionButton} {
+        display: flex;
+    }
+    &:hover ${ChapterTitle} {
+        font-weight: 500;
+    }
+
+    &:last-child {
+        margin-bottom: 150px;
+    }
+
+    ${(props) =>
+        props.showButtons &&
+        css`
+            display: flex;
+        `}
+`
+
+const ChapterTimestamp = styled.a`
+    color: ${(props) => props.theme.colors.prime1};
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    width: fit-content;
+    text-align: right;
+`
+
 const OptionsContainerRight = styled.div`
     display: flex;
     align-items: center;
@@ -3113,7 +3243,8 @@ const SelectedTextBoxBar = styled.div`
 const SelectedAIText = styled.div<{ fullHeight: boolean }>`
     color: ${(props) => props.theme.colors.white};
     flex: 1;
-    font-size: 16px;
+    font-size: 14px;
+    line-height: 22px;
     flex-wrap: wrap;
     display: flex;
     overflow: scroll
@@ -3198,7 +3329,19 @@ const SummaryContainer = styled.div`
     min-height: 60px;
     height: 100%;
     overflow: scroll;
-    padding-top: 10px;
+    padding: 10px 0px 10px 0px;
+`
+const ChapterContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: space-between;
+    grid-gap: 2px;
+    align-items: flex-start;
+    min-height: 60px;
+    height: 100%;
+    overflow: scroll;
+    padding: 10px 10px 10px 10px;
 `
 
 const SummaryFooter = styled.div`
@@ -3229,6 +3372,15 @@ const PoweredBy = styled.div`
 `
 
 const SummarySection = styled.div`
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    align-items: start;
+    height: fill-available;
+    flex: 1;
+    height: 30%;
+`
+const ChapterSection = styled.div`
     display: flex;
     width: 100%;
     justify-content: center;

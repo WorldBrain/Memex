@@ -46,6 +46,8 @@ export default class Logic extends UILogic<State, Event> {
         autoLoginState: 'pristine',
         showSyncNotification: false,
         showOnboardingVideo: false,
+        welcomeStep: 'start',
+        enableNudges: true,
     })
 
     async init() {
@@ -268,6 +270,46 @@ export default class Logic extends UILogic<State, Event> {
         })
         await this.checkIfAutoOpenLinkAvailable()
         await this._onUserLogIn(!!event.newSignUp)
+    }
+
+    goToNextOnboardingStep: EventHandler<'goToNextOnboardingStep'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            welcomeStep: { $set: event.step },
+        })
+
+        if (event.step === 'finish') {
+            this.dependencies.navToDashboard()
+        }
+
+        // if (previousState.welcomeStep === 'start') {
+        //     this.emitMutation({
+        //         welcomeStep: { $set: 'login' },
+        //     })
+        // }
+        // if (previousState.welcomeStep === 'nudges') {
+        //     this.emitMutation({
+        //         welcomeStep: { $set: 'basicIntro' },
+        //     })
+        // }
+        // if (previousState.welcomeStep === 'login') {
+        //     this.emitMutation({
+        //         welcomeStep: { $set: 'finish' },
+        //     })
+        // }
+    }
+    enableNudges: EventHandler<'enableNudges'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            enableNudges: { $set: !previousState.enableNudges },
+        })
+        browser.storage.local.set({
+            enableNudges: !previousState.enableNudges,
+        })
     }
 
     goToSyncStep: EventHandler<'goToSyncStep'> = async ({ previousState }) => {

@@ -33,6 +33,8 @@ export interface State {
     showSyncNotification?: boolean
     showOnboardingSelection?: boolean
     showOnboardingVideo?: boolean
+    welcomeStep: string
+    enableNudges: boolean
 }
 
 export type Event = UIEvent<{
@@ -42,4 +44,6 @@ export type Event = UIEvent<{
     onUserLogIn: { newSignUp?: boolean }
     setAuthDialogMode: { mode: AuthDialogMode }
     showOnboardingVideo: null
+    goToNextOnboardingStep: { step: string }
+    enableNudges: null
 }>

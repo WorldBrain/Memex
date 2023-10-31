@@ -1824,7 +1824,8 @@ const ListSidebarContent = styled(Rnd)<{
             props.theme.variant === 'light' &&
             css`
                 border-color: ${(props) => props.theme.colors.greyScale2};
-                box-shadow: ${() => props.theme.borderStyles.boxShadowRight};
+                /* box-shadow: ${() =>
+                    props.theme.borderStyles.boxShadowRight}; */
             `};
 `
 

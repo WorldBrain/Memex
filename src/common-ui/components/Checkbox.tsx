@@ -30,6 +30,8 @@ export interface Props {
     isLoading?: boolean
     fontSize?: number
     checkBoxColor?: ColorThemeKeys
+    borderColor?: ColorThemeKeys
+    width?: string
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -48,7 +50,11 @@ class Checkbox extends React.PureComponent<Props> {
 
     render() {
         return (
-            <LabelContainer zIndex={this.props.zIndex} htmlFor={this.props.id}>
+            <LabelContainer
+                width={this.props.width}
+                zIndex={this.props.zIndex}
+                htmlFor={this.props.id}
+            >
                 <LabelText>
                     <InputContainer
                         type="checkbox"
@@ -66,6 +72,7 @@ class Checkbox extends React.PureComponent<Props> {
                             mode={this.props.mode}
                             isChecked={this.props.isChecked}
                             checkBoxColor={this.props.checkBoxColor}
+                            borderColor={this.props.borderColor}
                         >
                             {this.props.isChecked && (
                                 <Icon
@@ -135,10 +142,10 @@ const ChildrenBox = styled.span<{ mode }>`
     }
 `
 
-const LabelContainer = styled.label<{ zIndex?: number }>`
+const LabelContainer = styled.label<{ zIndex?: number; width: boolean }>`
     display: flex;
     align-items: center;
-    width: 100%;
+    width: ${(props) => (props.width ? props.width : '100%')};
     cursor: pointer;
     z-index: ${(props) => props.zIndex};
 `
@@ -164,17 +171,23 @@ const LabelText = styled.span<{ fontSize }>`
     }
 `
 
-const LabelCheck = styled.span<{ isChecked; mode; size; checkBoxColor }>`
+const LabelCheck = styled.span<{
+    isChecked
+    mode
+    size
+    checkBoxColor
+    borderColor
+}>`
     border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '5px')};
     border: 2px solid
         ${(props) =>
             props.isChecked
                 ? props.theme.colors.white
-                : props.theme.colors[props.checkBoxColor ?? 'greyScale2']};
+                : props.theme.colors.greyScale3};
     background: ${(props) =>
         props.isChecked
             ? props.theme.colors.white
-            : props.theme.colors[props.checkBoxColor ?? 'greyScale2']};
+            : props.theme.colors[props.checkBoxColor] ?? 'greyScale2'};
     vertical-align: middle;
     width: ${(props) => (props.size ? props.size + 'px' : '24px')};
     height: ${(props) => (props.size ? props.size + 'px' : '24px')};
@@ -206,6 +219,17 @@ const LabelCheck = styled.span<{ isChecked; mode; size; checkBoxColor }>`
                 props.isChecked
                     ? props.theme.colors.greyScale5
                     : props.theme.colors.greyScale4};
+        `};
+    ${(props) =>
+        props.borderColor &&
+        css<any>`
+            outline: 1px solid
+                ${(props) => props.theme.colors[props.borderColor]};
+            border: none;
+
+            &:hover {
+                outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+            }
         `};
 `
 

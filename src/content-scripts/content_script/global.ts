@@ -91,7 +91,6 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
@@ -203,7 +202,6 @@ export async function main(
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
-    const pkmSyncBG = runInBackground<PkmSyncInterface>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
@@ -349,7 +347,6 @@ export async function main(
                     },
                     annotationsBG,
                     contentSharingBG,
-                    pkmSyncBG: pkmSyncBG,
                     skipPageIndexing: false,
                     syncSettingsBG: syncSettingsBG,
                     privacyLevelOverride: privacyLevel,
@@ -645,7 +642,7 @@ export async function main(
                 includeLastFewSecs,
             )
 
-            if (timestampToPass === null) {
+            if (timestampToPass == null) {
                 const aIbutton = document.getElementById(
                     'AItimeStampButtonInner',
                 )
@@ -655,7 +652,13 @@ export async function main(
 
             inPageUI.showSidebar({
                 action: 'create_youtube_timestamp_with_AI_summary',
-                timeStampANDSummaryJSON: timestampToPass,
+                videoRangeTimestamps: timestampToPass,
+            })
+            inPageUI.hideTooltip()
+        },
+        openChapterSummary: async () => {
+            inPageUI.showSidebar({
+                action: 'open_chapter_summary',
             })
             inPageUI.hideTooltip()
         },
@@ -839,7 +842,6 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
-                pkmSyncBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -1660,6 +1662,11 @@ function renderSpacesBar(
 export function loadYoutubeButtons(annotationsFunctions) {
     const below = document.querySelector('#below')
     const player = document.querySelector('#player')
+    const url = new URL(window.location.href)
+    const videoPath = url.pathname + '?v=' + url.searchParams.get('v')
+    const selector = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
+    const chapterContainer = document.querySelectorAll(selector)
+    let hasChapterContainer = chapterContainer.length > 0
 
     if (below) {
         injectYoutubeButtonMenu(annotationsFunctions)
@@ -1668,7 +1675,7 @@ export function loadYoutubeButtons(annotationsFunctions) {
         injectYoutubeContextMenu(annotationsFunctions)
     }
 
-    if (!below || !player) {
+    if (!below || !player || !hasChapterContainer) {
         // Create a new MutationObserver instance
         const observer = new MutationObserver(function (
             mutationsList,
@@ -1683,7 +1690,7 @@ export function loadYoutubeButtons(annotationsFunctions) {
                             if (node.querySelector('#player')) {
                                 injectYoutubeContextMenu(annotationsFunctions)
 
-                                if (below && player) {
+                                if (below && player && hasChapterContainer) {
                                     observer.disconnect()
                                 }
                             }
@@ -1695,8 +1702,80 @@ export function loadYoutubeButtons(annotationsFunctions) {
                             if (node.querySelector('#below')) {
                                 injectYoutubeButtonMenu(annotationsFunctions)
 
-                                if (below && player) {
+                                if (below && player && hasChapterContainer) {
                                     observer.disconnect()
+                                }
+                            }
+                        }
+                    }
+                    if (!hasChapterContainer) {
+                        if (node instanceof HTMLElement) {
+                            // Check if the "below" element is in the added node or its descendants
+                            if (
+                                node.classList.contains(
+                                    'yt-core-attributed-string__link',
+                                )
+                            ) {
+                                if (
+                                    node
+                                        .getAttribute('href')
+                                        .startsWith(videoPath)
+                                ) {
+                                    const selector2 = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
+                                    const chapterTimestamps = document.querySelectorAll(
+                                        selector2,
+                                    )
+                                    const chapterBlocks = []
+                                    hasChapterContainer = true
+                                    Array.from(chapterTimestamps).forEach(
+                                        (block, i) => {
+                                            const chapteblock =
+                                                block.parentElement
+                                            chapterBlocks.push(chapteblock)
+                                        },
+                                    )
+
+                                    const firstBlock = chapterBlocks[0]
+
+                                    const buttonIcon = runtime.getURL(
+                                        '/img/memex-icon.svg',
+                                    )
+
+                                    const newBlock = document.createElement(
+                                        'div',
+                                    )
+                                    newBlock.style.display = 'flex'
+                                    newBlock.style.alignItems = 'center'
+                                    newBlock.style.marginTop = '10px'
+                                    newBlock.style.marginBottom = '10px'
+                                    newBlock.style.flexWrap = 'wrap'
+                                    newBlock.style.gap = '15px'
+                                    newBlock.style.width = 'fit-content'
+                                    newBlock.style.height = 'fit-content'
+                                    newBlock.style.padding =
+                                        '10px 16px 10px 16px'
+                                    newBlock.style.borderRadius = '5px'
+                                    newBlock.style.backgroundColor = '#12131B'
+                                    newBlock.style.color = '#C6F0D4'
+                                    newBlock.style.fontSize = '14px'
+                                    newBlock.style.fontFamily = 'Arial'
+                                    newBlock.style.cursor = 'pointer'
+                                    newBlock.onclick = () => {
+                                        annotationsFunctions.openChapterSummary()
+                                    }
+                                    newBlock.innerHTML = `<img src=${buttonIcon} style="height: 23px; padding-left: 2px; display: flex; grid-gap:5px; width: auto"/> <div style="white-space: nowrap">Summarize Chapters</div>`
+
+                                    firstBlock.insertAdjacentElement(
+                                        'beforebegin',
+                                        newBlock,
+                                    )
+                                    injectYoutubeButtonMenu(
+                                        annotationsFunctions,
+                                    )
+
+                                    if (below && player && chapterContainer) {
+                                        observer.disconnect()
+                                    }
                                 }
                             }
                         }
@@ -1754,45 +1833,15 @@ export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
 
     const normalisedYoutubeURL = 'https://www.youtube.com/watch?v=' + videoId
 
-    const response = await fetch(baseUrl + '/youtube-transcripts', {
-        method: 'POST',
-        body: JSON.stringify({
-            originalUrl: normalisedYoutubeURL,
-            getRawTranscript: true,
-        }),
-        headers: { 'Content-Type': 'application/json' },
-    })
-
-    let responseContent = await response.text()
-
-    const transcriptJSON = JSON.parse(responseContent).transcriptText
-
-    if (transcriptJSON === null) {
-        return null
-    }
-
-    const [startTimeURL, humanTimestamp] = getHTML5VideoTimestamp(
-        includeLastFewSecs,
-    )
+    const [startTimeURL] = getHTML5VideoTimestamp(includeLastFewSecs)
     const [endTimeURL] = getHTML5VideoTimestamp(0)
 
     const startTimeSecs = parseFloat(
         new URL(startTimeURL).searchParams.get('t'),
     )
     const endTimeSecs = parseFloat(new URL(endTimeURL).searchParams.get('t'))
-    const videoTimeStampForComment = `[${humanTimestamp}](${startTimeURL})`
 
-    const relevantTranscriptItems = transcriptJSON.filter((item) => {
-        const flooredStart = Math.floor(item.start)
-        const flooredEnd = Math.floor(item.end)
-
-        return (
-            (flooredStart >= startTimeSecs && flooredStart <= endTimeSecs) ||
-            (flooredEnd >= startTimeSecs && flooredEnd <= endTimeSecs)
-        )
-    })
-
-    return [videoTimeStampForComment, JSON.stringify(relevantTranscriptItems)]
+    return [startTimeSecs, endTimeSecs]
 }
 
 export function getTimestampNoteContentForYoutubeNotes(
