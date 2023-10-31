@@ -148,6 +148,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             (list) => list.parentUnifiedId == null,
         )
 
+        // Derived state used to hide nested lists if any of their ancestors are collapsed
+        const listShowFlag = new Map<string, boolean>()
+
         return rootLists
             .map((root) =>
                 mapTree({
@@ -165,14 +168,18 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             list.unifiedId
                         ]
 
-                        const isParentListToggled =
-                            list.parentUnifiedId != null
-                                ? parentListTreeState?.isTreeToggled
-                                : true
-
-                        if (!isParentListToggled) {
-                            return null
+                        if (list.parentUnifiedId != null) {
+                            const parentShowFlag = listShowFlag.get(
+                                list.parentUnifiedId,
+                            )
+                            if (
+                                !parentShowFlag ||
+                                !parentListTreeState?.isTreeToggled
+                            ) {
+                                return null
+                            }
                         }
+                        listShowFlag.set(list.unifiedId, true)
 
                         // TODO: This renders the new list input directly under the list. It's meant to be rendered after all the list's children.
                         //  With the current state shape that's quite difficult to do. Maybe need to change to recursive rendering of a node's children type thing
