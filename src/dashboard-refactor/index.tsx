@@ -565,6 +565,10 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setShowMoreMenuListId', { listId }),
                     toggleEditMenu: () =>
                         this.processEvent('setEditMenuListId', { listId }),
+                    onDeleteSpaceIntent: () =>
+                        this.processEvent('setDeletingListId', { listId }),
+                    onDeleteSpaceConfirm: () =>
+                        this.processEvent('confirmListDelete', null),
                 })}
                 onListDragStart={(listId) => (e) =>
                     this.processEvent('dragList', {
@@ -1183,20 +1187,20 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.deletingListId) {
-            return (
-                <DeleteConfirmModal
-                    isShown
-                    message="Delete this Space?"
-                    submessage="This does NOT delete the pages in it"
-                    onClose={() => this.processEvent('cancelListDelete', null)}
-                    deleteDocs={() =>
-                        this.processEvent('confirmListDelete', null)
-                    }
-                    icon={icons.collectionsEmpty}
-                />
-            )
-        }
+        // if (modalsState.deletingListId) {
+        //     return (
+        //         <DeleteConfirmModal
+        //             isShown
+        //             message="Delete this Space?"
+        //             submessage="This does NOT delete the pages in it"
+        //             onClose={() => this.processEvent('cancelListDelete', null)}
+        //             deleteDocs={() =>
+        //                 this.processEvent('confirmListDelete', null)
+        //             }
+        //             icon={icons.collectionsEmpty}
+        //         />
+        //     )
+        // }
 
         if (modalsState.deletingNoteArgs) {
             return (

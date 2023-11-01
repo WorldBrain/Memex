@@ -162,15 +162,13 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         await this.dependencies.contentSharingBG.deleteListAndAllAssociatedData(
             { localListId: listData.localId },
         )
+        this.emitMutation({ mode: { $set: null } })
     }
 
     intendToDeleteSpace: EventHandler<'intendToDeleteSpace'> = async ({
         event,
     }) => {
-        if (this.dependencies.onDeleteSpaceIntent) {
-            this.dependencies.onDeleteSpaceIntent(event.reactEvent)
-            return
-        }
+        this.dependencies.onDeleteSpaceIntent?.(event.reactEvent)
         this.emitMutation({ mode: { $set: 'confirm-space-delete' } })
     }
 

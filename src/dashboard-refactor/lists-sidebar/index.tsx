@@ -53,7 +53,13 @@ export interface ListsSidebarProps extends ListsSidebarState {
         | 'listData'
         | 'isCreator'
         | 'isShared'
-    > & { spacesBG: RemoteCollectionsInterface }
+    > &
+        Pick<
+            SpaceEditMenuBtnProps,
+            'onDeleteSpaceConfirm' | 'onDeleteSpaceIntent'
+        > & {
+            spacesBG: RemoteCollectionsInterface
+        }
     searchBarProps: ListsSidebarSearchBarProps
     ownListsGroup: ListGroup
     joinedListsGroup: ListGroup

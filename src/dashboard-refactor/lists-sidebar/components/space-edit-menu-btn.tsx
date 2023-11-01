@@ -19,7 +19,7 @@ export default class SpaceEditMenuBtn extends PureComponent<Props> {
 
     private toggleEditMenu = (e) => {
         this.props.toggleEditMenu(e)
-        e.stopPropagation()
+        e?.stopPropagation()
 
         return
     }

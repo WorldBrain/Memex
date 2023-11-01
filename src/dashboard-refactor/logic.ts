@@ -4008,14 +4008,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setDeletingListId: EventHandler<'setDeletingListId'> = async ({
-        event,
-    }) => {
-        this.emitMutation({
-            modals: { deletingListId: { $set: event.listId } },
-            listsSidebar: { showMoreMenuListId: { $set: undefined } },
-        })
-    }
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
         await browser.storage.local.set({
             themeVariant:
@@ -4178,6 +4170,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    setDeletingListId: EventHandler<'setDeletingListId'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            modals: { deletingListId: { $set: event.listId } },
+            // listsSidebar: { showMoreMenuListId: { $set: undefined } },
+        })
+    }
+
     cancelListDelete: EventHandler<'cancelListDelete'> = async ({ event }) => {
         this.emitMutation({
             modals: {
@@ -4204,7 +4205,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: { listDeleteState: { $set: taskState } },
             }),
             async () => {
-                this.options.annotationsCache.removeList({ unifiedId: listId })
                 this.emitMutation({
                     modals: { deletingListId: { $set: undefined } },
                     listsSidebar: {
@@ -4215,9 +4215,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 })
-                await this.options.contentShareBG.deleteListAndAllAssociatedData(
-                    { localListId: listData.localId! },
-                )
+                this.options.annotationsCache.removeList({ unifiedId: listId })
+
+                // NOTE: This is performed inside SpaceContextMenuLogic.confirmSpaceDelete
+                // TODO: Make this less disconnected
+                // await this.options.contentShareBG.deleteListAndAllAssociatedData(
+                //     { localListId: listData.localId! },
+                // )
             },
         )
     }

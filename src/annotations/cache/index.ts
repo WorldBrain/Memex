@@ -18,7 +18,10 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
-import { forEachTreeTraverse } from 'src/custom-lists/tree-utils'
+import {
+    forEachTreeTraverse,
+    mapTreeTraverse,
+} from 'src/custom-lists/tree-utils'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -743,24 +746,36 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.events.emit('newAnnotationsState', this.annotations)
     }
 
-    removeList: PageAnnotationsCacheInterface['removeList'] = (list) => {
-        const previousList = this.lists.byId[list.unifiedId]
-        if (!previousList) {
+    removeList: PageAnnotationsCacheInterface['removeList'] = ({
+        unifiedId,
+    }) => {
+        const targetList = this.lists.byId[unifiedId]
+        if (!targetList) {
             throw new Error('No existing cached list found to remove')
         }
 
-        if (previousList.remoteId != null) {
-            this.remoteListIdsToCacheIds.delete(previousList.remoteId)
-        }
-        if (previousList.localId != null) {
-            this.localListIdsToCacheIds.delete(previousList.localId)
-        }
-        this.lists.allIds = this.lists.allIds.filter(
-            (unifiedListId) => unifiedListId !== list.unifiedId,
-        )
-        delete this.lists.byId[list.unifiedId]
+        // Ensure we delete all descendent lists as well, in order from leaves to the target
+        const descendentLists = mapTreeTraverse({
+            strategy: 'dfs',
+            root: targetList,
+            cb: (node) => node,
+            getChildren: (node) => this.getListsByParentId(node.unifiedId),
+        }).reverse()
 
-        this.events.emit('removedList', previousList)
+        for (const listToRemove of descendentLists) {
+            if (listToRemove.remoteId != null) {
+                this.remoteListIdsToCacheIds.delete(listToRemove.remoteId)
+            }
+            if (listToRemove.localId != null) {
+                this.localListIdsToCacheIds.delete(listToRemove.localId)
+            }
+            this.lists.allIds = this.lists.allIds.filter(
+                (unifiedListId) => unifiedListId !== listToRemove.unifiedId,
+            )
+            delete this.lists.byId[listToRemove.unifiedId]
+            this.events.emit('removedList', listToRemove)
+        }
+
         this.events.emit('newListsState', this.lists)
     }
 }
