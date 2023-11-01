@@ -4142,6 +4142,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     collabKey,
                 } = await listsBG.createCustomList({
                     name: newListName,
+                    parentListId: parentList.localId!,
                 })
                 const user = await authBG.getCurrentUser()
                 annotationsCache.addList({
@@ -4159,10 +4160,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         parentList.localId!,
                     ],
                     isPrivate: true,
-                })
-                await listsBG.createListTree({
-                    localListId,
-                    parentListId: parentList.localId!,
                 })
 
                 this.emitMutation({

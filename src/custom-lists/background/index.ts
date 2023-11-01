@@ -64,7 +64,6 @@ export default class CustomListBackground {
 
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
-            createListTree: this.createListTree,
             deleteListTree: this.deleteListTree,
             updateListTreeParent: this.updateListTreeParent,
             insertPageToList: async (params) => {
@@ -359,26 +358,30 @@ export default class CustomListBackground {
                 ...preGeneratedIds,
             },
         )
+        await this.createListTree({
+            localListId,
+            now: createdAt?.getTime(),
+        })
 
         return { ...listShareResult, localListId }
     }
 
-    createListTree: RemoteCollectionsInterface['createListTree'] = async ({
-        localListId,
-        parentListId,
-        now,
-    }) => {
+    createListTree = async (args: {
+        localListId: number
+        parentListId?: number
+        now?: number
+    }): Promise<{ treeId: number }> => {
         const pathIds =
-            parentListId != null
+            args.parentListId != null
                 ? await this.storage.getMaterializedPathIdsFromTree({
-                      id: parentListId,
+                      id: args.parentListId,
                   })
                 : []
         const { id: treeId } = await this.storage.createListTree({
-            localListId,
-            parentListId,
+            localListId: args.localListId,
+            parentListId: args.parentListId,
+            now: args.now,
             pathIds,
-            now,
         })
         return { treeId }
     }

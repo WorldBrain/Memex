@@ -76,11 +76,6 @@ export interface CollectionsCacheInterface {
 }
 
 export interface RemoteCollectionsInterface {
-    createListTree(args: {
-        localListId: number
-        parentListId?: number
-        now?: number
-    }): Promise<{ treeId: number }>
     updateListTreeParent(args: {
         localListId: number
         parentListId: number
@@ -91,6 +86,7 @@ export interface RemoteCollectionsInterface {
         args: {
             name: string
             id?: number
+            parentListId?: number
             createdAt?: Date
             dontTrack?: boolean
         } & (
