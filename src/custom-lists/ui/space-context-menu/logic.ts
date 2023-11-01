@@ -33,8 +33,6 @@ export interface State {
     inviteLinksLoadState: TaskState
 
     loadState: TaskState
-    ownershipLoadState: TaskState
-    listShareLoadState: TaskState
     showSuccessMsg: boolean
     showSaveButton: boolean
     nameValue: string
