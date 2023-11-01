@@ -100,6 +100,12 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                     </LoadingStatusContainer>
                 )}
                 <BottomSection>
+                    {this.state.isLocalPDF && (
+                        <LocalPDFWarning>
+                            The PDF file is not uploaded. Send it separately &
+                            recipients must drop it into the web reader.
+                        </LocalPDFWarning>
+                    )}
                     {this.props.listData.remoteId != null && (
                         <SectionTopbar>
                             <SectionTitle>
@@ -178,6 +184,20 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
         return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
+
+const LocalPDFWarning = styled.div`
+    background: ${(props) => props.theme.colors.warning}80;
+    border: 1px solid ${(props) => props.theme.colors.warning};
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 300px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    margin-bottom: 10px;
+    font-size: 14px;
+`
 
 const LoadingStatusContainer = styled.div<{ padding: string }>`
     display: flex;

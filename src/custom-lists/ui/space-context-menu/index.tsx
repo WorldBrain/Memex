@@ -53,6 +53,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
 
         return (
             <ContextMenuContainer>
+                {this.state.isLocalPDF && (
+                    <LocalPDFWarning>
+                        The PDF file is not uploaded. Send it separately &
+                        recipients must drop it into the web reader.
+                    </LocalPDFWarning>
+                )}
                 {this.props.isCreator && this.props.listData.remoteId != null && (
                     <DropdownMenuBtn
                         elementHeight="60px"
@@ -105,6 +111,20 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
+
+const LocalPDFWarning = styled.div`
+    background: ${(props) => props.theme.colors.warning}80;
+    border: 1px solid ${(props) => props.theme.colors.warning};
+    border-radius: 8px;
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 260px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    margin-bottom: 10px;
+    font-size: 14px;
+`
 
 const ContextMenuContainer = styled.div`
     display: flex;

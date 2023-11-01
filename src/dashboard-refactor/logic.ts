@@ -3669,6 +3669,27 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         if (pageData.fullPdfUrl!.startsWith('blob:')) {
             // Show dropzone for local-only PDFs
+            const input = document.createElement('input')
+            input.type = 'file'
+            input.onchange = async (e) => {
+                const file = (e.target as HTMLInputElement).files![0]
+                const reader = new FileReader()
+                reader.onload = (event) => {
+                    const pdfDataUrl = event.target!.result as string
+                    // this.emitMutation({ pdfDataUrl: { $set: pdfDataUrl } })
+                }
+                reader.readAsDataURL(file)
+
+                // const file = firstItem.getAsFile()
+                const pdfObjectUrl = URL.createObjectURL(file)
+
+                await openPDFInViewer(pdfObjectUrl, {
+                    tabsAPI: this.options.tabsAPI,
+                    runtimeAPI: this.options.runtimeAPI,
+                })
+                this.emitMutation({ showDropArea: { $set: false } })
+            }
+            input.click()
             this.emitMutation({ showDropArea: { $set: true } })
         } else {
             await openPDFInViewer(pageData.fullPdfUrl!, {

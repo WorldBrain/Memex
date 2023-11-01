@@ -2161,8 +2161,6 @@ export class SidebarContainerLogic extends UILogic<
             textToAnalyse = document.title + document.body.innerText
         }
 
-        console.log('text', textToAnalyse)
-
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
                 isPagePDF || previousState.fetchLocalHTML
@@ -2479,7 +2477,6 @@ export class SidebarContainerLogic extends UILogic<
 
         let prompt = 'Summarise this for me: '
 
-        console.log('hihglihted', event.textToProcess)
         await this.processUIEvent('queryAIwithPrompt', {
             event: {
                 prompt: prompt,

@@ -1180,6 +1180,10 @@ export class AnnotationsSidebarContainer<
                                             this.props.contentSharingBG
                                         }
                                         listData={listData}
+                                        disableWriteOps={
+                                            this.state
+                                                .hasListDataBeenManuallyPulled
+                                        }
                                         onSetSpacePrivate={(isPrivate) =>
                                             this.processEvent(
                                                 'setListPrivacy',
