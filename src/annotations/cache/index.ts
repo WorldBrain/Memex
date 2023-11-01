@@ -655,6 +655,22 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 previousList.hasRemoteAnnotationsToLoad
         }
 
+        // If list was shared, set up reverse ref from remote->cached ID
+        if (previousList.remoteId !== nextList.remoteId) {
+            this.remoteListIdsToCacheIds.set(
+                nextList.remoteId,
+                nextList.unifiedId,
+            )
+        }
+
+        this.lists = {
+            ...this.lists,
+            byId: {
+                ...this.lists.byId,
+                [updates.unifiedId]: nextList,
+            },
+        }
+
         // If the parent has changed, this plus all descendent lists must update ancestor references
         if (previousList.parentUnifiedId !== nextList.parentUnifiedId) {
             forEachTreeTraverse({
@@ -678,22 +694,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                     ].filter((id) => id != null)
                 },
             })
-        }
-
-        // If list was shared, set up reverse ref from remote->cached ID
-        if (previousList.remoteId !== nextList.remoteId) {
-            this.remoteListIdsToCacheIds.set(
-                nextList.remoteId,
-                nextList.unifiedId,
-            )
-        }
-
-        this.lists = {
-            ...this.lists,
-            byId: {
-                ...this.lists.byId,
-                [updates.unifiedId]: nextList,
-            },
         }
 
         this.events.emit('updatedList', nextList)
