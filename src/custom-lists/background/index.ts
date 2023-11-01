@@ -339,6 +339,7 @@ export default class CustomListBackground {
         type,
         createdAt,
         dontTrack,
+        parentListId,
         ...preGeneratedIds
     }) => {
         const id = _id ?? this.generateListId()
@@ -360,6 +361,7 @@ export default class CustomListBackground {
         )
         await this.createListTree({
             localListId,
+            parentListId,
             now: createdAt?.getTime(),
         })
 
