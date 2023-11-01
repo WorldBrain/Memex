@@ -43,35 +43,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         }
     }
 
-    private handleNameChange: React.KeyboardEventHandler = async (event) => {
-        const name = (event.target as HTMLInputElement).value
-        await this.processEvent('updateSpaceName', { name })
-    }
-
-    private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
-        e,
-    ) => {
-        if (e.key === 'Escape') {
-            // Allow escape keydown to bubble up to close the sidebar only if no input state
-            if (this.state.nameValue.trim().length) {
-                e.stopPropagation()
-            }
-            await this.processEvent('cancelSpaceNameEdit', null)
-            return
-        }
-
-        if (e.key === 'Enter') {
-            if (this.state.nameValue.trim().length > 0) {
-                e.preventDefault()
-                e.stopPropagation()
-                await this.processEvent('confirmSpaceNameEdit', null)
-            }
-        }
-
-        // If we don't have this, events will bubble up into the page!
-        e.stopPropagation()
-    }
-
     private renderMainContent() {
         if (this.state.mode === 'followed-space') {
             return (

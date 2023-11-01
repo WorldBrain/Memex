@@ -27,7 +27,7 @@ export interface Dependencies {
     ) => void
     copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
-    onConfirmSpaceNameEdit: (name: string) => void
+    onConfirmSpaceNameEdit?: (name: string) => void
     onSetSpacePrivate: (isPrivate: boolean) => Promise<void>
     onDeleteSpaceIntent?: React.MouseEventHandler
     onDeleteSpaceConfirm?: React.MouseEventHandler
