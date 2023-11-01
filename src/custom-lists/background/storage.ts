@@ -36,7 +36,7 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import { forEachTreeAsync } from '../tree-utils'
+import { forEachTreeTraverseAsync, forEachTreeClimbAsync } from '../tree-utils'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -663,7 +663,7 @@ export default class CustomListStorage extends StorageModule {
         }
 
         // Go through entire subtree that starts from the node we need to change and update each node's ancestor references
-        await forEachTreeAsync({
+        await forEachTreeTraverseAsync({
             root: nodeToChange,
             concurrent: false, // TODO: Maybe can be done concurrently once sync support is in
             getChildren: (node) =>
@@ -697,6 +697,32 @@ export default class CustomListStorage extends StorageModule {
                 })
             },
         })
+    }
+
+    async isListAAncestorOfListB(
+        listAId: number,
+        listBId: number,
+    ): Promise<boolean> {
+        const startingNode = await this.getTreeDataForList({
+            localListId: listBId,
+        })
+        if (!startingNode) {
+            return false
+        }
+
+        let isAncestor = false
+        await forEachTreeClimbAsync({
+            startingNode,
+            getParent: (node) =>
+                node.parentId != null
+                    ? this.getTreeDataForList({ localListId: node.parentId })
+                    : null,
+            cb: async (node) => {
+                isAncestor = node.listId === listAId
+            },
+            shouldEndEarly: () => isAncestor,
+        })
+        return isAncestor
     }
 
     async deleteListTree(params: { treeId: number }): Promise<void> {

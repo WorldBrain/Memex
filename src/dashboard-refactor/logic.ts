@@ -3710,9 +3710,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 isListAncestorOfTargetList =
                     isListAncestorOfTargetList || node.unifiedId === listId
             },
+            shouldEndEarly: () => isListAncestorOfTargetList,
         })
         if (isListAncestorOfTargetList) {
-            console.log('lllll')
             throw new Error(
                 'Cannot make list a child of a descendent - this would result in a cycle',
             )

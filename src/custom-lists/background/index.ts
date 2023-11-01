@@ -25,7 +25,6 @@ import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
-import { mapTreeAsync } from '../tree-utils'
 
 const limitSuggestionsStorageLength = 25
 
@@ -389,6 +388,13 @@ export default class CustomListBackground {
         parentListId,
         now,
     }) => {
+        if (
+            await this.storage.isListAAncestorOfListB(localListId, parentListId)
+        ) {
+            throw new Error(
+                'Cannot make list a child of a descendent - this would result in a cycle',
+            )
+        }
         await this.storage.updateListTreeParent({
             localListId,
             parentListId,

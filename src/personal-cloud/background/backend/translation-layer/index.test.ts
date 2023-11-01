@@ -2405,6 +2405,89 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
+        it('should not allow reordering of custom list trees that introduces a cycle', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                testSyncPushTrigger,
+                getDatabaseContents,
+                testDownload,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.third)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.third)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.second)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.third)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const nowA = Date.now()
+
+            const assertExpectedLocalTreeData = async () =>
+                expect(
+                    await setups[0].storageManager
+                        .collection('customListTrees')
+                        .findAllObjects({}),
+                ).toEqual([
+                    LOCAL_TEST_DATA_V24.customListTrees.first,
+                    LOCAL_TEST_DATA_V24.customListTrees.second,
+                    LOCAL_TEST_DATA_V24.customListTrees.third,
+                    LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                ])
+
+            await assertExpectedLocalTreeData()
+
+            // Attempt to introduce a cycle by making grandparent list child of current grandchild
+            let error: Error
+            try {
+                await setups[0].backgroundModules.customLists.updateListTreeParent(
+                    {
+                        localListId:
+                            LOCAL_TEST_DATA_V24.customListTrees.first.listId,
+                        parentListId:
+                            LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                        now: nowA,
+                    },
+                )
+            } catch (e) {
+                error = e
+            }
+            expect(error).toBeDefined()
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await assertExpectedLocalTreeData()
+        })
+
         it('should delete custom list trees', async () => {
             const {
                 setups,

@@ -1,4 +1,4 @@
-interface TreeTraverseArgs<T, CBReturn> {
+type TreeTraverseArgs<T, CBReturn> = {
     root: T
     strategy?: 'dfs' | 'bfs'
     cb: (node: T, index: number) => CBReturn
@@ -17,6 +17,14 @@ type TreeClimbArgs<T, CBReturn> = {
     startingNode: T
     cb: (node: T, distance: number) => CBReturn
     getParent: (node: T) => T | null
+    shouldEndEarly?: (node: T, distance: number) => boolean
+}
+
+type TreeClimbAsyncArgs<T, CBReturn> = Omit<
+    TreeClimbArgs<T, Promise<CBReturn>>,
+    'getParent'
+> & {
+    getParent: (node: T) => Promise<T | null>
 }
 
 export function forEachTreeClimb<T, Return>(
@@ -29,6 +37,7 @@ export function mapTreeClimb<T, Return>({
     cb,
     getParent,
     startingNode,
+    shouldEndEarly,
 }: TreeClimbArgs<T, Return>): Return[] {
     const returnVal: Return[] = []
 
@@ -36,8 +45,41 @@ export function mapTreeClimb<T, Return>({
     let currentNode = startingNode
 
     do {
-        cb(currentNode, distance++)
+        returnVal.push(cb(currentNode, distance))
+        if (shouldEndEarly?.(currentNode, distance)) {
+            break
+        }
         currentNode = getParent(currentNode)
+        distance++
+    } while (currentNode != null)
+
+    return returnVal
+}
+
+export async function forEachTreeClimbAsync<T, Return>(
+    params: TreeClimbAsyncArgs<T, Return>,
+): Promise<void> {
+    await mapTreeClimbAsync(params)
+}
+
+export async function mapTreeClimbAsync<T, Return>({
+    cb,
+    getParent,
+    startingNode,
+    shouldEndEarly,
+}: TreeClimbAsyncArgs<T, Return>): Promise<Return[]> {
+    const returnVal: Return[] = []
+
+    let distance = 0
+    let currentNode = startingNode
+
+    do {
+        returnVal.push(await cb(currentNode, distance))
+        if (shouldEndEarly?.(currentNode, distance)) {
+            break
+        }
+        currentNode = await getParent(currentNode)
+        distance++
     } while (currentNode != null)
 
     return returnVal
@@ -70,13 +112,13 @@ export function mapTreeTraverse<T, Return>({
     return returnVal
 }
 
-export async function forEachTreeAsync<T, Return>(
+export async function forEachTreeTraverseAsync<T, Return>(
     args: TreeTraverseAsyncArgs<T, Return>,
 ): Promise<void> {
-    await mapTreeAsync(args)
+    await mapTreeTraverseAsync(args)
 }
 
-export async function mapTreeAsync<T, Return>({
+export async function mapTreeTraverseAsync<T, Return>({
     cb,
     root,
     concurrent,
