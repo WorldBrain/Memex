@@ -46,6 +46,7 @@ export interface State {
     nameValue: string
     showSaveButton: boolean
     pageListDataForCurrentPage: UnifiedList | null
+    isLocalPDF: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -72,10 +73,17 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         mode: null,
         showSaveButton: false,
         pageListDataForCurrentPage: null,
+        isLocalPDF: false,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         let state = previousState
+
+        if (window.location.href.includes('/pdfjs/viewer.html?file=blob')) {
+            this.emitMutation({
+                isLocalPDF: { $set: true },
+            })
+        }
 
         await loadInitial(this, async () => {
             if (this.dependencies.listData) {
