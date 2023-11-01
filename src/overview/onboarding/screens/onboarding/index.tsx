@@ -99,7 +99,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             </TitleBox>
             <DescriptionText>
                 When something breaks or you have feature requests, <br />
-                let us know via the live chat where you find the ? icon.{' '}
+                let us know via the live chat at every ? icon.{' '}
             </DescriptionText>
             <PrimaryAction
                 label={'Continue'}
@@ -152,7 +152,7 @@ export default class OnboardingScreen extends StatefulUIElement<
             </Title>
             <DescriptionText>
                 When on a website, hover to the bottom right corner. <br />
-                It's the jumping point for everything.
+                It's the jumping point for saving, organising & summarising.
             </DescriptionText>
             <MemexActionButtonIntro src={'img/memexActionButtonIntro.png'} />
             <PrimaryAction

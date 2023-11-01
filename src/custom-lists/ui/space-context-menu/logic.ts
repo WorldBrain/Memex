@@ -57,6 +57,7 @@ export interface State {
     showSaveButton: boolean
     nameValue: string
     mode: 'confirm-space-delete' | 'followed-space' | null
+    isLocalPDF: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -82,9 +83,16 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         showSuccessMsg: false,
         mode: null,
         showSaveButton: false,
+        isLocalPDF: false,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        if (window.location.href.includes('/pdfjs/viewer.html?file=blob')) {
+            this.emitMutation({
+                isLocalPDF: { $set: true },
+            })
+        }
+
         await loadInitial(this, async () => {
             if (this.dependencies.listData.remoteId == null) {
                 await this._shareSpace('private')
