@@ -45,6 +45,7 @@ import {
     buildMaterializedPath,
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
+import cloneDeep from 'lodash/cloneDeep'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -1993,46 +1994,48 @@ describe('Personal cloud translation layer', () => {
 
             const nowA = Date.now()
 
+            const listTreesData = cloneDeep(LOCAL_TEST_DATA_V24.customListTrees)
+
             const assertExpectedLocalTreeData = async () =>
                 expect(
                     await setups[0].storageManager
                         .collection('customListTrees')
                         .findAllObjects({}),
                 ).toEqual([
-                    LOCAL_TEST_DATA_V24.customListTrees.first,
-                    LOCAL_TEST_DATA_V24.customListTrees.second,
-                    LOCAL_TEST_DATA_V24.customListTrees.third,
-                    LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                    listTreesData.first,
+                    listTreesData.second,
+                    listTreesData.third,
+                    listTreesData.fourth,
                 ])
 
             await assertExpectedLocalTreeData()
 
             // Move a subtree (with child) to be the child of its sibling - should update both subtree root and child ancestor refs
             await setups[0].backgroundModules.customLists.updateListTreeParent({
-                localListId: LOCAL_TEST_DATA_V24.customListTrees.third.listId,
-                parentListId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                localListId: listTreesData.third.listId,
+                parentListId: listTreesData.second.listId,
                 now: nowA,
             })
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             // Update test data to have expected post-reordering values
-            LOCAL_TEST_DATA_V24.customListTrees.third = {
-                ...LOCAL_TEST_DATA_V24.customListTrees.third,
+            listTreesData.third = {
+                ...listTreesData.third,
                 updatedWhen: nowA,
-                parentId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                parentId: listTreesData.second.listId,
                 path: buildMaterializedPath(
-                    LOCAL_TEST_DATA_V24.customListTrees.first.listId,
-                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                    listTreesData.first.listId,
+                    listTreesData.second.listId,
                 ),
             }
-            LOCAL_TEST_DATA_V24.customListTrees.fourth = {
-                ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
+            listTreesData.fourth = {
+                ...listTreesData.fourth,
                 updatedWhen: nowA,
-                parentId: LOCAL_TEST_DATA_V24.customListTrees.third.listId, // Unchanged
+                parentId: listTreesData.third.listId, // Unchanged
                 path: buildMaterializedPath(
-                    LOCAL_TEST_DATA_V24.customListTrees.first.listId,
-                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
-                    LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                    listTreesData.first.listId,
+                    listTreesData.second.listId,
+                    listTreesData.third.listId,
                 ),
             }
             await assertExpectedLocalTreeData()
@@ -2067,8 +2070,8 @@ describe('Personal cloud translation layer', () => {
                             testListTreesA.second.personalList,
                         ),
                         parentId: testListTreesA.second.personalList,
-                        localPath: LOCAL_TEST_DATA_V24.customListTrees.third.path,
-                        localParentId: LOCAL_TEST_DATA_V24.customListTrees.third.parentId,
+                        localPath: listTreesData.third.path,
+                        localParentId: listTreesData.third.parentId,
                     },
                     {
                         ...testListTreesA.fourth,
@@ -2078,7 +2081,7 @@ describe('Personal cloud translation layer', () => {
                             testListTreesA.second.personalList,
                             testListTreesA.third.personalList,
                         ),
-                        localPath: LOCAL_TEST_DATA_V24.customListTrees.fourth.path,
+                        localPath: listTreesData.fourth.path,
                     },
                 ],
                 sharedListTree: [
@@ -2121,34 +2124,32 @@ describe('Personal cloud translation layer', () => {
             const nowB = Date.now()
             // Move new parent of subtree from prev call to be tree of its own - should affect everything but the root of the old tree
             await setups[0].backgroundModules.customLists.updateListTreeParent({
-                localListId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                localListId: listTreesData.second.listId,
                 parentListId: null,
                 now: nowB,
             })
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             // Update test data to have expected post-reordering values
-            LOCAL_TEST_DATA_V24.customListTrees.second = {
-                ...LOCAL_TEST_DATA_V24.customListTrees.second,
+            listTreesData.second = {
+                ...listTreesData.second,
                 updatedWhen: nowB,
                 parentId: null,
                 path: null,
             }
-            LOCAL_TEST_DATA_V24.customListTrees.third = {
-                ...LOCAL_TEST_DATA_V24.customListTrees.third,
+            listTreesData.third = {
+                ...listTreesData.third,
                 updatedWhen: nowB,
-                parentId: LOCAL_TEST_DATA_V24.customListTrees.second.listId, // Unchanged
-                path: buildMaterializedPath(
-                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
-                ),
+                parentId: listTreesData.second.listId, // Unchanged
+                path: buildMaterializedPath(listTreesData.second.listId),
             }
-            LOCAL_TEST_DATA_V24.customListTrees.fourth = {
-                ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
+            listTreesData.fourth = {
+                ...listTreesData.fourth,
                 updatedWhen: nowB,
-                parentId: LOCAL_TEST_DATA_V24.customListTrees.third.listId, // Unchanged
+                parentId: listTreesData.third.listId, // Unchanged
                 path: buildMaterializedPath(
-                    LOCAL_TEST_DATA_V24.customListTrees.second.listId,
-                    LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                    listTreesData.second.listId,
+                    listTreesData.third.listId,
                 ),
             }
             await assertExpectedLocalTreeData()
@@ -2179,16 +2180,16 @@ describe('Personal cloud translation layer', () => {
                         updatedWhen: nowB,
                         path: null,
                         parentId: null,
-                        localPath: LOCAL_TEST_DATA_V24.customListTrees.second.path,
-                        localParentId: LOCAL_TEST_DATA_V24.customListTrees.second.parentId,
+                        localPath: listTreesData.second.path,
+                        localParentId: listTreesData.second.parentId,
                     },
                     {
                         ...testListTreesB.third,
                         updatedWhen: nowB,
                         path: buildMaterializedPath(testListTreesB.second.personalList),
                         parentId: testListTreesB.second.personalList,
-                        localPath: LOCAL_TEST_DATA_V24.customListTrees.third.path,
-                        localParentId: LOCAL_TEST_DATA_V24.customListTrees.third.parentId,
+                        localPath: listTreesData.third.path,
+                        localParentId: listTreesData.third.parentId,
                     },
                     {
                         ...testListTreesB.fourth,
@@ -2198,7 +2199,7 @@ describe('Personal cloud translation layer', () => {
                             testListTreesB.second.personalList,
                             testListTreesB.third.personalList,
                         ),
-                        localPath: LOCAL_TEST_DATA_V24.customListTrees.fourth.path,
+                        localPath: listTreesData.fourth.path,
                     },
                 ],
                 sharedListTree: [
@@ -2241,22 +2242,22 @@ describe('Personal cloud translation layer', () => {
                     {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'customListTrees',
-                        object: LOCAL_TEST_DATA_V24.customListTrees.first,
+                        object: listTreesData.first,
                     },
                     {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'customListTrees',
-                        object: LOCAL_TEST_DATA_V24.customListTrees.second,
+                        object: listTreesData.second,
                     },
                     {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'customListTrees',
-                        object: LOCAL_TEST_DATA_V24.customListTrees.third,
+                        object: listTreesData.third,
                     },
                     {
                         type: PersonalCloudUpdateType.Overwrite,
                         collection: 'customListTrees',
-                        object: LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                        object: listTreesData.fourth,
                     },
                 ],
                 { skip: 8 },
