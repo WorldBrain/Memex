@@ -1196,15 +1196,6 @@ export class AnnotationsSidebarContainer<
                                             this.state
                                                 .hasListDataBeenManuallyPulled
                                         }
-                                        onConfirmSpaceNameEdit={(newName) => {
-                                            this.processEvent('editListName', {
-                                                unifiedListId:
-                                                    listData.unifiedId,
-                                                localId: listData.localId,
-                                                newName,
-                                                oldName: listData.name,
-                                            })
-                                        }}
                                         onSetSpacePrivate={(isPrivate) =>
                                             this.processEvent(
                                                 'setListPrivacy',
