@@ -323,6 +323,7 @@ export default class DirectLinkingBackground {
             comment: toCreate.comment,
             body: toCreate.body,
             selector: toCreate.selector,
+            color: toCreate.color,
             createdWhen: new Date(toCreate.createdWhen ?? Date.now()),
         })
 

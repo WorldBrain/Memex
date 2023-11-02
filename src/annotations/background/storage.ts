@@ -509,6 +509,7 @@ export default class AnnotationStorage extends StorageModule {
         url,
         comment,
         selector,
+        color,
         createdWhen = new Date(),
     }: Omit<Annotation, 'tags' | 'lists'>) {
         if (!body?.length && !comment?.length) {
@@ -537,6 +538,7 @@ export default class AnnotationStorage extends StorageModule {
                     body: body ?? '',
                     comment: comment ?? '',
                     createdWhen: createdWhen,
+                    color: color ?? null,
                     pageCreatedWhen: pageDate,
                     pageUrl: pageDataStorage?.fullUrl ?? pageUrl,
                 }
@@ -554,6 +556,7 @@ export default class AnnotationStorage extends StorageModule {
             comment,
             body,
             selector,
+            color,
             createdWhen,
             lastEdited: createdWhen,
             url,

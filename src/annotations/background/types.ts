@@ -93,6 +93,7 @@ export interface CreateAnnotationParams {
     title?: string
     comment?: string
     body?: string
+    color?: string
     selector?: Anchor
     isBookmarked?: boolean
     isSocialPost?: boolean

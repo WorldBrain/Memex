@@ -32,6 +32,7 @@ export interface Annotation {
     createdWhen?: Date
     lastEdited?: Date
     comment?: string
+    color?: string
     _body_terms?: string[]
     _comment_terms?: string[]
     tags: string[]
