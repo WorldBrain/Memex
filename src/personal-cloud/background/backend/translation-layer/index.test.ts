@@ -2499,89 +2499,129 @@ describe('Personal cloud translation layer', () => {
                 testDownload,
                 testSyncPushTrigger,
             } = await setup()
-            await setups[0].storageManager
-                .collection('customLists')
-                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
-            await setups[0].storageManager
-                .collection('customLists')
-                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
-            await setups[0].storageManager
-                .collection('customLists')
-                .createObject(LOCAL_TEST_DATA_V24.customLists.third)
-            await setups[0].storageManager
-                .collection('customLists')
-                .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
-            await setups[0].storageManager
-                .collection('sharedListMetadata')
-                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
-            await setups[0].storageManager
-                .collection('sharedListMetadata')
-                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.second)
-            await setups[0].storageManager
-                .collection('sharedListMetadata')
-                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.third)
-            await setups[0].storageManager
-                .collection('sharedListMetadata')
-                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.fourth)
-            await setups[0].storageManager
-                .collection('customListTrees')
-                .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
-            await setups[0].storageManager
-                .collection('customListTrees')
-                .createObject(LOCAL_TEST_DATA_V24.customListTrees.second)
-            await setups[0].storageManager
-                .collection('customListTrees')
-                .createObject(LOCAL_TEST_DATA_V24.customListTrees.third)
-            await setups[0].storageManager
-                .collection('customListTrees')
-                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
-            await setups[0].backgroundModules.personalCloud.waitForSync()
 
-            // Delete 2 tree nodes
-            await setups[0].storageManager
-                .collection('customListTrees')
-                .deleteOneObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
-            await setups[0].storageManager
-                .collection('customListTrees')
-                .deleteOneObject(LOCAL_TEST_DATA_V24.customListTrees.third)
-            await setups[0].backgroundModules.personalCloud.waitForSync()
+            const insertAllTestListData = async () => {
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.third)
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.second)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.third)
+                await setups[0].storageManager
+                    .collection('sharedListMetadata')
+                    .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.fourth)
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .createObject(LOCAL_TEST_DATA_V24.customListTrees.second)
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .createObject(LOCAL_TEST_DATA_V24.customListTrees.third)
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            }
 
-            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
-            const testLists = remoteData.personalList
-            const testListTrees = remoteData.personalListTree
-            const testListShares = remoteData.personalListShare
+            await insertAllTestListData()
 
-            // prettier-ignore
+            const customListData = cloneDeep(LOCAL_TEST_DATA_V24.customLists)
+            for (const id in customListData) {
+                customListData[id].nameTerms = expect.anything()
+            }
+
             expect(
-                await getDatabaseContents([
-                    // 'dataUsageEntry',
-                    'personalDataChange',
-                    'personalBlockStats',
-                    'personalList',
-                    'personalListTree',
-                ], { getWhere: getPersonalWhere }),
-            ).toEqual({
-                ...personalDataChanges(remoteData, [
-                    [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
-                    [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
-                    [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
-                    [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
-                    [DataChangeType.Delete, 'personalListTree', testListTrees.fourth.id, { id: LOCAL_TEST_DATA_V24.customListTrees.fourth.id }],
-                    [DataChangeType.Delete, 'personalListTree', testListTrees.third.id, { id: LOCAL_TEST_DATA_V24.customListTrees.third.id }],
-                ], { skipChanges: 8 }),
-                personalBlockStats: [],
-                personalList: [testLists.first, testLists.second, testLists.third, testLists.fourth],
-                personalListTree: [testListTrees.first, testListTrees.second],
-            })
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .findAllObjects({}),
+            ).toEqual([
+                LOCAL_TEST_DATA_V24.customListTrees.first,
+                LOCAL_TEST_DATA_V24.customListTrees.second,
+                LOCAL_TEST_DATA_V24.customListTrees.third,
+                LOCAL_TEST_DATA_V24.customListTrees.fourth,
+            ])
+            expect(
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([
+                customListData.first,
+                customListData.second,
+                customListData.third,
+                customListData.fourth,
+            ])
 
-            // prettier-ignore
-            await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.first },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.second },
-                { type: PersonalCloudUpdateType.Delete, collection: 'customListTrees', where: { id: LOCAL_TEST_DATA_V24.customListTrees.fourth.id } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'customListTrees', where: { id: LOCAL_TEST_DATA_V24.customListTrees.third.id } },
-            ], { skip: 8 })
-            testSyncPushTrigger({ wasTriggered: true })
+            // Delete first list, which is the ancestor of all the others. Thus deleting all lists
+            await setups[0].backgroundModules.contentSharing.deleteListAndAllAssociatedData(
+                {
+                    localListId: LOCAL_TEST_DATA_V24.customLists.first.id,
+                },
+            )
+
+            expect(
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([])
+
+            await insertAllTestListData()
+            // Delete third list, which should also result in the deletion of the fourth list - its child
+            await setups[0].backgroundModules.contentSharing.deleteListAndAllAssociatedData(
+                {
+                    localListId: LOCAL_TEST_DATA_V24.customLists.third.id,
+                },
+            )
+
+            expect(
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .findAllObjects({}),
+            ).toEqual([
+                LOCAL_TEST_DATA_V24.customListTrees.first,
+                LOCAL_TEST_DATA_V24.customListTrees.second,
+            ])
+            expect(
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([customListData.first, customListData.second])
+
+            await setups[0].backgroundModules.contentSharing.deleteListAndAllAssociatedData(
+                {
+                    localListId: LOCAL_TEST_DATA_V24.customLists.first.id,
+                },
+            )
+            expect(
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await setups[0].storageManager
+                    .collection('customLists')
+                    .findAllObjects({}),
+            ).toEqual([])
         })
 
         it('should create custom list descriptions', async () => {

@@ -37,6 +37,7 @@ import {
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
 import { forEachTreeTraverseAsync, forEachTreeClimbAsync } from '../tree-utils'
+import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -766,6 +767,35 @@ export default class CustomListStorage extends StorageModule {
         await this.operation('deleteListTreeByListId', {
             listId: params.rootLocalListId,
         })
+    }
+
+    /**
+     * Returns an array of all list IDs in the list tree starting at the given root in BFS order.
+     */
+    async getAllListIdsInTreeByList(params: {
+        rootLocalListId: number
+    }): Promise<number[]> {
+        const listTree = await this.getTreeDataForList({
+            localListId: params.rootLocalListId,
+        })
+        if (!listTree) {
+            throw new Error('Could not find root data of tree to traverse')
+        }
+        const materializedPath = buildMaterializedPath(
+            ...extractMaterializedPathIds(listTree.path ?? '', 'number'),
+            listTree.listId,
+        )
+        const storageBackend = this.options.storageManager
+            .backend as DexieStorageBackend
+
+        const listTrees: ListTree[] = await storageBackend.dexieInstance
+            .table('customListTrees')
+            .where('path')
+            .startsWith(materializedPath)
+            .toArray()
+
+        // TODO: Maybe sort each level of siblings
+        return listTrees.map((tree) => tree.listId)
     }
 
     async removeListAssociatedData({ listId }: { listId: number }) {

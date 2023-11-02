@@ -89,7 +89,6 @@ export default class SummarizeBackground {
             queryPrompt,
             apiKey,
             undefined,
-            shortSummary,
         )) {
             const token = result?.t
             if (token?.length > 0) {

@@ -376,23 +376,38 @@ export default class ContentSharingBackground {
             pageActivityIndicator,
         } = this.options.getBgModules()
 
-        await directLinking.annotationStorage.removeAnnotsFromList({
-            listId: localListId,
-        })
-        const remoteListId = await this.storage.getRemoteListId({
-            localId: localListId,
-        })
-        await customLists.storage.removeListAssociatedData({
-            listId: localListId,
-        })
-        await customLists.storage.removeList({ id: localListId })
-        if (remoteListId != null) {
-            await this.storage.deleteMetadataByLocalListId({ localListId })
-            await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
-                {
-                    sharedList: remoteListId,
-                },
-            )
+        let treeListIds: number[]
+        try {
+            treeListIds = await customLists.storage.getAllListIdsInTreeByList({
+                rootLocalListId: localListId,
+            })
+        } catch (err) {
+            // Letting this error fly to keep backward compatibility for existing lists that may not yet have `customListTrees` data
+            //  and saves doing the error read for the `customLists` data
+            console.error(err)
+        }
+        // Reverse so that we delete nodes starting from the leaves
+        treeListIds.reverse().push(localListId)
+
+        for (const listId of treeListIds) {
+            await directLinking.annotationStorage.removeAnnotsFromList({
+                listId,
+            })
+            const remoteListId = await this.storage.getRemoteListId({
+                localId: listId,
+            })
+            await customLists.storage.removeListAssociatedData({ listId })
+            await customLists.storage.removeList({ id: listId })
+            if (remoteListId != null) {
+                await this.storage.deleteMetadataByLocalListId({
+                    localListId: listId,
+                })
+                await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
+                    {
+                        sharedList: remoteListId,
+                    },
+                )
+            }
         }
     }
 
