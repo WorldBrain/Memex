@@ -3335,7 +3335,7 @@ const ChapterContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: 100%;
-    justify-content: space-between;
+    justify-content: flex-start;
     grid-gap: 2px;
     align-items: flex-start;
     min-height: 60px;
