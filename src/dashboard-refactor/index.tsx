@@ -645,6 +645,15 @@ export class DashboardContainer extends StatefulUIElement<
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.lists}
+                saveHighlightColorSettings={(newState) => {
+                    this.processEvent('saveHighlightColorSettings', {
+                        newState: newState,
+                    })
+                }}
+                getHighlightColorSettings={() =>
+                    this.processEvent('getHighlightColorSettings', null)
+                }
+                highlightColorSettings={this.state.highlightColors}
                 getListDetailsById={this.getListDetailsById}
                 youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
@@ -1537,6 +1546,21 @@ export class DashboardContainer extends StatefulUIElement<
                                     activePage: false,
                                 })
                             }
+                            saveHighlightColorSettings={(newState) => {
+                                this.processEvent(
+                                    'saveHighlightColorSettings',
+                                    {
+                                        newState: newState,
+                                    },
+                                )
+                            }}
+                            getHighlightColorSettings={() =>
+                                this.processEvent(
+                                    'getHighlightColorSettings',
+                                    null,
+                                )
+                            }
+                            highlightColorSettings={this.state.highlightColors}
                         />
                     </MainFrame>
                     {this.renderModals()}

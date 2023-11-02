@@ -12,6 +12,9 @@ type Props = SidebarContainerOptions & {
     onNotesSidebarClose?: () => void
     theme: MemexTheme
     imageSupport?: ImageSupportInterface<'caller'>
+    saveHighlightColorSettings: (newState) => void
+    getHighlightColorSettings: () => void
+    highlightColorSettings: string
 }
 
 export class AnnotationsSidebarInDashboardResults extends React.Component<

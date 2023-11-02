@@ -51,6 +51,7 @@ import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
@@ -106,7 +107,11 @@ export const removeAllResultOccurrencesOfPage = (
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
     syncSettings: SyncSettingsStore<
-        'contentSharing' | 'dashboard' | 'extension' | 'activityIndicator'
+        | 'contentSharing'
+        | 'dashboard'
+        | 'extension'
+        | 'activityIndicator'
+        | 'highlightColors'
     >
     currentSearchID = 0
 
@@ -378,6 +383,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 pendingRemoteChangeCount: null,
                 lastSuccessfulSyncDate: null,
             },
+            highlightColors: null,
         }
     }
 
@@ -1333,6 +1339,45 @@ export class DashboardLogic extends UILogic<State, Events> {
             modals: {
                 showSubscription: { $set: event.isShown },
             },
+        })
+    }
+
+    getHighlightColorSettings: EventHandler<
+        'getHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        let highlightColorJSON
+        if (previousState.highlightColors) {
+            highlightColorJSON = JSON.parse(previousState.highlightColors)
+        } else {
+            const highlightColors = await this.syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            if (highlightColors) {
+                highlightColorJSON = highlightColors
+            } else {
+                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+                await this.syncSettings.highlightColors.set(
+                    'highlightColors',
+                    highlightColorJSON,
+                )
+            }
+        }
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
+        })
+
+        return highlightColorJSON
+    }
+    saveHighlightColorSettings: EventHandler<
+        'saveHighlightColorSettings'
+    > = async ({ event }) => {
+        const newState = JSON.parse(event.newState)
+        await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
         })
     }
     /* END - modal event handlers */

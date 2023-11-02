@@ -102,6 +102,7 @@ import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annot
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -149,7 +150,9 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
-    syncSettings: SyncSettingsStore<'contentSharing' | 'extension' | 'openAI'>
+    syncSettings: SyncSettingsStore<
+        'contentSharing' | 'extension' | 'openAI' | 'highlightColors'
+    >
     resizeObserver
     sidebar
     readingViewState
@@ -327,6 +330,7 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
+            highlightColors: null,
         }
     }
 
@@ -499,6 +503,45 @@ export class SidebarContainerLogic extends UILogic<
                 })
             },
         )
+    }
+
+    getHighlightColorSettings: EventHandler<
+        'getHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        let highlightColorJSON
+        if (previousState.highlightColors) {
+            highlightColorJSON = JSON.parse(previousState.highlightColors)
+        } else {
+            const highlightColors = await this.syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            if (highlightColors) {
+                highlightColorJSON = highlightColors
+            } else {
+                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+                await this.syncSettings.highlightColors.set(
+                    'highlightColors',
+                    highlightColorJSON,
+                )
+            }
+        }
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
+        })
+
+        return highlightColorJSON
+    }
+    saveHighlightColorSettings: EventHandler<
+        'saveHighlightColorSettings'
+    > = async ({ event }) => {
+        const newState = JSON.parse(event.newState)
+        await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
+        })
     }
 
     /** Should only be used for state initialization. */

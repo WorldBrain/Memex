@@ -63,6 +63,7 @@ export interface RootState {
     bulkDeleteLoadingState?: TaskState
     bulkSelectedUrls: string[]
     bulkEditSpacesLoadingState?: TaskState
+    highlightColors: string
 }
 
 export type Events = UIEvent<
@@ -147,6 +148,8 @@ export type DashboardModalsEvents = UIEvent<{
     setShareListId: { listId?: string }
     setShowLoginModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
+    getHighlightColorSettings: null
+    saveHighlightColorSettings: { newState: string }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 

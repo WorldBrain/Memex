@@ -230,6 +230,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     bgScriptBG: RemoteBGScriptInterface
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
+    saveHighlightColorSettings: (newState) => void
+    getHighlightColorSettings: () => void
+    highlightColorSettings: string
 }
 
 interface AnnotationsSidebarState {
@@ -744,6 +747,15 @@ export class AnnotationsSidebar extends React.Component<
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
+                            saveHighlightColorSettings={
+                                this.props.saveHighlightColorSettings
+                            }
+                            getHighlightColorSettings={
+                                this.props.getHighlightColorSettings
+                            }
+                            highlightColorSettings={
+                                this.props.highlightColorSettings
+                            }
                             isShared
                             isBulkShareProtected
                             onSpacePickerToggle={() => {

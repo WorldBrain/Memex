@@ -122,6 +122,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showAICounter: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
+    highlightColors: string
 
     activeTab: SidebarTab
     showChapters: boolean
@@ -272,6 +273,8 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    getHighlightColorSettings: null
+    saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
         imageData: string

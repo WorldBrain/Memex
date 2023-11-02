@@ -45,7 +45,10 @@ import ListDetails, {
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import {
+    AnnotationSharingStates,
+    ContentSharingInterface,
+} from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
@@ -57,6 +60,9 @@ import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPick
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { SyncSettingsBackground } from 'src/sync-settings/background'
+import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -128,6 +134,9 @@ export type Props = RootState &
         imageSupport: ImageSupportInterface<'caller'>
         onBulkSelect: (itemData, remove) => Promise<void>
         selectedItems: string[]
+        saveHighlightColorSettings: (newState) => void
+        getHighlightColorSettings: () => void
+        highlightColorSettings: string
     }
 
 export interface State {
@@ -301,6 +310,11 @@ export default class SearchResultsContainer extends React.Component<
         return (
             <AnnotationEditable
                 imageSupport={this.props.imageSupport}
+                saveHighlightColorSettings={
+                    this.props.saveHighlightColorSettings
+                }
+                getHighlightColorSettings={this.props.getHighlightColorSettings}
+                highlightColorSettings={this.props.highlightColorSettings}
                 zIndex={zIndex}
                 key={noteId}
                 unifiedId={noteId}

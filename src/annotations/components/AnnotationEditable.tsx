@@ -33,6 +33,10 @@ import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { Anchor } from 'src/highlighting/types'
+import HighlightColorPicker from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker'
+import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
+import { SyncSettingsBackground } from 'src/sync-settings/background'
+import tinycolor from 'tinycolor2'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -108,6 +112,9 @@ export interface AnnotationProps {
     shareMenuAnnotationInstanceId: string
     imageSupport: ImageSupportInterface<'caller'>
     selector?: Anchor
+    saveHighlightColorSettings: (newState) => void
+    getHighlightColorSettings: () => void
+    highlightColorSettings: string
 }
 
 export interface AnnotationEditableEventProps {
@@ -132,6 +139,7 @@ interface State {
     truncatedTextHighlight: string
     truncatedTextComment: string
     needsTruncation?: boolean
+    showHighlightColorPicker?: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -141,6 +149,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     private tutorialButtonRef = React.createRef<HTMLElement>()
     private shareMenuButtonRef = React.createRef<HTMLDivElement>()
     private copyPasterButtonRef = React.createRef<HTMLDivElement>()
+    private highlightsBarRef = React.createRef<HTMLDivElement>()
     private spacePickerBodyButtonRef = React.createRef<HTMLDivElement>()
     private spacePickerFooterButtonRef = React.createRef<HTMLDivElement>()
 
@@ -182,6 +191,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         truncatedTextHighlight: '',
         truncatedTextComment: '',
         needsTruncation: false,
+        showHighlightColorPicker: false,
     }
 
     focusEditForm() {
@@ -411,8 +421,19 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
             >
+                {this.renderHighlightsColorPicker()}
                 <ActionBox>{actionsBox}</ActionBox>
-                {!isScreenshotAnnotation && <Highlightbar />}
+                {!isScreenshotAnnotation && (
+                    <Highlightbar
+                        ref={this.highlightsBarRef}
+                        onClick={() =>
+                            this.setState({
+                                showHighlightColorPicker: !this.state
+                                    .showHighlightColorPicker,
+                            })
+                        }
+                    />
+                )}
                 <Markdown
                     imageSupport={this.props.imageSupport}
                     isHighlight
@@ -424,6 +445,33 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 </Markdown>
             </HighlightStyled>
         )
+    }
+
+    private renderHighlightsColorPicker() {
+        if (this.state.showHighlightColorPicker) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.highlightsBarRef.current}
+                    closeComponent={() =>
+                        this.setState({
+                            showHighlightColorPicker: false,
+                        })
+                    }
+                >
+                    <HighlightColorPicker
+                        saveHighlightColorSettings={
+                            this.props.saveHighlightColorSettings
+                        }
+                        getHighlightColorSettings={
+                            this.props.getHighlightColorSettings
+                        }
+                        highlightColorSettings={
+                            this.props.highlightColorSettings
+                        }
+                    />
+                </PopoutBox>
+            )
+        }
     }
 
     private setTextAreaHeight() {
@@ -945,7 +993,13 @@ const Highlightbar = styled.div`
     background-color: ${(props) => props.theme.colors.prime1};
     margin-right: 10px;
     border-radius: 2px;
-    width: 4px;
+    width: 5px;
+    cursor: pointer;
+
+    &:hover {
+        background: ${(props) =>
+            tinycolor(props.theme.colors.prime1).lighten(25).toHexString()};
+    }
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`

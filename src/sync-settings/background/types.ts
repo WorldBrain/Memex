@@ -81,6 +81,9 @@ export interface SyncSettingsByFeature {
         highlightsEnabled: boolean
         ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     }
+    highlightColors: {
+        highlightColors: []
+    }
 }
 
 export type SyncSettingNames = {
