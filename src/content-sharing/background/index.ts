@@ -40,6 +40,7 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import type { ListTree } from 'src/custom-lists/background/types'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -376,20 +377,27 @@ export default class ContentSharingBackground {
             pageActivityIndicator,
         } = this.options.getBgModules()
 
-        let treeListIds: number[]
+        let listTrees: ListTree[]
         try {
-            treeListIds = await customLists.storage.getAllListIdsInTreeByList({
+            listTrees = await customLists.storage.getAllNodesInTreeByList({
                 rootLocalListId: localListId,
             })
         } catch (err) {
-            // Letting this error fly to keep backward compatibility for existing lists that may not yet have `customListTrees` data
-            //  and saves doing the error read for the `customLists` data
+            // Error should only occur here when deleteing existing lists that do not yet have `customListTrees` data.
+            //  Letting it pass to retain backwards compatibility and saves doing the error-case read for the `customLists` data
             console.error(err)
         }
         // Reverse so that we delete nodes starting from the leaves
-        treeListIds.reverse().push(localListId)
+        listTrees.reverse().push({ listId: localListId } as ListTree)
 
-        for (const listId of treeListIds) {
+        for (const listTree of listTrees) {
+            if (listTree.linkTarget) {
+                await customLists.storage.deleteListTreeLink({
+                    localListId: listTree.linkTarget,
+                })
+                continue
+            }
+            const listId = listTree.listId
             await directLinking.annotationStorage.removeAnnotsFromList({
                 listId,
             })

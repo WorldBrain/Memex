@@ -2549,6 +2549,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('customListTrees')
                     .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+                await setups[0].storageManager
+                    .collection('customListTrees')
+                    .createObject(LOCAL_TEST_DATA_V24.customListTrees.fifth)
             }
 
             await insertAllTestListData()
@@ -2567,6 +2570,7 @@ describe('Personal cloud translation layer', () => {
                 LOCAL_TEST_DATA_V24.customListTrees.second,
                 LOCAL_TEST_DATA_V24.customListTrees.third,
                 LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                LOCAL_TEST_DATA_V24.customListTrees.fifth,
             ])
             expect(
                 await setups[0].storageManager
@@ -2612,6 +2616,7 @@ describe('Personal cloud translation layer', () => {
             ).toEqual([
                 LOCAL_TEST_DATA_V24.customListTrees.first,
                 LOCAL_TEST_DATA_V24.customListTrees.second,
+                LOCAL_TEST_DATA_V24.customListTrees.fifth,
             ])
             expect(
                 await setups[0].storageManager

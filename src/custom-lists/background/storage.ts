@@ -252,6 +252,11 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'deleteObjects',
                     args: { listId: '$listId:int' },
                 },
+                deleteListTreeByLinkTarget: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'deleteObjects',
+                    args: { linkTarget: '$listId:int' },
+                },
                 deleteListTreeById: {
                     collection: CustomListStorage.LIST_TREES_COLL,
                     operation: 'deleteObjects',
@@ -762,21 +767,18 @@ export default class CustomListStorage extends StorageModule {
         )
     }
 
-    async deleteListSubtree(params: {
-        rootLocalListId: number
-    }): Promise<void> {
-        // TODO: Delete all descendent nodes
-        await this.operation('deleteListTreeByListId', {
-            listId: params.rootLocalListId,
+    async deleteListTreeLink(params: { localListId: number }): Promise<void> {
+        await this.operation('deleteListTreeByLinkTarget', {
+            listId: params.localListId,
         })
     }
 
     /**
      * Returns an array of all list IDs in the list tree starting at the given root in BFS order.
      */
-    async getAllListIdsInTreeByList(params: {
+    async getAllNodesInTreeByList(params: {
         rootLocalListId: number
-    }): Promise<number[]> {
+    }): Promise<ListTree[]> {
         const listTree = await this.getTreeDataForList({
             localListId: params.rootLocalListId,
         })
@@ -797,12 +799,12 @@ export default class CustomListStorage extends StorageModule {
             .toArray()
 
         // TODO: Maybe sort each level of siblings
-        return listTrees.map((tree) => tree.listId)
+        return listTrees
     }
 
     async removeListAssociatedData({ listId }: { listId: number }) {
         await this.operation('deleteListEntriesByListId', { listId })
-        await this.deleteListSubtree({ rootLocalListId: listId })
+        await this.operation('deleteListTreeByListId', { listId })
         await this.deleteListDescriptions({ listId })
     }
 
