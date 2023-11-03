@@ -2963,9 +2963,20 @@ export class SidebarContainerLogic extends UILogic<
 
         let transcriptChunkedByChapter = []
         let chapters = previousState.chapterList
+        let videoLength = previousState.videoDetails
+            ? /* @ts-ignore */
+              previousState.videoDetails?.details?.lengthSeconds
+            : null
+
         if (chapters) {
             let currentChapterStart = chapters[event.chapterIndex]?.start
-            let nextChapterStart = chapters[event.chapterIndex + 1].start
+            let nextChapterStart
+            if (event.chapterIndex === chapters.length - 1) {
+                nextChapterStart = videoLength
+            } else {
+                nextChapterStart =
+                    chapters[event.chapterIndex + 1].start ?? videoLength - 1
+            }
             let chapterTranscript = transcript.filter(
                 (item) =>
                     item.start >= currentChapterStart - 2 &&
