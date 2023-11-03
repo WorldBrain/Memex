@@ -1878,6 +1878,9 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('customListTrees')
                 .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fifth)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -1901,10 +1904,11 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
                     [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
                     [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
+                    [DataChangeType.Create, 'personalListTree', testListTrees.fifth.id],
                 ], { skipChanges: 8 }),
                 personalBlockStats: [],
                 personalList: [testLists.first, testLists.second, testLists.third, testLists.fourth],
-                personalListTree: [testListTrees.first, testListTrees.second, testListTrees.third, testListTrees.fourth],
+                personalListTree: [testListTrees.first, testListTrees.second, testListTrees.third, testListTrees.fourth, testListTrees.fifth],
                 sharedListTree: [
                     expect.objectContaining({
                         creator: TEST_USER.id,
@@ -1932,6 +1936,13 @@ describe('Personal cloud translation layer', () => {
                         parentId:testListShares.third.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId, testListShares.third.remoteId),
                     }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTrees.fifth.order,
+                        linkTarget: testListShares.first.remoteId,
+                        parentId:testListShares.second.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId, testListShares.second.remoteId),
+                    }),
                 ],
             })
 
@@ -1941,6 +1952,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.second },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.third },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.fifth },
             ], { skip: 8 })
             testSyncPushTrigger({ wasTriggered: true })
         })

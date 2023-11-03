@@ -33,7 +33,8 @@ export interface PageListEntry {
 
 export interface ListTree {
     id: number
-    listId: number
+    listId: number | null
+    linkTarget: number | null
     /** A materialized path, containing IDs of all ancestors of this tree delimited by comma in order from oldest to youngest. e.g., "a,b,c" */
     path: string
     parentId: number | null

@@ -531,6 +531,7 @@ export default class CustomListStorage extends StorageModule {
         parentListId?: number
         pathIds?: number[]
         now?: number
+        isLink?: boolean
     }): Promise<ListTree> {
         const existingList = await this.fetchListById(params.localListId)
         if (!existingList) {
@@ -541,7 +542,8 @@ export default class CustomListStorage extends StorageModule {
 
         const now = params.now ?? Date.now()
         const listTree: Omit<ListTree, 'id'> = {
-            listId: params.localListId,
+            listId: params.isLink ? null : params.localListId,
+            linkTarget: params.isLink ? params.localListId : null,
             parentId: params.parentListId ?? null,
             path: params.pathIds?.length
                 ? buildMaterializedPath(...params.pathIds)
