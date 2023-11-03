@@ -1919,28 +1919,28 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: testListTrees.second.order,
                         sharedList: testListShares.second.remoteId,
-                        parentId:testListShares.first.remoteId,
+                        parentListId:testListShares.first.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: testListTrees.third.order,
                         sharedList: testListShares.third.remoteId,
-                        parentId:testListShares.first.remoteId,
+                        parentListId:testListShares.first.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: testListTrees.fourth.order,
                         sharedList: testListShares.fourth.remoteId,
-                        parentId:testListShares.third.remoteId,
+                        parentListId:testListShares.third.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId, testListShares.third.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: testListTrees.fifth.order,
                         linkTarget: testListShares.first.remoteId,
-                        parentId:testListShares.second.remoteId,
+                        parentListId:testListShares.second.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId, testListShares.second.remoteId),
                     }),
                 ],
@@ -2034,7 +2034,7 @@ describe('Personal cloud translation layer', () => {
             listTreesData.third = {
                 ...listTreesData.third,
                 updatedWhen: nowA,
-                parentId: listTreesData.second.listId,
+                parentListId: listTreesData.second.listId,
                 path: buildMaterializedPath(
                     listTreesData.first.listId,
                     listTreesData.second.listId,
@@ -2043,7 +2043,7 @@ describe('Personal cloud translation layer', () => {
             listTreesData.fourth = {
                 ...listTreesData.fourth,
                 updatedWhen: nowA,
-                parentId: listTreesData.third.listId, // Unchanged
+                parentListId: listTreesData.third.listId, // Unchanged
                 path: buildMaterializedPath(
                     listTreesData.first.listId,
                     listTreesData.second.listId,
@@ -2081,9 +2081,9 @@ describe('Personal cloud translation layer', () => {
                             testListTreesA.first.personalList,
                             testListTreesA.second.personalList,
                         ),
-                        parentId: testListTreesA.second.personalList,
+                        parentListId: testListTreesA.second.personalList,
                         localPath: listTreesData.third.path,
-                        localParentId: listTreesData.third.parentId,
+                        localParentId: listTreesData.third.parentListId,
                     },
                     {
                         ...testListTreesA.fourth,
@@ -2106,14 +2106,14 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: testListTreesA.second.order,
                         sharedList: testListSharesA.second.remoteId,
-                        parentId: testListSharesA.first.remoteId,
+                        parentListId: testListSharesA.first.remoteId,
                         path: buildMaterializedPath(testListSharesA.first.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: testListTreesA.third.order,
                         sharedList: testListSharesA.third.remoteId,
-                        parentId: testListSharesA.second.remoteId,
+                        parentListId: testListSharesA.second.remoteId,
                         path: buildMaterializedPath(
                             testListSharesA.first.remoteId,
                             testListSharesA.second.remoteId,
@@ -2123,7 +2123,7 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: testListTreesA.fourth.order,
                         sharedList: testListSharesA.fourth.remoteId,
-                        parentId: testListSharesA.third.remoteId,
+                        parentListId: testListSharesA.third.remoteId,
                         path: buildMaterializedPath(
                             testListSharesA.first.remoteId,
                             testListSharesA.second.remoteId,
@@ -2146,19 +2146,19 @@ describe('Personal cloud translation layer', () => {
             listTreesData.second = {
                 ...listTreesData.second,
                 updatedWhen: nowB,
-                parentId: null,
+                parentListId: null,
                 path: null,
             }
             listTreesData.third = {
                 ...listTreesData.third,
                 updatedWhen: nowB,
-                parentId: listTreesData.second.listId, // Unchanged
+                parentListId: listTreesData.second.listId, // Unchanged
                 path: buildMaterializedPath(listTreesData.second.listId),
             }
             listTreesData.fourth = {
                 ...listTreesData.fourth,
                 updatedWhen: nowB,
-                parentId: listTreesData.third.listId, // Unchanged
+                parentListId: listTreesData.third.listId, // Unchanged
                 path: buildMaterializedPath(
                     listTreesData.second.listId,
                     listTreesData.third.listId,
@@ -2191,22 +2191,22 @@ describe('Personal cloud translation layer', () => {
                         ...testListTreesB.second,
                         updatedWhen: nowB,
                         path: null,
-                        parentId: null,
+                        parentListId: null,
                         localPath: listTreesData.second.path,
-                        localParentId: listTreesData.second.parentId,
+                        localParentId: listTreesData.second.parentListId,
                     },
                     {
                         ...testListTreesB.third,
                         updatedWhen: nowB,
                         path: buildMaterializedPath(testListTreesB.second.personalList),
-                        parentId: testListTreesB.second.personalList,
+                        parentListId: testListTreesB.second.personalList,
                         localPath: listTreesData.third.path,
-                        localParentId: listTreesData.third.parentId,
+                        localParentId: listTreesData.third.parentListId,
                     },
                     {
                         ...testListTreesB.fourth,
                         updatedWhen: nowB,
-                        parentId: testListTreesB.third.personalList,
+                        parentListId: testListTreesB.third.personalList,
                         path: buildMaterializedPath(
                             testListTreesB.second.personalList,
                             testListTreesB.third.personalList,
@@ -2224,21 +2224,21 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: testListTreesB.second.order,
                         sharedList: testListSharesB.second.remoteId,
-                        parentId: null,
+                        parentListId: null,
                         path: null,
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: testListTreesB.third.order,
                         sharedList: testListSharesB.third.remoteId,
-                        parentId: testListSharesB.second.remoteId,
+                        parentListId: testListSharesB.second.remoteId,
                         path: buildMaterializedPath(testListSharesB.second.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: testListTreesB.fourth.order,
                         sharedList: testListSharesB.fourth.remoteId,
-                        parentId: testListSharesB.third.remoteId,
+                        parentListId: testListSharesB.third.remoteId,
                         path: buildMaterializedPath(
                             testListSharesB.second.remoteId,
                             testListSharesB.third.remoteId,
@@ -2388,21 +2388,21 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: 1,
                         sharedList: testListShares.second.remoteId,
-                        parentId:testListShares.first.remoteId,
+                        parentListId:testListShares.first.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: 1,
                         sharedList: testListShares.third.remoteId,
-                        parentId:testListShares.first.remoteId,
+                        parentListId:testListShares.first.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         order: 1,
                         sharedList: testListShares.fourth.remoteId,
-                        parentId:testListShares.third.remoteId,
+                        parentListId:testListShares.third.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId, testListShares.third.remoteId),
                     }),
                 ],

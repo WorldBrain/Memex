@@ -224,7 +224,7 @@ export default class CustomListBackground {
 
         return lists.map((list) => ({
             ...list,
-            parentListId: treeDataByList[list.id]?.parentId ?? null,
+            parentListId: treeDataByList[list.id]?.parentListId ?? null,
             pathListIds: extractMaterializedPathIds(
                 treeDataByList[list.id]?.path ?? '',
                 'number',

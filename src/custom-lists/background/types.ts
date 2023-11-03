@@ -37,7 +37,7 @@ export interface ListTree {
     linkTarget: number | null
     /** A materialized path, containing IDs of all ancestors of this tree delimited by comma in order from oldest to youngest. e.g., "a,b,c" */
     path: string
-    parentId: number | null
+    parentListId: number | null
     order: number
     createdWhen: number
     updatedWhen: number

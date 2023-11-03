@@ -29,19 +29,19 @@ export const LIST_4 = {
 
 export const LIST_TREE_1 = {
     localListId: LIST_1.id,
-    parentId: null,
+    parentListId: null,
 }
 export const LIST_TREE_2 = {
     localListId: LIST_2.id,
-    parentId: LIST_1.id,
+    parentListId: LIST_1.id,
 }
 export const LIST_TREE_3 = {
     localListId: LIST_3.id,
-    parentId: LIST_1.id,
+    parentListId: LIST_1.id,
 }
 export const LIST_TREE_4 = {
     localListId: LIST_4.id,
-    parentId: LIST_2.id,
+    parentListId: LIST_2.id,
 }
 
 export const LIST_1_TERMS = ['some', 'ipsum']

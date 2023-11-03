@@ -100,7 +100,7 @@ export default class CustomListStorage extends StorageModule {
                 findListTreesByParentListId: {
                     collection: CustomListStorage.LIST_TREES_COLL,
                     operation: 'findObjects',
-                    args: { parentId: '$parentListId:int' },
+                    args: { parentListId: '$parentListId:int' },
                 },
                 findListTreesByLocalListIds: {
                     collection: CustomListStorage.LIST_TREES_COLL,
@@ -114,7 +114,7 @@ export default class CustomListStorage extends StorageModule {
                         { id: '$id:pk' },
                         {
                             path: '$path:string',
-                            parentId: '$parentListId:int',
+                            parentListId: '$parentListId:int',
                             updatedWhen: '$updatedWhen:int',
                         },
                     ],
@@ -549,7 +549,7 @@ export default class CustomListStorage extends StorageModule {
         const listTree: Omit<ListTree, 'id'> = {
             listId: params.isLink ? null : params.localListId,
             linkTarget: params.isLink ? params.localListId : null,
-            parentId: params.parentListId ?? null,
+            parentListId: params.parentListId ?? null,
             path: params.pathIds?.length
                 ? buildMaterializedPath(...params.pathIds)
                 : null,
@@ -569,17 +569,17 @@ export default class CustomListStorage extends StorageModule {
         id: number
     }): Promise<number[]> {
         const pathIds: number[] = [params.id]
-        let parentId = params.id
+        let parentListId = params.id
         while (true) {
             const currentNode: ListTree = await this.operation(
                 'findListTreeByListId',
-                { listId: parentId },
+                { listId: parentListId },
             )
-            parentId = currentNode?.parentId
-            if (parentId == null) {
+            parentListId = currentNode?.parentListId
+            if (parentListId == null) {
                 break
             }
-            pathIds.unshift(parentId)
+            pathIds.unshift(parentListId)
         }
         return pathIds
     }
@@ -678,9 +678,12 @@ export default class CustomListStorage extends StorageModule {
                 this.getTreesByParent({ parentListId: node.listId }),
             cb: async (node, i) => {
                 // We want to manually point the root to the new parent, then cascade that change down through descendents
-                const parentId = i === 0 ? params.parentListId : node.parentId
+                const parentListId =
+                    i === 0 ? params.parentListId : node.parentListId
                 const parentNode: ListTree =
-                    parentId != null ? await getTreeByListId(parentId) : null
+                    parentListId != null
+                        ? await getTreeByListId(parentListId)
+                        : null
 
                 const parentPathIds =
                     parentNode?.path != null
@@ -689,7 +692,7 @@ export default class CustomListStorage extends StorageModule {
                               'number',
                           ) as number[])
                         : []
-                node.parentId = parentNode?.listId ?? null
+                node.parentListId = parentNode?.listId ?? null
                 node.path =
                     parentNode?.listId != null
                         ? buildMaterializedPath(
@@ -701,7 +704,7 @@ export default class CustomListStorage extends StorageModule {
                     updatedWhen,
                     id: node.id,
                     path: node.path,
-                    parentListId: node.parentId,
+                    parentListId: node.parentListId,
                 })
             },
         })
@@ -722,8 +725,10 @@ export default class CustomListStorage extends StorageModule {
         await forEachTreeClimbAsync({
             startingNode,
             getParent: (node) =>
-                node.parentId != null
-                    ? this.getTreeDataForList({ localListId: node.parentId })
+                node.parentListId != null
+                    ? this.getTreeDataForList({
+                          localListId: node.parentListId,
+                      })
                     : null,
             cb: async (node) => {
                 isAncestor = node.listId === listAId
