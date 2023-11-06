@@ -411,7 +411,7 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async editAnnotation(_, pk, comment, isSocialPost?: boolean) {
+    async editAnnotation(_, pk, comment, color, isSocialPost?: boolean) {
         if (isSocialPost) {
             pk = await this.lookupSocialId(pk)
         }
@@ -432,7 +432,7 @@ export default class DirectLinkingBackground {
             }
         }
 
-        return this.annotationStorage.editAnnotation(pk, comment)
+        return this.annotationStorage.editAnnotation(pk, comment, color)
     }
 
     async deleteAnnotation(_, pk, isSocialPost?: boolean) {

@@ -149,6 +149,7 @@ export type DashboardModalsEvents = UIEvent<{
     setShowLoginModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
     getHighlightColorSettings: null
+    saveHighlightColor: { color: string }
     saveHighlightColorSettings: { newState: string }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }

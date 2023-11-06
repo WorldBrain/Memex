@@ -146,6 +146,7 @@ export interface NoteData {
     selector?: Anchor
     isShared?: boolean
     isBulkShareProtected?: boolean
+    color?: string
 }
 
 export type PageData = Pick<
@@ -379,5 +380,6 @@ export type Events = UIEvent<{
         isProtected?: boolean
         mainBtnPressed?: boolean
         keepListsIfUnsharing?: boolean
+        color?: string
     }
 }>

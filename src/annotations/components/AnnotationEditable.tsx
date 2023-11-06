@@ -42,6 +42,7 @@ export interface HighlightProps extends AnnotationProps {
     body: string
     comment?: string
     selector?: Anchor
+    color?: string
 }
 
 export interface NoteProps extends AnnotationProps {
@@ -112,6 +113,7 @@ export interface AnnotationProps {
     shareMenuAnnotationInstanceId: string
     imageSupport: ImageSupportInterface<'caller'>
     selector?: Anchor
+    saveHighlightColor: (color, id) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
@@ -421,7 +423,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
             >
-                {this.renderHighlightsColorPicker()}
+                {this.renderHighlightsColorPicker(this.props.unifiedId)}
                 <ActionBox>{actionsBox}</ActionBox>
                 {!isScreenshotAnnotation && (
                     <Highlightbar
@@ -432,6 +434,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     .showHighlightColorPicker,
                             })
                         }
+                        color={this.props.color}
                     />
                 )}
                 <Markdown
@@ -447,7 +450,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 
-    private renderHighlightsColorPicker() {
+    private renderHighlightsColorPicker(unifiedId) {
         if (this.state.showHighlightColorPicker) {
             return (
                 <PopoutBox
@@ -461,6 +464,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     <HighlightColorPicker
                         saveHighlightColorSettings={
                             this.props.saveHighlightColorSettings
+                        }
+                        saveHighlightColor={(color) =>
+                            this.props.saveHighlightColor(color, unifiedId)
                         }
                         getHighlightColorSettings={
                             this.props.getHighlightColorSettings
@@ -890,6 +896,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     render() {
+        console.log('annotation', this.props.color)
         const { annotationFooterDependencies } = this.props
         return (
             <ThemeProvider theme={this.theme}>

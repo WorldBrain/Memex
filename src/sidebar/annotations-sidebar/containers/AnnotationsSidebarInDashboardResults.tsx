@@ -12,6 +12,7 @@ type Props = SidebarContainerOptions & {
     onNotesSidebarClose?: () => void
     theme: MemexTheme
     imageSupport?: ImageSupportInterface<'caller'>
+    saveHighlightColor: (color, id) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string

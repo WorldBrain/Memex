@@ -533,6 +533,16 @@ export class SidebarContainerLogic extends UILogic<
 
         return highlightColorJSON
     }
+    saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
+        event,
+    }) => {
+        const newState = JSON.parse(event.color)
+        await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
+        })
+    }
     saveHighlightColorSettings: EventHandler<
         'saveHighlightColorSettings'
     > = async ({ event }) => {

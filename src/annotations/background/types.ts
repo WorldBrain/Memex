@@ -38,7 +38,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     >
     editAnnotation: RemotePositionalFunction<
         Role,
-        [string, string, boolean] | [string, string],
+        [string, string, boolean] | [string, string, string],
         any
     >
     updateAnnotationTags: RemotePositionalFunction<

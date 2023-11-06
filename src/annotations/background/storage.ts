@@ -144,6 +144,7 @@ export default class AnnotationStorage extends StorageModule {
                     { url: '$url:pk' },
                     {
                         comment: '$comment:string',
+                        color: '$color:string',
                         lastEdited: '$lastEdited:any',
                     },
                 ],
@@ -593,6 +594,7 @@ export default class AnnotationStorage extends StorageModule {
     async editAnnotation(
         url: string,
         comment: string,
+        color: string,
         lastEdited = new Date(),
     ) {
         if (await isPkmSyncEnabled()) {
@@ -642,9 +644,12 @@ export default class AnnotationStorage extends StorageModule {
             } catch (e) {}
         }
 
+        console.log('annot', url, comment, color, lastEdited)
+
         return this.operation('editAnnotation', {
             url,
             comment,
+            color,
             lastEdited,
         })
     }

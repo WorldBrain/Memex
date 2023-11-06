@@ -25,11 +25,13 @@ type AnnotationCreateData = {
     createdWhen?: Date
     selector?: Anchor
     localListIds?: number[]
+    color?: string
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
 
 interface AnnotationUpdateData {
     localId: string
     comment: string | null
+    color?: string
 }
 
 export interface SaveAnnotationParams<
@@ -102,6 +104,7 @@ export async function createAnnotation({
                         .replace(/\\\(/g, '(')
                         .replace(/\\\)/g, ')'),
                     body: annotationData.body,
+                    color: annotationData.color,
                 },
                 { skipPageIndexing },
             )
@@ -189,6 +192,11 @@ export async function updateAnnotation({
     return {
         remoteAnnotationId,
         savePromise: (async () => {
+            console.log(
+                'annotation1',
+                annotationData.color,
+                annotationData.localId,
+            )
             if (annotationData.comment != null) {
                 await annotationsBG.editAnnotation(
                     annotationData.localId,
@@ -197,7 +205,9 @@ export async function updateAnnotation({
                         .replace(/\\\]/g, ']')
                         .replace(/\\\(/g, '(')
                         .replace(/\\\)/g, ')'),
+                    annotationData.color,
                 )
+                console.log('save worked')
             }
 
             await Promise.all([

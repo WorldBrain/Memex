@@ -1380,6 +1380,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             highlightColors: { $set: JSON.stringify(newState) },
         })
     }
+    saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
+        event,
+    }) => {
+        const newState = JSON.parse(event.color)
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
+        })
+        // this.processUIEvent('saveNoteEdit', { color: event.color })
+    }
     /* END - modal event handlers */
 
     /* START - search result event handlers */
@@ -2946,6 +2956,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        console.log('event', event)
         const {
             editNoteForm,
             ...existing
@@ -2955,6 +2966,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             editNoteForm.tags,
         )
 
+        console.log('event2', event)
         await executeUITask(
             this,
             (taskState) => ({
@@ -2996,6 +3008,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             !!event.keepListsIfUnsharing,
                                     },
                                     lists: { $set: lists },
+                                    color: { $set: event.color },
                                 },
                             },
                         },
@@ -3005,10 +3018,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 })
 
+                console.log('event3', event)
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,
                         comment: editNoteForm.inputValue,
+                        color: event.color,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,

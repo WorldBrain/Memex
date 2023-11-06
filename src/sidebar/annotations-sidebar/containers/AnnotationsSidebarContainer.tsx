@@ -74,6 +74,7 @@ export interface Props extends SidebarContainerOptions {
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
+    saveHighlightColor?: (color) => void
     saveHighlightColorSettings?: (newState) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
@@ -845,6 +846,12 @@ export class AnnotationsSidebarContainer<
                             chapterSummaries={this.state.chapterSummaries}
                             videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
+                            saveHighlightColor={(color, id) => {
+                                this.processEvent('saveHighlightColor', {
+                                    noteId: id,
+                                    color: color,
+                                })
+                            }}
                             saveHighlightColorSettings={(newState) => {
                                 this.processEvent(
                                     'saveHighlightColorSettings',

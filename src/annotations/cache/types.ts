@@ -112,6 +112,7 @@ export type UnifiedAnnotation = Pick<
     lastEdited: number
     createdWhen: number
     creator?: UserReference
+    color?: string
 
     // Misc annotation feature state
     privacyLevel: AnnotationPrivacyLevels

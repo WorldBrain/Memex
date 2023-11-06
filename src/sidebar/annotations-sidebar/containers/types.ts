@@ -274,6 +274,7 @@ interface SidebarEvents {
         }
     }
     getHighlightColorSettings: null
+    saveHighlightColor: { color: string }
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {

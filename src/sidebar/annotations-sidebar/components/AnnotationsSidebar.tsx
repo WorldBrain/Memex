@@ -230,6 +230,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     bgScriptBG: RemoteBGScriptInterface
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
+    saveHighlightColor: (color, id) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
@@ -747,6 +748,12 @@ export class AnnotationsSidebar extends React.Component<
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
+                            saveHighlightColor={(color) =>
+                                this.props.saveHighlightColor(
+                                    color,
+                                    annotation.unifiedId,
+                                )
+                            }
                             saveHighlightColorSettings={
                                 this.props.saveHighlightColorSettings
                             }
@@ -772,6 +779,7 @@ export class AnnotationsSidebar extends React.Component<
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}
                             comment={annotation.comment}
+                            color={annotation.color}
                             lastEdited={annotation.lastEdited}
                             createdWhen={annotation.createdWhen}
                             creatorDependencies={
@@ -2218,6 +2226,7 @@ export class AnnotationsSidebar extends React.Component<
                             pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}
                             comment={annot.comment}
+                            color={annot.color}
                             isShared={isShared}
                             createdWhen={annot.createdWhen}
                             isBulkShareProtected={[
