@@ -94,6 +94,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -429,6 +430,7 @@ export async function main(
         screenshotAnchor?,
         screenshotImage?,
         imageSupport?,
+        highlightColor?,
     ): Promise<AutoPk> {
         let highlightId: AutoPk
         try {
@@ -448,6 +450,7 @@ export async function main(
                 screenshotAnchor,
                 screenshotImage,
                 imageSupport,
+                highlightColor,
             })
         } catch (err) {
             captureException(err)
@@ -460,10 +463,16 @@ export async function main(
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => async (selection: Selection, shouldShare: boolean) => {
+        ) => async (
+            selection: Selection,
+            shouldShare: boolean,
+            drawRectangle?: boolean,
+            highlightColor?: string,
+        ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
+            console.log('runs', selection)
             let screenshotGrabResult
             if (
                 isPdfViewerRunning &&
@@ -488,12 +497,20 @@ export async function main(
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
+                    highlightColor,
                 )
             } else if (
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                await saveHighlight(shouldShare)
+                console.log('estads', highlightColor)
+                await saveHighlight(
+                    shouldShare,
+                    null,
+                    null,
+                    null,
+                    highlightColor,
+                )
             }
 
             if (inPageUI.componentsShown.sidebar) {
@@ -762,6 +779,30 @@ export async function main(
         }, 200)
     }
 
+    async function getHighlightColorSettings() {
+        const syncSettings = createSyncSettingsStore({ syncSettingsBG })
+        const highlightColorStore = syncSettings.highlightColors
+        let highlightColorJSON
+        const highlightColors = await highlightColorStore.get('highlightColors')
+
+        if (highlightColors) {
+            highlightColorJSON = highlightColors
+        } else {
+            highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+            await highlightColorStore.set('highlightColors', highlightColorJSON)
+        }
+        return highlightColorJSON
+    }
+    async function saveHighlightColorSettings(newStateInput) {
+        const newState = JSON.parse(newStateInput)
+        await syncSettingsBG.highlightColorStore.set(
+            'highlightColors',
+            newState,
+        )
+
+        return newState
+    }
+
     // 4. Create a contentScriptRegistry object with functions for each content script
     // component, that when run, initialise the respective component with its
     // dependencies
@@ -858,6 +899,8 @@ export async function main(
                     action: 'createFromTooltip',
                 }),
                 askAI: annotationsFunctions.askAI(),
+                getHighlightColorsSettings: () => getHighlightColorSettings(),
+                saveHighlightColorsSettings: () => saveHighlightColorSettings(),
             })
             components.tooltip?.resolve()
         },
@@ -1273,7 +1316,15 @@ class PageInfo {
     normalizeGmailFullURL = async (url) => {
         let fullUrl = url
 
-        if (url.includes('#search') || url.includes('#inbox')) {
+        if (
+            url.includes('#search') ||
+            url.includes('#inbox') ||
+            url.includes('#sent') ||
+            url.includes('#snoozed') ||
+            url.includes('#drafts') ||
+            url.includes('#imp') ||
+            url.includes('#scheduled')
+        ) {
             const parts = url.split('/')
             const mailId = parts[parts.length - 1]
             fullUrl = `https://mail.google.com/mail/#inbox/${mailId}`
