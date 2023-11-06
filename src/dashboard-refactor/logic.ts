@@ -1382,13 +1382,59 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
     saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
         event,
+        previousState,
     }) => {
-        const newState = JSON.parse(event.color)
+        const { ...existing } = previousState.searchResults.noteData.byId[
+            event.noteId
+        ]
+        console.log('exec2', event, existing)
 
-        this.emitMutation({
-            highlightColors: { $set: JSON.stringify(newState) },
-        })
-        // this.processUIEvent('saveNoteEdit', { color: event.color })
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { noteUpdateState: { $set: taskState } },
+            }),
+            async () => {
+                // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+                // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+                //  to make a SAS annotation private protected upon save btn press
+
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [event.noteId]: {
+                                    comment: { $set: existing.comment },
+                                    color: { $set: event.color },
+                                },
+                            },
+                        },
+                    },
+                    modals: {
+                        confirmPrivatizeNoteArgs: { $set: null },
+                    },
+                })
+
+                const unifiedListIds = new Set(existing.lists)
+
+                // this.options.annotationsCache.updateAnnotation({
+                //     comment: existing.comment,
+                //     color: event.color,
+                //     unifiedId: event.unifiedId,
+                // })
+
+                console.log('event3', event)
+                await updateAnnotation({
+                    annotationData: {
+                        localId: event.noteId,
+                        comment: existing.comment,
+                        color: event.color,
+                    },
+                    annotationsBG: this.options.annotationsBG,
+                    contentSharingBG: this.options.contentShareBG,
+                })
+            },
+        )
     }
     /* END - modal event handlers */
 
@@ -2956,7 +3002,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        console.log('event', event)
+        console.log('exec')
         const {
             editNoteForm,
             ...existing
@@ -2966,7 +3012,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             editNoteForm.tags,
         )
 
-        console.log('event2', event)
         await executeUITask(
             this,
             (taskState) => ({

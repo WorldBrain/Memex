@@ -52,6 +52,7 @@ export interface PageAnnotationsCacheInterface {
             | 'comment'
             | 'unifiedListIds'
             | 'privacyLevel'
+            | 'color'
         >,
         opts?: {
             updateLastEditedTimestamp?: boolean

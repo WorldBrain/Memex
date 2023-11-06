@@ -119,4 +119,5 @@ export type SharedAnnotationWithRefs = SharedAnnotation & {
     creatorReference: UserReference
     creator?: UserPublicDetails
     selector?: Anchor
+    color?: string
 }

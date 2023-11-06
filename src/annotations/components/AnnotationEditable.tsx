@@ -113,7 +113,7 @@ export interface AnnotationProps {
     shareMenuAnnotationInstanceId: string
     imageSupport: ImageSupportInterface<'caller'>
     selector?: Anchor
-    saveHighlightColor: (color, id) => void
+    saveHighlightColor: (id, color) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
@@ -434,7 +434,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     .showHighlightColorPicker,
                             })
                         }
-                        color={this.props.color}
+                        barColor={this.props.color}
                     />
                 )}
                 <Markdown
@@ -465,8 +465,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         saveHighlightColorSettings={
                             this.props.saveHighlightColorSettings
                         }
-                        saveHighlightColor={(color) =>
-                            this.props.saveHighlightColor(color, unifiedId)
+                        changeHighlightColor={(color) =>
+                            this.props.saveHighlightColor(unifiedId, color)
                         }
                         getHighlightColorSettings={
                             this.props.getHighlightColorSettings
@@ -896,7 +896,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     render() {
-        console.log('annotation', this.props.color)
         const { annotationFooterDependencies } = this.props
         return (
             <ThemeProvider theme={this.theme}>
@@ -996,7 +995,7 @@ const HighlightContent = styled.div`
     width: fill-available;
 `
 
-const Highlightbar = styled.div`
+const Highlightbar = styled.div<{ barColor: string }>`
     background-color: ${(props) => props.theme.colors.prime1};
     margin-right: 10px;
     border-radius: 2px;
@@ -1005,8 +1004,14 @@ const Highlightbar = styled.div`
 
     &:hover {
         background: ${(props) =>
-            tinycolor(props.theme.colors.prime1).lighten(25).toHexString()};
+            tinycolor(props.barColor).lighten(25).toHexString()};
     }
+
+    ${(props) =>
+        props.barColor &&
+        css<any>`
+            background: ${(props) => props.barColor};
+        `}
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`

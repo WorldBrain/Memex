@@ -134,7 +134,7 @@ export type Props = RootState &
         imageSupport: ImageSupportInterface<'caller'>
         onBulkSelect: (itemData, remove) => Promise<void>
         selectedItems: string[]
-        saveHighlightColor: (color, id) => void
+        saveHighlightColor: (color, id, unifiedId) => void
         saveHighlightColorSettings: (newState) => void
         getHighlightColorSettings: () => void
         highlightColorSettings: string
@@ -311,9 +311,10 @@ export default class SearchResultsContainer extends React.Component<
         return (
             <AnnotationEditable
                 imageSupport={this.props.imageSupport}
-                saveHighlightColor={(color, id) =>
-                    this.props.saveHighlightColor(color, id)
-                }
+                saveHighlightColor={(id, color) => {
+                    console.log('121212')
+                    this.props.saveHighlightColor(id, color, noteId)
+                }}
                 saveHighlightColorSettings={
                     this.props.saveHighlightColorSettings
                 }
@@ -321,6 +322,7 @@ export default class SearchResultsContainer extends React.Component<
                 highlightColorSettings={this.props.highlightColorSettings}
                 zIndex={zIndex}
                 key={noteId}
+                color={noteData.color}
                 unifiedId={noteId}
                 tags={noteData.tags}
                 lists={localListIds}

@@ -326,6 +326,7 @@ export async function main(
                 lastEdited: data.updatedWhen,
                 createdWhen: data.createdWhen,
                 normalizedPageUrl: normalizeUrl(data.fullPageUrl),
+                color: data.color,
             })
 
             const createPromise = (async () => {
@@ -360,6 +361,7 @@ export async function main(
                         fullPageUrl: data.fullPageUrl,
                         pageTitle: pageInfo.getPageTitle(),
                         createdWhen: new Date(data.createdWhen),
+                        color: data.color,
                     },
                 })
 
@@ -433,6 +435,7 @@ export async function main(
         highlightColor?,
     ): Promise<AutoPk> {
         let highlightId: AutoPk
+        console.log('color', highlightColor)
         try {
             highlightId = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,

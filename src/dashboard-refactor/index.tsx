@@ -645,12 +645,14 @@ export class DashboardContainer extends StatefulUIElement<
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.lists}
-                saveHighlightColor={(color, id) => {
-                    this.processEvent('saveNoteEdit', {
-                        noteId: id,
-                        shouldShare: false,
-                        color: color,
-                    })
+                saveHighlightColor={(id, color) => {
+                    {
+                        console.log('color', color, id)
+                        this.processEvent('saveHighlightColor', {
+                            noteId: id,
+                            color: color,
+                        })
+                    }
                 }}
                 saveHighlightColorSettings={(newState) => {
                     this.processEvent('saveHighlightColorSettings', {
@@ -1553,13 +1555,12 @@ export class DashboardContainer extends StatefulUIElement<
                                     activePage: false,
                                 })
                             }
-                            saveHighlightColor={(color, id) => {
+                            saveHighlightColor={(id, color, unifiedId) => {
                                 {
-                                    console.log('arrives')
-                                    this.processEvent('saveNoteEdit', {
+                                    this.processEvent('saveHighlightColor', {
                                         noteId: id,
-                                        shouldShare: false,
                                         color: color,
+                                        unifiedId: unifiedId,
                                     })
                                 }
                             }}

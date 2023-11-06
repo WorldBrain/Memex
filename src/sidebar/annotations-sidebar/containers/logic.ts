@@ -535,12 +535,54 @@ export class SidebarContainerLogic extends UILogic<
     }
     saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
         event,
+        previousState,
     }) => {
-        const newState = JSON.parse(event.color)
-        await this.syncSettings.highlightColors.set('highlightColors', newState)
+        console.log('aread', event.color)
+        const cardId = getAnnotCardInstanceId(event)
+        const {
+            annotations: {
+                byId: { [event.noteId]: annotationData },
+            },
+        } = previousState
+
+        console.log('anntoationdata', annotationData)
+        if (annotationData?.creator?.id !== this.options.getCurrentUser()?.id) {
+            return
+        }
+
+        const now = Date.now()
+
+        await updateAnnotation({
+            annotationsBG: this.options.annotationsBG,
+            contentSharingBG: this.options.contentSharingBG,
+            annotationData: {
+                comment: annotationData.comment,
+                localId: annotationData.localId,
+                color: event.color,
+            },
+        })
+
+        this.options.annotationsCache.updateAnnotation({
+            ...annotationData,
+            comment: annotationData.comment,
+            color: event.color,
+        })
 
         this.emitMutation({
-            highlightColors: { $set: JSON.stringify(newState) },
+            // annotationCardInstances: {
+            //     byId: {
+            //         [cardId]: {
+            //             color: { $set: event.color },
+            //         },
+            //     },
+            // },
+            annotations: {
+                byId: {
+                    [event.noteId]: {
+                        comment: { $set: annotationData.comment },
+                    },
+                },
+            },
         })
     }
     saveHighlightColorSettings: EventHandler<

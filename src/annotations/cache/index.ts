@@ -559,6 +559,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             lastEdited: opts?.updateLastEditedTimestamp
                 ? opts?.now ?? Date.now()
                 : previous.lastEdited,
+            color: updates.color ?? previous.color,
         }
 
         this.updateCachedListAnnotationRefsForAnnotationUpdate(previous, next)

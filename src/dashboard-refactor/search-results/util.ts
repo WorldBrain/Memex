@@ -166,6 +166,7 @@ const annotationToNoteData = (
         tags: annotation.tags ?? [],
         lists,
         selector: annotation.selector,
+        color: annotation.color,
         createdWhen: annotation.createdWhen,
         displayTime: new Date(
             annotation.lastEdited ?? annotation.createdWhen,

@@ -274,7 +274,11 @@ interface SidebarEvents {
         }
     }
     getHighlightColorSettings: null
-    saveHighlightColor: { color: string }
+    saveHighlightColor: {
+        instanceLocation: string
+        noteId: string
+        color: string
+    }
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
@@ -460,6 +464,7 @@ export interface AnnotationCardInstance {
     isCommentEditing: boolean
     cardMode: AnnotationCardMode
     comment: string
+    color: string
 }
 
 export interface ListInstance {

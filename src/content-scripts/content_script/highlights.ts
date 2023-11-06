@@ -33,6 +33,7 @@ const showHighlights = async (options: HighlightDependencies) => {
         options.annotationsCache.getAnnotationsArray().map((annot) => ({
             id: annot.unifiedId,
             selector: annot.selector,
+            color: annot.color,
         })),
         ({ annotationId, openInEdit }) =>
             options.inPageUI.showSidebar({

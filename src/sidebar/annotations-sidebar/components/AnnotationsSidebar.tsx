@@ -230,7 +230,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     bgScriptBG: RemoteBGScriptInterface
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
-    saveHighlightColor: (color, id) => void
+    saveHighlightColor: (id, color) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
@@ -750,8 +750,9 @@ export class AnnotationsSidebar extends React.Component<
                             pageUrl={this.props.normalizedPageUrl}
                             saveHighlightColor={(color) =>
                                 this.props.saveHighlightColor(
-                                    color,
                                     annotation.unifiedId,
+                                    color,
+                                    instanceId,
                                 )
                             }
                             saveHighlightColorSettings={
