@@ -1273,7 +1273,15 @@ class PageInfo {
     normalizeGmailFullURL = async (url) => {
         let fullUrl = url
 
-        if (url.includes('#search') || url.includes('#inbox')) {
+        if (
+            url.includes('#search') ||
+            url.includes('#inbox') ||
+            url.includes('#sent') ||
+            url.includes('#snoozed') ||
+            url.includes('#drafts') ||
+            url.includes('#imp') ||
+            url.includes('#scheduled')
+        ) {
             const parts = url.split('/')
             const mailId = parts[parts.length - 1]
             fullUrl = `https://mail.google.com/mail/#inbox/${mailId}`

@@ -29,6 +29,7 @@ import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { browser } from 'webextension-polyfill-ts'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { Checkbox } from 'src/common-ui/components'
+import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -258,11 +259,9 @@ export default class PageResultView extends PureComponent<Props> {
 
         return (
             <BulkSelectButtonBox>
-                <Checkbox
+                <CheckboxNotInput
                     isChecked={this.props.isBulkSelected}
-                    handleChange={(
-                        event: React.KeyboardEvent<HTMLInputElement>,
-                    ) => {
+                    onClick={(event: React.MouseEvent<HTMLInputElement>) => {
                         if (event.nativeEvent.shiftKey) {
                             this.props.shiftSelectItem()
                         } else {
@@ -277,6 +276,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 this.props.selectItem(itemData, false)
                             }
                             event.preventDefault()
+                            event.stopPropagation()
                         }
                     }}
                     size={18}
