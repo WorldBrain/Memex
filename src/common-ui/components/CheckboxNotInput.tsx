@@ -1,20 +1,15 @@
 import * as React from 'react'
-import cx from 'classnames'
 import styled, { ThemeProps, css } from 'styled-components'
-
-const styles = require('./Checkbox.css')
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { ColorThemeKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-export type CheckboxToggle = (
-    event: React.SyntheticEvent<HTMLInputElement>,
-) => void
+export type CheckboxToggle = (event: React.MouseEvent<HTMLInputElement>) => void
 
 export interface Props {
     id?: string
-    handleChange: CheckboxToggle
+    onClick: React.MouseEventHandler
     name?: string
     isChecked: boolean
     isDisabled?: boolean
@@ -34,36 +29,24 @@ export interface Props {
     width?: string
 }
 
-class Checkbox extends React.PureComponent<Props> {
-    private get labelClass() {
-        return cx(styles.label, this.props.labelClass, {
-            [styles.disabledLabel]: !!this.props.isDisabled,
-        })
-    }
-
-    private get iconClass() {
-        return cx(styles.icon, {
-            [styles.checkedIcon]: !!this.props.isChecked,
-            [styles.disabledIcon]: !!this.props.isDisabled,
-        })
-    }
-
+export default class CheckboxNotInput extends React.PureComponent<Props> {
     render() {
         return (
             <LabelContainer
                 width={this.props.width}
                 zIndex={this.props.zIndex}
                 htmlFor={this.props.id}
+                onClick={this.props.onClick}
             >
                 <LabelText>
-                    <InputContainer
+                    {/* <InputContainer
                         type="checkbox"
                         checked={this.props.isChecked}
                         onChange={this.props.handleChange}
                         id={this.props.id}
                         disabled={this.props.isDisabled}
                         name={this.props.name}
-                    />
+                    /> */}
                     {this.props.isLoading ? (
                         <LoadingIndicator size={16} />
                     ) : (
@@ -232,5 +215,3 @@ const LabelCheck = styled.span<{
             }
         `};
 `
-
-export default Checkbox

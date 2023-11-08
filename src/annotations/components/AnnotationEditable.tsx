@@ -1089,10 +1089,10 @@ const AnnotationStyled = styled.div`
     cursor: ${({ theme }) => theme.cursor}
         ${({ theme }) =>
             theme.isEditing &&
-            `
-        background-color: white;
-        cursor: default;
-    `};
+            css`
+                background-color: ${(props) => props.theme.colors.greyScale1};
+                cursor: default;
+            `};
 
     ${({ theme }) =>
         theme.isActive &&

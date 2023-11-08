@@ -16,6 +16,7 @@ import { GUIDED_ONBOARDING_URL } from '../../constants'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
+import { Checkbox } from 'src/common-ui/components'
 
 const styles = require('../../components/onboarding-box.css')
 
@@ -63,46 +64,129 @@ export default class OnboardingScreen extends StatefulUIElement<
     private renderSyncNotif() {
         return (
             <WelcomeContainer>
-                <LeftSide>
-                    <ContentBox>
-                        {' '}
-                        <LoadingIndicatorBoxSync>
-                            <LoadingIndicator size={40} />
-                        </LoadingIndicatorBoxSync>
-                        <DescriptionText>
-                            We're syncing your existing data. <br />
-                            It may take a while for everything to show up.
-                        </DescriptionText>
-                        <PrimaryAction
-                            type="secondary"
-                            size="medium"
-                            label="Go to Dashboard"
-                            onClick={() => {
-                                this.props.navToDashboard()
-                            }}
-                        />
-                    </ContentBox>
-                </LeftSide>
+                <ContentBox>
+                    {' '}
+                    <LoadingIndicatorBoxSync>
+                        <LoadingIndicator size={40} />
+                    </LoadingIndicatorBoxSync>
+                    <DescriptionText>
+                        We're syncing your existing data. <br />
+                        It may take a while for everything to show up.
+                    </DescriptionText>
+                    <PrimaryAction
+                        type="secondary"
+                        size="medium"
+                        label="Go to Dashboard"
+                        onClick={() => {
+                            this.props.navToDashboard()
+                        }}
+                    />
+                </ContentBox>
             </WelcomeContainer>
         )
     }
 
+    private renderWelcomeStep = () => (
+        <WelcomeBox>
+            <TitleBox>
+                <Title>
+                    Welcome to
+                    <br /> Memex
+                </Title>
+                <BetaButton>
+                    <BetaButtonInner>BETA</BetaButtonInner>
+                </BetaButton>
+            </TitleBox>
+            <DescriptionText>
+                When something breaks or you have feature requests, <br />
+                let us know via the live chat at every ? icon.{' '}
+            </DescriptionText>
+            <PrimaryAction
+                label={'Continue'}
+                icon={'longArrowRight'}
+                onClick={() =>
+                    this.processEvent('goToNextOnboardingStep', {
+                        step: 'login',
+                    })
+                }
+                type="primary"
+                size={'large'}
+            />
+        </WelcomeBox>
+    )
+    private renderNudges = () => (
+        <WelcomeBox>
+            <Title>Enable Nudges</Title>
+            <DescriptionText>
+                We know its sometimes hard to get into the habit of a new tool.
+                <br /> We've built in a few gentle nudges as you browse.
+            </DescriptionText>
+            <CheckBoxContainer>
+                <Checkbox
+                    label="Nudges enabled"
+                    isChecked={this.state.enableNudges}
+                    handleChange={async () => {
+                        this.processEvent('enableNudges', null)
+                    }}
+                    width={'fit-content'}
+                />
+            </CheckBoxContainer>
+            <PrimaryAction
+                label={'Continue'}
+                icon={'longArrowRight'}
+                onClick={() =>
+                    this.processEvent('goToNextOnboardingStep', {
+                        step: 'nudges',
+                    })
+                }
+                type="primary"
+                size={'large'}
+            />
+        </WelcomeBox>
+    )
+    private renderBasicIntro = () => (
+        <WelcomeBox>
+            <Title>
+                The one thing you need <br />
+                to get started
+            </Title>
+            <DescriptionText>
+                When on a website, hover to the bottom right corner. <br />
+                It's the jumping point for saving, organising & summarising.
+            </DescriptionText>
+            <MemexActionButtonIntro src={'img/memexActionButtonIntro.png'} />
+            <PrimaryAction
+                label={'Finish'}
+                icon={'longArrowRight'}
+                onClick={() =>
+                    this.processEvent('goToNextOnboardingStep', {
+                        step: 'finish',
+                    })
+                }
+                type="primary"
+                size={'large'}
+            />
+        </WelcomeBox>
+    )
+
     private renderLoginStep = () => (
         <WelcomeContainer>
-            <LeftSide>
-                {this.state.loadState === 'running' ? (
+            {this.state.loadState === 'running' ? (
+                <ContentBox>
                     <LoadingIndicatorBox>
                         <LoadingIndicator size={40} />
                         <DescriptionText>
                             Preparing a smooth ride
                         </DescriptionText>
                     </LoadingIndicatorBox>
-                ) : (
-                    <ContentBox>
+                </ContentBox>
+            ) : (
+                <ContentBox>
+                    <>
                         {this.state.authDialogMode === 'signup' && (
-                            <>
-                                <Title>Welcome to Memex</Title>
-                            </>
+                            <UserScreenContainer>
+                                <Title>Sign Up</Title>
+                            </UserScreenContainer>
                         )}
                         {this.state.authDialogMode === 'login' && (
                             <UserScreenContainer>
@@ -139,15 +223,14 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 })
                             }}
                         />
-                    </ContentBox>
-                )}
-                {this.state.loadState === 'error' && (
-                    <AuthErrorMessage>
-                        This account does not exist or the password is wrong.
-                    </AuthErrorMessage>
-                )}
-            </LeftSide>
-            {this.renderInfoSide()}
+                    </>
+                </ContentBox>
+            )}
+            {this.state.loadState === 'error' && (
+                <AuthErrorMessage>
+                    This account does not exist or the password is wrong.
+                </AuthErrorMessage>
+            )}
         </WelcomeContainer>
     )
 
@@ -162,7 +245,8 @@ export default class OnboardingScreen extends StatefulUIElement<
 
         return (
             <OnboardingOptionsContainer>
-                <Title> How would you like to get started?</Title>
+                <Title>If you want </Title>
+                <DescriptionText>Don't forget the spam folder!</DescriptionText>
                 {this.state.showOnboardingVideo ? (
                     <>
                         {' '}
@@ -236,36 +320,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                                 <OnboardingTitle>Watch a Video</OnboardingTitle>
                                 <Icon
                                     icon={OnboardingIcons[1]}
-                                    heightAndWidth="40px"
-                                    color="prime1"
-                                    hoverOff
-                                />
-                            </OnboardingOptionBox>
-                            <OnboardingOptionBox
-                                onClick={async () => {
-                                    window.open(
-                                        'https://tutorials.memex.garden/tutorials',
-                                        '_blank',
-                                    )
-                                    if (this.props.analyticsBG) {
-                                        try {
-                                            await trackOnboardingPath(
-                                                this.props.analyticsBG,
-                                                {
-                                                    type: 'docs',
-                                                },
-                                            )
-                                        } catch (error) {
-                                            console.error(
-                                                `Error tracking onboarding tutorial', ${error}`,
-                                            )
-                                        }
-                                    }
-                                }}
-                            >
-                                <OnboardingTitle>Read Docs</OnboardingTitle>
-                                <Icon
-                                    icon={OnboardingIcons[2]}
                                     heightAndWidth="40px"
                                     color="prime1"
                                     hoverOff
@@ -348,16 +402,91 @@ export default class OnboardingScreen extends StatefulUIElement<
     render() {
         return (
             <OnboardingBox>
-                {this.state.showSyncNotification && this.renderSyncNotif()}
-                {this.state.showOnboardingSelection &&
-                    this.renderOnboardingSelection()}
-                {!this.state.showOnboardingSelection &&
-                    !this.state.showSyncNotification &&
-                    this.renderLoginStep()}
+                <OnboardingContent>
+                    {this.state.welcomeStep === 'start' &&
+                        this.renderWelcomeStep()}
+                    {this.state.welcomeStep === 'nudges' && this.renderNudges()}
+                    {this.state.welcomeStep === 'basicIntro' &&
+                        this.renderBasicIntro()}
+                    {this.state.showSyncNotification &&
+                        this.state.welcomeStep === 'finish' &&
+                        this.renderSyncNotif()}
+                    {this.state.showOnboardingSelection &&
+                        this.renderBasicIntro()}
+                    {!this.state.showOnboardingSelection &&
+                        !this.state.showSyncNotification &&
+                        this.state.welcomeStep === 'login' &&
+                        this.renderLoginStep()}
+                </OnboardingContent>
+                {this.renderInfoSide()}
             </OnboardingBox>
         )
     }
 }
+
+const OnboardingContent = styled.div`
+    z-index: 1;
+    position: relative;
+`
+
+const MemexActionButtonIntro = styled.img`
+    height: 450px;
+    width: auto;
+    border-radius: 8px;
+    margin-top: -250px;
+    z-index: -1;
+    margin-bottom: 30px;
+`
+
+const CheckBoxContainer = styled.div`
+    margin-bottom: 40px;
+    margin-top: -10px;
+`
+
+const TitleBox = styled.div`
+    margin-bottom: 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+`
+
+const WelcomeBox = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+`
+
+const BetaButton = styled.div`
+    display: flex;
+    background: linear-gradient(
+        90deg,
+        #d9d9d9 0%,
+        #2e73f8 0.01%,
+        #0a4bca 78.86%,
+        #0041be 100%
+    );
+    border-radius: 50px;
+    height: 48px;
+    width: 88px;
+    align-items: center;
+    justify-content: center;
+`
+
+const BetaButtonInner = styled.div`
+    display: flex;
+    background: ${(props) => props.theme.colors.black};
+    color: #0a4bca;
+    font-size: 20px;
+    letter-spacing: 1px;
+    height: 40px;
+    width: 80px;
+    font-weight: 600;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50px;
+`
 
 const RecommendedPill = styled.div`
     background-color: ${(props) => props.theme.colors.prime2};
@@ -524,24 +653,25 @@ const LogoImg = styled.img`
 const ContentBox = styled.div`
     display: flex;
     flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
+    justify-content: center;
+    align-items: center;
     padding: 30px 50px;
     background: ${(props) => props.theme.colors.black}30;
     backdrop-filter: blur(5px);
     border-radius: 20px;
+    z-index: 2;
 `
 
 const Title = styled.div`
     background: ${(props) => props.theme.colors.headerGradient};
-    font-size: 30px;
+    font-size: 60px;
     font-weight: 800;
     margin-bottom: 20px;
     margin-top: 30px;
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
-    text-align: left;
+    text-align: center;
 `
 
 const DescriptionText = styled.div`
@@ -549,7 +679,7 @@ const DescriptionText = styled.div`
     font-size: 18px;
     font-weight: 300;
     margin-bottom: 40px;
-    text-align: left;
+    text-align: center;
 `
 
 const RightSide = styled.div`
@@ -563,7 +693,7 @@ const RightSide = styled.div`
     position: absolute;
     right: 0;
     top: 0%;
-    z-index: 1;
+    z-index: 0;
 
     @media (max-width: 1000px) {
         display: none;
@@ -599,11 +729,10 @@ const Header = styled.div`
     font-weight: bold;
 `
 const AuthenticationMethods = styled.div`
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  width: 100%;
-  }
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    width: 100%;
 `
 const EmailPasswordLogin = styled.div`
     display: grid;

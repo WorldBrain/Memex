@@ -25,6 +25,7 @@ const FlexLayout = styled.div`
     flex-direction: column;
     justify-content: center; /* We need the white box to sit in the middle of the screen */
     height: 100vh;
+    align-items: center;
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.black};
 `

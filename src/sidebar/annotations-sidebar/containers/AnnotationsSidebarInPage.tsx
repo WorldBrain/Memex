@@ -31,7 +31,6 @@ import { ANNOT_BOX_ID_PREFIX } from '../constants'
 import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
-import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends ContainerProps {
@@ -39,7 +38,6 @@ export interface Props extends ContainerProps {
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
     imageSupport?: ImageSupportInterface<'caller'>
-    pkmSyncBG: PkmSyncInterface
     bgScriptBG?: RemoteBGScriptInterface
 }
 
@@ -347,8 +345,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
 
             this.processEvent('createYoutubeTimestampWithAISummary', {
-                timeStampANDSummaryJSON: event.timeStampANDSummaryJSON,
+                videoRangeTimestamps: {
+                    startTimeSecs: event.videoRangeTimestamps[0],
+                    endTimeSecs: event.videoRangeTimestamps[1],
+                },
             })
+            return true
+        } else if (event.action === 'open_chapter_summary') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('getVideoChapters', null)
             return true
         } else if (
             event.action === 'create_youtube_timestamp_with_screenshot'

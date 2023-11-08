@@ -22,7 +22,7 @@ import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexi
 import { isExtensionTab } from 'src/tab-management/utils'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type ContentSharingBackground from 'src/content-sharing/background'
-import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
 
@@ -53,7 +53,7 @@ export default class CustomListBackground {
                 normalizedPageUrl: string,
                 listId: number,
             ) => Promise<void>
-            pkmSyncBG?: PkmSyncInterface
+            pkmSyncBG: PKMSyncBackgroundModule
         },
     ) {
         // Makes the custom list Table in indexed DB.

@@ -1,3 +1,1 @@
-export interface PkmSyncInterface {
-    pushPKMSyncUpdate(item, checkForFilteredSpaces): Promise<void>
-}
+export interface PkmSyncInterface {}

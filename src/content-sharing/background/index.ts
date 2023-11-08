@@ -492,8 +492,6 @@ export default class ContentSharingBackground {
             annotationSharingStatesPromise,
         } = await this.listSharingService.shareList(options)
 
-        console.log('after share list in performlistshare')
-
         // NOTE: Currently we don't wait for the annotationsSharingStatesPromise, letting list annotations
         //  get shared asyncronously. If we wanted some UI loading state, we'd need to set up another remote
         //  method to wait for it.
@@ -501,7 +499,6 @@ export default class ContentSharingBackground {
             options.localListId
         ] = annotationSharingStatesPromise
 
-        console.log('before track space')
         if (this.options.analyticsBG && options.dontTrack == null) {
             try {
                 await trackSpaceCreate(this.options.analyticsBG, {
@@ -511,7 +508,6 @@ export default class ContentSharingBackground {
                 console.error(`Error tracking space share event', ${error}`)
             }
         }
-        console.log('after track space')
     }
 
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
@@ -1066,8 +1062,6 @@ export default class ContentSharingBackground {
             dontTrack: true,
         })
 
-        console.log('after perform list shaaaaaaare')
-
         // NOTE: These calls to create followList and followedListEntry docs should trigger personal cloud sync upload
         await bgModules.pageActivityIndicator.createFollowedList(
             {
@@ -1078,7 +1072,6 @@ export default class ContentSharingBackground {
             },
             { invokeCloudSync: true },
         )
-        console.log('after createfollowedlist')
         await bgModules.pageActivityIndicator.createFollowedListEntry(
             {
                 creator,
@@ -1093,16 +1086,12 @@ export default class ContentSharingBackground {
             { invokeCloudSync: true },
         )
 
-        console.log('after createfollowedlistEntry')
-
         await this.options.backend.processListKey({
             type: SharedCollectionType.PageLink,
             allowOwnKeyProcessing: true,
             listId: remoteListId,
             keyString: collabKey.toString(),
         })
-
-        console.log('after processListKey')
 
         if (this.options.analyticsBG) {
             try {
@@ -1113,6 +1102,5 @@ export default class ContentSharingBackground {
                 console.error(`Error tracking space create event', ${error}`)
             }
         }
-        console.log('after analyticstrackpagelinkcreate')
     }
 }

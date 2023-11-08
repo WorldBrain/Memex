@@ -149,4 +149,16 @@ export class RibbonHolderLogic extends UILogic<
             })
         }
     }
+
+    // showNudges: EventHandler<
+    //     'showNudges'
+    // > = async ({}) => {
+
+    //     this.emitMutation({
+    //         showNudges: { $set: true },
+    //     })
+    //     await this.dependencies.inPageUI.showSidebar({
+    //         action: 'show_shared_spaces',
+    //     })
+    // }
 }

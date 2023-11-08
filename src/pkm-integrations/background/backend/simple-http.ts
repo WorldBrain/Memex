@@ -12,7 +12,11 @@ export class MemexLocalBackend {
     async isConnected() {
         try {
             const response = await fetch(`${this.url}/status`)
-            return response.status === 200
+            if (response.status === 200) {
+                return true
+            } else {
+                return false
+            }
         } catch (e) {
             return false
         }
@@ -83,7 +87,7 @@ export class MemexLocalBackend {
             })
         }
 
-        if (!response.ok) {
+        if (!response.ok || response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`)
         }
     }
@@ -125,9 +129,10 @@ export class MemexLocalBackend {
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`)
         }
-
-        const pageContent = await response.text() // or response.text() if the data is plain text
-        return pageContent
+        if (response.ok && response.status === 200) {
+            const pageContent = await response.text() // or response.text() if the data is plain text
+            return pageContent
+        }
     }
 
     async retrieveIndexFile(object: string) {

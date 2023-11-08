@@ -6,7 +6,7 @@ import { StoredContentType } from 'src/page-indexing/background/types'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
 import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
@@ -27,7 +27,7 @@ export const handleIncomingData = (deps: {
     pageActivityIndicatorBG: PageActivityIndicatorBackground
     persistentStorageManager: StorageManager
     storageManager: StorageManager
-    pkmSyncBG: PkmSyncInterface
+    pkmSyncBG: PKMSyncBackgroundModule
     imageSupport: ImageSupportInterface
 }) => async ({
     storageType,
@@ -112,7 +112,7 @@ export const handleIncomingData = (deps: {
 }
 
 async function handleSyncedDataForPKMSync(
-    pkmSyncBG: PkmSyncInterface,
+    pkmSyncBG: PKMSyncBackgroundModule,
     collection,
     updates,
     where,

@@ -3,7 +3,7 @@ import styled from 'styled-components'
 
 import {
     AuthError,
-    AuthProvider,
+    AuthProviderType,
 } from '@worldbrain/memex-common/lib/authentication/types'
 import SimpleTextInput from '@worldbrain/memex-common/lib/common-ui/components/simple-text-input'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -616,8 +616,8 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
 
 function SocialLogin(props: {
     icon: string
-    provider: AuthProvider
-    onClick(event: { provider: AuthProvider }): void
+    provider: AuthProviderType
+    onClick(event: { provider: AuthProviderType }): void
     mode: AuthDialogMode
 }) {
     let modeName: string
@@ -726,7 +726,7 @@ const DisplayNameContainer = styled.div`
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
-    text-align: left;
+    text-align: center;
 `
 
 const FeatureInfoBox = styled.div`

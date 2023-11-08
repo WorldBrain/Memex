@@ -17,8 +17,8 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             textToProcess?: string
             queryPrompt?: string
             apiKey?: string
-            shortSummary?: boolean
-            outputLocation?: 'editor' | 'summaryContainer'
+            outputLocation?: 'editor' | 'summaryContainer' | 'chapterSummary'
+            chapterSummaryIndex?: number
         }
     >
     getTextSummary: RemoteFunction<
@@ -69,8 +69,8 @@ export default class SummarizeBackground {
             textToProcess,
             queryPrompt,
             apiKey,
-            shortSummary,
             outputLocation,
+            chapterSummaryIndex,
         },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
@@ -98,6 +98,15 @@ export default class SummarizeBackground {
                         tab.id,
                         {
                             token: token,
+                        },
+                    )
+                } else if (outputLocation === 'chapterSummary') {
+                    this.options.remoteEventEmitter.emitToTab(
+                        'newChapterSummaryToken',
+                        tab.id,
+                        {
+                            token: token,
+                            chapterSummaryIndex: chapterSummaryIndex,
                         },
                     )
                 } else {

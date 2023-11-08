@@ -139,7 +139,7 @@ const GroupTitle = styled.div`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    font-size: 14px;
+    font-size: 12px;
     font-weight: 400;
     padding: 5px 10px 5px 0px;
     justify-content: space-between;

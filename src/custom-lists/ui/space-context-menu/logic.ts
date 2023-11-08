@@ -18,6 +18,8 @@ export interface Dependencies {
     isCreator: boolean
     errorMessage?: string
     copyToClipboard: (text: string) => Promise<boolean>
+    onSpaceNameChange?: (newName: string) => void
+    onConfirmSpaceNameEdit?: (name: string) => void
     onSetSpacePrivate: (isPrivate: boolean) => Promise<void>
 }
 
@@ -31,6 +33,11 @@ export interface State {
     inviteLinksLoadState: TaskState
 
     loadState: TaskState
+    showSuccessMsg: boolean
+    showSaveButton: boolean
+    nameValue: string
+    mode: 'confirm-space-delete' | 'followed-space' | null
+    isLocalPDF: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -50,9 +57,20 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         loadState: 'pristine',
         inviteLinksLoadState: 'pristine',
         inviteLinks: [],
+        nameValue: this.dependencies.listData.name,
+        showSuccessMsg: false,
+        mode: null,
+        showSaveButton: false,
+        isLocalPDF: false,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
+        if (window.location.href.includes('/pdfjs/viewer.html?file=blob')) {
+            this.emitMutation({
+                isLocalPDF: { $set: true },
+            })
+        }
+
         await loadInitial(this, async () => {
             await this.loadInviteLinks()
         })

@@ -46,6 +46,7 @@ export interface State {
     nameValue: string
     showSaveButton: boolean
     pageListDataForCurrentPage: UnifiedList | null
+    isLocalPDF: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -72,51 +73,35 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         mode: null,
         showSaveButton: false,
         pageListDataForCurrentPage: null,
+        isLocalPDF: false,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         let state = previousState
 
+        if (window.location.href.includes('/pdfjs/viewer.html?file=blob')) {
+            this.emitMutation({
+                isLocalPDF: { $set: true },
+            })
+        }
+
         await loadInitial(this, async () => {
-            // this.emitMutation({ inviteLinksLoadState: { $set: 'running' } })
-
-            const listsOfPage = await this.dependencies.spacesBG.fetchListPagesByUrl(
-                {
-                    url: window.location.href,
-                },
-            )
-
-            const listsOfPageIds = listsOfPage.map((list) => list.id)
-
-            let listsOfPageData = null
-            for (const list of listsOfPageIds) {
-                let listData = this.dependencies.annotationsCache.getListByLocalId(
-                    list,
-                )
-
-                if (
-                    listData.type === 'page-link' &&
-                    (listData?.localId > listsOfPageData?.localId ||
-                        listsOfPageData == null)
-                ) {
-                    listsOfPageData = listData
-                }
-            }
-
-            if (listsOfPageData) {
+            if (this.dependencies.listData) {
                 this.emitMutation({
-                    pageListDataForCurrentPage: { $set: listsOfPageData },
+                    pageListDataForCurrentPage: {
+                        $set: this.dependencies.listData,
+                    },
                 })
 
-                await this.loadInviteLinks(listsOfPageData)
+                await this.loadInviteLinks(
+                    this.dependencies.listData as UnifiedListForCache<
+                        'page-link'
+                    >,
+                )
 
                 if (this.dependencies.loadOwnershipData) {
                     state = await this.loadSpaceOwnership(previousState)
                 }
-
-                // if (state.mode !== 'followed-space') {
-                //     await this.loadInviteLinks(listsOfPageData[0])
-                // }
             }
         })
     }
