@@ -63,7 +63,7 @@ import {
     setBulkEdit,
 } from 'src/bulk-edit/utils'
 import type { DragToListAction } from './lists-sidebar/types'
-import { forEachTreeClimb } from 'src/custom-lists/tree-utils'
+import { forEachTreeClimb } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,

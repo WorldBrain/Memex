@@ -36,7 +36,10 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import { forEachTreeTraverseAsync, forEachTreeClimbAsync } from '../tree-utils'
+import {
+    forEachTreeTraverseAsync,
+    forEachTreeClimbAsync,
+} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 export default class CustomListStorage extends StorageModule {

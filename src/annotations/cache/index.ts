@@ -21,7 +21,7 @@ import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-
 import {
     forEachTreeTraverse,
     mapTreeTraverse,
-} from 'src/custom-lists/tree-utils'
+} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
