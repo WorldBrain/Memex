@@ -2546,7 +2546,9 @@ export class AnnotationsSidebar extends React.Component<
                             this.editPageLinkButtonRef,
                         )}
                         <TooltipBox
-                            tooltipText={'Edit Space'}
+                            tooltipText={
+                                isPageLink ? 'Edit Page Link' : 'Edit Space'
+                            }
                             placement="bottom"
                         >
                             <Icon
@@ -2561,7 +2563,9 @@ export class AnnotationsSidebar extends React.Component<
                             />
                         </TooltipBox>
                         <TooltipBox
-                            tooltipText={'Copy Invite Links'}
+                            tooltipText={
+                                isPageLink ? 'Share Page' : 'Share Space'
+                            }
                             placement="bottom"
                         >
                             <Icon
@@ -2576,7 +2580,9 @@ export class AnnotationsSidebar extends React.Component<
                             />
                         </TooltipBox>
                         <TooltipBox
-                            tooltipText={'Open Page Link'}
+                            tooltipText={
+                                isPageLink ? 'Open Page Link' : 'Go to Space'
+                            }
                             placement="bottom"
                         >
                             <Icon

@@ -32,6 +32,11 @@ const waitForDocument = async () => {
 
             document.title = title
 
+            globalThis['__setDarkMode'] = (isDark: boolean) =>
+                (pdfViewer.viewer.style.filter = `invert(${
+                    isDark ? 1 : 0
+                }) contrast(75%)`)
+
             return pdfDocument
         }
         await new Promise((resolve) => setTimeout(resolve, 200))
