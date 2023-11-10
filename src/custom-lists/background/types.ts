@@ -91,6 +91,7 @@ export interface RemoteCollectionsInterface {
         description: string
     }): Promise<void>
     removePageFromList(args: { id: number; url: string }): Promise<void>
+    removeAllListPages(args: { listId: number }): Promise<void>
     fetchSharedListDataWithOwnership(args: {
         remoteListId: string
     }): Promise<PageList | null>

@@ -73,6 +73,7 @@ export default class CustomListBackground {
             },
             updateListName: this.updateList,
             removePageFromList: this.removePageFromList,
+            removeAllListPages: this.removeAllListPages,
             fetchAllLists: this.fetchAllLists,
             fetchListById: this.fetchListById,
             fetchAnnotationRefsForRemoteListsOnPage: this
@@ -426,6 +427,11 @@ export default class CustomListBackground {
         return this.storage.removePageFromList({
             listId: id,
             pageUrl: normalizeUrl(url),
+        })
+    }
+    removeAllListPages = async (listId) => {
+        return this.storage.removeAllListPages({
+            listId: listId,
         })
     }
 
