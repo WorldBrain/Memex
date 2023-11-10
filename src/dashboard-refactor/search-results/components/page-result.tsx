@@ -264,6 +264,8 @@ export default class PageResultView extends PureComponent<Props> {
                     onClick={(event: React.MouseEvent<HTMLInputElement>) => {
                         if (event.nativeEvent.shiftKey) {
                             this.props.shiftSelectItem()
+                            event.preventDefault()
+                            event.stopPropagation()
                         } else {
                             const itemData = {
                                 url: this.props.normalizedUrl,

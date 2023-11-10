@@ -636,6 +636,9 @@ export default class CustomListStorage extends StorageModule {
 
         return this.operation('deleteListEntriesById', { listId, pageUrl })
     }
+    async removeAllListPages({ listId }: { listId: number }) {
+        return this.operation('deleteListEntriesByListId', { listId })
+    }
 
     async deleteListDescriptions({
         listId,
