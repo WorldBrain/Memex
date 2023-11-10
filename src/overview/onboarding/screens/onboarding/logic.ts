@@ -200,6 +200,9 @@ export default class Logic extends UILogic<State, Event> {
                     const creationTime = await (
                         await this.dependencies.authBG.getCurrentUser()
                     ).creationTime
+                    this.emitMutation({
+                        welcomeStep: { $set: 'finish' },
+                    })
 
                     const now = Math.floor(Date.now() / 1000)
 

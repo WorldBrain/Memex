@@ -472,7 +472,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 (from && from.length) ||
                 (to && to.length)
             ) {
-                const selectedListId = selectedSpace
+                let selectedListId
+                selectedListId = selectedSpace
                     ? this.options.annotationsCache.getListByLocalId(
                           selectedSpace,
                       )?.unifiedId ?? null
@@ -1606,13 +1607,15 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     clearInbox: EventHandler<'clearInbox'> = async () => {
-        const listContent = await this.options.listsBG.fetchListById({
-            id: SPECIAL_LIST_IDS.INBOX,
+        this.emitMutation({
+            loadState: { $set: 'running' },
+            listsSidebar: {
+                inboxUnreadCount: { $set: 0 },
+            },
         })
-        const pages = listContent.pages
-        const filterOutPages = (pages: string[]) =>
-            pages.filter((page) => page === '')
-
+        await this.options.listsBG.removeAllListPages({
+            listId: SPECIAL_LIST_IDS.INBOX,
+        })
         this.emitMutation({
             searchResults: {
                 results: {
@@ -1631,17 +1634,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        for (let page of pages) {
-            await this.options.listsBG.removePageFromList({
-                id: SPECIAL_LIST_IDS.INBOX,
-                url: page,
-            })
-        }
-
         this.emitMutation({
             searchResults: {
                 clearInboxLoadState: { $set: 'pristine' },
             },
+            loadState: { $set: 'pristine' },
         })
     }
 
@@ -3547,14 +3544,18 @@ export class DashboardLogic extends UILogic<State, Events> {
                 : event.listId
 
         if (listIdToSet != null) {
-            const listData = getListData(listIdToSet, previousState, {
-                mustBeLocal: true,
-                source: 'setSelectedListId',
-            })
-            this.updateQueryStringParameter(
-                'selectedSpace',
-                listData.localId!.toString(),
-            )
+            if (listIdToSet === '20201014' || listIdToSet === '20201015') {
+                this.updateQueryStringParameter('selectedSpace', listIdToSet)
+            } else {
+                const listData = getListData(listIdToSet, previousState, {
+                    mustBeLocal: true,
+                    source: 'setSelectedListId',
+                })
+                this.updateQueryStringParameter(
+                    'selectedSpace',
+                    listData.localId!.toString(),
+                )
+            }
         } else {
             this.updateQueryStringParameter('selectedSpace', null)
         }

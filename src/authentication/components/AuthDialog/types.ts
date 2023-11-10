@@ -1,7 +1,7 @@
 import type { UIEvent } from 'ui-logic-core'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { AuthProvider } from '@worldbrain/memex-common/lib/authentication/types'
+import { AuthProviderType } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface
@@ -36,7 +36,7 @@ export type Event = UIEvent<{
     editPassword: { value: string }
     editPasswordConfirm: { value: string }
     emailPasswordConfirm: null
-    socialLogin: { provider: AuthProvider }
+    socialLogin: { provider: AuthProviderType }
     toggleMode: { mode: AuthDialogMode }
     editDisplayName: { value: string }
     passwordReset: null
