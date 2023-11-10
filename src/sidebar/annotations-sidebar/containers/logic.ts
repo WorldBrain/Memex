@@ -933,6 +933,9 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     ) {
                         document.body.style.position = 'relative'
+                    } else {
+                        document.body.style.position = 'sticky'
+                        this.adjustYoutubePlayerSize()
                     }
                     this.resizeObserver.observe(this.sidebar)
                     window.addEventListener('resize', this.debounceReadingWidth)
@@ -941,6 +944,13 @@ export class SidebarContainerLogic extends UILogic<
                     document.body.style.position = 'initial'
                     if (document.body.offsetWidth === 0) {
                         document.body.style.width = '100%'
+                    }
+                    if (
+                        window.location.href.startsWith(
+                            'https://www.youtube.com',
+                        )
+                    ) {
+                        this.adjustYoutubePlayerSize()
                     }
                     this.resizeObserver.disconnect()
                     window.removeEventListener(
@@ -964,6 +974,26 @@ export class SidebarContainerLogic extends UILogic<
                 currentWindowWidth - currentsidebarWidth - 40 + 'px'
 
             document.body.style.width = readingWidth
+
+            if (window.location.href.startsWith('https://www.youtube.com')) {
+                document.body.style.position = 'sticky'
+                this.adjustYoutubePlayerSize()
+            }
+        }
+    }
+
+    private adjustYoutubePlayerSize() {
+        const moviePlayer = document.getElementById('movie_player')
+        const moviePlayerWidth = moviePlayer.clientWidth
+        const moviePlayerHeight = moviePlayer.clientHeight
+
+        const videoStream = moviePlayer.getElementsByClassName(
+            'video-stream html5-main-video',
+        )
+        if (videoStream[0]) {
+            const videoStreamElement = videoStream[0] as HTMLElement
+            videoStreamElement.style.width = moviePlayerWidth + 'px'
+            videoStreamElement.style.height = moviePlayerHeight + 'px'
         }
     }
 
@@ -1150,6 +1180,11 @@ export class SidebarContainerLogic extends UILogic<
 
         if (document.body.offsetWidth === 0) {
             document.body.style.width = '100%'
+        }
+
+        if (window.location.href.startsWith('https://www.youtube.com')) {
+            document.body.style.position = 'initial'
+            this.adjustYoutubePlayerSize()
         }
     }
 
