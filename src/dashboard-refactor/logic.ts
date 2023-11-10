@@ -2298,6 +2298,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
         )
 
+        let syncSettings: SyncSettingsStore<'extension'>
+
+        syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.options.syncSettingsBG,
+        })
+
+        const shouldShareSettings = await syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -2308,6 +2318,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
+                let shouldShare
+
+                if (shouldShareSettings) {
+                    shouldShare = 200
+                }
+
                 const { savePromise } = await createAnnotation({
                     annotationData: {
                         comment: formState.inputValue,
@@ -2315,7 +2331,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         localListIds: listsToAdd.map((list) => list.localId),
                     },
                     shareOpts: {
-                        shouldShare: event.shouldShare,
+                        shouldShare: shouldShare || event.shouldShare,
                         isBulkShareProtected: event.isProtected,
                         shouldCopyShareLink: event.shouldShare,
                     },

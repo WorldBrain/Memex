@@ -700,6 +700,7 @@ const EntryRowContainer = styled.div`
     align-items: center;
     margin: 0 5px;
     border-radius: 6px;
+    position: relative;
 `
 
 const TabsBar = styled.div`

@@ -288,6 +288,12 @@ export async function main(
                 now: () => data.createdWhen,
             })
 
+            const syncSettings = createSyncSettingsStore({ syncSettingsBG })
+
+            const shouldShareSettings = await syncSettings.extension.get(
+                'shouldAutoAddSpaces',
+            )
+
             const localListIds: number[] = []
             const remoteListIds: string[] = []
             const unifiedListIds: UnifiedList['unifiedId'][] = []
@@ -314,6 +320,9 @@ export async function main(
                     : AnnotationPrivacyLevels.PRIVATE
             }
 
+            if (shouldShareSettings) {
+                privacyLevel = 200
+            }
             const { unifiedId } = annotationsCache.addAnnotation({
                 localId,
                 privacyLevel,

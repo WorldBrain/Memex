@@ -275,7 +275,6 @@ interface SidebarEvents {
     }
     getHighlightColorSettings: null
     saveHighlightColor: {
-        instanceLocation: string
         noteId: string
         color: string
     }

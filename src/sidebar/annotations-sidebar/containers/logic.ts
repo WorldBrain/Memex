@@ -537,28 +537,29 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        console.log('aread', event.color)
-        const cardId = getAnnotCardInstanceId(event)
+        console.log('event, color', event.color, event.noteId)
         const {
             annotations: {
                 byId: { [event.noteId]: annotationData },
             },
         } = previousState
 
-        console.log('anntoationdata', annotationData)
         if (annotationData?.creator?.id !== this.options.getCurrentUser()?.id) {
             return
         }
 
-        const now = Date.now()
-
         await updateAnnotation({
             annotationsBG: this.options.annotationsBG,
             contentSharingBG: this.options.contentSharingBG,
+            keepListsIfUnsharing: true,
             annotationData: {
                 comment: annotationData.comment,
                 localId: annotationData.localId,
                 color: event.color,
+            },
+            shareOpts: {
+                shouldShare: annotationData.privacyLevel === 200 ? true : false,
+                skipPrivacyLevelUpdate: true,
             },
         })
 
@@ -566,24 +567,33 @@ export class SidebarContainerLogic extends UILogic<
             ...annotationData,
             comment: annotationData.comment,
             color: event.color,
+            unifiedListIds: annotationData.unifiedListIds,
         })
 
         this.emitMutation({
-            // annotationCardInstances: {
-            //     byId: {
-            //         [cardId]: {
-            //             color: { $set: event.color },
-            //         },
-            //     },
-            // },
             annotations: {
                 byId: {
                     [event.noteId]: {
                         comment: { $set: annotationData.comment },
+                        unifiedListIds: { $set: annotationData.unifiedListIds },
                     },
                 },
             },
         })
+        let highlights: HTMLCollection = document.getElementsByTagName(
+            'hypothesis-highlight',
+        )
+
+        let memexHighlights: Element[] = Array.from(
+            highlights,
+        ).filter((highlight) =>
+            highlight.classList.contains(`memex-highlight-${event.noteId}`),
+        )
+
+        for (let item of memexHighlights) {
+            item.setAttribute('style', `background-color:${event.color};`)
+            item.setAttribute('highlightcolor', `${event.color}`)
+        }
     }
     saveHighlightColorSettings: EventHandler<
         'saveHighlightColorSettings'
@@ -1792,6 +1802,18 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        let syncSettings: SyncSettingsStore<'extension'>
+
+        syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.options.syncSettingsBG,
+        })
+
+        const shouldShareSettings = await syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+
+        console.log('hsasödfasdf', shouldShareSettings)
+
         const now = event.now ?? Date.now()
         const annotationId =
             event.annotationId ??
@@ -1888,11 +1910,18 @@ export class SidebarContainerLogic extends UILogic<
                     previousState.hasListDataBeenManuallyPulled,
                 privacyLevelOverride: privacyLevel,
                 shareOpts: {
-                    shouldShare: remoteListIds.length > 0 || event.shouldShare,
+                    shouldShare:
+                        shouldShareSettings ||
+                        remoteListIds.length > 0 ||
+                        event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
             })
+
+            if (shouldShareSettings) {
+                privacyLevel = 200
+            }
 
             this.options.annotationsCache.addAnnotation({
                 localId: annotationId,

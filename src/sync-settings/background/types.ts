@@ -67,6 +67,7 @@ export interface SyncSettingsByFeature {
             sharePageShortcut: string
         }
         shouldAutoCreateNoteLink: boolean
+        shouldAutoAddSpaces: boolean
     }
     readwise: {
         apiKey: string

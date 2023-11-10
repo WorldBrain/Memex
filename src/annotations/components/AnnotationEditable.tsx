@@ -34,8 +34,6 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { Anchor } from 'src/highlighting/types'
 import HighlightColorPicker from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker'
-import { ContentSharingBackend } from '@worldbrain/memex-common/lib/content-sharing/backend'
-import { SyncSettingsBackground } from 'src/sync-settings/background'
 import tinycolor from 'tinycolor2'
 
 export interface HighlightProps extends AnnotationProps {
@@ -113,10 +111,10 @@ export interface AnnotationProps {
     shareMenuAnnotationInstanceId: string
     imageSupport: ImageSupportInterface<'caller'>
     selector?: Anchor
-    saveHighlightColor: (id, color) => void
-    saveHighlightColorSettings: (newState) => void
-    getHighlightColorSettings: () => void
-    highlightColorSettings: string
+    saveHighlightColor?: (id, color) => void
+    saveHighlightColorSettings?: (newState) => void
+    getHighlightColorSettings?: () => void
+    highlightColorSettings?: string
 }
 
 export interface AnnotationEditableEventProps {
@@ -142,6 +140,7 @@ interface State {
     truncatedTextComment: string
     needsTruncation?: boolean
     showHighlightColorPicker?: boolean
+    showHighlightColorTooltip?: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -194,6 +193,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         truncatedTextComment: '',
         needsTruncation: false,
         showHighlightColorPicker: false,
+        showHighlightColorTooltip: false,
     }
 
     focusEditForm() {
@@ -418,15 +418,27 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         const isScreenshotAnnotation = this.props.selector?.dimensions != null
 
+        console.log('this.pro', this.props.color)
         return (
             <HighlightStyled
                 onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
             >
                 {this.renderHighlightsColorPicker(this.props.unifiedId)}
+                {this.renderHighlightsColorTooltip()}
                 <ActionBox>{actionsBox}</ActionBox>
                 {!isScreenshotAnnotation && (
                     <Highlightbar
+                        onMouseEnter={() =>
+                            this.setState({
+                                showHighlightColorTooltip: true,
+                            })
+                        }
+                        onMouseLeave={() =>
+                            this.setState({
+                                showHighlightColorTooltip: false,
+                            })
+                        }
                         ref={this.highlightsBarRef}
                         onClick={() =>
                             this.setState({
@@ -450,6 +462,28 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 
+    private renderHighlightsColorTooltip() {
+        if (
+            this.state.showHighlightColorTooltip &&
+            !this.state.showHighlightColorPicker
+        ) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.highlightsBarRef.current}
+                    offsetX={5}
+                    placement={'right-start'}
+                    closeComponent={() =>
+                        this.setState({
+                            showHighlightColorTooltip: false,
+                        })
+                    }
+                    instaClose
+                >
+                    test
+                </PopoutBox>
+            )
+        }
+    }
     private renderHighlightsColorPicker(unifiedId) {
         if (this.state.showHighlightColorPicker) {
             return (
@@ -460,6 +494,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             showHighlightColorPicker: false,
                         })
                     }
+                    offsetX={5}
+                    placement={'right-start'}
                 >
                     <HighlightColorPicker
                         saveHighlightColorSettings={
@@ -629,17 +665,17 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.props.unifiedId,
                     buttonRef: this.copyPasterButtonRef,
                 },
-                {
-                    key: 'add-spaces-btn',
-                    image: 'plus',
-                    imageColor: 'prime1',
-                    tooltipText: 'Add Note to Spaces',
-                    onClick: () => this.updateSpacePickerState('footer'),
-                    buttonRef: this.spacePickerFooterButtonRef,
-                    active:
-                        this.props.spacePickerAnnotationInstance ===
-                        this.props.unifiedId,
-                },
+                // {
+                //     key: 'add-spaces-btn',
+                //     image: 'plus',
+                //     imageColor: 'prime1',
+                //     tooltipText: 'Add Note to Spaces',
+                //     onClick: () => this.updateSpacePickerState('footer'),
+                //     buttonRef: this.spacePickerFooterButtonRef,
+                //     active:
+                //         this.props.spacePickerAnnotationInstance ===
+                //         this.props.unifiedId,
+                // },
                 // {
                 //     key: 'share-note-btn',
                 //     image: shareIconData.icon,
@@ -651,14 +687,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
 
         return [
-            {
-                key: 'add-spaces-btn',
-                image: 'plus',
-                imageColor: 'prime1',
-                // onClick: () => this.updateSpacePickerState('footer'),
-                // buttonRef: this.props.spacePickerButtonRef,
-                // active: this.state.showSpacePicker === 'footer',
-            },
+            // {
+            //     key: 'add-spaces-btn',
+            //     image: 'plus',
+            //     imageColor: 'prime1',
+            //     // onClick: () => this.updateSpacePickerState('footer'),
+            //     // buttonRef: this.props.spacePickerButtonRef,
+            //     // active: this.state.showSpacePicker === 'footer',
+            // },
             appendRepliesToggle && repliesToggle,
         ]
     }
@@ -689,16 +725,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         <TooltipBox
                             tooltipText={
                                 shareIconData.label === 'Private' ? (
-                                    <span>
-                                        Private to you <br /> unless shared in
-                                        Spaces
-                                    </span>
+                                    <span>Only manually added to Spaces</span>
                                 ) : shareIconData.label === 'Shared' ? (
                                     <span>Shared in some Spaces</span>
                                 ) : (
                                     <span>
-                                        Automatically added to all <i>shared</i>{' '}
-                                        Spaces <br /> you put the page into
+                                        Auto-added to all Spaces <br /> the
+                                        document is in
                                     </span>
                                 )
                             }
@@ -711,8 +744,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                         showShareMenu: true,
                                     })
                                 }}
-                                label={shareIconData.label}
-                                icon={shareIconData.icon}
+                                label={'Spaces'}
+                                icon={
+                                    this.props.lists.length > 0 ? (
+                                        <ListCounter>
+                                            {this.props.lists.length}
+                                        </ListCounter>
+                                    ) : (
+                                        'plus'
+                                    )
+                                }
+                                iconColor={
+                                    this.props.lists.length > 0
+                                        ? 'white'
+                                        : 'prime1'
+                                }
                                 size={'small'}
                                 type={'tertiary'}
                                 padding="0px 4px 0px 2px"
@@ -775,10 +821,22 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 showShareMenu: true,
                             })
                         }}
-                        label={shareIconData.label}
-                        icon={shareIconData.icon}
+                        label={'Spaces'}
+                        icon={
+                            this.props.lists.length > 0 ? (
+                                <ListCounter>
+                                    {this.props.lists.length}
+                                </ListCounter>
+                            ) : (
+                                'plus'
+                            )
+                        }
+                        iconColor={
+                            this.props.lists.length > 0 ? 'white' : 'prime1'
+                        }
                         size={'small'}
                         type={'tertiary'}
+                        padding="0px 4px 0px 2px"
                         innerRef={this.shareMenuButtonRef}
                         active={this.state.showShareMenu}
                     />
@@ -947,9 +1005,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     lists={this.displayLists}
                                     onMouseEnter={this.props.onListsHover}
                                     onListClick={this.props.onListClick}
-                                    onEditBtnClick={() =>
-                                        this.updateSpacePickerState('lists-bar')
-                                    }
+                                    onEditBtnClick={() => null}
                                     spacePickerButtonRef={
                                         this.spacePickerBodyButtonRef
                                     }
@@ -990,7 +1046,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
 const ShareMenuContainer = styled.div`
     display: flex;
-    margin-left: 5px;
 `
 
 const HighlightContent = styled.div`
@@ -998,8 +1053,12 @@ const HighlightContent = styled.div`
     width: fill-available;
 `
 
+const TooltipBoxContainer = styled(TooltipBox)`
+    width: 5px;
+`
+
 const Highlightbar = styled.div<{ barColor: string }>`
-    background-color: ${(props) => props.theme.colors.prime1};
+    background: ${(props) => props.theme.colors.prime2};
     margin-right: 10px;
     border-radius: 2px;
     width: 5px;
@@ -1007,14 +1066,24 @@ const Highlightbar = styled.div<{ barColor: string }>`
 
     &:hover {
         background: ${(props) =>
-            tinycolor(props.barColor).lighten(25).toHexString()};
+            tinycolor(props.theme.colors.prime2).lighten(25).toHexString()};
     }
 
     ${(props) =>
         props.barColor &&
         css<any>`
             background: ${(props) => props.barColor};
+
+            &:hover {
+                background: ${(props) =>
+                    tinycolor(props.barColor).lighten(25).toHexString()};
+            }
         `}
+`
+
+const ListCounter = styled.div`
+    width: fit-content;
+    padding: 5px;
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
@@ -1144,7 +1213,7 @@ const DefaultFooterStyled = styled.div`
     align-items: center;
     justify-content: space-between;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
-    padding-left: 4px;
+    padding: 0px 0px 0px 15px;
 `
 
 const AnnotationStyled = styled.div`

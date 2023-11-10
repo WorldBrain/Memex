@@ -359,6 +359,7 @@ export class AnnotationsSidebar extends React.Component<
             console.error('Could not load theme, falling back to dark mode')
         }
         this.setState({ themeVariant })
+        await this.props.getHighlightColorSettings()
     }
 
     async componentDidUpdate(
@@ -748,22 +749,6 @@ export class AnnotationsSidebar extends React.Component<
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
-                            saveHighlightColor={(color) =>
-                                this.props.saveHighlightColor(
-                                    annotation.unifiedId,
-                                    color,
-                                    instanceId,
-                                )
-                            }
-                            saveHighlightColorSettings={
-                                this.props.saveHighlightColorSettings
-                            }
-                            getHighlightColorSettings={
-                                this.props.getHighlightColorSettings
-                            }
-                            highlightColorSettings={
-                                this.props.highlightColorSettings
-                            }
                             isShared
                             isBulkShareProtected
                             onSpacePickerToggle={() => {
@@ -2223,6 +2208,21 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
+                            // saveHighlightColor={(color) =>
+                            //     this.props.saveHighlightColor(
+                            //         annot.unifiedId,
+                            //         color,
+                            //     )
+                            // }
+                            // saveHighlightColorSettings={
+                            //     this.props.saveHighlightColorSettings
+                            // }
+                            // getHighlightColorSettings={
+                            //     this.props.getHighlightColorSettings
+                            // }
+                            // highlightColorSettings={
+                            //     this.props.highlightColorSettings
+                            // }
                             contextLocation={this.props.sidebarContext}
                             pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}
@@ -2881,7 +2881,7 @@ export class AnnotationsSidebar extends React.Component<
                             active={this.state.showAllNotesCopyPaster}
                         />
                     </TooltipBox>
-                    <TooltipBox
+                    {/* <TooltipBox
                         tooltipText={'Bulk Share Notes'}
                         placement={'bottom'}
                     >
@@ -2901,7 +2901,7 @@ export class AnnotationsSidebar extends React.Component<
                             }}
                             active={this.state.showAllNotesShareMenu}
                         />
-                    </TooltipBox>
+                    </TooltipBox> */}
                 </TopBarActionBtns>
             </>
         )

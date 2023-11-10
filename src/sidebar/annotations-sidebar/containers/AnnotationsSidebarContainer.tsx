@@ -850,8 +850,12 @@ export class AnnotationsSidebarContainer<
                                 unifiedAnnotationId,
                                 color,
                             ) => {
+                                console.log(
+                                    'adsfads',
+                                    unifiedAnnotationId,
+                                    color,
+                                )
                                 this.processEvent('saveHighlightColor', {
-                                    instanceLocation: 'annotations-tab',
                                     noteId: unifiedAnnotationId,
                                     color: color,
                                 })

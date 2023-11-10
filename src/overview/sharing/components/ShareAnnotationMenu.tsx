@@ -15,6 +15,9 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { Checkbox } from 'src/common-ui/components'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { browser } from 'webextension-polyfill-ts'
+import { SyncSettingsStore } from 'src/sync-settings/util'
 
 const COPY_TIMEOUT = 2000
 
@@ -39,6 +42,9 @@ export interface Props {
     autoCreateLinkState?: TaskState
     autoCreateLinkSetting?: boolean
     toggleAutoCreateLinkSetting?: () => void
+    renderAutoAddDefaultSettings?: JSX.Element
+    autoAddButtonRef?: React.RefObject<HTMLDivElement>
+    showAutoAddMenu?: (isShown) => void
 }
 
 interface State {
@@ -48,9 +54,11 @@ interface State {
 class ShareAnnotationMenu extends PureComponent<Props, State> {
     copyTimeout?: ReturnType<typeof setTimeout>
     menuRef: React.RefObject<HTMLDivElement>
-    state: State = { copyState: 'pristine' }
+    state: State = {
+        copyState: 'pristine',
+    }
 
-    componentDidMount() {
+    async componentDidMount() {
         if (this.props.shortcutHandlerDict) {
             for (const [shortcut, handler] of Object.entries(
                 this.props.shortcutHandlerDict,
@@ -98,32 +106,40 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     private renderLinkContent() {
         const { copyState } = this.state
         return (
-            <PrimaryAction
-                onClick={() =>
-                    this.props.link
-                        ? this.handleLinkCopy()
-                        : this.handleCreateLink()
+            <TooltipBox
+                tooltipText={
+                    'Create a link to just this annotation for quick sharing'
                 }
-                label={
-                    copyState === 'running' ? (
-                        <LoadingIndicator size={14} />
-                    ) : copyState === 'success' ? (
-                        'Link copied to clipboard'
-                    ) : (
-                        'Share Annotation'
-                    )
-                }
-                icon={
-                    copyState === 'running'
-                        ? null
-                        : copyState === 'success'
-                        ? 'copy'
-                        : 'link'
-                }
-                type="secondary"
-                size="medium"
-                fullWidth
-            />
+                placement="bottom"
+                fullWidthTarget
+            >
+                <PrimaryAction
+                    onClick={() =>
+                        this.props.link
+                            ? this.handleLinkCopy()
+                            : this.handleCreateLink()
+                    }
+                    label={
+                        copyState === 'running' ? (
+                            <LoadingIndicator size={14} />
+                        ) : copyState === 'success' ? (
+                            'Copied'
+                        ) : (
+                            'Copy Sharing Link'
+                        )
+                    }
+                    icon={
+                        copyState === 'running'
+                            ? null
+                            : copyState === 'success'
+                            ? 'copy'
+                            : 'link'
+                    }
+                    type="forth"
+                    size="medium"
+                    fullWidth
+                />
+            </TooltipBox>
         )
     }
 
@@ -181,8 +197,9 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                     // isDisabled={!this.state.shortcutsEnabled}
                                     name={'Copy link when creating highlight'}
                                     label={'Copy link when creating highlight'}
-                                    fontSize={14}
-                                    size={14}
+                                    fontSize={12}
+                                    width="fit-content"
+                                    size={10}
                                     isLoading={
                                         this.props.autoCreateLinkState ===
                                         'running'
@@ -201,21 +218,16 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                         <LoadingIndicator size={16} />
                                     </LoadingBox>
                                 ) : ( */}
-                                <TooltipBox
-                                    tooltipText={
-                                        <TooltipTextBox>
-                                            Added to all Spaces you put the page
-                                            into <br />
-                                            <KeyboardShortcuts
-                                                keys={this.props.privacyOptions[1].shortcut.split(
-                                                    '+',
-                                                )}
-                                                size={'small'}
-                                            />
-                                        </TooltipTextBox>
+                                <AutoAddContainer
+                                    onMouseEnter={() =>
+                                        this.props.showAutoAddMenu(true)
                                     }
-                                    placement={'bottom-end'}
+                                    onMouseLeave={() => {
+                                        this.props.showAutoAddMenu(false)
+                                    }}
+                                    ref={this.props.autoAddButtonRef}
                                 >
+                                    {this.props.renderAutoAddDefaultSettings}
                                     <Checkbox
                                         key={1}
                                         id={'1'}
@@ -230,8 +242,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                                 : this.props.privacyOptions[1].onClick()
                                         }
                                         // isDisabled={!this.state.shortcutsEnabled}
-                                        name={'Auto Share'}
-                                        label={'Auto Share'}
+                                        name={'Boost'}
+                                        label={'Auto Add'}
                                         fontSize={14}
                                         size={14}
                                         isLoading={
@@ -239,7 +251,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                             'running'
                                         }
                                     />
-                                </TooltipBox>
+                                </AutoAddContainer>
                                 {/* )} */}
                             </SubtitleSection>
                             {/* <TopArea>
@@ -314,6 +326,8 @@ const SubtitleSection = styled.div`
     padding: 0 15px;
 `
 
+const AutoAddContainer = styled.div``
+
 const TopArea = styled.div<{ context: string }>`
     padding: 10px 15px 10px 15px;
     height: fit-content;
@@ -321,6 +335,7 @@ const TopArea = styled.div<{ context: string }>`
     grid-gap: 5px;
     display: flex;
     flex-direction: column;
+    align-items: center;
 
     &:first-child {
         padding: 0px 15px 0px 15px;
@@ -425,11 +440,4 @@ const PrivacyOptionContainer = styled(Margin)`
     flex-direction: row;
     align-items: center;
     grid-gap: 4px;
-`
-const TooltipTextBox = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    grid-gap: 5px;
-    justify-content: center;
 `

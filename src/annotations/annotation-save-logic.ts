@@ -88,6 +88,12 @@ export async function createAnnotation({
 > {
     let remoteAnnotationId: string = null
 
+    let syncSettings: SyncSettingsStore<'extension'>
+
+    syncSettings = createSyncSettingsStore({
+        syncSettingsBG: syncSettingsBG,
+    })
+
     return {
         remoteAnnotationId,
         savePromise: (async () => {
@@ -109,7 +115,23 @@ export async function createAnnotation({
                 { skipPageIndexing },
             )
 
-            if (shareOpts?.shouldShare) {
+            const shouldShareSettings = await syncSettings.extension.get(
+                'shouldAutoAddSpaces',
+            )
+
+            let privacyLevel
+            if (shouldShareSettings) {
+                privacyLevel = 200
+            }
+
+            if (shouldShareSettings) {
+                await contentSharingBG.shareAnnotation({
+                    annotationUrl,
+                    remoteAnnotationId,
+                    shareToParentPageLists: true,
+                    skipPrivacyLevelUpdate: false,
+                })
+            } else if (shareOpts?.shouldShare) {
                 await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
@@ -121,7 +143,8 @@ export async function createAnnotation({
             await contentSharingBG.setAnnotationPrivacyLevel({
                 annotationUrl,
                 privacyLevel:
-                    privacyLevelOverride ?? shareOptsToPrivacyLvl(shareOpts),
+                    (privacyLevel || privacyLevelOverride) ??
+                    shareOptsToPrivacyLvl(shareOpts),
             })
 
             if (annotationData.localListIds?.length) {
@@ -192,11 +215,6 @@ export async function updateAnnotation({
     return {
         remoteAnnotationId,
         savePromise: (async () => {
-            console.log(
-                'annotation1',
-                annotationData.color,
-                annotationData.localId,
-            )
             if (annotationData.comment != null) {
                 await annotationsBG.editAnnotation(
                     annotationData.localId,
@@ -207,7 +225,6 @@ export async function updateAnnotation({
                         .replace(/\\\)/g, ')'),
                     annotationData.color,
                 )
-                console.log('save worked')
             }
 
             await Promise.all([

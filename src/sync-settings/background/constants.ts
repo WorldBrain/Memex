@@ -40,6 +40,7 @@ export const SETTING_NAMES: SyncSettingNames = {
             FEATURE_PREFIX.EXTENSION + 'should_track_analytics',
         shouldAutoCreateNoteLink:
             FEATURE_PREFIX.EXTENSION + 'shouldAutoCreateNoteLink',
+        shouldAutoAddSpaces: FEATURE_PREFIX.EXTENSION + 'shouldAutoAddSpaces',
     },
     pdfIntegration: {
         shouldAutoOpen: FEATURE_PREFIX.PDF_INTEGRATION + 'should_auto_open',
