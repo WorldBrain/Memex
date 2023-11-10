@@ -1,4 +1,5 @@
 import type {
+    AuthProviderType,
     AuthService,
     LoginHooks,
 } from '@worldbrain/memex-common/lib/authentication/types'
@@ -15,6 +16,9 @@ import {
     signInWithCustomToken,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
+    signInWithPopup,
+    GoogleAuthProvider,
+    TwitterAuthProvider,
 } from 'firebase/auth'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 
@@ -37,6 +41,16 @@ export function createAuthDependencies(options: {
 } {
     const devAuthState = (options && options.devAuthState) || ''
     if (devAuthState === '' || devAuthState === 'staging') {
+        function providerFromType(type: AuthProviderType) {
+            if (type === 'google') {
+                return new GoogleAuthProvider()
+            }
+            if (type === 'twitter') {
+                return new TwitterAuthProvider()
+            }
+            throw new Error(`Unknown auth provider: ${type}`)
+        }
+
         return {
             authService: new WorldbrainAuthService({
                 ...(options.loginHooks ?? {}),
@@ -48,6 +62,11 @@ export function createAuthDependencies(options: {
                     sendPasswordResetEmail,
                     signInWithEmailAndPassword,
                     createUserWithEmailAndPassword,
+                    signInViaProvider: (type) => {
+                        const auth = getAuth()
+                        const provider = providerFromType(type)
+                        return signInWithPopup(auth, provider)
+                    },
                 },
             }),
             subscriptionService: new WorldbrainSubscriptionsService(
