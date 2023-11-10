@@ -465,9 +465,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         saveHighlightColorSettings={
                             this.props.saveHighlightColorSettings
                         }
-                        changeHighlightColor={(color) =>
+                        changeHighlightColor={(color) => {
                             this.props.saveHighlightColor(unifiedId, color)
-                        }
+                            this.setState({
+                                showHighlightColorPicker: false,
+                            })
+                        }}
                         getHighlightColorSettings={
                             this.props.getHighlightColorSettings
                         }
