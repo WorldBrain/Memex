@@ -230,6 +230,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     bgScriptBG: RemoteBGScriptInterface
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
+    setAIModel: (AImodel) => void
 }
 
 interface AnnotationsSidebarState {
@@ -1875,6 +1876,53 @@ export class AnnotationsSidebar extends React.Component<
                                                 queryMode,
                                             )
                                         }
+                                    }}
+                                    initSelectedIndex={
+                                        this.props.queryMode ===
+                                        'chapterSummary'
+                                            ? 1
+                                            : 0
+                                    }
+                                    selectedState={
+                                        this.props.queryMode ===
+                                            'chapterSummary' && 1
+                                    }
+                                    keepSelectedState
+                                />
+                                <DropdownMenuBtnSmall
+                                    elementHeight="fit-content"
+                                    hideDescriptionInPreview
+                                    menuItems={[
+                                        {
+                                            id: 'GPT 3.5',
+                                            name: 'GPT 3.5',
+                                            info: 'Fast & decent',
+                                        },
+                                        {
+                                            id: 'GPT 4',
+                                            name: 'GPT 4',
+                                            isDisabled: this.props.hasKey
+                                                ? false
+                                                : true,
+                                            info: (
+                                                <span>
+                                                    Better at understanding
+                                                    logic
+                                                    <br />
+                                                    ONLY WITH OWN KEY
+                                                </span>
+                                            ),
+                                        },
+                                    ]}
+                                    onMenuItemClick={(props, index) => {
+                                        let AImodel
+                                        if (index === 0) {
+                                            AImodel = 'gpt-3.5-turbo-1106'
+                                        }
+                                        if (index === 1) {
+                                            AImodel = 'gpt-4-0613'
+                                        }
+                                        this.props.setAIModel(AImodel)
                                     }}
                                     initSelectedIndex={
                                         this.props.queryMode ===

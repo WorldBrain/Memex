@@ -327,6 +327,7 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
+            AImodel: 'gpt-3.5-turbo-1106',
         }
     }
 
@@ -1053,6 +1054,12 @@ export class SidebarContainerLogic extends UILogic<
     setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {
         this.emitMutation({
             popoutsActive: { $set: event },
+        })
+    }
+    setAIModel: EventHandler<'setAIModel'> = async ({ event }) => {
+        console.log('eeee', event)
+        this.emitMutation({
+            AImodel: { $set: event },
         })
     }
 
@@ -2184,18 +2191,10 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         let contentType = fullPageUrl?.includes('youtube.com/watch')
-            ? 'video'
+            ? 'video transcript'
             : 'text'
 
-        let queryPrompt
-
-        if (previousState.queryMode === 'question') {
-            queryPrompt = prompt
-        } else {
-            prompt
-                ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}". Do not introduce your summary, just output the summary. \n\n`
-                : undefined
-        }
+        let queryPrompt = prompt
 
         if (!previousState.isTrial) {
             await updateAICounter()
@@ -2217,10 +2216,11 @@ export class SidebarContainerLogic extends UILogic<
             prompt: {
                 $set:
                     outputLocation !== 'chapterSummary'
-                        ? previousState.prompt
-                        : prompt,
+                        ? prompt
+                        : previousState.prompt,
             },
             showAICounter: { $set: true },
+            hasKey: { $set: true },
         })
 
         let textToAnalyse = textAsAlternative
@@ -2245,6 +2245,7 @@ export class SidebarContainerLogic extends UILogic<
             apiKey: openAIKey ? openAIKey : undefined,
             outputLocation: outputLocation ?? null,
             chapterSummaryIndex: chapterSummaryIndex ?? null,
+            AImodel: previousState.AImodel,
         })
 
         return response
@@ -2492,6 +2493,7 @@ export class SidebarContainerLogic extends UILogic<
                 event.queryMode === 'summarize' ||
                 previousState.queryMode === 'summarize'
             ) {
+                console.log('summarize', event.prompt)
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
                     event.highlightedText ||
