@@ -901,7 +901,6 @@ export class SidebarContainerLogic extends UILogic<
         const bottomBar = document.getElementsByClassName(
             'ytp-chrome-bottom',
         )[0] as HTMLElement
-        console.log('bottomBar', bottomBar)
         const moviePlayerWidth = moviePlayer.clientWidth
         const moviePlayerHeight = moviePlayer.clientHeight
 
@@ -1064,7 +1063,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
     setAIModel: EventHandler<'setAIModel'> = async ({ event }) => {
-        console.log('eeee', event)
         this.emitMutation({
             AImodel: { $set: event },
         })
@@ -2500,7 +2498,6 @@ export class SidebarContainerLogic extends UILogic<
                 event.queryMode === 'summarize' ||
                 previousState.queryMode === 'summarize'
             ) {
-                console.log('summarize', event.prompt)
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
                     event.highlightedText ||
@@ -2840,6 +2837,11 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             spaceTitleEditValue: { $set: event.value },
+        })
+    }
+    addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
+        this.emitMutation({
+            hasKey: { $set: !previousState.hasKey },
         })
     }
 
