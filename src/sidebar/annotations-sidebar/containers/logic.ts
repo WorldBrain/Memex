@@ -889,6 +889,11 @@ export class SidebarContainerLogic extends UILogic<
 
     private adjustYoutubePlayerSize() {
         const moviePlayer = document.getElementById('movie_player')
+
+        const bottomBar = document.getElementsByClassName(
+            'ytp-chrome-bottom',
+        )[0] as HTMLElement
+        console.log('bottomBar', bottomBar)
         const moviePlayerWidth = moviePlayer.clientWidth
         const moviePlayerHeight = moviePlayer.clientHeight
 
@@ -898,6 +903,7 @@ export class SidebarContainerLogic extends UILogic<
         if (videoStream[0]) {
             const videoStreamElement = videoStream[0] as HTMLElement
             videoStreamElement.style.width = moviePlayerWidth + 'px'
+            bottomBar.style.width = moviePlayerWidth - 12 + 'px'
             videoStreamElement.style.height = moviePlayerHeight + 'px'
         }
     }
