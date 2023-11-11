@@ -19,6 +19,7 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             apiKey?: string
             outputLocation?: 'editor' | 'summaryContainer' | 'chapterSummary'
             chapterSummaryIndex?: number
+            AImodel?: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
         }
     >
     getTextSummary: RemoteFunction<
@@ -71,6 +72,7 @@ export default class SummarizeBackground {
             apiKey,
             outputLocation,
             chapterSummaryIndex,
+            AImodel,
         },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
@@ -89,7 +91,9 @@ export default class SummarizeBackground {
             queryPrompt,
             apiKey,
             undefined,
+            AImodel,
         )) {
+            console.log('aimdoel1', AImodel)
             const token = result?.t
             if (token?.length > 0) {
                 if (outputLocation === 'editor') {

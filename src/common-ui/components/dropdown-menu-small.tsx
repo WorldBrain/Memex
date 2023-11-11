@@ -8,7 +8,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 export interface MenuItemProps {
     name: string
     id?: string | number
-    info?: string
+    info?: string | JSX.Element
     isDisabled?: boolean
     soonAvailable?: boolean
 }
@@ -117,6 +117,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         backgroundColor={this.props.backgroundColor}
                         elementHeight={this.props.elementHeight}
                         isOpened={this.state.isOpened}
+                        isDisabled={props.isDisabled}
                     >
                         <MenuItemName isSelected={this.state.selected === i}>
                             <MenuItemBox>
@@ -126,7 +127,9 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                                     {props.name}
                                 </MenuItemName>
                                 {props.info && (
-                                    <MenuItemInfo>{props.info}</MenuItemInfo>
+                                    <MenuItemInfo isDisabled={props.isDisabled}>
+                                        {props.info}
+                                    </MenuItemInfo>
                                 )}
                             </MenuItemBox>
                             {this.state.selected === i && (
@@ -228,6 +231,7 @@ const MenuItem = styled.div<{
     backgroundColor
     elementHeight: string
     isOpened: boolean
+    isDisabled: boolean
 }>`
     background: ${(props) =>
         props.backgroundColor && props.theme.colors[props.backgroundColor]};
@@ -269,6 +273,17 @@ const MenuItem = styled.div<{
                 cursor: pointer;
             }
         `};
+    ${(props) =>
+        props.isDisabled &&
+        css`
+            cursor: not-allowed;
+            opacity: 0.8;
+
+            * {
+                cursor: not-allowed;
+                opacity: 0.9;
+            }
+        `};
 `
 
 const MenuTitle = styled.div`
@@ -291,10 +306,17 @@ const MenuItemName = styled.div<{ isSelected; isOpened }>`
     width: -webkit-fill-available;
 `
 
-const MenuItemInfo = styled.div`
+const MenuItemInfo = styled.div<{
+    isDisabled: boolean
+}>`
     font-weight: 300;
     font-size: 12px;
     color: ${(props) => props.theme.colors.greyScale5};
+    ${(props) =>
+        props.isDisabled &&
+        css`
+            color: ${(props) => props.theme.colors.greyScale7};
+        `}
 `
 
 const Menu = styled.div<{ isOpen: boolean; elementHeight: string }>`
