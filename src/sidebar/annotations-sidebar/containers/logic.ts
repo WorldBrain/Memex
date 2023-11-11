@@ -2187,9 +2187,15 @@ export class SidebarContainerLogic extends UILogic<
             ? 'video'
             : 'text'
 
-        let queryPrompt = prompt
-            ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}". Do not introduce your summary, just output the summary. \n\n`
-            : undefined
+        let queryPrompt
+
+        if (previousState.queryMode === 'question') {
+            queryPrompt = prompt
+        } else {
+            prompt
+                ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}". Do not introduce your summary, just output the summary. \n\n`
+                : undefined
+        }
 
         if (!previousState.isTrial) {
             await updateAICounter()
