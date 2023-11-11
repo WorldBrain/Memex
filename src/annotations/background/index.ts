@@ -316,7 +316,6 @@ export default class DirectLinkingBackground {
             throw new Error('Annotation ID should not be a full URL')
         }
 
-        console.log('color', toCreate.color)
         await this.annotationStorage.createAnnotation({
             pageUrl: normalizedPageUrl,
             url: annotationUrl,
@@ -418,8 +417,6 @@ export default class DirectLinkingBackground {
         }
 
         const existingAnnotation = await this.getAnnotationByPk(pk)
-
-        console.log('existingAnnot', existingAnnotation)
 
         if (!existingAnnotation?.comment?.length) {
             if (this.options.analyticsBG) {

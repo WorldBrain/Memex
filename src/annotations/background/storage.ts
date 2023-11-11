@@ -644,8 +644,6 @@ export default class AnnotationStorage extends StorageModule {
             } catch (e) {}
         }
 
-        console.log('annot', url, comment, color, lastEdited)
-
         return this.operation('editAnnotation', {
             url,
             comment,

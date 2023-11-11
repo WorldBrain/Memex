@@ -849,15 +849,12 @@ export class AnnotationsSidebarContainer<
                             saveHighlightColor={(
                                 unifiedAnnotationId,
                                 color,
+                                colorId,
                             ) => {
-                                console.log(
-                                    'adsfads',
-                                    unifiedAnnotationId,
-                                    color,
-                                )
                                 this.processEvent('saveHighlightColor', {
                                     noteId: unifiedAnnotationId,
                                     color: color,
+                                    colorId: colorId,
                                 })
                             }}
                             saveHighlightColorSettings={(newState) => {

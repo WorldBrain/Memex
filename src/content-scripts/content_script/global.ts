@@ -232,7 +232,9 @@ export async function main(
         ? { type: 'user-reference', id: _currentUser.id }
         : null
     const fullPageUrl = await pageInfo.getFullPageUrl()
-    const annotationsCache = new PageAnnotationsCache({})
+    const annotationsCache = new PageAnnotationsCache({
+        syncSettingsBG: syncSettingsBG,
+    })
     window['__annotationsCache'] = annotationsCache
 
     const loadCacheDataPromise = hydrateCacheForPageAnnotations({
@@ -323,6 +325,7 @@ export async function main(
             if (shouldShareSettings) {
                 privacyLevel = 200
             }
+
             const { unifiedId } = annotationsCache.addAnnotation({
                 localId,
                 privacyLevel,
@@ -444,7 +447,6 @@ export async function main(
         highlightColor?,
     ): Promise<AutoPk> {
         let highlightId: AutoPk
-        console.log('color', highlightColor)
         try {
             highlightId = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
@@ -479,12 +481,11 @@ export async function main(
             selection: Selection,
             shouldShare: boolean,
             drawRectangle?: boolean,
-            highlightColor?: string,
+            highlightColorSettings?: string,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
-            console.log('runs', selection)
             let screenshotGrabResult
             if (
                 isPdfViewerRunning &&
@@ -509,19 +510,18 @@ export async function main(
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
-                    highlightColor,
+                    highlightColorSettings,
                 )
             } else if (
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                console.log('estads', highlightColor)
                 await saveHighlight(
                     shouldShare,
                     null,
                     null,
                     null,
-                    highlightColor,
+                    highlightColorSettings,
                 )
             }
 

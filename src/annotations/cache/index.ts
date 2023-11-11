@@ -18,11 +18,15 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
+import { array2RGBA } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
     events?: TypedEventEmitter<PageAnnotationsCacheEvents>
     debug?: boolean
+    syncSettingsBG?: RemoteSyncSettingsInterface
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
@@ -50,9 +54,24 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         UnifiedAnnotation['unifiedId']
     >()
 
+    private highlightColorSettings
+
     constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
         deps.events = deps.events ?? new EventEmitter()
+
+        this.initializeAsync()
+    }
+
+    async initializeAsync() {
+        // Call your async function here
+        const syncSettingsBG = this.deps.syncSettingsBG
+        const syncSettings = await createSyncSettingsStore({ syncSettingsBG })
+        const highlightColorSettings = await syncSettings.highlightColors.get(
+            'highlightColors',
+        )
+
+        this.highlightColorSettings = highlightColorSettings
     }
 
     private generateAnnotationId = (): string =>
@@ -160,6 +179,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         opts: { now: number },
     ): UnifiedAnnotation => {
         const unifiedAnnotationId = this.generateAnnotationId()
+        if (annotation.color != null) {
+            const annotColorAsRGB = this.highlightColorSettings.find(
+                (item) => item.id === annotation.color,
+            )?.color
+
+            annotation.color = array2RGBA(annotColorAsRGB)
+        }
+
         if (annotation.remoteId != null) {
             this.remoteAnnotIdsToCacheIds.set(
                 annotation.remoteId,
@@ -378,10 +405,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const seedData = [...annotations]
             .sort(this.deps.sortingFn)
             .map((annot) => this.prepareAnnotationForCaching(annot, { now }))
+
         this.annotations = initNormalizedState({
             seedData,
             getId: (annot) => annot.unifiedId,
         })
+
         this.events.emit('newAnnotationsState', this.annotations)
 
         return { unifiedIds: seedData.map((annot) => annot.unifiedId) }
@@ -548,6 +577,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 updates.remoteId,
                 previous.unifiedId,
             )
+        }
+
+        if (updates.color != null) {
+            const annotColorAsRGB = this.highlightColorSettings.find(
+                (item) => item.id === updates.color,
+            )?.color
+
+            updates.color = array2RGBA(annotColorAsRGB)
         }
 
         const next: UnifiedAnnotation = {

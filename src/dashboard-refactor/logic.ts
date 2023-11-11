@@ -1388,7 +1388,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         const { ...existing } = previousState.searchResults.noteData.byId[
             event.noteId
         ]
-        console.log('exec2', event, existing)
 
         await executeUITask(
             this,
@@ -1424,7 +1423,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 //     unifiedId: event.unifiedId,
                 // })
 
-                console.log('event3', event)
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,
@@ -3015,7 +3013,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        console.log('exec')
         const {
             editNoteForm,
             ...existing
@@ -3076,7 +3073,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 })
 
-                console.log('event3', event)
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,

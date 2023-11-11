@@ -277,6 +277,7 @@ interface SidebarEvents {
     saveHighlightColor: {
         noteId: string
         color: string
+        colorId: string
     }
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null

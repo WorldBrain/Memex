@@ -537,7 +537,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        console.log('event, color', event.color, event.noteId)
         const {
             annotations: {
                 byId: { [event.noteId]: annotationData },
@@ -555,7 +554,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationData: {
                 comment: annotationData.comment,
                 localId: annotationData.localId,
-                color: event.color,
+                color: event.colorId,
             },
             shareOpts: {
                 shouldShare: annotationData.privacyLevel === 200 ? true : false,
@@ -566,7 +565,7 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.updateAnnotation({
             ...annotationData,
             comment: annotationData.comment,
-            color: event.color,
+            color: event.colorId,
             unifiedListIds: annotationData.unifiedListIds,
         })
 
@@ -1811,8 +1810,6 @@ export class SidebarContainerLogic extends UILogic<
         const shouldShareSettings = await syncSettings.extension.get(
             'shouldAutoAddSpaces',
         )
-
-        console.log('hsasödfasdf', shouldShareSettings)
 
         const now = event.now ?? Date.now()
         const annotationId =

@@ -230,7 +230,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     bgScriptBG: RemoteBGScriptInterface
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
-    saveHighlightColor: (id, color) => void
+    saveHighlightColor: (id, color, colorId) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string

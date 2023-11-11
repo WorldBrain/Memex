@@ -312,7 +312,6 @@ export default class SearchResultsContainer extends React.Component<
             <AnnotationEditable
                 imageSupport={this.props.imageSupport}
                 saveHighlightColor={(id, color) => {
-                    console.log('121212')
                     this.props.saveHighlightColor(id, color, noteId)
                 }}
                 saveHighlightColorSettings={

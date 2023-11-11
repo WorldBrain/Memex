@@ -647,7 +647,6 @@ export class DashboardContainer extends StatefulUIElement<
                 listData={listsSidebar.lists}
                 saveHighlightColor={(id, color) => {
                     {
-                        console.log('color', color, id)
                         this.processEvent('saveHighlightColor', {
                             noteId: id,
                             color: color,

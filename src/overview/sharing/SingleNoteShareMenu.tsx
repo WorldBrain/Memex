@@ -127,8 +127,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         const isAutoAddStorage = await this.getAutoAddSetting()
 
-        console.log('isautostorage', isAutoAddStorage)
-
         if (isAutoAddStorage != null) {
             this.setState({
                 isAutoAddSet: isAutoAddStorage,
