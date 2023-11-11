@@ -327,6 +327,8 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
+            AImodel: 'gpt-3.5-turbo-1106',
+            hasKey: false,
         }
     }
 
@@ -620,9 +622,15 @@ export class SidebarContainerLogic extends UILogic<
             await (await this.options.authBG.getCurrentUser()).creationTime,
         ).getTime()
 
+        const openAIKey = await this.syncSettings.openAI.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
+
         this.emitMutation({
-            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+            hasKey: { $set: hasAPIKey },
+        })
+        this.emitMutation({
             signupDate: { $set: signupDate },
+            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
         })
     }
 
@@ -889,6 +897,11 @@ export class SidebarContainerLogic extends UILogic<
 
     private adjustYoutubePlayerSize() {
         const moviePlayer = document.getElementById('movie_player')
+
+        const bottomBar = document.getElementsByClassName(
+            'ytp-chrome-bottom',
+        )[0] as HTMLElement
+        console.log('bottomBar', bottomBar)
         const moviePlayerWidth = moviePlayer.clientWidth
         const moviePlayerHeight = moviePlayer.clientHeight
 
@@ -898,6 +911,7 @@ export class SidebarContainerLogic extends UILogic<
         if (videoStream[0]) {
             const videoStreamElement = videoStream[0] as HTMLElement
             videoStreamElement.style.width = moviePlayerWidth + 'px'
+            bottomBar.style.width = moviePlayerWidth - 12 + 'px'
             videoStreamElement.style.height = moviePlayerHeight + 'px'
         }
     }
@@ -1047,6 +1061,12 @@ export class SidebarContainerLogic extends UILogic<
     setPopoutsActive: EventHandler<'setPopoutsActive'> = async ({ event }) => {
         this.emitMutation({
             popoutsActive: { $set: event },
+        })
+    }
+    setAIModel: EventHandler<'setAIModel'> = async ({ event }) => {
+        console.log('eeee', event)
+        this.emitMutation({
+            AImodel: { $set: event },
         })
     }
 
@@ -2153,12 +2173,10 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         let contentType = fullPageUrl?.includes('youtube.com/watch')
-            ? 'video'
+            ? 'video transcript'
             : 'text'
 
         let queryPrompt = prompt
-            ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}". Do not introduce your summary, just output the summary. \n\n`
-            : undefined
 
         if (!previousState.isTrial) {
             await updateAICounter()
@@ -2180,10 +2198,11 @@ export class SidebarContainerLogic extends UILogic<
             prompt: {
                 $set:
                     outputLocation !== 'chapterSummary'
-                        ? previousState.prompt
-                        : prompt,
+                        ? prompt
+                        : previousState.prompt,
             },
             showAICounter: { $set: true },
+            hasKey: { $set: hasAPIKey },
         })
 
         let textToAnalyse = textAsAlternative
@@ -2208,6 +2227,7 @@ export class SidebarContainerLogic extends UILogic<
             apiKey: openAIKey ? openAIKey : undefined,
             outputLocation: outputLocation ?? null,
             chapterSummaryIndex: chapterSummaryIndex ?? null,
+            AImodel: previousState.AImodel,
         })
 
         return response
@@ -2455,6 +2475,7 @@ export class SidebarContainerLogic extends UILogic<
                 event.queryMode === 'summarize' ||
                 previousState.queryMode === 'summarize'
             ) {
+                console.log('summarize', event.prompt)
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
                     event.highlightedText ||

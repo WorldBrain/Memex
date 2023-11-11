@@ -364,7 +364,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         }
                     >
                         <Icon
-                            icon="settings"
+                            icon="key"
                             heightAndWidth="22px"
                             onClick={() => this.setState({ showTooltip: true })}
                             containerRef={this.tooltipButtonRef}
