@@ -328,6 +328,7 @@ export class SidebarContainerLogic extends UILogic<
             chapterSummaries: [],
             chapterList: [],
             AImodel: 'gpt-3.5-turbo-1106',
+            hasKey: false,
         }
     }
 
@@ -621,9 +622,15 @@ export class SidebarContainerLogic extends UILogic<
             await (await this.options.authBG.getCurrentUser()).creationTime,
         ).getTime()
 
+        const openAIKey = await this.syncSettings.openAI.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
+
         this.emitMutation({
-            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+            hasKey: { $set: hasAPIKey },
+        })
+        this.emitMutation({
             signupDate: { $set: signupDate },
+            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
         })
     }
 
@@ -2220,7 +2227,7 @@ export class SidebarContainerLogic extends UILogic<
                         : previousState.prompt,
             },
             showAICounter: { $set: true },
-            hasKey: { $set: true },
+            hasKey: { $set: hasAPIKey },
         })
 
         let textToAnalyse = textAsAlternative

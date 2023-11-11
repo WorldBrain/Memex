@@ -1703,6 +1703,8 @@ export class AnnotationsSidebar extends React.Component<
                 )
             }
 
+            console.log('asdfadsfasdf', this.props.hasKey)
+
             return (
                 <AISidebarContainer>
                     {this.props.selectedTextAIPreview && (
