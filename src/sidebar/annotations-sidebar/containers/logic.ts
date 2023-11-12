@@ -850,6 +850,9 @@ export class SidebarContainerLogic extends UILogic<
                         document.body.style.position = 'sticky'
                         this.adjustYoutubePlayerSize()
                     }
+                    if (window.location.href.includes('mail.google.com')) {
+                        this.adjustGmailWidth('initial')
+                    }
                     this.resizeObserver.observe(this.sidebar)
                     window.addEventListener('resize', this.debounceReadingWidth)
                 } else {
@@ -864,6 +867,9 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     ) {
                         this.adjustYoutubePlayerSize()
+                    }
+                    if (window.location.href.includes('mail.google.com')) {
+                        this.adjustGmailWidth('initial')
                     }
                     this.resizeObserver.disconnect()
                     window.removeEventListener(
@@ -892,7 +898,22 @@ export class SidebarContainerLogic extends UILogic<
                 document.body.style.position = 'sticky'
                 this.adjustYoutubePlayerSize()
             }
+            if (window.location.href.includes('mail.google.com')) {
+                this.adjustGmailWidth(readingWidth)
+            }
         }
+    }
+
+    private adjustGmailWidth(readingWidth) {
+        const setMaxWidth = (element: HTMLElement) => {
+            element.style.maxWidth = readingWidth
+            Array.from(element.children).forEach((child) => {
+                setMaxWidth(child as HTMLElement)
+            })
+        }
+        Array.from(document.body.children).forEach((child) => {
+            setMaxWidth(child as HTMLElement)
+        })
     }
 
     private adjustYoutubePlayerSize() {
@@ -901,7 +922,6 @@ export class SidebarContainerLogic extends UILogic<
         const bottomBar = document.getElementsByClassName(
             'ytp-chrome-bottom',
         )[0] as HTMLElement
-        console.log('bottomBar', bottomBar)
         const moviePlayerWidth = moviePlayer.clientWidth
         const moviePlayerHeight = moviePlayer.clientHeight
 
@@ -1064,7 +1084,6 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
     setAIModel: EventHandler<'setAIModel'> = async ({ event }) => {
-        console.log('eeee', event)
         this.emitMutation({
             AImodel: { $set: event },
         })
@@ -1110,6 +1129,10 @@ export class SidebarContainerLogic extends UILogic<
         if (window.location.href.startsWith('https://www.youtube.com')) {
             document.body.style.position = 'initial'
             this.adjustYoutubePlayerSize()
+        }
+
+        if (window.location.href.includes('mail.google.com')) {
+            this.adjustGmailWidth('initial')
         }
     }
 
@@ -2500,7 +2523,6 @@ export class SidebarContainerLogic extends UILogic<
                 event.queryMode === 'summarize' ||
                 previousState.queryMode === 'summarize'
             ) {
-                console.log('summarize', event.prompt)
                 this.queryAI(
                     isPagePDF ? undefined : previousState.fullPageUrl,
                     event.highlightedText ||
@@ -2840,6 +2862,13 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             spaceTitleEditValue: { $set: event.value },
+        })
+    }
+    addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
+        this.emitMutation({
+            hasKey: {
+                $set: previousState.hasKey ? !previousState.hasKey : true,
+            },
         })
     }
 

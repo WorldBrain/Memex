@@ -657,6 +657,7 @@ export class AnnotationsSidebarContainer<
             syncSettingsBG={this.props.syncSettingsBG}
             isTrial={this.state.isTrial}
             signupDate={this.state.signupDate}
+            addedKey={() => this.processEvent('addedKey', null)}
         />
     )
 
