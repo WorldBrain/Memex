@@ -2866,7 +2866,9 @@ export class SidebarContainerLogic extends UILogic<
     }
     addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
         this.emitMutation({
-            hasKey: { $set: !previousState.hasKey },
+            hasKey: {
+                $set: previousState.hasKey ? !previousState.hasKey : true,
+            },
         })
     }
 
