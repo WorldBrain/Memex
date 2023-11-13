@@ -429,7 +429,7 @@ export default class CustomListBackground {
             pageUrl: normalizeUrl(url),
         })
     }
-    removeAllListPages = async (listId) => {
+    removeAllListPages = async (listId: number) => {
         return this.storage.removeAllListPages({
             listId: listId,
         })
