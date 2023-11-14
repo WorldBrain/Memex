@@ -18,7 +18,10 @@ import {
     PersonalCloudOverwriteUpdate,
     PersonalCloudDeviceId,
     PersonalCloudMediaBackend,
+    PersonalCloudListTreeMoveUpdate,
+    PersonalCloudListTreeDeleteUpdate,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { preprocessPulledObject } from '@worldbrain/memex-common/lib/personal-cloud/utils'
 import {
     PersonalCloudAction,
@@ -47,6 +50,7 @@ import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { Runtime } from 'webextension-polyfill'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
+import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -317,8 +321,9 @@ export class PersonalCloudBackground {
     async integrateUpdate(update: PersonalCloudUpdate) {
         this._debugLog('Processing update', update)
 
-        const { collection } = update
         const storageManager =
+            (update.type === PersonalCloudUpdateType.Delete ||
+                update.type === PersonalCloudUpdateType.Overwrite) &&
             update.storage === 'persistent'
                 ? this.options.persistentStorageManager
                 : this.options.storageManager
@@ -326,7 +331,7 @@ export class PersonalCloudBackground {
         if (update.type === PersonalCloudUpdateType.Overwrite) {
             preprocessPulledObject({
                 storageRegistry: storageManager.registry,
-                collection,
+                collection: update.collection,
                 object: update.object,
             })
             if (update.media) {
@@ -352,6 +357,25 @@ export class PersonalCloudBackground {
                 'deleteObjects',
                 update.collection,
                 update.where,
+            )
+        } else if (update.type === PersonalCloudUpdateType.ListTreeMove) {
+            await storageManager.operation(
+                LIST_TREE_OPERATION_ALIASES.moveTree,
+                LIST_COLL_NAMES.listTrees,
+                {
+                    localListId: update.rootNodeLocalListId,
+                    newParentListId: update.parentLocalListId,
+                },
+                { skipSync: true },
+            )
+        } else if (update.type === PersonalCloudUpdateType.ListTreeDelete) {
+            await storageManager.operation(
+                LIST_TREE_OPERATION_ALIASES.deleteTree,
+                LIST_COLL_NAMES.listTrees,
+                {
+                    localListId: update.rootNodeLocalListId,
+                },
+                { skipSync: true },
             )
         }
     }
@@ -394,6 +418,26 @@ export class PersonalCloudBackground {
             throw this._integrationError
         }
         this._debugLog('waitforsyncdone')
+    }
+
+    async handleListTreeStorageChange(
+        update:
+            | PersonalCloudListTreeMoveUpdate
+            | PersonalCloudListTreeDeleteUpdate,
+    ) {
+        await this.actionQueue.scheduleAction(
+            {
+                type: PersonalCloudActionType.PushObject,
+                updates: [
+                    {
+                        ...update,
+                        deviceId: this.deviceId,
+                        schemaVersion: this.currentSchemaVersion!,
+                    },
+                ],
+            },
+            { queueInteraction: 'queue-and-return' },
+        )
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
