@@ -279,6 +279,7 @@ interface SidebarEvents {
         imageData: string
     }
     getVideoChapters: null
+    addedKey: null
     summariseChapter: {
         chapterIndex: number
     }
