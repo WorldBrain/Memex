@@ -52,6 +52,7 @@ export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
     mediaBackend: PersonalCloudMediaBackend
     runtimeAPI: Runtime.Static
+    extensionVersion: string
     storageManager: StorageManager
     syncSettingsStore: SyncSettingsStore<'dashboard'>
     persistentStorageManager: StorageManager
@@ -171,6 +172,7 @@ export class PersonalCloudBackground {
                             {
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
+                                extVersion: this.options.extensionVersion,
                                 deviceId: this.deviceId,
                                 collection: actionData.collection,
                                 object: this.preprocessObjectForPush({
@@ -421,6 +423,7 @@ export class PersonalCloudBackground {
                             {
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
+                                extVersion: this.options.extensionVersion,
                                 deviceId: this.deviceId,
                                 collection,
                                 object: this.preprocessObjectForPush({
@@ -450,6 +453,7 @@ export class PersonalCloudBackground {
                             .map((object) => ({
                                 type: PersonalCloudUpdateType.Overwrite,
                                 schemaVersion: this.currentSchemaVersion!,
+                                extVersion: this.options.extensionVersion,
                                 deviceId: this.deviceId,
                                 collection,
                                 object,
@@ -473,6 +477,7 @@ export class PersonalCloudBackground {
                         updates: wheres.map((where) => ({
                             type: PersonalCloudUpdateType.Delete,
                             schemaVersion: this.currentSchemaVersion!,
+                            extVersion: this.options.extensionVersion,
                             deviceId: this.deviceId,
                             collection,
                             where,

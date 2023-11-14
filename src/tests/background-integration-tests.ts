@@ -142,6 +142,7 @@ export async function setupBackgroundIntegrationTest(
             query: () => [],
             get: () => null,
             onRemoved: { addListener: () => {} },
+            onUpdated: { addListener: () => {} },
         },
         contextMenus: {
             create: () => {},
@@ -153,6 +154,7 @@ export async function setupBackgroundIntegrationTest(
             onStartup: { addListener: () => {} },
             onMessage: { addListener: () => {} },
             onMessageExternal: { addListener: () => {} },
+            getManifest: () => ({ version: 'integration-test-version' }),
         },
         extension: {
             getURL: () => '',

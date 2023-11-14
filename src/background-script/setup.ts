@@ -521,6 +521,7 @@ export function createBackgroundModules(options: {
         serverStorageManager: options.serverStorage.manager,
         runtimeAPI: options.browserAPIs.runtime,
         jobScheduler: jobScheduler.scheduler,
+        extensionVersion: options.browserAPIs.runtime.getManifest().version,
         persistentStorageManager: options.persistentStorageManager,
         mediaBackend:
             options.personalCloudMediaBackend ??
