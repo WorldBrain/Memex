@@ -155,6 +155,7 @@ describe('Annotations storage', () => {
                 await annotationStorage.editAnnotation(
                     DATA.comment.url,
                     'Edited comment',
+                    'one',
                 )
                 const newComment = await annotationStorage.getAnnotationByPk(
                     DATA.comment.url,
@@ -178,6 +179,7 @@ describe('Annotations storage', () => {
                 await annotationStorage.editAnnotation(
                     DATA.highlight.url,
                     'Adding a comment to the highlight.',
+                    'two',
                 )
                 const newHighlight = await annotationStorage.getAnnotationByPk(
                     DATA.highlight.url,

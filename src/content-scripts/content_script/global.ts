@@ -806,11 +806,10 @@ export async function main(
         return highlightColorJSON
     }
     async function saveHighlightColorSettings(newStateInput) {
+        const syncSettings = createSyncSettingsStore({ syncSettingsBG })
+        const highlightColorStore = syncSettings.highlightColors
         const newState = JSON.parse(newStateInput)
-        await syncSettingsBG.highlightColorStore.set(
-            'highlightColors',
-            newState,
-        )
+        await highlightColorStore.set('highlightColors', newState)
 
         return newState
     }
@@ -912,7 +911,8 @@ export async function main(
                 }),
                 askAI: annotationsFunctions.askAI(),
                 getHighlightColorsSettings: () => getHighlightColorSettings(),
-                saveHighlightColorsSettings: () => saveHighlightColorSettings(),
+                saveHighlightColorsSettings: (newState) =>
+                    saveHighlightColorSettings(newState),
             })
             components.tooltip?.resolve()
         },
@@ -1067,6 +1067,8 @@ export async function main(
             action: 'createFromShortcut',
         }),
         askAI: annotationsFunctions.askAI(),
+        getHighlightColorsSettings: getHighlightColorSettings,
+        saveHighlightColorsSettings: saveHighlightColorSettings,
     })
     const loadContentScript = createContentScriptLoader({
         contentScriptsBG,

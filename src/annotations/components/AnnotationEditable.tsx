@@ -116,6 +116,7 @@ export interface AnnotationProps {
     saveHighlightColorSettings?: (newState) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
+    color?: string
 }
 
 export interface AnnotationEditableEventProps {

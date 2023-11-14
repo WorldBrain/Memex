@@ -48,7 +48,7 @@ export interface Props {
     /** Opens the annotation sidebar with all of the annotations */
     openAnnotationSidebar: MouseEventHandler
     goToAnnotation: (annotation: Annotation) => void
-    handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
+    // handleEditAnnotation: (url: string, comment: string, tags: string[]) => void
     handleDeleteAnnotation: (url: string) => void
     setActiveTagPickerNoteId: (id: string) => void
     setActiveListPickerNoteId: (id: string) => void

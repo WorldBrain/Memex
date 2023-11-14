@@ -645,11 +645,12 @@ export class DashboardContainer extends StatefulUIElement<
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.lists}
-                saveHighlightColor={(id, color) => {
+                saveHighlightColor={(id, color, unifiedId) => {
                     {
                         this.processEvent('saveHighlightColor', {
                             noteId: id,
                             color: color,
+                            unifiedId: unifiedId,
                         })
                     }
                 }}
