@@ -120,6 +120,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     isWidthLocked: boolean
     showAISuggestionsDropDown: boolean
     showAICounter: boolean
+    hasKey: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
     highlightColors: string
@@ -241,6 +242,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
             loadingState: TaskState
         }
     }
+    AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
 }
 
 export type AnnotationEvent<T> = {
@@ -285,6 +287,7 @@ interface SidebarEvents {
         imageData: string
     }
     getVideoChapters: null
+    addedKey: null
     summariseChapter: {
         chapterIndex: number
     }
@@ -311,6 +314,8 @@ interface SidebarEvents {
     setQueryMode: {
         mode: string
     }
+    setAIModel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+
     toggleAISuggestionsDropDown: null
     removeSelectedTextAIPreview: null
     updatePromptState: {

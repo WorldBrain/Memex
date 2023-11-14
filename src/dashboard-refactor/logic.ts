@@ -1711,9 +1711,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 inboxUnreadCount: { $set: 0 },
             },
         })
-        await this.options.listsBG.removeAllListPages({
-            listId: SPECIAL_LIST_IDS.INBOX,
-        })
+        await this.options.listsBG.removeAllListPages(SPECIAL_LIST_IDS.INBOX)
         this.emitMutation({
             searchResults: {
                 results: {

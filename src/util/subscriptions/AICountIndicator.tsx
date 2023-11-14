@@ -18,6 +18,7 @@ export interface Props {
     position?: 'top' | 'bottom'
     isTrial: boolean
     signupDate: number
+    addedKey: () => void
 }
 
 interface State {
@@ -55,7 +56,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
     async componentDidMount() {
         const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
-        if (result[COUNTER_STORAGE_KEY].sQ != null) {
+        if (result[COUNTER_STORAGE_KEY]?.sQ != null) {
             this.setState({
                 totalCount: parseInt(result[COUNTER_STORAGE_KEY].sQ),
                 currentCount: result[COUNTER_STORAGE_KEY].cQ,
@@ -299,6 +300,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         this.setState({
                                             showSaveButton: false,
                                         })
+                                        this.props.addedKey()
                                     }}
                                     label="Save"
                                     type="secondary"
@@ -364,7 +366,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         }
                     >
                         <Icon
-                            icon="settings"
+                            icon="key"
                             heightAndWidth="22px"
                             onClick={() => this.setState({ showTooltip: true })}
                             containerRef={this.tooltipButtonRef}

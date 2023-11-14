@@ -330,6 +330,8 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
+            AImodel: 'gpt-3.5-turbo-1106',
+            hasKey: false,
             highlightColors: null,
         }
     }
@@ -724,9 +726,15 @@ export class SidebarContainerLogic extends UILogic<
             await (await this.options.authBG.getCurrentUser()).creationTime,
         ).getTime()
 
+        const openAIKey = await this.syncSettings.openAI.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
+
         this.emitMutation({
-            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+            hasKey: { $set: hasAPIKey },
+        })
+        this.emitMutation({
             signupDate: { $set: signupDate },
+            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
         })
     }
 
@@ -946,6 +954,9 @@ export class SidebarContainerLogic extends UILogic<
                         document.body.style.position = 'sticky'
                         this.adjustYoutubePlayerSize()
                     }
+                    if (window.location.href.includes('mail.google.com')) {
+                        this.adjustGmailWidth('initial')
+                    }
                     this.resizeObserver.observe(this.sidebar)
                     window.addEventListener('resize', this.debounceReadingWidth)
                 } else {
@@ -960,6 +971,9 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     ) {
                         this.adjustYoutubePlayerSize()
+                    }
+                    if (window.location.href.includes('mail.google.com')) {
+                        this.adjustGmailWidth('initial')
                     }
                     this.resizeObserver.disconnect()
                     window.removeEventListener(
@@ -988,11 +1002,30 @@ export class SidebarContainerLogic extends UILogic<
                 document.body.style.position = 'sticky'
                 this.adjustYoutubePlayerSize()
             }
+            if (window.location.href.includes('mail.google.com')) {
+                this.adjustGmailWidth(readingWidth)
+            }
         }
+    }
+
+    private adjustGmailWidth(readingWidth) {
+        const setMaxWidth = (element: HTMLElement) => {
+            element.style.maxWidth = readingWidth
+            Array.from(element.children).forEach((child) => {
+                setMaxWidth(child as HTMLElement)
+            })
+        }
+        Array.from(document.body.children).forEach((child) => {
+            setMaxWidth(child as HTMLElement)
+        })
     }
 
     private adjustYoutubePlayerSize() {
         const moviePlayer = document.getElementById('movie_player')
+
+        const bottomBar = document.getElementsByClassName(
+            'ytp-chrome-bottom',
+        )[0] as HTMLElement
         const moviePlayerWidth = moviePlayer.clientWidth
         const moviePlayerHeight = moviePlayer.clientHeight
 
@@ -1002,6 +1035,7 @@ export class SidebarContainerLogic extends UILogic<
         if (videoStream[0]) {
             const videoStreamElement = videoStream[0] as HTMLElement
             videoStreamElement.style.width = moviePlayerWidth + 'px'
+            bottomBar.style.width = moviePlayerWidth - 12 + 'px'
             videoStreamElement.style.height = moviePlayerHeight + 'px'
         }
     }
@@ -1153,6 +1187,11 @@ export class SidebarContainerLogic extends UILogic<
             popoutsActive: { $set: event },
         })
     }
+    setAIModel: EventHandler<'setAIModel'> = async ({ event }) => {
+        this.emitMutation({
+            AImodel: { $set: event },
+        })
+    }
 
     show: EventHandler<'show'> = async ({ event }) => {
         this.showState = 'visible'
@@ -1194,6 +1233,10 @@ export class SidebarContainerLogic extends UILogic<
         if (window.location.href.startsWith('https://www.youtube.com')) {
             document.body.style.position = 'initial'
             this.adjustYoutubePlayerSize()
+        }
+
+        if (window.location.href.includes('mail.google.com')) {
+            this.adjustGmailWidth('initial')
         }
     }
 
@@ -2274,12 +2317,10 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         let contentType = fullPageUrl?.includes('youtube.com/watch')
-            ? 'video'
+            ? 'video transcript'
             : 'text'
 
         let queryPrompt = prompt
-            ? `You are given a ${contentType}. Summarise the text with consideration of the following prompt: "${prompt}". Do not introduce your summary, just output the summary. \n\n`
-            : undefined
 
         if (!previousState.isTrial) {
             await updateAICounter()
@@ -2301,10 +2342,11 @@ export class SidebarContainerLogic extends UILogic<
             prompt: {
                 $set:
                     outputLocation !== 'chapterSummary'
-                        ? previousState.prompt
-                        : prompt,
+                        ? prompt
+                        : previousState.prompt,
             },
             showAICounter: { $set: true },
+            hasKey: { $set: hasAPIKey },
         })
 
         let textToAnalyse = textAsAlternative
@@ -2329,6 +2371,7 @@ export class SidebarContainerLogic extends UILogic<
             apiKey: openAIKey ? openAIKey : undefined,
             outputLocation: outputLocation ?? null,
             chapterSummaryIndex: chapterSummaryIndex ?? null,
+            AImodel: previousState.AImodel,
         })
 
         return response
@@ -2915,6 +2958,13 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             spaceTitleEditValue: { $set: event.value },
+        })
+    }
+    addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
+        this.emitMutation({
+            hasKey: {
+                $set: previousState.hasKey ? !previousState.hasKey : true,
+            },
         })
     }
 
