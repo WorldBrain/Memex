@@ -178,12 +178,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         { localListIds, ...annotation }: UnifiedAnnotationForCache,
         opts: { now: number },
     ): UnifiedAnnotation => {
+        console.log(
+            'annotation.color',
+            annotation.color,
+            this.highlightColorSettings,
+        )
         const unifiedAnnotationId = this.generateAnnotationId()
         if (annotation.color != null) {
             const annotColorAsRGB = this.highlightColorSettings.find(
                 (item) => item.id === annotation.color,
             )?.color
 
+            console.log('annotColorAsRGB', annotColorAsRGB)
             annotation.color = array2RGBA(annotColorAsRGB)
         }
 

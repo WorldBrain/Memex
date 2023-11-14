@@ -539,6 +539,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        console.log('event.notid', event.noteId)
         const {
             annotations: {
                 byId: { [event.noteId]: annotationData },
@@ -549,34 +550,39 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        console.log('annotationData', annotationData)
+
         await updateAnnotation({
             annotationsBG: this.options.annotationsBG,
             contentSharingBG: this.options.contentSharingBG,
             keepListsIfUnsharing: true,
             annotationData: {
-                comment: annotationData.comment,
-                localId: annotationData.localId,
+                comment: annotationData?.comment ?? '',
+                localId: annotationData?.localId,
                 color: event.colorId,
             },
             shareOpts: {
-                shouldShare: annotationData.privacyLevel === 200 ? true : false,
+                shouldShare:
+                    annotationData?.privacyLevel === 200 ? true : false,
                 skipPrivacyLevelUpdate: true,
             },
         })
 
         this.options.annotationsCache.updateAnnotation({
             ...annotationData,
-            comment: annotationData.comment,
+            comment: annotationData?.comment ?? '',
             color: event.colorId,
-            unifiedListIds: annotationData.unifiedListIds,
+            unifiedListIds: annotationData?.unifiedListIds,
         })
 
         this.emitMutation({
             annotations: {
                 byId: {
                     [event.noteId]: {
-                        comment: { $set: annotationData.comment },
-                        unifiedListIds: { $set: annotationData.unifiedListIds },
+                        comment: { $set: annotationData?.comment },
+                        unifiedListIds: {
+                            $set: annotationData?.unifiedListIds,
+                        },
                     },
                 },
             },

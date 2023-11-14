@@ -231,7 +231,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
     setAIModel: (AImodel) => void
-    saveHighlightColor: (id, color, colorId) => void
+    saveHighlightColor: (noteId, colorId, color) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string

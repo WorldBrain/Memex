@@ -851,15 +851,11 @@ export class AnnotationsSidebarContainer<
                             chapterSummaries={this.state.chapterSummaries}
                             videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
-                            saveHighlightColor={(
-                                unifiedAnnotationId,
-                                color,
-                                colorId,
-                            ) => {
+                            saveHighlightColor={(noteId, colorId, color) => {
                                 this.processEvent('saveHighlightColor', {
-                                    noteId: unifiedAnnotationId,
-                                    color: color,
+                                    noteId: noteId,
                                     colorId: colorId,
+                                    color: color,
                                 })
                             }}
                             saveHighlightColorSettings={(newState) => {

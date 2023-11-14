@@ -134,7 +134,7 @@ export type Props = RootState &
         imageSupport: ImageSupportInterface<'caller'>
         onBulkSelect: (itemData, remove) => Promise<void>
         selectedItems: string[]
-        saveHighlightColor: (color, id, unifiedId) => void
+        saveHighlightColor: (id, color, unifiedId) => void
         saveHighlightColorSettings: (newState) => void
         getHighlightColorSettings: () => void
         highlightColorSettings: string
@@ -311,8 +311,8 @@ export default class SearchResultsContainer extends React.Component<
         return (
             <AnnotationEditable
                 imageSupport={this.props.imageSupport}
-                saveHighlightColor={(id, color) => {
-                    this.props.saveHighlightColor(id, color, noteId)
+                saveHighlightColor={(id, color, colorId) => {
+                    this.props.saveHighlightColor(id, colorId, noteId)
                 }}
                 saveHighlightColorSettings={
                     this.props.saveHighlightColorSettings

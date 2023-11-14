@@ -112,7 +112,7 @@ export interface AnnotationProps {
     shareMenuAnnotationInstanceId: string
     imageSupport: ImageSupportInterface<'caller'>
     selector?: Anchor
-    saveHighlightColor?: (id, color, colorId) => void
+    saveHighlightColor?: (noteId, colorId, color) => void
     saveHighlightColorSettings?: (newState) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
@@ -516,8 +516,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         changeHighlightColor={(color, colorId) => {
                             this.props.saveHighlightColor(
                                 unifiedId,
-                                color,
                                 colorId,
+                                color,
                             )
                             this.setState({
                                 showHighlightColorPicker: false,
