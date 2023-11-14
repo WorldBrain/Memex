@@ -25,6 +25,7 @@ import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
+import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
 
 const limitSuggestionsStorageLength = 25
 
@@ -394,17 +395,27 @@ export default class CustomListBackground {
         now,
     }) => {
         if (
-            await this.storage.isListAAncestorOfListB(localListId, parentListId)
+            parentListId != null &&
+            (await this.storage.isListAAncestorOfListB(
+                localListId,
+                parentListId,
+            ))
         ) {
             throw new Error(
                 'Cannot make list a child of a descendent - this would result in a cycle',
             )
         }
-        await this.storage.updateListTreeParent({
-            localListId,
-            parentListId,
-            now,
-        })
+
+        // This will get caught by the ListTreeMiddleware
+        await this.options.storageManager.operation(
+            LIST_TREE_OPERATION_ALIASES.moveTree,
+            CustomListStorage.LIST_TREES_COLL,
+            {
+                localListId,
+                newParentListId: parentListId,
+                now,
+            },
+        )
     }
 
     deleteListTree: RemoteCollectionsInterface['deleteListTree'] = async ({

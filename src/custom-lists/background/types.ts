@@ -79,7 +79,7 @@ export interface CollectionsCacheInterface {
 export interface RemoteCollectionsInterface {
     updateListTreeParent(args: {
         localListId: number
-        parentListId: number
+        parentListId: number | null
         now?: number
     }): Promise<void>
     deleteListTree(args: { treeId: number }): Promise<void>

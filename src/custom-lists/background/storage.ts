@@ -110,18 +110,6 @@ export default class CustomListStorage extends StorageModule {
                     operation: 'findObjects',
                     args: { listId: { $in: '$listIds:int[]' } },
                 },
-                updateListTreeAncestors: {
-                    collection: CustomListStorage.LIST_TREES_COLL,
-                    operation: 'updateObjects',
-                    args: [
-                        { id: '$id:pk' },
-                        {
-                            path: '$path:string',
-                            parentListId: '$parentListId:int',
-                            updatedWhen: '$updatedWhen:int',
-                        },
-                    ],
-                },
                 findListsIncluding: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
                     operation: 'findObjects',
@@ -624,6 +612,7 @@ export default class CustomListStorage extends StorageModule {
         now?: number
     }): Promise<void> {
         const updatedWhen = params.now ?? Date.now()
+        // Keep a cache to avoid needing to look up the same nodes multiple times
         const treeCache = new Map<number, ListTree>()
         const getTreeByListId = async (
             localListId: number,
@@ -641,21 +630,9 @@ export default class CustomListStorage extends StorageModule {
             return listTree
         }
 
-        // Check for existence of list tree data, and create if missing - this provides backwards compatibility with pre-nested lists data
-        const parentNode =
-            params.parentListId != null
-                ? await getTreeByListId(params.parentListId)
-                : null
-        if (!parentNode && params.parentListId != null) {
-            const newListTree = await this.createListTree({
-                localListId: params.parentListId,
-                now: params.now,
-            })
-            treeCache.set(params.parentListId, newListTree)
-        }
-
         const nodeToChange = await getTreeByListId(params.localListId)
-        // If the node to change doesn't have list tree data, then it's old pre-nested lists data, which is guaranteed to have no descendants
+
+        // If the node to change doesn't have list tree data, then it's old pre-nested lists data, which is guaranteed to have no descendants - so just create it and finish up
         if (!nodeToChange) {
             const pathIds =
                 params.parentListId != null
@@ -670,6 +647,45 @@ export default class CustomListStorage extends StorageModule {
                 now: params.now,
                 pathIds,
             })
+            return
+        }
+
+        const newParentNode =
+            params.parentListId != null
+                ? await getTreeByListId(params.parentListId)
+                : null
+        // If the parent node doesn't have list tree data, same deal - it's old pre-nested lists data so create it. But still need to continue to potentially update descendents of the main node we're changing
+        if (!newParentNode && params.parentListId != null) {
+            const newListTree = await this.createListTree({
+                localListId: params.parentListId,
+                now: params.now,
+            })
+            treeCache.set(params.parentListId, newListTree)
+        }
+
+        // Link nodes are always leaves. Simply update this node and finish up
+        if (nodeToChange.linkTarget != null) {
+            await this.options.storageManager.backend.operation(
+                'updateObjects',
+                CustomListStorage.LIST_TREES_COLL,
+                {
+                    id: nodeToChange.id,
+                },
+                {
+                    updatedWhen,
+                    parentListId: newParentNode?.listId ?? null,
+                    path:
+                        newParentNode != null
+                            ? buildMaterializedPath(
+                                  ...extractMaterializedPathIds(
+                                      newParentNode.path ?? '',
+                                      'number',
+                                  ),
+                                  newParentNode.listId,
+                              )
+                            : null,
+                },
+            )
             return
         }
 
@@ -688,27 +704,31 @@ export default class CustomListStorage extends StorageModule {
                         ? await getTreeByListId(parentListId)
                         : null
 
-                const parentPathIds =
-                    parentNode?.path != null
-                        ? (extractMaterializedPathIds(
-                              parentNode.path,
-                              'number',
-                          ) as number[])
-                        : []
                 node.parentListId = parentNode?.listId ?? null
                 node.path =
                     parentNode?.listId != null
                         ? buildMaterializedPath(
-                              ...[...parentPathIds, parentNode.listId],
+                              ...extractMaterializedPathIds(
+                                  parentNode?.path ?? '',
+                                  'number',
+                              ),
+                              parentNode.listId,
                           )
                         : null
 
-                await this.operation('updateListTreeAncestors', {
-                    updatedWhen,
-                    id: node.id,
-                    path: node.path,
-                    parentListId: node.parentListId,
-                })
+                // Note we're running this on the storage backend so that it skips storex middleware and doesn't get synced (tree updates handled in a special way for sync)
+                await this.options.storageManager.backend.operation(
+                    'updateObjects',
+                    CustomListStorage.LIST_TREES_COLL,
+                    {
+                        id: node.id,
+                    },
+                    {
+                        path: node.path,
+                        parentListId: node.parentListId,
+                        updatedWhen,
+                    },
+                )
             },
         })
     }
