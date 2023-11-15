@@ -630,6 +630,19 @@ export default class CustomListStorage extends StorageModule {
             return listTree
         }
 
+        const newParentNode =
+            params.parentListId != null
+                ? await getTreeByListId(params.parentListId)
+                : null
+        // If the parent node doesn't have list tree data, same deal - it's old pre-nested lists data so create it. But still need to continue to potentially update descendents of the main node we're changing
+        if (!newParentNode && params.parentListId != null) {
+            const newListTree = await this.createListTree({
+                localListId: params.parentListId,
+                now: params.now,
+            })
+            treeCache.set(params.parentListId, newListTree)
+        }
+
         const nodeToChange = await getTreeByListId(params.localListId)
 
         // If the node to change doesn't have list tree data, then it's old pre-nested lists data, which is guaranteed to have no descendants - so just create it and finish up
@@ -648,19 +661,6 @@ export default class CustomListStorage extends StorageModule {
                 pathIds,
             })
             return
-        }
-
-        const newParentNode =
-            params.parentListId != null
-                ? await getTreeByListId(params.parentListId)
-                : null
-        // If the parent node doesn't have list tree data, same deal - it's old pre-nested lists data so create it. But still need to continue to potentially update descendents of the main node we're changing
-        if (!newParentNode && params.parentListId != null) {
-            const newListTree = await this.createListTree({
-                localListId: params.parentListId,
-                now: params.now,
-            })
-            treeCache.set(params.parentListId, newListTree)
         }
 
         // Link nodes are always leaves. Simply update this node and finish up
