@@ -813,6 +813,11 @@ export default class CustomListStorage extends StorageModule {
         if (!listTree) {
             throw new Error('Could not find root data of tree to traverse')
         }
+        // Link nodes are always leaves
+        if (listTree.linkTarget != null) {
+            return [listTree]
+        }
+
         const materializedPath = buildMaterializedPath(
             ...extractMaterializedPathIds(listTree.path ?? '', 'number'),
             listTree.listId,

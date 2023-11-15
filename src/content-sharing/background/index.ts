@@ -41,6 +41,8 @@ import {
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { ListTree } from 'src/custom-lists/background/types'
+import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
+import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -369,6 +371,17 @@ export default class ContentSharingBackground {
     }
 
     deleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
+        localListId,
+    }) => {
+        // This will get caught by the ListTreeMiddleware
+        await this.options.storageManager.operation(
+            LIST_TREE_OPERATION_ALIASES.deleteTree,
+            LIST_COLL_NAMES.listTrees,
+            { localListId },
+        )
+    }
+
+    performDeleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
         localListId,
     }) => {
         const {
