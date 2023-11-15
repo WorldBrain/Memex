@@ -41,6 +41,7 @@ import {
     forEachTreeClimbAsync,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import type { OperationBatch } from '@worldbrain/storex'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -634,7 +635,7 @@ export default class CustomListStorage extends StorageModule {
             params.parentListId != null
                 ? await getTreeByListId(params.parentListId)
                 : null
-        // If the parent node doesn't have list tree data, same deal - it's old pre-nested lists data so create it. But still need to continue to potentially update descendents of the main node we're changing
+        // If the parent node doesn't have list tree data, it's old pre-nested lists data, so create it
         if (!newParentNode && params.parentListId != null) {
             const newListTree = await this.createListTree({
                 localListId: params.parentListId,
@@ -644,7 +645,6 @@ export default class CustomListStorage extends StorageModule {
         }
 
         const nodeToChange = await getTreeByListId(params.localListId)
-
         // If the node to change doesn't have list tree data, then it's old pre-nested lists data, which is guaranteed to have no descendants - so just create it and finish up
         if (!nodeToChange) {
             const pathIds =
@@ -689,17 +689,18 @@ export default class CustomListStorage extends StorageModule {
             return
         }
 
+        const batch: OperationBatch = []
         // Go through entire subtree that starts from the node we need to change and update each node's ancestor references
         await forEachTreeTraverseAsync({
             root: nodeToChange,
-            concurrent: false, // TODO: Maybe can be done concurrently once sync support is in
+            concurrent: true,
             getChildren: (node) =>
                 this.getTreesByParent({ parentListId: node.listId }),
             cb: async (node, i) => {
                 // We want to manually point the root to the new parent, then cascade that change down through descendents
                 const parentListId =
                     i === 0 ? params.parentListId : node.parentListId
-                const parentNode: ListTree =
+                const parentNode =
                     parentListId != null
                         ? await getTreeByListId(parentListId)
                         : null
@@ -716,21 +717,21 @@ export default class CustomListStorage extends StorageModule {
                           )
                         : null
 
-                // Note we're running this on the storage backend so that it skips storex middleware and doesn't get synced (tree updates handled in a special way for sync)
-                await this.options.storageManager.backend.operation(
-                    'updateObjects',
-                    CustomListStorage.LIST_TREES_COLL,
-                    {
-                        id: node.id,
-                    },
-                    {
+                batch.push({
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'updateObjects',
+                    where: { id: node.id },
+                    updates: {
                         path: node.path,
                         parentListId: node.parentListId,
                         updatedWhen,
                     },
-                )
+                })
             },
         })
+
+        // Note we're running this on the storage backend so that it skips storex middleware and doesn't get synced (tree updates handled in a special way for sync)
+        await this.options.storageManager.backend.executeBatch(batch)
     }
 
     async isListAAncestorOfListB(
