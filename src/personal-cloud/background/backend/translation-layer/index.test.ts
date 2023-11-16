@@ -1963,6 +1963,7 @@ describe('Personal cloud translation layer', () => {
                 serverIdCapturer,
                 getPersonalWhere,
                 testSyncPushTrigger,
+                personalDataChanges,
                 getDatabaseContents,
                 testDownload,
             } = await setup()
@@ -2060,23 +2061,19 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             expect(
                 await getDatabaseContents([
-                    // 'personalDataChange', // TODO: Figure out how these change
+                    'personalDataChange',
                     'personalListTree',
                     'sharedListTree',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                // ...personalDataChanges(remoteData, [
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
-                // ], { skipChanges: 8 }),
+                ...personalDataChanges(remoteDataA, [
+                    // No changes should be created from the server-side changes
+                ], { skipChanges: 12 }),
                 personalListTree: [
                     testListTreesA.first,
                     testListTreesA.second,
                     {
                         ...testListTreesA.third,
-                        updatedWhen: nowA,
                         path: buildMaterializedPath(
                             testListTreesA.first.personalList,
                             testListTreesA.second.personalList,
@@ -2087,7 +2084,6 @@ describe('Personal cloud translation layer', () => {
                     },
                     {
                         ...testListTreesA.fourth,
-                        updatedWhen: nowA,
                         path: buildMaterializedPath(
                             testListTreesA.first.personalList,
                             testListTreesA.second.personalList,
