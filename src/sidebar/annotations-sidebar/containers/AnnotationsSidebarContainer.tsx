@@ -843,7 +843,6 @@ export class AnnotationsSidebarContainer<
                             }}
                             loadState={this.state.loadState}
                             setAIModel={(AImodel) => {
-                                console.log('adadfadfasdf', AImodel)
                                 this.processEvent('setAIModel', AImodel)
                             }}
                             showChapters={this.state.showChapters}

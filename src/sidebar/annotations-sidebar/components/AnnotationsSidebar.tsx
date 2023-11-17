@@ -1709,8 +1709,6 @@ export class AnnotationsSidebar extends React.Component<
                 )
             }
 
-            console.log('asdfadsfasdf', this.props.hasKey)
-
             return (
                 <AISidebarContainer>
                     {this.props.selectedTextAIPreview && (
@@ -2258,21 +2256,22 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
-                            // saveHighlightColor={(color) =>
-                            //     this.props.saveHighlightColor(
-                            //         annot.unifiedId,
-                            //         color,
-                            //     )
-                            // }
-                            // saveHighlightColorSettings={
-                            //     this.props.saveHighlightColorSettings
-                            // }
-                            // getHighlightColorSettings={
-                            //     this.props.getHighlightColorSettings
-                            // }
-                            // highlightColorSettings={
-                            //     this.props.highlightColorSettings
-                            // }
+                            saveHighlightColor={(noteId, colorId, color) =>
+                                this.props.saveHighlightColor(
+                                    noteId,
+                                    colorId,
+                                    color,
+                                )
+                            }
+                            saveHighlightColorSettings={
+                                this.props.saveHighlightColorSettings
+                            }
+                            getHighlightColorSettings={
+                                this.props.getHighlightColorSettings
+                            }
+                            highlightColorSettings={
+                                this.props.highlightColorSettings
+                            }
                             contextLocation={this.props.sidebarContext}
                             pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}

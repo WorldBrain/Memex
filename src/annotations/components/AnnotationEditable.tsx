@@ -35,7 +35,7 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import { Anchor } from 'src/highlighting/types'
 import HighlightColorPicker from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker'
 import tinycolor from 'tinycolor2'
-import { RGBA2array } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -425,7 +425,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
             >
-                {this.renderHighlightsColorPicker(this.props.unifiedId)}
+                {this.renderHighlightsColorPicker(
+                    this.props.unifiedId,
+                    this.props.color,
+                )}
                 {this.renderHighlightsColorTooltip()}
                 <ActionBox>{actionsBox}</ActionBox>
                 {!isScreenshotAnnotation && (
@@ -474,8 +477,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             const label = settings.find(
                 (setting) =>
                     JSON.stringify(setting.color) ===
-                    JSON.stringify(RGBA2array(this.props.color)),
-            )?.label
+                    JSON.stringify(this.props.color),
+            )
 
             return (
                 <PopoutBox
@@ -490,14 +493,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     instaClose
                 >
                     {/* {this.props.highlightColorSettings[]} */}
-                    <LabelBox>{label}</LabelBox>
+                    <LabelBox>{label.label}</LabelBox>
                 </PopoutBox>
             )
         }
     }
-    private renderHighlightsColorPicker(unifiedId) {
+    private renderHighlightsColorPicker(unifiedId, selectedColor) {
         if (this.state.showHighlightColorPicker) {
-            console.log('this.', this.props.highlightColorSettings)
             return (
                 <PopoutBox
                     targetElementRef={this.highlightsBarRef.current}
@@ -529,6 +531,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         highlightColorSettings={
                             this.props.highlightColorSettings
                         }
+                        selectedColor={selectedColor}
                     />
                 </PopoutBox>
             )
@@ -1088,11 +1091,13 @@ const Highlightbar = styled.div<{ barColor: string }>`
     ${(props) =>
         props.barColor &&
         css<any>`
-            background: ${(props) => props.barColor};
+            background: ${(props) => RGBAobjectToString(props.barColor)};
 
             &:hover {
                 background: ${(props) =>
-                    tinycolor(props.barColor).lighten(25).toHexString()};
+                    tinycolor(RGBAobjectToString(props.barColor))
+                        .lighten(25)
+                        .toHexString()};
             }
         `}
 `

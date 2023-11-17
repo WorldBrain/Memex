@@ -103,6 +103,7 @@ import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -539,7 +540,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        console.log('event.notid', event.noteId)
         const {
             annotations: {
                 byId: { [event.noteId]: annotationData },
@@ -549,8 +549,6 @@ export class SidebarContainerLogic extends UILogic<
         if (annotationData?.creator?.id !== this.options.getCurrentUser()?.id) {
             return
         }
-
-        console.log('annotationData', annotationData)
 
         await updateAnnotation({
             annotationsBG: this.options.annotationsBG,
@@ -583,6 +581,7 @@ export class SidebarContainerLogic extends UILogic<
                         unifiedListIds: {
                             $set: annotationData?.unifiedListIds,
                         },
+                        color: { $set: event.color },
                     },
                 },
             },
@@ -598,19 +597,69 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         for (let item of memexHighlights) {
-            item.setAttribute('style', `background-color:${event.color};`)
-            item.setAttribute('highlightcolor', `${event.color}`)
+            item.setAttribute(
+                'style',
+                `background-color:${RGBAobjectToString(event.color)};`,
+            )
+            item.setAttribute(
+                'highlightcolor',
+                `${RGBAobjectToString(event.color)}`,
+            )
         }
     }
     saveHighlightColorSettings: EventHandler<
         'saveHighlightColorSettings'
-    > = async ({ event }) => {
+    > = async ({ event, previousState }) => {
         const newState = JSON.parse(event.newState)
+        const oldState = JSON.parse(previousState.highlightColors)
         await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        const changedColors = newState
+            .map((newItem, index) => {
+                const oldItem = oldState[index]
+                if (
+                    oldItem &&
+                    newItem.id === oldItem.id &&
+                    JSON.stringify(newItem.color) !==
+                        JSON.stringify(oldItem.color)
+                ) {
+                    return {
+                        oldColor: RGBAobjectToString(oldItem.color),
+                        newColor: RGBAobjectToString(newItem.color),
+                    }
+                }
+            })
+            .filter((item) => item != null)
 
         this.emitMutation({
             highlightColors: { $set: JSON.stringify(newState) },
         })
+
+        let highlights: HTMLCollection = document.getElementsByTagName(
+            'hypothesis-highlight',
+        )
+
+        for (let color of changedColors) {
+            let memexHighlights: Element[] = Array.from(highlights).filter(
+                (highlight) => {
+                    if (
+                        highlight.getAttribute('highlightcolor') ===
+                        color.oldColor
+                    ) {
+                        highlight.setAttribute(
+                            'style',
+                            `background-color:${RGBAobjectToString(
+                                color.newColor,
+                            )};`,
+                        )
+                        highlight.setAttribute(
+                            'highlightcolor',
+                            JSON.stringify(`${color.newColor}`),
+                        )
+                    }
+                },
+            )
+        }
     }
 
     /** Should only be used for state initialization. */
