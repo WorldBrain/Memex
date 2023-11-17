@@ -622,7 +622,7 @@ export default class CustomListStorage extends StorageModule {
             if (cached) {
                 return cached
             }
-            const listTree: ListTree | null = await this.getTreeDataForList({
+            const listTree = await this.getTreeDataForList({
                 localListId,
             })
             if (listTree) {
@@ -694,8 +694,20 @@ export default class CustomListStorage extends StorageModule {
         await forEachTreeTraverseAsync({
             root: nodeToChange,
             concurrent: true,
-            getChildren: (node) =>
-                this.getTreesByParent({ parentListId: node.listId }),
+            getChildren: async (node) => {
+                const children = await this.getTreesByParent({
+                    parentListId: node.listId,
+                })
+                // Ensure the cached version is used for each child, if already there, as their links get updated in each iteration
+                return children.map((child) => {
+                    const childId = child.listId ?? child.linkTarget
+                    const existing = treeCache.get(childId)
+                    if (!existing) {
+                        treeCache.set(childId, child)
+                    }
+                    return existing ?? child
+                })
+            },
             cb: async (node, i) => {
                 // We want to manually point the root to the new parent, then cascade that change down through descendents
                 const parentListId =
@@ -707,10 +719,10 @@ export default class CustomListStorage extends StorageModule {
 
                 node.parentListId = parentNode?.listId ?? null
                 node.path =
-                    parentNode?.listId != null
+                    parentNode != null
                         ? buildMaterializedPath(
                               ...extractMaterializedPathIds(
-                                  parentNode?.path ?? '',
+                                  parentNode.path ?? '',
                                   'number',
                               ),
                               parentNode.listId,

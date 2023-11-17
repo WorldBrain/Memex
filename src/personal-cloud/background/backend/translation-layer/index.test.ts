@@ -2057,7 +2057,6 @@ describe('Personal cloud translation layer', () => {
             const testListTreesA = remoteDataA.personalListTree
             const testListSharesA = remoteDataA.personalListShare
 
-            // TODO: Fix this once sync support
             // prettier-ignore
             expect(
                 await getDatabaseContents([
@@ -2093,19 +2092,28 @@ describe('Personal cloud translation layer', () => {
                     },
                 ],
                 sharedListTree: [
-                    expect.objectContaining({
+                    {
+                        id: 1,
                         creator: TEST_USER.id,
                         order: testListTreesA.first.order,
                         sharedList: testListSharesA.first.remoteId,
-                    }),
-                    expect.objectContaining({
+                        // parentListId: null,
+                        // path: null,
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
+                    {
+                        id: 2,
                         creator: TEST_USER.id,
                         order: testListTreesA.second.order,
                         sharedList: testListSharesA.second.remoteId,
                         parentListId: testListSharesA.first.remoteId,
                         path: buildMaterializedPath(testListSharesA.first.remoteId),
-                    }),
-                    expect.objectContaining({
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
+                    {
+                        id: 3,
                         creator: TEST_USER.id,
                         order: testListTreesA.third.order,
                         sharedList: testListSharesA.third.remoteId,
@@ -2114,8 +2122,11 @@ describe('Personal cloud translation layer', () => {
                             testListSharesA.first.remoteId,
                             testListSharesA.second.remoteId,
                         ),
-                    }),
-                    expect.objectContaining({
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
+                    {
+                        id: 4,
                         creator: TEST_USER.id,
                         order: testListTreesA.fourth.order,
                         sharedList: testListSharesA.fourth.remoteId,
@@ -2125,7 +2136,9 @@ describe('Personal cloud translation layer', () => {
                             testListSharesA.second.remoteId,
                             testListSharesA.third.remoteId,
                         ),
-                    }),
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
                 ],
             })
 
@@ -2166,34 +2179,33 @@ describe('Personal cloud translation layer', () => {
             const testListTreesB = remoteDataB.personalListTree
             const testListSharesB = remoteDataB.personalListShare
 
-            // TODO: Fix this once sync support
             // prettier-ignore
             expect(
                 await getDatabaseContents([
-                    // 'personalDataChange', // TODO: Figure out how these change
+                    'personalDataChange',
                     'personalListTree',
                     'sharedListTree',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
-                // ...personalDataChanges(remoteData, [
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
-                //     [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
-                // ], { skipChanges: 8 }),
+                ...personalDataChanges(remoteDataB, [
+                    // No changes should be created from the server-side changes
+                ], { skipChanges: 12 }),
                 personalListTree: [
                     testListTreesB.first,
                     {
                         ...testListTreesB.second,
-                        updatedWhen: nowB,
-                        path: null,
-                        parentListId: null,
-                        localPath: listTreesData.second.path,
-                        localParentId: listTreesData.second.parentListId,
+                        // TODO: Currently I'm deleting all null fields on DB read (see `deleteNullFields`), thus these fields end up as `undefined`. Fix this up
+                        // path: null,
+                        // parentListId: null,
+                        // localPath: listTreesData.second.path,
+                        // localParentId: listTreesData.second.parentListId,
+                        path: undefined,
+                        parentListId: undefined,
+                        localPath: undefined,
+                        localParentId: undefined,
                     },
                     {
                         ...testListTreesB.third,
-                        updatedWhen: nowB,
                         path: buildMaterializedPath(testListTreesB.second.personalList),
                         parentListId: testListTreesB.second.personalList,
                         localPath: listTreesData.third.path,
@@ -2201,7 +2213,6 @@ describe('Personal cloud translation layer', () => {
                     },
                     {
                         ...testListTreesB.fourth,
-                        updatedWhen: nowB,
                         parentListId: testListTreesB.third.personalList,
                         path: buildMaterializedPath(
                             testListTreesB.second.personalList,
@@ -2211,26 +2222,38 @@ describe('Personal cloud translation layer', () => {
                     },
                 ],
                 sharedListTree: [
-                    expect.objectContaining({
+                    {
+                        id: 1,
                         creator: TEST_USER.id,
                         order: testListTreesB.first.order,
                         sharedList: testListSharesB.first.remoteId,
-                    }),
-                    expect.objectContaining({
+                        // parentListId: null,
+                        // path: null,
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
+                    {
+                        id: 2,
                         creator: TEST_USER.id,
                         order: testListTreesB.second.order,
                         sharedList: testListSharesB.second.remoteId,
-                        parentListId: null,
-                        path: null,
-                    }),
-                    expect.objectContaining({
+                        // parentListId: null,
+                        // path: null,
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
+                    {
+                        id: 3,
                         creator: TEST_USER.id,
                         order: testListTreesB.third.order,
                         sharedList: testListSharesB.third.remoteId,
                         parentListId: testListSharesB.second.remoteId,
                         path: buildMaterializedPath(testListSharesB.second.remoteId),
-                    }),
-                    expect.objectContaining({
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
+                    {
+                        id: 4,
                         creator: TEST_USER.id,
                         order: testListTreesB.fourth.order,
                         sharedList: testListSharesB.fourth.remoteId,
@@ -2239,36 +2262,30 @@ describe('Personal cloud translation layer', () => {
                             testListSharesB.second.remoteId,
                             testListSharesB.third.remoteId,
                         ),
-                    }),
+                        createdWhen: expect.any(Number),
+                        updatedWhen: expect.any(Number),
+                    },
                 ],
             })
 
-            // TODO: Figure expected DL out
             // prettier - ignore
             await testDownload(
                 [
                     {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: listTreesData.first,
+                        type: PersonalCloudUpdateType.ListTreeMove,
+                        rootNodeLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.third.id,
+                        parentLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.second.id,
                     },
                     {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: listTreesData.second,
-                    },
-                    {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: listTreesData.third,
-                    },
-                    {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: listTreesData.fourth,
+                        type: PersonalCloudUpdateType.ListTreeMove,
+                        rootNodeLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.second.id,
+                        parentLocalListId: null,
                     },
                 ],
-                { skip: 8 },
+                { skip: 12 },
             )
 
             testSyncPushTrigger({ wasTriggered: true })
