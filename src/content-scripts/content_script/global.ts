@@ -225,6 +225,20 @@ export async function main(
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 
+    // loadInitialSettings
+
+    const syncSettings = createSyncSettingsStore({
+        syncSettingsBG: syncSettingsBG,
+    })
+
+    const isAutoAddStorage = await syncSettings.extension.get(
+        'shouldAutoAddSpaces',
+    )
+
+    if (isAutoAddStorage == null) {
+        await syncSettings.extension.set('shouldAutoAddSpaces', true)
+    }
+
     // 2.5 load cache
 
     const _currentUser = await authBG.getCurrentUser()
@@ -312,18 +326,15 @@ export async function main(
             }
 
             let privacyLevel: AnnotationPrivacyLevels
-            if (remoteListIds.length) {
+            if (inPageUI.selectedList) {
                 privacyLevel = data.shouldShare
                     ? AnnotationPrivacyLevels.SHARED
                     : AnnotationPrivacyLevels.PROTECTED
             } else {
-                privacyLevel = data.shouldShare
-                    ? AnnotationPrivacyLevels.SHARED
-                    : AnnotationPrivacyLevels.PRIVATE
-            }
-
-            if (shouldShareSettings) {
-                privacyLevel = 200
+                privacyLevel =
+                    shouldShareSettings || data.shouldShare
+                        ? AnnotationPrivacyLevels.SHARED
+                        : AnnotationPrivacyLevels.PRIVATE
             }
 
             const { unifiedId } = annotationsCache.addAnnotation({

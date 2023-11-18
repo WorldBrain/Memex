@@ -133,9 +133,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             })
         } else if (isAutoAddStorage == null) {
             this.setState({
-                isAutoAddSet: false,
+                isAutoAddSet: true,
             })
-            await this.setAutoAddSetting(false)
+            await this.setAutoAddSetting(true)
         }
 
         let existingSetting = await this.syncSettings.extension.get(

@@ -1992,14 +1992,15 @@ export class SidebarContainerLogic extends UILogic<
             maybeAddLocalListIdForCacheList(event.listInstanceId)
 
             let privacyLevel: AnnotationPrivacyLevels
-            if (remoteListIds.length) {
+            if (previousState.selectedListId) {
                 privacyLevel = event.shouldShare
                     ? AnnotationPrivacyLevels.SHARED
                     : AnnotationPrivacyLevels.PROTECTED
             } else {
-                privacyLevel = event.shouldShare
-                    ? AnnotationPrivacyLevels.SHARED
-                    : AnnotationPrivacyLevels.PRIVATE
+                privacyLevel =
+                    shouldShareSettings || event.shouldShare
+                        ? AnnotationPrivacyLevels.SHARED
+                        : AnnotationPrivacyLevels.PRIVATE
             }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
@@ -2026,10 +2027,6 @@ export class SidebarContainerLogic extends UILogic<
                     isBulkShareProtected: event.isProtected,
                 },
             })
-
-            if (shouldShareSettings) {
-                privacyLevel = 200
-            }
 
             this.options.annotationsCache.addAnnotation({
                 localId: annotationId,
