@@ -1289,7 +1289,7 @@ const AnnotationStyled = styled.div`
     ${({ theme }) =>
         theme.isActive &&
         `
-        outline: 1px solid ${theme.colors.prime1}60;
+        outline: 2px solid ${theme.colors.prime1}60;
     `};
 
     ${(props) =>

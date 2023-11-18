@@ -235,6 +235,13 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     getInitialState(): SidebarContainerState {
+        let sidebarWidth = SIDEBAR_WIDTH_STORAGE_KEY
+        if (window.location.href.includes('youtube.com/watch')) {
+            const sidebarContainerWidth = document.getElementById('secondary')
+                .clientWidth
+            sidebarWidth = sidebarContainerWidth - 50 + 'px'
+        }
+
         return {
             ...annotationConversationInitialState(),
 
@@ -250,6 +257,7 @@ export class SidebarContainerLogic extends UILogic<
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
             selectedTextAIPreview: undefined,
+            sidebarWidth: sidebarWidth,
 
             users: {},
             currentUserReference: null,
@@ -1018,9 +1026,6 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     ) {
                         document.body.style.position = 'relative'
-                    } else {
-                        document.body.style.position = 'sticky'
-                        this.adjustYoutubePlayerSize()
                     }
                     if (window.location.href.includes('mail.google.com')) {
                         this.adjustGmailWidth('initial')
@@ -1032,13 +1037,6 @@ export class SidebarContainerLogic extends UILogic<
                     document.body.style.position = 'initial'
                     if (document.body.offsetWidth === 0) {
                         document.body.style.width = '100%'
-                    }
-                    if (
-                        window.location.href.startsWith(
-                            'https://www.youtube.com',
-                        )
-                    ) {
-                        this.adjustYoutubePlayerSize()
                     }
                     if (window.location.href.includes('mail.google.com')) {
                         this.adjustGmailWidth('initial')
@@ -1061,17 +1059,11 @@ export class SidebarContainerLogic extends UILogic<
             const sidebar = this.sidebar
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
-            let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 40 + 'px'
+            let readingWidth = currentWindowWidth - currentsidebarWidth - 40
 
-            document.body.style.width = readingWidth
-
-            if (window.location.href.startsWith('https://www.youtube.com')) {
-                document.body.style.position = 'sticky'
-                this.adjustYoutubePlayerSize()
-            }
+            document.body.style.width = readingWidth + 'px'
             if (window.location.href.includes('mail.google.com')) {
-                this.adjustGmailWidth(readingWidth)
+                this.adjustGmailWidth(readingWidth + 'px')
             }
         }
     }
@@ -1086,26 +1078,6 @@ export class SidebarContainerLogic extends UILogic<
         Array.from(document.body.children).forEach((child) => {
             setMaxWidth(child as HTMLElement)
         })
-    }
-
-    private adjustYoutubePlayerSize() {
-        const moviePlayer = document.getElementById('movie_player')
-
-        const bottomBar = document.getElementsByClassName(
-            'ytp-chrome-bottom',
-        )[0] as HTMLElement
-        const moviePlayerWidth = moviePlayer.clientWidth
-        const moviePlayerHeight = moviePlayer.clientHeight
-
-        const videoStream = moviePlayer.getElementsByClassName(
-            'video-stream html5-main-video',
-        )
-        if (videoStream[0]) {
-            const videoStreamElement = videoStream[0] as HTMLElement
-            videoStreamElement.style.width = moviePlayerWidth + 'px'
-            bottomBar.style.width = moviePlayerWidth - 12 + 'px'
-            videoStreamElement.style.height = moviePlayerHeight + 'px'
-        }
     }
 
     private async getYoutubeDetails(url) {
@@ -1266,13 +1238,15 @@ export class SidebarContainerLogic extends UILogic<
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
-        if (!window.location.href.startsWith('https://www.youtube.com')) {
-            document.body.style.position = 'relative'
-        }
-        const width =
+
+        let width =
             event.existingWidthState != null
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
+
+        if (!window.location.href.startsWith('https://www.youtube.com')) {
+            document.body.style.position = 'relative'
+        }
 
         this.emitMutation({
             showState: { $set: 'visible' },
@@ -1296,11 +1270,6 @@ export class SidebarContainerLogic extends UILogic<
 
         if (document.body.offsetWidth === 0) {
             document.body.style.width = '100%'
-        }
-
-        if (window.location.href.startsWith('https://www.youtube.com')) {
-            document.body.style.position = 'initial'
-            this.adjustYoutubePlayerSize()
         }
 
         if (window.location.href.includes('mail.google.com')) {

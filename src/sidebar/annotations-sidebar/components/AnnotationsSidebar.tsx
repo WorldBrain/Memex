@@ -3749,7 +3749,7 @@ const TopAreaContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     z-index: 1;
-    padding-top: 5px;
+    padding: 5px 10px;
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
 
@@ -3952,10 +3952,12 @@ const AnnotationContainer = styled(Margin)`
     overflow-x: visible; */
     height: calc(100% + 30px);
     overflow: scroll;
+    padding: 0 10px;
     padding-bottom: 100px;
     flex: 1;
     z-index: 10;
     position: relative;
+    width: unset;
 
     scrollbar-width: none;
 
@@ -3994,7 +3996,7 @@ const AnnotationBox = styled.div<{
 const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     display: flex;
     flex-direction: column;
-    width: 100%;
+    padding: 0 10px;
     padding-bottom: 60px;
     z-index: ${(props) => 999 - props.zIndex};
 `
@@ -4251,7 +4253,6 @@ const AnnotationsSectionStyled = styled.div`
     flex: 1;
     z-index: 19;
     overflow: scroll;
-    padding: 0px 10px 0px 10px;
 
     scrollbar-width: none;
 

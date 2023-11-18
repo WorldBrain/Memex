@@ -151,6 +151,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     /** Mirrors the annotations cache state of the same name */
     pageListIds: Set<UnifiedList['unifiedId']>
     lists: PageAnnotationsCacheInterface['lists']
+
     annotations: PageAnnotationsCacheInterface['annotations']
 
     pageSummary: string
