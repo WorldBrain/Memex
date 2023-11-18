@@ -102,7 +102,7 @@ export interface PageAnnotationsCacheInterface {
 
 export type UnifiedAnnotation = Pick<
     Annotation & SharedAnnotation,
-    'body' | 'comment'
+    'body' | 'comment' | 'color'
 > & {
     // Core annotation data
     unifiedId: string
@@ -113,11 +113,18 @@ export type UnifiedAnnotation = Pick<
     lastEdited: number
     createdWhen: number
     creator?: UserReference
-    color?: string
+    color?: RGBAColor
 
     // Misc annotation feature state
     privacyLevel: AnnotationPrivacyLevels
     unifiedListIds: UnifiedList['unifiedId'][]
+}
+
+export type RGBAColor = {
+    r: number
+    g: number
+    b: number
+    a: number
 }
 
 export type UnifiedAnnotationForCache = Omit<

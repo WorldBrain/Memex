@@ -51,6 +51,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type {
     PageAnnotationsCacheEvents,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
@@ -569,23 +570,10 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.updateAnnotation({
             ...annotationData,
             comment: annotationData?.comment ?? '',
-            color: event.colorId,
+            color: event.color,
             unifiedListIds: annotationData?.unifiedListIds,
         })
 
-        this.emitMutation({
-            annotations: {
-                byId: {
-                    [event.noteId]: {
-                        comment: { $set: annotationData?.comment },
-                        unifiedListIds: {
-                            $set: annotationData?.unifiedListIds,
-                        },
-                        color: { $set: event.color },
-                    },
-                },
-            },
-        })
         let highlights: HTMLCollection = document.getElementsByTagName(
             'hypothesis-highlight',
         )
@@ -624,8 +612,9 @@ export class SidebarContainerLogic extends UILogic<
                         JSON.stringify(oldItem.color)
                 ) {
                     return {
-                        oldColor: RGBAobjectToString(oldItem.color),
-                        newColor: RGBAobjectToString(newItem.color),
+                        id: oldItem.id,
+                        oldColor: oldItem.color,
+                        newColor: newItem.color,
                     }
                 }
             })
@@ -640,25 +629,49 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         for (let color of changedColors) {
-            let memexHighlights: Element[] = Array.from(highlights).filter(
-                (highlight) => {
-                    if (
-                        highlight.getAttribute('highlightcolor') ===
-                        color.oldColor
-                    ) {
-                        highlight.setAttribute(
-                            'style',
-                            `background-color:${RGBAobjectToString(
-                                color.newColor,
-                            )};`,
-                        )
-                        highlight.setAttribute(
-                            'highlightcolor',
-                            JSON.stringify(`${color.newColor}`),
-                        )
-                    }
-                },
+            Array.from(highlights).filter((highlight) => {
+                if (
+                    highlight.getAttribute('highlightcolor') ===
+                    RGBAobjectToString(color.oldColor)
+                ) {
+                    highlight.setAttribute(
+                        'style',
+                        `background-color:${RGBAobjectToString(
+                            color.newColor,
+                        )};`,
+                    )
+                    highlight.setAttribute(
+                        'highlightcolor',
+                        RGBAobjectToString(color.newColor),
+                    )
+                }
+            })
+            const annotationLocalIds: Annotation[] = await this.options.annotationsBG.listAnnotationIdsByColor(
+                { color: color.id },
             )
+
+            const annotations = []
+
+            for (let annotation of annotationLocalIds) {
+                const annotationCachedData = this.options.annotationsCache.getAnnotationByLocalId(
+                    annotation.url,
+                )
+                if (annotationCachedData) {
+                    annotations.push(annotationCachedData)
+                }
+            }
+
+            for (let annotation of annotations) {
+                const colorToUpdate = color.newColor
+
+                this.options.annotationsCache.updateAnnotation({
+                    comment: annotation.comment,
+                    privacyLevel: annotation.privacyLevel,
+                    unifiedListIds: annotation.unifiedListIds,
+                    unifiedId: annotation.unifiedId,
+                    color: colorToUpdate,
+                })
+            }
         }
     }
 

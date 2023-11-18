@@ -10,6 +10,7 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { RGBAColor } from './cache/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -25,13 +26,13 @@ type AnnotationCreateData = {
     createdWhen?: Date
     selector?: Anchor
     localListIds?: number[]
-    color?: string
+    color?: RGBAColor | string | string
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
 
 interface AnnotationUpdateData {
     localId: string
     comment: string | null
-    color?: string
+    color?: RGBAColor | string | string
 }
 
 export interface SaveAnnotationParams<

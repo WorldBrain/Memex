@@ -25,7 +25,10 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { formateCalendarTime } from '@worldbrain/memex-common/lib/utils/date-time'
-import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    RGBAColor,
+} from 'src/annotations/cache/types'
 
 export const notesTypeToString = (type: NotesType): string => {
     if (type === 'user') {
@@ -166,7 +169,7 @@ const annotationToNoteData = (
         tags: annotation.tags ?? [],
         lists,
         selector: annotation.selector,
-        color: annotation.color,
+        color: annotation.color as RGBAColor,
         createdWhen: annotation.createdWhen,
         displayTime: new Date(
             annotation.lastEdited ?? annotation.createdWhen,

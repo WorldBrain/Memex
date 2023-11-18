@@ -6,6 +6,7 @@ import type { PageList } from 'src/custom-lists/background/types'
 import type { Annotation, SharedAnnotationWithRefs } from '../types'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedAnnotationForCache,
     UnifiedList,
@@ -21,7 +22,6 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
-import { annotation } from '../background/storage.test.data'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -65,7 +65,7 @@ export const reshapeAnnotationForCache = (
             shouldShare: annot.isShared,
             isBulkShareProtected: annot.isBulkShareProtected,
         }),
-        color: annot.color,
+        color: annot.color as RGBAColor,
         ...(opts.extraData ?? {}),
     }
 }
@@ -91,7 +91,7 @@ export const reshapeSharedAnnotationForCache = (
         lastEdited: annot.updatedWhen,
         createdWhen: annot.createdWhen,
         privacyLevel: AnnotationPrivacyLevels.SHARED,
-        color: annot.color,
+        color: annot.color as RGBAColor,
         ...(opts.extraData ?? {}),
     }
 }

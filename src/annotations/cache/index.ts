@@ -20,10 +20,6 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
-import {
-    RGBAobjectToString,
-    array2RGBA,
-} from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -181,11 +177,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         { localListIds, ...annotation }: UnifiedAnnotationForCache,
         opts: { now: number },
     ): UnifiedAnnotation => {
-        console.log(
-            'annotation.color',
-            annotation.color,
-            this.highlightColorSettings,
-        )
         const unifiedAnnotationId = this.generateAnnotationId()
         if (annotation.color != null) {
             const annotColorObject = this.highlightColorSettings.find(
@@ -587,13 +578,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             )
         }
 
-        if (updates.color != null) {
-            const annotColorObject = this.highlightColorSettings.find(
-                (item) => item.id === updates.color,
-            )?.color
+        // if (updates.color != null) {
+        //     const annotColorObject = this.highlightColorSettings.find(
+        //         (item) => item.id === updates.color,
+        //     )?.color
 
-            updates.color = annotColorObject
-        }
+        //     updates.color = annotColorObject
+        // }
 
         const next: UnifiedAnnotation = {
             ...previous,

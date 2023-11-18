@@ -46,6 +46,7 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import type {
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
@@ -74,7 +75,7 @@ export interface Props extends SidebarContainerOptions {
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
-    saveHighlightColor?: (noteId, color, unifiedId) => void
+    saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
     saveHighlightColorSettings?: (newState) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string

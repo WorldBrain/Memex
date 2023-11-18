@@ -25,6 +25,7 @@ import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annot
 import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
@@ -278,7 +279,7 @@ interface SidebarEvents {
     getHighlightColorSettings: null
     saveHighlightColor: {
         noteId: string
-        color: string
+        color: RGBAColor
         colorId: string
     }
     saveHighlightColorSettings: { newState: string }

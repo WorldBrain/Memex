@@ -54,7 +54,10 @@ import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
-import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheEvents,
+    RGBAColor,
+} from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
@@ -1366,16 +1369,68 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         this.emitMutation({
-            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
+            highlightColors: { $set: highlightColorJSON },
         })
 
         return highlightColorJSON
     }
     saveHighlightColorSettings: EventHandler<
         'saveHighlightColorSettings'
-    > = async ({ event }) => {
+    > = async ({ event, previousState }) => {
         const newState = JSON.parse(event.newState)
         await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        // console.log('newStae', newState)
+
+        // const changedColors = newState
+        //     .map((newItem, index) => {
+        //         const oldItem = JSON.parse(previousState.highlightColors)[index]
+        //         if (
+        //             oldItem &&
+        //             newItem.id === oldItem.id &&
+        //             JSON.stringify(newItem.color) !==
+        //                 JSON.stringify(oldItem.color)
+        //         ) {
+        //             return {
+        //                 id: oldItem.id,
+        //                 oldColor: oldItem.color,
+        //                 newColor: newItem.color,
+        //             }
+        //         }
+        //     })
+        //     .filter((item) => item != null)
+
+        // console.log('changedColors', changedColors)
+
+        // for (let color of changedColors) {
+        //     const annotationLocalIds = await this.options.annotationsBG.listAnnotationIdsByColor(
+        //         color.id,
+        //     )
+
+        //     console.log('annotationLocalIds', annotationLocalIds)
+
+        //     const annotations = []
+
+        //     for (let annotationLocalId of annotationLocalIds) {
+        //         annotations.push(
+        //             await this.options.annotationsCache.getAnnotationByLocalId(
+        //                 annotationLocalId,
+        //             ),
+        //         )
+        //     }
+
+        //     console.log('annotations', annotations)
+
+        //     for (let annotation of annotations) {
+        //         this.options.annotationsCache.updateAnnotation({
+        //             comment: annotation.comment,
+        //             privacyLevel: annotation.privacyLevel,
+        //             unifiedListIds: annotation.unifiedListIds,
+        //             unifiedId: annotation,
+        //             color: color.newColor,
+        //         })
+        //     }
+        // }
 
         this.emitMutation({
             highlightColors: { $set: JSON.stringify(newState) },
@@ -1405,7 +1460,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     comment: { $set: existing.comment },
-                                    color: { $set: event.color },
+                                    color: { $set: event.color as RGBAColor },
                                 },
                             },
                         },
@@ -3061,7 +3116,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             !!event.keepListsIfUnsharing,
                                     },
                                     lists: { $set: lists },
-                                    color: { $set: event.color },
+                                    color: { $set: event.color as RGBAColor },
                                 },
                             },
                         },

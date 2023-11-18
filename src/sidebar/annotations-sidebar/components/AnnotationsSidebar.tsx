@@ -54,6 +54,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
@@ -2256,7 +2257,11 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
-                            saveHighlightColor={(noteId, colorId, color) =>
+                            saveHighlightColor={(
+                                noteId,
+                                colorId,
+                                color: RGBAColor | string,
+                            ) =>
                                 this.props.saveHighlightColor(
                                     noteId,
                                     colorId,

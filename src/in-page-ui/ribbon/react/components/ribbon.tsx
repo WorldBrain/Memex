@@ -28,7 +28,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { HexColorPicker } from 'react-colorful'
+import { HexColorPicker, RgbaColorPicker } from 'react-colorful'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -37,13 +37,14 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { UnifiedList } from 'src/annotations/cache/types'
+import { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
+import tinycolor from 'tinycolor2'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -81,7 +82,7 @@ interface State {
     blockListValue: string
     showColorPicker: boolean
     renderFeedback: boolean
-    pickerColor: string
+    pickerColor: RGBAColor
     showPickerSave: boolean
     renderLiveChat: boolean
     renderChangeLog: boolean
@@ -633,7 +634,7 @@ export default class Ribbon extends Component<Props, State> {
                     ) : undefined}
                 </PickerButtonTopBar>
                 <TextField
-                    value={this.state.pickerColor}
+                    value={tinycolor(this.state.pickerColor).toHex8String()}
                     onChange={(event) =>
                         this.updatePickerColor(
                             (event.target as HTMLInputElement).value,
@@ -642,7 +643,7 @@ export default class Ribbon extends Component<Props, State> {
                     componentRef={this.colorPickerField}
                 />
                 <HexPickerContainer>
-                    <HexColorPicker
+                    <RgbaColorPicker
                         color={this.state.pickerColor}
                         onChange={(value) => {
                             this.setState({

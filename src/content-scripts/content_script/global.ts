@@ -85,7 +85,7 @@ import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { UnifiedList } from 'src/annotations/cache/types'
+import type { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import {
     trackAnnotationCreate,
     trackPageActivityIndicatorHit,
@@ -338,7 +338,7 @@ export async function main(
                 lastEdited: data.updatedWhen,
                 createdWhen: data.createdWhen,
                 normalizedPageUrl: normalizeUrl(data.fullPageUrl),
-                color: data.color,
+                color: data.color as RGBAColor,
             })
 
             const createPromise = (async () => {
@@ -481,7 +481,7 @@ export async function main(
             selection: Selection,
             shouldShare: boolean,
             drawRectangle?: boolean,
-            highlightColorSettings?: string,
+            highlightColorSettings?: RGBAColor | string,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return

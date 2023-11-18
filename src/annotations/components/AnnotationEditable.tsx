@@ -28,7 +28,7 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import type { UnifiedAnnotation } from '../cache/types'
+import type { RGBAColor, UnifiedAnnotation } from '../cache/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
@@ -41,7 +41,7 @@ export interface HighlightProps extends AnnotationProps {
     body: string
     comment?: string
     selector?: Anchor
-    color?: string
+    color?: RGBAColor
 }
 
 export interface NoteProps extends AnnotationProps {
@@ -116,7 +116,7 @@ export interface AnnotationProps {
     saveHighlightColorSettings?: (newState) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
-    color?: string
+    color?: RGBAColor
 }
 
 export interface AnnotationEditableEventProps {
@@ -143,6 +143,7 @@ interface State {
     needsTruncation?: boolean
     showHighlightColorPicker?: boolean
     showHighlightColorTooltip?: boolean
+    currentHighlightColor?: RGBAColor
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -165,7 +166,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     constructor(props: Props) {
         super(props)
-
         // Afford control from above by using passed down refs instead of local refs, if supplied
         if (props.copyPasterButtonRef) {
             this.copyPasterButtonRef = props.copyPasterButtonRef
@@ -204,6 +204,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     componentDidMount() {
         this.setTextAreaHeight()
+
+        this.setState({
+            currentHighlightColor: this.props.color,
+        })
 
         // let needsTruncation: boolean
 
@@ -254,6 +258,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         ) {
             this.hasInitShowSpacePickerChanged = true
             this.setState({ showSpacePicker: this.props.initShowSpacePicker })
+        }
+        if (prevProps.color != this.props.color) {
+            this.setState({
+                currentHighlightColor: this.props.color,
+            })
         }
     }
 
@@ -429,6 +438,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.unifiedId,
                     this.props.color,
                 )}
+
                 {this.renderHighlightsColorTooltip()}
                 <ActionBox>{actionsBox}</ActionBox>
                 {!isScreenshotAnnotation && (
@@ -450,7 +460,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     .showHighlightColorPicker,
                             })
                         }
-                        barColor={this.props.color}
+                        barColor={
+                            this.state.currentHighlightColor &&
+                            RGBAobjectToString(this.state.currentHighlightColor)
+                        }
                     />
                 )}
                 <Markdown
@@ -478,24 +491,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 (setting) =>
                     JSON.stringify(setting.color) ===
                     JSON.stringify(this.props.color),
-            )
+            )?.label
 
-            return (
-                <PopoutBox
-                    targetElementRef={this.highlightsBarRef.current}
-                    offsetX={5}
-                    placement={'right-start'}
-                    closeComponent={() =>
-                        this.setState({
-                            showHighlightColorTooltip: false,
-                        })
-                    }
-                    instaClose
-                >
-                    {/* {this.props.highlightColorSettings[]} */}
-                    <LabelBox>{label.label}</LabelBox>
-                </PopoutBox>
-            )
+            if (label) {
+                return (
+                    <PopoutBox
+                        targetElementRef={this.highlightsBarRef.current}
+                        offsetX={5}
+                        placement={'right-start'}
+                        closeComponent={() =>
+                            this.setState({
+                                showHighlightColorTooltip: false,
+                            })
+                        }
+                        instaClose
+                    >
+                        {/* {this.props.highlightColorSettings[]} */}
+                        <LabelBox>{label}</LabelBox>
+                    </PopoutBox>
+                )
+            }
         }
     }
     private renderHighlightsColorPicker(unifiedId, selectedColor) {
@@ -515,7 +530,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         saveHighlightColorSettings={
                             this.props.saveHighlightColorSettings
                         }
-                        changeHighlightColor={(color, colorId) => {
+                        changeHighlightColor={(
+                            color: RGBAColor | string,
+                            colorId,
+                        ) => {
                             this.props.saveHighlightColor(
                                 unifiedId,
                                 colorId,
@@ -1091,13 +1109,11 @@ const Highlightbar = styled.div<{ barColor: string }>`
     ${(props) =>
         props.barColor &&
         css<any>`
-            background: ${(props) => RGBAobjectToString(props.barColor)};
+            background: ${(props) => props.barColor};
 
             &:hover {
                 background: ${(props) =>
-                    tinycolor(RGBAobjectToString(props.barColor))
-                        .lighten(25)
-                        .toHexString()};
+                    tinycolor(props.barColor).lighten(25).toHexString()};
             }
         `}
 `

@@ -73,6 +73,7 @@ export default class DirectLinkingBackground {
         this.remoteFunctions = {
             getAllAnnotationsByUrl: this.getAllAnnotationsByUrl.bind(this),
             listAnnotationsByPageUrl: this.listAnnotationsByPageUrl.bind(this),
+            listAnnotationIdsByColor: this.listAnnotationIdsByColor,
             createAnnotation: this.createAnnotation.bind(this),
             editAnnotation: this.editAnnotation.bind(this),
             editAnnotationTags: this.editAnnotationTags.bind(this),
@@ -188,6 +189,16 @@ export default class DirectLinkingBackground {
             createdWhen: annot.createdWhen?.getTime(),
             lastEdited: (annot.lastEdited ?? annot.createdWhen)?.getTime(),
         }))
+    }
+    listAnnotationIdsByColor = async (
+        info: { tab: { id: number } },
+        params: { color: string },
+    ) => {
+        const annotationIDs = await this.annotationStorage.listAnnotationIdsByColor(
+            params.color,
+        )
+
+        return annotationIDs
     }
 
     getAllAnnotationsByUrl = async (
@@ -381,6 +392,7 @@ export default class DirectLinkingBackground {
 
         return sharedAnnotationReferences.map((ref) => ({
             ...annotationsById[ref.id],
+            color: annotationsById[ref.id].color,
             creatorReference: annotationsById[ref.id].creator,
             creator: creatorData?.[annotationsById[ref.id].creator.id],
             selector:

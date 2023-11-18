@@ -188,6 +188,11 @@ export default class AnnotationStorage extends StorageModule {
                 operation: 'findObjects',
                 args: { pageUrl: '$pageUrl:string' },
             },
+            listAnnotationIdsByColor: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'findObjects',
+                args: { color: '$color:string' },
+            },
             listAnnotationsByPageUrls: {
                 collection: AnnotationStorage.ANNOTS_COLL,
                 operation: 'findObjects',
@@ -302,6 +307,13 @@ export default class AnnotationStorage extends StorageModule {
             'listAnnotationsByPageUrls',
             { pageUrls },
         )
+
+        return annotations
+    }
+    async listAnnotationIdsByColor(color: string) {
+        const annotations = await this.operation('listAnnotationIdsByColor', {
+            color,
+        })
 
         return annotations
     }

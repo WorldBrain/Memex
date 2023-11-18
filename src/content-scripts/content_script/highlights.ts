@@ -1,3 +1,4 @@
+import { RGBAColor } from 'src/annotations/cache/types'
 import type { HighlightDependencies, HighlightsScriptMain } from './types'
 // import { bodyLoader } from 'src/util/loader'
 
@@ -33,7 +34,7 @@ const showHighlights = async (options: HighlightDependencies) => {
         options.annotationsCache.getAnnotationsArray().map((annot) => ({
             id: annot.unifiedId,
             selector: annot.selector,
-            color: annot.color,
+            color: annot.color as RGBAColor,
         })),
         ({ annotationId, openInEdit }) =>
             options.inPageUI.showSidebar({
