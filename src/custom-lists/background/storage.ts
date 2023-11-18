@@ -36,12 +36,10 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import {
-    forEachTreeTraverseAsync,
-    forEachTreeClimbAsync,
-} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { forEachTreeClimbAsync } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { OperationBatch } from '@worldbrain/storex'
+import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -613,110 +611,29 @@ export default class CustomListStorage extends StorageModule {
         now?: number
     }): Promise<void> {
         const updatedWhen = params.now ?? Date.now()
-        // Keep a cache to avoid needing to look up the same nodes multiple times
-        const treeCache = new Map<number, ListTree>()
-        const getTreeByListId = async (
-            localListId: number,
-        ): Promise<ListTree | null> => {
-            const cached = treeCache.get(localListId)
-            if (cached) {
-                return cached
-            }
-            const listTree = await this.getTreeDataForList({
-                localListId,
-            })
-            if (listTree) {
-                treeCache.set(localListId, listTree)
-            }
-            return listTree
-        }
-
-        const newParentNode =
-            params.parentListId != null
-                ? await getTreeByListId(params.parentListId)
-                : null
-        // If the parent node doesn't have list tree data, it's old pre-nested lists data, so create it
-        if (!newParentNode && params.parentListId != null) {
-            const newListTree = await this.createListTree({
-                localListId: params.parentListId,
-                now: params.now,
-            })
-            treeCache.set(params.parentListId, newListTree)
-        }
-
-        const nodeToChange = await getTreeByListId(params.localListId)
-        // If the node to change doesn't have list tree data, then it's old pre-nested lists data, which is guaranteed to have no descendants - so just create it and finish up
-        if (!nodeToChange) {
-            const pathIds =
-                params.parentListId != null
-                    ? await this.getMaterializedPathIdsFromTree({
-                          id: params.parentListId,
-                      })
-                    : null
-
-            await this.createListTree({
-                localListId: params.localListId,
-                parentListId: params.parentListId,
-                now: params.now,
-                pathIds,
-            })
-            return
-        }
-
-        // Link nodes are always leaves. Simply update this node and finish up
-        if (nodeToChange.linkTarget != null) {
-            await this.options.storageManager.backend.operation(
-                'updateObjects',
-                CustomListStorage.LIST_TREES_COLL,
-                {
-                    id: nodeToChange.id,
-                },
-                {
-                    updatedWhen,
-                    parentListId: newParentNode?.listId ?? null,
-                    path:
-                        newParentNode != null
-                            ? buildMaterializedPath(
-                                  ...extractMaterializedPathIds(
-                                      newParentNode.path ?? '',
-                                      'number',
-                                  ),
-                                  newParentNode.listId,
-                              )
-                            : null,
-                },
-            )
-            return
-        }
 
         const batch: OperationBatch = []
-        // Go through entire subtree that starts from the node we need to change and update each node's ancestor references
-        await forEachTreeTraverseAsync({
-            root: nodeToChange,
-            concurrent: true,
-            getChildren: async (node) => {
-                const children = await this.getTreesByParent({
+        await moveTree<ListTree>({
+            nodeId: params.localListId,
+            newParentNodeId: params.parentListId,
+            selectNodeId: (node) => node.listId ?? node.linkTarget,
+            selectNodeParentId: (node) => node.parentListId,
+            retrieveNode: (localListId) =>
+                this.getTreeDataForList({
+                    localListId: localListId as number,
+                }),
+            createNode: (localListId, parentLocalListId) =>
+                this.createListTree({
+                    localListId: localListId as number,
+                    parentListId: parentLocalListId as number,
+                    now: params.now,
+                }),
+            getChildrenOfNode: (node) =>
+                this.getTreesByParent({
                     parentListId: node.listId,
-                })
-                // Ensure the cached version is used for each child, if already there, as their links get updated in each iteration
-                return children.map((child) => {
-                    const childId = child.listId ?? child.linkTarget
-                    const existing = treeCache.get(childId)
-                    if (!existing) {
-                        treeCache.set(childId, child)
-                    }
-                    return existing ?? child
-                })
-            },
-            cb: async (node, i) => {
-                // We want to manually point the root to the new parent, then cascade that change down through descendents
-                const parentListId =
-                    i === 0 ? params.parentListId : node.parentListId
-                const parentNode =
-                    parentListId != null
-                        ? await getTreeByListId(parentListId)
-                        : null
-
+                }),
+            isNodeALeaf: (node) => node.linkTarget != null,
+            updateNodesParent: (node, parentNode) => {
                 node.parentListId = parentNode?.listId ?? null
                 node.path =
                     parentNode != null
@@ -739,6 +656,13 @@ export default class CustomListStorage extends StorageModule {
                         updatedWhen,
                     },
                 })
+            },
+            assertSuitableParent: (node) => {
+                if (node?.linkTarget != null) {
+                    throw new Error(
+                        'Cannot move a list tree node to be a child of a link target node',
+                    )
+                }
             },
         })
 
