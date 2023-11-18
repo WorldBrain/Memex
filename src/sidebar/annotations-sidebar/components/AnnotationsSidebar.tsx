@@ -764,6 +764,26 @@ export class AnnotationsSidebar extends React.Component<
                                         : null,
                                 )
                             }}
+                            saveHighlightColor={(
+                                noteId,
+                                colorId,
+                                color: RGBAColor | string,
+                            ) =>
+                                this.props.saveHighlightColor(
+                                    noteId,
+                                    colorId,
+                                    color,
+                                )
+                            }
+                            saveHighlightColorSettings={
+                                this.props.saveHighlightColorSettings
+                            }
+                            getHighlightColorSettings={
+                                this.props.getHighlightColorSettings
+                            }
+                            highlightColorSettings={
+                                this.props.highlightColorSettings
+                            }
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}
                             comment={annotation.comment}

@@ -505,6 +505,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             })
                         }
                         instaClose
+                        disableBlur
                     >
                         {/* {this.props.highlightColorSettings[]} */}
                         <LabelBox>{label}</LabelBox>
@@ -525,6 +526,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     }
                     offsetX={5}
                     placement={'right-start'}
+                    disableBlur
                 >
                     <HighlightColorPicker
                         saveHighlightColorSettings={
