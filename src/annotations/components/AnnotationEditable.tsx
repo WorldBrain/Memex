@@ -1095,7 +1095,7 @@ const TooltipBoxContainer = styled(TooltipBox)`
 `
 
 const Highlightbar = styled.div<{ barColor: string }>`
-    background: ${(props) => props.theme.colors.prime2};
+    background: ${(props) => props.theme.colors.prime1};
     margin-right: 10px;
     border-radius: 2px;
     width: 5px;
@@ -1103,7 +1103,11 @@ const Highlightbar = styled.div<{ barColor: string }>`
 
     &:hover {
         background: ${(props) =>
-            tinycolor(props.theme.colors.prime2).lighten(25).toHexString()};
+            props.theme.variant === 'dark'
+                ? tinycolor(props.theme.colors.prime1).lighten(25).toHexString()
+                : tinycolor(props.theme.colors.prime1)
+                      .darken(25)
+                      .toHexString()};
     }
 
     ${(props) =>
@@ -1113,7 +1117,9 @@ const Highlightbar = styled.div<{ barColor: string }>`
 
             &:hover {
                 background: ${(props) =>
-                    tinycolor(props.barColor).lighten(25).toHexString()};
+                    props.theme.variant === 'dark'
+                        ? tinycolor(props.barColor).lighten(25).toHexString()
+                        : tinycolor(props.barColor).darken(25).toHexString()};
             }
         `}
 `
@@ -1134,7 +1140,12 @@ const AnnotationBox = styled(Margin)<{ zIndex: number }>`
 `
 
 const LabelBox = styled.div`
-    padding: 10px 15px;
+    padding: 8px 16px;
+    color: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale7
+            : props.theme.colors.greyScale6};
+    font-size: 14px;
 `
 
 const SaveActionBar = styled.div`

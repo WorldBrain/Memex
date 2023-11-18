@@ -509,6 +509,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.emitMutation({
                 themeVariant: { $set: themeVariant },
             })
+
+            let syncSettings: SyncSettingsStore<'highlightColors'>
+
+            syncSettings = createSyncSettingsStore({
+                syncSettingsBG: this.options.syncSettingsBG,
+            })
+
+            const highlightColorSettings = await syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            this.emitMutation({
+                highlightColors: {
+                    $set: JSON.stringify(highlightColorSettings),
+                },
+            })
         })
     }
 
