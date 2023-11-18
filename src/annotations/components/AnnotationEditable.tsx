@@ -429,6 +429,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         const isScreenshotAnnotation = this.props.selector?.dimensions != null
 
+        console.log('annotationcolor', this.state.currentHighlightColor)
         return (
             <HighlightStyled
                 onClick={this.props.onHighlightClick}
@@ -492,6 +493,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     JSON.stringify(setting.color) ===
                     JSON.stringify(this.props.color),
             )?.label
+
+            console.log('settings', settings, label)
 
             if (label) {
                 return (

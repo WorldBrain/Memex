@@ -84,6 +84,13 @@ import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { Checkbox } from 'src/common-ui/components'
 import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
 import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/interceptVideoLinks'
+import { AuthBackground } from 'src/authentication/background'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import { browser } from 'webextension-polyfill-ts'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -236,6 +243,13 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
+    authBG: AuthRemoteFunctionsInterface
+    spacesBG: RemoteCollectionsInterface
+    contentSharingBG: ContentSharingInterface
+    analyticsBG: AnalyticsCoreInterface
+    pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
+    onListShare: any
+    localStorageAPI: any
 }
 
 interface AnnotationsSidebarState {
@@ -1272,6 +1286,27 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    renderSpacePicker() {
+        return (
+            <CollectionPicker
+                {...this.props.lists}
+                authBG={this.props.authBG}
+                spacesBG={this.props.spacesBG}
+                annotationsCache={this.props.annotationsCache}
+                contentSharingBG={this.props.contentSharingBG}
+                bgScriptBG={this.props.bgScriptBG}
+                analyticsBG={this.props.analyticsBG}
+                pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
+                localStorageAPI={browser.storage.local}
+                // actOnAllTabs={this.props.lists.listAllTabs}
+                initialSelectedListIds={
+                    this.props.lists.fetchInitialListSelections
+                }
+                onListShare={this.props.onListShare}
+            />
+        )
+    }
+
     private renderSharedNotesByList() {
         const {
             lists,
@@ -1297,6 +1332,7 @@ export class AnnotationsSidebar extends React.Component<
         if (allLists?.length === 0) {
             return (
                 <EmptyMessageContainer>
+                    {this.renderSpacePicker()}
                     <IconBox heightAndWidth="40px">
                         <Icon
                             filePath={icons.collectionsEmpty}
@@ -1323,6 +1359,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <>
                 <SpaceTypeSection>
+                    {this.renderSpacePicker()}
                     <SpaceTypeSectionHeader>
                         Page Links{' '}
                         <SpacesCounter>{pageLinkLists?.length}</SpacesCounter>
