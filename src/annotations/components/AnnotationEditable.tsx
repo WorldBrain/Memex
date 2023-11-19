@@ -1006,6 +1006,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     render() {
         const { annotationFooterDependencies } = this.props
+
+        const listsToDisplay = this.props.lists.filter(
+            (list) =>
+                list !== SPECIAL_LIST_IDS.INBOX &&
+                list !== SPECIAL_LIST_IDS.MOBILE &&
+                list !== SPECIAL_LIST_IDS.FEED,
+        )
+
         return (
             <ThemeProvider theme={this.theme}>
                 <AnnotationBox
@@ -1045,25 +1053,24 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            {((this.props.lists.length > 0 &&
-                                this.displayLists.length > 0) ||
-                                this.props.isEditing) && (
-                                <ListsSegment
-                                    tabIndex={0}
-                                    lists={this.displayLists}
-                                    onMouseEnter={this.props.onListsHover}
-                                    onListClick={this.props.onListClick}
-                                    onEditBtnClick={() => null}
-                                    spacePickerButtonRef={
-                                        this.spacePickerBodyButtonRef
-                                    }
-                                    padding={
-                                        this.props.isEditing
-                                            ? '10px 15px 10px 10px'
-                                            : '0px 15px 10px 15px'
-                                    }
-                                />
-                            )}
+                            {listsToDisplay.length > 0 &&
+                                this.displayLists.length > 0 && (
+                                    <ListsSegment
+                                        tabIndex={0}
+                                        lists={this.displayLists}
+                                        onMouseEnter={this.props.onListsHover}
+                                        onListClick={this.props.onListClick}
+                                        onEditBtnClick={() => null}
+                                        spacePickerButtonRef={
+                                            this.spacePickerBodyButtonRef
+                                        }
+                                        padding={
+                                            this.props.isEditing
+                                                ? '10px 15px 10px 10px'
+                                                : '0px 15px 10px 15px'
+                                        }
+                                    />
+                                )}
                             {this.renderFooter()}
                         </AnnotationStyled>
                         {this.renderCopyPaster(this.copyPasterButtonRef)}

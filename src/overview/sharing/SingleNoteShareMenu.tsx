@@ -200,15 +200,22 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                         <TooltipTextBox>
                             {this.props.isShared ? (
                                 <>
-                                    Annotation is added to all
+                                    Added to all Spaces
                                     <br />
-                                    Spaces you put the document into.
+                                    the document is in.
+                                    <br />
+                                    <span>
+                                        For generally relevant annotations.
+                                    </span>
                                 </>
                             ) : (
                                 <>
-                                    Annotation is added to all
+                                    Added to all Spaces
                                     <br />
-                                    Spaces you put the document into.
+                                    the document is in.
+                                    <span>
+                                        For generally relevant annotations.
+                                    </span>
                                 </>
                             )}
                             <KeyboardShortcuts
@@ -584,8 +591,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                     shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
                                     description: (
                                         <>
-                                            Auto-shared to Spaces <br /> the
-                                            page is added to{' '}
+                                            For annotations relevant for many
+                                            contexts Auto-shared to Spaces{' '}
+                                            <br /> the page is added to{' '}
                                         </>
                                     ),
                                 },
@@ -646,7 +654,7 @@ const TooltipTextBox = styled.div`
     grid-gap: 5px;
     justify-content: center;
     color: ${(props) => props.theme.colors.greyScale7};
-    font-size: 12px;
+    font-size: 14px;
     text-align: center;
     grid-gap: 10px;
 `
