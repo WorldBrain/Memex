@@ -10,9 +10,9 @@ import SpaceEmailInvites from '../space-email-invites'
 import { __wrapClick } from '../utils'
 import SpaceLinks from '../space-links'
 
-export interface Props extends Dependencies {
-    disableWriteOps?: boolean
-}
+export interface Props extends Dependencies {}
+
+const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
 
 export default class SpaceContextMenuContainer extends StatefulUIElement<
     Props,
@@ -23,17 +23,12 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
         copyToClipboard,
     }
 
-    /**
-     * This only exists as we're awkwardly doing the list share from this component's stateful logic on load if remoteId == null
-     *  and SpaceInviteLinks logic tries to load them from the DB. Though in this case they're not ready and should instead be passed
-     *  down from this comp once sharing is complete.
-     *  TODO: Ideally we move sharing to happen in the BG then we can write the UI assuming lists are always already shared.
-     */
-    private isFirstOpenOnNewList = false
-
     constructor(props: Props) {
         super(props, new Logic(props))
-        this.isFirstOpenOnNewList = props.listData.remoteId == null
+    }
+
+    private get isFollowedSpace(): boolean {
+        return this.props.listData.localId == null
     }
 
     private handleWebViewOpen: React.MouseEventHandler = (e) => {
@@ -44,7 +39,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     }
 
     private renderMainContent() {
-        if (this.state.mode === 'followed-space') {
+        if (this.isFollowedSpace) {
             return (
                 <DeleteBox>
                     <PrimaryAction
@@ -56,7 +51,6 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             )
         }
 
-        const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
         return (
             <ContextMenuContainer>
                 {this.state.isLocalPDF && (

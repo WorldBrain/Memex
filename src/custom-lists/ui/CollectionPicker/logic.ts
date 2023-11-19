@@ -178,6 +178,7 @@ export default class SpacePickerLogic extends UILogic<
                     normalizedPageUrlToFilterPageLinksBy,
                 ) ?? new Set()
 
+            console.log('pagelistIdset', pageListIdsSet)
             const localPageListIds: number[] = Array.from(pageListIdsSet)
                 .map(
                     (unifiedListId) =>
@@ -479,36 +480,6 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    setListRemoteId: EventHandler<'setListRemoteId'> = async ({ event }) => {
-        const listData = __getListDataByLocalId(
-            event.localListId,
-            this.dependencies,
-            { source: 'setListRemoteId', mustBeLocal: true },
-        )
-
-        this.dependencies.onListShare?.(event)
-        this.dependencies.annotationsCache.updateList({
-            unifiedId: listData.unifiedId,
-            remoteId: event.remoteListId.toString(),
-        })
-
-        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
-            const annotData = this.dependencies.annotationsCache.getAnnotationByLocalId(
-                localAnnotId,
-            )
-            if (!annotData) {
-                continue
-            }
-            this.dependencies.annotationsCache.updateAnnotation({
-                unifiedId: annotData.unifiedId,
-                ...annotData,
-                remoteId: event.annotationLocalToRemoteIdsDict[
-                    localAnnotId
-                ].toString(),
-            })
-        }
-    }
-
     validateSpaceName(name: string, listIdToSkip?: number) {
         const validationResult = validateSpaceName(
             name,
@@ -758,6 +729,7 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry, analyticsBG, shouldRerender },
         previousState,
     }) => {
+        console.log('enrypress', entry)
         if (!(await pageActionAllowed(analyticsBG))) {
             return
         }
@@ -781,6 +753,7 @@ export default class SpacePickerLogic extends UILogic<
                     entry.localId,
                 )
             } else {
+                console.log('selectentry', entry.localId)
                 this.localListIdsMRU = Array.from(
                     new Set([listData.localId, ...this.localListIdsMRU]),
                 )
@@ -809,7 +782,10 @@ export default class SpacePickerLogic extends UILogic<
                     this.dependencies.annotationsCache.lists,
                 )
             }
+
+            console.log('entrpressprefinihs')
             await entrySelectPromise
+            console.log('entrpressfinihs')
         } catch (e) {
             this.selectedListIds = previousState.selectedListIds
             const mutation: UIMutation<SpacePickerState> = {
@@ -859,11 +835,16 @@ export default class SpacePickerLogic extends UILogic<
         name: string,
         previousState: SpacePickerState,
     ): Promise<number> {
-        const localListId = await this.dependencies.createNewEntry(name)
+        const {
+            collabKey,
+            localListId,
+            remoteListId,
+        } = await this.dependencies.createNewEntry(name)
         this.dependencies.annotationsCache.addList({
             name,
+            collabKey,
             localId: localListId,
-            remoteId: null,
+            remoteId: remoteListId,
             hasRemoteAnnotationsToLoad: false,
             type: 'user-list',
             unifiedAnnotationIds: [],
@@ -874,8 +855,7 @@ export default class SpacePickerLogic extends UILogic<
         this.localListIdsMRU.unshift(localListId)
         this.selectedListIds.unshift(localListId)
 
-        const listData: NormalizedState<UnifiedList> = this.dependencies
-            .annotationsCache.lists
+        const listData = this.dependencies.annotationsCache.lists
 
         const userLists = normalizedStateToArray(listData)
         const sortPredicate = sortDisplayEntries(

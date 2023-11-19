@@ -61,12 +61,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             setup.backgroundModules.tabManagement.injectContentScripts = () =>
                                 undefined
 
-                            listId = await customLists(
+                            const res = await customLists(
                                 setup,
                             ).remoteFunctions.createCustomList({
                                 name: testList,
                                 id: Date.now(),
                             })
+                            listId = res.localListId
 
                             await customLists(
                                 setup,
@@ -157,12 +158,13 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                             setup.backgroundModules.tabManagement.injectContentScripts = () =>
                                 undefined
 
-                            listId = await customLists(
+                            const res = await customLists(
                                 setup,
                             ).remoteFunctions.createCustomList({
                                 name: testList,
                                 id: Date.now(),
                             })
+                            listId = res.localListId
 
                             await customLists(
                                 setup,

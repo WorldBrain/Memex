@@ -59,12 +59,6 @@ export type Events = UIEvent<{
     setShowMoreMenuListId: { listId: string }
     setEditMenuListId: { listId: string }
     dropPageOnListItem: { listId: string; dataTransfer: DataTransfer }
-    handleListShare: {
-        listId: string
-        remoteListId: AutoPk
-        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
-    }
-    setListRemoteId: { listId: string; remoteListId: string }
 
     confirmListDelete: null
     cancelListDelete: null

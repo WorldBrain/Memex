@@ -128,6 +128,10 @@ export type Props = RootState &
         imageSupport: ImageSupportInterface<'caller'>
         onBulkSelect: (itemData, remove) => Promise<void>
         selectedItems: string[]
+        saveHighlightColor?: (noteId, colorId, color) => void
+        saveHighlightColorSettings?: (newState) => void
+        getHighlightColorSettings?: () => void
+        highlightColorSettings: string
     }
 
 export interface State {
@@ -298,6 +302,18 @@ export default class SearchResultsContainer extends React.Component<
         const localListIds = this.getLocalListIdsForCacheIds(cachedListIds)
         const hasSharedLists = this.getRemoteIdsForCacheIds(cachedListIds)
 
+        const noteColor = JSON.parse(this.props.highlightColorSettings).find(
+            (item) => {
+                return item.id === noteData.color
+            },
+        ).color
+
+        console.log(
+            'noteColor',
+            noteColor,
+            noteData.color,
+            JSON.parse(this.props.highlightColorSettings),
+        )
         return (
             <AnnotationEditable
                 imageSupport={this.props.imageSupport}
@@ -306,6 +322,7 @@ export default class SearchResultsContainer extends React.Component<
                 unifiedId={noteId}
                 tags={noteData.tags}
                 lists={localListIds}
+                color={noteColor}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
@@ -319,6 +336,11 @@ export default class SearchResultsContainer extends React.Component<
                         ? new Date(noteData.displayTime)
                         : undefined
                 }
+                saveHighlightColorSettings={
+                    this.props.saveHighlightColorSettings
+                }
+                getHighlightColorSettings={this.props.getHighlightColorSettings}
+                highlightColorSettings={this.props.highlightColorSettings}
                 isEditing={noteData.isEditing}
                 isDeleting={false}
                 renderCopyPasterForAnnotation={() => (

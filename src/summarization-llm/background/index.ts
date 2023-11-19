@@ -93,7 +93,6 @@ export default class SummarizeBackground {
             undefined,
             AImodel,
         )) {
-            console.log('aimdoel1', AImodel)
             const token = result?.t
             if (token?.length > 0) {
                 if (outputLocation === 'editor') {

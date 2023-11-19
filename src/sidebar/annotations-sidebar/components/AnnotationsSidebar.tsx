@@ -54,6 +54,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
@@ -231,6 +232,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
     setAIModel: (AImodel) => void
+    saveHighlightColor: (noteId, colorId, color) => void
+    saveHighlightColorSettings: (newState) => void
+    getHighlightColorSettings: () => void
+    highlightColorSettings: string
 }
 
 interface AnnotationsSidebarState {
@@ -356,6 +361,7 @@ export class AnnotationsSidebar extends React.Component<
             console.error('Could not load theme, falling back to dark mode')
         }
         this.setState({ themeVariant })
+        await this.props.getHighlightColorSettings()
     }
 
     async componentDidUpdate(
@@ -758,9 +764,30 @@ export class AnnotationsSidebar extends React.Component<
                                         : null,
                                 )
                             }}
+                            saveHighlightColor={(
+                                noteId,
+                                colorId,
+                                color: RGBAColor | string,
+                            ) =>
+                                this.props.saveHighlightColor(
+                                    noteId,
+                                    colorId,
+                                    color,
+                                )
+                            }
+                            saveHighlightColorSettings={
+                                this.props.saveHighlightColorSettings
+                            }
+                            getHighlightColorSettings={
+                                this.props.getHighlightColorSettings
+                            }
+                            highlightColorSettings={
+                                this.props.highlightColorSettings
+                            }
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}
                             comment={annotation.comment}
+                            color={annotation.color}
                             lastEdited={annotation.lastEdited}
                             createdWhen={annotation.createdWhen}
                             creatorDependencies={
@@ -1703,8 +1730,6 @@ export class AnnotationsSidebar extends React.Component<
                 )
             }
 
-            console.log('asdfadsfasdf', this.props.hasKey)
-
             return (
                 <AISidebarContainer>
                     {this.props.selectedTextAIPreview && (
@@ -2252,10 +2277,31 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
+                            saveHighlightColor={(
+                                noteId,
+                                colorId,
+                                color: RGBAColor | string,
+                            ) =>
+                                this.props.saveHighlightColor(
+                                    noteId,
+                                    colorId,
+                                    color,
+                                )
+                            }
+                            saveHighlightColorSettings={
+                                this.props.saveHighlightColorSettings
+                            }
+                            getHighlightColorSettings={
+                                this.props.getHighlightColorSettings
+                            }
+                            highlightColorSettings={
+                                this.props.highlightColorSettings
+                            }
                             contextLocation={this.props.sidebarContext}
                             pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}
                             comment={annot.comment}
+                            color={annot.color}
                             isShared={isShared}
                             createdWhen={annot.createdWhen}
                             isBulkShareProtected={[
@@ -2909,7 +2955,7 @@ export class AnnotationsSidebar extends React.Component<
                             active={this.state.showAllNotesCopyPaster}
                         />
                     </TooltipBox>
-                    <TooltipBox
+                    {/* <TooltipBox
                         tooltipText={'Bulk Share Notes'}
                         placement={'bottom'}
                     >
@@ -2929,7 +2975,7 @@ export class AnnotationsSidebar extends React.Component<
                             }}
                             active={this.state.showAllNotesShareMenu}
                         />
-                    </TooltipBox>
+                    </TooltipBox> */}
                 </TopBarActionBtns>
             </>
         )
@@ -3703,7 +3749,7 @@ const TopAreaContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     z-index: 1;
-    padding-top: 5px;
+    padding: 5px 10px;
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
 
@@ -3906,10 +3952,12 @@ const AnnotationContainer = styled(Margin)`
     overflow-x: visible; */
     height: calc(100% + 30px);
     overflow: scroll;
+    padding: 0 10px;
     padding-bottom: 100px;
     flex: 1;
     z-index: 10;
     position: relative;
+    width: unset;
 
     scrollbar-width: none;
 
@@ -3948,7 +3996,7 @@ const AnnotationBox = styled.div<{
 const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     display: flex;
     flex-direction: column;
-    width: 100%;
+    padding: 0 10px;
     padding-bottom: 60px;
     z-index: ${(props) => 999 - props.zIndex};
 `
@@ -4205,7 +4253,6 @@ const AnnotationsSectionStyled = styled.div`
     flex: 1;
     z-index: 19;
     overflow: scroll;
-    padding: 0px 10px 0px 10px;
 
     scrollbar-width: none;
 

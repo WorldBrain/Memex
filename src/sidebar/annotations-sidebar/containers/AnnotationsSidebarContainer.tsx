@@ -46,6 +46,7 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import type {
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
@@ -74,6 +75,10 @@ export interface Props extends SidebarContainerOptions {
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
+    saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
+    saveHighlightColorSettings?: (newState) => void
+    getHighlightColorSettings?: () => void
+    highlightColorSettings?: string
 }
 
 export class AnnotationsSidebarContainer<
@@ -131,21 +136,10 @@ export class AnnotationsSidebarContainer<
         annotationId?: UnifiedAnnotation['unifiedId'],
     ) => async (name: string) => {
         const listId = Date.now()
-
-        // this.props.annotationsCache.addList({
-        //     name,
-        //     localId: listId,
-        //     unifiedAnnotationIds: annotationId ? [annotationId] : [],
-        //     hasRemoteAnnotationsToLoad: false,
-        //     creator: this.props.getCurrentUser(),
-        //     type: 'user-list',
-        // })
-        await this.props.customListsBG.createCustomList({
+        return this.props.customListsBG.createCustomList({
             name: name,
             id: listId,
         })
-
-        return listId
     }
 
     private getListDetailsById: ListDetailsGetter = (listId) => {
@@ -353,11 +347,12 @@ export class AnnotationsSidebarContainer<
             renderSpacePicker: () => (
                 <CollectionPicker
                     showPageLinks
-                    selectEntry={(listId) =>
+                    selectEntry={async (listId) => {
+                        console.log('test')
                         this.processEvent('setNewPageNoteLists', {
                             lists: [...this.state.commentBox.lists, listId],
                         })
-                    }
+                    }}
                     unselectEntry={(listId) =>
                         this.processEvent('setNewPageNoteLists', {
                             lists: this.state.commentBox.lists.filter(
@@ -441,7 +436,8 @@ export class AnnotationsSidebarContainer<
                     params.annotation.unifiedListIds,
                 ),
             selectEntry: async (listId, options) => {
-                this.processEvent(getUpdateListsEvent(listId), {
+                console.log('updatelist')
+                this.processEvent('updateListsForAnnotation', {
                     added: listId,
                     deleted: null,
                     unifiedAnnotationId: params.annotation.unifiedId,
@@ -487,11 +483,12 @@ export class AnnotationsSidebarContainer<
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
+
+        console.log('annotation', annotation)
         return (
             <CollectionPicker
                 {...this.getSpacePickerProps({
                     annotation,
-                    showExternalConfirmations: true,
                 })}
                 bgScriptBG={this.props.bgScriptBG}
                 closePicker={closePicker}
@@ -518,9 +515,11 @@ export class AnnotationsSidebarContainer<
     private renderShareMenuForAnnotation = () => (
         unifiedId: UnifiedAnnotation['unifiedId'],
     ) => {
+        console.log('coming here')
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
+        console.log('annotations,', annotation)
         if (!annotation.localId) {
             return
         }
@@ -807,9 +806,9 @@ export class AnnotationsSidebarContainer<
                         default={{
                             x: 0,
                             y: 0,
-                            width: this.state.sidebarWidth
-                                ? this.state.sidebarWidth
-                                : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                            width: this.state.sidebarWidth,
+                            // ? this.state.sidebarWidth
+                            // : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
                             height: 'auto',
                         }}
                         resizeHandleWrapperClass={'sidebarResizeHandle'}
@@ -850,7 +849,6 @@ export class AnnotationsSidebarContainer<
                             }}
                             loadState={this.state.loadState}
                             setAIModel={(AImodel) => {
-                                console.log('adadfadfasdf', AImodel)
                                 this.processEvent('setAIModel', AImodel)
                             }}
                             showChapters={this.state.showChapters}
@@ -858,6 +856,28 @@ export class AnnotationsSidebarContainer<
                             chapterSummaries={this.state.chapterSummaries}
                             videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
+                            saveHighlightColor={(noteId, colorId, color) => {
+                                this.processEvent('saveHighlightColor', {
+                                    noteId: noteId,
+                                    colorId: colorId,
+                                    color: color,
+                                })
+                            }}
+                            saveHighlightColorSettings={(newState) => {
+                                this.processEvent(
+                                    'saveHighlightColorSettings',
+                                    {
+                                        newState: newState,
+                                    },
+                                )
+                            }}
+                            getHighlightColorSettings={() =>
+                                this.processEvent(
+                                    'getHighlightColorSettings',
+                                    null,
+                                )
+                            }
+                            highlightColorSettings={this.state.highlightColors}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,
                                 annotationReference,
@@ -1195,12 +1215,7 @@ export class AnnotationsSidebarContainer<
                                         contentSharingBG={
                                             this.props.contentSharingBG
                                         }
-                                        spacesBG={this.props.customListsBG}
                                         listData={listData}
-                                        disableWriteOps={
-                                            this.state
-                                                .hasListDataBeenManuallyPulled
-                                        }
                                         onSetSpacePrivate={(isPrivate) =>
                                             this.processEvent(
                                                 'setListPrivacy',
@@ -1210,23 +1225,6 @@ export class AnnotationsSidebarContainer<
                                                     isPrivate,
                                                 },
                                             )
-                                        }
-                                        onSpaceShare={(
-                                            remoteListId,
-                                            annotationLocalToRemoteIdsDict,
-                                        ) =>
-                                            this.processEvent('shareList', {
-                                                remoteListId,
-                                                annotationLocalToRemoteIdsDict,
-                                                unifiedListId:
-                                                    listData.unifiedId,
-                                            })
-                                        }
-                                        onDeleteSpaceConfirm={() =>
-                                            this.processEvent('deleteList', {
-                                                unifiedListId:
-                                                    listData.unifiedId,
-                                            })
                                         }
                                         analyticsBG={this.props.analyticsBG}
                                     />

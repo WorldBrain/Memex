@@ -52,6 +52,7 @@ export interface PageAnnotationsCacheInterface {
             | 'comment'
             | 'unifiedListIds'
             | 'privacyLevel'
+            | 'color'
         >,
         opts?: {
             updateLastEditedTimestamp?: boolean
@@ -67,6 +68,7 @@ export interface PageAnnotationsCacheInterface {
                     | 'remoteId'
                     | 'description'
                     | 'name'
+                    | 'collabKey'
                     | 'normalizedPageUrl'
                     | 'hasRemoteAnnotationsToLoad'
                     | 'sharedListEntryId'
@@ -100,7 +102,7 @@ export interface PageAnnotationsCacheInterface {
 
 export type UnifiedAnnotation = Pick<
     Annotation & SharedAnnotation,
-    'body' | 'comment'
+    'body' | 'comment' | 'color'
 > & {
     // Core annotation data
     unifiedId: string
@@ -111,10 +113,18 @@ export type UnifiedAnnotation = Pick<
     lastEdited: number
     createdWhen: number
     creator?: UserReference
+    color?: RGBAColor
 
     // Misc annotation feature state
     privacyLevel: AnnotationPrivacyLevels
     unifiedListIds: UnifiedList['unifiedId'][]
+}
+
+export type RGBAColor = {
+    r: number
+    g: number
+    b: number
+    a: number
 }
 
 export type UnifiedAnnotationForCache = Omit<
@@ -131,7 +141,7 @@ type CoreUnifiedList<T> = {
     // Core list data
     unifiedId: string
     localId?: number
-    remoteId?: string
+    remoteId?: string // TODO: Make this non-optional and update all usages
     collabKey?: string
     name: string
     isPrivate?: boolean

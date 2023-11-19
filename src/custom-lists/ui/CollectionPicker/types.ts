@@ -53,11 +53,6 @@ export type SpacePickerEvent = UIEvent<{
         shouldRerender?: boolean
     }
     resultEntryFocus: { entry: UnifiedList; index: number }
-    setListRemoteId: {
-        localListId: number
-        remoteListId: AutoPk
-        annotationLocalToRemoteIdsDict: { [localId: string]: AutoPk }
-    }
     toggleEntryContextMenu: { listId: number }
     toggleEntryEditMenu: { listId: number }
     openListInWebUI: { unifiedListId: UnifiedList['unifiedId'] }
@@ -81,7 +76,13 @@ export interface SpacePickerDependencies {
     localStorageAPI: Storage.LocalStorageArea
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
-    createNewEntry: (name: string) => Promise<number>
+    createNewEntry: (
+        name: string,
+    ) => Promise<{
+        localListId: number
+        remoteListId: string
+        collabKey: string
+    }>
     selectEntry: (
         listId: number,
         options?: { protectAnnotation?: boolean },

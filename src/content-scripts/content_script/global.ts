@@ -85,7 +85,7 @@ import checkBrowser from 'src/util/check-browser'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { UnifiedList } from 'src/annotations/cache/types'
+import type { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import {
     trackAnnotationCreate,
     trackPageActivityIndicatorHit,
@@ -94,6 +94,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -224,6 +225,20 @@ export async function main(
     const toolbarNotifications = new ToolbarNotifications()
     toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 
+    // loadInitialSettings
+
+    const syncSettings = createSyncSettingsStore({
+        syncSettingsBG: syncSettingsBG,
+    })
+
+    const isAutoAddStorage = await syncSettings.extension.get(
+        'shouldAutoAddSpaces',
+    )
+
+    if (isAutoAddStorage == null) {
+        await syncSettings.extension.set('shouldAutoAddSpaces', true)
+    }
+
     // 2.5 load cache
 
     const _currentUser = await authBG.getCurrentUser()
@@ -231,7 +246,9 @@ export async function main(
         ? { type: 'user-reference', id: _currentUser.id }
         : null
     const fullPageUrl = await pageInfo.getFullPageUrl()
-    const annotationsCache = new PageAnnotationsCache({})
+    const annotationsCache = new PageAnnotationsCache({
+        syncSettingsBG: syncSettingsBG,
+    })
     window['__annotationsCache'] = annotationsCache
 
     const loadCacheDataPromise = hydrateCacheForPageAnnotations({
@@ -287,6 +304,12 @@ export async function main(
                 now: () => data.createdWhen,
             })
 
+            const syncSettings = createSyncSettingsStore({ syncSettingsBG })
+
+            const shouldShareSettings = await syncSettings.extension.get(
+                'shouldAutoAddSpaces',
+            )
+
             const localListIds: number[] = []
             const remoteListIds: string[] = []
             const unifiedListIds: UnifiedList['unifiedId'][] = []
@@ -303,14 +326,15 @@ export async function main(
             }
 
             let privacyLevel: AnnotationPrivacyLevels
-            if (remoteListIds.length) {
+            if (inPageUI.selectedList) {
                 privacyLevel = data.shouldShare
                     ? AnnotationPrivacyLevels.SHARED
                     : AnnotationPrivacyLevels.PROTECTED
             } else {
-                privacyLevel = data.shouldShare
-                    ? AnnotationPrivacyLevels.SHARED
-                    : AnnotationPrivacyLevels.PRIVATE
+                privacyLevel =
+                    shouldShareSettings || data.shouldShare
+                        ? AnnotationPrivacyLevels.SHARED
+                        : AnnotationPrivacyLevels.PRIVATE
             }
 
             const { unifiedId } = annotationsCache.addAnnotation({
@@ -325,6 +349,7 @@ export async function main(
                 lastEdited: data.updatedWhen,
                 createdWhen: data.createdWhen,
                 normalizedPageUrl: normalizeUrl(data.fullPageUrl),
+                color: data.color as RGBAColor,
             })
 
             const createPromise = (async () => {
@@ -342,7 +367,9 @@ export async function main(
                 } = await createAnnotation({
                     shareOpts: {
                         shouldShare:
-                            remoteListIds.length > 0 || data.shouldShare,
+                            shouldShareSettings ||
+                            remoteListIds.length > 0 ||
+                            data.shouldShare,
                         shouldCopyShareLink: data.shouldShare,
                     },
                     annotationsBG,
@@ -359,6 +386,7 @@ export async function main(
                         fullPageUrl: data.fullPageUrl,
                         pageTitle: pageInfo.getPageTitle(),
                         createdWhen: new Date(data.createdWhen),
+                        color: data.color,
                     },
                 })
 
@@ -429,6 +457,7 @@ export async function main(
         screenshotAnchor?,
         screenshotImage?,
         imageSupport?,
+        highlightColor?,
     ): Promise<AutoPk> {
         let highlightId: AutoPk
         try {
@@ -448,6 +477,7 @@ export async function main(
                 screenshotAnchor,
                 screenshotImage,
                 imageSupport,
+                highlightColor,
             })
         } catch (err) {
             captureException(err)
@@ -460,7 +490,12 @@ export async function main(
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
-        ) => async (selection: Selection, shouldShare: boolean) => {
+        ) => async (
+            selection: Selection,
+            shouldShare: boolean,
+            drawRectangle?: boolean,
+            highlightColorSettings?: RGBAColor | string,
+        ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
@@ -488,12 +523,19 @@ export async function main(
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
+                    highlightColorSettings,
                 )
             } else if (
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                await saveHighlight(shouldShare)
+                await saveHighlight(
+                    shouldShare,
+                    null,
+                    null,
+                    null,
+                    highlightColorSettings,
+                )
             }
 
             if (inPageUI.componentsShown.sidebar) {
@@ -762,6 +804,29 @@ export async function main(
         }, 200)
     }
 
+    async function getHighlightColorSettings() {
+        const syncSettings = createSyncSettingsStore({ syncSettingsBG })
+        const highlightColorStore = syncSettings.highlightColors
+        let highlightColorJSON
+        const highlightColors = await highlightColorStore.get('highlightColors')
+
+        if (highlightColors) {
+            highlightColorJSON = highlightColors
+        } else {
+            highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+            await highlightColorStore.set('highlightColors', highlightColorJSON)
+        }
+        return highlightColorJSON
+    }
+    async function saveHighlightColorSettings(newStateInput) {
+        const syncSettings = createSyncSettingsStore({ syncSettingsBG })
+        const highlightColorStore = syncSettings.highlightColors
+        const newState = JSON.parse(newStateInput)
+        await highlightColorStore.set('highlightColors', newState)
+
+        return newState
+    }
+
     // 4. Create a contentScriptRegistry object with functions for each content script
     // component, that when run, initialise the respective component with its
     // dependencies
@@ -858,6 +923,9 @@ export async function main(
                     action: 'createFromTooltip',
                 }),
                 askAI: annotationsFunctions.askAI(),
+                getHighlightColorsSettings: () => getHighlightColorSettings(),
+                saveHighlightColorsSettings: (newState) =>
+                    saveHighlightColorSettings(newState),
             })
             components.tooltip?.resolve()
         },
@@ -1012,6 +1080,8 @@ export async function main(
             action: 'createFromShortcut',
         }),
         askAI: annotationsFunctions.askAI(),
+        getHighlightColorsSettings: getHighlightColorSettings,
+        saveHighlightColorsSettings: saveHighlightColorSettings,
     })
     const loadContentScript = createContentScriptLoader({
         contentScriptsBG,

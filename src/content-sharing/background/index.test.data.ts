@@ -64,9 +64,9 @@ export async function createContentSharingTestList(
     setup: BackgroundIntegrationTestSetup,
     options?: { dontIndexPages?: boolean },
 ) {
-    const localListId = await setup.backgroundModules.customLists.createCustomList(
-        LIST_DATA,
-    )
+    const {
+        localListId,
+    } = await setup.backgroundModules.customLists.createCustomList(LIST_DATA)
     injectFakeTabs({
         tabManagement: setup.backgroundModules.tabManagement,
         tabsAPI: setup.browserAPIs.tabs,

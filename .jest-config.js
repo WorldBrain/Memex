@@ -15,7 +15,7 @@ module.exports = {
     transform: {
         ...tsjPreset.transform,
     },
-    testEnvironment: 'jsdom',
+    testEnvironment: 'node',
     transformIgnorePatterns: ['/node_modules/(?!(firebase|@firebase)/)'],
     modulePaths: ['<rootDir>'],
     moduleNameMapper: {

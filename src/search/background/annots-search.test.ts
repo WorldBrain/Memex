@@ -113,14 +113,16 @@ describe('Annotations search', () => {
         })
 
         // Insert collections + collection entries
-        coll1Id = await customListsBg.createCustomList({
+        const res1 = await customListsBg.createCustomList({
             name: DATA.coll1,
             id: Date.now(),
         })
-        coll2Id = await customListsBg.createCustomList({
+        const res2 = await customListsBg.createCustomList({
             name: DATA.coll2,
             id: Date.now(),
         })
+        coll1Id = res1.localListId
+        coll2Id = res2.localListId
 
         await contentSharingBg.scheduleListShare({ localListId: coll1Id })
         await contentSharingBg.waitForListShare({ localListId: coll1Id })

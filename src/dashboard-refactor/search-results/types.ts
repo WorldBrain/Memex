@@ -16,7 +16,10 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    RGBAColor,
+} from 'src/annotations/cache/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -26,7 +29,13 @@ export interface CommonInteractionProps {
 
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
-    createNewList: (name: string) => Promise<number>
+    createNewList: (
+        name: string,
+    ) => Promise<{
+        localListId: number
+        remoteListId: string
+        collabKey: string
+    }>
 }
 
 export type PageInteractionProps = Omit<
@@ -140,6 +149,7 @@ export interface NoteData {
     selector?: Anchor
     isShared?: boolean
     isBulkShareProtected?: boolean
+    color?: RGBAColor
 }
 
 export type PageData = Pick<
@@ -373,5 +383,6 @@ export type Events = UIEvent<{
         isProtected?: boolean
         mainBtnPressed?: boolean
         keepListsIfUnsharing?: boolean
+        color?: RGBAColor | string
     }
 }>

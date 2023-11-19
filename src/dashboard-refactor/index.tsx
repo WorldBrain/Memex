@@ -68,6 +68,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
+import { RGBAColor } from 'src/annotations/cache/types'
 
 const memexIconDarkMode = browser.runtime.getURL('img/memexIconDarkMode.svg')
 const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
@@ -142,7 +143,9 @@ export class DashboardContainer extends StatefulUIElement<
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
-        annotationsCache: new PageAnnotationsCache({}),
+        annotationsCache: new PageAnnotationsCache({
+            syncSettingsBG: runInBackground(),
+        }),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
         imageSupport: runInBackground(),
@@ -208,11 +211,6 @@ export class DashboardContainer extends StatefulUIElement<
                 : undefined,
             imageSupport: this.props.imageSupport,
         }
-    }
-
-    // TODO: move this to logic class - main reason it exists separately is that it needs to return the created list ID
-    private async createNewListViaPicker(name: string): Promise<number> {
-        return this.props.listsBG.createCustomList({ name })
     }
 
     private renderFiltersBar() {
@@ -543,38 +541,18 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 currentUser={this.state.currentUser}
                 initContextMenuBtnProps={(listId) => ({
-                    loadOwnershipData: true,
-                    spacesBG: this.props.listsBG,
                     contentSharingBG: this.props.contentShareBG,
-                    onCancelEdit: () =>
-                        this.processEvent('cancelListEdit', null),
-                    onConfirmSpaceNameEdit: (value) =>
-                        this.processEvent('confirmListEdit', {
-                            value,
-                            listId,
-                            skipDBOps: true,
-                        }),
+                    analyticsBG: this.props.analyticsBG,
+                    spacesBG: this.props.listsBG,
                     onSetSpacePrivate: (isPrivate) =>
                         this.processEvent('setListPrivacy', {
                             listId,
                             isPrivate,
                         }),
-                    onDeleteSpaceIntent: () =>
-                        this.processEvent('setDeletingListId', { listId }),
                     toggleMenu: () =>
                         this.processEvent('setShowMoreMenuListId', { listId }),
                     toggleEditMenu: () =>
                         this.processEvent('setEditMenuListId', { listId }),
-                    onSpaceShare: (
-                        remoteListId,
-                        annotationLocalToRemoteIdsDict,
-                    ) =>
-                        this.processEvent('handleListShare', {
-                            listId,
-                            remoteListId,
-                            annotationLocalToRemoteIdsDict,
-                        }),
-                    analyticsBG: this.props.analyticsBG,
                 })}
                 initDropReceivingState={(listId) => ({
                     onDragEnter: () => {
@@ -670,6 +648,28 @@ export class DashboardContainer extends StatefulUIElement<
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.lists}
+                saveHighlightColor={(
+                    id,
+                    color: RGBAColor | string,
+                    unifiedId,
+                ) => {
+                    {
+                        this.processEvent('saveHighlightColor', {
+                            noteId: id,
+                            color: color,
+                            unifiedId: unifiedId,
+                        })
+                    }
+                }}
+                saveHighlightColorSettings={(newState) => {
+                    this.processEvent('saveHighlightColorSettings', {
+                        newState: newState,
+                    })
+                }}
+                getHighlightColorSettings={() =>
+                    this.processEvent('getHighlightColorSettings', null)
+                }
+                highlightColorSettings={this.state.highlightColors}
                 getListDetailsById={this.getListDetailsById}
                 youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
@@ -932,7 +932,7 @@ export class DashboardContainer extends StatefulUIElement<
                             shareStates,
                         }),
                     createNewList: (day, pageId) => async (name) =>
-                        this.createNewListViaPicker(name),
+                        this.props.listsBG.createCustomList({ name }),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -965,7 +965,7 @@ export class DashboardContainer extends StatefulUIElement<
                             value,
                         }),
                     createNewList: (day, pageId) => async (name) =>
-                        this.createNewListViaPicker(name),
+                        this.props.listsBG.createCustomList({ name }),
                     addPageToList: (day, pageId) => (listId) => {
                         const listData = this.props.annotationsCache.getListByLocalId(
                             listId,
@@ -1105,7 +1105,7 @@ export class DashboardContainer extends StatefulUIElement<
                         )
                     },
                     createNewList: (noteId) => async (name) =>
-                        this.createNewListViaPicker(name),
+                        this.props.listsBG.createCustomList({ name }),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,
@@ -1274,10 +1274,10 @@ export class DashboardContainer extends StatefulUIElement<
                                           localListId: listData.localId,
                                       },
                                   )
-                                  await this.processEvent('setListRemoteId', {
-                                      listId: listData.unifiedId,
-                                      remoteListId: shareResult.remoteListId,
-                                  })
+                                  //   await this.processEvent('setListRemoteId', {
+                                  //       listId: listData.unifiedId,
+                                  //       remoteListId: shareResult.remoteListId,
+                                  //   })
                                   return shareResult
                               },
                               waitForListShare: () =>
@@ -1422,7 +1422,7 @@ export class DashboardContainer extends StatefulUIElement<
                             }}
                             peeking={
                                 listsSidebar.isSidebarPeeking
-                                    ? listsSidebar.isSidebarPeeking
+                                    ? listsSidebar.isSidebarPeeking.toString()
                                     : undefined
                             }
                             position={{
@@ -1562,6 +1562,30 @@ export class DashboardContainer extends StatefulUIElement<
                                     activePage: false,
                                 })
                             }
+                            saveHighlightColor={(id, color, unifiedId) => {
+                                {
+                                    this.processEvent('saveHighlightColor', {
+                                        noteId: id,
+                                        color: color,
+                                        unifiedId: unifiedId,
+                                    })
+                                }
+                            }}
+                            saveHighlightColorSettings={(newState) => {
+                                this.processEvent(
+                                    'saveHighlightColorSettings',
+                                    {
+                                        newState: newState,
+                                    },
+                                )
+                            }}
+                            getHighlightColorSettings={() =>
+                                this.processEvent(
+                                    'getHighlightColorSettings',
+                                    null,
+                                )
+                            }
+                            highlightColorSettings={this.state.highlightColors}
                         />
                     </MainFrame>
                     {this.renderModals()}
@@ -1625,8 +1649,8 @@ export class DashboardContainer extends StatefulUIElement<
                                     }}
                                     unselectEntry={null}
                                     createNewEntry={async (name) => {
-                                        const listId = await this.createNewListViaPicker(
-                                            name,
+                                        const res = await this.props.listsBG.createCustomList(
+                                            { name },
                                         )
                                         // await this.props.annotationsCache.addList(
                                         //     {
@@ -1644,9 +1668,9 @@ export class DashboardContainer extends StatefulUIElement<
                                         // )
                                         await this.processEvent(
                                             'setBulkEditSpace',
-                                            { listId: listId },
+                                            { listId: res.localListId },
                                         )
-                                        return listId
+                                        return res
                                     }}
                                     width={'300px'}
                                     autoFocus={false}

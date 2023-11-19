@@ -26,6 +26,10 @@ global.DataTransfer = function () {
 global.document = global.document ?? {}
 global.document.execCommand = () => true
 
+global.navigator = {
+    userAgent: 'jest',
+}
+
 global.ResizeObserver = class ResizeObserver {
     observe() {}
     disconnect() {}

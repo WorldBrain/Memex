@@ -142,6 +142,7 @@ export async function setupBackgroundIntegrationTest(
             query: () => [],
             get: () => null,
             onRemoved: { addListener: () => {} },
+            onUpdated: { addListener: () => {} },
         },
         contextMenus: {
             create: () => {},

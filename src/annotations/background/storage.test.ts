@@ -51,11 +51,11 @@ async function insertTestData({
     await annotationStorage.toggleAnnotBookmark({ url: DATA.hybrid.url })
 
     // Insert collections + collection entries
-    const coll1Id = await customLists.createCustomList({
+    const { localListId: coll1Id } = await customLists.createCustomList({
         name: DATA.coll1,
         id: Date.now(),
     })
-    const coll2Id = await customLists.createCustomList({
+    const { localListId: coll2Id } = await customLists.createCustomList({
         name: DATA.coll2,
         id: Date.now(),
     })
@@ -155,6 +155,7 @@ describe('Annotations storage', () => {
                 await annotationStorage.editAnnotation(
                     DATA.comment.url,
                     'Edited comment',
+                    'one',
                 )
                 const newComment = await annotationStorage.getAnnotationByPk(
                     DATA.comment.url,
@@ -178,6 +179,7 @@ describe('Annotations storage', () => {
                 await annotationStorage.editAnnotation(
                     DATA.highlight.url,
                     'Adding a comment to the highlight.',
+                    'two',
                 )
                 const newHighlight = await annotationStorage.getAnnotationByPk(
                     DATA.highlight.url,

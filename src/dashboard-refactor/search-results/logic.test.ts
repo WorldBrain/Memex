@@ -3676,11 +3676,11 @@ describe('Dashboard search results logic', () => {
                     }),
                 )
 
-                await searchResults.processEvent('handleListShare', {
-                    listId: listDataA.unifiedId,
-                    remoteListId: testRemoteListId,
-                    annotationLocalToRemoteIdsDict: {},
-                })
+                // await searchResults.processEvent('handleListShare', {
+                //     listId: listDataA.unifiedId,
+                //     remoteListId: testRemoteListId,
+                //     annotationLocalToRemoteIdsDict: {},
+                // })
 
                 expect(
                     searchResults.state.listsSidebar.lists.byId[
