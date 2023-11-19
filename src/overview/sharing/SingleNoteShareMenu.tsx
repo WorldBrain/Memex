@@ -144,9 +144,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         if (existingSetting == null) {
             await this.syncSettings.extension.set(
                 'shouldAutoCreateNoteLink',
-                true,
+                false,
             )
-            existingSetting = true
+            existingSetting = false
         }
 
         this.setState({
@@ -454,6 +454,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     ) => async (listId: number) => {
         const { selectEntry, unselectEntry } = this.props.spacePickerProps
 
+        console.log(
+            'shared',
+            selectType,
+            this.props.isShared,
+            this.props.getRemoteListIdForLocalId(listId),
+        )
         if (
             this.props.isShared &&
             this.props.getRemoteListIdForLocalId(listId) != null &&
@@ -466,6 +472,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     selectType,
                 },
             })
+            selectEntry(listId)
         } else {
             return selectType === 'select'
                 ? selectEntry(listId)
@@ -605,7 +612,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 'unselect',
                             )}
                             width={'300px'}
-                            autoFocus={false}
+                            autoFocus={true}
                         />
                     </SpacepickerContainer>
                 </>

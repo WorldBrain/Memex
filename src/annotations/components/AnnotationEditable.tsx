@@ -36,6 +36,8 @@ import { Anchor } from 'src/highlighting/types'
 import HighlightColorPicker from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker'
 import tinycolor from 'tinycolor2'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { sleepPromise } from 'src/util/promises'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -155,7 +157,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     private copyPasterButtonRef = React.createRef<HTMLDivElement>()
     private highlightsBarRef = React.createRef<HTMLDivElement>()
     private spacePickerBodyButtonRef = React.createRef<HTMLDivElement>()
-    private spacePickerFooterButtonRef = React.createRef<HTMLDivElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
     static defaultProps: Pick<Props, 'hoverState' | 'tags' | 'lists'> = {
@@ -251,13 +252,17 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     // This is a hack to ensure this state, which isn't available on init, only gets set once
     private hasInitShowSpacePickerChanged = false
-    componentDidUpdate(prevProps: Readonly<Props>) {
+    async componentDidUpdate(prevProps: Readonly<Props>) {
         if (
             !this.hasInitShowSpacePickerChanged &&
             this.props.initShowSpacePicker !== prevProps.initShowSpacePicker
         ) {
+            await sleepPromise(200)
+            this.props.onShareMenuToggle?.()
             this.hasInitShowSpacePickerChanged = true
-            this.setState({ showSpacePicker: this.props.initShowSpacePicker })
+            this.setState({
+                showShareMenu: this.props.initShowSpacePicker === 'footer',
+            })
         }
         if (prevProps.color != this.props.color) {
             this.setState({
@@ -757,6 +762,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             this.hasSharedLists,
         )
 
+        const listsToDisplay = this.props.lists.filter(
+            (list) =>
+                list !== SPECIAL_LIST_IDS.INBOX &&
+                list !== SPECIAL_LIST_IDS.MOBILE &&
+                list !== SPECIAL_LIST_IDS.FEED,
+        )
+
         if ((!isEditing && !isDeleting) || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
@@ -785,20 +797,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 }}
                                 label={'Spaces'}
                                 icon={
-                                    this.props.lists.length > 0 ? (
+                                    listsToDisplay.length > 0 ? (
                                         <ListCounter>
-                                            {this.props.lists.length}
+                                            {listsToDisplay.length}
                                         </ListCounter>
                                     ) : (
                                         'plus'
                                     )
                                 }
                                 iconColor={
-                                    this.props.lists.filter(
-                                        (list) =>
-                                            list !== 20201014 &&
-                                            list !== 20201015,
-                                    ).length > 0
+                                    listsToDisplay.length > 0
                                         ? 'white'
                                         : 'prime1'
                                 }
@@ -819,7 +827,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         actions={this.calcFooterActions()}
                     />
                     {this.renderSpacePicker(
-                        this.spacePickerFooterButtonRef,
+                        this.shareMenuButtonRef,
                         this.state.showSpacePicker,
                     )}
                     {this.renderShareMenu(this.shareMenuButtonRef)}
@@ -898,10 +906,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         </BtnContainerStyled>
                         {/* {this.renderMarkdownHelpButton()} */}
                     </SaveActionBar>
-                    {/* {this.renderSpacePicker(
-                        this.spacePickerFooterButtonRef,
-                        'footer',
-                    )} */}
+                    {this.renderSpacePicker(this.shareMenuButtonRef, 'footer')}
                     {this.state.showShareMenu &&
                         this.renderShareMenu(this.shareMenuButtonRef)}
                 </DeletionBox>

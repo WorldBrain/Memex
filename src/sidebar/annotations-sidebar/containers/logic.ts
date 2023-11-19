@@ -2035,7 +2035,9 @@ export class SidebarContainerLogic extends UILogic<
         'updateListsForAnnotation'
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
-        this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
+
+        console.log('adsads', annotationsCache, contentSharingBG)
+        // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
             annotationsCache.annotations.byId[event.unifiedAnnotationId]
@@ -2059,6 +2061,7 @@ export class SidebarContainerLogic extends UILogic<
         const unifiedListIds = new Set(existing.unifiedListIds)
         let bgPromise: Promise<{ sharingState: AnnotationSharingState }>
         if (event.added != null) {
+            console.log('event', event.added)
             const cacheList = annotationsCache.getListByLocalId(event.added)
             if (!cacheList) {
                 throw new Error(
@@ -2079,7 +2082,7 @@ export class SidebarContainerLogic extends UILogic<
             bgPromise = contentSharingBG.shareAnnotationToSomeLists({
                 annotationUrl: existing.localId,
                 localListIds: [event.added],
-                protectAnnotation: event.options?.protectAnnotation,
+                protectAnnotation: true,
             })
         } else if (event.deleted != null) {
             const cacheList = annotationsCache.getListByLocalId(event.deleted)
@@ -2102,9 +2105,7 @@ export class SidebarContainerLogic extends UILogic<
                 remoteId: existing.remoteId,
                 unifiedListIds: [...unifiedListIds],
                 unifiedId: event.unifiedAnnotationId,
-                privacyLevel: event.options?.protectAnnotation
-                    ? AnnotationPrivacyLevels.PROTECTED
-                    : existing.privacyLevel,
+                privacyLevel: existing.privacyLevel,
             },
             { keepListsIfUnsharing: event.options?.protectAnnotation },
         )

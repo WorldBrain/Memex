@@ -178,6 +178,7 @@ export default class SpacePickerLogic extends UILogic<
                     normalizedPageUrlToFilterPageLinksBy,
                 ) ?? new Set()
 
+            console.log('pagelistIdset', pageListIdsSet)
             const localPageListIds: number[] = Array.from(pageListIdsSet)
                 .map(
                     (unifiedListId) =>
@@ -728,6 +729,7 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry, analyticsBG, shouldRerender },
         previousState,
     }) => {
+        console.log('enrypress', entry)
         if (!(await pageActionAllowed(analyticsBG))) {
             return
         }
@@ -751,6 +753,7 @@ export default class SpacePickerLogic extends UILogic<
                     entry.localId,
                 )
             } else {
+                console.log('selectentry', entry.localId)
                 this.localListIdsMRU = Array.from(
                     new Set([listData.localId, ...this.localListIdsMRU]),
                 )
@@ -779,7 +782,10 @@ export default class SpacePickerLogic extends UILogic<
                     this.dependencies.annotationsCache.lists,
                 )
             }
+
+            console.log('entrpressprefinihs')
             await entrySelectPromise
+            console.log('entrpressfinihs')
         } catch (e) {
             this.selectedListIds = previousState.selectedListIds
             const mutation: UIMutation<SpacePickerState> = {

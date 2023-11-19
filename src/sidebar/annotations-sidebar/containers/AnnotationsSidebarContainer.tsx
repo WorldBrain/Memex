@@ -347,11 +347,12 @@ export class AnnotationsSidebarContainer<
             renderSpacePicker: () => (
                 <CollectionPicker
                     showPageLinks
-                    selectEntry={(listId) =>
+                    selectEntry={async (listId) => {
+                        console.log('test')
                         this.processEvent('setNewPageNoteLists', {
                             lists: [...this.state.commentBox.lists, listId],
                         })
-                    }
+                    }}
                     unselectEntry={(listId) =>
                         this.processEvent('setNewPageNoteLists', {
                             lists: this.state.commentBox.lists.filter(
@@ -435,7 +436,8 @@ export class AnnotationsSidebarContainer<
                     params.annotation.unifiedListIds,
                 ),
             selectEntry: async (listId, options) => {
-                this.processEvent(getUpdateListsEvent(listId), {
+                console.log('updatelist')
+                this.processEvent('updateListsForAnnotation', {
                     added: listId,
                     deleted: null,
                     unifiedAnnotationId: params.annotation.unifiedId,
@@ -481,11 +483,12 @@ export class AnnotationsSidebarContainer<
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
+
+        console.log('annotation', annotation)
         return (
             <CollectionPicker
                 {...this.getSpacePickerProps({
                     annotation,
-                    showExternalConfirmations: true,
                 })}
                 bgScriptBG={this.props.bgScriptBG}
                 closePicker={closePicker}
@@ -512,9 +515,11 @@ export class AnnotationsSidebarContainer<
     private renderShareMenuForAnnotation = () => (
         unifiedId: UnifiedAnnotation['unifiedId'],
     ) => {
+        console.log('coming here')
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
+        console.log('annotations,', annotation)
         if (!annotation.localId) {
             return
         }

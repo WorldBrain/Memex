@@ -3006,10 +3006,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
-            modals: {
-                confirmPrivatizeNoteArgs: { $set: null },
-                confirmSelectNoteSpaceArgs: { $set: null },
-            },
+            // modals: {
+            //     confirmPrivatizeNoteArgs: { $set: null },
+            //     confirmSelectNoteSpaceArgs: { $set: null },
+            // },
         })
     }
 
