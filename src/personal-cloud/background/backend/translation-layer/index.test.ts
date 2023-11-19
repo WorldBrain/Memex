@@ -2054,6 +2054,7 @@ describe('Personal cloud translation layer', () => {
             await assertExpectedLocalTreeData()
 
             const remoteDataA = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testListA = remoteDataA.personalList
             const testListTreesA = remoteDataA.personalListTree
             const testListSharesA = remoteDataA.personalListShare
 
@@ -2066,8 +2067,11 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...personalDataChanges(remoteDataA, [
-                    // No changes should be created from the server-side changes
-                ], { skipChanges: 12 }),
+                    [DataChangeType.ListTreeMove, 'personalListTree', testListTreesA.third.id, {
+                        localListId: testListA.third.localId,
+                        parentLocalListId: testListA.second.localId,
+                    }],
+                ], { skipChanges: 12, skipAssertTimestamp: true }),
                 personalListTree: [
                     testListTreesA.first,
                     testListTreesA.second,
@@ -2188,8 +2192,15 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...personalDataChanges(remoteDataB, [
-                    // No changes should be created from the server-side changes
-                ], { skipChanges: 12 }),
+                    [DataChangeType.ListTreeMove, 'personalListTree', testListTreesA.third.id, {
+                        localListId: testListA.third.localId,
+                        parentLocalListId: testListA.second.localId,
+                    }],
+                    [DataChangeType.ListTreeMove, 'personalListTree', testListTreesA.second.id, {
+                        localListId: testListA.second.localId,
+                        parentLocalListId: null,
+                    }],
+                ], { skipChanges: 12, skipAssertTimestamp: true }),
                 personalListTree: [
                     testListTreesB.first,
                     {
