@@ -382,7 +382,7 @@ class SpacePicker extends StatefulUIElement<
                         />
                         {list.remoteId != null && (
                             <PrimaryAction
-                                type="secondary"
+                                type="tertiary"
                                 size="small"
                                 label="Open Space"
                                 icon="globe"

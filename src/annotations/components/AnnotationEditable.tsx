@@ -794,7 +794,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     )
                                 }
                                 iconColor={
-                                    this.props.lists.length > 0
+                                    this.props.lists.filter(
+                                        (list) =>
+                                            list !== 20201014 &&
+                                            list !== 20201015,
+                                    ).length > 0
                                         ? 'white'
                                         : 'prime1'
                                 }
