@@ -116,6 +116,7 @@ const LOCAL_ANNOTATIONS_V24 = {
         comment: 'This is a test comment',
         createdWhen: new Date('2020-10-10'),
         lastEdited: new Date('2020-10-10'),
+        color: '#ffffff',
         selector: {
             quote: 'This is a test highlight',
             descriptor: { strategy: 'hyp-anchoring', content: [] },
@@ -163,7 +164,6 @@ const LOCAL_LISTS_V24 = {
         createdAt: new Date(1619414286452),
         isDeletable: true,
         isNestable: true,
-        type: null,
     },
     second: {
         id: 1619414286456,
@@ -172,7 +172,6 @@ const LOCAL_LISTS_V24 = {
         createdAt: new Date(1619414286456),
         isDeletable: true,
         isNestable: true,
-        type: null,
     },
 }
 
@@ -180,10 +179,12 @@ const LOCAL_SHARED_LIST_METADATA_V24 = {
     first: {
         localId: LOCAL_LISTS_V24.first.id,
         remoteId: 'test-1',
+        private: false,
     },
     second: {
         localId: LOCAL_LISTS_V24.second.id,
         remoteId: 'test-2',
+        private: false,
     },
 }
 
@@ -705,6 +706,7 @@ const REMOTE_ANNOTATIONS_V24 = {
         comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
         createdWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
         updatedWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
+        color: LOCAL_TEST_DATA_V24.annotations.first.color,
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
     },
@@ -1036,8 +1038,9 @@ export const REMOTE_TEST_DATA_V24 = {
             id: 1,
             personalList: REMOTE_LISTS_V24.first.id,
             remoteId: LOCAL_SHARED_LIST_METADATA_V24.first.remoteId,
-            user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            private: false,
             createdWhen: 565,
             updatedWhen: 565,
         },
@@ -1045,8 +1048,9 @@ export const REMOTE_TEST_DATA_V24 = {
             id: 2,
             personalList: REMOTE_LISTS_V24.second.id,
             remoteId: LOCAL_SHARED_LIST_METADATA_V24.second.remoteId,
-            user: TEST_USER.id,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            private: false,
             createdWhen: 565,
             updatedWhen: 565,
         },

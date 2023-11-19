@@ -41,4 +41,7 @@ export const createSyncSettingsStore = <
         searchInjection: new BrowserSettingsStore(args.syncSettingsBG, {
             prefix: FEATURE_PREFIX.SEARCH_INJECTION,
         }),
+        highlightColors: new BrowserSettingsStore(args.syncSettingsBG, {
+            prefix: FEATURE_PREFIX.HIGHLIGHT_COLORS,
+        }),
     } as SyncSettingsStoreInterface)

@@ -15,14 +15,14 @@ import { createClientApplicationLayer } from '@worldbrain/memex-common/lib/fireb
 import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
-import { ServerStorage } from './types'
+import type { ServerStorage } from './types'
 import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
 import ActivityStreamsStorage from '@worldbrain/memex-common/lib/activity-streams/storage'
 import ActivityFollowsStorage from '@worldbrain/memex-common/lib/activity-follows/storage'
 import PersonalCloudStorage from '@worldbrain/memex-common/lib/personal-cloud/storage'
 import { DiscordRetroSyncStorage } from '@worldbrain/memex-common/lib/discord/queue'
 import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
-import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import SlackStorage from '@worldbrain/memex-common/lib/slack/storage'
 import { SlackRetroSyncStorage } from '@worldbrain/memex-common/lib/slack/storage/retro-sync'
 
@@ -33,8 +33,12 @@ export function createServerStorageManager(options?: {
 }) {
     const firebase = getFirebase()
     const serverStorageBackend = new FirestoreStorageBackend({
-        firebase: firebase as any,
         firestore: firebase.firestore() as any,
+        firebaseModules: {
+            serverTimestamp: firebase.firestore.FieldValue.serverTimestamp,
+            documentId: firebase.firestore.FieldPath.documentId,
+            fromMillis: firebase.firestore.Timestamp.fromMillis,
+        },
     })
     return createStorageManager(serverStorageBackend, options)
 }
@@ -144,62 +148,7 @@ export function createMemoryServerStorage(options?: {
     })
 }
 
-export async function createTestServerStorage(options?: {
-    firebaseProjectId?: string
-    withTestUser?: { uid: string } | boolean
-    superuser?: boolean
-    setupMiddleware?: (storageMan: StorageManager) => StorageMiddleware[]
-}): Promise<ServerStorage> {
-    if (process.env.TEST_SERVER_STORAGE === 'firebase-emulator') {
-        const firebaseTesting = require('@firebase/testing')
-        const userId = options?.withTestUser
-            ? options?.withTestUser === true
-                ? 'default-user'
-                : options?.withTestUser.uid
-            : undefined
-        const firebaseProjectId =
-            options?.firebaseProjectId ?? Date.now().toString()
-        const firebaseApp = options?.superuser
-            ? firebaseTesting.initializeAdminApp({
-                  projectId: firebaseProjectId,
-              })
-            : firebaseTesting.initializeTestApp({
-                  projectId: firebaseProjectId,
-                  auth: userId ? { uid: userId } : undefined,
-              })
-        if (process.env.DISABLE_FIRESTORE_RULES === 'true') {
-            await firebaseTesting.loadFirestoreRules({
-                projectId: firebaseProjectId,
-                rules: `
-            service cloud.firestore {
-                match /databases/{database}/documents {
-                    match /{document=**} {
-                        allow read, write; // or allow read, write: if true;
-                    }
-                }
-            }
-            `,
-            })
-        }
-
-        const firestore = firebaseApp.firestore()
-        const backend = new FirestoreStorageBackend({
-            firebase: firebaseApp as any,
-            firebaseModule: firebaseTesting as any,
-            firestore: firestore as any,
-        })
-        const storageManager = createStorageManager(backend, options)
-
-        return createServerStorage(storageManager, {
-            autoPkType: 'string',
-            skipApplicationLayer: true,
-        })
-    } else {
-        return createMemoryServerStorage(options)
-    }
-}
-
-function createStorageManager(
+export function createStorageManager(
     backend: StorageBackend,
     options?: {
         setupMiddleware?(manager: StorageManager): StorageMiddleware[]

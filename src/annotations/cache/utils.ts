@@ -6,6 +6,7 @@ import type { PageList } from 'src/custom-lists/background/types'
 import type { Annotation, SharedAnnotationWithRefs } from '../types'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedAnnotationForCache,
     UnifiedList,
@@ -64,6 +65,7 @@ export const reshapeAnnotationForCache = (
             shouldShare: annot.isShared,
             isBulkShareProtected: annot.isBulkShareProtected,
         }),
+        color: annot.color as RGBAColor,
         ...(opts.extraData ?? {}),
     }
 }
@@ -89,6 +91,7 @@ export const reshapeSharedAnnotationForCache = (
         lastEdited: annot.updatedWhen,
         createdWhen: annot.createdWhen,
         privacyLevel: AnnotationPrivacyLevels.SHARED,
+        color: annot.color as RGBAColor,
         ...(opts.extraData ?? {}),
     }
 }
@@ -220,11 +223,49 @@ export async function hydrateCacheForPageAnnotations(
         const localListsData = await args.bgModules.customLists.fetchAllLists(
             {},
         )
-        const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
-            {
-                localListIds: localListsData.map((list) => list.id),
-            },
+
+        const localListIds = localListsData.map((list) => list.id)
+
+        let listMetadataFetch: {
+            [localListId: number]: SharedListMetadata
+        } = await args.bgModules.contentSharing.getListShareMetadata({
+            localListIds: localListIds,
+        })
+
+        let sharedListsLocalIds = []
+
+        for (let list in listMetadataFetch) {
+            sharedListsLocalIds.push(listMetadataFetch[list].localId)
+        }
+
+        const differenceList = localListIds.filter(
+            (x) => !sharedListsLocalIds.includes(x),
         )
+
+        let listMetadata: { [localListId: number]: SharedListMetadata } = {
+            ...listMetadataFetch,
+        }
+
+        for (let list of differenceList) {
+            const listShareData = await args.bgModules.contentSharing.scheduleListShare(
+                {
+                    localListId: list,
+                    isPrivate: true,
+                },
+            )
+
+            if (!listMetadata[list]) {
+                listMetadata[list] = {
+                    localId: undefined,
+                    remoteId: undefined,
+                }
+            }
+
+            listMetadata[list].localId = list
+            listMetadata[list].remoteId = listShareData.remoteListId
+            listMetadata[list].private = true
+        }
+
         const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
             args.fullPageUrl,
             Object.values(listMetadata).map((metadata) => metadata.remoteId),

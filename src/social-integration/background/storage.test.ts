@@ -18,7 +18,9 @@ describe('Social storage', () => {
         customListBg: CustomListBg
         socialStorage: SocialStorage
     }) {
-        const listId = await params.customListBg.createCustomList({
+        const {
+            localListId: listId,
+        } = await params.customListBg.createCustomList({
             name: DATA.customListNameA,
             id: Date.now(),
         })

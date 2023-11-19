@@ -28,6 +28,10 @@ import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { Checkbox } from 'src/common-ui/components'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 type SelectType = 'select' | 'unselect'
 
@@ -44,6 +48,8 @@ interface State extends ShareMenuCommonState {
     autoShareState: TaskState
     autoCreateLinkState: TaskState
     autoCreateLinkSetting: boolean
+    isAutoAddSet: boolean
+    showAutoAddMenu: boolean
 }
 
 export interface Props extends ShareMenuCommonProps {
@@ -93,6 +99,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         annotationsBG: runInBackground(),
         customListsBG: runInBackground(),
     }
+    private autoAddButtonRef: React.RefObject<HTMLDivElement>
+
     private syncSettings: SyncSettingsStore<'extension'>
 
     state: State = {
@@ -104,6 +112,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         confirmationMode: null,
         autoCreateLinkState: 'pristine',
         autoCreateLinkSetting: null,
+        isAutoAddSet: null,
+        showAutoAddMenu: false,
     }
 
     async componentDidMount() {
@@ -114,16 +124,30 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             autoCreateLinkState: 'running',
         })
 
+        this.autoAddButtonRef = React.createRef<HTMLDivElement>()
+
+        const isAutoAddStorage = await this.getAutoAddSetting()
+
+        if (isAutoAddStorage != null) {
+            this.setState({
+                isAutoAddSet: isAutoAddStorage,
+            })
+        } else if (isAutoAddStorage == null) {
+            this.setState({
+                isAutoAddSet: true,
+            })
+            await this.setAutoAddSetting(true)
+        }
+
         let existingSetting = await this.syncSettings.extension.get(
             'shouldAutoCreateNoteLink',
         )
-
         if (existingSetting == null) {
             await this.syncSettings.extension.set(
                 'shouldAutoCreateNoteLink',
-                true,
+                false,
             )
-            existingSetting = true
+            existingSetting = false
         }
 
         this.setState({
@@ -140,6 +164,107 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 async () => {
                     await this.shareAnnotation()
                 },
+            )
+        }
+    }
+
+    async setAutoAddSetting(isAutoAdd) {
+        return await this.syncSettings.extension.set(
+            'shouldAutoAddSpaces',
+            isAutoAdd,
+        )
+    }
+    async getAutoAddSetting() {
+        return await this.syncSettings.extension.get('shouldAutoAddSpaces')
+    }
+
+    async handleAutoAddToggle(isAutoAdd) {
+        this.setState({
+            isAutoAddSet: isAutoAdd,
+        })
+        await this.setAutoAddSetting(isAutoAdd)
+    }
+
+    renderAutoAddDefaultSettings() {
+        if (this.state.showAutoAddMenu) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.autoAddButtonRef?.current}
+                    placement="bottom-end"
+                    width="150px"
+                    closeComponent={() =>
+                        this.setState({ showAutoAddMenu: false })
+                    }
+                    offsetY={10}
+                    instaClose
+                >
+                    <AutoAddDefaultContainer>
+                        <TooltipTextBox>
+                            {this.props.isShared ? (
+                                <>
+                                    <strong>
+                                        <Icon
+                                            icon={'spread'}
+                                            color={'prime1'}
+                                            hoverOff
+                                            heightAndWidth="32px"
+                                        />
+                                        Added to all Spaces the document is in.
+                                    </strong>
+                                    For generally relevant annotations.
+                                </>
+                            ) : (
+                                <>
+                                    <strong>
+                                        Only added to Spaces
+                                        <br />
+                                        you manually put annotation in.
+                                    </strong>
+                                    <span>
+                                        For context specific annotations.
+                                        <br />
+                                        Setting auto-enables when you select
+                                        Spaces for indiviudal annotations.
+                                    </span>
+                                    <KeyboardShortCutBox>
+                                        Save & Auto-Add
+                                        <KeyboardShortcuts
+                                            keys={`shift+${SingleNoteShareMenu.MOD_KEY}+enter`.split(
+                                                '+',
+                                            )}
+                                            size={'small'}
+                                        />
+                                    </KeyboardShortCutBox>
+                                </>
+                            )}
+                        </TooltipTextBox>
+                        <DefaultCheckBoxContainer>
+                            <Checkbox
+                                key={3}
+                                id={'3'}
+                                width="fit-content"
+                                isChecked={this.state.isAutoAddSet === true}
+                                handleChange={() =>
+                                    this.handleAutoAddToggle(
+                                        !this.state.isAutoAddSet,
+                                    )
+                                }
+                                // isDisabled={!this.state.shortcutsEnabled}
+                                name={
+                                    this.state.isAutoAddSet
+                                        ? 'Is Default'
+                                        : 'Make Default'
+                                }
+                                label={
+                                    'Auto-adding default for new annotations'
+                                }
+                                fontSize={14}
+                                size={14}
+                                isLoading={this.state.isAutoAddSet == null}
+                            />
+                        </DefaultCheckBoxContainer>
+                    </AutoAddDefaultContainer>
+                </PopoutBox>
             )
         }
     }
@@ -349,6 +474,12 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     ) => async (listId: number) => {
         const { selectEntry, unselectEntry } = this.props.spacePickerProps
 
+        console.log(
+            'shared',
+            selectType,
+            this.props.isShared,
+            this.props.getRemoteListIdForLocalId(listId),
+        )
         if (
             this.props.isShared &&
             this.props.getRemoteListIdForLocalId(listId) != null &&
@@ -361,6 +492,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     selectType,
                 },
             })
+            return selectType === 'select'
+                ? selectEntry(listId)
+                : unselectEntry(listId)
         } else {
             return selectType === 'select'
                 ? selectEntry(listId)
@@ -421,75 +555,137 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         return (
             <>
                 <>
-                    <ShareAnnotationMenu
-                        link={this.state.link}
-                        showLink={true}
-                        onCopyLinkClick={this.handleLinkCopy}
-                        linkTitleCopy="Link to this annotation"
-                        privacyOptionsTitleCopy={undefined}
-                        isLoading={
-                            this.state.shareState === 'running' ||
-                            this.state.loadState === 'running'
-                        }
-                        autoCreateLinkSetting={this.state.autoCreateLinkSetting}
-                        autoCreateLinkState={this.state.autoCreateLinkState}
-                        toggleAutoCreateLinkSetting={async () => {
-                            await this.toggleAutoCreateLinkSetting()
-                        }}
-                        autoShareState={this.state.autoShareState}
-                        handleCreateLink={this.handleCreateLink}
-                        privacyOptions={[
-                            {
-                                icon: 'personFine',
-                                title: 'Private',
-                                hasProtectedOption: true,
-                                onClick: this.handleSetPrivate,
-                                isSelected: !this.props.isShared,
-                                shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                description: (
-                                    <>
-                                        Private to you <br /> unless shared in
-                                        specific Spaces
-                                    </>
-                                ),
-                            },
-                            {
-                                icon: 'globe',
-                                title: 'Auto-Shared',
-                                hasProtectedOption: true,
-                                onClick: this.handleSetShared,
-                                isSelected: this.props.isShared,
-                                shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                description: (
-                                    <>
-                                        Auto-shared to Spaces <br /> the page is
-                                        added to{' '}
-                                    </>
-                                ),
-                            },
-                        ]}
-                        shortcutHandlerDict={{
-                            // 'mod+shift+enter': this.handleSetProtected,
-                            'mod+shift+enter': () =>
-                                this.handleSetShared(false),
-                            'mod+enter': () => this.handleSetPrivate(false),
-                            'alt+enter': () => this.handleSetPrivate(true),
-                            'alt+shift+enter': () => this.handleSetShared(true),
-                        }}
-                    />
-
-                    <SpacePicker
-                        {...this.props.spacePickerProps}
-                        showPageLinks
-                        selectEntry={this.handleSpacePickerSelection('select')}
-                        unselectEntry={this.handleSpacePickerSelection(
-                            'unselect',
-                        )}
-                        width={'300px'}
-                        autoFocus={false}
-                    />
+                    <ShareMenuContainer>
+                        <ShareAnnotationMenu
+                            link={this.state.link}
+                            showLink={true}
+                            onCopyLinkClick={this.handleLinkCopy}
+                            linkTitleCopy="Link to this annotation"
+                            privacyOptionsTitleCopy={undefined}
+                            isLoading={
+                                this.state.shareState === 'running' ||
+                                this.state.loadState === 'running'
+                            }
+                            autoCreateLinkSetting={
+                                this.state.autoCreateLinkSetting
+                            }
+                            autoCreateLinkState={this.state.autoCreateLinkState}
+                            toggleAutoCreateLinkSetting={async () => {
+                                await this.toggleAutoCreateLinkSetting()
+                            }}
+                            renderAutoAddDefaultSettings={this.renderAutoAddDefaultSettings()}
+                            showAutoAddMenu={(isShown) =>
+                                this.setState({
+                                    showAutoAddMenu: isShown,
+                                })
+                            }
+                            autoAddButtonRef={this.autoAddButtonRef}
+                            autoShareState={this.state.autoShareState}
+                            handleCreateLink={this.handleCreateLink}
+                            privacyOptions={[
+                                {
+                                    icon: 'personFine',
+                                    title: 'Private',
+                                    hasProtectedOption: true,
+                                    onClick: this.handleSetPrivate,
+                                    isSelected: !this.props.isShared,
+                                    shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
+                                    description: (
+                                        <>
+                                            Private to you <br /> unless shared
+                                            in specific Spaces
+                                        </>
+                                    ),
+                                },
+                                {
+                                    icon: 'globe',
+                                    title: 'Auto-Added',
+                                    hasProtectedOption: true,
+                                    onClick: this.handleSetShared,
+                                    isSelected: this.props.isShared,
+                                    shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
+                                    description: (
+                                        <>
+                                            For annotations relevant for many
+                                            contexts Auto-shared to Spaces{' '}
+                                            <br /> the page is added to{' '}
+                                        </>
+                                    ),
+                                },
+                            ]}
+                            shortcutHandlerDict={{
+                                // 'mod+shift+enter': this.handleSetProtected,
+                                'mod+shift+enter': () =>
+                                    this.handleSetShared(false),
+                                'mod+enter': () => this.handleSetPrivate(false),
+                                'alt+enter': () => this.handleSetPrivate(true),
+                                'alt+shift+enter': () =>
+                                    this.handleSetShared(true),
+                            }}
+                        />
+                    </ShareMenuContainer>
+                    <SpacepickerContainer>
+                        <SpacePicker
+                            {...this.props.spacePickerProps}
+                            showPageLinks
+                            selectEntry={this.handleSpacePickerSelection(
+                                'select',
+                            )}
+                            unselectEntry={this.handleSpacePickerSelection(
+                                'unselect',
+                            )}
+                            width={'300px'}
+                            autoFocus={true}
+                        />
+                    </SpacepickerContainer>
                 </>
             </>
         )
     }
 }
+
+const AutoAddDefaultContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    grid-gap: 15px;
+`
+
+const ShareMenuContainer = styled.div`
+    position: relative;
+    z-index: 11;
+`
+const SpacepickerContainer = styled.div`
+    position: relative;
+    z-index: 10;
+`
+
+const TooltipTextBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    grid-gap: 5px;
+    justify-content: center;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 14px;
+    text-align: center;
+    grid-gap: 10px;
+    padding: 15px 15px 8px 15px;
+`
+
+const DefaultCheckBoxContainer = styled.div`
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    height: 20px;
+    padding: 15px 15px 15px 15px;
+`
+const KeyboardShortCutBox = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    align-items: center;
+    height: 30px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    grid-gap: 15px;
+`

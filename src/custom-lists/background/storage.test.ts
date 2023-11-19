@@ -221,11 +221,14 @@ describe('Custom List Integrations', () => {
                 }),
             ).toEqual([])
 
-            const listId = await customLists.createCustomList({
+            const { localListId } = await customLists.createCustomList({
                 name: listName,
                 id: Date.now(),
             })
-            await customLists.updateListDescription({ listId, description })
+            await customLists.updateListDescription({
+                listId: localListId,
+                description,
+            })
 
             expect(
                 await storageManager
@@ -233,7 +236,7 @@ describe('Custom List Integrations', () => {
                     .findAllObjects({}),
             ).toEqual([
                 expect.objectContaining({
-                    id: listId,
+                    id: localListId,
                     name: listName,
                 }),
             ])
@@ -243,7 +246,7 @@ describe('Custom List Integrations', () => {
                     .findAllObjects({}),
             ).toEqual([
                 {
-                    listId,
+                    listId: localListId,
                     description,
                 },
             ])
@@ -254,7 +257,7 @@ describe('Custom List Integrations', () => {
                 }),
             ).toEqual([
                 expect.objectContaining({
-                    id: listId,
+                    id: localListId,
                     name: listName,
                     description,
                 }),
@@ -445,7 +448,9 @@ describe('Custom List Integrations', () => {
             setMockFetchPage(url4)
             await checkInboxEntry(url3, { shouldExist: false })
             await checkInboxEntry(url4, { shouldExist: false })
-            const testListId = await customLists.createCustomList(DATA.LIST_1)
+            const {
+                localListId: testListId,
+            } = await customLists.createCustomList(DATA.LIST_1)
             await customLists.insertPageToList({ id: testListId, url: url4 })
             await checkInboxEntry(url4, { shouldExist: true })
             await customLists.removePageFromList({

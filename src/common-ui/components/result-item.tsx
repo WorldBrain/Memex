@@ -123,10 +123,10 @@ class ResultItem extends PureComponent<Props> {
                 handleDeleteAnnotation={(url) =>
                     annotationsBG.deleteAnnotation(url)
                 }
-                handleEditAnnotation={async (url, comment, tags) => {
-                    await annotationsBG.editAnnotation(url, comment)
-                    await annotationsBG.updateAnnotationTags({ url, tags })
-                }}
+                // handleEditAnnotation={async (url, comment, tags) => {
+                //     await annotationsBG.editAnnotation(url, comment)
+                //     await annotationsBG.updateAnnotationTags({ url, tags })
+                // }}
             />
         )
     }

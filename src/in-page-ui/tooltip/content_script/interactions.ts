@@ -123,6 +123,9 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                     handleUIStateChange,
                 )
         },
+        getHighlightColorsSettings: () => params.getHighlightColorsSettings(),
+        saveHighlightColorsSettings: (newStateInput) =>
+            params.saveHighlightColorsSettings(newStateInput),
     })
 
     setupTooltipTrigger(() => {

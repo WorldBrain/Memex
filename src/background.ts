@@ -228,13 +228,15 @@ export async function main(): Promise<void> {
     globalThis['dataSeeders'] = setupDataSeeders(storageManager)
     globalThis['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 
-    globalThis['selfTests'] = createSelfTests({
-        serverStorage,
-        storageManager,
-        backgroundModules,
-        persistentStorageManager,
-        localStorage: browser.storage.local,
-    })
+    if (process.env.NODE_ENV === 'development') {
+        globalThis['selfTests'] = createSelfTests({
+            serverStorage,
+            storageManager,
+            backgroundModules,
+            persistentStorageManager,
+            localStorage: browser.storage.local,
+        })
+    }
 
     rpcManager.unpause()
     __debugCounter++

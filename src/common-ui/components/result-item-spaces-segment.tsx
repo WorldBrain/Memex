@@ -131,14 +131,14 @@ export default function ListsSegment({
                                 </ListSpaceContainer>
                             )
                         })}
-                    <AddSpacesButton
+                    {/* <AddSpacesButton
                         hasNoLists={lists.length === 0}
                         onEditBtnClick={onEditBtnClick}
                         renderSpacePicker={renderSpacePicker}
                         tabIndex={tabIndex}
                         newLineOrientation={newLineOrientation}
                         spacePickerButtonRef={spacePickerButtonRef}
-                    />
+                    /> */}
                 </SpacesListContainer>
             </ListsContainer>
         </Container>

@@ -1,7 +1,7 @@
 import type { UIEvent } from 'ui-logic-core'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { AuthProviderType } from '@worldbrain/memex-common/lib/authentication/types'
+import type { AuthProviderType } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface Dependencies {
     authBG: AuthRemoteFunctionsInterface

@@ -16,6 +16,7 @@ import {
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 export interface Props {
     isShared?: boolean
@@ -163,7 +164,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                             <SharePrivacyOption
                                 hasProtectedOption
                                 icon="globe"
-                                title="Auto-Shared"
+                                title="Auto-Added"
                                 shortcut={`shift+${getKeyName({
                                     key: 'mod',
                                 })}+enter`}
@@ -190,32 +191,6 @@ export default class AnnotationSaveBtn extends React.PureComponent<
         return (
             <>
                 <SaveBtn tabIndex={this.props.tabIndex}>
-                    {this.renderShareMenu()}
-                    <TooltipBox
-                        placement="bottom"
-                        tooltipText={'Change Note Privacy'}
-                    >
-                        <SaveBtnArrow
-                            onClick={() =>
-                                this.setState({
-                                    isShareMenuShown: !this.state
-                                        .isShareMenuShown,
-                                })
-                            }
-                            ref={this.privacySelectionButtonRef}
-                        >
-                            <Icon
-                                heightAndWidth="20px"
-                                filePath={icons.arrowDown}
-                                hoverOff
-                            />
-                            {this.props.isShared
-                                ? 'Auto-Shared'
-                                : this.props.hasSharedLists
-                                ? 'Shared'
-                                : 'Private'}
-                        </SaveBtnArrow>
-                    </TooltipBox>
                     <TooltipBox
                         tooltipText={
                             <SaveButtonTooltipContainer>
@@ -229,28 +204,30 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                         optional={'shift'}
                                         size={'small'}
                                     />
-                                    to make auto-share
+                                    to make auto-add to all Spaces
                                 </BottomText>
                             </SaveButtonTooltipContainer>
                         }
                         placement="bottom-end"
                     >
-                        <IconContainer>
-                            <Icon
-                                heightAndWidth="20px"
-                                icon={icons.check}
-                                color={'prime1'}
-                                onClick={() =>
-                                    this.props.onSave(
-                                        !!this.props.isShared,
-                                        !!this.props.isProtected,
-                                        { mainBtnPressed: true },
-                                    )
-                                }
-                                darkBackground
-                                padding={'3px 8px'}
-                            />
-                        </IconContainer>
+                        <PrimaryAction
+                            icon={'check'}
+                            onClick={() =>
+                                this.props.onSave(
+                                    !!this.props.isShared,
+                                    !!this.props.isProtected,
+                                    { mainBtnPressed: true },
+                                )
+                            }
+                            iconColor="prime1"
+                            type={'tertiary'}
+                            size="small"
+                            label={'Save'}
+                            fontSize="14px"
+                            iconSize="18px"
+                            padding="2px 8px 2px 2px"
+                            fontColor="greyScale7"
+                        />
                     </TooltipBox>
                 </SaveBtn>
             </>
@@ -261,12 +238,6 @@ export default class AnnotationSaveBtn extends React.PureComponent<
 const PrivacyOptionsBox = styled.div`
     display: flex;
     grid-gap: 2px;
-`
-
-const IconContainer = styled.div`
-    > div {
-        border-radius: 0px 5px 5px 0px;
-    }
 `
 
 const SaveButtonTooltipContainer = styled.div`
@@ -323,7 +294,6 @@ const SaveBtn = styled.div`
     font-weight: 400;
     display: flex;
     flex: 1;
-    border: 1px solid ${(props) => props.theme.colors.greyScale3};
 `
 
 const PrivacyOptionsTitle = styled.div`

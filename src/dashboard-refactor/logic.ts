@@ -51,9 +51,13 @@ import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
-import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheEvents,
+    RGBAColor,
+} from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
@@ -63,7 +67,6 @@ import {
     getBulkEditItems,
     setBulkEdit,
 } from 'src/bulk-edit/utils'
-import { BULK_SELECT_STORAGE_KEY } from 'src/bulk-edit/constants'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -107,7 +110,11 @@ export const removeAllResultOccurrencesOfPage = (
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
     syncSettings: SyncSettingsStore<
-        'contentSharing' | 'dashboard' | 'extension' | 'activityIndicator'
+        | 'contentSharing'
+        | 'dashboard'
+        | 'extension'
+        | 'activityIndicator'
+        | 'highlightColors'
     >
     currentSearchID = 0
 
@@ -379,6 +386,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 pendingRemoteChangeCount: null,
                 lastSuccessfulSyncDate: null,
             },
+            highlightColors: null,
         }
     }
 
@@ -500,6 +508,22 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             this.emitMutation({
                 themeVariant: { $set: themeVariant },
+            })
+
+            let syncSettings: SyncSettingsStore<'highlightColors'>
+
+            syncSettings = createSyncSettingsStore({
+                syncSettingsBG: this.options.syncSettingsBG,
+            })
+
+            const highlightColorSettings = await syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            this.emitMutation({
+                highlightColors: {
+                    $set: JSON.stringify(highlightColorSettings),
+                },
             })
         })
     }
@@ -1336,6 +1360,151 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showSubscription: { $set: event.isShown },
             },
         })
+    }
+
+    getHighlightColorSettings: EventHandler<
+        'getHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        let highlightColorJSON
+        if (previousState.highlightColors) {
+            highlightColorJSON = JSON.parse(previousState.highlightColors)
+        } else {
+            const highlightColors = await this.syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            if (highlightColors) {
+                highlightColorJSON = highlightColors
+            } else {
+                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+                await this.syncSettings.highlightColors.set(
+                    'highlightColors',
+                    highlightColorJSON,
+                )
+            }
+        }
+
+        this.emitMutation({
+            highlightColors: { $set: highlightColorJSON },
+        })
+
+        return highlightColorJSON
+    }
+    saveHighlightColorSettings: EventHandler<
+        'saveHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        const newState = JSON.parse(event.newState)
+        await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        // console.log('newStae', newState)
+
+        // const changedColors = newState
+        //     .map((newItem, index) => {
+        //         const oldItem = JSON.parse(previousState.highlightColors)[index]
+        //         if (
+        //             oldItem &&
+        //             newItem.id === oldItem.id &&
+        //             JSON.stringify(newItem.color) !==
+        //                 JSON.stringify(oldItem.color)
+        //         ) {
+        //             return {
+        //                 id: oldItem.id,
+        //                 oldColor: oldItem.color,
+        //                 newColor: newItem.color,
+        //             }
+        //         }
+        //     })
+        //     .filter((item) => item != null)
+
+        // console.log('changedColors', changedColors)
+
+        // for (let color of changedColors) {
+        //     const annotationLocalIds = await this.options.annotationsBG.listAnnotationIdsByColor(
+        //         color.id,
+        //     )
+
+        //     console.log('annotationLocalIds', annotationLocalIds)
+
+        //     const annotations = []
+
+        //     for (let annotationLocalId of annotationLocalIds) {
+        //         annotations.push(
+        //             await this.options.annotationsCache.getAnnotationByLocalId(
+        //                 annotationLocalId,
+        //             ),
+        //         )
+        //     }
+
+        //     console.log('annotations', annotations)
+
+        //     for (let annotation of annotations) {
+        //         this.options.annotationsCache.updateAnnotation({
+        //             comment: annotation.comment,
+        //             privacyLevel: annotation.privacyLevel,
+        //             unifiedListIds: annotation.unifiedListIds,
+        //             unifiedId: annotation,
+        //             color: color.newColor,
+        //         })
+        //     }
+        // }
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
+        })
+    }
+    saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { ...existing } = previousState.searchResults.noteData.byId[
+            event.noteId
+        ]
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { noteUpdateState: { $set: taskState } },
+            }),
+            async () => {
+                // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+                // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+                //  to make a SAS annotation private protected upon save btn press
+
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [event.noteId]: {
+                                    comment: { $set: existing.comment },
+                                    color: { $set: event.color as RGBAColor },
+                                },
+                            },
+                        },
+                    },
+                    modals: {
+                        confirmPrivatizeNoteArgs: { $set: null },
+                    },
+                })
+
+                const unifiedListIds = new Set(existing.lists)
+
+                // this.options.annotationsCache.updateAnnotation({
+                //     comment: existing.comment,
+                //     color: event.color,
+                //     unifiedId: event.unifiedId,
+                // })
+
+                await updateAnnotation({
+                    annotationData: {
+                        localId: event.noteId,
+                        comment: existing.comment,
+                        color: event.color,
+                    },
+                    annotationsBG: this.options.annotationsBG,
+                    contentSharingBG: this.options.contentShareBG,
+                })
+            },
+        )
     }
     /* END - modal event handlers */
 
@@ -2196,6 +2365,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
         )
 
+        let syncSettings: SyncSettingsStore<'extension'>
+
+        syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.options.syncSettingsBG,
+        })
+
+        const shouldShareSettings = await syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -2206,6 +2385,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
+                let shouldShare
+
+                if (shouldShareSettings) {
+                    shouldShare = 200
+                }
+
                 const { savePromise } = await createAnnotation({
                     annotationData: {
                         comment: formState.inputValue,
@@ -2213,7 +2398,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         localListIds: listsToAdd.map((list) => list.localId),
                     },
                     shareOpts: {
-                        shouldShare: event.shouldShare,
+                        shouldShare: shouldShare || event.shouldShare,
                         isBulkShareProtected: event.isProtected,
                         shouldCopyShareLink: event.shouldShare,
                     },
@@ -2821,10 +3006,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
-            modals: {
-                confirmPrivatizeNoteArgs: { $set: null },
-                confirmSelectNoteSpaceArgs: { $set: null },
-            },
+            // modals: {
+            //     confirmPrivatizeNoteArgs: { $set: null },
+            //     confirmSelectNoteSpaceArgs: { $set: null },
+            // },
         })
     }
 
@@ -2947,6 +3132,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             !!event.keepListsIfUnsharing,
                                     },
                                     lists: { $set: lists },
+                                    color: { $set: event.color as RGBAColor },
                                 },
                             },
                         },
@@ -2960,6 +3146,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     annotationData: {
                         localId: event.noteId,
                         comment: editNoteForm.inputValue,
+                        color: event.color,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
@@ -3381,6 +3568,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        if (previousState.listsSidebar.isSidebarLocked) {
+            return
+        }
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })
@@ -3493,9 +3683,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                         addListErrorMessage: { $set: null },
                     },
                 })
-                await this.options.listsBG.createCustomList({
+                const {
+                    collabKey,
+                    remoteListId,
+                } = await this.options.listsBG.createCustomList({
                     name: newListName,
                     id: localListId,
+                })
+                this.options.annotationsCache.updateList({
+                    unifiedId,
+                    collabKey,
+                    remoteId: remoteListId,
                 })
             },
         )
@@ -3715,85 +3913,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     firstItem?.type === 'application/pdf',
             },
         })
-    }
-
-    setListRemoteId: EventHandler<'setListRemoteId'> = async ({
-        event,
-        previousState,
-    }) => {
-        // Should trigger state update on `newListsState` cache event
-        this.options.annotationsCache.updateList({
-            unifiedId: event.listId,
-            remoteId: event.remoteListId,
-        })
-    }
-
-    handleListShare: EventHandler<'handleListShare'> = async ({
-        event,
-        previousState,
-    }) => {
-        const memberAnnotParentPageIds = new Set<string>()
-        const memberPrivateAnnotIds = new Set<string>()
-        for (const noteData of Object.values(
-            previousState.searchResults.noteData.byId,
-        )) {
-            if (noteData.lists.includes(event.listId)) {
-                memberAnnotParentPageIds.add(noteData.pageUrl)
-
-                if (!noteData.isShared && !noteData.isBulkShareProtected) {
-                    memberPrivateAnnotIds.add(noteData.url)
-                }
-            }
-        }
-
-        const mutation: UIMutation<State['searchResults']> = {
-            pageData: { byId: {} },
-            noteData: { byId: {} },
-        }
-
-        for (const pageId of memberAnnotParentPageIds) {
-            mutation.pageData = {
-                ...mutation.pageData,
-                byId: {
-                    ...(mutation.pageData as any).byId,
-                    [pageId]: { lists: { $push: [event.listId] } },
-                },
-            }
-        }
-
-        for (const noteId of memberPrivateAnnotIds) {
-            mutation.noteData = {
-                ...mutation.noteData,
-                byId: {
-                    ...(mutation.noteData as any).byId,
-                    [noteId]: { isBulkShareProtected: { $set: true } },
-                },
-            }
-        }
-
-        // Should trigger state update on `newListsState` cache event
-        this.options.annotationsCache.updateList({
-            unifiedId: event.listId,
-            remoteId: event.remoteListId.toString(),
-        })
-
-        for (const localAnnotId in event.annotationLocalToRemoteIdsDict) {
-            const annotData = this.options.annotationsCache.getAnnotationByLocalId(
-                localAnnotId,
-            )
-            if (!annotData) {
-                continue
-            }
-            this.options.annotationsCache.updateAnnotation({
-                unifiedId: annotData.unifiedId,
-                ...annotData,
-                remoteId: event.annotationLocalToRemoteIdsDict[
-                    localAnnotId
-                ].toString(),
-            })
-        }
-
-        this.emitMutation({ searchResults: mutation })
     }
 
     setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {

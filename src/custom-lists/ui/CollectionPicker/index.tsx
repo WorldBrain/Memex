@@ -55,7 +55,6 @@ class SpacePicker extends StatefulUIElement<
         | 'pageActivityIndicatorBG'
         | 'annotationsCache'
         | 'localStorageAPI'
-        | 'createNewEntry'
         | 'analyticsBG'
     > = {
         authBG: auth,
@@ -65,10 +64,6 @@ class SpacePicker extends StatefulUIElement<
         localStorageAPI: browser.storage.local,
         pageActivityIndicatorBG: pageActivityIndicator,
         annotationsCache: new PageAnnotationsCache({}),
-        createNewEntry: async (name) =>
-            collections.createCustomList({
-                name,
-            }),
     }
 
     static MOD_KEY = getKeyName({ key: 'mod' })
@@ -345,7 +340,7 @@ class SpacePicker extends StatefulUIElement<
     }
 
     private handleSpaceContextMenuClose = (listId: number) => async () => {
-        const name = this.contextMenuRef?.current?.state.nameValue
+        const name = this.props.annotationsCache.getListByLocalId(listId)?.name
         if (name != null) {
             await this.processEvent('renameList', {
                 listId,
@@ -387,7 +382,7 @@ class SpacePicker extends StatefulUIElement<
                         />
                         {list.remoteId != null && (
                             <PrimaryAction
-                                type="secondary"
+                                type="tertiary"
                                 size="small"
                                 label="Open Space"
                                 icon="globe"
@@ -401,7 +396,6 @@ class SpacePicker extends StatefulUIElement<
                         )}
                     </PrimaryActionBox>
                     <SpaceContextMenu
-                        loadOwnershipData
                         isCreator={
                             list.creator?.id === this.state.currentUser?.id
                         }
@@ -409,36 +403,11 @@ class SpacePicker extends StatefulUIElement<
                         ref={this.contextMenuRef}
                         contentSharingBG={this.props.contentSharingBG}
                         analyticsBG={this.props.analyticsBG}
-                        spacesBG={this.props.spacesBG}
-                        onDeleteSpaceConfirm={() =>
-                            this.processEvent('deleteList', {
-                                listId: list.localId,
-                            })
-                        }
                         errorMessage={this.state.renameListErrorMessage}
                         onSetSpacePrivate={(isPrivate) =>
                             this.processEvent('setListPrivacy', {
                                 listId: list.localId,
                                 isPrivate,
-                            })
-                        }
-                        onConfirmSpaceNameEdit={(name) => {
-                            this.processEvent('renameList', {
-                                listId: list.localId,
-                                name,
-                            })
-                        }}
-                        onCancelEdit={this.handleSpaceContextMenuClose(
-                            list.localId,
-                        )}
-                        onSpaceShare={(
-                            remoteListId,
-                            annotationLocalToRemoteIdsDict,
-                        ) =>
-                            this.processEvent('setListRemoteId', {
-                                annotationLocalToRemoteIdsDict,
-                                localListId: list.localId,
-                                remoteListId,
                             })
                         }
                     />
@@ -731,6 +700,7 @@ const EntryRowContainer = styled.div`
     align-items: center;
     margin: 0 5px;
     border-radius: 6px;
+    position: relative;
 `
 
 const TabsBar = styled.div`
