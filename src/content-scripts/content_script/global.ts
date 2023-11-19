@@ -367,7 +367,9 @@ export async function main(
                 } = await createAnnotation({
                     shareOpts: {
                         shouldShare:
-                            remoteListIds.length > 0 || data.shouldShare,
+                            shouldShareSettings ||
+                            remoteListIds.length > 0 ||
+                            data.shouldShare,
                         shouldCopyShareLink: data.shouldShare,
                     },
                     annotationsBG,

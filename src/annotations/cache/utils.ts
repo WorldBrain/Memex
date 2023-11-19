@@ -223,11 +223,57 @@ export async function hydrateCacheForPageAnnotations(
         const localListsData = await args.bgModules.customLists.fetchAllLists(
             {},
         )
-        const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
-            {
-                localListIds: localListsData.map((list) => list.id),
-            },
+
+        const localListIds = localListsData.map((list) => list.id)
+
+        let listMetadataFetch: {
+            [localListId: number]: SharedListMetadata
+        } = await args.bgModules.contentSharing.getListShareMetadata({
+            localListIds: localListIds,
+        })
+
+        console.log('localListsData', localListsData)
+        console.log('listMetadatabfore', listMetadataFetch)
+
+        let sharedListsLocalIds = []
+
+        for (let list in listMetadataFetch) {
+            console.log(listMetadataFetch[list])
+            sharedListsLocalIds.push(listMetadataFetch[list].localId)
+        }
+
+        const differenceList = localListIds.filter(
+            (x) => !sharedListsLocalIds.includes(x),
         )
+
+        let listMetadata: { [localListId: number]: SharedListMetadata } = {
+            ...listMetadataFetch,
+        }
+
+        console.log('differencelist', differenceList)
+        for (let list of differenceList) {
+            const listShareData = await args.bgModules.contentSharing.scheduleListShare(
+                {
+                    localListId: list,
+                    isPrivate: true,
+                },
+            )
+
+            if (!listMetadata[list]) {
+                listMetadata[list] = {
+                    localId: undefined,
+                    remoteId: undefined,
+                }
+            }
+
+            listMetadata[list].localId = list
+            listMetadata[list].remoteId = listShareData.remoteListId
+            listMetadata[list].private = true
+
+            console.log('listMetadata[list]', listMetadata[list])
+        }
+
+        console.log('listMetadatabforeafter', listMetadata)
         const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
             args.fullPageUrl,
             Object.values(listMetadata).map((metadata) => metadata.remoteId),
