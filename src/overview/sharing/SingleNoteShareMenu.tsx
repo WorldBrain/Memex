@@ -31,6 +31,7 @@ import {
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { Checkbox } from 'src/common-ui/components'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 type SelectType = 'select' | 'unselect'
 
@@ -194,62 +195,74 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     closeComponent={() =>
                         this.setState({ showAutoAddMenu: false })
                     }
+                    offsetY={10}
                     instaClose
                 >
                     <AutoAddDefaultContainer>
                         <TooltipTextBox>
                             {this.props.isShared ? (
                                 <>
-                                    Added to all Spaces
-                                    <br />
-                                    the document is in.
-                                    <br />
-                                    <span>
-                                        For generally relevant annotations.
-                                    </span>
+                                    <strong>
+                                        <Icon
+                                            icon={'spread'}
+                                            color={'prime1'}
+                                            hoverOff
+                                            heightAndWidth="32px"
+                                        />
+                                        Added to all Spaces the document is in.
+                                    </strong>
+                                    For generally relevant annotations.
                                 </>
                             ) : (
                                 <>
-                                    Added to all Spaces
-                                    <br />
-                                    the document is in.
+                                    <strong>
+                                        Only added to Spaces
+                                        <br />
+                                        you manually put annotation in.
+                                    </strong>
                                     <span>
-                                        For generally relevant annotations.
+                                        For context specific annotations.
+                                        <br />
+                                        Setting auto-enables when you select
+                                        Spaces for indiviudal annotations.
                                     </span>
+                                    <KeyboardShortCutBox>
+                                        Save & Auto-Add
+                                        <KeyboardShortcuts
+                                            keys={`shift+${SingleNoteShareMenu.MOD_KEY}+enter`.split(
+                                                '+',
+                                            )}
+                                            size={'small'}
+                                        />
+                                    </KeyboardShortCutBox>
                                 </>
                             )}
-                            <KeyboardShortcuts
-                                keys={`shift+${SingleNoteShareMenu.MOD_KEY}+enter`.split(
-                                    '+',
-                                )}
-                                size={'small'}
-                            />
                         </TooltipTextBox>
-                        <Checkbox
-                            key={3}
-                            id={'3'}
-                            width="fit-content"
-                            isChecked={this.state.isAutoAddSet === true}
-                            handleChange={() =>
-                                this.handleAutoAddToggle(
-                                    !this.state.isAutoAddSet,
-                                )
-                            }
-                            // isDisabled={!this.state.shortcutsEnabled}
-                            name={
-                                this.state.isAutoAddSet
-                                    ? 'Is Default'
-                                    : 'Make Default'
-                            }
-                            label={
-                                this.state.isAutoAddSet
-                                    ? 'Is Default'
-                                    : 'Make Default'
-                            }
-                            fontSize={14}
-                            size={14}
-                            isLoading={this.state.isAutoAddSet == null}
-                        />
+                        <DefaultCheckBoxContainer>
+                            <Checkbox
+                                key={3}
+                                id={'3'}
+                                width="fit-content"
+                                isChecked={this.state.isAutoAddSet === true}
+                                handleChange={() =>
+                                    this.handleAutoAddToggle(
+                                        !this.state.isAutoAddSet,
+                                    )
+                                }
+                                // isDisabled={!this.state.shortcutsEnabled}
+                                name={
+                                    this.state.isAutoAddSet
+                                        ? 'Is Default'
+                                        : 'Make Default'
+                                }
+                                label={
+                                    'Auto-adding default for new annotations'
+                                }
+                                fontSize={14}
+                                size={14}
+                                isLoading={this.state.isAutoAddSet == null}
+                            />
+                        </DefaultCheckBoxContainer>
                     </AutoAddDefaultContainer>
                 </PopoutBox>
             )
@@ -479,7 +492,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     selectType,
                 },
             })
-            selectEntry(listId)
+            return selectType === 'select'
+                ? selectEntry(listId)
+                : unselectEntry(listId)
         } else {
             return selectType === 'select'
                 ? selectEntry(listId)
@@ -634,7 +649,6 @@ const AutoAddDefaultContainer = styled.div`
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    padding: 15px;
     grid-gap: 15px;
 `
 
@@ -657,4 +671,21 @@ const TooltipTextBox = styled.div`
     font-size: 14px;
     text-align: center;
     grid-gap: 10px;
+    padding: 15px 15px 8px 15px;
+`
+
+const DefaultCheckBoxContainer = styled.div`
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    height: 20px;
+    padding: 15px 15px 15px 15px;
+`
+const KeyboardShortCutBox = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    align-items: center;
+    height: 30px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    grid-gap: 15px;
 `

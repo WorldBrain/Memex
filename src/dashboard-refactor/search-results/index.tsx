@@ -308,12 +308,6 @@ export default class SearchResultsContainer extends React.Component<
             },
         ).color
 
-        console.log(
-            'noteColor',
-            noteColor,
-            noteData.color,
-            JSON.parse(this.props.highlightColorSettings),
-        )
         return (
             <AnnotationEditable
                 imageSupport={this.props.imageSupport}

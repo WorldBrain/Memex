@@ -177,9 +177,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         if (props.spacePickerBodyButtonRef) {
             this.spacePickerBodyButtonRef = props.spacePickerBodyButtonRef
         }
-        if (props.spacePickerFooterButtonRef) {
-            this.spacePickerFooterButtonRef = props.spacePickerFooterButtonRef
-        }
     }
 
     state: State = {
@@ -798,7 +795,15 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 label={'Spaces'}
                                 icon={
                                     listsToDisplay.length > 0 ? (
-                                        <ListCounter>
+                                        <ListCounter isShared={isShared}>
+                                            {isShared && (
+                                                <Icon
+                                                    icon={'spread'}
+                                                    heightAndWidth="24px"
+                                                    color={'prime1'}
+                                                    hoverOff
+                                                />
+                                            )}
                                             {listsToDisplay.length}
                                         </ListCounter>
                                     ) : (
@@ -875,8 +880,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         label={'Spaces'}
                         icon={
                             this.props.lists.length > 0 ? (
-                                <ListCounter>
-                                    {this.props.lists.length}
+                                <ListCounter isShared={isShared}>
+                                    {isShared && (
+                                        <Icon
+                                            icon={'spread'}
+                                            heightAndWidth="24px"
+                                            color={'prime1'}
+                                            hoverOff
+                                        />
+                                    )}
+                                    {listsToDisplay.length}
                                 </ListCounter>
                             ) : (
                                 'plus'
@@ -1054,7 +1067,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 {this.renderNote()}
                             </ContentContainer>
                             {listsToDisplay.length > 0 &&
-                                this.displayLists.length > 0 && (
+                                this.displayLists.length > 1 && (
                                     <ListsSegment
                                         tabIndex={0}
                                         lists={this.displayLists}
@@ -1142,9 +1155,15 @@ const Highlightbar = styled.div<{ barColor: string }>`
         `}
 `
 
-const ListCounter = styled.div`
+const ListCounter = styled.div<{ isShared: boolean }>`
     width: fit-content;
-    padding: 5px;
+    grid-gap: 5px;
+    display: flex;
+    align-items: center;
+    flex-direction: row;
+    justify-content: center;
+    padding: ${(props) => (props.isShared ? '5px 0 5px 0' : '5px 0 5px 8px')};
+    margin-right: 4px;
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
@@ -1283,7 +1302,7 @@ const DefaultFooterStyled = styled.div`
     align-items: center;
     justify-content: space-between;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
-    padding: 0px 0px 0px 15px;
+    padding: 0px 0px 0px 10px;
 `
 
 const AnnotationStyled = styled.div`

@@ -348,7 +348,6 @@ export class AnnotationsSidebarContainer<
                 <CollectionPicker
                     showPageLinks
                     selectEntry={async (listId) => {
-                        console.log('test')
                         this.processEvent('setNewPageNoteLists', {
                             lists: [...this.state.commentBox.lists, listId],
                         })
@@ -436,7 +435,6 @@ export class AnnotationsSidebarContainer<
                     params.annotation.unifiedListIds,
                 ),
             selectEntry: async (listId, options) => {
-                console.log('updatelist')
                 this.processEvent('updateListsForAnnotation', {
                     added: listId,
                     deleted: null,
@@ -484,7 +482,6 @@ export class AnnotationsSidebarContainer<
             unifiedId
         ]
 
-        console.log('annotation', annotation)
         return (
             <CollectionPicker
                 {...this.getSpacePickerProps({
@@ -515,11 +512,9 @@ export class AnnotationsSidebarContainer<
     private renderShareMenuForAnnotation = () => (
         unifiedId: UnifiedAnnotation['unifiedId'],
     ) => {
-        console.log('coming here')
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
-        console.log('annotations,', annotation)
         if (!annotation.localId) {
             return
         }
@@ -544,7 +539,7 @@ export class AnnotationsSidebarContainer<
                     this.processEvent('updateAnnotationShareInfo', {
                         privacyLevel: state.privacyLevel,
                         unifiedAnnotationId: annotation.unifiedId,
-                        keepListsIfUnsharing: opts?.keepListsIfUnsharing,
+                        keepListsIfUnsharing: true,
                     })
                 }
                 syncSettingsBG={this.props.syncSettingsBG}

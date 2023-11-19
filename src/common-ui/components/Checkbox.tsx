@@ -24,7 +24,7 @@ export interface Props {
     labelClass?: string
     mode?: 'radio' | 'multiSelect'
     size?: number
-    label?: string
+    label?: string | JSX.Element
     subLabel?: string
     zIndex?: number
     isLoading?: boolean
@@ -32,6 +32,7 @@ export interface Props {
     checkBoxColor?: ColorThemeKeys
     borderColor?: ColorThemeKeys
     width?: string
+    textPosition?: 'left' | 'right'
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -55,7 +56,7 @@ class Checkbox extends React.PureComponent<Props> {
                 zIndex={this.props.zIndex}
                 htmlFor={this.props.id}
             >
-                <LabelText>
+                <LabelText textPosition={this.props.textPosition}>
                     <InputContainer
                         type="checkbox"
                         checked={this.props.isChecked}
@@ -64,26 +65,28 @@ class Checkbox extends React.PureComponent<Props> {
                         disabled={this.props.isDisabled}
                         name={this.props.name}
                     />
-                    {this.props.isLoading ? (
-                        <LoadingIndicator size={16} />
-                    ) : (
-                        <LabelCheck
-                            size={this.props.size}
-                            mode={this.props.mode}
-                            isChecked={this.props.isChecked}
-                            checkBoxColor={this.props.checkBoxColor}
-                            borderColor={this.props.borderColor}
-                        >
-                            {this.props.isChecked && (
-                                <Icon
-                                    filePath={icons.check}
-                                    color="black"
-                                    heightAndWidth={'14px'}
-                                    hoverOff
-                                />
-                            )}
-                        </LabelCheck>
-                    )}
+                    <CheckBoxContainer size={this.props.size + 4}>
+                        {this.props.isLoading ? (
+                            <LoadingIndicator size={this.props.size - 2} />
+                        ) : (
+                            <LabelCheck
+                                size={this.props.size}
+                                mode={this.props.mode}
+                                isChecked={this.props.isChecked}
+                                checkBoxColor={this.props.checkBoxColor}
+                                borderColor={this.props.borderColor}
+                            >
+                                {this.props.isChecked && (
+                                    <Icon
+                                        filePath={icons.check}
+                                        color="black"
+                                        heightAndWidth={'14px'}
+                                        hoverOff
+                                    />
+                                )}
+                            </LabelCheck>
+                        )}
+                    </CheckBoxContainer>
                     {this.props.label && (
                         <LabelContentBox>
                             <LabelTitle fontSize={this.props.fontSize}>
@@ -157,7 +160,7 @@ const InputContainer = styled.input`
     cursor: pointer;
 `
 
-const LabelText = styled.span<{ fontSize }>`
+const LabelText = styled.span<{ fontSize; textPosition }>`
     font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '0.9em')};
     display: flex;
     align-items: center;
@@ -165,10 +168,25 @@ const LabelText = styled.span<{ fontSize }>`
     cursor: pointer;
     width: fill-available;
     height: fill-available;
+    grid-gap: 10px;
 
     &:hover {
         color: ${(props) => props.theme.colors.black};
     }
+
+    ${(props) =>
+        props.textPosition === 'left' &&
+        css`
+            flex-direction: row-reverse;
+        `}
+`
+
+const CheckBoxContainer = styled.div<{ size: number }>`
+    display: flex;
+    align-items: center;
+    align-items: center;
+    width: ${(props) => (props.size ? props.size + 'px' : '24px')};
+    height: ${(props) => (props.size ? props.size + 'px' : '24px')};
 `
 
 const LabelCheck = styled.span<{

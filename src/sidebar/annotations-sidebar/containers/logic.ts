@@ -2036,7 +2036,6 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
 
-        console.log('adsads', annotationsCache, contentSharingBG)
         // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
@@ -2061,7 +2060,6 @@ export class SidebarContainerLogic extends UILogic<
         const unifiedListIds = new Set(existing.unifiedListIds)
         let bgPromise: Promise<{ sharingState: AnnotationSharingState }>
         if (event.added != null) {
-            console.log('event', event.added)
             const cacheList = annotationsCache.getListByLocalId(event.added)
             if (!cacheList) {
                 throw new Error(

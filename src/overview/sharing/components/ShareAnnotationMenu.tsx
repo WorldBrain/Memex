@@ -243,7 +243,24 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                         }
                                         // isDisabled={!this.state.shortcutsEnabled}
                                         name={'Boost'}
-                                        label={'Auto Add'}
+                                        label={
+                                            <LabelContainer>
+                                                <Icon
+                                                    icon={'spread'}
+                                                    color={
+                                                        this.props
+                                                            .privacyOptions[1]
+                                                            .isSelected
+                                                            ? 'prime1'
+                                                            : 'greyScale5'
+                                                    }
+                                                    hoverOff
+                                                    heightAndWidth="22px"
+                                                />
+                                                Auto Add
+                                            </LabelContainer>
+                                        }
+                                        textPosition={'left'}
                                         fontSize={14}
                                         size={14}
                                         isLoading={
@@ -326,7 +343,19 @@ const SubtitleSection = styled.div`
     padding: 0 15px;
 `
 
-const AutoAddContainer = styled.div``
+const AutoAddContainer = styled.div`
+    display: flex;
+    grid-gap: 2px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-direction: row;
+`
+const LabelContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-direction: row;
+`
 
 const TopArea = styled.div<{ context: string }>`
     padding: 10px 15px 10px 15px;

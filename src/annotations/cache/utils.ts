@@ -232,13 +232,9 @@ export async function hydrateCacheForPageAnnotations(
             localListIds: localListIds,
         })
 
-        console.log('localListsData', localListsData)
-        console.log('listMetadatabfore', listMetadataFetch)
-
         let sharedListsLocalIds = []
 
         for (let list in listMetadataFetch) {
-            console.log(listMetadataFetch[list])
             sharedListsLocalIds.push(listMetadataFetch[list].localId)
         }
 
@@ -250,7 +246,6 @@ export async function hydrateCacheForPageAnnotations(
             ...listMetadataFetch,
         }
 
-        console.log('differencelist', differenceList)
         for (let list of differenceList) {
             const listShareData = await args.bgModules.contentSharing.scheduleListShare(
                 {
@@ -269,11 +264,8 @@ export async function hydrateCacheForPageAnnotations(
             listMetadata[list].localId = list
             listMetadata[list].remoteId = listShareData.remoteListId
             listMetadata[list].private = true
-
-            console.log('listMetadata[list]', listMetadata[list])
         }
 
-        console.log('listMetadatabforeafter', listMetadata)
         const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
             args.fullPageUrl,
             Object.values(listMetadata).map((metadata) => metadata.remoteId),
