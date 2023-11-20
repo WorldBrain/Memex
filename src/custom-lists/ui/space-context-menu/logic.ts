@@ -79,8 +79,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
     private async loadInviteLinks() {
         const { listData, contentSharingBG } = this.dependencies
 
-        console.log('listData', listData)
-
         const createListLink = (collaborationKey?: string): string =>
             listData.type === 'page-link'
                 ? getSinglePageShareUrl({
@@ -98,7 +96,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                 return
             }
 
-            console.log('collabkey', listData.collabKey)
             if (listData.collabKey != null) {
                 this.emitMutation({
                     inviteLinks: {
@@ -126,8 +123,6 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
                     },
                 },
             )
-
-            console.log('links', links)
 
             const contribLink = links.find((link) => link.keyString != null)
 

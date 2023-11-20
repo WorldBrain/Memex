@@ -70,8 +70,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             'highlightColors',
         )
 
-        console.log('initialise', highlightColorSettings)
-
         this.highlightColorSettings = highlightColorSettings
     }
 
