@@ -51,6 +51,8 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
             )
         }
 
+        console.log('Invite Links', this.state.inviteLinks)
+
         return (
             <ContextMenuContainer>
                 {this.state.isLocalPDF && (

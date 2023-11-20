@@ -457,7 +457,7 @@ export async function main(
         screenshotAnchor?,
         screenshotImage?,
         imageSupport?,
-        highlightColor?,
+        highlightColor?: { color: RGBAColor; id: string; label: string },
     ): Promise<AutoPk> {
         let highlightId: AutoPk
         try {
@@ -494,7 +494,11 @@ export async function main(
             selection: Selection,
             shouldShare: boolean,
             drawRectangle?: boolean,
-            highlightColorSettings?: RGBAColor | string,
+            highlightColorSetting?: {
+                color: RGBAColor
+                id: string
+                label: string
+            },
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
@@ -523,7 +527,7 @@ export async function main(
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
-                    highlightColorSettings,
+                    highlightColorSetting,
                 )
             } else if (
                 selection &&
@@ -534,7 +538,7 @@ export async function main(
                     null,
                     null,
                     null,
-                    highlightColorSettings,
+                    highlightColorSetting,
                 )
             }
 
