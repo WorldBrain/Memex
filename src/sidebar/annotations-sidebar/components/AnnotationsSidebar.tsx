@@ -3957,7 +3957,8 @@ const AnnotationContainer = styled(Margin)`
     flex: 1;
     z-index: 10;
     position: relative;
-    width: unset;
+    width: fill-available;
+    width: -moz-available;
 
     scrollbar-width: none;
 

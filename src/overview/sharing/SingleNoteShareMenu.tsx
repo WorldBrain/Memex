@@ -223,7 +223,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                     <span>
                                         For context specific annotations.
                                         <br />
-                                        Setting auto-enables when you select
+                                        Setting auto-disables when you select
                                         Spaces for indiviudal annotations.
                                     </span>
                                     <KeyboardShortCutBox>
@@ -474,12 +474,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     ) => async (listId: number) => {
         const { selectEntry, unselectEntry } = this.props.spacePickerProps
 
-        console.log(
-            'shared',
-            selectType,
-            this.props.isShared,
-            this.props.getRemoteListIdForLocalId(listId),
-        )
         if (
             this.props.isShared &&
             this.props.getRemoteListIdForLocalId(listId) != null &&
