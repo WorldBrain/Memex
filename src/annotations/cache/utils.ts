@@ -223,49 +223,11 @@ export async function hydrateCacheForPageAnnotations(
         const localListsData = await args.bgModules.customLists.fetchAllLists(
             {},
         )
-
-        const localListIds = localListsData.map((list) => list.id)
-
-        let listMetadataFetch: {
-            [localListId: number]: SharedListMetadata
-        } = await args.bgModules.contentSharing.getListShareMetadata({
-            localListIds: localListIds,
-        })
-
-        let sharedListsLocalIds = []
-
-        for (let list in listMetadataFetch) {
-            sharedListsLocalIds.push(listMetadataFetch[list].localId)
-        }
-
-        const differenceList = localListIds.filter(
-            (x) => !sharedListsLocalIds.includes(x),
+        const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
+            {
+                localListIds: localListsData.map((list) => list.id),
+            },
         )
-
-        let listMetadata: { [localListId: number]: SharedListMetadata } = {
-            ...listMetadataFetch,
-        }
-
-        for (let list of differenceList) {
-            const listShareData = await args.bgModules.contentSharing.scheduleListShare(
-                {
-                    localListId: list,
-                    isPrivate: true,
-                },
-            )
-
-            if (!listMetadata[list]) {
-                listMetadata[list] = {
-                    localId: undefined,
-                    remoteId: undefined,
-                }
-            }
-
-            listMetadata[list].localId = list
-            listMetadata[list].remoteId = listShareData.remoteListId
-            listMetadata[list].private = true
-        }
-
         const followedListsData = await args.bgModules.pageActivityIndicator.getPageFollowedLists(
             args.fullPageUrl,
             Object.values(listMetadata).map((metadata) => metadata.remoteId),

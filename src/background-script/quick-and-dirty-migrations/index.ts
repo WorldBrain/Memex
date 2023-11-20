@@ -22,6 +22,7 @@ import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { migrateTagsToSpaces } from './tags-migration'
 import { PersonalCloudActionType } from 'src/personal-cloud/background/types'
 import { PersonalCloudUpdateType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
+import { SharedListMetadata } from 'src/content-sharing/background/types'
 
 export interface MigrationProps {
     db: Dexie
@@ -35,6 +36,8 @@ export interface MigrationProps {
         | 'personalCloud'
         | 'pageActivityIndicator'
         | 'auth'
+        | 'customLists'
+        | 'contentSharing'
     >
     localExtSettingStore: SettingStore<LocalExtensionSettings>
     syncSettingsStore: SyncSettingsStore<'extension'>
@@ -53,6 +56,56 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This is sharing all private lists taht have not yet a remoteId
+     */
+    [MIGRATION_PREFIX + 'share-unshared-lists-and-entries']: async ({
+        bgModules,
+    }) => {
+        const localListsData = await bgModules.customLists.fetchAllLists({})
+
+        const localListIds = localListsData.map((list) => list.id)
+
+        let listMetadataFetch: {
+            [localListId: number]: SharedListMetadata
+        } = await bgModules.contentSharing.getListShareMetadata({
+            localListIds: localListIds,
+        })
+
+        let sharedListsLocalIds = []
+
+        for (let list in listMetadataFetch) {
+            sharedListsLocalIds.push(listMetadataFetch[list].localId)
+        }
+
+        const differenceList = localListIds.filter(
+            (x) => !sharedListsLocalIds.includes(x),
+        )
+
+        let listMetadata: { [localListId: number]: SharedListMetadata } = {
+            ...listMetadataFetch,
+        }
+
+        for (let list of differenceList) {
+            const listShareData = await bgModules.contentSharing.scheduleListShare(
+                {
+                    localListId: list,
+                    isPrivate: true,
+                },
+            )
+
+            if (!listMetadata[list]) {
+                listMetadata[list] = {
+                    localId: undefined,
+                    remoteId: undefined,
+                }
+            }
+
+            listMetadata[list].localId = list
+            listMetadata[list].remoteId = listShareData.remoteListId
+            listMetadata[list].private = true
+        }
+    },
     /*
      * This exists as we made some schema changes to the followedList* collections, adding `type` field
      * to followedList for page-link lists. And adding `sharedListEntry` field to followedListEntry acting
