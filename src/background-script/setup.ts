@@ -603,6 +603,7 @@ export function createBackgroundModules(options: {
             pageActivityIndicator,
             summarizeBG,
             auth,
+            contentSharing,
         },
     })
 
