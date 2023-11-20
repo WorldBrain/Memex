@@ -367,16 +367,16 @@ export default class Ribbon extends Component<Props, State> {
                         : 10
                 }
                 closeComponent={() => {
-                    null
+                    if (!this.state.showColorPicker) {
+                        this.setState({
+                            showColorPicker: false,
+                            renderFeedback: false,
+                            renderLiveChat: false,
+                            renderChangeLog: false,
+                        })
+                        this.props.toggleShowTutorial()
+                    }
                 }}
-                //     this.setState({
-                //         showColorPicker: false,
-                //         renderFeedback: false,
-                //         renderLiveChat: false,
-                //         renderChangeLog: false,
-                //     })
-                //     this.props.toggleShowTutorial()
-                // }}
                 width={'fit-content'}
             >
                 <SupportContainer>
