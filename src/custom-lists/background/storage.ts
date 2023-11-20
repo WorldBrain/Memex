@@ -25,7 +25,11 @@ import {
     trackSpaceCreate,
     trackSpaceEntryCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import {
+    DEFAULT_SPACE_BETWEEN,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 import {
     isPkmSyncEnabled,
     sharePageWithPKM,
@@ -527,6 +531,7 @@ export default class CustomListStorage extends StorageModule {
         pathIds?: number[]
         now?: number
         isLink?: boolean
+        isOnlyChild?: boolean
     }): Promise<ListTree> {
         const existingList = await this.fetchListById(params.localListId)
         if (!existingList) {
@@ -534,6 +539,24 @@ export default class CustomListStorage extends StorageModule {
                 `List does not exist to create list tree data for: ${params}`,
             )
         }
+
+        // Look up all sibling nodes to determine order of this one
+        const siblingNodes: ListTree[] =
+            !params.isOnlyChild && params.parentListId != null
+                ? await this.operation('findListTreesByParentListId', {
+                      parentListId: params.parentListId,
+                  })
+                : []
+        const order =
+            siblingNodes.length > 0
+                ? pushOrderedItem(
+                      siblingNodes.map((node) => ({
+                          id: node.id,
+                          key: node.order,
+                      })),
+                      '',
+                  ).create?.key ?? DEFAULT_SPACE_BETWEEN
+                : DEFAULT_SPACE_BETWEEN
 
         const now = params.now ?? Date.now()
         const listTree: Omit<ListTree, 'id'> = {
@@ -543,7 +566,7 @@ export default class CustomListStorage extends StorageModule {
             path: params.pathIds?.length
                 ? buildMaterializedPath(...params.pathIds)
                 : null,
-            order: 1, // TODO: Work out how to set initial order
+            order,
             createdWhen: now,
             updatedWhen: now,
         }
@@ -626,6 +649,7 @@ export default class CustomListStorage extends StorageModule {
                 this.createListTree({
                     localListId: localListId as number,
                     parentListId: parentLocalListId as number,
+                    isOnlyChild: true,
                     now: params.now,
                 }),
             getChildrenOfNode: (node) =>
