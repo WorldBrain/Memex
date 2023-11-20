@@ -26,10 +26,7 @@ import {
     trackSpaceEntryCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import {
-    DEFAULT_SPACE_BETWEEN,
-    pushOrderedItem,
-} from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { pushOrderedItem } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import {
     isPkmSyncEnabled,
     sharePageWithPKM,
@@ -220,6 +217,11 @@ export default class CustomListStorage extends StorageModule {
                         { listId: '$listId:pk' },
                         { description: '$description:string' },
                     ],
+                },
+                updateListTreeOrder: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'updateObjects',
+                    args: [{ listId: '$listId:int' }, { order: '$order:int' }],
                 },
                 deleteList: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -547,16 +549,13 @@ export default class CustomListStorage extends StorageModule {
                       parentListId: params.parentListId,
                   })
                 : []
-        const order =
-            siblingNodes.length > 0
-                ? pushOrderedItem(
-                      siblingNodes.map((node) => ({
-                          id: node.id,
-                          key: node.order,
-                      })),
-                      '',
-                  ).create?.key ?? DEFAULT_SPACE_BETWEEN
-                : DEFAULT_SPACE_BETWEEN
+        const order = pushOrderedItem(
+            siblingNodes.map((node) => ({
+                id: node.id,
+                key: node.order,
+            })),
+            '',
+        ).create.key
 
         const now = params.now ?? Date.now()
         const listTree: Omit<ListTree, 'id'> = {
@@ -649,6 +648,10 @@ export default class CustomListStorage extends StorageModule {
                 this.createListTree({
                     localListId: localListId as number,
                     parentListId: parentLocalListId as number,
+                    pathIds:
+                        parentLocalListId != null
+                            ? [parentLocalListId as number]
+                            : undefined,
                     isOnlyChild: true,
                     now: params.now,
                 }),
@@ -754,6 +757,18 @@ export default class CustomListStorage extends StorageModule {
             existing ? 'updateListDescription' : 'createListDescription',
             { listId, description },
         )
+    }
+
+    async updateListTreeOrder(params: {
+        localListId: number
+        order: number
+        now?: number
+    }): Promise<void> {
+        await this.operation('updateListTreeOrder', {
+            listId: params.localListId,
+            order: params.order,
+            updatedWhen: params.now ?? Date.now(),
+        })
     }
 
     async deleteListTreeLink(params: { localListId: number }): Promise<void> {

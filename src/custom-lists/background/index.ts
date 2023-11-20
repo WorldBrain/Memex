@@ -26,6 +26,8 @@ import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
 import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
+import { insertOrderedItemBeforeIndex } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { defaultTreeNodeSorter } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 
 const limitSuggestionsStorageLength = 25
 
@@ -387,6 +389,36 @@ export default class CustomListBackground {
             pathIds,
         })
         return { treeId }
+    }
+
+    updateListTreeOrder: RemoteCollectionsInterface['updateListTreeOrder'] = async ({
+        localListId,
+        siblingListIds,
+        intendedIndexAmongSiblings,
+        now,
+    }) => {
+        const siblingListTrees = await this.storage.getTreeDataForLists({
+            localListIds: siblingListIds,
+        })
+        const orderedItems = Object.values(siblingListTrees)
+            .sort(defaultTreeNodeSorter)
+            .map((tree) => ({
+                id: tree.id,
+                key: tree.order,
+            }))
+
+        // TODO: Implement sibling updates if in changes
+        const changes = insertOrderedItemBeforeIndex(
+            orderedItems,
+            '',
+            intendedIndexAmongSiblings,
+        )
+
+        await this.storage.updateListTreeOrder({
+            order: changes.create.key,
+            localListId,
+            now,
+        })
     }
 
     updateListTreeParent: RemoteCollectionsInterface['updateListTreeParent'] = async ({
