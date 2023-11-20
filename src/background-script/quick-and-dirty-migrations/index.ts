@@ -59,9 +59,8 @@ export const migrations: Migrations = {
     /*
      * This is sharing all private lists taht have not yet a remoteId
      */
-    [MIGRATION_PREFIX + 'trigger-reinit-followed-list-pull-resync-01']: async ({
+    [MIGRATION_PREFIX + 'share-unshared-lists-and-entries']: async ({
         bgModules,
-        storex,
     }) => {
         const localListsData = await bgModules.customLists.fetchAllLists({})
 
