@@ -4000,6 +4000,8 @@ const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     padding: 0 10px;
     padding-bottom: 60px;
     z-index: ${(props) => 999 - props.zIndex};
+    width: fill-available;
+    width: -moz-available;
 `
 
 const FollowedListsMsgContainer = styled.div`
