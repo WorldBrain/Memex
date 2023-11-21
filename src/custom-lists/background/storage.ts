@@ -534,6 +534,7 @@ export default class CustomListStorage extends StorageModule {
         now?: number
         isLink?: boolean
         isOnlyChild?: boolean
+        skipSyncEntry?: boolean
     }): Promise<ListTree> {
         const existingList = await this.fetchListById(params.localListId)
         if (!existingList) {
@@ -569,7 +570,16 @@ export default class CustomListStorage extends StorageModule {
             createdWhen: now,
             updatedWhen: now,
         }
-        const { object } = await this.operation('createListTree', listTree)
+
+        const opExecuter = params.skipSyncEntry
+            ? this.options.storageManager.backend
+            : this.options.storageManager
+
+        const { object } = await opExecuter.operation(
+            'createObject',
+            'customListTrees',
+            listTree,
+        )
         return { ...listTree, id: object.id }
     }
 
@@ -644,16 +654,23 @@ export default class CustomListStorage extends StorageModule {
                 this.getTreeDataForList({
                     localListId: localListId as number,
                 }),
-            createNode: (localListId, parentLocalListId) =>
+            createNode: (localListId, parentNode) =>
                 this.createListTree({
                     localListId: localListId as number,
-                    parentListId: parentLocalListId as number,
+                    parentListId: parentNode?.listId,
                     pathIds:
-                        parentLocalListId != null
-                            ? [parentLocalListId as number]
+                        parentNode != null
+                            ? [
+                                  ...(extractMaterializedPathIds(
+                                      parentNode.path,
+                                      'number',
+                                  ) as number[]),
+                                  parentNode.listId,
+                              ]
                             : undefined,
                     isOnlyChild: true,
                     now: params.now,
+                    skipSyncEntry: true,
                 }),
             getChildrenOfNode: (node) =>
                 this.getTreesByParent({

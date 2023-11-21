@@ -2374,7 +2374,7 @@ describe('Personal cloud translation layer', () => {
                     LOCAL_TEST_DATA_V24.customListTrees.fourth,
                 ].map((data) => ({
                     ...data,
-                    order: 1,
+                    order: expect.any(Number),
                     updatedWhen: nowA,
                     createdWhen: nowA,
                 })),
@@ -2383,6 +2383,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testList = remoteData.personalList
             const testListTrees = remoteData.personalListTree
             const testListShares = remoteData.personalListShare
 
@@ -2397,11 +2398,27 @@ describe('Personal cloud translation layer', () => {
                 ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
                     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
+                    [DataChangeType.ListTreeMove, 'personalListTree', testListTrees.second.id, {
+                        localListId: testList.second.localId,
+                        parentLocalListId: testList.first.localId,
+                    }],
                     [DataChangeType.Create, 'personalListTree', testListTrees.third.id],
+                    [DataChangeType.ListTreeMove, 'personalListTree', testListTrees.third.id, {
+                        localListId: testList.third.localId,
+                        parentLocalListId: testList.first.localId,
+                    }],
                     [DataChangeType.Create, 'personalListTree', testListTrees.fourth.id],
-                ], { skipChanges: 8 }),
+                    [DataChangeType.ListTreeMove, 'personalListTree', testListTrees.fourth.id, {
+                        localListId: testList.fourth.localId,
+                        parentLocalListId: testList.third.localId,
+                    }],
+                ], { skipChanges: 8, skipAssertTimestamp: true }),
                 personalListTree: [testListTrees.first, testListTrees.second, testListTrees.third, testListTrees.fourth]
-                    .map(data => ({...data, order: 1})),
+                    .map((data, i) => ({
+                        ...data,
+                        localId: Object.values(LOCAL_TEST_DATA_V24.customLists)[i].id,
+                        order: expect.any(Number),
+                    })),
                 sharedListTree: [
                     expect.objectContaining({
                         creator: TEST_USER.id,
@@ -2432,13 +2449,76 @@ describe('Personal cloud translation layer', () => {
                 ],
             })
 
-            // prettier-ignore
-            await testDownload([
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: { ...LOCAL_TEST_DATA_V24.customListTrees.first, order: 1, createdWhen: nowA, updatedWhen: nowA } },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: { ...LOCAL_TEST_DATA_V24.customListTrees.second, order: 1, createdWhen: nowA, updatedWhen: nowA } },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: { ...LOCAL_TEST_DATA_V24.customListTrees.third, order: 1, createdWhen: nowA, updatedWhen: nowA } },
-                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: { ...LOCAL_TEST_DATA_V24.customListTrees.fourth, order: 1, createdWhen: nowA, updatedWhen: nowA } },
-            ], { skip: 8 })
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.customListTrees.first,
+                            id: LOCAL_TEST_DATA_V24.customLists.first.id,
+                            order: expect.any(Number),
+                            createdWhen: expect.any(Number),
+                            updatedWhen: expect.any(Number),
+                        },
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.customListTrees.second,
+                            id: LOCAL_TEST_DATA_V24.customLists.second.id,
+                            order: expect.any(Number),
+                            createdWhen: expect.any(Number),
+                            updatedWhen: expect.any(Number),
+                        },
+                    },
+                    {
+                        type: PersonalCloudUpdateType.ListTreeMove,
+                        rootNodeLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.second.id,
+                        parentLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.first.id,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.customListTrees.third,
+                            id: LOCAL_TEST_DATA_V24.customLists.third.id,
+                            order: expect.any(Number),
+                            createdWhen: expect.any(Number),
+                            updatedWhen: expect.any(Number),
+                        },
+                    },
+                    {
+                        type: PersonalCloudUpdateType.ListTreeMove,
+                        rootNodeLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.third.id,
+                        parentLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.first.id,
+                    },
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'customListTrees',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                            id: LOCAL_TEST_DATA_V24.customLists.fourth.id,
+                            order: expect.any(Number),
+                            createdWhen: expect.any(Number),
+                            updatedWhen: expect.any(Number),
+                        },
+                    },
+                    {
+                        type: PersonalCloudUpdateType.ListTreeMove,
+                        rootNodeLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.fourth.id,
+                        parentLocalListId:
+                            LOCAL_TEST_DATA_V24.customLists.third.id,
+                    },
+                ],
+                { skip: 8 },
+            )
             testSyncPushTrigger({ wasTriggered: true })
         })
 
