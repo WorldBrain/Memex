@@ -82,28 +82,11 @@ export const migrations: Migrations = {
             (x) => !sharedListsLocalIds.includes(x),
         )
 
-        let listMetadata: { [localListId: number]: SharedListMetadata } = {
-            ...listMetadataFetch,
-        }
-
         for (let list of differenceList) {
-            const listShareData = await bgModules.contentSharing.scheduleListShare(
-                {
-                    localListId: list,
-                    isPrivate: true,
-                },
-            )
-
-            if (!listMetadata[list]) {
-                listMetadata[list] = {
-                    localId: undefined,
-                    remoteId: undefined,
-                }
-            }
-
-            listMetadata[list].localId = list
-            listMetadata[list].remoteId = listShareData.remoteListId
-            listMetadata[list].private = true
+            await bgModules.contentSharing.scheduleListShare({
+                localListId: list,
+                isPrivate: true,
+            })
         }
     },
     /*

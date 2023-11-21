@@ -45,6 +45,7 @@ import {
 import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import tinycolor from 'tinycolor2'
+import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -87,6 +88,7 @@ interface State {
     renderLiveChat: boolean
     renderChangeLog: boolean
     updatesAvailable: boolean
+    initialHighlightColor: RGBAColor
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -119,6 +121,7 @@ export default class Ribbon extends Component<Props, State> {
         renderLiveChat: false,
         renderChangeLog: false,
         updatesAvailable: false,
+        initialHighlightColor: null,
     }
 
     constructor(props: Props) {
@@ -157,10 +160,14 @@ export default class Ribbon extends Component<Props, State> {
         } = await browser.storage.local.get({
             [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
-        this.setState({ pickerColor: highlightsColor })
+        this.setState({
+            pickerColor: highlightsColor,
+            initialHighlightColor: highlightsColor,
+        })
     }
 
     updatePickerColor(value) {
+        const previousColor = { ...this.state.pickerColor }
         this.setState({
             pickerColor: value,
             showPickerSave: true,
@@ -170,15 +177,36 @@ export default class Ribbon extends Component<Props, State> {
             'hypothesis-highlight',
         )
 
-        for (let item of highlights) {
-            item.setAttribute('style', `background-color:${value};`)
+        for (let item of (highlights as any) as HTMLElement[]) {
+            const existingStyle = item.style.backgroundColor
+            let backgroundColor = ''
+
+            if (existingStyle.startsWith('rgb(')) {
+                backgroundColor = item.style.backgroundColor
+                    .replace(')', ', 1)')
+                    .replace('rgb(', 'rgba(')
+            } else if (existingStyle.startsWith('rgba(')) {
+                backgroundColor = existingStyle
+            }
+            if (backgroundColor === RGBAobjectToString(previousColor)) {
+                item.setAttribute(
+                    'style',
+                    `background-color:${RGBAobjectToString(value)};`,
+                )
+            }
         }
     }
 
     async saveHighlightColor() {
         this.setState({
             showPickerSave: false,
+            showColorPicker: false,
+            renderFeedback: false,
+            renderLiveChat: false,
+            renderChangeLog: false,
         })
+        this.props.toggleShowTutorial()
+
         await browser.storage.local.set({
             [HIGHLIGHT_COLOR_KEY]: this.state.pickerColor,
         })
@@ -339,13 +367,15 @@ export default class Ribbon extends Component<Props, State> {
                         : 10
                 }
                 closeComponent={() => {
-                    this.setState({
-                        showColorPicker: false,
-                        renderFeedback: false,
-                        renderLiveChat: false,
-                        renderChangeLog: false,
-                    })
-                    this.props.toggleShowTutorial()
+                    if (!this.state.showColorPicker) {
+                        this.setState({
+                            showColorPicker: false,
+                            renderFeedback: false,
+                            renderLiveChat: false,
+                            renderChangeLog: false,
+                        })
+                        this.props.toggleShowTutorial()
+                    }
                 }}
                 width={'fit-content'}
             >
@@ -467,9 +497,9 @@ export default class Ribbon extends Component<Props, State> {
                                         }}
                                     >
                                         <ColorPickerCircle
-                                            backgroundColor={
-                                                this.state.pickerColor
-                                            }
+                                            backgroundColor={RGBAobjectToString(
+                                                this.state.pickerColor,
+                                            )}
                                         />
                                         <InfoText>
                                             Change Highlight Color
@@ -616,13 +646,16 @@ export default class Ribbon extends Component<Props, State> {
                     <PrimaryAction
                         size={'small'}
                         icon={'arrowLeft'}
-                        label={'Go back'}
+                        label={'Cancel'}
                         type={'tertiary'}
-                        onClick={() =>
+                        onClick={() => {
+                            this.updatePickerColor(
+                                this.state.initialHighlightColor,
+                            )
                             this.setState({
                                 showColorPicker: false,
                             })
-                        }
+                        }}
                     />
                     {this.state.showPickerSave ? (
                         <PrimaryAction
@@ -646,9 +679,6 @@ export default class Ribbon extends Component<Props, State> {
                     <RgbaColorPicker
                         color={this.state.pickerColor}
                         onChange={(value) => {
-                            this.setState({
-                                pickerColor: value,
-                            })
                             this.updatePickerColor(value)
                         }}
                     />

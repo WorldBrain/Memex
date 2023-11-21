@@ -179,7 +179,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     ): UnifiedAnnotation => {
         const unifiedAnnotationId = this.generateAnnotationId()
         if (annotation.color != null) {
-            const annotColorObject = this.highlightColorSettings.find(
+            const annotColorObject = this.highlightColorSettings?.find(
                 (item) => item.id === annotation.color,
             )?.color
 
