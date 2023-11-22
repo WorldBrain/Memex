@@ -1978,8 +1978,8 @@ export class AnnotationsSidebar extends React.Component<
                                                     servers but sometimes we
                                                     can't reach it. E.g. if you
                                                     are behind a paywall.
-                                                    <br /> Use this to fetch the
-                                                    content from here.
+                                                    <br /> Use this to extract
+                                                    the content from the page.
                                                 </>
                                             }
                                             placement="bottom"
@@ -2001,8 +2001,8 @@ export class AnnotationsSidebar extends React.Component<
                                                           )
                                                 }
                                                 // isDisabled={!this.state.shortcutsEnabled}
-                                                name={'Use Local Content'}
-                                                label={'Use Local Content'}
+                                                name={'Local Content'}
+                                                label={'Local Content'}
                                                 size={14}
                                                 fontSize={12}
                                                 checkBoxColor="black"
@@ -3174,7 +3174,7 @@ const OptionsContainerLeft = styled.div`
     justify-content: flex-start;
     color: ${(props) => props.theme.colors.greyScale4};
     font-size: 12px;
-    grid-gap: 5px;
+    grid-gap: 1px;
     z-index: 100;
 `
 
