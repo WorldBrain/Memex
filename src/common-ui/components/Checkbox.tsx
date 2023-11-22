@@ -56,7 +56,10 @@ class Checkbox extends React.PureComponent<Props> {
                 zIndex={this.props.zIndex}
                 htmlFor={this.props.id}
             >
-                <LabelText textPosition={this.props.textPosition}>
+                <LabelText
+                    textPosition={this.props.textPosition}
+                    fontSize={this.props.fontSize}
+                >
                     <InputContainer
                         type="checkbox"
                         checked={this.props.isChecked}
@@ -115,7 +118,6 @@ const LabelContentBox = styled.div`
     flex-direction: column;
     align-items: flex-start;
     justify-content: center;
-    margin-left: 8px;
 `
 const LabelTitle = styled.div<{ fontSize: number }>`
     color: ${(props) => props.theme.colors.greyScale6};
@@ -168,7 +170,7 @@ const LabelText = styled.span<{ fontSize; textPosition }>`
     cursor: pointer;
     width: fill-available;
     height: fill-available;
-    grid-gap: 10px;
+    grid-gap: ${(props) => (props.fontSize < 14 ? '5px' : '15px')};
 
     &:hover {
         color: ${(props) => props.theme.colors.black};
@@ -197,7 +199,7 @@ const LabelCheck = styled.span<{
     borderColor
 }>`
     border-radius: ${(props) => (props.mode === 'radio' ? '20px' : '5px')};
-    border: 2px solid
+    outline: 2px solid
         ${(props) =>
             props.isChecked
                 ? props.theme.colors.white
