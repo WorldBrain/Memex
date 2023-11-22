@@ -201,7 +201,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                             </MenuItemBox>
                             <Icon
                                 filePath="arrowDown"
-                                color="greyScale7"
+                                color="greyScale6"
                                 heightAndWidth="18px"
                                 hoverOff
                             />
