@@ -1951,16 +1951,7 @@ export class AnnotationsSidebar extends React.Component<
                                         }
                                         this.props.setAIModel(AImodel)
                                     }}
-                                    initSelectedIndex={
-                                        this.props.queryMode ===
-                                        'chapterSummary'
-                                            ? 1
-                                            : 0
-                                    }
-                                    selectedState={
-                                        this.props.queryMode ===
-                                            'chapterSummary' && 1
-                                    }
+                                    initSelectedIndex={0}
                                     keepSelectedState
                                 />
 
