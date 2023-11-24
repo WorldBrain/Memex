@@ -3165,7 +3165,7 @@ const OptionsContainerLeft = styled.div`
     justify-content: flex-start;
     color: ${(props) => props.theme.colors.greyScale4};
     font-size: 12px;
-    grid-gap: 1px;
+    grid-gap: 3px;
     z-index: 100;
 `
 

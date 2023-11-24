@@ -306,7 +306,7 @@ export default class SearchResultsContainer extends React.Component<
             (item) => {
                 return item.id === noteData.color
             },
-        ).color
+        )?.color
 
         return (
             <AnnotationEditable
