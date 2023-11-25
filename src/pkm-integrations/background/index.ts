@@ -8,6 +8,7 @@ import moment from 'moment'
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
 import { pageTitle } from 'src/sidebar-overlay/sidebar/selectors'
 import type { PkmSyncInterface } from './types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -30,18 +31,31 @@ export class PKMSyncBackgroundModule {
 
     async pushPKMSyncUpdate(item, checkForFilteredSpaces) {
         if (await this.backendNew.isConnected()) {
-            const bufferedItems = await this.getBufferedItems()
-            bufferedItems.push(item)
-            const PKMSYNCremovewarning = await browser.storage.local.get(
-                'PKMSYNCremovewarning',
-            )
-
-            this.PKMSYNCremovewarning =
-                PKMSYNCremovewarning.PKMSYNCremovewarning
-
-            for (const item of bufferedItems) {
-                await this.processChanges(item, checkForFilteredSpaces)
+            console.log('item', item)
+            if (item.data.contentText?.length > 0) {
+                console.log('item', item)
+                const document = {
+                    createdWhen: item.data.createdWhen,
+                    userId: '1',
+                    normalizedUrl: normalizeUrl(item.data.pageUrl),
+                    contentType: item.type,
+                    contentText: item.data.contentText,
+                }
+                await this.backendNew.vectorIndexDocument(document)
             }
+
+            // const bufferedItems = await this.getBufferedItems()
+            // bufferedItems.push(item)
+            // const PKMSYNCremovewarning = await browser.storage.local.get(
+            //     'PKMSYNCremovewarning',
+            // )
+
+            // this.PKMSYNCremovewarning =
+            //     PKMSYNCremovewarning.PKMSYNCremovewarning
+
+            // for (const item of bufferedItems) {
+            //     await this.processChanges(item, checkForFilteredSpaces)
+            // }
         } else {
             await this.bufferPKMSyncItems(item)
         }

@@ -156,6 +156,8 @@ export default class PageStorage extends StorageModule {
     async createPage(pageData: PipelineRes, pageContentInfo?: any) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
+        console.log('pageData', pageData)
+
         await this.operation('createPage', {
             ...pageData,
             url: normalizedUrl,
@@ -181,8 +183,11 @@ export default class PageStorage extends StorageModule {
                         pageTitle: pageData.fullTitle,
                         createdWhen: Date.now(),
                         pkmSyncType: 'page',
+                        contentText: pageData.htmlBody,
                     }
                 }
+
+                console.log('datatosync', dataToSave)
 
                 sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
             } catch (e) {

@@ -101,7 +101,12 @@ export interface EditForms {
     [annotationUrl: string]: EditForm
 }
 
-export type SidebarTab = 'annotations' | 'spaces' | 'feed' | 'summary'
+export type SidebarTab =
+    | 'annotations'
+    | 'spaces'
+    | 'feed'
+    | 'summary'
+    | 'rabbitHole'
 
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
@@ -125,6 +130,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
     highlightColors: string
+    suggestionsResults: []
+    suggestionsResultsLoadState: TaskState
 
     activeTab: SidebarTab
     showChapters: boolean
@@ -472,6 +479,14 @@ export interface AnnotationCardInstance {
     cardMode: AnnotationCardMode
     comment: string
     color: string
+}
+export interface SuggestionCard {
+    normalizedUrl: UnifiedAnnotation['unifiedId']
+    title: boolean
+    description: boolean
+    contentType: 'page' | 'annotation'
+    creatorId?: AnnotationCardMode
+    spaces?: UnifiedList[]
 }
 
 export interface ListInstance {

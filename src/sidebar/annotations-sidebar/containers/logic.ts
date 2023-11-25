@@ -25,6 +25,7 @@ import type {
     SidebarContainerEvents,
     EditForm,
     AnnotationCardInstanceEvent,
+    SuggestionCard,
 } from './types'
 import type { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
@@ -105,6 +106,12 @@ import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
+import PageResultItem from 'src/common-ui/components/page-result-item'
+import {
+    PageData,
+    PageResult,
+} from 'src/dashboard-refactor/search-results/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -120,6 +127,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
     spacesBG?: SpacePickerDependencies['spacesBG']
+    storage
 }
 
 type EventHandler<
@@ -168,6 +176,7 @@ export class SidebarContainerLogic extends UILogic<
     private youtubeTranscriptSummary: string = ''
     private chapterSummaries
     private editor = null
+    private backendNew = null
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -343,6 +352,8 @@ export class SidebarContainerLogic extends UILogic<
             AImodel: 'gpt-3.5-turbo-1106',
             hasKey: false,
             highlightColors: null,
+            suggestionsResults: [],
+            suggestionsResultsLoadState: 'pristine',
         }
     }
 
@@ -2793,8 +2804,70 @@ export class SidebarContainerLogic extends UILogic<
                     )
                 }
             }
+        } else if (event.tab === 'rabbitHole') {
+            this.emitMutation({
+                suggestionsResultsLoadState: { $set: 'running' },
+            })
+            const currentPageContent = document.body.innerText
+
+            // add step to summmarise page and extract key information suitable for similiarity search
+
+            const results = await this.options.customListsBG.findSimilarBackground(
+                currentPageContent,
+            )
+
+            console.log('results', results)
+
+            const resultsArray: SuggestionCard[] = []
+            console.log('result', Object.values(results))
+            for (let result of Object.values(results)) {
+                console.log('result', result)
+                const pageData = await this.options.customListsBG.findPageByUrl(
+                    result.normalizedUrl || result.normalisedUrl,
+                )
+
+                console.log('pageData', pageData)
+
+                // for later to fetch other user's data
+                // const sharedAnnotations = await annotationsBG.getSharedAnnotations(
+                //     {
+                //         sharedAnnotationReferences:
+                //             listInstance.sharedAnnotationReferences,
+                //         withCreatorData: true,
+                //     },
+                // )
+
+                // const users = await this.options.contentSharingBG.
+
+                const pageToDisplay: SuggestionCard = {
+                    normalizedUrl: normalizeUrl(pageData.fullUrl),
+                    title: pageData.fullTitle,
+                    description: result.originalContent,
+                    // contentType: result.contentType,
+                    // creatorId: pageData.creator.reference.id,
+                }
+                console.log('pageDapageToDisplay1', pageToDisplay)
+
+                // find list data (do they belong to one ore more spaces?)
+                // const fetchedSpaces = await this.options.customListsBG.fetchPageListEntriesByUrl(
+                //     { url: normalizeUrl(pageData.fullUrl) },
+                // )
+
+                console.log('pageDapageToDisplay2', pageToDisplay)
+                resultsArray.push(pageToDisplay)
+            }
+
+            // next step is to fetch the respective user data from the creators, potentially load them async after reuslts already display
+
+            console.log('resulstarray', resultsArray)
+            this.emitMutation({
+                suggestionsResults: { $set: resultsArray },
+                suggestionsResultsLoadState: { $set: 'success' },
+            })
         }
     }
+
+    type = {}
 
     private async maybeLoadListRemoteAnnotations(
         state: SidebarContainerState,

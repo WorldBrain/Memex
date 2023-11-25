@@ -482,6 +482,12 @@ export default class CustomListStorage extends StorageModule {
             // updatedAt,
         })
     }
+    async findPageByUrl(normalizedUrl: string) {
+        console.log('normalizedUrl', normalizedUrl)
+        return await this.operation('findPageByUrl', {
+            url: normalizedUrl,
+        })
+    }
 
     async createOrUpdateListDescription({
         listId,

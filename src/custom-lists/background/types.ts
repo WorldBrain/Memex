@@ -98,6 +98,7 @@ export interface RemoteCollectionsInterface {
         oldName: string
         newName: string
     }): Promise<void>
+    findPageByUrl(normalizedUrl: string): Promise<void>
     fetchListDescriptions(args: {
         listIds: number[]
     }): Promise<{ [listId: number]: string | null }>
@@ -137,6 +138,7 @@ export interface RemoteCollectionsInterface {
         includeDescriptions?: boolean
     }): Promise<PageList[]>
     fetchListById(args: { id: number }): Promise<PageList>
+    findSimilarBackground(currentPageContent: string): Promise<PageList>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
     fetchPageListEntriesByUrl(args: { url: string }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<number[]>

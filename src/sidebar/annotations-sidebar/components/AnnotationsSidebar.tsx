@@ -84,6 +84,7 @@ import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { Checkbox } from 'src/common-ui/components'
 import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
 import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/interceptVideoLinks'
+import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -1428,7 +1429,7 @@ export class AnnotationsSidebar extends React.Component<
     // }
 
     private throwNoSelected
-    rror() {
+    error() {
         throw new Error(
             'Isolated view specific render method called when state not set',
         )
@@ -1680,6 +1681,30 @@ export class AnnotationsSidebar extends React.Component<
                 />
             </TooltipBox>
         )
+
+        if (this.props.activeTab === 'rabbitHole') {
+            return (
+                <AnnotationsSectionStyled>
+                    <SuggestionsList>
+                        {this.props.suggestionsResults?.map((item) => (
+                            <SuggestionsCardContainer>
+                                <SuggestionsCardBox>
+                                    <SuggestionsCardTitle>
+                                        {item.title}
+                                    </SuggestionsCardTitle>
+                                    <SuggestionsCardUrl>
+                                        {item.normalizedUrl}
+                                    </SuggestionsCardUrl>
+                                    <SuggestionsDescription>
+                                        {item.description}
+                                    </SuggestionsDescription>
+                                </SuggestionsCardBox>
+                            </SuggestionsCardContainer>
+                        ))}
+                    </SuggestionsList>
+                </AnnotationsSectionStyled>
+            )
+        }
 
         if (this.props.activeTab === 'summary') {
             const SuggestionsList = ({
@@ -2444,6 +2469,16 @@ export class AnnotationsSidebar extends React.Component<
                         height={'30px'}
                     />
                     <PrimaryAction
+                        onClick={this.props.setActiveTab('rabbitHole')}
+                        label={'rabbitHole'}
+                        active={this.props.activeTab === 'rabbitHole'}
+                        type={'tertiary'}
+                        size={'medium'}
+                        iconPosition={'right'}
+                        padding={'3px 6px'}
+                        height={'30px'}
+                    />
+                    <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
                         label={'Spaces'}
                         active={this.props.activeTab === 'spaces'}
@@ -2484,6 +2519,7 @@ export class AnnotationsSidebar extends React.Component<
                         padding={'3px 6px'}
                         height={'30px'}
                     />
+
                     <PrimaryAction
                         onClick={(event) => {
                             this.props.setActiveTab('feed')(event)
@@ -3010,6 +3046,39 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 }
+
+const SuggestionsList = styled.div`
+    display: flex;
+    grid-gap: 5px;
+    flex-direction: column;
+    margin: 10px;
+`
+
+const SuggestionsCardContainer = styled(ItemBox)`
+    margin-bottom: 5px;
+`
+const SuggestionsCardBox = styled.div`
+    margin-bottom: 5px;
+    grid-gap: 10px;
+    display: flex;
+    flex-direction: column;
+    padding: 15px;
+`
+const SuggestionsCardTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 16px;
+    font-weight: 400;
+`
+const SuggestionsCardUrl = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    font-weight: 300;
+`
+const SuggestionsDescription = styled(Markdown)`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 16px;
+    font-weight: 300;
+`
 
 const ActionButton = styled.div`
     display: none;

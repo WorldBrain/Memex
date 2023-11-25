@@ -477,7 +477,10 @@ export class PageIndexingBackground {
         opts: PageCreationOpts = {},
     ) {
         const { favIconURI } = pageData
-        pageData = this.removeAnyUnregisteredFields(pageData)
+
+        const originalHTML = pageData.htmlBody // adding this to keep the fullHTML in the processing pipeline
+        pageData = this.removeAnyUnregisteredFields(pageData) // this was already here
+        pageData.htmlBody = originalHTML // this is added too
         const pageContentInfo = await this.getContentInfoForPages()
 
         const contentIdentifier =
