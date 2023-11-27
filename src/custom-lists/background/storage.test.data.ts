@@ -40,21 +40,21 @@ export const MOBILE_LIST = {
 // export const LIST_4 = { ...LIST_3 }
 
 export const PAGE_ENTRY_1 = {
-    id: 1,
+    id: LIST_2.id,
     url: 'https://www.ipsum.com/test',
 }
 
 export const PAGE_ENTRY_2 = {
-    id: 2,
+    id: LIST_3.id,
     url: 'https://www.ipsum.com/test',
 }
 
 export const PAGE_ENTRY_3 = {
-    id: 1,
+    id: LIST_2.id,
     url: 'https://www.ipsum.in/lorem',
 }
 
 export const PAGE_ENTRY_4 = {
-    id: 3,
+    id: LIST_4.id,
     url: 'https://www.lorem.org/test/test1',
 }

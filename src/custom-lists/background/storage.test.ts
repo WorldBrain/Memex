@@ -7,6 +7,7 @@ import {
 } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { PageListEntry } from './types'
 
 async function insertTestData({
     backgroundModules: { customLists, contentSharing },
@@ -712,6 +713,28 @@ describe('Custom List Integrations', () => {
             const pagesAfter = await customLists.fetchListPagesById({ id: 1 })
             // No of pages deleted
             expect(pagesBefore.length - pagesAfter.length).toBe(1)
+        })
+
+        test('Handle invalid deletes', async () => {
+            const { customLists, storageManager } = await setupTest()
+            const entriesBefore: PageListEntry[] = await storageManager
+                .collection('pageListEntries')
+                .findObjects({})
+            console.log(entriesBefore)
+
+            // error that actually happened because of untyped function
+            await customLists.removeAllListPages({
+                listId: DATA.LIST_2.id,
+            } as any)
+
+            const entriesAfter: PageListEntry[] = await storageManager
+                .collection('pageListEntries')
+                .findObjects({})
+            const expected = entriesBefore.filter(
+                (entry) => entry.listId !== DATA.LIST_2.id,
+            )
+            expect(expected).not.toEqual(entriesBefore)
+            expect(entriesAfter).toEqual(expected)
         })
     })
 })
