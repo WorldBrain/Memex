@@ -105,6 +105,8 @@ import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
+import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -2630,6 +2632,12 @@ export class SidebarContainerLogic extends UILogic<
             let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
             let fullTextToProcess
             if (isPagePDF) {
+                const searchParams = new URLSearchParams(window.location.search)
+                const filePath = searchParams.get('file')
+                const pdf: PDFDocumentProxy = await (globalThis as any)[
+                    'pdfjsLib'
+                ].getDocument(filePath).promise
+                const text = await extractDataFromPDFDocument(pdf, true)
                 fullTextToProcess = document.body.innerText
             }
 
