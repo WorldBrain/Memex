@@ -84,53 +84,44 @@ export default function ListsSegment({
     spacePickerButtonRef,
     ...props
 }: Props) {
+    console.log('lists', lists)
     return (
         <Container padding={padding} {...props}>
             <ListsContainer newLineOrientation={newLineOrientation === true}>
                 <SpacesListContainer>
-                    {lists
-                        .filter(
-                            (l) =>
-                                !Object.values(SPECIAL_LIST_IDS).includes(
-                                    l.id,
-                                ) && l.id !== filteredbyListID,
-                        )
-                        .slice(0)
-                        .map((space) => {
-                            return (
-                                <ListSpaceContainer
-                                    key={space.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        onListClick(space.id)
-                                    }}
-                                    isLoading={
-                                        space.name == null && space != null
-                                    }
-                                    title={space.name}
-                                >
-                                    {' '}
-                                    {space.type === 'page-link' && (
+                    {lists.slice(0).map((space) => {
+                        return (
+                            <ListSpaceContainer
+                                key={space.id}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onListClick(space.id)
+                                }}
+                                isLoading={space.name == null && space != null}
+                                title={space.name}
+                            >
+                                {' '}
+                                {space.type === 'page-link' && (
+                                    <Icon
+                                        heightAndWidth="16px"
+                                        hoverOff
+                                        icon="link"
+                                        color="greyScale5"
+                                    />
+                                )}
+                                {space.isShared &&
+                                    space.type !== 'page-link' && (
                                         <Icon
                                             heightAndWidth="16px"
                                             hoverOff
-                                            icon="link"
+                                            icon="peopleFine"
                                             color="greyScale5"
                                         />
                                     )}
-                                    {space.isShared &&
-                                        space.type !== 'page-link' && (
-                                            <Icon
-                                                heightAndWidth="16px"
-                                                hoverOff
-                                                icon="peopleFine"
-                                                color="greyScale5"
-                                            />
-                                        )}
-                                    <SpaceName>{space.name}</SpaceName>
-                                </ListSpaceContainer>
-                            )
-                        })}
+                                <SpaceName>{space.name}</SpaceName>
+                            </ListSpaceContainer>
+                        )
+                    })}
                     {/* <AddSpacesButton
                         hasNoLists={lists.length === 0}
                         onEditBtnClick={onEditBtnClick}

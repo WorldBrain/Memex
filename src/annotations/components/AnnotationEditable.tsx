@@ -289,12 +289,26 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }> {
         const { lists, listIdToFilterOut, getListDetailsById } = this.props
 
-        return lists
-            .filter((id) => id !== listIdToFilterOut)
+        const listsToDisplay = this.props.lists.filter(
+            (list) =>
+                list !== SPECIAL_LIST_IDS.INBOX &&
+                list !== SPECIAL_LIST_IDS.MOBILE &&
+                list !== SPECIAL_LIST_IDS.FEED,
+        )
+
+        const displayLists = lists
+            .filter(
+                (list) =>
+                    list !== SPECIAL_LIST_IDS.INBOX &&
+                    list !== SPECIAL_LIST_IDS.MOBILE &&
+                    list !== SPECIAL_LIST_IDS.FEED,
+            )
             .map((id) => ({
                 id,
                 ...getListDetailsById(id),
             }))
+
+        return displayLists
     }
 
     private get hasSharedLists(): boolean {
@@ -1066,24 +1080,23 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            {listsToDisplay.length > 0 &&
-                                this.displayLists.length > 1 && (
-                                    <ListsSegment
-                                        tabIndex={0}
-                                        lists={this.displayLists}
-                                        onMouseEnter={this.props.onListsHover}
-                                        onListClick={this.props.onListClick}
-                                        onEditBtnClick={() => null}
-                                        spacePickerButtonRef={
-                                            this.spacePickerBodyButtonRef
-                                        }
-                                        padding={
-                                            this.props.isEditing
-                                                ? '10px 15px 10px 10px'
-                                                : '0px 15px 10px 15px'
-                                        }
-                                    />
-                                )}
+                            {this.displayLists.length >= 1 && (
+                                <ListsSegment
+                                    tabIndex={0}
+                                    lists={this.displayLists}
+                                    onMouseEnter={this.props.onListsHover}
+                                    onListClick={this.props.onListClick}
+                                    onEditBtnClick={() => null}
+                                    spacePickerButtonRef={
+                                        this.spacePickerBodyButtonRef
+                                    }
+                                    padding={
+                                        this.props.isEditing
+                                            ? '10px 15px 10px 10px'
+                                            : '0px 15px 10px 15px'
+                                    }
+                                />
+                            )}
                             {this.renderFooter()}
                         </AnnotationStyled>
                         {this.renderCopyPaster(this.copyPasterButtonRef)}
