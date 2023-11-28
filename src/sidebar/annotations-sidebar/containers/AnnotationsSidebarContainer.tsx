@@ -46,6 +46,7 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import type {
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
@@ -74,6 +75,10 @@ export interface Props extends SidebarContainerOptions {
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
+    saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
+    saveHighlightColorSettings?: (newState) => void
+    getHighlightColorSettings?: () => void
+    highlightColorSettings?: string
 }
 
 export class AnnotationsSidebarContainer<
@@ -342,11 +347,11 @@ export class AnnotationsSidebarContainer<
             renderSpacePicker: () => (
                 <CollectionPicker
                     showPageLinks
-                    selectEntry={(listId) =>
+                    selectEntry={async (listId) => {
                         this.processEvent('setNewPageNoteLists', {
                             lists: [...this.state.commentBox.lists, listId],
                         })
-                    }
+                    }}
                     unselectEntry={(listId) =>
                         this.processEvent('setNewPageNoteLists', {
                             lists: this.state.commentBox.lists.filter(
@@ -430,7 +435,7 @@ export class AnnotationsSidebarContainer<
                     params.annotation.unifiedListIds,
                 ),
             selectEntry: async (listId, options) => {
-                this.processEvent(getUpdateListsEvent(listId), {
+                this.processEvent('updateListsForAnnotation', {
                     added: listId,
                     deleted: null,
                     unifiedAnnotationId: params.annotation.unifiedId,
@@ -476,11 +481,11 @@ export class AnnotationsSidebarContainer<
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
+
         return (
             <CollectionPicker
                 {...this.getSpacePickerProps({
                     annotation,
-                    showExternalConfirmations: true,
                 })}
                 bgScriptBG={this.props.bgScriptBG}
                 closePicker={closePicker}
@@ -534,7 +539,7 @@ export class AnnotationsSidebarContainer<
                     this.processEvent('updateAnnotationShareInfo', {
                         privacyLevel: state.privacyLevel,
                         unifiedAnnotationId: annotation.unifiedId,
-                        keepListsIfUnsharing: opts?.keepListsIfUnsharing,
+                        keepListsIfUnsharing: true,
                     })
                 }
                 syncSettingsBG={this.props.syncSettingsBG}
@@ -796,9 +801,9 @@ export class AnnotationsSidebarContainer<
                         default={{
                             x: 0,
                             y: 0,
-                            width: this.state.sidebarWidth
-                                ? this.state.sidebarWidth
-                                : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                            width: this.state.sidebarWidth,
+                            // ? this.state.sidebarWidth
+                            // : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
                             height: 'auto',
                         }}
                         resizeHandleWrapperClass={'sidebarResizeHandle'}
@@ -839,7 +844,6 @@ export class AnnotationsSidebarContainer<
                             }}
                             loadState={this.state.loadState}
                             setAIModel={(AImodel) => {
-                                console.log('adadfadfasdf', AImodel)
                                 this.processEvent('setAIModel', AImodel)
                             }}
                             showChapters={this.state.showChapters}
@@ -847,6 +851,28 @@ export class AnnotationsSidebarContainer<
                             chapterSummaries={this.state.chapterSummaries}
                             videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
+                            saveHighlightColor={(noteId, colorId, color) => {
+                                this.processEvent('saveHighlightColor', {
+                                    noteId: noteId,
+                                    colorId: colorId,
+                                    color: color,
+                                })
+                            }}
+                            saveHighlightColorSettings={(newState) => {
+                                this.processEvent(
+                                    'saveHighlightColorSettings',
+                                    {
+                                        newState: newState,
+                                    },
+                                )
+                            }}
+                            getHighlightColorSettings={() =>
+                                this.processEvent(
+                                    'getHighlightColorSettings',
+                                    null,
+                                )
+                            }
+                            highlightColorSettings={this.state.highlightColors}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,
                                 annotationReference,

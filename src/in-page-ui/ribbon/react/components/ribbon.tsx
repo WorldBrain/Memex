@@ -28,7 +28,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { HexColorPicker } from 'react-colorful'
+import { HexColorPicker, RgbaColorPicker } from 'react-colorful'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -37,13 +37,15 @@ import { READ_STORAGE_FLAG } from 'src/common-ui/containers/UpdateNotifBanner/co
 import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { UnifiedList } from 'src/annotations/cache/types'
+import { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
+import tinycolor from 'tinycolor2'
+import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -81,11 +83,12 @@ interface State {
     blockListValue: string
     showColorPicker: boolean
     renderFeedback: boolean
-    pickerColor: string
+    pickerColor: RGBAColor
     showPickerSave: boolean
     renderLiveChat: boolean
     renderChangeLog: boolean
     updatesAvailable: boolean
+    initialHighlightColor: RGBAColor
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -118,6 +121,7 @@ export default class Ribbon extends Component<Props, State> {
         renderLiveChat: false,
         renderChangeLog: false,
         updatesAvailable: false,
+        initialHighlightColor: null,
     }
 
     constructor(props: Props) {
@@ -156,10 +160,14 @@ export default class Ribbon extends Component<Props, State> {
         } = await browser.storage.local.get({
             [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
         })
-        this.setState({ pickerColor: highlightsColor })
+        this.setState({
+            pickerColor: highlightsColor,
+            initialHighlightColor: highlightsColor,
+        })
     }
 
     updatePickerColor(value) {
+        const previousColor = { ...this.state.pickerColor }
         this.setState({
             pickerColor: value,
             showPickerSave: true,
@@ -169,15 +177,36 @@ export default class Ribbon extends Component<Props, State> {
             'hypothesis-highlight',
         )
 
-        for (let item of highlights) {
-            item.setAttribute('style', `background-color:${value};`)
+        for (let item of (highlights as any) as HTMLElement[]) {
+            const existingStyle = item.style.backgroundColor
+            let backgroundColor = ''
+
+            if (existingStyle.startsWith('rgb(')) {
+                backgroundColor = item.style.backgroundColor
+                    .replace(')', ', 1)')
+                    .replace('rgb(', 'rgba(')
+            } else if (existingStyle.startsWith('rgba(')) {
+                backgroundColor = existingStyle
+            }
+            if (backgroundColor === RGBAobjectToString(previousColor)) {
+                item.setAttribute(
+                    'style',
+                    `background-color:${RGBAobjectToString(value)};`,
+                )
+            }
         }
     }
 
     async saveHighlightColor() {
         this.setState({
             showPickerSave: false,
+            showColorPicker: false,
+            renderFeedback: false,
+            renderLiveChat: false,
+            renderChangeLog: false,
         })
+        this.props.toggleShowTutorial()
+
         await browser.storage.local.set({
             [HIGHLIGHT_COLOR_KEY]: this.state.pickerColor,
         })
@@ -338,13 +367,15 @@ export default class Ribbon extends Component<Props, State> {
                         : 10
                 }
                 closeComponent={() => {
-                    this.setState({
-                        showColorPicker: false,
-                        renderFeedback: false,
-                        renderLiveChat: false,
-                        renderChangeLog: false,
-                    })
-                    this.props.toggleShowTutorial()
+                    if (!this.state.showColorPicker) {
+                        this.setState({
+                            showColorPicker: false,
+                            renderFeedback: false,
+                            renderLiveChat: false,
+                            renderChangeLog: false,
+                        })
+                        this.props.toggleShowTutorial()
+                    }
                 }}
                 width={'fit-content'}
             >
@@ -466,9 +497,9 @@ export default class Ribbon extends Component<Props, State> {
                                         }}
                                     >
                                         <ColorPickerCircle
-                                            backgroundColor={
-                                                this.state.pickerColor
-                                            }
+                                            backgroundColor={RGBAobjectToString(
+                                                this.state.pickerColor,
+                                            )}
                                         />
                                         <InfoText>
                                             Change Highlight Color
@@ -615,13 +646,16 @@ export default class Ribbon extends Component<Props, State> {
                     <PrimaryAction
                         size={'small'}
                         icon={'arrowLeft'}
-                        label={'Go back'}
+                        label={'Cancel'}
                         type={'tertiary'}
-                        onClick={() =>
+                        onClick={() => {
+                            this.updatePickerColor(
+                                this.state.initialHighlightColor,
+                            )
                             this.setState({
                                 showColorPicker: false,
                             })
-                        }
+                        }}
                     />
                     {this.state.showPickerSave ? (
                         <PrimaryAction
@@ -633,7 +667,7 @@ export default class Ribbon extends Component<Props, State> {
                     ) : undefined}
                 </PickerButtonTopBar>
                 <TextField
-                    value={this.state.pickerColor}
+                    value={tinycolor(this.state.pickerColor).toHex8String()}
                     onChange={(event) =>
                         this.updatePickerColor(
                             (event.target as HTMLInputElement).value,
@@ -642,12 +676,9 @@ export default class Ribbon extends Component<Props, State> {
                     componentRef={this.colorPickerField}
                 />
                 <HexPickerContainer>
-                    <HexColorPicker
+                    <RgbaColorPicker
                         color={this.state.pickerColor}
                         onChange={(value) => {
-                            this.setState({
-                                pickerColor: value,
-                            })
                             this.updatePickerColor(value)
                         }}
                     />

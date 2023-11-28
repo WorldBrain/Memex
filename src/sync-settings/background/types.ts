@@ -67,6 +67,7 @@ export interface SyncSettingsByFeature {
             sharePageShortcut: string
         }
         shouldAutoCreateNoteLink: boolean
+        shouldAutoAddSpaces: boolean
     }
     readwise: {
         apiKey: string
@@ -80,6 +81,9 @@ export interface SyncSettingsByFeature {
         tooltipEnabled: boolean
         highlightsEnabled: boolean
         ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
+    }
+    highlightColors: {
+        highlightColors: []
     }
 }
 

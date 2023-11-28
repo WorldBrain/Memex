@@ -144,6 +144,7 @@ export default class AnnotationStorage extends StorageModule {
                     { url: '$url:pk' },
                     {
                         comment: '$comment:string',
+                        color: '$color:string',
                         lastEdited: '$lastEdited:any',
                     },
                 ],
@@ -186,6 +187,11 @@ export default class AnnotationStorage extends StorageModule {
                 collection: AnnotationStorage.ANNOTS_COLL,
                 operation: 'findObjects',
                 args: { pageUrl: '$pageUrl:string' },
+            },
+            listAnnotationIdsByColor: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'findObjects',
+                args: { color: '$color:string' },
             },
             listAnnotationsByPageUrls: {
                 collection: AnnotationStorage.ANNOTS_COLL,
@@ -301,6 +307,13 @@ export default class AnnotationStorage extends StorageModule {
             'listAnnotationsByPageUrls',
             { pageUrls },
         )
+
+        return annotations
+    }
+    async listAnnotationIdsByColor(color: string) {
+        const annotations = await this.operation('listAnnotationIdsByColor', {
+            color,
+        })
 
         return annotations
     }
@@ -509,6 +522,7 @@ export default class AnnotationStorage extends StorageModule {
         url,
         comment,
         selector,
+        color,
         createdWhen = new Date(),
     }: Omit<Annotation, 'tags' | 'lists'>) {
         if (!body?.length && !comment?.length) {
@@ -537,6 +551,7 @@ export default class AnnotationStorage extends StorageModule {
                     body: body ?? '',
                     comment: comment ?? '',
                     createdWhen: createdWhen,
+                    color: color ?? null,
                     pageCreatedWhen: pageDate,
                     pageUrl: pageDataStorage?.fullUrl ?? pageUrl,
                 }
@@ -554,6 +569,7 @@ export default class AnnotationStorage extends StorageModule {
             comment,
             body,
             selector,
+            color,
             createdWhen,
             lastEdited: createdWhen,
             url,
@@ -590,6 +606,7 @@ export default class AnnotationStorage extends StorageModule {
     async editAnnotation(
         url: string,
         comment: string,
+        color: string,
         lastEdited = new Date(),
     ) {
         if (await isPkmSyncEnabled()) {
@@ -642,6 +659,7 @@ export default class AnnotationStorage extends StorageModule {
         return this.operation('editAnnotation', {
             url,
             comment,
+            color,
             lastEdited,
         })
     }

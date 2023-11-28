@@ -51,6 +51,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type {
     PageAnnotationsCacheEvents,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
@@ -102,6 +103,10 @@ import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annot
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
+import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -149,7 +154,9 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
-    syncSettings: SyncSettingsStore<'contentSharing' | 'extension' | 'openAI'>
+    syncSettings: SyncSettingsStore<
+        'contentSharing' | 'extension' | 'openAI' | 'highlightColors'
+    >
     resizeObserver
     sidebar
     readingViewState
@@ -230,6 +237,13 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     getInitialState(): SidebarContainerState {
+        let sidebarWidth = SIDEBAR_WIDTH_STORAGE_KEY
+        if (window.location.href.includes('youtube.com/watch')) {
+            const sidebarContainerWidth = document.getElementById('secondary')
+                .clientWidth
+            sidebarWidth = sidebarContainerWidth - 50 + 'px'
+        }
+
         return {
             ...annotationConversationInitialState(),
 
@@ -245,6 +259,7 @@ export class SidebarContainerLogic extends UILogic<
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
             selectedTextAIPreview: undefined,
+            sidebarWidth: sidebarWidth,
 
             users: {},
             currentUserReference: null,
@@ -329,6 +344,7 @@ export class SidebarContainerLogic extends UILogic<
             chapterList: [],
             AImodel: 'gpt-3.5-turbo-1106',
             hasKey: false,
+            highlightColors: null,
         }
     }
 
@@ -501,6 +517,172 @@ export class SidebarContainerLogic extends UILogic<
                 })
             },
         )
+    }
+
+    getHighlightColorSettings: EventHandler<
+        'getHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        let highlightColorJSON
+        if (previousState.highlightColors) {
+            highlightColorJSON = JSON.parse(previousState.highlightColors)
+        } else {
+            const highlightColors = await this.syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            if (highlightColors) {
+                highlightColorJSON = highlightColors
+            } else {
+                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+                await this.syncSettings.highlightColors.set(
+                    'highlightColors',
+                    highlightColorJSON,
+                )
+            }
+        }
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
+        })
+
+        return highlightColorJSON
+    }
+    saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
+        event,
+        previousState,
+    }) => {
+        const {
+            annotations: {
+                byId: { [event.noteId]: annotationData },
+            },
+        } = previousState
+
+        if (annotationData?.creator?.id !== this.options.getCurrentUser()?.id) {
+            return
+        }
+
+        await updateAnnotation({
+            annotationsBG: this.options.annotationsBG,
+            contentSharingBG: this.options.contentSharingBG,
+            keepListsIfUnsharing: true,
+            annotationData: {
+                comment: annotationData?.comment ?? '',
+                localId: annotationData?.localId,
+                color: event.colorId,
+            },
+            shareOpts: {
+                shouldShare:
+                    annotationData?.privacyLevel === 200 ? true : false,
+                skipPrivacyLevelUpdate: true,
+            },
+        })
+
+        this.options.annotationsCache.updateAnnotation({
+            ...annotationData,
+            comment: annotationData?.comment ?? '',
+            color: event.color,
+            unifiedListIds: annotationData?.unifiedListIds,
+        })
+
+        let highlights: HTMLCollection = document.getElementsByTagName(
+            'hypothesis-highlight',
+        )
+
+        let memexHighlights: Element[] = Array.from(
+            highlights,
+        ).filter((highlight) =>
+            highlight.classList.contains(`memex-highlight-${event.noteId}`),
+        )
+
+        for (let item of memexHighlights) {
+            item.setAttribute(
+                'style',
+                `background-color:${RGBAobjectToString(event.color)};`,
+            )
+            item.setAttribute(
+                'highlightcolor',
+                `${RGBAobjectToString(event.color)}`,
+            )
+        }
+    }
+    saveHighlightColorSettings: EventHandler<
+        'saveHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        const newState = JSON.parse(event.newState)
+        const oldState = JSON.parse(previousState.highlightColors)
+        await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        const changedColors = newState
+            .map((newItem, index) => {
+                const oldItem = oldState[index]
+                if (
+                    oldItem &&
+                    newItem.id === oldItem.id &&
+                    JSON.stringify(newItem.color) !==
+                        JSON.stringify(oldItem.color)
+                ) {
+                    return {
+                        id: oldItem.id,
+                        oldColor: oldItem.color,
+                        newColor: newItem.color,
+                    }
+                }
+            })
+            .filter((item) => item != null)
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
+        })
+
+        let highlights: HTMLCollection = document.getElementsByTagName(
+            'hypothesis-highlight',
+        )
+
+        for (let color of changedColors) {
+            Array.from(highlights).filter((highlight) => {
+                if (
+                    highlight.getAttribute('highlightcolor') ===
+                    RGBAobjectToString(color.oldColor)
+                ) {
+                    highlight.setAttribute(
+                        'style',
+                        `background-color:${RGBAobjectToString(
+                            color.newColor,
+                        )};`,
+                    )
+                    highlight.setAttribute(
+                        'highlightcolor',
+                        RGBAobjectToString(color.newColor),
+                    )
+                }
+            })
+            const annotationLocalIds: Annotation[] = await this.options.annotationsBG.listAnnotationIdsByColor(
+                { color: color.id },
+            )
+
+            const annotations = []
+
+            for (let annotation of annotationLocalIds) {
+                const annotationCachedData = this.options.annotationsCache.getAnnotationByLocalId(
+                    annotation.url,
+                )
+                if (annotationCachedData) {
+                    annotations.push(annotationCachedData)
+                }
+            }
+
+            for (let annotation of annotations) {
+                const colorToUpdate = color.newColor
+
+                this.options.annotationsCache.updateAnnotation({
+                    comment: annotation.comment,
+                    privacyLevel: annotation.privacyLevel,
+                    unifiedListIds: annotation.unifiedListIds,
+                    unifiedId: annotation.unifiedId,
+                    color: colorToUpdate,
+                })
+            }
+        }
     }
 
     /** Should only be used for state initialization. */
@@ -846,9 +1028,6 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     ) {
                         document.body.style.position = 'relative'
-                    } else {
-                        document.body.style.position = 'sticky'
-                        this.adjustYoutubePlayerSize()
                     }
                     if (window.location.href.includes('mail.google.com')) {
                         this.adjustGmailWidth('initial')
@@ -860,13 +1039,6 @@ export class SidebarContainerLogic extends UILogic<
                     document.body.style.position = 'initial'
                     if (document.body.offsetWidth === 0) {
                         document.body.style.width = '100%'
-                    }
-                    if (
-                        window.location.href.startsWith(
-                            'https://www.youtube.com',
-                        )
-                    ) {
-                        this.adjustYoutubePlayerSize()
                     }
                     if (window.location.href.includes('mail.google.com')) {
                         this.adjustGmailWidth('initial')
@@ -889,17 +1061,11 @@ export class SidebarContainerLogic extends UILogic<
             const sidebar = this.sidebar
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
-            let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 40 + 'px'
+            let readingWidth = currentWindowWidth - currentsidebarWidth - 40
 
-            document.body.style.width = readingWidth
-
-            if (window.location.href.startsWith('https://www.youtube.com')) {
-                document.body.style.position = 'sticky'
-                this.adjustYoutubePlayerSize()
-            }
+            document.body.style.width = readingWidth + 'px'
             if (window.location.href.includes('mail.google.com')) {
-                this.adjustGmailWidth(readingWidth)
+                this.adjustGmailWidth(readingWidth + 'px')
             }
         }
     }
@@ -914,26 +1080,6 @@ export class SidebarContainerLogic extends UILogic<
         Array.from(document.body.children).forEach((child) => {
             setMaxWidth(child as HTMLElement)
         })
-    }
-
-    private adjustYoutubePlayerSize() {
-        const moviePlayer = document.getElementById('movie_player')
-
-        const bottomBar = document.getElementsByClassName(
-            'ytp-chrome-bottom',
-        )[0] as HTMLElement
-        const moviePlayerWidth = moviePlayer.clientWidth
-        const moviePlayerHeight = moviePlayer.clientHeight
-
-        const videoStream = moviePlayer.getElementsByClassName(
-            'video-stream html5-main-video',
-        )
-        if (videoStream[0]) {
-            const videoStreamElement = videoStream[0] as HTMLElement
-            videoStreamElement.style.width = moviePlayerWidth + 'px'
-            bottomBar.style.width = moviePlayerWidth - 12 + 'px'
-            videoStreamElement.style.height = moviePlayerHeight + 'px'
-        }
     }
 
     private async getYoutubeDetails(url) {
@@ -1094,13 +1240,15 @@ export class SidebarContainerLogic extends UILogic<
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
-        if (!window.location.href.startsWith('https://www.youtube.com')) {
-            document.body.style.position = 'relative'
-        }
-        const width =
+
+        let width =
             event.existingWidthState != null
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
+
+        if (!window.location.href.startsWith('https://www.youtube.com')) {
+            document.body.style.position = 'relative'
+        }
 
         this.emitMutation({
             showState: { $set: 'visible' },
@@ -1124,11 +1272,6 @@ export class SidebarContainerLogic extends UILogic<
 
         if (document.body.offsetWidth === 0) {
             document.body.style.width = '100%'
-        }
-
-        if (window.location.href.startsWith('https://www.youtube.com')) {
-            document.body.style.position = 'initial'
-            this.adjustYoutubePlayerSize()
         }
 
         if (window.location.href.includes('mail.google.com')) {
@@ -1740,6 +1883,16 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        let syncSettings: SyncSettingsStore<'extension'>
+
+        syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.options.syncSettingsBG,
+        })
+
+        const shouldShareSettings = await syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+
         const now = event.now ?? Date.now()
         const annotationId =
             event.annotationId ??
@@ -1810,14 +1963,15 @@ export class SidebarContainerLogic extends UILogic<
             maybeAddLocalListIdForCacheList(event.listInstanceId)
 
             let privacyLevel: AnnotationPrivacyLevels
-            if (remoteListIds.length) {
+            if (previousState.selectedListId) {
                 privacyLevel = event.shouldShare
                     ? AnnotationPrivacyLevels.SHARED
                     : AnnotationPrivacyLevels.PROTECTED
             } else {
-                privacyLevel = event.shouldShare
-                    ? AnnotationPrivacyLevels.SHARED
-                    : AnnotationPrivacyLevels.PRIVATE
+                privacyLevel =
+                    shouldShareSettings || event.shouldShare
+                        ? AnnotationPrivacyLevels.SHARED
+                        : AnnotationPrivacyLevels.PRIVATE
             }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
@@ -1836,7 +1990,10 @@ export class SidebarContainerLogic extends UILogic<
                     previousState.hasListDataBeenManuallyPulled,
                 privacyLevelOverride: privacyLevel,
                 shareOpts: {
-                    shouldShare: remoteListIds.length > 0 || event.shouldShare,
+                    shouldShare:
+                        shouldShareSettings ||
+                        remoteListIds.length > 0 ||
+                        event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
@@ -1880,7 +2037,8 @@ export class SidebarContainerLogic extends UILogic<
         'updateListsForAnnotation'
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
-        this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
+
+        // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
             annotationsCache.annotations.byId[event.unifiedAnnotationId]
@@ -1924,7 +2082,7 @@ export class SidebarContainerLogic extends UILogic<
             bgPromise = contentSharingBG.shareAnnotationToSomeLists({
                 annotationUrl: existing.localId,
                 localListIds: [event.added],
-                protectAnnotation: event.options?.protectAnnotation,
+                protectAnnotation: true,
             })
         } else if (event.deleted != null) {
             const cacheList = annotationsCache.getListByLocalId(event.deleted)
@@ -1947,9 +2105,7 @@ export class SidebarContainerLogic extends UILogic<
                 remoteId: existing.remoteId,
                 unifiedListIds: [...unifiedListIds],
                 unifiedId: event.unifiedAnnotationId,
-                privacyLevel: event.options?.protectAnnotation
-                    ? AnnotationPrivacyLevels.PROTECTED
-                    : existing.privacyLevel,
+                privacyLevel: existing.privacyLevel,
             },
             { keepListsIfUnsharing: event.options?.protectAnnotation },
         )
@@ -2476,6 +2632,12 @@ export class SidebarContainerLogic extends UILogic<
             let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
             let fullTextToProcess
             if (isPagePDF) {
+                const searchParams = new URLSearchParams(window.location.search)
+                const filePath = searchParams.get('file')
+                const pdf: PDFDocumentProxy = await (globalThis as any)[
+                    'pdfjsLib'
+                ].getDocument(filePath).promise
+                const text = await extractDataFromPDFDocument(pdf, true)
                 fullTextToProcess = document.body.innerText
             }
 

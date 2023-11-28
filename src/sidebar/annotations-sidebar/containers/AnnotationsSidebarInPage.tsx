@@ -186,6 +186,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     highlights.map((h) => ({
                         id: h.unifiedId,
                         selector: h.selector,
+                        color: h.color,
                     })),
                     ({ annotationId, openInEdit }) =>
                         inPageUI.showSidebar({

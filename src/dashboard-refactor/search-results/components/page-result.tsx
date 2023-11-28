@@ -130,7 +130,7 @@ export default class PageResultView extends PureComponent<Props> {
             return (
                 <PopoutBox
                     targetElementRef={this.spacePickerBarRef.current}
-                    placement={'bottom-start'}
+                    placement={'bottom-end'}
                     offsetX={10}
                     closeComponent={this.listPickerBtnClickHandler}
                     strategy={'fixed'}
@@ -164,7 +164,7 @@ export default class PageResultView extends PureComponent<Props> {
             return (
                 <PopoutBox
                     targetElementRef={this.spacePickerButtonRef.current}
-                    placement={'bottom-end'}
+                    placement={'bottom-start'}
                     offsetX={10}
                     closeComponent={this.listPickerBtnClickHandler}
                     strategy={'fixed'}
@@ -307,6 +307,24 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 
+    private renderSpacesButton(): ItemBoxBottomAction[] {
+        return [
+            {
+                key: 'add-spaces-btn',
+                image: 'plus',
+                imageColor: 'prime1',
+                ButtonText: 'Spaces',
+                iconSize: '14px',
+                onClick: (event) => {
+                    this.props.showPopoutsForResultBox(this.props.index)
+                    this.props.onListPickerFooterBtnClick(event)
+                },
+                buttonRef: this.spacePickerButtonRef,
+                active: this.props.listPickerShowStatus === 'footer',
+            },
+        ]
+    }
+
     private calcFooterActions(): ItemBoxBottomAction[] {
         if (this.props.hoverState === null) {
             return [
@@ -356,19 +374,19 @@ export default class PageResultView extends PureComponent<Props> {
                 //     onClick: this.props.onShareBtnClick,
                 //     tooltipText: 'Share Page and Notes',
                 // },
-                {
-                    key: 'add-spaces-btn',
-                    image: 'plus',
-                    imageColor: 'prime1',
-                    ButtonText: 'Spaces',
-                    iconSize: '14px',
-                    onClick: (event) => {
-                        this.props.showPopoutsForResultBox(this.props.index)
-                        this.props.onListPickerFooterBtnClick(event)
-                    },
-                    buttonRef: this.spacePickerButtonRef,
-                    active: this.props.listPickerShowStatus === 'footer',
-                },
+                // {
+                //     key: 'add-spaces-btn',
+                //     image: 'plus',
+                //     imageColor: 'prime1',
+                //     ButtonText: 'Spaces',
+                //     iconSize: '14px',
+                //     onClick: (event) => {
+                //         this.props.showPopoutsForResultBox(this.props.index)
+                //         this.props.onListPickerFooterBtnClick(event)
+                //     },
+                //     buttonRef: this.spacePickerButtonRef,
+                //     active: this.props.listPickerShowStatus === 'footer',
+                // },
                 {
                     key: 'expand-notes-btn',
                     image: this.hasNotes ? 'commentFull' : 'commentAdd',
@@ -459,6 +477,7 @@ export default class PageResultView extends PureComponent<Props> {
                         // }}
                         creationInfo={{ createdWhen: this.props.displayTime }}
                         actions={this.calcFooterActions()}
+                        spacesButton={this.renderSpacesButton()}
                     />
                     {this.renderSpacePicker()}
                     {this.renderCopyPaster()}

@@ -37,7 +37,10 @@ import type { PDFRemoteInterface } from 'src/pdf/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
-import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    RGBAColor,
+} from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import {
@@ -63,6 +66,7 @@ export interface RootState {
     bulkDeleteLoadingState?: TaskState
     bulkSelectedUrls: string[]
     bulkEditSpacesLoadingState?: TaskState
+    highlightColors: string
 }
 
 export type Events = UIEvent<
@@ -147,6 +151,13 @@ export type DashboardModalsEvents = UIEvent<{
     setShareListId: { listId?: string }
     setShowLoginModal: { isShown: boolean }
     setShowSubscriptionModal: { isShown: boolean }
+    getHighlightColorSettings: null
+    saveHighlightColor: {
+        noteId: string
+        color: RGBAColor | string
+        unifiedId: string
+    }
+    saveHighlightColorSettings: { newState: string }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 

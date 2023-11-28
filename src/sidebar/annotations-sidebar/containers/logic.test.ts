@@ -1016,6 +1016,7 @@ describe('SidebarContainerLogic', () => {
                             type: 'shared-annotation-reference',
                             id: DATA.SHARED_ANNOTATIONS[2].id,
                         },
+                        color: null,
                     },
                     {
                         excludeLocalLists: true,
@@ -1073,6 +1074,7 @@ describe('SidebarContainerLogic', () => {
                             type: 'shared-annotation-reference',
                             id: DATA.SHARED_ANNOTATIONS[3].id,
                         },
+                        color: null,
                     },
                     {
                         excludeLocalLists: true,

@@ -25,6 +25,7 @@ import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annot
 import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
@@ -123,6 +124,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     hasKey: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
+    highlightColors: string
 
     activeTab: SidebarTab
     showChapters: boolean
@@ -149,6 +151,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     /** Mirrors the annotations cache state of the same name */
     pageListIds: Set<UnifiedList['unifiedId']>
     lists: PageAnnotationsCacheInterface['lists']
+
     annotations: PageAnnotationsCacheInterface['annotations']
 
     pageSummary: string
@@ -274,6 +277,13 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    getHighlightColorSettings: null
+    saveHighlightColor: {
+        noteId: string
+        color: RGBAColor
+        colorId: string
+    }
+    saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
         imageData: string
@@ -461,6 +471,7 @@ export interface AnnotationCardInstance {
     isCommentEditing: boolean
     cardMode: AnnotationCardMode
     comment: string
+    color: string
 }
 
 export interface ListInstance {

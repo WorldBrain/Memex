@@ -54,6 +54,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
@@ -231,6 +232,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
     setAIModel: (AImodel) => void
+    saveHighlightColor: (noteId, colorId, color) => void
+    saveHighlightColorSettings: (newState) => void
+    getHighlightColorSettings: () => void
+    highlightColorSettings: string
 }
 
 interface AnnotationsSidebarState {
@@ -356,6 +361,7 @@ export class AnnotationsSidebar extends React.Component<
             console.error('Could not load theme, falling back to dark mode')
         }
         this.setState({ themeVariant })
+        await this.props.getHighlightColorSettings()
     }
 
     async componentDidUpdate(
@@ -758,9 +764,30 @@ export class AnnotationsSidebar extends React.Component<
                                         : null,
                                 )
                             }}
+                            saveHighlightColor={(
+                                noteId,
+                                colorId,
+                                color: RGBAColor | string,
+                            ) =>
+                                this.props.saveHighlightColor(
+                                    noteId,
+                                    colorId,
+                                    color,
+                                )
+                            }
+                            saveHighlightColorSettings={
+                                this.props.saveHighlightColorSettings
+                            }
+                            getHighlightColorSettings={
+                                this.props.getHighlightColorSettings
+                            }
+                            highlightColorSettings={
+                                this.props.highlightColorSettings
+                            }
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}
                             comment={annotation.comment}
+                            color={annotation.color}
                             lastEdited={annotation.lastEdited}
                             createdWhen={annotation.createdWhen}
                             creatorDependencies={
@@ -1703,8 +1730,6 @@ export class AnnotationsSidebar extends React.Component<
                 )
             }
 
-            console.log('asdfadsfasdf', this.props.hasKey)
-
             return (
                 <AISidebarContainer>
                     {this.props.selectedTextAIPreview && (
@@ -1926,16 +1951,7 @@ export class AnnotationsSidebar extends React.Component<
                                         }
                                         this.props.setAIModel(AImodel)
                                     }}
-                                    initSelectedIndex={
-                                        this.props.queryMode ===
-                                        'chapterSummary'
-                                            ? 1
-                                            : 0
-                                    }
-                                    selectedState={
-                                        this.props.queryMode ===
-                                            'chapterSummary' && 1
-                                    }
+                                    initSelectedIndex={0}
                                     keepSelectedState
                                 />
 
@@ -1953,8 +1969,8 @@ export class AnnotationsSidebar extends React.Component<
                                                     servers but sometimes we
                                                     can't reach it. E.g. if you
                                                     are behind a paywall.
-                                                    <br /> Use this to fetch the
-                                                    content from here.
+                                                    <br /> Use this to extract
+                                                    the content from the page.
                                                 </>
                                             }
                                             placement="bottom"
@@ -1976,8 +1992,8 @@ export class AnnotationsSidebar extends React.Component<
                                                           )
                                                 }
                                                 // isDisabled={!this.state.shortcutsEnabled}
-                                                name={'Use Local Content'}
-                                                label={'Use Local Content'}
+                                                name={'Local Content'}
+                                                label={'Local Content'}
                                                 size={14}
                                                 fontSize={12}
                                                 checkBoxColor="black"
@@ -2252,10 +2268,31 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.annotationsCache,
                                 annot.unifiedListIds,
                             )}
+                            saveHighlightColor={(
+                                noteId,
+                                colorId,
+                                color: RGBAColor | string,
+                            ) =>
+                                this.props.saveHighlightColor(
+                                    noteId,
+                                    colorId,
+                                    color,
+                                )
+                            }
+                            saveHighlightColorSettings={
+                                this.props.saveHighlightColorSettings
+                            }
+                            getHighlightColorSettings={
+                                this.props.getHighlightColorSettings
+                            }
+                            highlightColorSettings={
+                                this.props.highlightColorSettings
+                            }
                             contextLocation={this.props.sidebarContext}
                             pageUrl={this.props.normalizedPageUrl}
                             body={annot.body}
                             comment={annot.comment}
+                            color={annot.color}
                             isShared={isShared}
                             createdWhen={annot.createdWhen}
                             isBulkShareProtected={[
@@ -2909,7 +2946,7 @@ export class AnnotationsSidebar extends React.Component<
                             active={this.state.showAllNotesCopyPaster}
                         />
                     </TooltipBox>
-                    <TooltipBox
+                    {/* <TooltipBox
                         tooltipText={'Bulk Share Notes'}
                         placement={'bottom'}
                     >
@@ -2929,7 +2966,7 @@ export class AnnotationsSidebar extends React.Component<
                             }}
                             active={this.state.showAllNotesShareMenu}
                         />
-                    </TooltipBox>
+                    </TooltipBox> */}
                 </TopBarActionBtns>
             </>
         )
@@ -3128,7 +3165,7 @@ const OptionsContainerLeft = styled.div`
     justify-content: flex-start;
     color: ${(props) => props.theme.colors.greyScale4};
     font-size: 12px;
-    grid-gap: 10px;
+    grid-gap: 3px;
     z-index: 100;
 `
 
@@ -3703,7 +3740,7 @@ const TopAreaContainer = styled.div`
     flex-direction: column;
     width: fill-available;
     z-index: 1;
-    padding-top: 5px;
+    padding: 5px 10px;
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
 
@@ -3906,10 +3943,13 @@ const AnnotationContainer = styled(Margin)`
     overflow-x: visible; */
     height: calc(100% + 30px);
     overflow: scroll;
+    padding: 0 10px;
     padding-bottom: 100px;
     flex: 1;
     z-index: 10;
     position: relative;
+    width: fill-available;
+    width: -moz-available;
 
     scrollbar-width: none;
 
@@ -3948,9 +3988,11 @@ const AnnotationBox = styled.div<{
 const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     display: flex;
     flex-direction: column;
-    width: 100%;
+    padding: 0 10px;
     padding-bottom: 60px;
     z-index: ${(props) => 999 - props.zIndex};
+    width: fill-available;
+    width: -moz-available;
 `
 
 const FollowedListsMsgContainer = styled.div`
@@ -4205,7 +4247,6 @@ const AnnotationsSectionStyled = styled.div`
     flex: 1;
     z-index: 19;
     overflow: scroll;
-    padding: 0px 10px 0px 10px;
 
     scrollbar-width: none;
 
