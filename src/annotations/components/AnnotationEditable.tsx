@@ -289,19 +289,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }> {
         const { lists, listIdToFilterOut, getListDetailsById } = this.props
 
-        const listsToDisplay = this.props.lists.filter(
-            (list) =>
-                list !== SPECIAL_LIST_IDS.INBOX &&
-                list !== SPECIAL_LIST_IDS.MOBILE &&
-                list !== SPECIAL_LIST_IDS.FEED,
-        )
-
         const displayLists = lists
             .filter(
                 (list) =>
                     list !== SPECIAL_LIST_IDS.INBOX &&
                     list !== SPECIAL_LIST_IDS.MOBILE &&
-                    list !== SPECIAL_LIST_IDS.FEED,
+                    list !== SPECIAL_LIST_IDS.FEED &&
+                    list != this.props.listIdToFilterOut,
             )
             .map((id) => ({
                 id,
@@ -773,13 +767,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             this.hasSharedLists,
         )
 
-        const listsToDisplay = this.props.lists.filter(
-            (list) =>
-                list !== SPECIAL_LIST_IDS.INBOX &&
-                list !== SPECIAL_LIST_IDS.MOBILE &&
-                list !== SPECIAL_LIST_IDS.FEED,
-        )
-
         if ((!isEditing && !isDeleting) || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
@@ -808,7 +795,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 }}
                                 label={'Spaces'}
                                 icon={
-                                    listsToDisplay.length > 0 ? (
+                                    this.displayLists.length > 0 ? (
                                         <ListCounter isShared={isShared}>
                                             {isShared && (
                                                 <Icon
@@ -818,14 +805,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                                     hoverOff
                                                 />
                                             )}
-                                            {listsToDisplay.length}
+                                            {this.displayLists.length}
                                         </ListCounter>
                                     ) : (
                                         'plus'
                                     )
                                 }
                                 iconColor={
-                                    listsToDisplay.length > 0
+                                    this.displayLists.length > 0
                                         ? 'white'
                                         : 'prime1'
                                 }
@@ -893,7 +880,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         }}
                         label={'Spaces'}
                         icon={
-                            this.props.lists.length > 0 ? (
+                            this.displayLists.length > 0 ? (
                                 <ListCounter isShared={isShared}>
                                     {isShared && (
                                         <Icon
@@ -903,7 +890,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                             hoverOff
                                         />
                                     )}
-                                    {listsToDisplay.length}
+                                    {this.displayLists.length}
                                 </ListCounter>
                             ) : (
                                 'plus'
@@ -1033,13 +1020,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     render() {
         const { annotationFooterDependencies } = this.props
-
-        const listsToDisplay = this.props.lists.filter(
-            (list) =>
-                list !== SPECIAL_LIST_IDS.INBOX &&
-                list !== SPECIAL_LIST_IDS.MOBILE &&
-                list !== SPECIAL_LIST_IDS.FEED,
-        )
 
         return (
             <ThemeProvider theme={this.theme}>
