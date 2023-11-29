@@ -2814,6 +2814,7 @@ export class SidebarContainerLogic extends UILogic<
 
             const results = await this.options.customListsBG.findSimilarBackground(
                 currentPageContent,
+                normalizeUrl(previousState.fullPageUrl),
             )
 
             console.log('results', results)
@@ -2823,7 +2824,9 @@ export class SidebarContainerLogic extends UILogic<
             for (let result of Object.values(results)) {
                 console.log('result', result)
                 const pageData = await this.options.customListsBG.findPageByUrl(
-                    result.normalizedUrl || result.normalisedUrl,
+                    result.normalizedUrl ||
+                        result.normalisedUrl ||
+                        result.normalizedurl,
                 )
 
                 console.log('pageData', pageData)
@@ -2843,7 +2846,7 @@ export class SidebarContainerLogic extends UILogic<
                     normalizedUrl: normalizeUrl(pageData.fullUrl),
                     title: pageData.fullTitle,
                     description: result.originalContent,
-                    // contentType: result.contentType,
+                    contentType: result.contentType,
                     // creatorId: pageData.creator.reference.id,
                 }
                 console.log('pageDapageToDisplay1', pageToDisplay)

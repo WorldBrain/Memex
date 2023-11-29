@@ -219,11 +219,17 @@ export default class CustomListBackground {
         return this.storage.fetchListWithPagesById(id)
     }
 
-    findSimilarBackground = async (currentPageContent: string) => {
+    findSimilarBackground = async (
+        currentPageContent: string,
+        normalizedUrl: string,
+    ) => {
         const backend = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
-        const results = await backend.findSimilar(currentPageContent)
+        const results = await backend.findSimilar(
+            currentPageContent,
+            normalizedUrl,
+        )
 
         return results
     }

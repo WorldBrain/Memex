@@ -2,6 +2,7 @@ import { browser } from 'webextension-polyfill-ts'
 import { BackupObject } from './types'
 import { getPkmSyncKey } from './utils'
 import TurndownService from 'turndown'
+import { left } from '@popperjs/core'
 
 export class MemexLocalBackend {
     private url
@@ -96,31 +97,16 @@ export class MemexLocalBackend {
     async splitContentInReasonableChunks(document) {
         const parser = new DOMParser()
 
-        console.log('document', document.contentText)
-
         const htmlString =
             '<html><body>' + document.contentText + '</body></html>'
 
         const htmlDoc = parser.parseFromString(htmlString, 'text/html')
-        console.log('htmlsdoc', htmlDoc)
+        const paragraphs = htmlDoc.querySelectorAll('p')
 
-        const headers = htmlDoc.querySelectorAll('h1, h2, h3')
-
-        console.log('headers', headers)
         let chunks = []
 
-        headers.forEach((header, index) => {
-            let chunk = header.outerHTML
-            let node = header
-
-            while (
-                node.nextSibling &&
-                node.nextSibling !== headers[index + 1]
-            ) {
-                node = node.nextSibling
-                console.log('node', node)
-                chunk += node.outerHTML || node
-            }
+        paragraphs.forEach((paragraph) => {
+            let chunk = paragraph.textContent
 
             const turndownService = new TurndownService()
             chunk = turndownService.turndown(chunk)
@@ -128,21 +114,22 @@ export class MemexLocalBackend {
             chunks.push(chunk)
         })
 
-        console.log('chunks', chunks)
         return chunks
     }
 
     async vectorIndexDocument(document): Promise<any> {
         const syncKey = await getPkmSyncKey()
 
-        const chunksToIndex = await this.splitContentInReasonableChunks(
-            document,
-        )
-
-        console.log('chunksToIndex', chunksToIndex)
+        let chunksToIndex = []
+        if (document.contentType === 'page') {
+            chunksToIndex = await this.splitContentInReasonableChunks(document)
+        }
+        if (document.contentType === 'annotation') {
+            chunksToIndex = [document.contentText]
+        }
 
         for (let chunk of chunksToIndex) {
-            const body = JSON.stringify({
+            const body = {
                 sourceApplication: 'Memex',
                 createdWhen: document.createdWhen,
                 userId: document.userId,
@@ -150,19 +137,17 @@ export class MemexLocalBackend {
                 contentType: document.contentType,
                 originalContent: chunk,
                 syncKey: syncKey,
-            })
+            }
 
-            console.log('start')
+            console.log('body', body)
 
             const response = await fetch(`${this.url}/index_document`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: body,
+                body: JSON.stringify(body),
             })
-
-            console.log('response', response)
 
             if (response.ok) {
                 console.log('chunk processed', chunk)
@@ -173,15 +158,14 @@ export class MemexLocalBackend {
             }
         }
     }
-    async findSimilar(document): Promise<any> {
+    async findSimilar(document, normalizedUrl): Promise<any> {
         const syncKey = await getPkmSyncKey()
 
         const body = JSON.stringify({
             contentText: document,
+            normalizedUrl: normalizedUrl,
             syncKey: syncKey,
         })
-
-        console.log('start')
 
         const response = await fetch(`${this.url}/find_similar`, {
             method: 'POST',
@@ -192,9 +176,7 @@ export class MemexLocalBackend {
         })
 
         if (response.ok) {
-            console.log('test ok')
             const responseObj = await response.json()
-            console.log('response', responseObj)
             return responseObj
         }
 

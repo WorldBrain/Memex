@@ -1683,6 +1683,7 @@ export class AnnotationsSidebar extends React.Component<
         )
 
         if (this.props.activeTab === 'rabbitHole') {
+            console.log('item', this.props.suggestionsResults)
             return (
                 <AnnotationsSectionStyled>
                     <SuggestionsList>
@@ -1695,9 +1696,14 @@ export class AnnotationsSidebar extends React.Component<
                                     <SuggestionsCardUrl>
                                         {item.normalizedUrl}
                                     </SuggestionsCardUrl>
-                                    <SuggestionsDescription>
-                                        {item.description}
-                                    </SuggestionsDescription>
+                                    <SuggestionsDescriptionsContainer>
+                                        {item.contentType === 'annotation' && (
+                                            <Highlightbar />
+                                        )}
+                                        <SuggestionsDescription>
+                                            {item.description}
+                                        </SuggestionsDescription>
+                                    </SuggestionsDescriptionsContainer>
                                 </SuggestionsCardBox>
                             </SuggestionsCardContainer>
                         ))}
@@ -3111,6 +3117,25 @@ const ChapterSummaryText = styled(Markdown)`
     font-size: 14px;
     line-height: 24px;
     margin-bottom: 20px;
+`
+
+const Highlightbar = styled.div<{ barColor: string }>`
+    background: ${(props) => props.theme.colors.prime1};
+    margin-right: 10px;
+    border-radius: 2px;
+    width: 5px;
+    cursor: pointer;
+    position: absolute;
+    height: -webkit-fill-available;
+`
+
+const SuggestionsDescriptionsContainer = styled.div`
+    display: flex;
+    flex-direction: row;
+    grid-gap: 10px;
+    align-items: flex-start;
+    justify-content: flex-start;
+    position: relative;
 `
 
 const ChapterTitle = styled.div<{ hasSummary }>`

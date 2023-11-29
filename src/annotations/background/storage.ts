@@ -530,6 +530,7 @@ export default class AnnotationStorage extends StorageModule {
                 'Failed create annotation attempt - no highlight or comment supplied',
             )
         }
+        console.log('createdWhne', createdWhen)
         if (await isPkmSyncEnabled()) {
             try {
                 const pageVisitStorage = await this.options.storageManager
@@ -550,7 +551,7 @@ export default class AnnotationStorage extends StorageModule {
                     pageTitle: pageTitle,
                     body: body ?? '',
                     comment: comment ?? '',
-                    createdWhen: createdWhen,
+                    createdWhen: Math.floor(createdWhen.getTime() / 1000),
                     color: color ?? null,
                     pageCreatedWhen: pageDate,
                     pageUrl: pageDataStorage?.fullUrl ?? pageUrl,

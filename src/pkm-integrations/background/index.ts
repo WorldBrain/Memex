@@ -32,15 +32,22 @@ export class PKMSyncBackgroundModule {
     async pushPKMSyncUpdate(item, checkForFilteredSpaces) {
         if (await this.backendNew.isConnected()) {
             console.log('item', item)
-            if (item.data.contentText?.length > 0) {
-                console.log('item', item)
+            if (
+                item.data.contentText?.length > 0 ||
+                item.type === 'annotation'
+            ) {
                 const document = {
                     createdWhen: item.data.createdWhen,
                     userId: '1',
                     normalizedUrl: normalizeUrl(item.data.pageUrl),
                     contentType: item.type,
-                    contentText: item.data.contentText,
+                    contentText:
+                        item.data.contentText ||
+                        convertHTMLintoMarkdown(
+                            item.data.body + item.data.comment,
+                        ),
                 }
+
                 await this.backendNew.vectorIndexDocument(document)
             }
 
