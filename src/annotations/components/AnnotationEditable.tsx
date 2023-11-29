@@ -289,12 +289,20 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }> {
         const { lists, listIdToFilterOut, getListDetailsById } = this.props
 
-        return lists
-            .filter((id) => id !== listIdToFilterOut)
+        const displayLists = lists
+            .filter(
+                (list) =>
+                    list !== SPECIAL_LIST_IDS.INBOX &&
+                    list !== SPECIAL_LIST_IDS.MOBILE &&
+                    list !== SPECIAL_LIST_IDS.FEED &&
+                    list != this.props.listIdToFilterOut,
+            )
             .map((id) => ({
                 id,
                 ...getListDetailsById(id),
             }))
+
+        return displayLists
     }
 
     private get hasSharedLists(): boolean {
@@ -759,13 +767,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             this.hasSharedLists,
         )
 
-        const listsToDisplay = this.props.lists.filter(
-            (list) =>
-                list !== SPECIAL_LIST_IDS.INBOX &&
-                list !== SPECIAL_LIST_IDS.MOBILE &&
-                list !== SPECIAL_LIST_IDS.FEED,
-        )
-
         if ((!isEditing && !isDeleting) || footerDeps == null) {
             return (
                 <DefaultFooterStyled>
@@ -794,7 +795,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 }}
                                 label={'Spaces'}
                                 icon={
-                                    listsToDisplay.length > 0 ? (
+                                    this.displayLists.length > 0 ? (
                                         <ListCounter isShared={isShared}>
                                             {isShared && (
                                                 <Icon
@@ -804,14 +805,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                                     hoverOff
                                                 />
                                             )}
-                                            {listsToDisplay.length}
+                                            {this.displayLists.length}
                                         </ListCounter>
                                     ) : (
                                         'plus'
                                     )
                                 }
                                 iconColor={
-                                    listsToDisplay.length > 0
+                                    this.displayLists.length > 0
                                         ? 'white'
                                         : 'prime1'
                                 }
@@ -879,7 +880,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         }}
                         label={'Spaces'}
                         icon={
-                            this.props.lists.length > 0 ? (
+                            this.displayLists.length > 0 ? (
                                 <ListCounter isShared={isShared}>
                                     {isShared && (
                                         <Icon
@@ -889,7 +890,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                             hoverOff
                                         />
                                     )}
-                                    {listsToDisplay.length}
+                                    {this.displayLists.length}
                                 </ListCounter>
                             ) : (
                                 'plus'
@@ -1020,13 +1021,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     render() {
         const { annotationFooterDependencies } = this.props
 
-        const listsToDisplay = this.props.lists.filter(
-            (list) =>
-                list !== SPECIAL_LIST_IDS.INBOX &&
-                list !== SPECIAL_LIST_IDS.MOBILE &&
-                list !== SPECIAL_LIST_IDS.FEED,
-        )
-
         return (
             <ThemeProvider theme={this.theme}>
                 <AnnotationBox
@@ -1066,24 +1060,23 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
-                            {listsToDisplay.length > 0 &&
-                                this.displayLists.length > 1 && (
-                                    <ListsSegment
-                                        tabIndex={0}
-                                        lists={this.displayLists}
-                                        onMouseEnter={this.props.onListsHover}
-                                        onListClick={this.props.onListClick}
-                                        onEditBtnClick={() => null}
-                                        spacePickerButtonRef={
-                                            this.spacePickerBodyButtonRef
-                                        }
-                                        padding={
-                                            this.props.isEditing
-                                                ? '10px 15px 10px 10px'
-                                                : '0px 15px 10px 15px'
-                                        }
-                                    />
-                                )}
+                            {this.displayLists.length >= 1 && (
+                                <ListsSegment
+                                    tabIndex={0}
+                                    lists={this.displayLists}
+                                    onMouseEnter={this.props.onListsHover}
+                                    onListClick={this.props.onListClick}
+                                    onEditBtnClick={() => null}
+                                    spacePickerButtonRef={
+                                        this.spacePickerBodyButtonRef
+                                    }
+                                    padding={
+                                        this.props.isEditing
+                                            ? '10px 15px 10px 10px'
+                                            : '0px 15px 10px 15px'
+                                    }
+                                />
+                            )}
                             {this.renderFooter()}
                         </AnnotationStyled>
                         {this.renderCopyPaster(this.copyPasterButtonRef)}
