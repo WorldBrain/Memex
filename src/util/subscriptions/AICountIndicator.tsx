@@ -233,44 +233,49 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                 )}
                             </TitleAreaContainer>
                         )}
-                        <InfoTooltipSubTitleBox>
-                            {this.leftOverBlocks === 0 && (
-                                <InfoTooltipSubTitle>
-                                    You can't make any more AI summaries or
-                                    queries.
-                                    <br />
-                                    <strong>
-                                        Resets in {this.daysUntilNextMonth()}{' '}
-                                        days.
-                                    </strong>
-                                    <br />
-                                    Add OpenAI AI key for ♾️ queries at your own
-                                    cost + GPT-4 support.
-                                </InfoTooltipSubTitle>
-                            )}
-                            {!this.props.isTrial &&
-                                this.state.totalCount < 10000 && (
+                        {(this.leftOverBlocks === 0 ||
+                            (!this.props.isTrial &&
+                                this.state.totalCount < 10000) ||
+                            this.props.isTrial) && (
+                            <InfoTooltipSubTitleBox>
+                                {!this.props.isTrial &&
+                                    this.leftOverBlocks === 0 && (
+                                        <InfoTooltipSubTitle>
+                                            You can't make any more AI summaries
+                                            or queries.
+                                            <br />
+                                            <strong>
+                                                Resets in{' '}
+                                                {this.daysUntilNextMonth()}{' '}
+                                                days.
+                                            </strong>
+                                        </InfoTooltipSubTitle>
+                                    )}
+                                {!this.props.isTrial &&
+                                    this.state.totalCount < 10000 && (
+                                        <InfoTooltipSubTitle>
+                                            <strong>
+                                                Resets in{' '}
+                                                {this.daysUntilNextMonth()}{' '}
+                                                days.
+                                            </strong>
+                                            <br />
+                                            Add OpenAI AI key for ♾️ queries at
+                                            your own cost + GPT-4 support.
+                                        </InfoTooltipSubTitle>
+                                    )}
+                                {this.props.isTrial && (
                                     <InfoTooltipSubTitle>
-                                        <strong>
-                                            Resets in{' '}
-                                            {this.daysUntilNextMonth()} days.
-                                        </strong>
+                                        Make as many AI queries & summaries you
+                                        want.
                                         <br />
-                                        Add OpenAI AI key for ♾️ queries at your
-                                        own cost + GPT-4 support.
+                                        After the trial: 60 days
+                                        money-back-guarantee and a free tier
+                                        with 25 AI queries per month.
                                     </InfoTooltipSubTitle>
                                 )}
-                            {this.props.isTrial && (
-                                <InfoTooltipSubTitle>
-                                    Make as many AI queries & summaries you
-                                    want.
-                                    <br />
-                                    After the trial: 60 days
-                                    money-back-guarantee and a free tier with 25
-                                    AI queries per month.
-                                </InfoTooltipSubTitle>
-                            )}
-                        </InfoTooltipSubTitleBox>
+                            </InfoTooltipSubTitleBox>
+                        )}
                     </InfoTooltipTitleArea>
                     <OpenAIKeyContainer>
                         <OpenAIKeyTitle>OpenAI API Key</OpenAIKeyTitle>
