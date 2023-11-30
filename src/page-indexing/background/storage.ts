@@ -21,6 +21,7 @@ import decodeBlob from 'src/util/decode-blob'
 import { pageIsStub } from 'src/page-indexing/utils'
 import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
+    createRabbitHoleEntry,
     isPkmSyncEnabled,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
@@ -194,6 +195,17 @@ export default class PageStorage extends StorageModule {
                 console.error(e)
             }
         }
+        try {
+            const dataToSave = {
+                pageTitle: pageData.fullTitle,
+                normalizedUrl: normalizeUrl(pageData.fullUrl),
+                createdWhen: Math.floor(Date.now() / 1000),
+                userId: '1',
+                contentType: 'page',
+                contentText: pageData.htmlBody,
+            }
+            createRabbitHoleEntry(dataToSave, this.options.pkmSyncBG)
+        } catch (e) {}
     }
 
     async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {

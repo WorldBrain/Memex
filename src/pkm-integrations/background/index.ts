@@ -29,40 +29,35 @@ export class PKMSyncBackgroundModule {
         })
     }
 
-    async pushPKMSyncUpdate(item, checkForFilteredSpaces) {
+    async pushRabbitHoleUpdate(entryData) {
         if (await this.backendNew.isConnected()) {
-            console.log('item', item)
-            if (
-                item.data.contentText?.length > 0 ||
-                item.type === 'annotation'
-            ) {
-                const document = {
-                    createdWhen: item.data.createdWhen,
-                    userId: '1',
-                    normalizedUrl: normalizeUrl(item.data.pageUrl),
-                    contentType: item.type,
-                    contentText:
-                        item.data.contentText ||
-                        convertHTMLintoMarkdown(
-                            item.data.body + item.data.comment,
-                        ),
-                }
-
-                await this.backendNew.vectorIndexDocument(document)
+            const document = {
+                createdWhen: entryData.createdWhen,
+                userId: entryData.userId,
+                pageTitle: entryData.pageTitle,
+                normalizedUrl: entryData.normalizedUrl,
+                contentType: entryData.contentType,
+                contentText: entryData.contentText,
             }
 
-            // const bufferedItems = await this.getBufferedItems()
-            // bufferedItems.push(item)
-            // const PKMSYNCremovewarning = await browser.storage.local.get(
-            //     'PKMSYNCremovewarning',
-            // )
+            await this.backendNew.vectorIndexDocument(document)
+        }
+    }
 
-            // this.PKMSYNCremovewarning =
-            //     PKMSYNCremovewarning.PKMSYNCremovewarning
+    async pushPKMSyncUpdate(item, checkForFilteredSpaces) {
+        if (await this.backendNew.isConnected()) {
+            const bufferedItems = await this.getBufferedItems()
+            bufferedItems.push(item)
+            const PKMSYNCremovewarning = await browser.storage.local.get(
+                'PKMSYNCremovewarning',
+            )
 
-            // for (const item of bufferedItems) {
-            //     await this.processChanges(item, checkForFilteredSpaces)
-            // }
+            this.PKMSYNCremovewarning =
+                PKMSYNCremovewarning.PKMSYNCremovewarning
+
+            for (const item of bufferedItems) {
+                await this.processChanges(item, checkForFilteredSpaces)
+            }
         } else {
             await this.bufferPKMSyncItems(item)
         }

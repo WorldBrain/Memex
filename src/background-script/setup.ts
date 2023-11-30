@@ -481,6 +481,7 @@ export function createBackgroundModules(options: {
         getCurrentUserId,
         contentSharingBackend,
         jobScheduler: jobScheduler.scheduler,
+        pkmSyncBG,
     })
     const summarizeBG = new SummarizeBackground({
         remoteEventEmitter: createRemoteEventEmitter('pageSummary'),

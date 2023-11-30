@@ -120,42 +120,32 @@ export class MemexLocalBackend {
     async vectorIndexDocument(document): Promise<any> {
         const syncKey = await getPkmSyncKey()
 
-        let chunksToIndex = []
-        if (document.contentType === 'page') {
-            chunksToIndex = await this.splitContentInReasonableChunks(document)
+        const body = {
+            sourceApplication: 'Memex',
+            createdWhen: document.createdWhen,
+            userId: document.userId,
+            normalizedUrl: document.normalizedUrl,
+            contentType: document.contentType,
+            contentText: document.contentText,
+            syncKey: syncKey,
         }
-        if (document.contentType === 'annotation') {
-            chunksToIndex = [document.contentText]
+
+        console.log('body', body)
+
+        const response = await fetch(`${this.url}/index_document`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+        })
+
+        if (response.ok) {
+            console.log('chunk processed', chunk)
         }
 
-        for (let chunk of chunksToIndex) {
-            const body = {
-                sourceApplication: 'Memex',
-                createdWhen: document.createdWhen,
-                userId: document.userId,
-                normalizedUrl: document.normalizedUrl,
-                contentType: document.contentType,
-                originalContent: chunk,
-                syncKey: syncKey,
-            }
-
-            console.log('body', body)
-
-            const response = await fetch(`${this.url}/index_document`, {
-                method: 'PUT',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(body),
-            })
-
-            if (response.ok) {
-                console.log('chunk processed', chunk)
-            }
-
-            if (!response.ok || response.status !== 200) {
-                throw new Error(`HTTP error! status: ${response.status}`)
-            }
+        if (!response.ok || response.status !== 200) {
+            throw new Error(`HTTP error! status: ${response.status}`)
         }
     }
     async findSimilar(document, normalizedUrl): Promise<any> {
