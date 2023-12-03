@@ -134,6 +134,8 @@ export class PageIndexingBackground {
             lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
                 this.lookupPageTitleForUrl,
             ),
+            addPage: this.addPage.bind(this),
+            indexPage: this.indexPage.bind(this),
         }
     }
 
@@ -475,6 +477,7 @@ export class PageIndexingBackground {
     async createOrUpdatePage(
         pageData: PipelineRes,
         opts: PageCreationOpts = {},
+        props: PageCreationProps,
     ) {
         const { favIconURI } = pageData
 
@@ -482,6 +485,8 @@ export class PageIndexingBackground {
         pageData = this.removeAnyUnregisteredFields(pageData) // this was already here
         pageData.htmlBody = originalHTML // this is added too
         const pageContentInfo = await this.getContentInfoForPages()
+        const userData = await this.options.authBG.authService.getCurrentUser()
+        const userId = userData?.id
 
         const contentIdentifier =
             pageContentInfo[pageData.url]?.primaryIdentifier
@@ -495,7 +500,12 @@ export class PageIndexingBackground {
         if (existingPage) {
             await this.storage.updatePage(pageData, existingPage)
         } else {
-            await this.storage.createPage(pageData, pageContentInfo)
+            await this.storage.createPage(
+                pageData,
+                pageContentInfo,
+                userId,
+                props,
+            )
         }
 
         if (contentIdentifier) {
@@ -562,7 +572,7 @@ export class PageIndexingBackground {
         //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
         //     so we don't have to do this dance
 
-        if (!isMemexPageAPdf({ url: props.fullUrl })) {
+        if (!isMemexPageAPdf({ url: props.fullUrl }) && !props.tabId) {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
                 props.tabId = foundTabId
@@ -589,7 +599,13 @@ export class PageIndexingBackground {
             pageData.fullTitle = props.metaData.pageTitle
         }
 
-        await this.createOrUpdatePage(pageData, opts)
+        console.log('pageData', pageData)
+
+        if (props.metaData?.pageHTML) {
+            pageData.htmlBody = props.metaData.pageHTML
+        }
+
+        await this.createOrUpdatePage(pageData, opts, props)
 
         if (props.visitTime) {
             await this.storage.addPageVisit(
@@ -697,18 +713,26 @@ export class PageIndexingBackground {
                 return { ...existingPage, isExisting: true }
             }
 
-            const {
-                content,
-                htmlBody,
-                favIconURI,
-            } = await this.options.fetchPageData(props.fullUrl)
+            let content
+            let htmlBody
+            let favIconURI
+
+            if (!props.metaData?.pageHTML) {
+                const pageData = await this.options.fetchPageData(props.fullUrl)
+                content = pageData.content
+                htmlBody = pageData.htmlBody
+                favIconURI = pageData.favIconURI
+            } else {
+                htmlBody = props.metaData.pageHTML
+            }
+
             await this.storeDocContent(normalizeUrl(props.fullUrl), {
                 htmlBody,
             })
 
             pageDoc.favIconURI = favIconURI
-            pageDoc.content.title = content.title
-            pageDoc.content.fullText = content.fullText
+            pageDoc.content.title = content?.title || props.metaData.pageTitle
+            pageDoc.content.fullText = content?.fullText
         } else {
             const pdfData = await this.options.fetchPdfData(props.fullUrl)
             const baseLocator = await this.initContentIdentifier({

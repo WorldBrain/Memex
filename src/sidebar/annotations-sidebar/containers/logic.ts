@@ -171,6 +171,7 @@ export class SidebarContainerLogic extends UILogic<
     openAIkey
     showState
     focusIndex
+    previousState
     summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
     AIpromptSuggestions: { prompt: string; focused: boolean | null }[]
     // NOTE: this mirrors the state key of the same name. Only really exists as the cache's `updatedPageData` event listener can't access state :/
@@ -269,6 +270,7 @@ export class SidebarContainerLogic extends UILogic<
             foreignSelectedListLoadState: 'pristine',
             selectedTextAIPreview: undefined,
             sidebarWidth: sidebarWidth,
+            activeSuggestionsTab: 'MySuggestions',
 
             users: {},
             currentUserReference: null,
@@ -2166,14 +2168,14 @@ export class SidebarContainerLogic extends UILogic<
         const annotation = this.options.annotationsCache.annotations.byId[
             event.unifiedAnnotationId
         ]
+
         if (!annotation) {
             throw new Error(
                 `Could not find cached annotation data for ID: ${event.unifiedAnnotationId}`,
             )
         }
 
-        let fullPageURL =
-            this.fullPageUrl ?? 'https://' + annotation.normalizedPageUrl
+        let fullPageURL = 'https://' + annotation.normalizedPageUrl
 
         if (fullPageURL.includes('web.telegram.org')) {
             fullPageURL = convertMemexURLintoTelegramURL(fullPageURL)
@@ -2181,7 +2183,7 @@ export class SidebarContainerLogic extends UILogic<
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
                 fullPageUrl: fullPageURL,
-                annotationCacheId: event.unifiedAnnotationId,
+                annotationCacheId: annotation.localId,
             },
         )
     }
@@ -2203,12 +2205,26 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        let unifiedAnnotation
+        for (const id in this.options.annotationsCache.annotations.byId) {
+            if (
+                this.options.annotationsCache.annotations.byId[id].localId ===
+                event.unifiedAnnotationId
+            ) {
+                unifiedAnnotation = this.options.annotationsCache.annotations
+                    .byId[id]
+                break
+            }
+        }
+
+        const unifiedAnnotationId = unifiedAnnotation?.unifiedId
+
         this.emitMutation({
-            activeAnnotationId: { $set: event.unifiedAnnotationId },
+            activeAnnotationId: { $set: unifiedAnnotationId },
         })
 
         const cachedAnnotation = this.options.annotationsCache.annotations.byId[
-            event.unifiedAnnotationId
+            unifiedAnnotationId
         ]
         if (event.source === 'highlightCard') {
             if (cachedAnnotation?.selector != null) {
@@ -2224,7 +2240,7 @@ export class SidebarContainerLogic extends UILogic<
         const location = previousState.selectedListId ?? undefined
         const cardId = generateAnnotationCardInstanceId(
             {
-                unifiedId: event.unifiedAnnotationId,
+                unifiedId: unifiedAnnotationId,
             },
             location,
         )
@@ -2746,10 +2762,29 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private handleMouseUpToTriggerRabbitHole = (event) => {
+        this.listenToTextHighlightSuggestions()
+    }
+
+    setActiveSuggestionsTab: EventHandler<'setActiveSuggestionsTab'> = async ({
+        event,
+        previousState,
+    }) => {
+        console.log('setActiveSuggestionsTab', event.tab)
+        this.emitMutation({
+            activeSuggestionsTab: { $set: event.tab },
+        })
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
     }) => {
+        document.removeEventListener(
+            'mouseup',
+            this.handleMouseUpToTriggerRabbitHole,
+        )
+
         this.emitMutation({ activeTab: { $set: event.tab } })
 
         // Ensure in-page selectedList state only applies when the spaces tab is active
@@ -2813,72 +2848,211 @@ export class SidebarContainerLogic extends UILogic<
                 }
             }
         } else if (event.tab === 'rabbitHole') {
+            this.previousState = previousState
             this.emitMutation({
-                suggestionsResultsLoadState: { $set: 'running' },
+                loadState: { $set: 'running' },
             })
             const currentPageContent = document.body.innerText
 
+            const prompt = `You are given the text of a web page. Your task is to summarise it in such a way that is ideally suited for similarity comparison with other texts. This means you should retain all key entities and concepts as much as you can. Here is the text of the page:  `
+
+            const summary = await this.options.summarizeBG.getTextSummary({
+                text: currentPageContent,
+                prompt: prompt,
+            })
+
+            const summarisedText = summary.choices[0].text
+
             // add step to summmarise page and extract key information suitable for similiarity search
 
-            const results = await this.options.customListsBG.findSimilarBackground(
-                currentPageContent,
+            let results
+            results = await this.options.customListsBG.findSimilarBackground(
+                summarisedText,
                 normalizeUrl(previousState.fullPageUrl),
             )
 
-            console.log('results', results)
+            console.log('ressssss', results)
 
-            const resultsArray: SuggestionCard[] = []
-            console.log('result', Object.values(results))
-            for (let result of Object.values(results)) {
-                console.log('result', result)
-                const pageData = await this.options.customListsBG.findPageByUrl(
-                    result.normalizedUrl ||
-                        result.normalisedUrl ||
-                        result.normalizedurl,
-                )
+            await this.updateSuggestionResults(results)
 
-                console.log('pageData', pageData)
-
-                // for later to fetch other user's data
-                // const sharedAnnotations = await annotationsBG.getSharedAnnotations(
-                //     {
-                //         sharedAnnotationReferences:
-                //             listInstance.sharedAnnotationReferences,
-                //         withCreatorData: true,
-                //     },
-                // )
-
-                // const users = await this.options.contentSharingBG.
-
-                const pageToDisplay: SuggestionCard = {
-                    normalizedUrl: normalizeUrl(pageData.fullUrl),
-                    title: pageData.fullTitle,
-                    description: result.originalContent,
-                    contentType: result.contentType,
-                    // creatorId: pageData.creator.reference.id,
-                }
-                console.log('pageDapageToDisplay1', pageToDisplay)
-
-                // find list data (do they belong to one ore more spaces?)
-                // const fetchedSpaces = await this.options.customListsBG.fetchPageListEntriesByUrl(
-                //     { url: normalizeUrl(pageData.fullUrl) },
-                // )
-
-                console.log('pageDapageToDisplay2', pageToDisplay)
-                resultsArray.push(pageToDisplay)
-            }
-
-            // next step is to fetch the respective user data from the creators, potentially load them async after reuslts already display
-
-            console.log('resulstarray', resultsArray)
-            this.emitMutation({
-                suggestionsResults: { $set: resultsArray },
-                suggestionsResultsLoadState: { $set: 'success' },
-            })
+            // Add the event listener
+            document.addEventListener(
+                'mouseup',
+                this.handleMouseUpToTriggerRabbitHole,
+            )
         }
     }
 
-    type = {}
+    async listenToTextHighlightSuggestions() {
+        const selectedText = window.getSelection().toString().trim()
+        console.log('selectedTExt', selectedText.length)
+        if (selectedText.length > 0) {
+            this.emitMutation({
+                loadState: { $set: 'running' },
+            })
+            const results = await this.options.customListsBG.findSimilarBackground(
+                selectedText,
+                normalizeUrl(this.previousState.fullPageUrl),
+            )
+            await this.updateSuggestionResults(results)
+        }
+    }
+
+    async updateSuggestionResults(results) {
+        const resultsArray: SuggestionCard[] = []
+        const user = await this.options.authBG.getCurrentUser()
+        const userId = user?.id
+
+        type spaceItem = {
+            name: string
+            id?: number
+            unifiedId?: string
+            isShared?: boolean
+            remoteId?: string | AutoPk
+            localId?: number | null
+        }
+
+        for (let result of Object.values(results)) {
+            let space: spaceItem
+            let pageData
+            let pageToDisplay: SuggestionCard
+
+            if (userId != result.userId) {
+                const followedPageListData = []
+                const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
+                    'https://' + result.normalizedUrl,
+                )
+
+                for (let spaceItemKey in spacesData) {
+                    let spaceItem = spacesData[spaceItemKey]
+                    space = {
+                        name: spaceItem.name,
+                        remoteId: spaceItem.sharedList,
+                        unifiedId: null,
+                        isShared: false,
+                        localId: null,
+                        id: null,
+                    }
+                    followedPageListData.push(space)
+                }
+
+                pageToDisplay = {
+                    normalizedUrl: result.normalizedUrl,
+                    fullTitle: result.pageTitle,
+                    description: result.contentText,
+                    contentType: result.contentType,
+                    creatorId: result.userId,
+                    spaces: followedPageListData,
+                }
+            } else {
+                if (
+                    result.contentType === 'page' ||
+                    result.contentType === 'rss-feed-item'
+                ) {
+                    const pageListData = []
+                    pageData = await this.options.customListsBG.findPageByUrl(
+                        result.normalizedUrl,
+                    )
+
+                    const pageLists = await this.options.customListsBG.fetchPageLists(
+                        { url: pageData.fullUrl },
+                    )
+
+                    if (pageLists.length > 0) {
+                        for (let pageList of pageLists) {
+                            const list = await this.options.annotationsCache.getListByLocalId(
+                                pageList,
+                            )
+                            space = {
+                                name: list.name,
+                                remoteId: list.remoteId,
+                                unifiedId: list.unifiedId,
+                                isShared: !list.isPrivate,
+                                localId: list.localId,
+                                id: list.localId,
+                            }
+                            pageListData.push(space)
+                        }
+                    }
+
+                    pageToDisplay = {
+                        normalizedUrl: normalizeUrl(pageData.fullUrl),
+                        fullTitle: pageData.fullTitle,
+                        description: result.contentText,
+                        contentType: result.contentType,
+                        creatorId: userId,
+                        spaces: pageListData ?? null,
+                    }
+                } else if (result.contentType === 'annotation') {
+                    try {
+                        const annotationUrl = result.normalizedUrl.split(
+                            '/#',
+                        )[0]
+                        let annotationRawData = await this.options.annotationsBG.getAnnotationByPk(
+                            { url: result.normalizedUrl },
+                        )
+
+                        // Convert the string to a Date object
+                        let createdWhenDate = new Date(
+                            annotationRawData.createdWhen,
+                        )
+
+                        // Now you can use getTime method
+                        annotationRawData.createdWhen = Math.floor(
+                            createdWhenDate.getTime(),
+                        )
+                        let lastEditedDate = new Date(
+                            annotationRawData.lastEdited,
+                        )
+
+                        // Now you can use getTime method
+                        annotationRawData.lastEdited = Math.floor(
+                            lastEditedDate.getTime(),
+                        )
+                        annotationRawData.lists = []
+
+                        const annotationForCache = cacheUtils.reshapeAnnotationForCache(
+                            annotationRawData,
+                            annotationRawData.createdWhen,
+                        )
+                        const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
+                            annotationForCache,
+                        )
+
+                        if (annotationsCacheVersion) {
+                            console.log(
+                                'annotationsCacheVersion',
+                                annotationsCacheVersion,
+                            )
+                            console.log('annotationRawData', annotationRawData)
+                            pageToDisplay = {
+                                normalizedUrl: annotationUrl,
+                                fullTitle: result.pageTitle ?? annotationUrl,
+                                body: annotationRawData?.body ?? null,
+                                comment: annotationRawData?.comment ?? null,
+                                contentType: result.contentType,
+                                creatorId: result.userId,
+                                unifiedId: annotationsCacheVersion.unifiedId,
+                            }
+                            console.log('Annotation to display', pageToDisplay)
+                        }
+                    } catch (e) {
+                        console.log('Error', e)
+                    }
+                }
+            }
+            if (pageToDisplay) {
+                resultsArray.push(pageToDisplay)
+            }
+        }
+
+        // next step is to fetch the respective user data from the creators, potentially load them async after reuslts already display
+
+        this.emitMutation({
+            suggestionsResults: { $set: resultsArray },
+            loadState: { $set: 'success' },
+        })
+    }
 
     private async maybeLoadListRemoteAnnotations(
         state: SidebarContainerState,
@@ -3429,6 +3603,10 @@ export class SidebarContainerLogic extends UILogic<
         // if (previousState.followedListLoadState !== 'success') {
         //     return
         // }
+
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+        })
 
         if (event.unifiedListId == null) {
             this.options.events?.emit('setSelectedList', null)

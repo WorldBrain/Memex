@@ -65,11 +65,13 @@ export default class CustomListBackground {
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
             insertPageToList: async (params) => {
-                const currentTab = await this.options.queryTabs?.({
-                    active: true,
-                    currentWindow: true,
-                })
-                params.tabId = currentTab?.[0]?.id
+                if (!params.indexUrl) {
+                    const currentTab = await this.options.queryTabs?.({
+                        active: true,
+                        currentWindow: true,
+                    })
+                    params.tabId = currentTab?.[0]?.id
+                }
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
@@ -390,6 +392,8 @@ export default class CustomListBackground {
             suppressInboxEntry?: boolean
             pageTitle?: string
             dontTrack?: boolean
+            contentType?: 'rss-feed-item'
+            pageHTML?: string
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
@@ -415,6 +419,8 @@ export default class CustomListBackground {
                         : undefined,
                     metaData: {
                         pageTitle: params.pageTitle,
+                        contentType: params.contentType,
+                        pageHTML: params.pageHTML,
                     },
                 },
                 { addInboxEntryOnCreate: !params.suppressInboxEntry },

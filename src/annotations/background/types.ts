@@ -78,6 +78,7 @@ export interface AnnotationInterface<Role extends RemoteFunctionRole> {
     >
     toggleAnnotBookmark: RemotePositionalFunction<Role, any[], any>
     getAnnotBookmark: RemotePositionalFunction<Role, any[], any>
+    getAnnotationByPk: RemotePositionalFunction<Role, any[], any>
     getListIdsForAnnotation: RemotePositionalFunction<
         Role,
         [{ annotationId: string }],

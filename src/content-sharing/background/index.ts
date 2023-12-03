@@ -120,9 +120,9 @@ export default class ContentSharingBackground {
                 getAnnotation: (annotationUrl) =>
                     options
                         .getBgModules()
-                        .directLinking.annotationStorage.getAnnotationByPk(
-                            annotationUrl,
-                        ),
+                        .directLinking.annotationStorage.getAnnotationByPk({
+                            url: annotationUrl,
+                        }),
                 getAnnotations: (annotationUrls) =>
                     options
                         .getBgModules()
@@ -486,6 +486,7 @@ export default class ContentSharingBackground {
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
         options,
     ) => {
+        console.log('shareAnnotations', options)
         return this.annotationSharingService.shareAnnotation(options)
     }
 

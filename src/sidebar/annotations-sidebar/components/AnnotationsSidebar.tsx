@@ -39,6 +39,7 @@ import type {
     ListInstance,
     SidebarContainerState,
     SidebarTab,
+    SuggestionsTab,
 } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -85,6 +86,8 @@ import { Checkbox } from 'src/common-ui/components'
 import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
 import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/interceptVideoLinks'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
+import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
+import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -144,6 +147,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     renderPageLinkMenuForList: (listData: UnifiedList) => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
+    setActiveSuggestionsTab: (tab: SuggestionsTab) => React.MouseEventHandler
     expandFollowedListNotes: (listId: string) => void
     selectedListId: string
 
@@ -237,6 +241,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
+    onGoToAnnotation?: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -1531,7 +1536,7 @@ export class AnnotationsSidebar extends React.Component<
                                 contextLocation={this.props.sidebarContext}
                                 isStream={true}
                             >
-                                {this.props.pageSummary.trim()}
+                                {this.props.pageSummary?.trim()}
                             </Markdown>
                         </SummaryText>
                     ) : (
@@ -1653,6 +1658,95 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    renderSuggestionsList(item) {
+        console.log('item', item)
+        return (
+            <ItemBox>
+                <StyledPageResult
+                    isAnnotation={item.contentType === 'annotation'}
+                    onClick={() => {
+                        if (item.contentType === 'annotation') {
+                            this.props.onGoToAnnotation(item.unifiedId)
+                        } else {
+                            window.open('https://' + item.normalizedUrl)
+                        }
+                    }}
+                >
+                    <PageContentBox
+                        // onMouseOver={this.props.onMainContentHover}
+                        // onMouseLeave={
+                        //     this.props.listPickerShowStatus !== 'hide'
+                        //         ? this.listPickerBtnClickHandler
+                        //         : undefined
+                        // }
+                        tabIndex={-1}
+                    >
+                        <BlockContent
+                            type={'page'}
+                            normalizedUrl={item.normalizedUrl}
+                            originalUrl={
+                                null
+                                // 'https://' + item.normalizedUrl
+                            } // TODO: put proper url here
+                            fullTitle={item.fullTitle}
+                            pdfUrl={null}
+                            favIcon={null}
+                            youtubeService={null}
+                        />
+                    </PageContentBox>
+                    {item.spaces?.length > 0 && (
+                        <ListSegmentBox>
+                            <ListsSegment
+                                lists={item?.spaces}
+                                onListClick={this.props.onLocalListSelect}
+                                padding={'0px 20px 10px 20px'}
+                            />
+                        </ListSegmentBox>
+                    )}
+                    <SuggestionsDescriptionsContainer>
+                        <SuggestionsDescription textColor={'greyScale6'}>
+                            {item.description?.trim()}
+                        </SuggestionsDescription>
+                    </SuggestionsDescriptionsContainer>
+                </StyledPageResult>
+                {item.contentType === 'annotation' && (
+                    <ItemBox>
+                        {item.body?.length > 0 && (
+                            <HighlightStyled>
+                                <Highlightbar />
+                                <AnnotationSuggestionsBox>
+                                    <Markdown
+                                        imageSupport={this.props.imageSupport}
+                                        isHighlight
+                                        pageUrl={item.fullUrl}
+                                    >
+                                        {item.body}
+                                    </Markdown>
+                                </AnnotationSuggestionsBox>
+                            </HighlightStyled>
+                        )}
+                        {item.comment?.length > 0 && (
+                            <AnnotationEditContainer
+                                hasHighlight={item.comment.length > 0}
+                            >
+                                {' '}
+                                <NoteText
+                                    contextLocation={this.props.sidebarContext}
+                                    getYoutubePlayer={
+                                        this.props.getYoutubePlayer
+                                    }
+                                    imageSupport={this.props.imageSupport}
+                                >
+                                    {item.comment}
+                                </NoteText>
+                            </AnnotationEditContainer>
+                        )}
+                    </ItemBox>
+                )}
+            </ItemBox>
+        )
+    }
+
     private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
 
@@ -1683,31 +1777,139 @@ export class AnnotationsSidebar extends React.Component<
         )
 
         if (this.props.activeTab === 'rabbitHole') {
-            console.log('item', this.props.suggestionsResults)
+            if (this.props.loadState === 'running') {
+                return (
+                    <LoadingBox>
+                        <LoadingIndicator size={20} />
+                    </LoadingBox>
+                )
+            }
+
+            const EmptyMessage = (message) => {
+                return (
+                    <EmptyMessageContainer>
+                        <IconBox heightAndWidth="40px">
+                            <Icon
+                                filePath={icons.stars}
+                                heightAndWidth="20px"
+                                color="prime1"
+                                hoverOff
+                            />
+                        </IconBox>
+                        <InfoText>{message}</InfoText>
+                    </EmptyMessageContainer>
+                )
+            }
+
+            const MySuggestionsResults = this.props.suggestionsResults?.filter(
+                (item) => {
+                    return (
+                        item.creatorId === this.props.currentUser.id &&
+                        item.contentType !== 'rss-feed-item'
+                    )
+                },
+            )
+
+            const OtherSuggestionsResults = this.props.suggestionsResults?.filter(
+                (item) => {
+                    return (
+                        item.creatorId !== this.props.currentUser.id &&
+                        item.contentType !== 'rss-feed-item'
+                    )
+                },
+            )
+
+            const RSSsuggestionsResults = this.props.suggestionsResults?.filter(
+                (item) => {
+                    return item.contentType === 'rss-feed-item'
+                },
+            )
+
             return (
                 <AnnotationsSectionStyled>
-                    <SuggestionsList>
-                        {this.props.suggestionsResults?.map((item) => (
-                            <SuggestionsCardContainer>
-                                <SuggestionsCardBox>
-                                    <SuggestionsCardTitle>
-                                        {item.title}
-                                    </SuggestionsCardTitle>
-                                    <SuggestionsCardUrl>
-                                        {item.normalizedUrl}
-                                    </SuggestionsCardUrl>
-                                    <SuggestionsDescriptionsContainer>
-                                        {item.contentType === 'annotation' && (
-                                            <Highlightbar />
-                                        )}
-                                        <SuggestionsDescription>
-                                            {item.description}
-                                        </SuggestionsDescription>
-                                    </SuggestionsDescriptionsContainer>
-                                </SuggestionsCardBox>
-                            </SuggestionsCardContainer>
-                        ))}
-                    </SuggestionsList>
+                    <SuggestionsListSwitcher>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveSuggestionsTab(
+                                'MySuggestions',
+                            )}
+                            active={
+                                this.props.activeSuggestionsTab ===
+                                'MySuggestions'
+                            }
+                        >
+                            Saved by Me
+                            <SuggestionsCounter
+                                hasResults={MySuggestionsResults.length}
+                            >
+                                {MySuggestionsResults.length}
+                            </SuggestionsCounter>
+                        </SuggestionsSwitcherButton>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveSuggestionsTab(
+                                'OtherSuggestions',
+                            )}
+                            active={
+                                this.props.activeSuggestionsTab ===
+                                'OtherSuggestions'
+                            }
+                        >
+                            By Others{' '}
+                            <SuggestionsCounter
+                                hasResults={OtherSuggestionsResults.length}
+                            >
+                                {OtherSuggestionsResults.length}
+                            </SuggestionsCounter>
+                        </SuggestionsSwitcherButton>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveSuggestionsTab(
+                                'RSSsuggestions',
+                            )}
+                            active={
+                                this.props.activeSuggestionsTab ===
+                                'RSSsuggestions'
+                            }
+                        >
+                            From RSS feeds
+                            <SuggestionsCounter
+                                hasResults={RSSsuggestionsResults.length}
+                            >
+                                {RSSsuggestionsResults.length}
+                            </SuggestionsCounter>
+                        </SuggestionsSwitcherButton>
+                    </SuggestionsListSwitcher>
+                    {this.props.activeSuggestionsTab === 'MySuggestions' && (
+                        <SuggestionsList>
+                            {MySuggestionsResults.map((item) => {
+                                return this.renderSuggestionsList(item)
+                            })}
+                            {MySuggestionsResults.length === 0 &&
+                                EmptyMessage(
+                                    'No suitable suggestions found in your saved pages & annotations',
+                                )}
+                        </SuggestionsList>
+                    )}
+                    {this.props.activeSuggestionsTab === 'OtherSuggestions' && (
+                        <SuggestionsList>
+                            {OtherSuggestionsResults.map((item) => {
+                                return this.renderSuggestionsList(item)
+                            })}
+                            {OtherSuggestionsResults.length === 0 &&
+                                EmptyMessage(
+                                    'No suitable suggestions found in Spaces you follow',
+                                )}
+                        </SuggestionsList>
+                    )}
+                    {this.props.activeSuggestionsTab === 'RSSsuggestions' && (
+                        <SuggestionsList>
+                            {RSSsuggestionsResults.map((item) => {
+                                return this.renderSuggestionsList(item)
+                            })}
+                            {RSSsuggestionsResults.length === 0 &&
+                                EmptyMessage(
+                                    'No suitable suggestions found in your RSS feeds',
+                                )}
+                        </SuggestionsList>
+                    )}
                 </AnnotationsSectionStyled>
             )
         }
@@ -2476,7 +2678,7 @@ export class AnnotationsSidebar extends React.Component<
                     />
                     <PrimaryAction
                         onClick={this.props.setActiveTab('rabbitHole')}
-                        label={'rabbitHole'}
+                        label={'RabbitHole'}
                         active={this.props.activeTab === 'rabbitHole'}
                         type={'tertiary'}
                         size={'medium'}
@@ -2526,7 +2728,7 @@ export class AnnotationsSidebar extends React.Component<
                         height={'30px'}
                     />
 
-                    <PrimaryAction
+                    {/* <PrimaryAction
                         onClick={(event) => {
                             this.props.setActiveTab('feed')(event)
                             this.props.clickFeedActivityIndicator()
@@ -2554,7 +2756,7 @@ export class AnnotationsSidebar extends React.Component<
                                 </LoadingBox>
                             )
                         }
-                    />
+                    /> */}
                 </TopBarTabsContainer>
                 <TopBarBtnsContainer ref={this.sharePageLinkButtonRef}>
                     <PrimaryAction
@@ -3053,11 +3255,121 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const SuggestionsListSwitcher = styled.div`
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    position: sticky;
+    top: 0px;
+    z-index: 100;
+    background: ${(props) => props.theme.colors.greyScale1}60;
+    backdrop-filter: blur(10px);
+`
+
+const SuggestionsSwitcherButton = styled.div<{ active }>`
+    display: flex;
+    width: 33%;
+    flex: 1;
+    align-items: center;
+    border-bottom: 2px solid ${(props) => props.theme.colors.greyScale3};
+    height: 30px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 13px;
+    cursor: pointer;
+    justify-content: center;
+    user-select: none;
+    grid-gap: 5px;
+
+    ${(props) =>
+        props.active &&
+        css`
+            border-bottom: 2px solid ${props.theme.colors.prime2};
+        `}
+`
+
+const SuggestionsCounter = styled.div<{ hasResults }>`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 13px;
+
+    ${(props) =>
+        props.hasResults &&
+        css`
+            color: ${(props) => props.theme.colors.prime1};
+        `}
+`
+
+const ListSegmentBox = styled.div`
+    margin-top: -10px;
+`
+
+const AnnotationSuggestionsBox = styled.div`
+    display: block;
+    width: 100%;
+    margin-left: 25px !important;
+`
+const NoteText = styled(Markdown)`
+    display: block;
+    width: 100%;
+`
+
+const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
+    margin-top: ${(props) => !props.hasHighlight && '10px'};
+`
+
+const HighlightStyled = styled.div<{ hasComment: boolean }>`
+    font-weight: 400;
+    font-size: 14px;
+    letter-spacing: 0.5px;
+    margin: 0;
+    padding: 15px 15px 7px 15px;
+    line-height: 20px;
+    text-align: left;
+    line-break: normal;
+    display: flex;
+    position: relative;
+    margin-bottom: 15px;
+`
+
+const StyledPageResult = styled.div<{ isAnnotation: boolean }>`
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    border-radius: 12px;
+
+    ${(props) =>
+        props.theme.variant === 'light' &&
+        css`
+            box-shadow: ${props.theme.borderStyles
+                .boxShadowHoverElementsLighter};
+            border: 1px solid ${props.theme.colors.greyScale2};
+        `};
+    ${(props) =>
+        props.isAnnotation &&
+        css`
+            border-bottom: 1px solid ${props.theme.colors.greyScale2};
+            border-radius: 12px 12px 0px 0px;
+        `};
+`
+
+const PageContentBox = styled.div<{ hasSpaces: boolean }>`
+    display: flex;
+    flex-direction: column;
+    cursor: pointer;
+    text-decoration: none;
+    border-radius: 10px;
+`
+
 const SuggestionsList = styled.div`
     display: flex;
     grid-gap: 5px;
     flex-direction: column;
     margin: 10px;
+    width: fill-available;
+    width: -moz-available;
 `
 
 const SuggestionsCardContainer = styled(ItemBox)`
@@ -3081,7 +3393,7 @@ const SuggestionsCardUrl = styled.div`
     font-weight: 300;
 `
 const SuggestionsDescription = styled(Markdown)`
-    color: ${(props) => props.theme.colors.greyScale6};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-size: 16px;
     font-weight: 300;
 `
@@ -3136,6 +3448,7 @@ const SuggestionsDescriptionsContainer = styled.div`
     align-items: flex-start;
     justify-content: flex-start;
     position: relative;
+    padding: 0 20px 15px 20px;
 `
 
 const ChapterTitle = styled.div<{ hasSummary }>`

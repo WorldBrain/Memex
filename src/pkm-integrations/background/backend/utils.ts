@@ -1,4 +1,5 @@
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 // TODO: Refactor this so it's not importing and using the browser global
 import { browser } from 'webextension-polyfill-ts'
@@ -124,7 +125,7 @@ export type rabbitHoleDocument = {
     pageTitle: string
     normalizedUrl: string
     createdWhen: number
-    userId: UserReference['id']
+    userId: string
     contentType: string
     contentText: string
 }
@@ -134,6 +135,5 @@ export async function createRabbitHoleEntry(
     pkmSyncBG,
     checkForFilteredSpaces?,
 ) {
-    console.log('createRabbitHoleEntry', entryData)
     await pkmSyncBG.pushRabbitHoleUpdate(entryData, checkForFilteredSpaces)
 }

@@ -337,6 +337,7 @@ export function createBackgroundModules(options: {
         analytics,
         analyticsBG,
         pkmSyncBG,
+        authBG: auth,
         serverStorage: options.serverStorage.modules,
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)

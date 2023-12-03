@@ -6,7 +6,7 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { PipelineRes, VisitInteraction } from 'src/search'
+import { PageCreationProps, PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
 import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import {
@@ -25,6 +25,7 @@ import {
     isPkmSyncEnabled,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -154,10 +155,13 @@ export default class PageStorage extends StorageModule {
         }
     }
 
-    async createPage(pageData: PipelineRes, pageContentInfo?: any) {
+    async createPage(
+        pageData: PipelineRes,
+        pageContentInfo?: any,
+        userId?: Promise<AuthenticatedUser> | null,
+        props?: PageCreationProps,
+    ) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
-
-        console.log('pageData', pageData)
 
         await this.operation('createPage', {
             ...pageData,
@@ -188,8 +192,6 @@ export default class PageStorage extends StorageModule {
                     }
                 }
 
-                console.log('datatosync', dataToSave)
-
                 sharePageWithPKM(dataToSave, this.options.pkmSyncBG)
             } catch (e) {
                 console.error(e)
@@ -200,10 +202,11 @@ export default class PageStorage extends StorageModule {
                 pageTitle: pageData.fullTitle,
                 normalizedUrl: normalizeUrl(pageData.fullUrl),
                 createdWhen: Math.floor(Date.now() / 1000),
-                userId: '1',
-                contentType: 'page',
-                contentText: pageData.htmlBody,
+                userId: userId,
+                contentType: props.metaData?.contentType || 'page',
+                contentText: props.metaData?.pageHTML || pageData?.htmlBody,
             }
+            console.log('dta', dataToSave)
             createRabbitHoleEntry(dataToSave, this.options.pkmSyncBG)
         } catch (e) {}
     }

@@ -108,7 +108,6 @@ export function createOperationLoggingMiddleware(options: {
             if (typeof context.operation[1] === 'string') {
                 info.push(context.operation[1])
             }
-            console.log('executing operation', ...info)
 
             try {
                 const result = await next()

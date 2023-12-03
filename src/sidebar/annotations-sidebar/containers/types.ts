@@ -108,6 +108,11 @@ export type SidebarTab =
     | 'summary'
     | 'rabbitHole'
 
+export type SuggestionsTab =
+    | 'MySuggestions'
+    | 'RSSsuggestions'
+    | 'OtherSuggestions'
+
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
     cacheLoadState: TaskState
@@ -134,6 +139,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     suggestionsResultsLoadState: TaskState
 
     activeTab: SidebarTab
+    activeSuggestionsTab: SuggestionsTab
     showChapters: boolean
     pillVisibility: string
     renameListErrorMessage: string | null
@@ -309,6 +315,9 @@ interface SidebarEvents {
         url?: string
         prompt?: string
     }
+    setActiveSuggestionsTab: {
+        tab: SuggestionsTab
+    }
     askAIviaInPageInteractions: {
         textToProcess?: string
         url?: string
@@ -423,7 +432,7 @@ interface SidebarEvents {
     }
 
     goToAnnotationInNewTab: {
-        unifiedAnnotationId: UnifiedAnnotation['unifiedId']
+        unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
     }
 
     // Misc events
@@ -482,11 +491,14 @@ export interface AnnotationCardInstance {
 }
 export interface SuggestionCard {
     normalizedUrl: UnifiedAnnotation['unifiedId']
-    title: boolean
-    description: boolean
+    fullTitle: string
+    description?: boolean
     contentType: 'page' | 'annotation'
-    creatorId?: AnnotationCardMode
-    spaces?: UnifiedList[]
+    creatorId?: UserReference['id']
+    spaces?: any
+    body?: string
+    comment?: string
+    unifiedId?: UnifiedAnnotation['unifiedId']
 }
 
 export interface ListInstance {

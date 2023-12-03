@@ -159,7 +159,7 @@ export class AnnotationCreate extends React.Component<Props, State>
         id: number
         name: string | JSX.Element
         isShared: boolean
-        type: 'page-link' | 'user-list' | 'special-list'
+        type: 'page-link' | 'user-list' | 'special-list' | 'rss-feed'
     }> {
         return this.props.lists.map((id) => ({
             id,

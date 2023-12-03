@@ -88,6 +88,8 @@ export interface PageCreationProps {
     skipUpdatePageCount?: boolean
     metaData?: {
         pageTitle?: string
+        pageHTML?: string
+        contentType?: 'rss-feed-item'
     }
 }
 

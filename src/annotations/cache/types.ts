@@ -157,7 +157,11 @@ type CoreUnifiedList<T> = {
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
 }
 
-export type UnifiedListType = 'user-list' | 'special-list' | 'page-link'
+export type UnifiedListType =
+    | 'user-list'
+    | 'special-list'
+    | 'page-link'
+    | 'rss-feed'
 
 export type UnifiedList<
     T extends UnifiedListType = UnifiedListType

@@ -30,6 +30,7 @@ import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/ev
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import { AuthBackground } from 'src/authentication/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -50,6 +51,7 @@ export default class DirectLinkingBackground {
             socialBg: SocialBG
             pkmSyncBG: PKMSyncBackgroundModule
             normalizeUrl?: URLNormalizer
+            authBG: AuthBackground
             analytics: Analytics
             serverStorage: Pick<
                 ServerStorageModules,
@@ -88,6 +90,7 @@ export default class DirectLinkingBackground {
             getAnnotBookmark: this.getAnnotBookmark.bind(this),
             getSharedAnnotations: this.getSharedAnnotations,
             getListIdsForAnnotation: this.getListIdsForAnnotation,
+            getAnnotationByPk: this.getAnnotationByPk.bind(this),
         }
     }
 
@@ -327,15 +330,19 @@ export default class DirectLinkingBackground {
             throw new Error('Annotation ID should not be a full URL')
         }
 
+        const userData = await this.options.authBG.authService.getCurrentUser()
+        const userId = userData?.id
+
         await this.annotationStorage.createAnnotation({
             pageUrl: normalizedPageUrl,
-            url: annotationUrl,
+            url: annotationUrl.toString(),
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,
             selector: toCreate.selector,
             color: toCreate.color,
             createdWhen: new Date(toCreate.createdWhen ?? Date.now()),
+            userId: userId,
         })
 
         try {
@@ -348,11 +355,12 @@ export default class DirectLinkingBackground {
             console.error('Error tracking annotation create event', e)
         }
 
-        return annotationUrl
+        return annotationUrl.toString()
     }
 
-    async getAnnotationByPk(pk) {
-        return this.annotationStorage.getAnnotationByPk(pk)
+    async getAnnotationByPk(_, { url }: { url: string }) {
+        console.log('getAnnotationByPk1', url)
+        return this.annotationStorage.getAnnotationByPk({ url })
     }
 
     async toggleAnnotBookmark(_, { url }: { url: string }) {

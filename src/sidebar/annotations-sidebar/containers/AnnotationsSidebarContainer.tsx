@@ -858,6 +858,11 @@ export class AnnotationsSidebarContainer<
                                     color: color,
                                 })
                             }}
+                            onGoToAnnotation={async (unifiedAnnotationId) =>
+                                this.processEvent('goToAnnotationInNewTab', {
+                                    unifiedAnnotationId,
+                                })
+                            }
                             saveHighlightColorSettings={(newState) => {
                                 this.processEvent(
                                     'saveHighlightColorSettings',
@@ -1309,6 +1314,12 @@ export class AnnotationsSidebarContainer<
                             }
                             setActiveTab={(tab) => (event) => {
                                 this.processEvent('setActiveSidebarTab', {
+                                    tab,
+                                })
+                            }}
+                            setActiveSuggestionsTab={(tab) => (event) => {
+                                console.log('setActiveSuggestionsTab', tab)
+                                this.processEvent('setActiveSuggestionsTab', {
                                     tab,
                                 })
                             }}

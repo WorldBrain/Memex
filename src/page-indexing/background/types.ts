@@ -25,6 +25,16 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         { fullPageUrl: string },
         string | null
     >
+    addPage: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { fullPageUrl: string; pageContent: string },
+        string | null
+    >
+    indexPage: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { fullPageUrl: string; pageHTML: string },
+        string | null
+    >
 }
 
 export interface InitContentIdentifierParams {

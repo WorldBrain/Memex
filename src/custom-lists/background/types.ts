@@ -92,6 +92,7 @@ export interface RemoteCollectionsInterface {
         skipPageIndexing?: boolean
         suppressVisitCreation?: boolean
         pageTitle?: string
+        indexUrl?: boolean
     }): Promise<{ object: PageListEntry }>
     updateListName(args: {
         id: number

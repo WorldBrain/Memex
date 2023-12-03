@@ -46,6 +46,7 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import {
+    analyticsBG,
     bookmarks,
     copyPaster,
     subscription,
@@ -503,6 +504,11 @@ export async function main(
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
+            if (inPageUI.componentsShown.sidebar) {
+                inPageUI.showSidebar({
+                    action: 'show_annotation',
+                })
+            }
             let screenshotGrabResult
             if (
                 isPdfViewerRunning &&
@@ -542,11 +548,6 @@ export async function main(
                 )
             }
 
-            if (inPageUI.componentsShown.sidebar) {
-                inPageUI.showSidebar({
-                    action: 'show_annotation',
-                })
-            }
             await inPageUI.hideTooltip()
             if (analyticsBG) {
                 try {
@@ -966,8 +967,17 @@ export async function main(
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotationCacheId) => {
-            const unifiedAnnotation =
-                annotationsCache.annotations.byId[annotationCacheId]
+            let unifiedAnnotation
+            for (const id in annotationsCache.annotations.byId) {
+                if (
+                    annotationsCache.annotations.byId[id].localId ===
+                    annotationCacheId
+                ) {
+                    unifiedAnnotation = annotationsCache.annotations.byId[id]
+                    break
+                }
+            }
+
             if (!unifiedAnnotation) {
                 console.warn(
                     "Tried to go to highlight in new page that doesn't exist in cache",
@@ -1047,6 +1057,13 @@ export async function main(
                     existingButtons.remove()
                 }
                 loadYoutubeButtons(annotationsFunctions)
+            }
+            if (window.location.hostname.includes('.substack.com')) {
+                injectSubstackButtons(
+                    collectionsBG,
+                    pageIndexingBG,
+                    analyticsBG,
+                )
             }
 
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
@@ -1134,6 +1151,10 @@ export async function main(
     if (window.location.hostname === 'www.youtube.com') {
         loadYoutubeButtons(annotationsFunctions)
     }
+    if (window.location.hostname.includes('.substack.com')) {
+        injectSubstackButtons(collectionsBG, pageIndexingBG, analyticsBG)
+    }
+
     if (window.location.href.includes('web.telegram.org/')) {
         await injectTelegramCustomUI(
             collectionsBG,
@@ -1461,6 +1482,112 @@ export async function injectTelegramCustomUI(
         }
     } catch (error) {
         console.error(error.message)
+    }
+}
+
+export async function indexRSSfeed(
+    feedUrl,
+    collectionsBG,
+    pageIndexingBG,
+    analyticsBG,
+) {
+    const feedData = new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest()
+        xhr.open('GET', feedUrl)
+        xhr.onload = function () {
+            if (xhr.status === 200) {
+                resolve(xhr.responseText)
+            } else {
+                reject(new Error('Failed to load RSS feed: ' + xhr.status))
+            }
+        }
+        xhr.send()
+    })
+
+    try {
+        const data = await feedData
+        let parser = new DOMParser()
+        let xmlDoc = parser.parseFromString(data as string, 'text/xml')
+        let feedTitle = xmlDoc
+            .getElementsByTagName('channel')[0]
+            .getElementsByTagName('title')[0].childNodes[0].nodeValue
+
+        const ListData = await collectionsBG.createCustomList({
+            name: feedTitle,
+            isDeletable: true,
+            type: 'rss-feed',
+        })
+
+        let items = xmlDoc.getElementsByTagName('item')
+        for (let i = 0; i < items.length; i++) {
+            let item = items[i]
+            // You can now use the item variable to access each item in the RSS feed
+
+            let title = item.getElementsByTagName('title')[0].textContent
+
+            // [0].childNodes[0].nodeValue
+            let description = item.getElementsByTagName('description')[0]
+                .textContent
+            let link = item.getElementsByTagName('link')[0].textContent
+            let pubDate = item.getElementsByTagName('pubDate')[0].textContent
+            let content = item.getElementsByTagName('content:encoded')[0]
+                .textContent
+            let createdWhen = new Date(pubDate).getTime()
+
+            // Create a new DOMParser to parse the HTML string
+            let parser = new DOMParser()
+            // Parse the HTML string to a document
+            let contentDoc = parser.parseFromString(content, 'text/html')
+            // Get the innerText of the document
+            const textContent = contentDoc.body.innerText
+
+            // const document = {
+            //     listId: ListData.localListId,
+            //     pageUrl: normalizeUrl(link),
+            //     fullUrl: link,
+            //     createdAt: createdWhen,
+            //     pageTitle: title,
+            //     analyticsBG: null,
+            //     isShared: false,
+            //     dontTrack: true,
+            // }
+
+            // console.log('document', document)
+
+            await collectionsBG.insertPageToList({
+                id: ListData.localListId,
+                url: link,
+                createdAt: createdWhen,
+                pageTitle: title,
+                analyticsBG: analyticsBG,
+                isShared: false,
+                dontTrack: true,
+                indexUrl: true,
+                contentType: 'rss-feed-item',
+                pageHTML: content,
+            })
+
+            // await pageIndexingBG.addPage({
+            //     content: {
+            //         fullText: textContent,
+            //         title: title,
+            //     },
+            //     url: normalizeUrl(link),
+            //     originalUrl: link,
+            //     favIconURI: null,
+            // })
+            // await pageIndexingBG.indexPage({
+            //     fullUrl: link,
+            //     visitTime: new Date(pubDate),
+            //     skipUpdatePageCount: true,
+            //     metaData: {
+            //         pageTitle: title,
+            //         pageHTML: content,
+            //     },
+            // })
+        }
+    } catch (error) {
+        console.error('Error:', error)
     }
 }
 
@@ -1942,6 +2069,51 @@ export function getTimestampNoteContentForYoutubeNotes(
     } else {
         return null
     }
+}
+
+export function injectSubstackButtons(
+    collectionsBG,
+    pageIndexingBG,
+    analyticsBG,
+) {
+    const existingMemexButtons = document.getElementById('memexButtons')
+    if (existingMemexButtons) {
+        existingMemexButtons.remove()
+    }
+    const url = new URL(window.location.href)
+    const feedUrl = `${url.protocol}//${url.hostname}/feed`
+
+    const NavBarButtons = document.getElementsByClassName('navbar-buttons')
+    const memexButtons = document.createElement('div')
+    memexButtons.id = 'memexButtons'
+    memexButtons.style.display = 'flex'
+    memexButtons.style.alignItems = 'center'
+    memexButtons.style.height = 'fill-available'
+    memexButtons.style.padding = '00 15px 0 15px'
+
+    memexButtons.style.borderRadius = '6px'
+    memexButtons.style.border = '1px solid #3E3F47'
+    memexButtons.style.overflow = 'hidden'
+    memexButtons.style.overflowX = 'scroll'
+    memexButtons.style.backgroundColor = '#12131B'
+    memexButtons.style.color = '#FAFAFA'
+    memexButtons.style.fontSize = '14px'
+    memexButtons.style.gap = '10px'
+    memexButtons.style.cursor = 'pointer'
+    memexButtons.innerText = 'Follow with Memex'
+    memexButtons.onclick = async () => {
+        memexButtons.innerText = 'Followed!'
+        await indexRSSfeed(feedUrl, collectionsBG, pageIndexingBG, analyticsBG)
+    }
+
+    // MemexIconDisplay
+    const memexIcon = runtime.getURL('/img/memex-icon.svg')
+    const memexIconEl = document.createElement('img')
+    memexIconEl.src = memexIcon
+    memexButtons.appendChild(memexIconEl)
+    memexIconEl.style.height = '20px'
+
+    NavBarButtons[0].insertBefore(memexButtons, NavBarButtons[0].firstChild)
 }
 
 export async function injectYoutubeButtonMenu(annotationsFunctions: any) {

@@ -123,14 +123,13 @@ export class MemexLocalBackend {
         const body = {
             sourceApplication: 'Memex',
             createdWhen: document.createdWhen,
+            pageTitle: document.pageTitle,
             userId: document.userId,
             normalizedUrl: document.normalizedUrl,
             contentType: document.contentType,
             contentText: document.contentText,
             syncKey: syncKey,
         }
-
-        console.log('body', body)
 
         const response = await fetch(`${this.url}/index_document`, {
             method: 'PUT',
