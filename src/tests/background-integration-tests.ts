@@ -305,6 +305,8 @@ export async function setupBackgroundIntegrationTest(
                     ? 'production'
                     : 'staging',
         }),
+        backendEnv:
+            process.env.NODE_ENV === 'production' ? 'production' : 'staging',
     })
 
     registerBackgroundModuleCollections({

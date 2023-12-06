@@ -9,13 +9,18 @@ import type { GetContentFingerprints } from './types'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import { getPDFTitle } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/get-title'
+import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
+import { getOnlineBackendEnv } from 'src/util/env'
 
 const waitForDocument = async () => {
     while (true) {
         const pdfApplication = (globalThis as any)['PDFViewerApplication']
         const pdfViewer = pdfApplication?.pdfViewer
-        const pdfDocument: { fingerprint?: string; fingerprints?: string[] } =
-            pdfViewer?.pdfDocument
+        const pdfDocument: {
+            fingerprint?: string
+            fingerprints?: string[]
+            getData(): Promise<Uint8Array>
+        } = pdfViewer?.pdfDocument
         if (pdfDocument) {
             const searchParams = new URLSearchParams(location.search)
             const filePath = searchParams.get('file')
@@ -37,14 +42,14 @@ const waitForDocument = async () => {
                     isDark ? 1 : 0
                 }) contrast(75%)`)
 
-            return pdfDocument
+            return { pdfDocument, pdfApplication }
         }
         await new Promise((resolve) => setTimeout(resolve, 200))
     }
 }
 
 const getContentFingerprints: GetContentFingerprints = async () => {
-    const pdfDocument = await waitForDocument()
+    const { pdfDocument } = await waitForDocument()
     const fingerprintsStrings =
         pdfDocument.fingerprints ??
         (pdfDocument.fingerprint ? [pdfDocument.fingerprint] : [])
@@ -60,7 +65,7 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 }
 
 Global.main({ loadRemotely: false, getContentFingerprints }).then(
-    async (inPageUI) => {
+    async ({ inPageUI, pdfBG }) => {
         // DEBUG: Use this in console to debug screenshot UX
         // ;(window as any)['promptPdfScreenshot'] = promptPdfScreenshot
         // // DEBUG: Uncomment to trigger screenshot as soon as PDF is loaded
@@ -89,6 +94,19 @@ Global.main({ loadRemotely: false, getContentFingerprints }).then(
                     'pdfjsLib'
                 ].getDocument(filePath).promise
                 return extractDataFromPDFDocument(pdf)
+            },
+            uploadPdf: async (params) => {
+                const { pdfDocument } = await waitForDocument()
+                const content = await pdfDocument.getData()
+                const pdfService = new PdfUploadService({
+                    callFirebaseFunction: async () => null as any,
+                    dataUrlToBlob: () => null as any,
+                    env: getOnlineBackendEnv(),
+                })
+                await pdfService.uploadPdfContent({
+                    token: params.token,
+                    content,
+                })
             },
         })
         await inPageUI.showSidebar()

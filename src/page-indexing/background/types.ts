@@ -46,3 +46,10 @@ export enum StoredContentType {
     HtmlBody = 'htmlBody',
     PdfContent = 'pdfContent',
 }
+
+export type PagePutHandler = (event: {
+    identifier: ContentIdentifier
+    isNew: boolean
+    isPdf: boolean
+    tabId?: number
+}) => Promise<void>

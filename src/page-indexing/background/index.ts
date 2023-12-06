@@ -47,6 +47,7 @@ import {
     InitContentIdentifierParams,
     InitContentIdentifierReturns,
     WaitForContentIdentifierReturns,
+    PagePutHandler,
 } from './types'
 import {
     remoteFunctionWithExtraArgs,
@@ -107,6 +108,7 @@ export class PageIndexingBackground {
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
             getNow: () => number
             pkmSyncBG: PKMSyncBackgroundModule
+            onPagePut?: PagePutHandler
         },
     ) {
         this.storage = new PageStorage({
@@ -478,10 +480,10 @@ export class PageIndexingBackground {
     ) {
         const { favIconURI } = pageData
         pageData = this.removeAnyUnregisteredFields(pageData)
-        const pageContentInfo = await this.getContentInfoForPages()
+        const allContentInfo = await this.getContentInfoForPages()
 
-        const contentIdentifier =
-            pageContentInfo[pageData.url]?.primaryIdentifier
+        const pageContentInfo = allContentInfo[pageData.url]
+        const contentIdentifier = pageContentInfo?.primaryIdentifier
         if (contentIdentifier) {
             pageData.fullUrl = contentIdentifier.fullUrl
             pageData.url = contentIdentifier.normalizedUrl
@@ -492,7 +494,7 @@ export class PageIndexingBackground {
         if (existingPage) {
             await this.storage.updatePage(pageData, existingPage)
         } else {
-            await this.storage.createPage(pageData, pageContentInfo)
+            await this.storage.createPage(pageData, allContentInfo)
         }
 
         if (contentIdentifier) {
@@ -559,7 +561,8 @@ export class PageIndexingBackground {
         //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
         //     so we don't have to do this dance
 
-        if (!isMemexPageAPdf({ url: props.fullUrl })) {
+        const isPdf = isMemexPageAPdf({ url: props.fullUrl })
+        if (!isPdf) {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
                 props.tabId = foundTabId
@@ -587,6 +590,15 @@ export class PageIndexingBackground {
         }
 
         await this.createOrUpdatePage(pageData, opts)
+        await this.options.onPagePut?.({
+            identifier: {
+                normalizedUrl: pageData.url,
+                fullUrl: pageData.fullUrl,
+            },
+            isNew: !pageData.isExisting,
+            tabId: props.tabId,
+            isPdf,
+        })
 
         if (props.visitTime) {
             await this.storage.addPageVisit(

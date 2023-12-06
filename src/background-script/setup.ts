@@ -107,6 +107,8 @@ import { AuthRemoteFunctionsInterface } from 'src/authentication/background/type
 import { remoteFunctions } from 'src/util/remote-functions-background'
 import { ImageSupportBackground } from 'src/image-support/background'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
+import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
+import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -158,6 +160,7 @@ export function createBackgroundModules(options: {
     browserAPIs: Browser
     serverStorage: ServerStorage
     imageSupportBackend: ImageSupportBackend
+    backendEnv: 'staging' | 'production'
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
         name: string,
@@ -312,13 +315,22 @@ export function createBackgroundModules(options: {
 
     const reader = new ReaderBackground({ storageManager })
 
+    const pdfUploads = new PdfUploadService({
+        callFirebaseFunction,
+        dataUrlToBlob,
+        env: options.backendEnv,
+    })
     const pdfBg = new PDFBackground({
         webRequestAPI: options.browserAPIs.webRequest,
         runtimeAPI: options.browserAPIs.runtime,
         storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
         syncSettings: syncSettingsStore,
+        pdfUploads,
+        generateUploadId: () => generateServerId('uploadAuditLogEntry'),
+        pageStorage: pages.storage,
     })
+    pages.options.onPagePut = pdfBg.handlePagePut
 
     const social = new SocialBackground({ storageManager })
 

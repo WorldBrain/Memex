@@ -94,6 +94,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import { PDFRemoteInterface } from 'src/pdf/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -104,7 +105,7 @@ export async function main(
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
     } = {},
-): Promise<SharedInPageUIState> {
+) {
     const isRunningInFirefox = checkBrowser() === 'firefox'
     if (!isRunningInFirefox) {
         initSentry({})
@@ -219,6 +220,7 @@ export async function main(
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
     >()
+    const pdfBG = runInBackground<PDFRemoteInterface>()
     const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
     const toolbarNotifications = new ToolbarNotifications()
@@ -1145,7 +1147,7 @@ export async function main(
         }
     }
 
-    return inPageUI
+    return { inPageUI, pdfBG }
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>

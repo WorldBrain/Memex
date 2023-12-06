@@ -19,7 +19,10 @@ import {
 } from '@worldbrain/memex-common/lib/page-indexing/types'
 import decodeBlob from 'src/util/decode-blob'
 import { pageIsStub } from 'src/page-indexing/utils'
-import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import {
+    ContentFingerprint,
+    LocationSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
     isPkmSyncEnabled,
     sharePageWithPKM,
@@ -129,6 +132,17 @@ export default class PageStorage extends StorageModule {
             createLocator: {
                 operation: 'createObject',
                 collection: 'locators',
+            },
+            updateLocatorStatus: {
+                operation: 'updateObjects',
+                collection: 'locators',
+                args: [
+                    {
+                        normalizedUrl: '$normalizedUrl:string',
+                        locationScheme: '$locationScheme:string',
+                    },
+                    { status: '$status:string' },
+                ],
             },
         },
     })
@@ -419,6 +433,14 @@ export default class PageStorage extends StorageModule {
         await Promise.all(
             toStore.map((locator) => this.operation('createLocator', locator)),
         )
+    }
+
+    async updateLocatorStatus(params: {
+        normalizedUrl: string
+        locationScheme: LocationSchemeType
+        status: string
+    }) {
+        await this.operation('updateLocatorStatus', params)
     }
 
     async _maybeDecodeBlob(

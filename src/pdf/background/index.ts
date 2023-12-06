@@ -1,7 +1,22 @@
 import type { WebRequest, Tabs, Runtime, Storage } from 'webextension-polyfill'
-import type { SyncSettingsStore } from 'src/sync-settings/util'
+import type {
+    PdfUploadServiceInterface,
+    PdfUploadParams,
+    RequestPdfUploadSuccessResult,
+} from '@worldbrain/memex-common/lib/pdf/uploads/types'
+import type { SyncSettingsStore } from '../../sync-settings/util'
+import PageStorage from '../../page-indexing/background/storage'
 import type { PDFRemoteInterface } from './types'
 import { PDF_VIEWER_HTML } from '../constants'
+import {
+    ContentLocatorFormat,
+    ContentLocatorType,
+    LocationSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import { PagePutHandler } from 'src/page-indexing/background/types'
+import { runInTab } from 'src/util/webextensionRPC'
+import { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { ContentIdentifier } from 'src/search'
 
 export class PDFBackground {
     static OPEN_PDF_VIEWER_ONE_TIME_KEY =
@@ -16,11 +31,14 @@ export class PDFBackground {
             tabsAPI: Pick<Tabs.Static, 'update'>
             storageAPI: Pick<Storage.Static, 'local'>
             runtimeAPI: Pick<Runtime.Static, 'getURL'>
+            pdfUploads: PdfUploadServiceInterface
+            generateUploadId: () => string | number
             webRequestAPI: Pick<
                 WebRequest.Static,
                 'onBeforeRequest' | 'onHeadersReceived'
             >
             syncSettings: SyncSettingsStore<'pdfIntegration'>
+            pageStorage: PageStorage
         },
     ) {
         this.routeViewer = deps.runtimeAPI.getURL(PDF_VIEWER_HTML)
@@ -36,6 +54,7 @@ export class PDFBackground {
                     [PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY]: false,
                 })
             },
+            uploadPdf: this.uploadPdf,
         }
     }
 
@@ -128,6 +147,68 @@ export class PDFBackground {
             return false
         }
         return true
+    }
+
+    handlePagePut: PagePutHandler = async (event) => {
+        if (event.isNew && event.isPdf && event.tabId) {
+            await this.uploadPdf({
+                tabId: event.tabId,
+                identifier: event.identifier,
+            })
+        }
+    }
+
+    uploadPdf = async (params: {
+        tabId: number
+        identifier: ContentIdentifier
+    }) => {
+        const existingLocators = await this.deps.pageStorage.findLocatorsByNormalizedUrl(
+            params.identifier.normalizedUrl,
+        )
+        const existingStorageLocator = existingLocators.find(
+            (loc) => loc.locationScheme === LocationSchemeType.UploadStorage,
+        )
+        let uploadId = existingStorageLocator?.location
+        if (!uploadId) {
+            uploadId = this.deps.generateUploadId() as string
+            await this.deps.pageStorage.storeLocators({
+                identifier: params.identifier,
+                locators: [
+                    {
+                        format: ContentLocatorFormat.PDF,
+                        location: uploadId,
+                        locationScheme: LocationSchemeType.UploadStorage,
+                        locationType: ContentLocatorType.Remote,
+                        normalizedUrl: params.identifier.normalizedUrl,
+                        originalLocation: params.identifier.fullUrl,
+                        primary: true,
+                        valid: true,
+                        status: 'uploading',
+                        version: 0,
+                    },
+                ],
+            })
+        }
+        if (existingStorageLocator?.status === 'uploaded') {
+            return
+        }
+        const tokenResult = await this.deps.pdfUploads.getUploadToken({
+            uploadId,
+        })
+        if (tokenResult.error) {
+            throw new Error(
+                `Got error while trying to get PDF upload token: ${tokenResult.error}`,
+            )
+        }
+        const { token } = tokenResult as RequestPdfUploadSuccessResult
+        await runInTab<InPDFPageUIContentScriptRemoteInterface>(
+            params.tabId,
+        ).uploadPdf({ token })
+        await this.deps.pageStorage.updateLocatorStatus({
+            locationScheme: LocationSchemeType.UploadStorage,
+            normalizedUrl: params.identifier.normalizedUrl,
+            status: 'uploaded',
+        })
     }
 
     setupRequestInterceptors = async () => {
