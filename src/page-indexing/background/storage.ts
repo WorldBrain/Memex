@@ -158,8 +158,7 @@ export default class PageStorage extends StorageModule {
     async createPage(
         pageData: PipelineRes,
         pageContentInfo?: any,
-        userId?: Promise<AuthenticatedUser> | null,
-        props?: PageCreationProps,
+        userId?: Promise<AuthenticatedUser> | string | null,
     ) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
@@ -199,14 +198,13 @@ export default class PageStorage extends StorageModule {
         }
         try {
             const dataToSave = {
+                fullUrl: pageData.fullUrl,
                 pageTitle: pageData.fullTitle,
-                normalizedUrl: normalizeUrl(pageData.fullUrl),
                 createdWhen: Math.floor(Date.now() / 1000),
-                userId: userId,
-                contentType: props.metaData?.contentType || 'page',
-                contentText: props.metaData?.pageHTML || pageData?.htmlBody,
+                creatorId: userId.toString(),
+                contentType: 'page',
+                fullHTML: pageData?.htmlBody,
             }
-            console.log('dta', dataToSave)
             createRabbitHoleEntry(dataToSave, this.options.pkmSyncBG)
         } catch (e) {}
     }

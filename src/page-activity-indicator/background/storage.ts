@@ -159,11 +159,11 @@ export default class PageActivityIndicatorStorage extends StorageModule {
         try {
             const syncItem = {
                 pageTitle: data.entryTitle,
-                normalizedUrl: data.normalizedPageUrl,
+                fullUrl: 'https://' + data.normalizedPageUrl,
                 createdWhen: data.createdWhen,
-                userId: data.creator,
+                creatorId: data.creator,
                 contentType: 'page',
-                contentText: null,
+                fullHTML: null,
             }
             // send to local server
             createRabbitHoleEntry(syncItem, this.options.pkmSyncBG)

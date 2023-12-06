@@ -1521,7 +1521,12 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <SummarySection>
-                <SummaryContainer>
+                <SummaryContainer
+                    isSummaryShown={
+                        this.props.activeTab === 'summary' ||
+                        this.props.pageSummary?.length > 0
+                    }
+                >
                     {this.props.showLengthError &&
                         this.props.queryMode === 'summarize' && (
                             <ErrorContainer>
@@ -1540,20 +1545,22 @@ export class AnnotationsSidebar extends React.Component<
                             </Markdown>
                         </SummaryText>
                     ) : (
-                        <AIContainerNotif>
-                            <AIContainerNotifTitle>
-                                Summarise or ask questions <br /> about{' '}
-                                {contentType === 'video'
-                                    ? 'this video'
-                                    : contentType === 'highlight'
-                                    ? 'the selected text'
-                                    : 'this article'}
-                            </AIContainerNotifTitle>
-                            <AIContainerNotifSubTitle>
-                                Just type in a question or pick one of the
-                                templates
-                            </AIContainerNotifSubTitle>
-                        </AIContainerNotif>
+                        this.props.activeTab === 'summary' && (
+                            <AIContainerNotif>
+                                <AIContainerNotifTitle>
+                                    Summarise or ask questions <br /> about{' '}
+                                    {contentType === 'video'
+                                        ? 'this video'
+                                        : contentType === 'highlight'
+                                        ? 'the selected text'
+                                        : 'this article'}
+                                </AIContainerNotifTitle>
+                                <AIContainerNotifSubTitle>
+                                    Just type in a question or pick one of the
+                                    templates
+                                </AIContainerNotifSubTitle>
+                            </AIContainerNotif>
+                        )
                     )}
                 </SummaryContainer>
                 {/* {this.state
@@ -1658,8 +1665,537 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    renderSuggestionsList(item) {
-        console.log('item', item)
+    renderQaASection() {
+        const addPromptButton = (prompt) => (
+            <TooltipBox
+                tooltipText="Save prompt as template"
+                placement="bottom-end"
+            >
+                <Icon
+                    onClick={() => this.props.saveAIPrompt(prompt)}
+                    filePath={icons.plus}
+                    heightAndWidth="22px"
+                    color="prime1"
+                />
+            </TooltipBox>
+        )
+
+        const SuggestionsList = ({
+            AIsuggestions,
+        }: Pick<AnnotationsSidebarProps, 'AIsuggestions'>) => {
+            return (
+                <ClickAway
+                    onClickAway={() => this.props.toggleAISuggestionsDropDown()}
+                >
+                    <DropDown>
+                        {AIsuggestions.map((suggestion) => (
+                            <DropDownItem
+                                key={suggestion.prompt}
+                                onClick={() =>
+                                    this.props.selectAISuggestion(
+                                        suggestion.prompt,
+                                    )
+                                }
+                                focused={
+                                    suggestion.focused && suggestion.focused
+                                }
+                            >
+                                {suggestion.prompt}
+                                <RemoveTemplateIconBox>
+                                    <TooltipBox
+                                        tooltipText="Remove template"
+                                        placement="left"
+                                    >
+                                        <Icon
+                                            filePath={icons.removeX}
+                                            heightAndWidth="18px"
+                                            color="greyScale5"
+                                            onClick={(event) => {
+                                                event.stopPropagation()
+                                                this.props.removeAISuggestion(
+                                                    suggestion.prompt,
+                                                )
+                                            }}
+                                        />
+                                    </TooltipBox>
+                                </RemoveTemplateIconBox>
+                            </DropDownItem>
+                        ))}
+                    </DropDown>
+                </ClickAway>
+            )
+        }
+
+        return (
+            <AISidebarContainer>
+                {this.props.selectedTextAIPreview && (
+                    <SelectedAITextBox>
+                        <SelectedAITextHeader>
+                            <SelectedHeaderButtonBox>
+                                Selected Text
+                                <PrimaryAction
+                                    icon={'removeX'}
+                                    onClick={() =>
+                                        this.props.removeSelectedTextAIPreview()
+                                    }
+                                    type="tertiary"
+                                    size="small"
+                                    label={'Reset'}
+                                    padding={'0px 5px 0px 2px'}
+                                />
+                            </SelectedHeaderButtonBox>
+                            <PrimaryAction
+                                icon={
+                                    this.state.showAIhighlight
+                                        ? 'compress'
+                                        : 'expand'
+                                }
+                                padding={'0px 5px 0px 2px'}
+                                onClick={() =>
+                                    this.setState({
+                                        showAIhighlight: !this.state
+                                            .showAIhighlight,
+                                    })
+                                }
+                                type="tertiary"
+                                size="small"
+                                label={
+                                    this.state.showAIhighlight
+                                        ? 'Hide'
+                                        : 'Show All'
+                                }
+                            />
+                        </SelectedAITextHeader>
+                        <SelectedAITextContainer
+                            fullHeight={this.state.showAIhighlight}
+                        >
+                            <SelectedTextBoxBar />
+                            <SelectedAIText
+                                fullHeight={this.state.showAIhighlight}
+                            >
+                                {this.props.selectedTextAIPreview}
+                            </SelectedAIText>
+                            {!this.state.showAIhighlight && <BlurContainer />}
+                        </SelectedAITextContainer>
+                    </SelectedAITextBox>
+                )}
+                <QueryContainer
+                    AIDropDownShown={
+                        this.props.showAISuggestionsDropDown &&
+                        this.props.AIsuggestions?.length > 0
+                    }
+                >
+                    <TextField
+                        placeholder={
+                            this.props.prompt ??
+                            this.props.activeTab === 'rabbitHole'
+                                ? 'Ask a question across saved and followed pages'
+                                : 'Type a prompt like "Summarize in 2 paragraphs"'
+                        }
+                        value={this.props.prompt}
+                        icon="feed"
+                        element={null}
+                        iconSize="18px"
+                        height="40px"
+                        onChange={async (event) => {
+                            await this.props.updatePromptState(
+                                (event.target as HTMLInputElement).value,
+                            )
+                        }}
+                        onKeyDown={async (event) => {
+                            if (event.key === 'Enter') {
+                                await this.props.queryAIwithPrompt(
+                                    this.props.prompt,
+                                )
+                            }
+                            if (event.key === 'Escape') {
+                                this.props.toggleAISuggestionsDropDown()
+                            }
+                            if (event.key === 'ArrowUp') {
+                                if (!this.props.showAISuggestionsDropDown) {
+                                    this.props.toggleAISuggestionsDropDown()
+                                }
+                                this.props.navigateFocusInList('up')
+                                focus()
+                            }
+
+                            if (event.key === 'ArrowDown') {
+                                if (!this.props.showAISuggestionsDropDown) {
+                                    this.props.toggleAISuggestionsDropDown()
+                                }
+                                this.props.navigateFocusInList('down')
+                                focus()
+                            }
+                            event.stopPropagation()
+                        }}
+                        onKeyUp={async (event) => {
+                            event.stopPropagation()
+                        }}
+                        onClick={() => this.props.toggleAISuggestionsDropDown()}
+                        actionButton={
+                            this.props.prompt &&
+                            this.props.prompt?.length > 0 &&
+                            addPromptButton(this.props.prompt)
+                        }
+                        autoFocus={this.props.activeTab === 'summary'}
+                    />
+                    {this.props.showAISuggestionsDropDown &&
+                        this.props.AIsuggestions?.length > 0 && (
+                            <SuggestionsList {...this.props} />
+                        )}
+                </QueryContainer>
+                {!this.props.selectedTextAIPreview && (
+                    <OptionsContainer>
+                        <OptionsContainerLeft>
+                            <DropdownMenuBtnSmall
+                                elementHeight="fit-content"
+                                hideDescriptionInPreview
+                                menuItems={[
+                                    {
+                                        id: 'summarize',
+                                        name: 'Summarize',
+                                        info: 'Best for summarisations',
+                                    },
+                                    {
+                                        id: 'chapters',
+                                        name: 'Chapters',
+                                        info:
+                                            'Get chapter overview and summaries',
+                                    },
+                                    {
+                                        id: 'Question',
+                                        name: 'General Question',
+                                        info: 'Unrelated to the content',
+                                    },
+                                ]}
+                                onMenuItemClick={async (props, index) => {
+                                    let queryMode
+                                    if (index === 0) {
+                                        queryMode = 'summarize'
+                                    }
+                                    if (index === 1) {
+                                        queryMode = 'chapterSummary'
+                                    }
+                                    if (index === 2) {
+                                        queryMode = 'question'
+                                    }
+                                    this.props.setQueryMode(queryMode)
+
+                                    if (index === 0) {
+                                        await this.props.queryAIwithPrompt(
+                                            this.props.prompt,
+                                        )
+                                    }
+                                    if (index === 1) {
+                                        await this.props.getVideoChapters()
+                                    }
+
+                                    if (index === 2) {
+                                        await this.props.queryAIwithPrompt(
+                                            this.props.prompt,
+                                            undefined,
+                                            queryMode,
+                                        )
+                                    }
+                                }}
+                                initSelectedIndex={
+                                    this.props.queryMode === 'chapterSummary'
+                                        ? 1
+                                        : 0
+                                }
+                                selectedState={
+                                    this.props.queryMode === 'chapterSummary' &&
+                                    1
+                                }
+                                keepSelectedState
+                            />
+                            <DropdownMenuBtnSmall
+                                elementHeight="fit-content"
+                                hideDescriptionInPreview
+                                menuItems={[
+                                    {
+                                        id: 'GPT 3.5',
+                                        name: 'GPT 3.5',
+                                        info: 'Fast & decent',
+                                    },
+                                    {
+                                        id: 'GPT 4',
+                                        name: 'GPT 4',
+                                        isDisabled: this.props.hasKey
+                                            ? false
+                                            : true,
+                                        info: (
+                                            <span>
+                                                Better at understanding logic
+                                                <br />
+                                                ONLY WITH OWN KEY
+                                            </span>
+                                        ),
+                                    },
+                                ]}
+                                onMenuItemClick={(props, index) => {
+                                    let AImodel
+                                    if (index === 0) {
+                                        AImodel = 'gpt-3.5-turbo-1106'
+                                    }
+                                    if (index === 1) {
+                                        AImodel = 'gpt-4-0613'
+                                    }
+                                    this.props.setAIModel(AImodel)
+                                }}
+                                initSelectedIndex={0}
+                                keepSelectedState
+                            />
+
+                            {!this.props.fullPageUrl.includes(
+                                'youtube.com/watch',
+                            ) &&
+                                (this.props.sidebarContext === 'in-page' ||
+                                    this.props.queryMode !== 'question') && (
+                                    <TooltipBox
+                                        tooltipText={
+                                            <>
+                                                For performance we usually fetch
+                                                the text via our servers but
+                                                sometimes we can't reach it.
+                                                E.g. if you are behind a
+                                                paywall.
+                                                <br /> Use this to extract the
+                                                content from the page.
+                                            </>
+                                        }
+                                        placement="bottom"
+                                        width="150px"
+                                    >
+                                        <Checkbox
+                                            key={1}
+                                            id={'1'}
+                                            isChecked={
+                                                this.props.fetchLocalHTML
+                                            }
+                                            handleChange={() =>
+                                                this.props.fetchLocalHTML
+                                                    ? this.props.changeFetchLocalHTML(
+                                                          false,
+                                                      )
+                                                    : this.props.changeFetchLocalHTML(
+                                                          true,
+                                                      )
+                                            }
+                                            // isDisabled={!this.state.shortcutsEnabled}
+                                            name={'Local Content'}
+                                            label={'Local Content'}
+                                            size={14}
+                                            fontSize={12}
+                                            checkBoxColor="black"
+                                            borderColor="greyScale3"
+                                        />
+                                    </TooltipBox>
+                                )}
+                        </OptionsContainerLeft>
+                        <OptionsContainerRight>
+                            {this.props.pageSummary?.length > 0 && (
+                                <TooltipBox
+                                    tooltipText={
+                                        <>
+                                            Create new note <br /> from output
+                                        </>
+                                    }
+                                    placement="bottom-end"
+                                >
+                                    <Icon
+                                        icon={'commentAdd'}
+                                        onClick={() => {
+                                            this.props.createNewNoteFromAISummary(
+                                                this.props.pageSummary,
+                                            )
+                                        }}
+                                        heightAndWidth="22px"
+                                        color="prime1"
+                                    />
+                                </TooltipBox>
+                            )}
+                            {this.props.renderAICounter('top')}
+                        </OptionsContainerRight>
+                    </OptionsContainer>
+                )}
+                {this.props.loadState === 'running' ? (
+                    <LoaderBoxInSummary>
+                        {this.renderLoader()}
+                    </LoaderBoxInSummary>
+                ) : this.props.showChapters ? (
+                    this.showChapterList()
+                ) : (
+                    this.showSummary()
+                )}
+                <SummaryFooter>
+                    <RightSideButtons>
+                        <BetaButton>
+                            <BetaButtonInner>BETA</BetaButtonInner>
+                        </BetaButton>
+                        <PrimaryAction
+                            type="tertiary"
+                            size="small"
+                            onClick={() => {
+                                window.open(
+                                    'https://memex.garden/chatsupport',
+                                    '_blank',
+                                )
+                            }}
+                            label="Report Bug"
+                        />
+                    </RightSideButtons>
+                    <PoweredBy>
+                        Powered by
+                        <Icon
+                            icon="openAI"
+                            height="18px"
+                            hoverOff
+                            width="70px"
+                        />
+                    </PoweredBy>
+                </SummaryFooter>
+            </AISidebarContainer>
+        )
+    }
+
+    renderRabbitHoleList() {
+        if (this.props.loadState === 'running') {
+            return (
+                <LoadingBox>
+                    <LoadingIndicator size={20} />
+                </LoadingBox>
+            )
+        }
+
+        const EmptyMessage = (message) => {
+            return (
+                <EmptyMessageContainer>
+                    <IconBox heightAndWidth="40px">
+                        <Icon
+                            filePath={icons.stars}
+                            heightAndWidth="20px"
+                            color="prime1"
+                            hoverOff
+                        />
+                    </IconBox>
+                    <InfoText>{message}</InfoText>
+                </EmptyMessageContainer>
+            )
+        }
+
+        const MySuggestionsResults = this.props.suggestionsResults?.filter(
+            (item) => {
+                return (
+                    item.creatorId === this.props.currentUser.id &&
+                    item.contentType !== 'rss-feed-item'
+                )
+            },
+        )
+
+        const OtherSuggestionsResults = this.props.suggestionsResults?.filter(
+            (item) => {
+                return (
+                    item.creatorId !== this.props.currentUser.id &&
+                    item.contentType !== 'rss-feed-item'
+                )
+            },
+        )
+
+        const RSSsuggestionsResults = this.props.suggestionsResults?.filter(
+            (item) => {
+                return item.contentType === 'rss-feed-item'
+            },
+        )
+
+        return (
+            <AnnotationsSectionStyled>
+                <SuggestionsListSwitcher>
+                    <SuggestionsSwitcherButton
+                        onClick={this.props.setActiveSuggestionsTab(
+                            'MySuggestions',
+                        )}
+                        active={
+                            this.props.activeSuggestionsTab === 'MySuggestions'
+                        }
+                    >
+                        Saved by Me
+                        <SuggestionsCounter
+                            hasResults={MySuggestionsResults.length}
+                        >
+                            {MySuggestionsResults.length}
+                        </SuggestionsCounter>
+                    </SuggestionsSwitcherButton>
+                    <SuggestionsSwitcherButton
+                        onClick={this.props.setActiveSuggestionsTab(
+                            'OtherSuggestions',
+                        )}
+                        active={
+                            this.props.activeSuggestionsTab ===
+                            'OtherSuggestions'
+                        }
+                    >
+                        By Others{' '}
+                        <SuggestionsCounter
+                            hasResults={OtherSuggestionsResults.length}
+                        >
+                            {OtherSuggestionsResults.length}
+                        </SuggestionsCounter>
+                    </SuggestionsSwitcherButton>
+                    <SuggestionsSwitcherButton
+                        onClick={this.props.setActiveSuggestionsTab(
+                            'RSSsuggestions',
+                        )}
+                        active={
+                            this.props.activeSuggestionsTab === 'RSSsuggestions'
+                        }
+                    >
+                        From RSS feeds
+                        <SuggestionsCounter
+                            hasResults={RSSsuggestionsResults.length}
+                        >
+                            {RSSsuggestionsResults.length}
+                        </SuggestionsCounter>
+                    </SuggestionsSwitcherButton>
+                </SuggestionsListSwitcher>
+                {this.props.activeSuggestionsTab === 'MySuggestions' && (
+                    <SuggestionsList>
+                        {MySuggestionsResults.map((item) => {
+                            return this.renderSuggestionsListItem(item)
+                        })}
+                        {MySuggestionsResults.length === 0 &&
+                            EmptyMessage(
+                                'No suitable suggestions found in your saved pages & annotations',
+                            )}
+                    </SuggestionsList>
+                )}
+                {this.props.activeSuggestionsTab === 'OtherSuggestions' && (
+                    <SuggestionsList>
+                        {OtherSuggestionsResults.map((item) => {
+                            return this.renderSuggestionsListItem(item)
+                        })}
+                        {OtherSuggestionsResults.length === 0 &&
+                            EmptyMessage(
+                                'No suitable suggestions found in Spaces you follow',
+                            )}
+                    </SuggestionsList>
+                )}
+                {this.props.activeSuggestionsTab === 'RSSsuggestions' && (
+                    <SuggestionsList>
+                        {RSSsuggestionsResults.map((item) => {
+                            return this.renderSuggestionsListItem(item)
+                        })}
+                        {RSSsuggestionsResults.length === 0 &&
+                            EmptyMessage(
+                                'No suitable suggestions found in your RSS feeds',
+                            )}
+                    </SuggestionsList>
+                )}
+            </AnnotationsSectionStyled>
+        )
+    }
+
+    renderSuggestionsListItem(item) {
         return (
             <ItemBox>
                 <StyledPageResult
@@ -1668,7 +2204,7 @@ export class AnnotationsSidebar extends React.Component<
                         if (item.contentType === 'annotation') {
                             this.props.onGoToAnnotation(item.unifiedId)
                         } else {
-                            window.open('https://' + item.normalizedUrl)
+                            window.open(item.fullUrl)
                         }
                     }}
                 >
@@ -1683,7 +2219,7 @@ export class AnnotationsSidebar extends React.Component<
                     >
                         <BlockContent
                             type={'page'}
-                            normalizedUrl={item.normalizedUrl}
+                            normalizedUrl={normalizeUrl(item.fullUrl)}
                             originalUrl={
                                 null
                                 // 'https://' + item.normalizedUrl
@@ -1762,544 +2298,12 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderLoader()
         }
 
-        const addPromptButton = (prompt) => (
-            <TooltipBox
-                tooltipText="Save prompt as template"
-                placement="bottom-end"
-            >
-                <Icon
-                    onClick={() => this.props.saveAIPrompt(prompt)}
-                    filePath={icons.plus}
-                    heightAndWidth="22px"
-                    color="prime1"
-                />
-            </TooltipBox>
-        )
-
         if (this.props.activeTab === 'rabbitHole') {
-            if (this.props.loadState === 'running') {
-                return (
-                    <LoadingBox>
-                        <LoadingIndicator size={20} />
-                    </LoadingBox>
-                )
-            }
-
-            const EmptyMessage = (message) => {
-                return (
-                    <EmptyMessageContainer>
-                        <IconBox heightAndWidth="40px">
-                            <Icon
-                                filePath={icons.stars}
-                                heightAndWidth="20px"
-                                color="prime1"
-                                hoverOff
-                            />
-                        </IconBox>
-                        <InfoText>{message}</InfoText>
-                    </EmptyMessageContainer>
-                )
-            }
-
-            const MySuggestionsResults = this.props.suggestionsResults?.filter(
-                (item) => {
-                    return (
-                        item.creatorId === this.props.currentUser.id &&
-                        item.contentType !== 'rss-feed-item'
-                    )
-                },
-            )
-
-            const OtherSuggestionsResults = this.props.suggestionsResults?.filter(
-                (item) => {
-                    return (
-                        item.creatorId !== this.props.currentUser.id &&
-                        item.contentType !== 'rss-feed-item'
-                    )
-                },
-            )
-
-            const RSSsuggestionsResults = this.props.suggestionsResults?.filter(
-                (item) => {
-                    return item.contentType === 'rss-feed-item'
-                },
-            )
-
-            return (
-                <AnnotationsSectionStyled>
-                    <SuggestionsListSwitcher>
-                        <SuggestionsSwitcherButton
-                            onClick={this.props.setActiveSuggestionsTab(
-                                'MySuggestions',
-                            )}
-                            active={
-                                this.props.activeSuggestionsTab ===
-                                'MySuggestions'
-                            }
-                        >
-                            Saved by Me
-                            <SuggestionsCounter
-                                hasResults={MySuggestionsResults.length}
-                            >
-                                {MySuggestionsResults.length}
-                            </SuggestionsCounter>
-                        </SuggestionsSwitcherButton>
-                        <SuggestionsSwitcherButton
-                            onClick={this.props.setActiveSuggestionsTab(
-                                'OtherSuggestions',
-                            )}
-                            active={
-                                this.props.activeSuggestionsTab ===
-                                'OtherSuggestions'
-                            }
-                        >
-                            By Others{' '}
-                            <SuggestionsCounter
-                                hasResults={OtherSuggestionsResults.length}
-                            >
-                                {OtherSuggestionsResults.length}
-                            </SuggestionsCounter>
-                        </SuggestionsSwitcherButton>
-                        <SuggestionsSwitcherButton
-                            onClick={this.props.setActiveSuggestionsTab(
-                                'RSSsuggestions',
-                            )}
-                            active={
-                                this.props.activeSuggestionsTab ===
-                                'RSSsuggestions'
-                            }
-                        >
-                            From RSS feeds
-                            <SuggestionsCounter
-                                hasResults={RSSsuggestionsResults.length}
-                            >
-                                {RSSsuggestionsResults.length}
-                            </SuggestionsCounter>
-                        </SuggestionsSwitcherButton>
-                    </SuggestionsListSwitcher>
-                    {this.props.activeSuggestionsTab === 'MySuggestions' && (
-                        <SuggestionsList>
-                            {MySuggestionsResults.map((item) => {
-                                return this.renderSuggestionsList(item)
-                            })}
-                            {MySuggestionsResults.length === 0 &&
-                                EmptyMessage(
-                                    'No suitable suggestions found in your saved pages & annotations',
-                                )}
-                        </SuggestionsList>
-                    )}
-                    {this.props.activeSuggestionsTab === 'OtherSuggestions' && (
-                        <SuggestionsList>
-                            {OtherSuggestionsResults.map((item) => {
-                                return this.renderSuggestionsList(item)
-                            })}
-                            {OtherSuggestionsResults.length === 0 &&
-                                EmptyMessage(
-                                    'No suitable suggestions found in Spaces you follow',
-                                )}
-                        </SuggestionsList>
-                    )}
-                    {this.props.activeSuggestionsTab === 'RSSsuggestions' && (
-                        <SuggestionsList>
-                            {RSSsuggestionsResults.map((item) => {
-                                return this.renderSuggestionsList(item)
-                            })}
-                            {RSSsuggestionsResults.length === 0 &&
-                                EmptyMessage(
-                                    'No suitable suggestions found in your RSS feeds',
-                                )}
-                        </SuggestionsList>
-                    )}
-                </AnnotationsSectionStyled>
-            )
+            return <>{this.renderRabbitHoleList()}</>
         }
 
         if (this.props.activeTab === 'summary') {
-            const SuggestionsList = ({
-                AIsuggestions,
-            }: Pick<AnnotationsSidebarProps, 'AIsuggestions'>) => {
-                return (
-                    <ClickAway
-                        onClickAway={() =>
-                            this.props.toggleAISuggestionsDropDown()
-                        }
-                    >
-                        <DropDown>
-                            {AIsuggestions.map((suggestion) => (
-                                <DropDownItem
-                                    key={suggestion.prompt}
-                                    onClick={() =>
-                                        this.props.selectAISuggestion(
-                                            suggestion.prompt,
-                                        )
-                                    }
-                                    focused={
-                                        suggestion.focused && suggestion.focused
-                                    }
-                                >
-                                    {suggestion.prompt}
-                                    <RemoveTemplateIconBox>
-                                        <TooltipBox
-                                            tooltipText="Remove template"
-                                            placement="left"
-                                        >
-                                            <Icon
-                                                filePath={icons.removeX}
-                                                heightAndWidth="18px"
-                                                color="greyScale5"
-                                                onClick={(event) => {
-                                                    event.stopPropagation()
-                                                    this.props.removeAISuggestion(
-                                                        suggestion.prompt,
-                                                    )
-                                                }}
-                                            />
-                                        </TooltipBox>
-                                    </RemoveTemplateIconBox>
-                                </DropDownItem>
-                            ))}
-                        </DropDown>
-                    </ClickAway>
-                )
-            }
-
-            return (
-                <AISidebarContainer>
-                    {this.props.selectedTextAIPreview && (
-                        <SelectedAITextBox>
-                            <SelectedAITextHeader>
-                                <SelectedHeaderButtonBox>
-                                    Selected Text
-                                    <PrimaryAction
-                                        icon={'removeX'}
-                                        onClick={() =>
-                                            this.props.removeSelectedTextAIPreview()
-                                        }
-                                        type="tertiary"
-                                        size="small"
-                                        label={'Reset'}
-                                        padding={'0px 5px 0px 2px'}
-                                    />
-                                </SelectedHeaderButtonBox>
-                                <PrimaryAction
-                                    icon={
-                                        this.state.showAIhighlight
-                                            ? 'compress'
-                                            : 'expand'
-                                    }
-                                    padding={'0px 5px 0px 2px'}
-                                    onClick={() =>
-                                        this.setState({
-                                            showAIhighlight: !this.state
-                                                .showAIhighlight,
-                                        })
-                                    }
-                                    type="tertiary"
-                                    size="small"
-                                    label={
-                                        this.state.showAIhighlight
-                                            ? 'Hide'
-                                            : 'Show All'
-                                    }
-                                />
-                            </SelectedAITextHeader>
-                            <SelectedAITextContainer
-                                fullHeight={this.state.showAIhighlight}
-                            >
-                                <SelectedTextBoxBar />
-                                <SelectedAIText
-                                    fullHeight={this.state.showAIhighlight}
-                                >
-                                    {this.props.selectedTextAIPreview}
-                                </SelectedAIText>
-                                {!this.state.showAIhighlight && (
-                                    <BlurContainer />
-                                )}
-                            </SelectedAITextContainer>
-                        </SelectedAITextBox>
-                    )}
-                    <QueryContainer
-                        AIDropDownShown={
-                            this.props.showAISuggestionsDropDown &&
-                            this.props.AIsuggestions?.length > 0
-                        }
-                    >
-                        <TextField
-                            placeholder={
-                                this.props.prompt ??
-                                'Type a prompt like "Summarize in 2 paragraphs"'
-                            }
-                            value={this.props.prompt}
-                            icon="feed"
-                            element={null}
-                            iconSize="18px"
-                            height="40px"
-                            onChange={async (event) => {
-                                await this.props.updatePromptState(
-                                    (event.target as HTMLInputElement).value,
-                                )
-                            }}
-                            onKeyDown={async (event) => {
-                                if (event.key === 'Enter') {
-                                    await this.props.queryAIwithPrompt(
-                                        this.props.prompt,
-                                    )
-                                }
-                                if (event.key === 'Escape') {
-                                    this.props.toggleAISuggestionsDropDown()
-                                }
-                                if (event.key === 'ArrowUp') {
-                                    if (!this.props.showAISuggestionsDropDown) {
-                                        this.props.toggleAISuggestionsDropDown()
-                                    }
-                                    this.props.navigateFocusInList('up')
-                                    focus()
-                                }
-
-                                if (event.key === 'ArrowDown') {
-                                    if (!this.props.showAISuggestionsDropDown) {
-                                        this.props.toggleAISuggestionsDropDown()
-                                    }
-                                    this.props.navigateFocusInList('down')
-                                    focus()
-                                }
-                                event.stopPropagation()
-                            }}
-                            onKeyUp={async (event) => {
-                                event.stopPropagation()
-                            }}
-                            onClick={() =>
-                                this.props.toggleAISuggestionsDropDown()
-                            }
-                            actionButton={
-                                this.props.prompt &&
-                                this.props.prompt?.length > 0 &&
-                                addPromptButton(this.props.prompt)
-                            }
-                            autoFocus={this.props.activeTab === 'summary'}
-                        />
-                        {this.props.showAISuggestionsDropDown &&
-                            this.props.AIsuggestions?.length > 0 && (
-                                <SuggestionsList {...this.props} />
-                            )}
-                    </QueryContainer>
-                    {!this.props.selectedTextAIPreview && (
-                        <OptionsContainer>
-                            <OptionsContainerLeft>
-                                <DropdownMenuBtnSmall
-                                    elementHeight="fit-content"
-                                    hideDescriptionInPreview
-                                    menuItems={[
-                                        {
-                                            id: 'summarize',
-                                            name: 'Summarize',
-                                            info: 'Best for summarisations',
-                                        },
-                                        {
-                                            id: 'chapters',
-                                            name: 'Chapters',
-                                            info:
-                                                'Get chapter overview and summaries',
-                                        },
-                                        {
-                                            id: 'Question',
-                                            name: 'General Question',
-                                            info: 'Unrelated to the content',
-                                        },
-                                    ]}
-                                    onMenuItemClick={async (props, index) => {
-                                        let queryMode
-                                        if (index === 0) {
-                                            queryMode = 'summarize'
-                                        }
-                                        if (index === 1) {
-                                            queryMode = 'chapterSummary'
-                                        }
-                                        if (index === 2) {
-                                            queryMode = 'question'
-                                        }
-                                        this.props.setQueryMode(queryMode)
-
-                                        if (index === 0) {
-                                            await this.props.queryAIwithPrompt(
-                                                this.props.prompt,
-                                            )
-                                        }
-                                        if (index === 1) {
-                                            await this.props.getVideoChapters()
-                                        }
-
-                                        if (index === 2) {
-                                            await this.props.queryAIwithPrompt(
-                                                this.props.prompt,
-                                                undefined,
-                                                queryMode,
-                                            )
-                                        }
-                                    }}
-                                    initSelectedIndex={
-                                        this.props.queryMode ===
-                                        'chapterSummary'
-                                            ? 1
-                                            : 0
-                                    }
-                                    selectedState={
-                                        this.props.queryMode ===
-                                            'chapterSummary' && 1
-                                    }
-                                    keepSelectedState
-                                />
-                                <DropdownMenuBtnSmall
-                                    elementHeight="fit-content"
-                                    hideDescriptionInPreview
-                                    menuItems={[
-                                        {
-                                            id: 'GPT 3.5',
-                                            name: 'GPT 3.5',
-                                            info: 'Fast & decent',
-                                        },
-                                        {
-                                            id: 'GPT 4',
-                                            name: 'GPT 4',
-                                            isDisabled: this.props.hasKey
-                                                ? false
-                                                : true,
-                                            info: (
-                                                <span>
-                                                    Better at understanding
-                                                    logic
-                                                    <br />
-                                                    ONLY WITH OWN KEY
-                                                </span>
-                                            ),
-                                        },
-                                    ]}
-                                    onMenuItemClick={(props, index) => {
-                                        let AImodel
-                                        if (index === 0) {
-                                            AImodel = 'gpt-3.5-turbo-1106'
-                                        }
-                                        if (index === 1) {
-                                            AImodel = 'gpt-4-0613'
-                                        }
-                                        this.props.setAIModel(AImodel)
-                                    }}
-                                    initSelectedIndex={0}
-                                    keepSelectedState
-                                />
-
-                                {!this.props.fullPageUrl.includes(
-                                    'youtube.com/watch',
-                                ) &&
-                                    (this.props.sidebarContext === 'in-page' ||
-                                        this.props.queryMode !==
-                                            'question') && (
-                                        <TooltipBox
-                                            tooltipText={
-                                                <>
-                                                    For performance we usually
-                                                    fetch the text via our
-                                                    servers but sometimes we
-                                                    can't reach it. E.g. if you
-                                                    are behind a paywall.
-                                                    <br /> Use this to extract
-                                                    the content from the page.
-                                                </>
-                                            }
-                                            placement="bottom"
-                                            width="150px"
-                                        >
-                                            <Checkbox
-                                                key={1}
-                                                id={'1'}
-                                                isChecked={
-                                                    this.props.fetchLocalHTML
-                                                }
-                                                handleChange={() =>
-                                                    this.props.fetchLocalHTML
-                                                        ? this.props.changeFetchLocalHTML(
-                                                              false,
-                                                          )
-                                                        : this.props.changeFetchLocalHTML(
-                                                              true,
-                                                          )
-                                                }
-                                                // isDisabled={!this.state.shortcutsEnabled}
-                                                name={'Local Content'}
-                                                label={'Local Content'}
-                                                size={14}
-                                                fontSize={12}
-                                                checkBoxColor="black"
-                                                borderColor="greyScale3"
-                                            />
-                                        </TooltipBox>
-                                    )}
-                            </OptionsContainerLeft>
-                            <OptionsContainerRight>
-                                {this.props.pageSummary?.length > 0 && (
-                                    <TooltipBox
-                                        tooltipText={
-                                            <>
-                                                Create new note <br /> from
-                                                output
-                                            </>
-                                        }
-                                        placement="bottom-end"
-                                    >
-                                        <Icon
-                                            icon={'commentAdd'}
-                                            onClick={() => {
-                                                this.props.createNewNoteFromAISummary(
-                                                    this.props.pageSummary,
-                                                )
-                                            }}
-                                            heightAndWidth="22px"
-                                            color="prime1"
-                                        />
-                                    </TooltipBox>
-                                )}
-                                {this.props.renderAICounter('top')}
-                            </OptionsContainerRight>
-                        </OptionsContainer>
-                    )}
-                    {this.props.loadState === 'running' ? (
-                        <LoaderBoxInSummary>
-                            {this.renderLoader()}
-                        </LoaderBoxInSummary>
-                    ) : this.props.showChapters ? (
-                        this.showChapterList()
-                    ) : (
-                        this.showSummary()
-                    )}
-                    <SummaryFooter>
-                        <RightSideButtons>
-                            <BetaButton>
-                                <BetaButtonInner>BETA</BetaButtonInner>
-                            </BetaButton>
-                            <PrimaryAction
-                                type="tertiary"
-                                size="small"
-                                onClick={() => {
-                                    window.open(
-                                        'https://memex.garden/chatsupport',
-                                        '_blank',
-                                    )
-                                }}
-                                label="Report Bug"
-                            />
-                        </RightSideButtons>
-                        <PoweredBy>
-                            Powered by
-                            <Icon
-                                icon="openAI"
-                                height="18px"
-                                hoverOff
-                                width="70px"
-                            />
-                        </PoweredBy>
-                    </SummaryFooter>
-                </AISidebarContainer>
-            )
+            return this.renderQaASection()
         }
 
         if (

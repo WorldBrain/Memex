@@ -490,15 +490,16 @@ export interface AnnotationCardInstance {
     color: string
 }
 export interface SuggestionCard {
-    normalizedUrl: UnifiedAnnotation['unifiedId']
+    fullUrl: UnifiedAnnotation['unifiedId']
     fullTitle: string
     description?: boolean
-    contentType: 'page' | 'annotation'
+    contentType: 'page' | 'annotation' | 'rss-feed-item'
     creatorId?: UserReference['id']
     spaces?: any
     body?: string
     comment?: string
     unifiedId?: UnifiedAnnotation['unifiedId']
+    sourceApplication?: string
 }
 
 export interface ListInstance {

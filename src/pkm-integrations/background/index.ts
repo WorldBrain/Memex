@@ -5,10 +5,8 @@ import { marked } from 'marked'
 import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
-import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
-import { pageTitle } from 'src/sidebar-overlay/sidebar/selectors'
 import type { PkmSyncInterface } from './types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { sleepPromise } from 'src/util/promises'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -21,6 +19,9 @@ export class PKMSyncBackgroundModule {
         this.backendNew = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
+        this.remoteFunctions = {
+            addRSSfeedSource: this.addRSSfeedSource,
+        }
     }
 
     setupRemoteFunctions() {
@@ -33,14 +34,23 @@ export class PKMSyncBackgroundModule {
         if (await this.backendNew.isConnected()) {
             const document = {
                 createdWhen: entryData.createdWhen,
-                userId: entryData.userId,
+                creatorId: entryData.creatorId,
                 pageTitle: entryData.pageTitle,
-                normalizedUrl: entryData.normalizedUrl,
+                fullUrl: entryData.fullUrl,
                 contentType: entryData.contentType,
-                contentText: entryData.contentText,
+                fullHTML: entryData.fullHTML,
             }
 
             await this.backendNew.vectorIndexDocument(document)
+        }
+    }
+    addRSSfeedSource = async (feedUrl: string, isSubstack: boolean) => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+        console.log('arrives here', feedUrl, isSubstack)
+        if (await backend.isConnected()) {
+            await backend.addRSSfeedSource(feedUrl, isSubstack)
         }
     }
 

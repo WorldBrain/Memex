@@ -1318,7 +1318,6 @@ export class AnnotationsSidebarContainer<
                                 })
                             }}
                             setActiveSuggestionsTab={(tab) => (event) => {
-                                console.log('setActiveSuggestionsTab', tab)
                                 this.processEvent('setActiveSuggestionsTab', {
                                     tab,
                                 })

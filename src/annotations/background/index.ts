@@ -359,7 +359,7 @@ export default class DirectLinkingBackground {
     }
 
     async getAnnotationByPk(_, { url }: { url: string }) {
-        console.log('getAnnotationByPk1', url)
+        console.log('url', url)
         return this.annotationStorage.getAnnotationByPk({ url })
     }
 

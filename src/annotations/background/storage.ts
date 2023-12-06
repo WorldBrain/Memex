@@ -506,7 +506,6 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async getAnnotationByPk({ url }: { url: string }) {
-        console.log('getAnnotationByPk', url)
         const annotation = this.operation('findAnnotationByUrl', { url })
         return annotation
     }
@@ -569,11 +568,11 @@ export default class AnnotationStorage extends StorageModule {
 
             const annotationData = {
                 pageTitle: pageTitle,
-                normalizedUrl: url,
+                fullUrl: 'https://' + url,
                 createdWhen: Math.floor(createdWhen.getTime() / 1000),
-                userId: userId,
+                creatorId: userId,
                 contentType: 'annotation',
-                contentText: (body ?? '') + (comment ? ' ' + comment : ''),
+                fullHTML: (body ?? '') + (comment ? ' ' + comment : ''),
             }
             await createRabbitHoleEntry(annotationData, this.options.pkmSyncBG)
         } catch (e) {}
@@ -622,9 +621,10 @@ export default class AnnotationStorage extends StorageModule {
         comment: string,
         color: string,
         lastEdited = new Date(),
+        userId: string,
     ) {
-        if (await isPkmSyncEnabled()) {
-            try {
+        try {
+            if (!(await isPkmSyncEnabled())) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
 
@@ -667,8 +667,25 @@ export default class AnnotationStorage extends StorageModule {
                             listNames: listNames,
                         }),
                 )
-            } catch (e) {}
-        }
+                const annotationDataForRabbitHole = {
+                    pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
+                    fullUrl: 'https://' + annotationDataForPKMSyncUpdate.url,
+                    createdWhen:
+                        Math.floor(
+                            annotationDataForPKMSyncUpdate.createdWhen,
+                        ).getTime() / 1000,
+                    creatorId: userId,
+                    contentType: 'annotation',
+                    fullHTML:
+                        (annotationDataForPKMSyncUpdate.body ?? '') +
+                        (comment ? ' ' + comment : ''),
+                }
+                await createRabbitHoleEntry(
+                    annotationDataForRabbitHole,
+                    this.options.pkmSyncBG,
+                )
+            }
+        } catch (e) {}
 
         return this.operation('editAnnotation', {
             url,

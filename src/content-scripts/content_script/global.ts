@@ -96,6 +96,7 @@ import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshot
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -204,6 +205,7 @@ export async function main(
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+    const pkmSyncBG = runInBackground<PKMSyncBackgroundModule>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
@@ -952,6 +954,15 @@ export async function main(
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
 
+    const checkIfSubstackHeader = () => {
+        const headerLinks = document.head.getElementsByTagName('link')
+        for (let link of headerLinks) {
+            if (link.href.startsWith('https://substackcdn.com')) {
+                return true
+            }
+        }
+    }
+
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
@@ -1058,11 +1069,16 @@ export async function main(
                 }
                 loadYoutubeButtons(annotationsFunctions)
             }
-            if (window.location.hostname.includes('.substack.com')) {
+
+            if (
+                window.location.hostname.includes('.substack.com') ||
+                checkIfSubstackHeader()
+            ) {
                 injectSubstackButtons(
                     collectionsBG,
                     pageIndexingBG,
                     analyticsBG,
+                    pkmSyncBG,
                 )
             }
 
@@ -1151,8 +1167,16 @@ export async function main(
     if (window.location.hostname === 'www.youtube.com') {
         loadYoutubeButtons(annotationsFunctions)
     }
-    if (window.location.hostname.includes('.substack.com')) {
-        injectSubstackButtons(collectionsBG, pageIndexingBG, analyticsBG)
+    if (
+        window.location.hostname.includes('.substack.com') ||
+        checkIfSubstackHeader()
+    ) {
+        injectSubstackButtons(
+            collectionsBG,
+            pageIndexingBG,
+            analyticsBG,
+            pkmSyncBG,
+        )
     }
 
     if (window.location.href.includes('web.telegram.org/')) {
@@ -1485,107 +1509,9 @@ export async function injectTelegramCustomUI(
     }
 }
 
-export async function indexRSSfeed(
-    feedUrl,
-    collectionsBG,
-    pageIndexingBG,
-    analyticsBG,
-) {
-    const feedData = new Promise((resolve, reject) => {
-        let xhr = new XMLHttpRequest()
-        xhr.open('GET', feedUrl)
-        xhr.onload = function () {
-            if (xhr.status === 200) {
-                resolve(xhr.responseText)
-            } else {
-                reject(new Error('Failed to load RSS feed: ' + xhr.status))
-            }
-        }
-        xhr.send()
-    })
-
+export async function indexRSSfeed(feedUrl, pkmSyncBG, isSubstack) {
     try {
-        const data = await feedData
-        let parser = new DOMParser()
-        let xmlDoc = parser.parseFromString(data as string, 'text/xml')
-        let feedTitle = xmlDoc
-            .getElementsByTagName('channel')[0]
-            .getElementsByTagName('title')[0].childNodes[0].nodeValue
-
-        const ListData = await collectionsBG.createCustomList({
-            name: feedTitle,
-            isDeletable: true,
-            type: 'rss-feed',
-        })
-
-        let items = xmlDoc.getElementsByTagName('item')
-        for (let i = 0; i < items.length; i++) {
-            let item = items[i]
-            // You can now use the item variable to access each item in the RSS feed
-
-            let title = item.getElementsByTagName('title')[0].textContent
-
-            // [0].childNodes[0].nodeValue
-            let description = item.getElementsByTagName('description')[0]
-                .textContent
-            let link = item.getElementsByTagName('link')[0].textContent
-            let pubDate = item.getElementsByTagName('pubDate')[0].textContent
-            let content = item.getElementsByTagName('content:encoded')[0]
-                .textContent
-            let createdWhen = new Date(pubDate).getTime()
-
-            // Create a new DOMParser to parse the HTML string
-            let parser = new DOMParser()
-            // Parse the HTML string to a document
-            let contentDoc = parser.parseFromString(content, 'text/html')
-            // Get the innerText of the document
-            const textContent = contentDoc.body.innerText
-
-            // const document = {
-            //     listId: ListData.localListId,
-            //     pageUrl: normalizeUrl(link),
-            //     fullUrl: link,
-            //     createdAt: createdWhen,
-            //     pageTitle: title,
-            //     analyticsBG: null,
-            //     isShared: false,
-            //     dontTrack: true,
-            // }
-
-            // console.log('document', document)
-
-            await collectionsBG.insertPageToList({
-                id: ListData.localListId,
-                url: link,
-                createdAt: createdWhen,
-                pageTitle: title,
-                analyticsBG: analyticsBG,
-                isShared: false,
-                dontTrack: true,
-                indexUrl: true,
-                contentType: 'rss-feed-item',
-                pageHTML: content,
-            })
-
-            // await pageIndexingBG.addPage({
-            //     content: {
-            //         fullText: textContent,
-            //         title: title,
-            //     },
-            //     url: normalizeUrl(link),
-            //     originalUrl: link,
-            //     favIconURI: null,
-            // })
-            // await pageIndexingBG.indexPage({
-            //     fullUrl: link,
-            //     visitTime: new Date(pubDate),
-            //     skipUpdatePageCount: true,
-            //     metaData: {
-            //         pageTitle: title,
-            //         pageHTML: content,
-            //     },
-            // })
-        }
+        await pkmSyncBG.addRSSfeedSource(feedUrl, isSubstack)
     } catch (error) {
         console.error('Error:', error)
     }
@@ -2075,13 +2001,14 @@ export function injectSubstackButtons(
     collectionsBG,
     pageIndexingBG,
     analyticsBG,
+    pkmSyncBG,
 ) {
     const existingMemexButtons = document.getElementById('memexButtons')
     if (existingMemexButtons) {
         existingMemexButtons.remove()
     }
     const url = new URL(window.location.href)
-    const feedUrl = `${url.protocol}//${url.hostname}/feed`
+    const feedUrl = `${url.protocol}//${url.hostname}`
 
     const NavBarButtons = document.getElementsByClassName('navbar-buttons')
     const memexButtons = document.createElement('div')
@@ -2103,7 +2030,7 @@ export function injectSubstackButtons(
     memexButtons.innerText = 'Follow with Memex'
     memexButtons.onclick = async () => {
         memexButtons.innerText = 'Followed!'
-        await indexRSSfeed(feedUrl, collectionsBG, pageIndexingBG, analyticsBG)
+        await indexRSSfeed(feedUrl, pkmSyncBG, true)
     }
 
     // MemexIconDisplay

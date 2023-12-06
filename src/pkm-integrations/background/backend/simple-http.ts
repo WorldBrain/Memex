@@ -94,69 +94,80 @@ export class MemexLocalBackend {
         }
     }
 
-    async splitContentInReasonableChunks(document) {
-        const parser = new DOMParser()
-
-        const htmlString =
-            '<html><body>' + document.contentText + '</body></html>'
-
-        const htmlDoc = parser.parseFromString(htmlString, 'text/html')
-        const paragraphs = htmlDoc.querySelectorAll('p')
-
-        let chunks = []
-
-        paragraphs.forEach((paragraph) => {
-            let chunk = paragraph.textContent
-
-            const turndownService = new TurndownService()
-            chunk = turndownService.turndown(chunk)
-
-            chunks.push(chunk)
-        })
-
-        return chunks
-    }
-
     async vectorIndexDocument(document): Promise<any> {
         const syncKey = await getPkmSyncKey()
+        let body
 
-        const body = {
-            sourceApplication: 'Memex',
-            createdWhen: document.createdWhen,
-            pageTitle: document.pageTitle,
-            userId: document.userId,
-            normalizedUrl: document.normalizedUrl,
-            contentType: document.contentType,
-            contentText: document.contentText,
-            syncKey: syncKey,
-        }
+        console.log('document', document)
 
-        const response = await fetch(`${this.url}/index_document`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(body),
-        })
+        if (document.contentType === 'annotation') {
+            body = {
+                sourceApplication: 'Memex',
+                createdWhen: document.createdWhen,
+                pageTitle: document.pageTitle,
+                creatorId: document.creatorId,
+                fullUrl: document.fullUrl,
+                contentType: document.contentType,
+                fullHTML: document.fullHTML,
+                syncKey: syncKey,
+            }
 
-        if (response.ok) {
-            console.log('chunk processed', chunk)
-        }
+            const response = await fetch(`${this.url}/add_annotation`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            })
 
-        if (!response.ok || response.status !== 200) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+            if (response.ok) {
+            }
+
+            if (!response.ok || response.status !== 200) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+        } else {
+            body = {
+                sourceApplication: 'Memex',
+                createdWhen: document.createdWhen,
+                pageTitle: document.pageTitle,
+                creatorId: document.creatorId,
+                fullUrl: document.fullUrl,
+                contentType: document.contentType,
+                fullHTML: document.fullHTML,
+                syncKey: syncKey,
+            }
+            const response = await fetch(`${this.url}/add_page`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(body),
+            })
+
+            if (response.ok) {
+                console.log('chunk processed')
+            }
+
+            if (!response.ok || response.status !== 200) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
         }
     }
-    async findSimilar(document, normalizedUrl): Promise<any> {
+    async findSimilar(document, fullUrl): Promise<any> {
         const syncKey = await getPkmSyncKey()
+
+        console.log('document', fullUrl)
 
         const body = JSON.stringify({
             contentText: document,
-            normalizedUrl: normalizedUrl,
+            fullUrl: fullUrl,
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/find_similar`, {
+        console.log('body', body)
+
+        const response = await fetch(`${this.url}/get_similar`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -171,6 +182,32 @@ export class MemexLocalBackend {
 
         if (!response.ok || response.status !== 200) {
             throw new Error(`HTTP error! status: ${response.status}`)
+        }
+    }
+    async addRSSfeedSource(feedUrl, isSubstack): Promise<any> {
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            feedUrl: feedUrl,
+            syncKey: syncKey,
+            isSubstack: isSubstack,
+        })
+
+        const response = await fetch(`${this.url}/add_rss_feed_source`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
+
+        if (response.ok) {
+            const responseObj = await response.json()
+            return responseObj
+        }
+
+        if (!response.ok || response.status !== 200) {
+            throw new Error(`Error getting all RSS feeds: ${response.status}`)
         }
     }
 

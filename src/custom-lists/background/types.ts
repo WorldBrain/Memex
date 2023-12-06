@@ -141,7 +141,7 @@ export interface RemoteCollectionsInterface {
     fetchListById(args: { id: number }): Promise<PageList>
     findSimilarBackground(
         currentPageContent: string,
-        normalizedUrl: string,
+        fullUrl: string,
     ): Promise<PageList>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
     fetchPageListEntriesByUrl(args: { url: string }): Promise<PageListEntry[]>

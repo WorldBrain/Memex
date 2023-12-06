@@ -486,7 +486,6 @@ export default class ContentSharingBackground {
     shareAnnotation: ContentSharingInterface['shareAnnotation'] = async (
         options,
     ) => {
-        console.log('shareAnnotations', options)
         return this.annotationSharingService.shareAnnotation(options)
     }
 

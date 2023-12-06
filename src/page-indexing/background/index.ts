@@ -477,7 +477,6 @@ export class PageIndexingBackground {
     async createOrUpdatePage(
         pageData: PipelineRes,
         opts: PageCreationOpts = {},
-        props: PageCreationProps,
     ) {
         const { favIconURI } = pageData
 
@@ -500,12 +499,7 @@ export class PageIndexingBackground {
         if (existingPage) {
             await this.storage.updatePage(pageData, existingPage)
         } else {
-            await this.storage.createPage(
-                pageData,
-                pageContentInfo,
-                userId,
-                props,
-            )
+            await this.storage.createPage(pageData, pageContentInfo, userId)
         }
 
         if (contentIdentifier) {
@@ -599,13 +593,7 @@ export class PageIndexingBackground {
             pageData.fullTitle = props.metaData.pageTitle
         }
 
-        console.log('pageData', pageData)
-
-        if (props.metaData?.pageHTML) {
-            pageData.htmlBody = props.metaData.pageHTML
-        }
-
-        await this.createOrUpdatePage(pageData, opts, props)
+        await this.createOrUpdatePage(pageData, opts)
 
         if (props.visitTime) {
             await this.storage.addPageVisit(

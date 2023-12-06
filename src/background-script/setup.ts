@@ -147,6 +147,7 @@ export interface BackgroundModules {
     userMessages: UserMessageService
     personalCloud: PersonalCloudBackground
     imageSupport: ImageSupportBackground
+    pkmSyncBG: PKMSyncBackgroundModule
 }
 
 export function createBackgroundModules(options: {
@@ -606,6 +607,7 @@ export function createBackgroundModules(options: {
             summarizeBG,
             auth,
             contentSharing,
+            pkmSyncBG,
         },
     })
 
@@ -620,6 +622,7 @@ export function createBackgroundModules(options: {
         // connectivityChecker,
         readable: reader,
         pdfBg,
+        pkmSyncBG,
         directLinking,
         search,
         eventLog: new EventLogBackground({ storageManager }),

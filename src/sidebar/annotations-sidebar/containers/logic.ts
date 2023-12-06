@@ -2770,7 +2770,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        console.log('setActiveSuggestionsTab', event.tab)
         this.emitMutation({
             activeSuggestionsTab: { $set: event.tab },
         })
@@ -2861,6 +2860,8 @@ export class SidebarContainerLogic extends UILogic<
                 prompt: prompt,
             })
 
+            console.log('summary', summary)
+
             const summarisedText = summary.choices[0].text
 
             // add step to summmarise page and extract key information suitable for similiarity search
@@ -2868,7 +2869,9 @@ export class SidebarContainerLogic extends UILogic<
             let results
             results = await this.options.customListsBG.findSimilarBackground(
                 summarisedText,
-                normalizeUrl(previousState.fullPageUrl),
+                normalizeUrl(previousState.fullPageUrl, {
+                    skipProtocolTrim: true,
+                }),
             )
 
             console.log('ressssss', results)
@@ -2892,7 +2895,9 @@ export class SidebarContainerLogic extends UILogic<
             })
             const results = await this.options.customListsBG.findSimilarBackground(
                 selectedText,
-                normalizeUrl(this.previousState.fullPageUrl),
+                normalizeUrl(this.previousState.fullPageUrl, {
+                    skipProtocolTrim: true,
+                }),
             )
             await this.updateSuggestionResults(results)
         }
@@ -2917,10 +2922,12 @@ export class SidebarContainerLogic extends UILogic<
             let pageData
             let pageToDisplay: SuggestionCard
 
-            if (userId != result.userId) {
+            console.log('result', result, userId, result.userId)
+
+            if (userId != result.creatorId) {
                 const followedPageListData = []
                 const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
-                    'https://' + result.normalizedUrl,
+                    result.fullUrl,
                 )
 
                 for (let spaceItemKey in spacesData) {
@@ -2937,12 +2944,13 @@ export class SidebarContainerLogic extends UILogic<
                 }
 
                 pageToDisplay = {
-                    normalizedUrl: result.normalizedUrl,
+                    fullUrl: result.fullUrl,
                     fullTitle: result.pageTitle,
                     description: result.contentText,
                     contentType: result.contentType,
-                    creatorId: result.userId,
+                    creatorId: result.creatorId,
                     spaces: followedPageListData,
+                    sourceApplication: result.sourceApplication,
                 }
             } else {
                 if (
@@ -2951,7 +2959,7 @@ export class SidebarContainerLogic extends UILogic<
                 ) {
                     const pageListData = []
                     pageData = await this.options.customListsBG.findPageByUrl(
-                        result.normalizedUrl,
+                        normalizeUrl(result.fullUrl),
                     )
 
                     const pageLists = await this.options.customListsBG.fetchPageLists(
@@ -2976,7 +2984,7 @@ export class SidebarContainerLogic extends UILogic<
                     }
 
                     pageToDisplay = {
-                        normalizedUrl: normalizeUrl(pageData.fullUrl),
+                        fullUrl: pageData.fullUrl,
                         fullTitle: pageData.fullTitle,
                         description: result.contentText,
                         contentType: result.contentType,
@@ -2984,13 +2992,24 @@ export class SidebarContainerLogic extends UILogic<
                         spaces: pageListData ?? null,
                     }
                 } else if (result.contentType === 'annotation') {
+                    console.log('is annotation', result)
                     try {
-                        const annotationUrl = result.normalizedUrl.split(
-                            '/#',
-                        )[0]
+                        const annotationUrl = normalizeUrl(
+                            result.fullUrl,
+                        ).split('/#')[0]
+
+                        const normalizedUrl = normalizeUrl(result.fullUrl, {
+                            stripHash: false,
+                        })
+
+                        console.log('normalizedUrl', normalizedUrl)
                         let annotationRawData = await this.options.annotationsBG.getAnnotationByPk(
-                            { url: result.normalizedUrl },
+                            {
+                                url: result.fullUrl.replace('https://', ''),
+                            },
                         )
+
+                        console.log('annotationRawData', annotationRawData)
 
                         // Convert the string to a Date object
                         let createdWhenDate = new Date(
@@ -3015,26 +3034,27 @@ export class SidebarContainerLogic extends UILogic<
                             annotationRawData,
                             annotationRawData.createdWhen,
                         )
+                        console.log('annotationForCache', annotationForCache)
                         const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
                             annotationForCache,
                         )
 
+                        console.log(
+                            'annotationsCacheVersion',
+                            annotationsCacheVersion,
+                        )
+
                         if (annotationsCacheVersion) {
-                            console.log(
-                                'annotationsCacheVersion',
-                                annotationsCacheVersion,
-                            )
-                            console.log('annotationRawData', annotationRawData)
                             pageToDisplay = {
-                                normalizedUrl: annotationUrl,
+                                fullUrl: annotationUrl,
                                 fullTitle: result.pageTitle ?? annotationUrl,
                                 body: annotationRawData?.body ?? null,
                                 comment: annotationRawData?.comment ?? null,
                                 contentType: result.contentType,
-                                creatorId: result.userId,
+                                creatorId: result.creatorId,
                                 unifiedId: annotationsCacheVersion.unifiedId,
                             }
-                            console.log('Annotation to display', pageToDisplay)
+                            console.log('pageToDisplay', pageToDisplay)
                         }
                     } catch (e) {
                         console.log('Error', e)

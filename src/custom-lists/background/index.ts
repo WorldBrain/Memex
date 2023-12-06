@@ -223,15 +223,12 @@ export default class CustomListBackground {
 
     findSimilarBackground = async (
         currentPageContent: string,
-        normalizedUrl: string,
+        fullUrl: string,
     ) => {
         const backend = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
-        const results = await backend.findSimilar(
-            currentPageContent,
-            normalizedUrl,
-        )
+        const results = await backend.findSimilar(currentPageContent, fullUrl)
 
         return results
     }
@@ -392,8 +389,6 @@ export default class CustomListBackground {
             suppressInboxEntry?: boolean
             pageTitle?: string
             dontTrack?: boolean
-            contentType?: 'rss-feed-item'
-            pageHTML?: string
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
@@ -419,8 +414,6 @@ export default class CustomListBackground {
                         : undefined,
                     metaData: {
                         pageTitle: params.pageTitle,
-                        contentType: params.contentType,
-                        pageHTML: params.pageHTML,
                     },
                 },
                 { addInboxEntryOnCreate: !params.suppressInboxEntry },
