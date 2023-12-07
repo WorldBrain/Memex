@@ -373,6 +373,7 @@ export default class DirectLinkingBackground {
 
         const annotationsById = await contentSharing.getAnnotations({
             references: sharedAnnotationReferences,
+            skipUserHighlightColors: true,
         })
 
         let creatorData: GetUsersPublicDetailsResult
