@@ -2893,6 +2893,14 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     }
 
+                    this.options.events?.emit('renderHighlights', {
+                        highlights: cacheUtils.getListHighlightsArray(
+                            this.options.annotationsCache,
+                            unifiedListId,
+                        ),
+                        removeExisting: false,
+                    })
+
                     // Ensure cache added annotations are set in latest state
                     nextState = {
                         ...nextState,
