@@ -308,7 +308,7 @@ export const LOCAL_TEST_DATA_V24 = {
             deviceId: REMOTE_DEVICES_V24.first.id,
         },
         fourth_uploading: {
-            id: 3,
+            id: 4,
             fingerprint: 'test-fingerprint-1',
             fingerprintScheme: FingerprintSchemeType.PdfV1,
             location: 'getmemex.com/test2.pdf',
@@ -319,6 +319,23 @@ export const LOCAL_TEST_DATA_V24 = {
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
             status: 'uploading',
+            primary: true,
+            valid: true,
+            version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
+        },
+        fourth_uploaded: {
+            id: 4,
+            fingerprint: 'test-fingerprint-1',
+            fingerprintScheme: FingerprintSchemeType.PdfV1,
+            location: 'getmemex.com/test2.pdf',
+            locationType: ContentLocatorType.Remote,
+            locationScheme: LocationSchemeType.UploadStorage,
+            normalizedUrl: LOCAL_PAGES_V24.fourth.url,
+            originalLocation: 'https://getmemex.com/test2.pdf',
+            format: ContentLocatorFormat.PDF,
+            lastVisited: 1635927743925,
+            status: 'uploaded',
             primary: true,
             valid: true,
             version: 0,
@@ -673,8 +690,8 @@ const REMOTE_LOCATORS_V24 = {
         fingerprintScheme:
             LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprintScheme,
     },
-    fourth_uploading: {
-        id: 7,
+    fourth_c_uploading: {
+        id: 8,
         createdWhen: 566,
         updatedWhen: 566,
         user: TEST_USER.id,
@@ -698,6 +715,32 @@ const REMOTE_LOCATORS_V24 = {
         fingerprintScheme:
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.fingerprintScheme,
         status: 'uploading',
+    },
+    fourth_c_uploaded: {
+        id: 8,
+        createdWhen: 566,
+        updatedWhen: 566,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+        localId: LOCAL_TEST_DATA_V24.locators.fourth_uploading.id,
+        format: LOCAL_TEST_DATA_V24.locators.fourth_uploading.format,
+        location: LOCAL_TEST_DATA_V24.locators.fourth_uploading.location,
+        locationScheme:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationScheme,
+        locationType:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
+        originalLocation:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.originalLocation,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_uploading.lastVisited,
+        // contentSize: null,
+        fingerprint: LOCAL_TEST_DATA_V24.locators.fourth_uploading.fingerprint,
+        fingerprintScheme:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.fingerprintScheme,
+        status: 'uploaded',
     },
     twitter_a: {
         id: 1,

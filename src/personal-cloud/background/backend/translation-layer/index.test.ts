@@ -187,7 +187,7 @@ type DataChange = [
     /* type: */ DataChangeType,
     /* collection: */ string,
     /* id: */ string | number,
-    /* info: */ any?,
+    /* info? */ any?,
 ]
 
 interface DataChangeAssertOpts {
@@ -721,14 +721,14 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_dummy.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
-                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_uploading.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_c_uploading.id],
                 ], { skipAssertTimestamp: true }),
                 personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
                 personalContentLocator: [
                     testLocators.first, testLocators.second,
                     testLocators.third_dummy, testLocators.third,
-                    testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b, testLocators.fourth_uploading],
+                    testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b, testLocators.fourth_c_uploading],
             })
 
             // NOTE: Only the locators for the third+fourth pages are downloaded, as they are the only PDFs
@@ -742,6 +742,103 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_b },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploading },
+            ])
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should update locators', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
+            // Note we still want to insert the non-PDF pages here to test the different locators behavior
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.third)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.fourth)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_b)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_uploading)
+            await setups[0].backgroundModules.pages.storage.updateLocatorStatus(
+                {
+                    normalizedUrl:
+                        LOCAL_TEST_DATA_V24.locators.fourth_uploading
+                            .normalizedUrl,
+                    locationScheme: LocationSchemeType.UploadStorage,
+                    status: 'uploaded',
+                },
+            )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.fourth.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_c_uploading.id],
+                    [DataChangeType.Modify, 'personalContentLocator', testLocators.fourth_c_uploading.id],
+                ], { skipAssertTimestamp: true }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
+                personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
+                personalContentLocator: [
+                    testLocators.first, testLocators.second,
+                    testLocators.third_dummy, testLocators.third,
+                    testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b, testLocators.fourth_c_uploaded],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_b },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
             ])
             testSyncPushTrigger({ wasTriggered: true })
         })
