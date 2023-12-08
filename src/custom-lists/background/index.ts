@@ -222,8 +222,8 @@ export default class CustomListBackground {
     }
 
     findSimilarBackground = async (
-        currentPageContent: string,
-        fullUrl: string,
+        currentPageContent?: string,
+        fullUrl?: string,
     ) => {
         const backend = new MemexLocalBackend({
             url: 'http://localhost:11922',

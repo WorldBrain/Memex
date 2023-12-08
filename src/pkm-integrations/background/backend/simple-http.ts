@@ -16,6 +16,8 @@ export class MemexLocalBackend {
             const response = await fetch(`${this.url}/status`)
             if (response.status === 200) {
                 return true
+            } else if (response.status === 500) {
+                return false
             } else {
                 return false
             }
@@ -24,9 +26,15 @@ export class MemexLocalBackend {
         }
     }
 
-    async isAuthenticated() {
-        // this is for now, until there is some kind of authentication
-        return this.isConnected()
+    async isReadyToSync() {
+        const response = await fetch(`${this.url}/status`)
+        if (response.status === 200) {
+            return true
+        } else if (response.status === 500) {
+            return 'not-available'
+        } else {
+            return false
+        }
     }
 
     async isReachable() {
@@ -98,8 +106,6 @@ export class MemexLocalBackend {
         const syncKey = await getPkmSyncKey()
         let body
 
-        console.log('document', document)
-
         if (document.contentType === 'annotation') {
             body = {
                 sourceApplication: 'Memex',
@@ -146,7 +152,6 @@ export class MemexLocalBackend {
             })
 
             if (response.ok) {
-                console.log('chunk processed')
             }
 
             if (!response.ok || response.status !== 200) {
@@ -154,18 +159,14 @@ export class MemexLocalBackend {
             }
         }
     }
-    async findSimilar(document, fullUrl): Promise<any> {
+    async findSimilar(document?, fullUrl?): Promise<any> {
         const syncKey = await getPkmSyncKey()
-
-        console.log('document', fullUrl)
 
         const body = JSON.stringify({
             contentText: document,
             fullUrl: fullUrl,
             syncKey: syncKey,
         })
-
-        console.log('body', body)
 
         const response = await fetch(`${this.url}/get_similar`, {
             method: 'POST',

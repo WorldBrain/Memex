@@ -107,6 +107,7 @@ export type SidebarTab =
     | 'feed'
     | 'summary'
     | 'rabbitHole'
+export type SidebarAITab = 'ThisPage' | 'ExistingKnowledge' | 'InFollowedFeeds'
 
 export type SuggestionsTab =
     | 'MySuggestions'
@@ -139,6 +140,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     suggestionsResultsLoadState: TaskState
 
     activeTab: SidebarTab
+    activeAITab: SidebarAITab
+    summaryModeActiveTab: 'Answer' | 'References'
     activeSuggestionsTab: SuggestionsTab
     showChapters: boolean
     pillVisibility: string
@@ -207,14 +210,26 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showSocialSearch: boolean
     shouldShowTagsUIs: boolean
     showUpgradeModal: boolean
+    desktopAppDownloadLink: string
 
     annotCount?: number
     showLengthError?: boolean
     youtubeTranscriptSummary?: string
     youtubeTranscriptSummaryloadState: TaskState
     fetchLocalHTML: boolean
+    rabbitHoleBetaFeatureAccess:
+        | 'denied'
+        | 'granted'
+        | 'requested'
+        | 'tutorial'
+        | 'onboarded'
+        | 'onboarding'
+        | 'downloadStarted'
+        | 'helperConnectionDenied'
+        | 'helperConnectionSuccess'
+        | null
 
-    // Search result props
+    // Search result propsallowed
     shouldShowCount: boolean
     isInvalidSearch: boolean
     totalResultCount: number
@@ -317,6 +332,12 @@ interface SidebarEvents {
     }
     setActiveSuggestionsTab: {
         tab: SuggestionsTab
+    }
+    setSummaryMode: {
+        tab: 'Answer' | 'References'
+    }
+    setActiveAITab: {
+        tab: SidebarAITab
     }
     askAIviaInPageInteractions: {
         textToProcess?: string
@@ -466,6 +487,20 @@ interface SidebarEvents {
     setAllNotesShareMenuShown: { shown: boolean }
 
     createPageLink: { forceCreate?: boolean }
+    setRabbitHoleBetaFeatureAccess: {
+        permission:
+            | 'denied'
+            | 'granted'
+            | 'requested'
+            | 'tutorial'
+            | 'onboarded'
+            | 'onboarding'
+            | 'downloadStarted'
+            | 'helperConnectionDenied'
+            | 'helperConnectionSuccess'
+            | null
+    }
+    requestRabbitHoleBetaFeatureAccess: { reasonText: string }
 }
 
 export type SidebarContainerEvents = UIEvent<

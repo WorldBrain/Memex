@@ -271,3 +271,84 @@ export async function AIActionAllowed(analyticsBG) {
         return false
     }
 }
+export async function rabbitHoleBetaFeatureAllowed(authBG) {
+    const onboardingComplete = await browser.storage.local.get(
+        'rabbitHoleBetaFeatureAccessOnboardingDone',
+    )
+
+    if (onboardingComplete.rabbitHoleBetaFeatureAccessOnboardingDone) {
+        return 'onboarded'
+    }
+
+    const status = await checkStatus()
+
+    if (status.AIlimit > 10000) {
+        return 'granted'
+    } else {
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
+        const email = (await authBG.getCurrentUser()).email
+        const userId = (await authBG.getCurrentUser()).id
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+
+        const response = await fetch(
+            baseUrl + '/check_rabbithole_beta_status',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: email,
+                    userId: userId,
+                }),
+                headers: { 'Content-Type': 'application/json' },
+            },
+        )
+
+        let responseContent = await response.json()
+
+        if (responseContent.status === 'granted') {
+            return 'granted'
+        } else if (responseContent.status === 'requested') {
+            return 'requested'
+        } else {
+            return 'denied'
+        }
+    }
+}
+export async function downloadMemexDesktop() {
+    const OS = window.navigator.platform.includes('Win')
+        ? 'win'
+        : window.navigator.platform.includes('Mac')
+        ? 'mac'
+        : 'linux'
+
+    const OSData = await navigator.userAgentData.getHighEntropyValues([
+        'architecture',
+    ])
+
+    let arch = OSData.architecture
+
+    const isStaging =
+        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+        process.env.NODE_ENV === 'development'
+
+    const baseUrl = isStaging
+        ? 'https://cloudflare-memex-staging.memex.workers.dev'
+        : 'https://cloudfare-memex.memex.workers.dev'
+
+    const response = await fetch(baseUrl + '/download_memex_desktop', {
+        method: 'POST',
+        body: JSON.stringify({
+            OS: OS,
+            arch: arch,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+    })
+
+    let responseContent = await response.json()
+    return responseContent.downloadUrl
+}

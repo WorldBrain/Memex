@@ -3,6 +3,7 @@ import * as React from 'react'
 import Waypoint from 'react-waypoint'
 import styled, { css, keyframes } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+
 import {
     ConversationReplies,
     SharedProps as RepliesProps,
@@ -13,6 +14,8 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
+import { VideoFrame } from '@worldbrain/memex-common/lib/common-ui/components/videoFrameWrapper'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
@@ -37,6 +40,7 @@ import type { AnnotationSharingAccess } from 'src/content-sharing/ui/types'
 import type {
     AnnotationInstanceRefs,
     ListInstance,
+    SidebarAITab,
     SidebarContainerState,
     SidebarTab,
     SuggestionsTab,
@@ -147,6 +151,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     renderPageLinkMenuForList: (listData: UnifiedList) => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
+    setActiveAITab: (tab: SidebarAITab) => React.MouseEventHandler
     setActiveSuggestionsTab: (tab: SuggestionsTab) => React.MouseEventHandler
     expandFollowedListNotes: (listId: string) => void
     selectedListId: string
@@ -242,6 +247,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     getHighlightColorSettings: () => void
     highlightColorSettings: string
     onGoToAnnotation?: () => void
+    setRabbitHoleBetaFeatureAccess?: (permission) => void
+    requestRabbitHoleBetaFeatureAccess?: (reasonText) => void
+    setSummaryMode: (tab) => void
 }
 
 interface AnnotationsSidebarState {
@@ -264,6 +272,8 @@ interface AnnotationsSidebarState {
     autoFocusCreateForm: boolean
     spaceTitleEditState: boolean
     hoveredListId: string | null
+    copiedVideoLink: boolean
+    onboardingReasonContainer?: string
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -310,6 +320,8 @@ export class AnnotationsSidebar extends React.Component<
         autoFocusCreateForm: false,
         spaceTitleEditState: false,
         hoveredListId: null,
+        copiedVideoLink: false,
+        onboardingReasonContainer: null,
     }
 
     addYoutubeTimestampToEditor(commentText) {
@@ -1519,50 +1531,133 @@ export class AnnotationsSidebar extends React.Component<
             contentType = 'page'
         }
 
+        let InstructionsTitlePlaceholder =
+            'Summarise or ask questions about this page'
+        let instructionsSubTitlePlaceholder =
+            'Just type in a question or pick one of the templates'
+
+        if (contentType === 'video') {
+            InstructionsTitlePlaceholder =
+                'Summarise or ask questions about this video'
+            instructionsSubTitlePlaceholder =
+                'Just type in a question or pick one of the templates'
+        }
+        if (contentType === 'highlight') {
+            InstructionsTitlePlaceholder =
+                'Summarise or ask questions about the selected text'
+            instructionsSubTitlePlaceholder =
+                'Just type in a question or pick one of the templates'
+        }
+        if (this.props.activeAITab === 'ExistingKnowledge') {
+            InstructionsTitlePlaceholder =
+                'Ask questions about the pages and annotations you saved'
+            instructionsSubTitlePlaceholder =
+                'Just type in a question or pick one of the templates'
+        }
+        if (this.props.activeAITab === 'InFollowedFeeds') {
+            InstructionsTitlePlaceholder =
+                'Ask questions about the spaces and blogs you follow'
+            instructionsSubTitlePlaceholder =
+                'Just type in a question or pick one of the templates'
+        }
+
+        let referencesCounter
+
+        if (this.props.activeAITab === 'ExistingKnowledge') {
+            referencesCounter = this.props.suggestionsResults?.filter(
+                (item) => {
+                    return (
+                        item.creatorId === this.props.currentUser.id &&
+                        item.contentType !== 'rss-feed-item'
+                    )
+                },
+            )
+        } else if (this.props.activeAITab === 'InFollowedFeeds') {
+            referencesCounter = this.props.suggestionsResults?.filter(
+                (item) => {
+                    return (
+                        item.creatorId !== this.props.currentUser.id ||
+                        item.contentType == 'rss-feed-item'
+                    )
+                },
+            )
+        }
+
         return (
             <SummarySection>
-                <SummaryContainer
-                    isSummaryShown={
-                        this.props.activeTab === 'summary' ||
-                        this.props.pageSummary?.length > 0
-                    }
-                >
-                    {this.props.showLengthError &&
-                        this.props.queryMode === 'summarize' && (
-                            <ErrorContainer>
-                                This article is too big. Consider summarising
-                                per paragraph for better quality.
-                            </ErrorContainer>
-                        )}
-                    {this.props.pageSummary?.length > 0 ? (
-                        <SummaryText ref={this.pageSummaryText}>
-                            <Markdown
-                                getYoutubePlayer={this.props.getYoutubePlayer}
-                                contextLocation={this.props.sidebarContext}
-                                isStream={true}
+                {(this.props.activeAITab === 'ExistingKnowledge' ||
+                    this.props.activeAITab === 'InFollowedFeeds') &&
+                    this.props.pageSummary.length > 0 && (
+                        <SuggestionsListSwitcher>
+                            <SuggestionsSwitcherButton
+                                onClick={this.props.setSummaryMode('Answer')}
+                                active={
+                                    this.props.summaryModeActiveTab === 'Answer'
+                                }
                             >
-                                {this.props.pageSummary?.trim()}
-                            </Markdown>
-                        </SummaryText>
-                    ) : (
-                        this.props.activeTab === 'summary' && (
-                            <AIContainerNotif>
-                                <AIContainerNotifTitle>
-                                    Summarise or ask questions <br /> about{' '}
-                                    {contentType === 'video'
-                                        ? 'this video'
-                                        : contentType === 'highlight'
-                                        ? 'the selected text'
-                                        : 'this article'}
-                                </AIContainerNotifTitle>
-                                <AIContainerNotifSubTitle>
-                                    Just type in a question or pick one of the
-                                    templates
-                                </AIContainerNotifSubTitle>
-                            </AIContainerNotif>
-                        )
+                                Answer
+                            </SuggestionsSwitcherButton>
+                            <SuggestionsSwitcherButton
+                                onClick={this.props.setSummaryMode(
+                                    'References',
+                                )}
+                                active={
+                                    this.props.summaryModeActiveTab ===
+                                    'References'
+                                }
+                            >
+                                References
+                                <SuggestionsCounter
+                                    hasResults={referencesCounter.length}
+                                >
+                                    {referencesCounter.length}
+                                </SuggestionsCounter>
+                            </SuggestionsSwitcherButton>
+                        </SuggestionsListSwitcher>
                     )}
-                </SummaryContainer>
+                {this.props.summaryModeActiveTab === 'References' &&
+                    this.renderRabbitHoleList()}
+                {this.props.summaryModeActiveTab === 'Answer' && (
+                    <SummaryContainer
+                        isSummaryShown={
+                            this.props.activeTab === 'summary' ||
+                            this.props.pageSummary?.length > 0
+                        }
+                    >
+                        {this.props.showLengthError &&
+                            this.props.queryMode === 'summarize' && (
+                                <ErrorContainer>
+                                    This article is too big. Consider
+                                    summarising per paragraph for better
+                                    quality.
+                                </ErrorContainer>
+                            )}
+                        {this.props.pageSummary?.length > 0 ? (
+                            <SummaryText ref={this.pageSummaryText}>
+                                <Markdown
+                                    getYoutubePlayer={
+                                        this.props.getYoutubePlayer
+                                    }
+                                    contextLocation={this.props.sidebarContext}
+                                    isStream={true}
+                                >
+                                    {this.props.pageSummary?.trim()}
+                                </Markdown>
+                            </SummaryText>
+                        ) : (
+                            this.props.activeTab === 'summary' && (
+                                <AIContainerNotif>
+                                    <AIContainerNotifTitle>
+                                        {InstructionsTitlePlaceholder}
+                                    </AIContainerNotifTitle>
+                                    <AIContainerNotifSubTitle>
+                                        {instructionsSubTitlePlaceholder}
+                                    </AIContainerNotifSubTitle>
+                                </AIContainerNotif>
+                            )
+                        )}
+                    </SummaryContainer>
+                )}
                 {/* {this.state
                     .summarizeArticleLoadState[
                     entry.normalizedUrl
@@ -1728,307 +1823,358 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <AISidebarContainer>
-                {this.props.selectedTextAIPreview && (
-                    <SelectedAITextBox>
-                        <SelectedAITextHeader>
-                            <SelectedHeaderButtonBox>
-                                Selected Text
-                                <PrimaryAction
-                                    icon={'removeX'}
-                                    onClick={() =>
-                                        this.props.removeSelectedTextAIPreview()
-                                    }
-                                    type="tertiary"
-                                    size="small"
-                                    label={'Reset'}
-                                    padding={'0px 5px 0px 2px'}
-                                />
-                            </SelectedHeaderButtonBox>
-                            <PrimaryAction
-                                icon={
-                                    this.state.showAIhighlight
-                                        ? 'compress'
-                                        : 'expand'
-                                }
-                                padding={'0px 5px 0px 2px'}
-                                onClick={() =>
-                                    this.setState({
-                                        showAIhighlight: !this.state
-                                            .showAIhighlight,
-                                    })
-                                }
-                                type="tertiary"
-                                size="small"
-                                label={
-                                    this.state.showAIhighlight
-                                        ? 'Hide'
-                                        : 'Show All'
-                                }
-                            />
-                        </SelectedAITextHeader>
-                        <SelectedAITextContainer
-                            fullHeight={this.state.showAIhighlight}
-                        >
-                            <SelectedTextBoxBar />
-                            <SelectedAIText
-                                fullHeight={this.state.showAIhighlight}
-                            >
-                                {this.props.selectedTextAIPreview}
-                            </SelectedAIText>
-                            {!this.state.showAIhighlight && <BlurContainer />}
-                        </SelectedAITextContainer>
-                    </SelectedAITextBox>
-                )}
-                <QueryContainer
-                    AIDropDownShown={
-                        this.props.showAISuggestionsDropDown &&
-                        this.props.AIsuggestions?.length > 0
-                    }
-                >
-                    <TextField
-                        placeholder={
-                            this.props.prompt ??
-                            this.props.activeTab === 'rabbitHole'
-                                ? 'Ask a question across saved and followed pages'
-                                : 'Type a prompt like "Summarize in 2 paragraphs"'
-                        }
-                        value={this.props.prompt}
-                        icon="feed"
-                        element={null}
-                        iconSize="18px"
-                        height="40px"
-                        onChange={async (event) => {
-                            await this.props.updatePromptState(
-                                (event.target as HTMLInputElement).value,
-                            )
-                        }}
-                        onKeyDown={async (event) => {
-                            if (event.key === 'Enter') {
-                                await this.props.queryAIwithPrompt(
-                                    this.props.prompt,
-                                )
-                            }
-                            if (event.key === 'Escape') {
-                                this.props.toggleAISuggestionsDropDown()
-                            }
-                            if (event.key === 'ArrowUp') {
-                                if (!this.props.showAISuggestionsDropDown) {
-                                    this.props.toggleAISuggestionsDropDown()
-                                }
-                                this.props.navigateFocusInList('up')
-                                focus()
-                            }
-
-                            if (event.key === 'ArrowDown') {
-                                if (!this.props.showAISuggestionsDropDown) {
-                                    this.props.toggleAISuggestionsDropDown()
-                                }
-                                this.props.navigateFocusInList('down')
-                                focus()
-                            }
-                            event.stopPropagation()
-                        }}
-                        onKeyUp={async (event) => {
-                            event.stopPropagation()
-                        }}
-                        onClick={() => this.props.toggleAISuggestionsDropDown()}
-                        actionButton={
-                            this.props.prompt &&
-                            this.props.prompt?.length > 0 &&
-                            addPromptButton(this.props.prompt)
-                        }
-                        autoFocus={this.props.activeTab === 'summary'}
-                    />
-                    {this.props.showAISuggestionsDropDown &&
-                        this.props.AIsuggestions?.length > 0 && (
-                            <SuggestionsList {...this.props} />
-                        )}
-                </QueryContainer>
-                {!this.props.selectedTextAIPreview && (
-                    <OptionsContainer>
-                        <OptionsContainerLeft>
-                            <DropdownMenuBtnSmall
-                                elementHeight="fit-content"
-                                hideDescriptionInPreview
-                                menuItems={[
-                                    {
-                                        id: 'summarize',
-                                        name: 'Summarize',
-                                        info: 'Best for summarisations',
-                                    },
-                                    {
-                                        id: 'chapters',
-                                        name: 'Chapters',
-                                        info:
-                                            'Get chapter overview and summaries',
-                                    },
-                                    {
-                                        id: 'Question',
-                                        name: 'General Question',
-                                        info: 'Unrelated to the content',
-                                    },
-                                ]}
-                                onMenuItemClick={async (props, index) => {
-                                    let queryMode
-                                    if (index === 0) {
-                                        queryMode = 'summarize'
-                                    }
-                                    if (index === 1) {
-                                        queryMode = 'chapterSummary'
-                                    }
-                                    if (index === 2) {
-                                        queryMode = 'question'
-                                    }
-                                    this.props.setQueryMode(queryMode)
-
-                                    if (index === 0) {
-                                        await this.props.queryAIwithPrompt(
-                                            this.props.prompt,
-                                        )
-                                    }
-                                    if (index === 1) {
-                                        await this.props.getVideoChapters()
-                                    }
-
-                                    if (index === 2) {
-                                        await this.props.queryAIwithPrompt(
-                                            this.props.prompt,
-                                            undefined,
-                                            queryMode,
-                                        )
-                                    }
-                                }}
-                                initSelectedIndex={
-                                    this.props.queryMode === 'chapterSummary'
-                                        ? 1
-                                        : 0
-                                }
-                                selectedState={
-                                    this.props.queryMode === 'chapterSummary' &&
-                                    1
-                                }
-                                keepSelectedState
-                            />
-                            <DropdownMenuBtnSmall
-                                elementHeight="fit-content"
-                                hideDescriptionInPreview
-                                menuItems={[
-                                    {
-                                        id: 'GPT 3.5',
-                                        name: 'GPT 3.5',
-                                        info: 'Fast & decent',
-                                    },
-                                    {
-                                        id: 'GPT 4',
-                                        name: 'GPT 4',
-                                        isDisabled: this.props.hasKey
-                                            ? false
-                                            : true,
-                                        info: (
-                                            <span>
-                                                Better at understanding logic
-                                                <br />
-                                                ONLY WITH OWN KEY
-                                            </span>
-                                        ),
-                                    },
-                                ]}
-                                onMenuItemClick={(props, index) => {
-                                    let AImodel
-                                    if (index === 0) {
-                                        AImodel = 'gpt-3.5-turbo-1106'
-                                    }
-                                    if (index === 1) {
-                                        AImodel = 'gpt-4-0613'
-                                    }
-                                    this.props.setAIModel(AImodel)
-                                }}
-                                initSelectedIndex={0}
-                                keepSelectedState
-                            />
-
-                            {!this.props.fullPageUrl.includes(
-                                'youtube.com/watch',
-                            ) &&
-                                (this.props.sidebarContext === 'in-page' ||
-                                    this.props.queryMode !== 'question') && (
-                                    <TooltipBox
-                                        tooltipText={
-                                            <>
-                                                For performance we usually fetch
-                                                the text via our servers but
-                                                sometimes we can't reach it.
-                                                E.g. if you are behind a
-                                                paywall.
-                                                <br /> Use this to extract the
-                                                content from the page.
-                                            </>
-                                        }
-                                        placement="bottom"
-                                        width="150px"
-                                    >
-                                        <Checkbox
-                                            key={1}
-                                            id={'1'}
-                                            isChecked={
-                                                this.props.fetchLocalHTML
+                <SuggestionsListSwitcher>
+                    <SuggestionsSwitcherButton
+                        onClick={this.props.setActiveAITab('ThisPage')}
+                        active={this.props.activeAITab === 'ThisPage'}
+                    >
+                        This Page
+                    </SuggestionsSwitcherButton>
+                    <SuggestionsSwitcherButton
+                        onClick={this.props.setActiveAITab('ExistingKnowledge')}
+                        active={this.props.activeAITab === 'ExistingKnowledge'}
+                    >
+                        Existing knowledge
+                    </SuggestionsSwitcherButton>
+                    <SuggestionsSwitcherButton
+                        onClick={this.props.setActiveAITab('InFollowedFeeds')}
+                        active={this.props.activeAITab === 'InFollowedFeeds'}
+                    >
+                        In Followed
+                    </SuggestionsSwitcherButton>
+                </SuggestionsListSwitcher>
+                {this.props.rabbitHoleBetaFeatureAccess === 'onboarded' ||
+                this.props.activeAITab === 'ThisPage' ? (
+                    <>
+                        {this.props.selectedTextAIPreview && (
+                            <SelectedAITextBox>
+                                <SelectedAITextHeader>
+                                    <SelectedHeaderButtonBox>
+                                        Selected Text
+                                        <PrimaryAction
+                                            icon={'removeX'}
+                                            onClick={() =>
+                                                this.props.removeSelectedTextAIPreview()
                                             }
-                                            handleChange={() =>
-                                                this.props.fetchLocalHTML
-                                                    ? this.props.changeFetchLocalHTML(
-                                                          false,
-                                                      )
-                                                    : this.props.changeFetchLocalHTML(
-                                                          true,
-                                                      )
-                                            }
-                                            // isDisabled={!this.state.shortcutsEnabled}
-                                            name={'Local Content'}
-                                            label={'Local Content'}
-                                            size={14}
-                                            fontSize={12}
-                                            checkBoxColor="black"
-                                            borderColor="greyScale3"
+                                            type="tertiary"
+                                            size="small"
+                                            label={'Reset'}
+                                            padding={'0px 5px 0px 2px'}
                                         />
-                                    </TooltipBox>
-                                )}
-                        </OptionsContainerLeft>
-                        <OptionsContainerRight>
-                            {this.props.pageSummary?.length > 0 && (
-                                <TooltipBox
-                                    tooltipText={
-                                        <>
-                                            Create new note <br /> from output
-                                        </>
-                                    }
-                                    placement="bottom-end"
-                                >
-                                    <Icon
-                                        icon={'commentAdd'}
-                                        onClick={() => {
-                                            this.props.createNewNoteFromAISummary(
-                                                this.props.pageSummary,
-                                            )
-                                        }}
-                                        heightAndWidth="22px"
-                                        color="prime1"
+                                    </SelectedHeaderButtonBox>
+                                    <PrimaryAction
+                                        icon={
+                                            this.state.showAIhighlight
+                                                ? 'compress'
+                                                : 'expand'
+                                        }
+                                        padding={'0px 5px 0px 2px'}
+                                        onClick={() =>
+                                            this.setState({
+                                                showAIhighlight: !this.state
+                                                    .showAIhighlight,
+                                            })
+                                        }
+                                        type="tertiary"
+                                        size="small"
+                                        label={
+                                            this.state.showAIhighlight
+                                                ? 'Hide'
+                                                : 'Show All'
+                                        }
                                     />
-                                </TooltipBox>
-                            )}
-                            {this.props.renderAICounter('top')}
-                        </OptionsContainerRight>
-                    </OptionsContainer>
-                )}
-                {this.props.loadState === 'running' ? (
-                    <LoaderBoxInSummary>
-                        {this.renderLoader()}
-                    </LoaderBoxInSummary>
-                ) : this.props.showChapters ? (
-                    this.showChapterList()
+                                </SelectedAITextHeader>
+                                <SelectedAITextContainer
+                                    fullHeight={this.state.showAIhighlight}
+                                >
+                                    <SelectedTextBoxBar />
+                                    <SelectedAIText
+                                        fullHeight={this.state.showAIhighlight}
+                                    >
+                                        {this.props.selectedTextAIPreview}
+                                    </SelectedAIText>
+                                    {!this.state.showAIhighlight && (
+                                        <BlurContainer />
+                                    )}
+                                </SelectedAITextContainer>
+                            </SelectedAITextBox>
+                        )}
+                        <QueryContainer
+                            AIDropDownShown={
+                                this.props.showAISuggestionsDropDown &&
+                                this.props.AIsuggestions?.length > 0
+                            }
+                        >
+                            <TextField
+                                placeholder={
+                                    this.props.prompt ??
+                                    this.props.activeTab === 'rabbitHole'
+                                        ? 'Ask a question across saved and followed pages'
+                                        : 'Type a prompt like "Summarize in 2 paragraphs"'
+                                }
+                                value={this.props.prompt}
+                                icon="feed"
+                                element={null}
+                                iconSize="18px"
+                                height="40px"
+                                onChange={async (event) => {
+                                    await this.props.updatePromptState(
+                                        (event.target as HTMLInputElement)
+                                            .value,
+                                    )
+                                }}
+                                onKeyDown={async (event) => {
+                                    if (event.key === 'Enter') {
+                                        await this.props.queryAIwithPrompt(
+                                            this.props.prompt,
+                                        )
+                                    }
+                                    if (event.key === 'Escape') {
+                                        this.props.toggleAISuggestionsDropDown()
+                                    }
+                                    if (event.key === 'ArrowUp') {
+                                        if (
+                                            !this.props
+                                                .showAISuggestionsDropDown
+                                        ) {
+                                            this.props.toggleAISuggestionsDropDown()
+                                        }
+                                        this.props.navigateFocusInList('up')
+                                        focus()
+                                    }
+
+                                    if (event.key === 'ArrowDown') {
+                                        if (
+                                            !this.props
+                                                .showAISuggestionsDropDown
+                                        ) {
+                                            this.props.toggleAISuggestionsDropDown()
+                                        }
+                                        this.props.navigateFocusInList('down')
+                                        focus()
+                                    }
+                                    event.stopPropagation()
+                                }}
+                                onKeyUp={async (event) => {
+                                    event.stopPropagation()
+                                }}
+                                onClick={() =>
+                                    this.props.toggleAISuggestionsDropDown()
+                                }
+                                actionButton={
+                                    this.props.prompt &&
+                                    this.props.prompt?.length > 0 &&
+                                    addPromptButton(this.props.prompt)
+                                }
+                                autoFocus={this.props.activeTab === 'summary'}
+                            />
+                            {this.props.showAISuggestionsDropDown &&
+                                this.props.AIsuggestions?.length > 0 && (
+                                    <SuggestionsList {...this.props} />
+                                )}
+                        </QueryContainer>
+                        {!this.props.selectedTextAIPreview && (
+                            <OptionsContainer>
+                                <OptionsContainerLeft>
+                                    <DropdownMenuBtnSmall
+                                        elementHeight="fit-content"
+                                        hideDescriptionInPreview
+                                        menuItems={[
+                                            {
+                                                id: 'summarize',
+                                                name: 'Summarize',
+                                                info: 'Best for summarisations',
+                                            },
+                                            {
+                                                id: 'chapters',
+                                                name: 'Chapters',
+                                                info:
+                                                    'Get chapter overview and summaries',
+                                            },
+                                            {
+                                                id: 'Question',
+                                                name: 'General Question',
+                                                info:
+                                                    'Unrelated to the content',
+                                            },
+                                        ]}
+                                        onMenuItemClick={async (
+                                            props,
+                                            index,
+                                        ) => {
+                                            let queryMode
+                                            if (index === 0) {
+                                                queryMode = 'summarize'
+                                            }
+                                            if (index === 1) {
+                                                queryMode = 'chapterSummary'
+                                            }
+                                            if (index === 2) {
+                                                queryMode = 'question'
+                                            }
+                                            this.props.setQueryMode(queryMode)
+
+                                            if (index === 0) {
+                                                await this.props.queryAIwithPrompt(
+                                                    this.props.prompt,
+                                                )
+                                            }
+                                            if (index === 1) {
+                                                await this.props.getVideoChapters()
+                                            }
+
+                                            if (index === 2) {
+                                                await this.props.queryAIwithPrompt(
+                                                    this.props.prompt,
+                                                    undefined,
+                                                    queryMode,
+                                                )
+                                            }
+                                        }}
+                                        initSelectedIndex={
+                                            this.props.queryMode ===
+                                            'chapterSummary'
+                                                ? 1
+                                                : 0
+                                        }
+                                        selectedState={
+                                            this.props.queryMode ===
+                                                'chapterSummary' && 1
+                                        }
+                                        keepSelectedState
+                                    />
+                                    <DropdownMenuBtnSmall
+                                        elementHeight="fit-content"
+                                        hideDescriptionInPreview
+                                        menuItems={[
+                                            {
+                                                id: 'GPT 3.5',
+                                                name: 'GPT 3.5',
+                                                info: 'Fast & decent',
+                                            },
+                                            {
+                                                id: 'GPT 4',
+                                                name: 'GPT 4',
+                                                isDisabled: this.props.hasKey
+                                                    ? false
+                                                    : true,
+                                                info: (
+                                                    <span>
+                                                        Better at understanding
+                                                        logic
+                                                        <br />
+                                                        ONLY WITH OWN KEY
+                                                    </span>
+                                                ),
+                                            },
+                                        ]}
+                                        onMenuItemClick={(props, index) => {
+                                            let AImodel
+                                            if (index === 0) {
+                                                AImodel = 'gpt-3.5-turbo-1106'
+                                            }
+                                            if (index === 1) {
+                                                AImodel = 'gpt-4-0613'
+                                            }
+                                            this.props.setAIModel(AImodel)
+                                        }}
+                                        initSelectedIndex={0}
+                                        keepSelectedState
+                                    />
+
+                                    {!this.props.fullPageUrl.includes(
+                                        'youtube.com/watch',
+                                    ) &&
+                                        (this.props.sidebarContext ===
+                                            'in-page' ||
+                                            this.props.queryMode !==
+                                                'question') && (
+                                            <TooltipBox
+                                                tooltipText={
+                                                    <>
+                                                        For performance we
+                                                        usually fetch the text
+                                                        via our servers but
+                                                        sometimes we can't reach
+                                                        it. E.g. if you are
+                                                        behind a paywall.
+                                                        <br /> Use this to
+                                                        extract the content from
+                                                        the page.
+                                                    </>
+                                                }
+                                                placement="bottom"
+                                                width="150px"
+                                            >
+                                                <Checkbox
+                                                    key={1}
+                                                    id={'1'}
+                                                    isChecked={
+                                                        this.props
+                                                            .fetchLocalHTML
+                                                    }
+                                                    handleChange={() =>
+                                                        this.props
+                                                            .fetchLocalHTML
+                                                            ? this.props.changeFetchLocalHTML(
+                                                                  false,
+                                                              )
+                                                            : this.props.changeFetchLocalHTML(
+                                                                  true,
+                                                              )
+                                                    }
+                                                    // isDisabled={!this.state.shortcutsEnabled}
+                                                    name={'Local Content'}
+                                                    label={'Local Content'}
+                                                    size={14}
+                                                    fontSize={12}
+                                                    checkBoxColor="black"
+                                                    borderColor="greyScale3"
+                                                />
+                                            </TooltipBox>
+                                        )}
+                                </OptionsContainerLeft>
+                                <OptionsContainerRight>
+                                    {this.props.pageSummary?.length > 0 && (
+                                        <TooltipBox
+                                            tooltipText={
+                                                <>
+                                                    Create new note <br /> from
+                                                    output
+                                                </>
+                                            }
+                                            placement="bottom-end"
+                                        >
+                                            <Icon
+                                                icon={'commentAdd'}
+                                                onClick={() => {
+                                                    this.props.createNewNoteFromAISummary(
+                                                        this.props.pageSummary,
+                                                    )
+                                                }}
+                                                heightAndWidth="22px"
+                                                color="prime1"
+                                            />
+                                        </TooltipBox>
+                                    )}
+                                    {this.props.renderAICounter('top')}
+                                </OptionsContainerRight>
+                            </OptionsContainer>
+                        )}
+                        {this.props.loadState === 'running' ? (
+                            <LoaderBoxInSummary>
+                                {this.renderLoader()}
+                            </LoaderBoxInSummary>
+                        ) : this.props.showChapters ? (
+                            this.showChapterList()
+                        ) : (
+                            this.showSummary()
+                        )}
+                    </>
                 ) : (
-                    this.showSummary()
+                    this.renderBetaAccessOnboarding()
                 )}
-                <SummaryFooter>
+                {/* <SummaryFooter>
                     <RightSideButtons>
                         <BetaButton>
                             <BetaButtonInner>BETA</BetaButtonInner>
@@ -2054,17 +2200,17 @@ export class AnnotationsSidebar extends React.Component<
                             width="70px"
                         />
                     </PoweredBy>
-                </SummaryFooter>
+                </SummaryFooter> */}
             </AISidebarContainer>
         )
     }
 
     renderRabbitHoleList() {
-        if (this.props.loadState === 'running') {
+        const loaderBox = () => {
             return (
-                <LoadingBox>
-                    <LoadingIndicator size={20} />
-                </LoadingBox>
+                <LoaderBox height={'150px'}>
+                    <LoadingIndicator size={30} />
+                </LoaderBox>
             )
         }
 
@@ -2096,100 +2242,81 @@ export class AnnotationsSidebar extends React.Component<
         const OtherSuggestionsResults = this.props.suggestionsResults?.filter(
             (item) => {
                 return (
-                    item.creatorId !== this.props.currentUser.id &&
-                    item.contentType !== 'rss-feed-item'
+                    item.creatorId !== this.props.currentUser.id ||
+                    item.contentType == 'rss-feed-item'
                 )
-            },
-        )
-
-        const RSSsuggestionsResults = this.props.suggestionsResults?.filter(
-            (item) => {
-                return item.contentType === 'rss-feed-item'
             },
         )
 
         return (
             <AnnotationsSectionStyled>
-                <SuggestionsListSwitcher>
-                    <SuggestionsSwitcherButton
-                        onClick={this.props.setActiveSuggestionsTab(
-                            'MySuggestions',
-                        )}
-                        active={
-                            this.props.activeSuggestionsTab === 'MySuggestions'
-                        }
-                    >
-                        Saved by Me
-                        <SuggestionsCounter
-                            hasResults={MySuggestionsResults.length}
-                        >
-                            {MySuggestionsResults.length}
-                        </SuggestionsCounter>
-                    </SuggestionsSwitcherButton>
-                    <SuggestionsSwitcherButton
-                        onClick={this.props.setActiveSuggestionsTab(
-                            'OtherSuggestions',
-                        )}
-                        active={
-                            this.props.activeSuggestionsTab ===
-                            'OtherSuggestions'
-                        }
-                    >
-                        By Others{' '}
-                        <SuggestionsCounter
-                            hasResults={OtherSuggestionsResults.length}
-                        >
-                            {OtherSuggestionsResults.length}
-                        </SuggestionsCounter>
-                    </SuggestionsSwitcherButton>
-                    <SuggestionsSwitcherButton
-                        onClick={this.props.setActiveSuggestionsTab(
-                            'RSSsuggestions',
-                        )}
-                        active={
-                            this.props.activeSuggestionsTab === 'RSSsuggestions'
-                        }
-                    >
-                        From RSS feeds
-                        <SuggestionsCounter
-                            hasResults={RSSsuggestionsResults.length}
-                        >
-                            {RSSsuggestionsResults.length}
-                        </SuggestionsCounter>
-                    </SuggestionsSwitcherButton>
-                </SuggestionsListSwitcher>
-                {this.props.activeSuggestionsTab === 'MySuggestions' && (
-                    <SuggestionsList>
-                        {MySuggestionsResults.map((item) => {
-                            return this.renderSuggestionsListItem(item)
-                        })}
-                        {MySuggestionsResults.length === 0 &&
-                            EmptyMessage(
-                                'No suitable suggestions found in your saved pages & annotations',
+                {((this.props.activeAITab !== 'ExistingKnowledge' &&
+                    this.props.activeAITab !== 'InFollowedFeeds') ||
+                    this.props.activeTab === 'rabbitHole') && (
+                    <SuggestionsListSwitcher>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveSuggestionsTab(
+                                'MySuggestions',
                             )}
-                    </SuggestionsList>
+                            active={
+                                this.props.activeSuggestionsTab ===
+                                'MySuggestions'
+                            }
+                        >
+                            Saved by Me
+                            <SuggestionsCounter
+                                hasResults={MySuggestionsResults.length}
+                            >
+                                {MySuggestionsResults.length}
+                            </SuggestionsCounter>
+                        </SuggestionsSwitcherButton>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveSuggestionsTab(
+                                'OtherSuggestions',
+                            )}
+                            active={
+                                this.props.activeSuggestionsTab ===
+                                'OtherSuggestions'
+                            }
+                        >
+                            From Followed{' '}
+                            <SuggestionsCounter
+                                hasResults={OtherSuggestionsResults.length}
+                            >
+                                {OtherSuggestionsResults.length}
+                            </SuggestionsCounter>
+                        </SuggestionsSwitcherButton>
+                    </SuggestionsListSwitcher>
                 )}
-                {this.props.activeSuggestionsTab === 'OtherSuggestions' && (
-                    <SuggestionsList>
-                        {OtherSuggestionsResults.map((item) => {
-                            return this.renderSuggestionsListItem(item)
-                        })}
-                        {OtherSuggestionsResults.length === 0 &&
-                            EmptyMessage(
-                                'No suitable suggestions found in Spaces you follow',
-                            )}
-                    </SuggestionsList>
-                )}
-                {this.props.activeSuggestionsTab === 'RSSsuggestions' && (
-                    <SuggestionsList>
-                        {RSSsuggestionsResults.map((item) => {
-                            return this.renderSuggestionsListItem(item)
-                        })}
-                        {RSSsuggestionsResults.length === 0 &&
-                            EmptyMessage(
-                                'No suitable suggestions found in your RSS feeds',
-                            )}
-                    </SuggestionsList>
+                {this.props.suggestionsResultsLoadState === 'running' ? (
+                    <>{loaderBox()}</>
+                ) : (
+                    <>
+                        {this.props.activeSuggestionsTab ===
+                            'MySuggestions' && (
+                            <SuggestionsList>
+                                {MySuggestionsResults.map((item) => {
+                                    return this.renderSuggestionsListItem(item)
+                                })}
+                                {MySuggestionsResults.length === 0 &&
+                                    EmptyMessage(
+                                        'No suitable suggestions found in your saved pages & annotations',
+                                    )}
+                            </SuggestionsList>
+                        )}
+                        {this.props.activeSuggestionsTab ===
+                            'OtherSuggestions' && (
+                            <SuggestionsList>
+                                {OtherSuggestionsResults.map((item) => {
+                                    return this.renderSuggestionsListItem(item)
+                                })}
+                                {OtherSuggestionsResults.length === 0 &&
+                                    EmptyMessage(
+                                        'No suitable suggestions found in Spaces you follow',
+                                    )}
+                            </SuggestionsList>
+                        )}
+                    </>
                 )}
             </AnnotationsSectionStyled>
         )
@@ -2283,6 +2410,253 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    private renderBetaAccessOnboarding() {
+        console.log(
+            'rabbitHoleBetaFeatureAccess2',
+            this.props.rabbitHoleBetaFeatureAccess,
+        )
+        if (this.props.rabbitHoleBetaFeatureAccess === 'denied') {
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>
+                        🐇{'  '} Enter the Rabbit Hole!
+                    </OnboardingTitle>
+                    <OnboardingSubtitle>
+                        Get related content recommenations and ask questions
+                        across all of your saved pages, annotations and from
+                        blogs/RSS feeds you follow.
+                        <br />
+                    </OnboardingSubtitle>
+                    <VideoFrame
+                        // General Intro into the feature that should entice people to join the waitlist
+                        src={'https://share.descript.com/embed/Dj3vfeH0z1O'}
+                        videoSizeFull={true}
+                    />
+
+                    <OnboardingH2Title>Join Wait List</OnboardingH2Title>
+                    <TextArea
+                        placeholder="How will this feature be useful to you? What's the context you want to apply it in?"
+                        onChange={(e) =>
+                            this.setState({
+                                onboardingReasonContainer: e.target.value,
+                            })
+                        }
+                    />
+
+                    {this.state?.onboardingReasonContainer?.length > 0 && (
+                        <PrimaryAction
+                            onClick={() => {
+                                this.props.requestRabbitHoleBetaFeatureAccess(
+                                    this.state.onboardingReasonContainer,
+                                )
+                            }}
+                            label="Join WaitList"
+                            icon="plus"
+                            type="primary"
+                            size="medium"
+                        />
+                    )}
+                </OnboardingContainer>
+            )
+        } else if (this.props.rabbitHoleBetaFeatureAccess === 'requested') {
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>You're on the waitlist</OnboardingTitle>
+                    <OnboardingSubtitle>
+                        Skip the line by subscribing to our yearly or lifetime
+                        plan.
+                    </OnboardingSubtitle>
+                    <PrimaryAction
+                        onClick={() => {
+                            window.open(
+                                'https://memex.garden/upgrade',
+                                '_blank',
+                            )
+                        }}
+                        label="Subscribe"
+                        icon="stars"
+                        type="primary"
+                        size="medium"
+                    />
+                    <OnboardingH2Title>Rewatch Intro Video</OnboardingH2Title>
+
+                    <VideoFrame
+                        // Same General Intro into the feature that should entice people to join the waitlist
+                        src={'https://share.descript.com/embed/Dj3vfeH0z1O'}
+                        videoSizeFull={true}
+                    />
+                    <PrimaryAction
+                        onClick={() => {
+                            navigator.clipboard.writeText(
+                                'https://share.descript.com/view/Dj3vfeH0z1O',
+                            )
+                            this.setState({
+                                copiedVideoLink: true,
+                            })
+
+                            setTimeout(() => {
+                                this.setState({
+                                    copiedVideoLink: false,
+                                })
+                            }, 3000)
+                        }}
+                        label={
+                            this.state.copiedVideoLink
+                                ? 'Copied!'
+                                : '"Share Link to Video"'
+                        }
+                        icon="link"
+                        type="tertiary"
+                        size="medium"
+                    />
+                </OnboardingContainer>
+            )
+        } else if (this.props.rabbitHoleBetaFeatureAccess === 'granted') {
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>You're in!</OnboardingTitle>
+                    <OnboardingSubtitle>
+                        This feature is early so watch this short video for a
+                        few important notes before you get started
+                    </OnboardingSubtitle>
+                    <VideoFrame
+                        // Welcome message and more detailed intro into the feature
+                        src={'https://share.descript.com/embed/wm9tGYFdND7'}
+                        videoSizeFull={true}
+                    />
+                    <PrimaryAction
+                        onClick={() => {
+                            this.props.setRabbitHoleBetaFeatureAccess(
+                                'onboarding',
+                            )
+                        }}
+                        label="Get started"
+                        icon="stars"
+                        type="primary"
+                        size="medium"
+                    />
+                </OnboardingContainer>
+            )
+        } else if (this.props.rabbitHoleBetaFeatureAccess === 'onboarding') {
+            const OS = window.navigator.platform.includes('Win')
+                ? 'Windows'
+                : window.navigator.platform.includes('Mac')
+                ? 'MacOS'
+                : window.navigator.platform.includes('Linux') && 'Linux'
+            let downloadUrlRef = React.createRef()
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>
+                        Download the Memex Desktop App
+                    </OnboardingTitle>
+                    <OnboardingSubtitle>
+                        The search & recommendation engine will run locally on
+                        your machine. Recommended to have at least 16gb of RAM.
+                        <br /> If this feature proves to be successful we're
+                        also going to offer a fully cloud-based service.
+                    </OnboardingSubtitle>
+                    <PrimaryAction
+                        onClick={async () => {
+                            const url = downloadUrlRef.current.value
+                            window.open(url, '_blank')
+                            this.props.setRabbitHoleBetaFeatureAccess(
+                                'downloadStarted',
+                            )
+                        }}
+                        label={`Download for ${OS}`}
+                        icon="stars"
+                        type="primary"
+                        size="medium"
+                    />
+                    <input
+                        hidden
+                        type="text"
+                        id="downloadUrl"
+                        placeholder="Enter download URL"
+                        ref={downloadUrlRef}
+                        value={this.props?.desktopAppDownloadLink}
+                    />
+                </OnboardingContainer>
+            )
+        } else if (
+            this.props.rabbitHoleBetaFeatureAccess === 'downloadStarted'
+        ) {
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>
+                        <LoadingIndicator size={20} />
+                        Download Started
+                    </OnboardingTitle>
+                    <OnboardingSubtitle>
+                        Memex is now waiting for the Desktop app to be installed
+                        & started, and then will automatically connect to it
+                    </OnboardingSubtitle>
+                </OnboardingContainer>
+            )
+        } else if (
+            this.props.rabbitHoleBetaFeatureAccess === 'helperConnectionDenied'
+        ) {
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>
+                        Connecting to the Desktop App failed
+                    </OnboardingTitle>
+                    <OnboardingSubtitle>
+                        Reach out to support by clicking on the ? mark in the
+                        bottom right corner, and then on the "live chat".
+                    </OnboardingSubtitle>
+                    <PrimaryAction
+                        onClick={() => {
+                            this.props.setRabbitHoleBetaFeatureAccess(
+                                'downloadStarted',
+                            )
+                        }}
+                        label="Finish!"
+                        icon="longArrowRight"
+                        type="primary"
+                        size="medium"
+                    />
+                </OnboardingContainer>
+            )
+        } else if (
+            this.props.rabbitHoleBetaFeatureAccess === 'helperConnectionSuccess'
+        ) {
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>Indexing started!</OnboardingTitle>
+                    <OnboardingSubtitle>
+                        The desktop app has now successfully connected to your
+                        extension and started to index your saved & followed
+                        pages. It may take a while for all results to show up
+                        and your computer may fan up for a bit.
+                    </OnboardingSubtitle>
+
+                    <OnboardingH2Title>
+                        Rewatch Tutorial Video
+                    </OnboardingH2Title>
+                    <VideoFrame
+                        // Welcome message and more detailed intro into the feature
+                        src={'https://share.descript.com/embed/wm9tGYFdND7'}
+                        videoSizeFull={true}
+                    />
+                    <PrimaryAction
+                        onClick={() => {
+                            this.props.setRabbitHoleBetaFeatureAccess(
+                                'onboarded',
+                            )
+                        }}
+                        label="Finish!"
+                        icon="longArrowRight"
+                        type="primary"
+                        size="medium"
+                    />
+                </OnboardingContainer>
+            )
+        } else if (this.props.rabbitHoleBetaFeatureAccess === 'onboarded') {
+            return
+        }
+    }
+
     private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
 
@@ -2299,10 +2673,33 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.activeTab === 'rabbitHole') {
-            return <>{this.renderRabbitHoleList()}</>
+            if (this.props.rabbitHoleBetaFeatureAccess == null) {
+                return (
+                    <LoadingBox>
+                        <LoadingIndicator size={20} />
+                    </LoadingBox>
+                )
+            }
+            if (this.props.rabbitHoleBetaFeatureAccess === 'onboarded') {
+                return <>{this.renderRabbitHoleList()}</>
+            } else if (this.props.rabbitHoleBetaFeatureAccess === 'granted') {
+                return <>{this.renderBetaAccessOnboarding()}</>
+            } else {
+                return <>{this.renderBetaAccessOnboarding()}</>
+            }
         }
 
         if (this.props.activeTab === 'summary') {
+            if (
+                this.props.prompt?.length > 0 &&
+                this.props.suggestionsResults?.length > 0 &&
+                this.props.pageSummary?.length > 0 &&
+                this.props.activeAITab !== 'ThisPage'
+            ) {
+                return (
+                    <ResultsBodyBox>{this.renderQaASection()}</ResultsBodyBox>
+                )
+            }
             return this.renderQaASection()
         }
 
@@ -2323,18 +2720,34 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <>
-                {this.props.activeTab === 'annotations' ? (
+                {(this.props.activeTab === 'annotations' ||
+                    this.props.activeTab === 'spaces') && (
                     <AnnotationsSectionStyled>
-                        {this.renderAnnotationsEditable(
-                            cacheUtils.getUserAnnotationsArray(
-                                { annotations: this.props.annotations },
-                                this.props.currentUser?.id.toString(),
-                            ),
+                        <SuggestionsListSwitcher>
+                            <SuggestionsSwitcherButton
+                                onClick={this.props.setActiveTab('annotations')}
+                                active={this.props.activeTab === 'annotations'}
+                            >
+                                All by Me{' '}
+                            </SuggestionsSwitcherButton>
+                            <SuggestionsSwitcherButton
+                                onClick={this.props.setActiveTab('spaces')}
+                                active={this.props.activeTab === 'spaces'}
+                            >
+                                By Spaces{' '}
+                            </SuggestionsSwitcherButton>
+                        </SuggestionsListSwitcher>
+                        {this.props.activeTab === 'annotations' &&
+                            this.renderAnnotationsEditable(
+                                cacheUtils.getUserAnnotationsArray(
+                                    { annotations: this.props.annotations },
+                                    this.props.currentUser?.id.toString(),
+                                ),
+                            )}
+
+                        {this.props.activeTab === 'spaces' && (
+                            <>{this.renderSharedNotesByList()}</>
                         )}
-                    </AnnotationsSectionStyled>
-                ) : (
-                    <AnnotationsSectionStyled>
-                        {this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
                 <UpdateNotifBanner
@@ -2690,7 +3103,7 @@ export class AnnotationsSidebar extends React.Component<
                         padding={'3px 6px'}
                         height={'30px'}
                     />
-                    <PrimaryAction
+                    {/* <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
                         label={'Spaces'}
                         active={this.props.activeTab === 'spaces'}
@@ -2720,7 +3133,7 @@ export class AnnotationsSidebar extends React.Component<
                                 </LoadingBox>
                             )
                         }
-                    />
+                    /> */}
                     <PrimaryAction
                         onClick={this.props.setActiveTab('summary')}
                         label={'Ask'}
@@ -3247,17 +3660,87 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
+                {/* <GlobalStyle sidebarContext={this.props.sidebarContext} /> */}
                 <TopBar sidebarContext={this.props.sidebarContext}>
                     {this.renderTopBarSwitcher()}
                     {/* {this.renderSharePageButton()} */}
                     {/* {this.props.sidebarActions()} */}
                 </TopBar>
-                {this.renderPageShareModal()}
                 {this.renderResultsBody(this.state.themeVariant)}
+                {this.renderPageShareModal()}
             </ResultBodyContainer>
         )
     }
 }
+
+const ResultsBodyBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: scroll;
+    position: relative;
+    justify-content: flex-start;
+`
+
+const OnboardingContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    margin: 10px;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+`
+
+const OnboardingTitle = styled.div`
+    display: flex;
+    font-size: 18px;
+    font-weight: bold;
+    background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    align-items: center;
+    grid-gap: 10px;
+`
+const OnboardingH2Title = styled.div`
+    display: flex;
+    font-size: 16px;
+    font-weight: 500;
+    margin-top: 20px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    align-items: center;
+`
+
+const OnboardingSubtitle = styled.div`
+    display: flex;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 10px;
+    line-height: 24px;
+`
+
+const OnboardingVideo = styled.iframe`
+    width: fill-available;
+    width: -moz-available;
+    border: none;
+    border-radius: 8px;
+    background: ${(props) => props.theme.colors.greyScale2};
+`
+
+const ReferencesTitle = styled.div`
+    display: flex;
+    align-items: center;
+    font-size: 18px;
+    font-weight: 600;
+    color: ${(props) => props.theme.colors.greyScale7};
+    margin: 20px 0 0px 0;
+    padding: 0 0 10px 20px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+`
 
 const SuggestionsListSwitcher = styled.div`
     display: flex;
@@ -3566,7 +4049,7 @@ const OptionsContainer = styled.div`
     align-items: center;
     justify-content: space-between;
     padding: 0px 15px 10px 15px;
-    z-index: 100;
+    z-index: 101;
     height: 24px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
 `
@@ -3700,7 +4183,7 @@ const QueryContainer = styled.div<{
     padding: 15px 15px 10px 15px;
     display: flex;
     flex-direction: column;
-    z-index: 101;
+    z-index: 102;
 
     ${(props) =>
         props.AIDropDownShown &&
@@ -3714,12 +4197,13 @@ const QueryContainer = styled.div<{
 
 const AISidebarContainer = styled.div`
     display: flex;
+    position: relative;
     height: fill-available;
     /* overflow: scroll; */
     display: flex;
     flex-direction: column;
-    height: 450px;
-    flex: 1;
+    height: 100%;
+    overflow: hidden;
 
     &::-webkit-scrollbar {
         display: none;
@@ -3878,11 +4362,11 @@ const PoweredBy = styled.div`
 const SummarySection = styled.div`
     display: flex;
     width: 100%;
-    justify-content: center;
+    justify-content: flex-start;
     align-items: start;
-    height: fill-available;
+    flex-direction: column;
+    min-height: 70%;
     flex: 1;
-    height: 30%;
 `
 const ChapterSection = styled.div`
     display: flex;
@@ -3895,7 +4379,7 @@ const ChapterSection = styled.div`
 `
 
 const SummaryText = styled.div`
-    padding: 0px 20px 240px 20px;
+    padding: 0px 20px 20px 20px;
     color: ${(props) => props.theme.colors.greyScale7};
     font-size: 16px;
     line-height: 22px;
@@ -4177,8 +4661,8 @@ const ActionButtons = styled.div`
     grid-gap: 10px;
 `
 
-const LoaderBox = styled.div`
-    height: 100px;
+const LoaderBox = styled.div<{ height: string }>`
+    height: ${(props) => (props.height ? props.height : '100px')};
     width: 100%;
     align-items: center;
     justify-content: center;
@@ -4696,7 +5180,7 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
     width: fill-available;
     display: flex;
     flex-direction: column;
-    height: 100%;
+    height: 100vh;
 
     &::-webkit-scrollbar {
         display: none;

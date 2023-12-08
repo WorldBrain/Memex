@@ -80,6 +80,8 @@ import {
 } from 'src/util/webextensionRPC'
 import {
     AIActionAllowed,
+    downloadMemexDesktop,
+    rabbitHoleBetaFeatureAllowed,
     updateAICounter,
 } from 'src/util/subscriptions/storage'
 import {
@@ -106,14 +108,9 @@ import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
-import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
-import PageResultItem from 'src/common-ui/components/page-result-item'
-import {
-    PageData,
-    PageResult,
-} from 'src/dashboard-refactor/search-results/types'
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
+import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -271,11 +268,13 @@ export class SidebarContainerLogic extends UILogic<
             selectedTextAIPreview: undefined,
             sidebarWidth: sidebarWidth,
             activeSuggestionsTab: 'MySuggestions',
+            activeAITab: 'ThisPage',
 
             users: {},
             currentUserReference: null,
             pillVisibility: 'unhover',
             videoDetails: null,
+            summaryModeActiveTab: 'Answer',
 
             isWidthLocked: false,
             isLocked: false,
@@ -290,6 +289,7 @@ export class SidebarContainerLogic extends UILogic<
             activeListContextMenuId: null,
             activeListEditMenuId: null,
             fetchLocalHTML: false,
+            rabbitHoleBetaFeatureAccess: null,
 
             commentBox: { ...INIT_FORM_STATE },
 
@@ -358,6 +358,7 @@ export class SidebarContainerLogic extends UILogic<
             highlightColors: null,
             suggestionsResults: [],
             suggestionsResultsLoadState: 'pristine',
+            desktopAppDownloadLink: null,
         }
     }
 
@@ -827,6 +828,30 @@ export class SidebarContainerLogic extends UILogic<
             signupDate: { $set: signupDate },
             isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
         })
+
+        await this.checkRabbitHoleOnboardingStage()
+    }
+
+    private checkRabbitHoleOnboardingStage = async () => {
+        const rabbitHoleBetaAccess = await rabbitHoleBetaFeatureAllowed(
+            this.options.authBG,
+        )
+
+        this.emitMutation({
+            rabbitHoleBetaFeatureAccess: { $set: rabbitHoleBetaAccess },
+        })
+
+        if (rabbitHoleBetaAccess === 'onboarded') {
+            return
+        }
+
+        if (rabbitHoleBetaAccess === 'granted') {
+            const url = await downloadMemexDesktop()
+
+            this.emitMutation({
+                desktopAppDownloadLink: { $set: url },
+            })
+        }
     }
 
     cleanup = () => {
@@ -1462,6 +1487,84 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         return listData
+    }
+
+    setRabbitHoleBetaFeatureAccess: EventHandler<
+        'setRabbitHoleBetaFeatureAccess'
+    > = async ({ event }) => {
+        this.emitMutation({
+            rabbitHoleBetaFeatureAccess: { $set: event.permission },
+        })
+
+        if (event.permission === 'downloadStarted') {
+            let isConnected = false
+            let counter = 0
+            while (!isConnected && counter < 3000) {
+                counter++
+                await new Promise((resolve) => setTimeout(resolve, 1000))
+                let backend
+                try {
+                    backend = await new MemexLocalBackend({
+                        url: 'http://localhost:11922',
+                    }).isReadyToSync()
+                } catch (e) {
+                    console.log(
+                        'Trying to connect to Desktop App but not yet available',
+                    )
+                    continue
+                }
+                if (!backend) {
+                    this.emitMutation({
+                        rabbitHoleBetaFeatureAccess: {
+                            $set: 'helperConnectionDenied',
+                        },
+                    })
+                } else {
+                    this.emitMutation({
+                        rabbitHoleBetaFeatureAccess: {
+                            $set: 'helperConnectionSuccess',
+                        },
+                    })
+                    isConnected = true
+                }
+            }
+        }
+
+        if (event.permission === 'onboarded') {
+            await browser.storage.local.set({
+                rabbitHoleBetaFeatureAccessOnboardingDone: true,
+            })
+        }
+    }
+    requestRabbitHoleBetaFeatureAccess: EventHandler<
+        'requestRabbitHoleBetaFeatureAccess'
+    > = async ({ event }) => {
+        this.emitMutation({
+            rabbitHoleBetaFeatureAccess: { $set: 'requested' },
+        })
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
+        const email = (await this.options.authBG.getCurrentUser()).email
+        const userId = (await this.options.authBG.getCurrentUser()).id
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+
+        const response = await fetch(
+            baseUrl + '/subscribe_rabbithole_waitlist',
+            {
+                method: 'POST',
+                body: JSON.stringify({
+                    email: email,
+                    userId: userId,
+                    reasonText: event.reasonText,
+                }),
+                headers: { 'Content-Type': 'application/json' },
+            },
+        )
     }
 
     setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
@@ -2358,6 +2461,10 @@ export class SidebarContainerLogic extends UILogic<
             | null,
         chapterSummaryIndex?: number,
     ) {
+        this.emitMutation({
+            loadState: { $set: 'running' },
+        })
+
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
@@ -2411,7 +2518,9 @@ export class SidebarContainerLogic extends UILogic<
             hasKey: { $set: hasAPIKey },
         })
 
-        let textToAnalyse = textAsAlternative
+        let textToAnalyse
+        let isContentSearch = false
+        textToAnalyse = textAsAlternative
             ? textAsAlternative
             : highlightedText
             ? highlightedText
@@ -2419,6 +2528,59 @@ export class SidebarContainerLogic extends UILogic<
 
         if (previousState.fetchLocalHTML) {
             textToAnalyse = document.title + document.body.innerText
+        }
+
+        if (
+            previousState.activeAITab === 'ExistingKnowledge' ||
+            previousState.activeAITab === 'InFollowedFeeds'
+        ) {
+            if (previousState.prompt?.length === 0 && prompt.length === 0) {
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                })
+                return
+            }
+            const results = await this.options.customListsBG.findSimilarBackground(
+                previousState.prompt || prompt,
+            )
+
+            let extractedData
+
+            if (previousState.activeAITab === 'ExistingKnowledge') {
+                this.emitMutation({
+                    activeSuggestionsTab: { $set: 'MySuggestions' },
+                })
+                extractedData = Object.entries(results).filter((result) => {
+                    return (
+                        result.creatorId ===
+                        previousState.currentUserReference.id
+                    )
+                })
+            }
+            if (previousState.activeAITab === 'InFollowedFeeds') {
+                this.emitMutation({
+                    activeSuggestionsTab: { $set: 'OtherSuggestions' },
+                })
+
+                extractedData = results.filter((result) => {
+                    return (
+                        result.creatorId !==
+                        previousState.currentUserReference.id
+                    )
+                })
+
+                extractedData = extractedData.map((result) => {
+                    return {
+                        pageTitle: result.pageTitle,
+                        contentText: result.contentText,
+                    }
+                })
+            }
+
+            textToAnalyse = JSON.stringify(extractedData)
+            isContentSearch = true
+
+            await this.updateSuggestionResults(results)
         }
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
@@ -2434,6 +2596,7 @@ export class SidebarContainerLogic extends UILogic<
             outputLocation: outputLocation ?? null,
             chapterSummaryIndex: chapterSummaryIndex ?? null,
             AImodel: previousState.AImodel,
+            isContentSearch: isContentSearch ? true : false,
         })
 
         return response
@@ -2774,6 +2937,25 @@ export class SidebarContainerLogic extends UILogic<
             activeSuggestionsTab: { $set: event.tab },
         })
     }
+    setSummaryMode: EventHandler<'setSummaryMode'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            summaryModeActiveTab: { $set: event.tab },
+        })
+    }
+    setActiveAITab: EventHandler<'setActiveAITab'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (event.tab !== 'ThisPage') {
+            await this.checkRabbitHoleOnboardingStage()
+        }
+        this.emitMutation({
+            activeAITab: { $set: event.tab },
+        })
+    }
 
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
@@ -2847,34 +3029,31 @@ export class SidebarContainerLogic extends UILogic<
                 }
             }
         } else if (event.tab === 'rabbitHole') {
-            this.previousState = previousState
             this.emitMutation({
-                loadState: { $set: 'running' },
+                suggestionsResultsLoadState: { $set: 'running' },
             })
+            this.previousState = previousState
+            await this.checkRabbitHoleOnboardingStage()
             const currentPageContent = document.body.innerText
 
             const prompt = `You are given the text of a web page. Your task is to summarise it in such a way that is ideally suited for similarity comparison with other texts. This means you should retain all key entities and concepts as much as you can. Here is the text of the page:  `
 
-            const summary = await this.options.summarizeBG.getTextSummary({
-                text: currentPageContent,
-                prompt: prompt,
-            })
+            // const summary = await this.options.summarizeBG.getTextSummary({
+            //     text: currentPageContent,
+            //     prompt: prompt,
+            // })
 
-            console.log('summary', summary)
-
-            const summarisedText = summary.choices[0].text
+            // const summarisedText = summary.choices[0].text
 
             // add step to summmarise page and extract key information suitable for similiarity search
 
             let results
             results = await this.options.customListsBG.findSimilarBackground(
-                summarisedText,
+                currentPageContent,
                 normalizeUrl(previousState.fullPageUrl, {
                     skipProtocolTrim: true,
                 }),
             )
-
-            console.log('ressssss', results)
 
             await this.updateSuggestionResults(results)
 
@@ -2888,10 +3067,9 @@ export class SidebarContainerLogic extends UILogic<
 
     async listenToTextHighlightSuggestions() {
         const selectedText = window.getSelection().toString().trim()
-        console.log('selectedTExt', selectedText.length)
         if (selectedText.length > 0) {
             this.emitMutation({
-                loadState: { $set: 'running' },
+                suggestionsResultsLoadState: { $set: 'running' },
             })
             const results = await this.options.customListsBG.findSimilarBackground(
                 selectedText,
@@ -2921,8 +3099,6 @@ export class SidebarContainerLogic extends UILogic<
             let space: spaceItem
             let pageData
             let pageToDisplay: SuggestionCard
-
-            console.log('result', result, userId, result.userId)
 
             if (userId != result.creatorId) {
                 const followedPageListData = []
@@ -2962,37 +3138,38 @@ export class SidebarContainerLogic extends UILogic<
                         normalizeUrl(result.fullUrl),
                     )
 
-                    const pageLists = await this.options.customListsBG.fetchPageLists(
-                        { url: pageData.fullUrl },
-                    )
+                    if (pageData) {
+                        const pageLists = await this.options.customListsBG.fetchPageLists(
+                            { url: pageData?.fullUrl },
+                        )
 
-                    if (pageLists.length > 0) {
-                        for (let pageList of pageLists) {
-                            const list = await this.options.annotationsCache.getListByLocalId(
-                                pageList,
-                            )
-                            space = {
-                                name: list.name,
-                                remoteId: list.remoteId,
-                                unifiedId: list.unifiedId,
-                                isShared: !list.isPrivate,
-                                localId: list.localId,
-                                id: list.localId,
+                        if (pageLists.length > 0) {
+                            for (let pageList of pageLists) {
+                                const list = await this.options.annotationsCache.getListByLocalId(
+                                    pageList,
+                                )
+                                space = {
+                                    name: list.name,
+                                    remoteId: list.remoteId,
+                                    unifiedId: list.unifiedId,
+                                    isShared: !list.isPrivate,
+                                    localId: list.localId,
+                                    id: list.localId,
+                                }
+                                pageListData.push(space)
                             }
-                            pageListData.push(space)
                         }
                     }
 
                     pageToDisplay = {
-                        fullUrl: pageData.fullUrl,
-                        fullTitle: pageData.fullTitle,
+                        fullUrl: pageData?.fullUrl || result?.fullUrl,
+                        fullTitle: pageData?.fullTitle || result?.pageTitle,
                         description: result.contentText,
                         contentType: result.contentType,
                         creatorId: userId,
                         spaces: pageListData ?? null,
                     }
                 } else if (result.contentType === 'annotation') {
-                    console.log('is annotation', result)
                     try {
                         const annotationUrl = normalizeUrl(
                             result.fullUrl,
@@ -3002,14 +3179,11 @@ export class SidebarContainerLogic extends UILogic<
                             stripHash: false,
                         })
 
-                        console.log('normalizedUrl', normalizedUrl)
                         let annotationRawData = await this.options.annotationsBG.getAnnotationByPk(
                             {
                                 url: result.fullUrl.replace('https://', ''),
                             },
                         )
-
-                        console.log('annotationRawData', annotationRawData)
 
                         // Convert the string to a Date object
                         let createdWhenDate = new Date(
@@ -3034,7 +3208,6 @@ export class SidebarContainerLogic extends UILogic<
                             annotationRawData,
                             annotationRawData.createdWhen,
                         )
-                        console.log('annotationForCache', annotationForCache)
                         const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
                             annotationForCache,
                         )
@@ -3054,7 +3227,6 @@ export class SidebarContainerLogic extends UILogic<
                                 creatorId: result.creatorId,
                                 unifiedId: annotationsCacheVersion.unifiedId,
                             }
-                            console.log('pageToDisplay', pageToDisplay)
                         }
                     } catch (e) {
                         console.log('Error', e)
@@ -3070,8 +3242,10 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             suggestionsResults: { $set: resultsArray },
-            loadState: { $set: 'success' },
+            suggestionsResultsLoadState: { $set: 'success' },
         })
+
+        return resultsArray
     }
 
     private async maybeLoadListRemoteAnnotations(

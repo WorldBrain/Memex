@@ -1317,8 +1317,18 @@ export class AnnotationsSidebarContainer<
                                     tab,
                                 })
                             }}
+                            setSummaryMode={(tab) => (event) => {
+                                this.processEvent('setSummaryMode', {
+                                    tab,
+                                })
+                            }}
                             setActiveSuggestionsTab={(tab) => (event) => {
                                 this.processEvent('setActiveSuggestionsTab', {
+                                    tab,
+                                })
+                            }}
+                            setActiveAITab={(tab) => (event) => {
+                                this.processEvent('setActiveAITab', {
                                     tab,
                                 })
                             }}
@@ -1385,6 +1395,18 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             fetchLocalHTML={this.state.fetchLocalHTML}
+                            setRabbitHoleBetaFeatureAccess={(permission) =>
+                                this.processEvent(
+                                    'setRabbitHoleBetaFeatureAccess',
+                                    { permission },
+                                )
+                            }
+                            requestRabbitHoleBetaFeatureAccess={(reasonText) =>
+                                this.processEvent(
+                                    'requestRabbitHoleBetaFeatureAccess',
+                                    { reasonText },
+                                )
+                            }
                         />
                     </Rnd>
                 </ContainerStyled>
