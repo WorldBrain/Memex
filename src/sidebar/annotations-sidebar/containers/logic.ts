@@ -2132,7 +2132,7 @@ export class SidebarContainerLogic extends UILogic<
                     )
                     .filter((id) => !!id),
             },
-            { keepListsIfUnsharing: true },
+            { forceListUpdate: true },
         )
     }
 

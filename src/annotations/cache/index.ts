@@ -531,7 +531,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         let nextUnifiedListIds = [...previous.unifiedListIds]
         let privacyLevel = updates.privacyLevel
 
-        if (previous.privacyLevel === updates.privacyLevel) {
+        if (opts?.forceListUpdate) {
+            nextUnifiedListIds = [...updates.unifiedListIds]
+        } else if (previous.privacyLevel === updates.privacyLevel) {
             nextUnifiedListIds = [...updates.unifiedListIds]
 
             // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots

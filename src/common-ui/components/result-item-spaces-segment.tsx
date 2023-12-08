@@ -84,7 +84,6 @@ export default function ListsSegment({
     spacePickerButtonRef,
     ...props
 }: Props) {
-    console.log('lists', lists)
     return (
         <Container padding={padding} {...props}>
             <ListsContainer newLineOrientation={newLineOrientation === true}>

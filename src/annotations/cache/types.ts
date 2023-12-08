@@ -57,6 +57,7 @@ export interface PageAnnotationsCacheInterface {
         opts?: {
             updateLastEditedTimestamp?: boolean
             keepListsIfUnsharing?: boolean
+            forceListUpdate?: boolean
             now?: number
         },
     ) => void
