@@ -449,10 +449,9 @@ export async function main(
         screenshotImage?,
         imageSupport?,
         highlightColor?: { color: RGBAColor; id: string; label: string },
-    ): Promise<AutoPk> {
-        let highlightId: AutoPk
+    ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         try {
-            highlightId = await highlightRenderer.saveAndRenderHighlight({
+            const result = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
                 onClick: ({ annotationId, openInEdit }) =>
                     inPageUI.showSidebar({
@@ -470,12 +469,15 @@ export async function main(
                 imageSupport,
                 highlightColor,
             })
+            const annotationId = result.annotationId
+            const createPromise = result.createPromise
+
+            return { annotationId, createPromise }
         } catch (err) {
             captureException(err)
             await inPageUI.toggleErrorMessage({ type: 'annotation' })
             throw err
         }
-        return highlightId
     }
 
     const annotationsFunctions = {
@@ -518,24 +520,27 @@ export async function main(
                     return
                 }
 
-                await saveHighlight(
+                const results = await saveHighlight(
                     shouldShare,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
                     highlightColorSetting,
                 )
+
+                await results.createPromise
             } else if (
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                await saveHighlight(
+                const results = await saveHighlight(
                     shouldShare,
                     null,
                     null,
                     null,
                     highlightColorSetting,
                 )
+                await results.createPromise
             }
 
             await inPageUI.hideTooltip()
@@ -583,12 +588,15 @@ export async function main(
                     return
                 }
 
-                const annotationId = await saveHighlight(
+                const result = await saveHighlight(
                     shouldShare,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
                 )
+
+                const annotationId = result.annotationId
+                const createPromise = result.createPromise
                 await inPageUI.showSidebar(
                     annotationId
                         ? {
@@ -602,11 +610,15 @@ export async function main(
                               commentText: commentText ?? '',
                           },
                 )
+                await createPromise
             } else if (
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                const annotationId = await saveHighlight(shouldShare)
+                const result = await saveHighlight(shouldShare)
+
+                const annotationId = result.annotationId
+                const createPromise = result.createPromise
                 await inPageUI.showSidebar(
                     annotationId
                         ? {
@@ -620,6 +632,7 @@ export async function main(
                               commentText: commentText ?? '',
                           },
                 )
+                await createPromise
             } else if (window.location.href.includes('youtube.com')) {
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
