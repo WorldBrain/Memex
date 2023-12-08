@@ -240,23 +240,6 @@ export default class RibbonContainer extends StatefulUIElement<
                     toggleBookmark: () =>
                         this.processEvent('toggleBookmark', null),
                 }}
-                tagging={{
-                    ...this.state.tagging,
-                    setShowTagsPicker: (value) =>
-                        this.processEvent('setShowTagsPicker', { value }),
-                    tagAllTabs: (value) =>
-                        this.processEvent('tagAllTabs', { value }),
-                    updateTags: (value) =>
-                        this.processEvent('updateTags', { value }),
-                    fetchInitialTagSelections: () =>
-                        this.props.tags.fetchPageTags({
-                            url: this.normalizedPageUrl,
-                        }),
-                    queryEntries: (query) =>
-                        this.props.tags.searchForTagSuggestions({ query }),
-                    loadDefaultSuggestions: this.props.tags
-                        .fetchInitialTagSuggestions,
-                }}
                 lists={{
                     ...this.state.lists,
                     listAllTabs: (value) =>

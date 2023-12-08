@@ -81,3 +81,11 @@ export function renderSpacesBar(
 
     return spacesBar
 }
+
+export async function indexRSSfeed(feedUrl, pkmSyncBG, isSubstack) {
+    try {
+        await pkmSyncBG.addRSSfeedSource(feedUrl, isSubstack)
+    } catch (error) {
+        console.error('Error:', error)
+    }
+}

@@ -30,7 +30,6 @@ export interface RibbonContainerDependencies {
     bookmarks: BookmarksInterface
     customLists: RemoteCollectionsInterface
     activityIndicatorBG: ActivityIndicatorInterface
-    tags: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     contentSharing: ContentSharingInterface

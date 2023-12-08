@@ -29,7 +29,6 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as sidebarUtils from 'src/sidebar-overlay/utils'
@@ -45,7 +44,6 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import {
-    analyticsBG,
     bookmarks,
     copyPaster,
     subscription,
@@ -82,7 +80,6 @@ import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
@@ -220,7 +217,6 @@ export async function main(
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
-    const tagsBG = runInBackground<RemoteTagsInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
     >()
@@ -781,7 +777,6 @@ export async function main(
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 annotationsCache,
-                tags: tagsBG,
                 customLists: collectionsBG,
                 authBG,
                 bgScriptBG,

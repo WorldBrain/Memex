@@ -18,7 +18,6 @@ export interface RemoteTagsInterface {
         query: string
         limit?: number
     }): Promise<string[]>
-    fetchInitialTagSuggestions(): Promise<string[]>
     updateTagForPage(args: {
         added: string
         deleted: string
