@@ -92,6 +92,7 @@ import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/int
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
+import { sleepPromise } from 'src/util/promises'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -324,10 +325,25 @@ export class AnnotationsSidebar extends React.Component<
         onboardingReasonContainer: null,
     }
 
-    addYoutubeTimestampToEditor(commentText) {
-        this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
-            commentText,
-        )
+    async addYoutubeTimestampToEditor(commentText) {
+        let annotationCreateRef = this.annotationCreateRef.current
+
+        if (annotationCreateRef) {
+            this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+                commentText,
+            )
+        }
+        // fix race condition of annotationCreateRef not being available yet, hacky but works
+        while (!annotationCreateRef) {
+            await sleepPromise(25)
+            annotationCreateRef = this.annotationCreateRef.current
+            if (annotationCreateRef) {
+                this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+                    commentText,
+                )
+            }
+            await sleepPromise(25)
+        }
     }
 
     private maybeCreateContextBtnRef({
@@ -2411,10 +2427,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderBetaAccessOnboarding() {
-        console.log(
-            'rabbitHoleBetaFeatureAccess2',
-            this.props.rabbitHoleBetaFeatureAccess,
-        )
         if (this.props.rabbitHoleBetaFeatureAccess === 'denied') {
             return (
                 <OnboardingContainer>

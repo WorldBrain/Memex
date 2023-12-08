@@ -48,7 +48,6 @@ export class PKMSyncBackgroundModule {
         const backend = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
-        console.log('arrives here', feedUrl, isSubstack)
         if (await backend.isConnected()) {
             await backend.addRSSfeedSource(feedUrl, isSubstack)
         }

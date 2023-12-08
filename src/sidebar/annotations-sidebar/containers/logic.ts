@@ -1508,7 +1508,7 @@ export class SidebarContainerLogic extends UILogic<
                         url: 'http://localhost:11922',
                     }).isReadyToSync()
                 } catch (e) {
-                    console.log(
+                    console.error(
                         'Trying to connect to Desktop App but not yet available',
                     )
                     continue
@@ -3210,11 +3210,6 @@ export class SidebarContainerLogic extends UILogic<
                         )
                         const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
                             annotationForCache,
-                        )
-
-                        console.log(
-                            'annotationsCacheVersion',
-                            annotationsCacheVersion,
                         )
 
                         if (annotationsCacheVersion) {

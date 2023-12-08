@@ -238,7 +238,64 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     private handleExternalAction = async (event: SidebarActionOptions) => {
-        // Don't handle any external action until init logic has completed
+        // instantl load page summaries bc they are not dependent on initlogicpromise
+
+        if (event.action === 'show_page_summary') {
+            await this.processEvent('askAIviaInPageInteractions', {
+                textToProcess: event.highlightedText,
+            })
+        } else if (
+            event.action === 'create_youtube_timestamp_with_AI_summary'
+        ) {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+
+            this.processEvent('createYoutubeTimestampWithAISummary', {
+                videoRangeTimestamps: {
+                    startTimeSecs: event.videoRangeTimestamps[0],
+                    endTimeSecs: event.videoRangeTimestamps[1],
+                },
+            })
+            return true
+        } else if (event.action === 'open_chapter_summary') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('getVideoChapters', null)
+            return true
+        } else if (
+            event.action === 'create_youtube_timestamp_with_screenshot'
+        ) {
+            if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+                await sleepPromise(100)
+            }
+
+            this.processEvent('createYoutubeTimestampWithScreenshot', {
+                imageData: event.imageData,
+            })
+            return true
+        } else if (event.action === 'youtube_timestamp') {
+            if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab:
+                        this.state.selectedListId &&
+                        this.state.activeTab === 'spaces'
+                            ? 'spaces'
+                            : 'annotations',
+                })
+                await sleepPromise(100)
+            }
+            this.sidebarRef.current?.addYoutubeTimestampToEditor(
+                event.commentText,
+            )
+            return true
+        }
+
+        // Don't handle any external action that depend on cache until init logic has completed
         await Promise.all([
             this.initLogicPromise,
             this.props.inPageUI.cacheLoadPromise,
@@ -312,21 +369,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
             await sleepPromise(500)
             await this.processEvent('createPageLink', null)
-        } else if (event.action === 'show_page_summary') {
-            await this.processEvent('askAIviaInPageInteractions', {
-                textToProcess: event.highlightedText,
-            })
-        } else if (event.action === 'youtube_timestamp') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab:
-                    this.state.selectedListId &&
-                    this.state.activeTab === 'spaces'
-                        ? 'spaces'
-                        : 'annotations',
-            })
-            this.sidebarRef.current?.addYoutubeTimestampToEditor(
-                event.commentText,
-            )
         } else if (event.action === 'check_sidebar_status') {
             return true
         } else if (event.action === 'set_focus_mode') {
@@ -336,40 +378,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
             this.processEvent('setSelectedList', {
                 unifiedListId: unifiedListId,
-            })
-            return true
-        } else if (
-            event.action === 'create_youtube_timestamp_with_AI_summary'
-        ) {
-            await this.processEvent('setActiveSidebarTab', {
-                tab: 'annotations',
-            })
-
-            this.processEvent('createYoutubeTimestampWithAISummary', {
-                videoRangeTimestamps: {
-                    startTimeSecs: event.videoRangeTimestamps[0],
-                    endTimeSecs: event.videoRangeTimestamps[1],
-                },
-            })
-            return true
-        } else if (event.action === 'open_chapter_summary') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab: 'summary',
-            })
-            await this.processEvent('getVideoChapters', null)
-            return true
-        } else if (
-            event.action === 'create_youtube_timestamp_with_screenshot'
-        ) {
-            if (this.state.activeTab !== 'annotations') {
-                await this.processEvent('setActiveSidebarTab', {
-                    tab: 'annotations',
-                })
-                await sleepPromise(100)
-            }
-
-            this.processEvent('createYoutubeTimestampWithScreenshot', {
-                imageData: event.imageData,
             })
             return true
         }
