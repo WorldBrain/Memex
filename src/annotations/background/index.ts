@@ -430,12 +430,10 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async editAnnotation(_, pk, comment, color, isSocialPost?: boolean) {
-        if (isSocialPost) {
-            pk = await this.lookupSocialId(pk)
-        }
-
-        const existingAnnotation = await this.getAnnotationByPk(pk)
+    async editAnnotation(_, url, comment, color) {
+        const existingAnnotation = await this.getAnnotationByPk(url, {
+            url: url,
+        })
 
         if (!existingAnnotation?.comment?.length) {
             if (this.options.analyticsBG) {
@@ -451,7 +449,7 @@ export default class DirectLinkingBackground {
             }
         }
 
-        return this.annotationStorage.editAnnotation(pk, comment, color)
+        return this.annotationStorage.editAnnotation(url, comment, color)
     }
 
     async deleteAnnotation(_, pk, isSocialPost?: boolean) {

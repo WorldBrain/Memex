@@ -134,8 +134,6 @@ export class PageIndexingBackground {
             lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
                 this.lookupPageTitleForUrl,
             ),
-            addPage: this.addPage.bind(this),
-            indexPage: this.indexPage.bind(this),
         }
     }
 
@@ -359,7 +357,7 @@ export class PageIndexingBackground {
 
     /**
      * Adds/updates a page + associated visit (pages never exist without either an assoc.
-     * visit or bookmark in current model).
+     * visit or bookmark in cutags/background/storage.test.tsrrent model).
      */
     async addPage({
         visits = [],
@@ -705,14 +703,10 @@ export class PageIndexingBackground {
             let htmlBody
             let favIconURI
 
-            if (!props.metaData?.pageHTML) {
-                const pageData = await this.options.fetchPageData(props.fullUrl)
-                content = pageData.content
-                htmlBody = pageData.htmlBody
-                favIconURI = pageData.favIconURI
-            } else {
-                htmlBody = props.metaData.pageHTML
-            }
+            const pageData = await this.options.fetchPageData(props.fullUrl)
+            content = pageData.content
+            htmlBody = pageData.htmlBody
+            favIconURI = pageData.favIconURI
 
             await this.storeDocContent(normalizeUrl(props.fullUrl), {
                 htmlBody,

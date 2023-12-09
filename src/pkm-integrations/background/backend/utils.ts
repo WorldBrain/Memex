@@ -125,7 +125,7 @@ export async function getPathsFromLocalStorage() {
 export type rabbitHoleDocument = {
     pageTitle: string
     fullUrl: string
-    createdWhen: number
+    createdWhen: Date | number
     creatorId: string | AutoPk
     contentType: string
     fullHTML: string

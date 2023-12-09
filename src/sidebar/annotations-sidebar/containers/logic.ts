@@ -126,7 +126,6 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
     spacesBG?: SpacePickerDependencies['spacesBG']
-    storage
 }
 
 type EventHandler<
@@ -175,8 +174,6 @@ export class SidebarContainerLogic extends UILogic<
     private fullPageUrl: string
     private youtubeTranscriptSummary: string = ''
     private chapterSummaries
-    private editor = null
-    private backendNew = null
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -428,7 +425,7 @@ export class SidebarContainerLogic extends UILogic<
         )
         this.options.events?.emit('renderHighlights', {
             highlights,
-            removeExisting: state.activeTab === 'annotations' ? false : true,
+            removeExisting: true,
         })
     }
 
@@ -2550,7 +2547,7 @@ export class SidebarContainerLogic extends UILogic<
                 this.emitMutation({
                     activeSuggestionsTab: { $set: 'MySuggestions' },
                 })
-                extractedData = Object.entries(results).filter((result) => {
+                extractedData = results.filter((result) => {
                     return (
                         result.creatorId ===
                         previousState.currentUserReference.id
@@ -2990,6 +2987,8 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
+            console.log('waaaa')
+            this.renderOwnHighlights(previousState)
         } else if (
             event.tab === 'summary' &&
             ((event.prompt && event.prompt?.length > 0) ||
@@ -3081,7 +3080,7 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    async updateSuggestionResults(results) {
+    async updateSuggestionResults(results: SuggestionCard[]) {
         const resultsArray: SuggestionCard[] = []
         const user = await this.options.authBG.getCurrentUser()
         const userId = user?.id
@@ -3121,8 +3120,8 @@ export class SidebarContainerLogic extends UILogic<
 
                 pageToDisplay = {
                     fullUrl: result.fullUrl,
-                    fullTitle: result.pageTitle,
-                    description: result.contentText,
+                    pageTitle: result.pageTitle,
+                    contentText: result.contentText,
                     contentType: result.contentType,
                     creatorId: result.creatorId,
                     spaces: followedPageListData,
@@ -3163,8 +3162,8 @@ export class SidebarContainerLogic extends UILogic<
 
                     pageToDisplay = {
                         fullUrl: pageData?.fullUrl || result?.fullUrl,
-                        fullTitle: pageData?.fullTitle || result?.pageTitle,
-                        description: result.contentText,
+                        pageTitle: pageData?.fullTitle || result?.pageTitle,
+                        contentText: result.contentText,
                         contentType: result.contentType,
                         creatorId: userId,
                         spaces: pageListData ?? null,
@@ -3215,7 +3214,7 @@ export class SidebarContainerLogic extends UILogic<
                         if (annotationsCacheVersion) {
                             pageToDisplay = {
                                 fullUrl: annotationUrl,
-                                fullTitle: result.pageTitle ?? annotationUrl,
+                                pageTitle: result.pageTitle ?? annotationUrl,
                                 body: annotationRawData?.body ?? null,
                                 comment: annotationRawData?.comment ?? null,
                                 contentType: result.contentType,
@@ -3808,6 +3807,8 @@ export class SidebarContainerLogic extends UILogic<
             previousState,
             event.unifiedListId,
         )
+
+        this.renderOwnHighlights(previousState)
 
         this.emitMutation({})
     }

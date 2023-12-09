@@ -130,10 +130,9 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
 
     setupTooltipTrigger(() => {
         params.inPageUI.showTooltip()
-    }, params.toolbarNotifications)
+    }, null)
     conditionallyTriggerTooltip({
         callback: () => params.inPageUI.showTooltip(),
-        toolbarNotifications: params.toolbarNotifications,
     })
 }
 

@@ -326,6 +326,7 @@ export async function downloadMemexDesktop() {
         ? 'mac'
         : 'linux'
 
+    // @ts-ignore
     const OSData = await navigator.userAgentData.getHighEntropyValues([
         'architecture',
     ])

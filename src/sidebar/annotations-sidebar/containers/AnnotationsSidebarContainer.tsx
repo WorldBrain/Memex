@@ -114,6 +114,7 @@ export class AnnotationsSidebarContainer<
                 },
                 imageSupport: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
+                storage: props.storageAPI,
             }),
         )
 

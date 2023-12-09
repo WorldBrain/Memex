@@ -136,7 +136,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
     highlightColors: string
-    suggestionsResults: []
+    suggestionsResults: SuggestionCard[]
     suggestionsResultsLoadState: TaskState
 
     activeTab: SidebarTab
@@ -526,8 +526,8 @@ export interface AnnotationCardInstance {
 }
 export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']
-    fullTitle: string
-    description?: boolean
+    pageTitle: string
+    contentText?: string
     contentType: 'page' | 'annotation' | 'rss-feed-item'
     creatorId?: UserReference['id']
     spaces?: any

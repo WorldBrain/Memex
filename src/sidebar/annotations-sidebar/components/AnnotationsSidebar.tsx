@@ -43,6 +43,7 @@ import type {
     SidebarAITab,
     SidebarContainerState,
     SidebarTab,
+    SuggestionCard,
     SuggestionsTab,
 } from '../containers/types'
 import { ExternalLink } from 'src/common-ui/components/design-library/actions/ExternalLink'
@@ -247,7 +248,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
-    onGoToAnnotation?: () => void
+    onGoToAnnotation?: (unifiedId) => void
     setRabbitHoleBetaFeatureAccess?: (permission) => void
     requestRabbitHoleBetaFeatureAccess?: (reasonText) => void
     setSummaryMode: (tab) => void
@@ -1581,7 +1582,7 @@ export class AnnotationsSidebar extends React.Component<
 
         if (this.props.activeAITab === 'ExistingKnowledge') {
             referencesCounter = this.props.suggestionsResults?.filter(
-                (item) => {
+                (item: SuggestionCard) => {
                     return (
                         item.creatorId === this.props.currentUser.id &&
                         item.contentType !== 'rss-feed-item'
@@ -1590,7 +1591,7 @@ export class AnnotationsSidebar extends React.Component<
             )
         } else if (this.props.activeAITab === 'InFollowedFeeds') {
             referencesCounter = this.props.suggestionsResults?.filter(
-                (item) => {
+                (item: SuggestionCard) => {
                     return (
                         item.creatorId !== this.props.currentUser.id ||
                         item.contentType == 'rss-feed-item'
@@ -2247,7 +2248,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         const MySuggestionsResults = this.props.suggestionsResults?.filter(
-            (item) => {
+            (item: SuggestionCard) => {
                 return (
                     item.creatorId === this.props.currentUser.id &&
                     item.contentType !== 'rss-feed-item'
@@ -2256,7 +2257,7 @@ export class AnnotationsSidebar extends React.Component<
         )
 
         const OtherSuggestionsResults = this.props.suggestionsResults?.filter(
-            (item) => {
+            (item: SuggestionCard) => {
                 return (
                     item.creatorId !== this.props.currentUser.id ||
                     item.contentType == 'rss-feed-item'
@@ -2338,7 +2339,7 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    renderSuggestionsListItem(item) {
+    renderSuggestionsListItem(item: SuggestionCard) {
         return (
             <ItemBox>
                 <StyledPageResult
@@ -2367,7 +2368,7 @@ export class AnnotationsSidebar extends React.Component<
                                 null
                                 // 'https://' + item.normalizedUrl
                             } // TODO: put proper url here
-                            fullTitle={item.fullTitle}
+                            fullTitle={item.pageTitle}
                             pdfUrl={null}
                             favIcon={null}
                             youtubeService={null}
@@ -2384,7 +2385,7 @@ export class AnnotationsSidebar extends React.Component<
                     )}
                     <SuggestionsDescriptionsContainer>
                         <SuggestionsDescription textColor={'greyScale6'}>
-                            {item.description?.trim()}
+                            {item.contentText?.trim()}
                         </SuggestionsDescription>
                     </SuggestionsDescriptionsContainer>
                 </StyledPageResult>
@@ -2450,7 +2451,8 @@ export class AnnotationsSidebar extends React.Component<
                         placeholder="How will this feature be useful to you? What's the context you want to apply it in?"
                         onChange={(e) =>
                             this.setState({
-                                onboardingReasonContainer: e.target.value,
+                                onboardingReasonContainer: (e.target as HTMLTextAreaElement)
+                                    .value,
                             })
                         }
                     />
@@ -2555,7 +2557,7 @@ export class AnnotationsSidebar extends React.Component<
                 : window.navigator.platform.includes('Mac')
                 ? 'MacOS'
                 : window.navigator.platform.includes('Linux') && 'Linux'
-            let downloadUrlRef = React.createRef()
+            let downloadUrlRef = React.createRef<HTMLInputElement>()
             return (
                 <OnboardingContainer>
                     <OnboardingTitle>
@@ -3099,7 +3101,10 @@ export class AnnotationsSidebar extends React.Component<
                     <PrimaryAction
                         onClick={this.props.setActiveTab('annotations')}
                         label={'Notes'}
-                        active={this.props.activeTab === 'annotations'}
+                        active={
+                            this.props.activeTab === 'annotations' ||
+                            this.props.activeTab === 'spaces'
+                        }
                         type={'tertiary'}
                         size={'medium'}
                         padding={'3px 6px'}
@@ -3869,6 +3874,8 @@ const SuggestionsList = styled.div`
     margin: 10px;
     width: fill-available;
     width: -moz-available;
+    overflow: scroll;
+    padding-bottom: 150px;
 `
 
 const SuggestionsCardContainer = styled(ItemBox)`
@@ -5153,7 +5160,7 @@ const AnnotationsSectionStyled = styled.div`
     height: fill-available;
     flex: 1;
     z-index: 19;
-    overflow: scroll;
+    overflow: hidden;
 
     scrollbar-width: none;
 

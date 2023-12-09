@@ -120,13 +120,6 @@ export default class RibbonContainer extends StatefulUIElement<
             this.props.setRibbonShouldAutoHide(true)
         } else if (event.action === 'list') {
             this.processEvent('setShowListsPicker', { value: true })
-        } else if (event.action === 'tag') {
-            // This serves to temporary "disable" the shortcut until we remove tags UI
-            if (!this.state.tagging.shouldShowTagsUIs) {
-                this.props.inPageUI.hideRibbon()
-            } else {
-                this.processEvent('setShowTagsPicker', { value: true })
-            }
         }
     }
 

@@ -506,8 +506,11 @@ export default class AnnotationStorage extends StorageModule {
     }
 
     async getAnnotationByPk({ url }: { url: string }) {
-        const annotation = this.operation('findAnnotationByUrl', { url })
-        return annotation
+        if (url.length > 0) {
+            console.log('url', url)
+            const annotation = this.operation('findAnnotationByUrl', { url })
+            return annotation
+        }
     }
 
     async getAllAnnotationsByUrl(params: AnnotSearchParams) {
@@ -621,7 +624,7 @@ export default class AnnotationStorage extends StorageModule {
         comment: string,
         color: string,
         lastEdited = new Date(),
-        userId: string,
+        userId?: string,
     ) {
         try {
             if (!(await isPkmSyncEnabled())) {
@@ -670,10 +673,7 @@ export default class AnnotationStorage extends StorageModule {
                 const annotationDataForRabbitHole = {
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
                     fullUrl: 'https://' + annotationDataForPKMSyncUpdate.url,
-                    createdWhen:
-                        Math.floor(
-                            annotationDataForPKMSyncUpdate.createdWhen,
-                        ).getTime() / 1000,
+                    createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
                     creatorId: userId,
                     contentType: 'annotation',
                     fullHTML:
@@ -686,6 +686,8 @@ export default class AnnotationStorage extends StorageModule {
                 )
             }
         } catch (e) {}
+
+        console.log('edit', url, comment, color, lastEdited)
 
         return this.operation('editAnnotation', {
             url,
