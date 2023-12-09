@@ -857,6 +857,7 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
+                pkmSyncBG,
             })
             components.sidebar?.resolve()
         },

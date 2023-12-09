@@ -111,6 +111,8 @@ import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/compo
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -126,6 +128,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
     spacesBG?: SpacePickerDependencies['spacesBG']
+    pkmSyncBG?: PkmSyncInterface
 }
 
 type EventHandler<
@@ -842,7 +845,11 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        if (rabbitHoleBetaAccess === 'granted') {
+        if (
+            rabbitHoleBetaAccess === 'granted' ||
+            rabbitHoleBetaAccess === 'grantedBcOfSubscription'
+        ) {
+            console.log('granted', rabbitHoleBetaAccess)
             const url = await downloadMemexDesktop()
 
             this.emitMutation({
@@ -1493,37 +1500,23 @@ export class SidebarContainerLogic extends UILogic<
             rabbitHoleBetaFeatureAccess: { $set: event.permission },
         })
 
+        if (event.permission === 'onboarding') {
+            const url = await downloadMemexDesktop()
+
+            this.emitMutation({
+                desktopAppDownloadLink: { $set: url },
+            })
+        }
+
         if (event.permission === 'downloadStarted') {
-            let isConnected = false
-            let counter = 0
-            while (!isConnected && counter < 3000) {
-                counter++
-                await new Promise((resolve) => setTimeout(resolve, 1000))
-                let backend
-                try {
-                    backend = await new MemexLocalBackend({
-                        url: 'http://localhost:11922',
-                    }).isReadyToSync()
-                } catch (e) {
-                    console.error(
-                        'Trying to connect to Desktop App but not yet available',
-                    )
-                    continue
-                }
-                if (!backend) {
-                    this.emitMutation({
-                        rabbitHoleBetaFeatureAccess: {
-                            $set: 'helperConnectionDenied',
-                        },
-                    })
-                } else {
-                    this.emitMutation({
-                        rabbitHoleBetaFeatureAccess: {
-                            $set: 'helperConnectionSuccess',
-                        },
-                    })
-                    isConnected = true
-                }
+            const desktopAppRunning = await this.checkIfDesktopAppIsRunning()
+            console.log('desktopAppRunning', desktopAppRunning)
+            if (desktopAppRunning) {
+                this.emitMutation({
+                    rabbitHoleBetaFeatureAccess: {
+                        $set: 'helperConnectionSuccess',
+                    },
+                })
             }
         }
 
@@ -1533,12 +1526,37 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
     }
+
+    async checkIfDesktopAppIsRunning() {
+        let isConnected = false
+        let counter = 0
+        while (!isConnected && counter < 3000) {
+            counter++
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            let backend
+            try {
+                backend = await this.options.pkmSyncBG.checkConnectionStatus()
+                console.log('backend', backend)
+            } catch (e) {
+                console.error(
+                    'Trying to connect to Desktop App but not yet available',
+                )
+                continue
+            }
+            if (backend) {
+                isConnected = true
+                return true
+            }
+        }
+    }
+
     requestRabbitHoleBetaFeatureAccess: EventHandler<
         'requestRabbitHoleBetaFeatureAccess'
     > = async ({ event }) => {
         this.emitMutation({
-            rabbitHoleBetaFeatureAccess: { $set: 'requested' },
+            rabbitHoleBetaFeatureAccess: { $set: null },
         })
+
         const isStaging =
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
@@ -1550,18 +1568,23 @@ export class SidebarContainerLogic extends UILogic<
             ? 'https://cloudflare-memex-staging.memex.workers.dev'
             : 'https://cloudfare-memex.memex.workers.dev'
 
-        const response = await fetch(
-            baseUrl + '/subscribe_rabbithole_waitlist',
-            {
-                method: 'POST',
-                body: JSON.stringify({
-                    email: email,
-                    userId: userId,
-                    reasonText: event.reasonText,
-                }),
-                headers: { 'Content-Type': 'application/json' },
-            },
+        await fetch(baseUrl + '/subscribe_rabbithole_waitlist', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email,
+                userId: userId,
+                reasonText: event.reasonText,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+
+        const onboardingStage = await rabbitHoleBetaFeatureAllowed(
+            this.options.authBG,
         )
+
+        this.emitMutation({
+            rabbitHoleBetaFeatureAccess: { $set: onboardingStage },
+        })
     }
 
     setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
@@ -3033,6 +3056,14 @@ export class SidebarContainerLogic extends UILogic<
             })
             this.previousState = previousState
             await this.checkRabbitHoleOnboardingStage()
+            const isRunning = await this.checkIfDesktopAppIsRunning()
+
+            if (!isRunning) {
+                this.emitMutation({
+                    suggestionsResultsLoadState: { $set: 'error' },
+                })
+            }
+
             const currentPageContent = document.body.innerText
 
             const prompt = `You are given the text of a web page. Your task is to summarise it in such a way that is ideally suited for similarity comparison with other texts. This means you should retain all key entities and concepts as much as you can. Here is the text of the page:  `

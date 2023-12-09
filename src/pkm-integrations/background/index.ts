@@ -21,6 +21,7 @@ export class PKMSyncBackgroundModule {
         })
         this.remoteFunctions = {
             addRSSfeedSource: this.addRSSfeedSource,
+            checkConnectionStatus: this.checkConnectionStatus,
         }
     }
 
@@ -28,6 +29,10 @@ export class PKMSyncBackgroundModule {
         makeRemotelyCallable({
             ...this.remoteFunctions,
         })
+    }
+
+    checkConnectionStatus = async () => {
+        return this.backendNew.isReadyToSync()
     }
 
     async pushRabbitHoleUpdate(entryData) {

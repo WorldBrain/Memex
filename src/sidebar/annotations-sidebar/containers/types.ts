@@ -220,6 +220,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     rabbitHoleBetaFeatureAccess:
         | 'denied'
         | 'granted'
+        | 'grantedBcOfSubscription'
         | 'requested'
         | 'tutorial'
         | 'onboarded'

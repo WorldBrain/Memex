@@ -25,14 +25,19 @@ export class MemexLocalBackend {
             return false
         }
     }
-
     async isReadyToSync() {
-        const response = await fetch(`${this.url}/status`)
-        if (response.status === 200) {
-            return true
-        } else if (response.status === 500) {
-            return 'not-available'
-        } else {
+        console.log('isReadyToSync', this.url)
+        try {
+            const response = await fetch(`${this.url}/status`)
+            if (response.status === 200) {
+                return true
+            } else if (response.status === 500) {
+                return 'not-available'
+            } else {
+                return false
+            }
+        } catch (error) {
+            console.error('Error in isReadyToSync:', error)
             return false
         }
     }

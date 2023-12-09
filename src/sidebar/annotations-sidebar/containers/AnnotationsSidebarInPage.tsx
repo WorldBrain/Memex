@@ -32,6 +32,8 @@ import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -39,6 +41,7 @@ export interface Props extends ContainerProps {
     highlighter: HighlightRendererInterface
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
+    pkmSyncBG?: PkmSyncInterface
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<

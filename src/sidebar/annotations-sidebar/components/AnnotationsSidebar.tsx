@@ -2307,6 +2307,23 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 {this.props.suggestionsResultsLoadState === 'running' ? (
                     <>{loaderBox()}</>
+                ) : this.props.suggestionsResultsLoadState === 'error' ? (
+                    <EmptyMessageContainer>
+                        <IconBox heightAndWidth="40px">
+                            <Icon
+                                filePath={icons.stop}
+                                heightAndWidth="20px"
+                                color="prime1"
+                                hoverOff
+                            />
+                        </IconBox>
+                        <InfoText>
+                            The deskop app is not connected.
+                            <br />
+                            Make sure it is running or reach out to support via
+                            the live chat.
+                        </InfoText>
+                    </EmptyMessageContainer>
                 ) : (
                     <>
                         {this.props.activeSuggestionsTab ===
@@ -2517,7 +2534,7 @@ export class AnnotationsSidebar extends React.Component<
                         label={
                             this.state.copiedVideoLink
                                 ? 'Copied!'
-                                : '"Share Link to Video"'
+                                : 'Share Link to Video'
                         }
                         icon="link"
                         type="tertiary"
@@ -2529,6 +2546,36 @@ export class AnnotationsSidebar extends React.Component<
             return (
                 <OnboardingContainer>
                     <OnboardingTitle>You're in!</OnboardingTitle>
+                    <OnboardingSubtitle>
+                        This feature is early so watch this short video for a
+                        few important notes before you get started
+                    </OnboardingSubtitle>
+                    <VideoFrame
+                        // Welcome message and more detailed intro into the feature
+                        src={'https://share.descript.com/embed/wm9tGYFdND7'}
+                        videoSizeFull={true}
+                    />
+                    <PrimaryAction
+                        onClick={() => {
+                            this.props.setRabbitHoleBetaFeatureAccess(
+                                'onboarding',
+                            )
+                        }}
+                        label="Get started"
+                        icon="stars"
+                        type="primary"
+                        size="medium"
+                    />
+                </OnboardingContainer>
+            )
+        } else if (
+            this.props.rabbitHoleBetaFeatureAccess === 'grantedBcOfSubscription'
+        ) {
+            return (
+                <OnboardingContainer>
+                    <OnboardingTitle>
+                        You've got instant access with your subscription
+                    </OnboardingTitle>
                     <OnboardingSubtitle>
                         This feature is early so watch this short video for a
                         few important notes before you get started
@@ -2689,9 +2736,9 @@ export class AnnotationsSidebar extends React.Component<
         if (this.props.activeTab === 'rabbitHole') {
             if (this.props.rabbitHoleBetaFeatureAccess == null) {
                 return (
-                    <LoadingBox>
-                        <LoadingIndicator size={20} />
-                    </LoadingBox>
+                    <LoaderBox>
+                        <LoadingIndicator size={30} />
+                    </LoaderBox>
                 )
             }
             if (this.props.rabbitHoleBetaFeatureAccess === 'onboarded') {

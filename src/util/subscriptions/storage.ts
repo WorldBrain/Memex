@@ -282,41 +282,44 @@ export async function rabbitHoleBetaFeatureAllowed(authBG) {
 
     const status = await checkStatus()
 
-    if (status.AIlimit > 10000) {
-        return 'granted'
-    } else {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
+    const grantedBcOfSubscription = status.AIlimit > 10000
 
-        const email = (await authBG.getCurrentUser()).email
-        const userId = (await authBG.getCurrentUser()).id
+    const isStaging =
+        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+        process.env.NODE_ENV === 'development'
 
-        const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+    const email = (await authBG.getCurrentUser()).email
+    const userId = (await authBG.getCurrentUser()).id
 
-        const response = await fetch(
-            baseUrl + '/check_rabbithole_beta_status',
-            {
-                method: 'POST',
-                body: JSON.stringify({
-                    email: email,
-                    userId: userId,
-                }),
-                headers: { 'Content-Type': 'application/json' },
-            },
-        )
+    const baseUrl = isStaging
+        ? 'https://cloudflare-memex-staging.memex.workers.dev'
+        : 'https://cloudfare-memex.memex.workers.dev'
 
-        let responseContent = await response.json()
+    const response = await fetch(baseUrl + '/check_rabbithole_beta_status', {
+        method: 'POST',
+        body: JSON.stringify({
+            email: email,
+            userId: userId,
+        }),
+        headers: { 'Content-Type': 'application/json' },
+    })
 
-        if (responseContent.status === 'granted') {
+    let responseContent = await response.json()
+
+    if (responseContent.status === 'granted') {
+        if (grantedBcOfSubscription) {
             return 'granted'
-        } else if (responseContent.status === 'requested') {
-            return 'requested'
-        } else {
-            return 'denied'
         }
+        return 'granted'
+    } else if (
+        responseContent.status === 'requested' &&
+        grantedBcOfSubscription
+    ) {
+        return 'grantedBcOfSubscription'
+    } else if (responseContent.status === 'requested') {
+        return 'requested'
+    } else {
+        return 'denied'
     }
 }
 export async function downloadMemexDesktop() {
