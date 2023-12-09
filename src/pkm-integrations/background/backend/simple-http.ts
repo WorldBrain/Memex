@@ -173,21 +173,25 @@ export class MemexLocalBackend {
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/get_similar`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: body,
-        })
+        try {
+            const response = await fetch(`${this.url}/get_similar`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body,
+            })
 
-        if (response.ok) {
-            const responseObj = await response.json()
-            return responseObj
-        }
+            if (response.ok) {
+                const responseObj = await response.json()
+                return responseObj
+            }
 
-        if (!response.ok || response.status !== 200) {
-            throw new Error(`HTTP error! status: ${response.status}`)
+            if (!response.ok || response.status !== 200) {
+                throw new Error(`HTTP error! status: ${response.status}`)
+            }
+        } catch (error) {
+            return 'not-connected'
         }
     }
     async addRSSfeedSource(feedUrl, isSubstack): Promise<any> {

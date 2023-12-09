@@ -2400,11 +2400,13 @@ export class AnnotationsSidebar extends React.Component<
                             />
                         </ListSegmentBox>
                     )}
-                    <SuggestionsDescriptionsContainer>
-                        <SuggestionsDescription textColor={'greyScale6'}>
-                            {item.contentText?.trim()}
-                        </SuggestionsDescription>
-                    </SuggestionsDescriptionsContainer>
+                    {item.contentText?.length > 0 && (
+                        <SuggestionsDescriptionsContainer>
+                            <SuggestionsDescription textColor={'greyScale6'}>
+                                {item.contentText?.trim()}
+                            </SuggestionsDescription>
+                        </SuggestionsDescriptionsContainer>
+                    )}
                 </StyledPageResult>
                 {item.contentType === 'annotation' && (
                     <ItemBox>
@@ -3869,6 +3871,7 @@ const NoteText = styled(Markdown)`
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
     margin-top: ${(props) => !props.hasHighlight && '10px'};
+    padding: 0px 20px 20px 30px;
 `
 
 const HighlightStyled = styled.div<{ hasComment: boolean }>`

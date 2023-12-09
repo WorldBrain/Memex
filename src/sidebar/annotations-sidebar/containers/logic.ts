@@ -842,7 +842,10 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         if (rabbitHoleBetaAccess === 'onboarded') {
-            return
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: { $set: 'onboarded' },
+            })
+            return 'onboarded'
         }
 
         if (
@@ -1527,7 +1530,7 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    async checkIfDesktopAppIsRunning() {
+    async checkIfDesktopAppIsRunning(onetimeCheck?: boolean) {
         let isConnected = false
         let counter = 0
         while (!isConnected && counter < 3000) {
@@ -1536,7 +1539,6 @@ export class SidebarContainerLogic extends UILogic<
             let backend
             try {
                 backend = await this.options.pkmSyncBG.checkConnectionStatus()
-                console.log('backend', backend)
             } catch (e) {
                 console.error(
                     'Trying to connect to Desktop App but not yet available',
@@ -1546,6 +1548,8 @@ export class SidebarContainerLogic extends UILogic<
             if (backend) {
                 isConnected = true
                 return true
+            } else if (onetimeCheck && isConnected === false) {
+                return false
             }
         }
     }
@@ -3055,16 +3059,18 @@ export class SidebarContainerLogic extends UILogic<
                 suggestionsResultsLoadState: { $set: 'running' },
             })
             this.previousState = previousState
-            await this.checkRabbitHoleOnboardingStage()
-            const isRunning = await this.checkIfDesktopAppIsRunning()
-
-            if (!isRunning) {
-                this.emitMutation({
-                    suggestionsResultsLoadState: { $set: 'error' },
-                })
+            if (
+                !(
+                    previousState.rabbitHoleBetaFeatureAccess === 'onboarded' ||
+                    (await this.checkRabbitHoleOnboardingStage()) ===
+                        'onboarded'
+                )
+            ) {
+                return
             }
 
-            const currentPageContent = document.body.innerText
+            const currentPageContent =
+                document.title && document.title + document.body.innerText
 
             const prompt = `You are given the text of a web page. Your task is to summarise it in such a way that is ideally suited for similarity comparison with other texts. This means you should retain all key entities and concepts as much as you can. Here is the text of the page:  `
 
@@ -3084,6 +3090,12 @@ export class SidebarContainerLogic extends UILogic<
                     skipProtocolTrim: true,
                 }),
             )
+            if (results === 'not-connected') {
+                this.emitMutation({
+                    suggestionsResultsLoadState: { $set: 'error' },
+                })
+                return
+            }
 
             await this.updateSuggestionResults(results)
 
