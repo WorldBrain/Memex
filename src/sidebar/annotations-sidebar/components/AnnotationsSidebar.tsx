@@ -1847,26 +1847,36 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <AISidebarContainer>
-                <SuggestionsListSwitcher>
-                    <SuggestionsSwitcherButton
-                        onClick={this.props.setActiveAITab('ThisPage')}
-                        active={this.props.activeAITab === 'ThisPage'}
-                    >
-                        This Page
-                    </SuggestionsSwitcherButton>
-                    <SuggestionsSwitcherButton
-                        onClick={this.props.setActiveAITab('ExistingKnowledge')}
-                        active={this.props.activeAITab === 'ExistingKnowledge'}
-                    >
-                        Existing knowledge
-                    </SuggestionsSwitcherButton>
-                    <SuggestionsSwitcherButton
-                        onClick={this.props.setActiveAITab('InFollowedFeeds')}
-                        active={this.props.activeAITab === 'InFollowedFeeds'}
-                    >
-                        In Followed
-                    </SuggestionsSwitcherButton>
-                </SuggestionsListSwitcher>
+                {this.props.sidebarContext === 'in-page' && (
+                    <SuggestionsListSwitcher>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveAITab('ThisPage')}
+                            active={this.props.activeAITab === 'ThisPage'}
+                        >
+                            This Page
+                        </SuggestionsSwitcherButton>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveAITab(
+                                'ExistingKnowledge',
+                            )}
+                            active={
+                                this.props.activeAITab === 'ExistingKnowledge'
+                            }
+                        >
+                            Existing knowledge
+                        </SuggestionsSwitcherButton>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setActiveAITab(
+                                'InFollowedFeeds',
+                            )}
+                            active={
+                                this.props.activeAITab === 'InFollowedFeeds'
+                            }
+                        >
+                            In Followed
+                        </SuggestionsSwitcherButton>
+                    </SuggestionsListSwitcher>
+                )}
                 {this.props.rabbitHoleBetaFeatureAccess === 'onboarded' ||
                 this.props.activeAITab === 'ThisPage' ? (
                     <>
@@ -3297,16 +3307,18 @@ export class AnnotationsSidebar extends React.Component<
                         padding={'3px 6px'}
                         height={'30px'}
                     />
-                    <PrimaryAction
-                        onClick={this.props.setActiveTab('rabbitHole')}
-                        label={'RabbitHole'}
-                        active={this.props.activeTab === 'rabbitHole'}
-                        type={'tertiary'}
-                        size={'medium'}
-                        iconPosition={'right'}
-                        padding={'3px 6px'}
-                        height={'30px'}
-                    />
+                    {this.props.sidebarContext === 'in-page' && (
+                        <PrimaryAction
+                            onClick={this.props.setActiveTab('rabbitHole')}
+                            label={'RabbitHole'}
+                            active={this.props.activeTab === 'rabbitHole'}
+                            type={'tertiary'}
+                            size={'medium'}
+                            iconPosition={'right'}
+                            padding={'3px 6px'}
+                            height={'30px'}
+                        />
+                    )}
                     {/* <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
                         label={'Spaces'}
@@ -3349,7 +3361,7 @@ export class AnnotationsSidebar extends React.Component<
                         height={'30px'}
                     />
 
-                    {/* <PrimaryAction
+                    <PrimaryAction
                         onClick={(event) => {
                             this.props.setActiveTab('feed')(event)
                             this.props.clickFeedActivityIndicator()
@@ -3377,7 +3389,7 @@ export class AnnotationsSidebar extends React.Component<
                                 </LoadingBox>
                             )
                         }
-                    /> */}
+                    />
                 </TopBarTabsContainer>
                 <TopBarBtnsContainer ref={this.sharePageLinkButtonRef}>
                     <PrimaryAction
