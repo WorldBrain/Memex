@@ -44,7 +44,6 @@ export default class TagsBackground {
             addTagsToOpenTabs: this.addTagsToOpenTabs,
             delTagsFromOpenTabs: this.delTagsFromOpenTabs,
             searchForTagSuggestions: this.searchForTagSuggestions,
-            fetchInitialTagSuggestions: this.fetchInitialTagSuggestions,
         }
         this.localStorage = new BrowserSettingsStore<TagsSettings>(
             options.localBrowserStorage,
@@ -60,27 +59,6 @@ export default class TagsBackground {
             type: 'tag',
             ...args,
         })
-    }
-
-    fetchInitialTagSuggestions = async (
-        { limit }: { limit?: number } = { limit: limitSuggestionsReturnLength },
-    ) => {
-        let suggestions = await this.localStorage.get('suggestions')
-
-        if (!suggestions) {
-            // Populate first time suggestions for old users installing this version
-            suggestions =
-                (await this.options.searchBackgroundModule.storage.suggestExtended(
-                    { type: 'tag' },
-                )) ?? []
-            console['info'](
-                'No cached tag suggestions found so loaded suggestions from DB:',
-                suggestions,
-            )
-            await this.localStorage.set('suggestions', suggestions)
-        }
-
-        return suggestions.slice(0, limit)
     }
 
     addTagsToOpenTabs = async (params: { name: string; time?: number }) => {

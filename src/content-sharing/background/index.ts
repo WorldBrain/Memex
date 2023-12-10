@@ -120,9 +120,9 @@ export default class ContentSharingBackground {
                 getAnnotation: (annotationUrl) =>
                     options
                         .getBgModules()
-                        .directLinking.annotationStorage.getAnnotationByPk(
-                            annotationUrl,
-                        ),
+                        .directLinking.annotationStorage.getAnnotationByPk({
+                            url: annotationUrl,
+                        }),
                 getAnnotations: (annotationUrls) =>
                     options
                         .getBgModules()

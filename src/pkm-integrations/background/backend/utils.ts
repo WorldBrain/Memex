@@ -1,4 +1,7 @@
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 // TODO: Refactor this so it's not importing and using the browser global
 import { browser } from 'webextension-polyfill-ts'
 
@@ -117,4 +120,25 @@ export async function getPathsFromLocalStorage() {
     const data = await browser.storage.local.get('PKMSYNCpkmFolders')
 
     return data.PKMSYNCpkmFolders
+}
+
+export type rabbitHoleDocument = {
+    pageTitle: string
+    fullUrl: string
+    createdWhen: Date | number
+    creatorId: string | AutoPk
+    contentType: string
+    fullHTML: string
+}
+
+export async function createRabbitHoleEntry(
+    entryData: rabbitHoleDocument,
+    pkmSyncBG,
+    checkForFilteredSpaces?,
+) {
+    await pkmSyncBG.pushRabbitHoleUpdate(entryData, checkForFilteredSpaces)
+}
+
+export async function addFeedSources(feedSources, pkmSyncBG) {
+    await pkmSyncBG.addFeedSources(feedSources)
 }

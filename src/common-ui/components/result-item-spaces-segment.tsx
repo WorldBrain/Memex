@@ -7,13 +7,13 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import { padding } from 'polished'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
-    onEditBtnClick: React.MouseEventHandler
     lists: Array<{
         id: number
         name: string | JSX.Element
         isShared: boolean
-        type: 'page-link' | 'user-list' | 'special-list'
+        type: 'page-link' | 'user-list' | 'special-list' | 'rss-feed'
     }>
+    onEditBtnClick?: React.MouseEventHandler
     onListClick?: (localListId: number) => void
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
@@ -98,6 +98,7 @@ export default function ListsSegment({
                                 }}
                                 isLoading={space.name == null && space != null}
                                 title={space.name}
+                                spaceId={space.id ?? null}
                             >
                                 {' '}
                                 {space.type === 'page-link' && (
@@ -105,6 +106,14 @@ export default function ListsSegment({
                                         heightAndWidth="16px"
                                         hoverOff
                                         icon="link"
+                                        color="greyScale5"
+                                    />
+                                )}
+                                {space.type === 'rss-feed' && (
+                                    <Icon
+                                        heightAndWidth="16px"
+                                        hoverOff
+                                        icon="feed"
                                         color="greyScale5"
                                     />
                                 )}
@@ -178,6 +187,7 @@ const loading = keyframes`
 const ListSpaceContainer = styled.div<{
     onClick: React.MouseEventHandler
     isLoading: boolean
+    spaceId: number
 }>`
     background-color: ${(props) => props.theme.colors.greyScale3};
     color: ${(props) => props.theme.colors.greyScale6};
@@ -189,7 +199,7 @@ const ListSpaceContainer = styled.div<{
     height: 20px;
     margin: 2px 4px 2px 0;
     display: flex;
-    cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
+    cursor: ${(props) => (props.spaceId ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;

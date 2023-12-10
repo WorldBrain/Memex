@@ -20,7 +20,6 @@ export interface RibbonSubcomponentProps {
     sidebar: RibbonSidebarProps
     commentBox: RibbonCommentBoxProps // TODO: (sidebar-refactor) depreciated ,remove when new annotation interface below is complete
     bookmark: RibbonBookmarkProps
-    tagging: RibbonTaggingProps
     lists: RibbonListsProps
     annotationsCache: PageAnnotationsCacheInterface
     search: RibbonSearchProps
@@ -77,19 +76,6 @@ export interface RibbonBookmarkProps {
     isBookmarked: boolean
     toggleBookmark: () => void
     lastBookmarkTimestamp: number
-}
-
-export interface RibbonTaggingProps {
-    tags: string[]
-    pageHasTags: boolean
-    showTagsPicker: boolean
-    shouldShowTagsUIs: boolean
-    updateTags: PickerUpdateHandler
-    tagAllTabs: (value: string) => Promise<void>
-    setShowTagsPicker: (value: boolean) => void
-    loadDefaultSuggestions: () => Promise<string[]>
-    queryEntries: (query: string) => Promise<string[]>
-    fetchInitialTagSelections: () => Promise<string[]>
 }
 
 export interface ListEntryArgs {
