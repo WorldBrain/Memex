@@ -153,8 +153,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     existingFeedSources?: {
         feedTitle: string
         feedUrl: string
-        feedFavIcon: string
-        type: 'substack'
+        feedFavIcon?: string
+        type?: 'substack'
         confirmState?: TaskState
     }[]
 

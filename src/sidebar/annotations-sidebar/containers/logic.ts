@@ -1486,11 +1486,18 @@ export class SidebarContainerLogic extends UILogic<
                     title = title.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
                 }
 
+                let confirmState
+                if (title) {
+                    confirmState = 'success'
+                } else {
+                    confirmState = 'error'
+                }
+
                 const updatedSource = {
                     feedTitle: title ?? feedUrl,
                     feedUrl: feedUrl,
                     type: null,
-                    confirmState: title ? 'success' : 'error',
+                    confirmState: confirmState,
                     feedFavIcon: null,
                 }
 
@@ -1556,16 +1563,6 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             existingFeedSources: { $set: feedSources },
-        })
-    }
-    checkRSSSource: EventHandler<'saveFeedSources'> = async ({
-        event,
-        previousState,
-    }) => {
-        await this.options.pkmSyncBG.loadFeedSources()
-
-        this.emitMutation({
-            existingFeedSources: { $set: event.sources },
         })
     }
 
