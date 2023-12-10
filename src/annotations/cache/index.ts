@@ -65,12 +65,16 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     async initializeAsync() {
         // Call your async function here
         const syncSettingsBG = this.deps.syncSettingsBG
-        const syncSettings = await createSyncSettingsStore({ syncSettingsBG })
-        const highlightColorSettings = await syncSettings.highlightColors.get(
-            'highlightColors',
-        )
+        if (syncSettingsBG != null) {
+            const syncSettings = await createSyncSettingsStore({
+                syncSettingsBG,
+            })
+            const highlightColorSettings =
+                syncSettings &&
+                (await syncSettings?.highlightColors.get('highlightColors'))
 
-        this.highlightColorSettings = highlightColorSettings
+            this.highlightColorSettings = highlightColorSettings
+        }
     }
 
     private generateAnnotationId = (): string =>
