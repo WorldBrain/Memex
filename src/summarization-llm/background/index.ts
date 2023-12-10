@@ -20,6 +20,7 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             outputLocation?: 'editor' | 'summaryContainer' | 'chapterSummary'
             chapterSummaryIndex?: number
             AImodel?: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+            isContentSearch?: boolean
         }
     >
     getTextSummary: RemoteFunction<
@@ -73,6 +74,7 @@ export default class SummarizeBackground {
             outputLocation,
             chapterSummaryIndex,
             AImodel,
+            isContentSearch,
         },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
@@ -92,6 +94,7 @@ export default class SummarizeBackground {
             apiKey,
             undefined,
             AImodel,
+            isContentSearch,
         )) {
             const token = result?.t
             if (token?.length > 0) {

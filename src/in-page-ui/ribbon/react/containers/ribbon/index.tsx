@@ -120,13 +120,6 @@ export default class RibbonContainer extends StatefulUIElement<
             this.props.setRibbonShouldAutoHide(true)
         } else if (event.action === 'list') {
             this.processEvent('setShowListsPicker', { value: true })
-        } else if (event.action === 'tag') {
-            // This serves to temporary "disable" the shortcut until we remove tags UI
-            if (!this.state.tagging.shouldShowTagsUIs) {
-                this.props.inPageUI.hideRibbon()
-            } else {
-                this.processEvent('setShowTagsPicker', { value: true })
-            }
         }
     }
 
@@ -239,23 +232,6 @@ export default class RibbonContainer extends StatefulUIElement<
                     ...this.state.bookmark,
                     toggleBookmark: () =>
                         this.processEvent('toggleBookmark', null),
-                }}
-                tagging={{
-                    ...this.state.tagging,
-                    setShowTagsPicker: (value) =>
-                        this.processEvent('setShowTagsPicker', { value }),
-                    tagAllTabs: (value) =>
-                        this.processEvent('tagAllTabs', { value }),
-                    updateTags: (value) =>
-                        this.processEvent('updateTags', { value }),
-                    fetchInitialTagSelections: () =>
-                        this.props.tags.fetchPageTags({
-                            url: this.normalizedPageUrl,
-                        }),
-                    queryEntries: (query) =>
-                        this.props.tags.searchForTagSuggestions({ query }),
-                    loadDefaultSuggestions: this.props.tags
-                        .fetchInitialTagSuggestions,
                 }}
                 lists={{
                     ...this.state.lists,

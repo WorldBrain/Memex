@@ -23,6 +23,7 @@ import type {
 } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/types'
 import { SHARED_LIST_TIMESTAMP_GET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 
 export interface PageActivityIndicatorDependencies {
     fetch: typeof fetch
@@ -30,6 +31,7 @@ export interface PageActivityIndicatorDependencies {
     jobScheduler: JobScheduler
     contentSharingBackend: ContentSharingBackendInterface
     getCurrentUserId: () => Promise<AutoPk | null>
+    pkmSyncBG: PKMSyncBackgroundModule
 }
 
 export const PERIODIC_SYNC_JOB_NAME = 'followed-list-entry-sync'
@@ -41,6 +43,7 @@ export class PageActivityIndicatorBackground {
     constructor(private deps: PageActivityIndicatorDependencies) {
         this.storage = new PageActivityIndicatorStorage({
             storageManager: deps.storageManager,
+            pkmSyncBG: deps.pkmSyncBG,
         })
 
         this.remoteFunctions = {

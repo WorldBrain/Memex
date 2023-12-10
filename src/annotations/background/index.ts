@@ -30,6 +30,8 @@ import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/ev
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import { AuthBackground } from 'src/authentication/background'
+import { RGBAColor } from '@worldbrain/memex-common/lib/annotations/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -50,6 +52,7 @@ export default class DirectLinkingBackground {
             socialBg: SocialBG
             pkmSyncBG: PKMSyncBackgroundModule
             normalizeUrl?: URLNormalizer
+            authBG: AuthBackground
             analytics: Analytics
             serverStorage: Pick<
                 ServerStorageModules,
@@ -88,6 +91,7 @@ export default class DirectLinkingBackground {
             getAnnotBookmark: this.getAnnotBookmark.bind(this),
             getSharedAnnotations: this.getSharedAnnotations,
             getListIdsForAnnotation: this.getListIdsForAnnotation,
+            getAnnotationByPk: this.getAnnotationByPk.bind(this),
         }
     }
 
@@ -327,15 +331,19 @@ export default class DirectLinkingBackground {
             throw new Error('Annotation ID should not be a full URL')
         }
 
+        const userData = await this.options.authBG.authService.getCurrentUser()
+        const userId = userData?.id
+
         await this.annotationStorage.createAnnotation({
             pageUrl: normalizedPageUrl,
-            url: annotationUrl,
+            url: annotationUrl.toString(),
             pageTitle,
             comment: toCreate.comment,
             body: toCreate.body,
             selector: toCreate.selector,
             color: toCreate.color,
             createdWhen: new Date(toCreate.createdWhen ?? Date.now()),
+            userId: userId,
         })
 
         try {
@@ -348,11 +356,11 @@ export default class DirectLinkingBackground {
             console.error('Error tracking annotation create event', e)
         }
 
-        return annotationUrl
+        return annotationUrl.toString()
     }
 
-    async getAnnotationByPk(pk) {
-        return this.annotationStorage.getAnnotationByPk(pk)
+    async getAnnotationByPk(_, { url }: { url: string }) {
+        return this.annotationStorage.getAnnotationByPk({ url })
     }
 
     async toggleAnnotBookmark(_, { url }: { url: string }) {
@@ -373,6 +381,7 @@ export default class DirectLinkingBackground {
 
         const annotationsById = await contentSharing.getAnnotations({
             references: sharedAnnotationReferences,
+            skipUserHighlightColors: true,
         })
 
         let creatorData: GetUsersPublicDetailsResult
@@ -423,12 +432,10 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async editAnnotation(_, pk, comment, color, isSocialPost?: boolean) {
-        if (isSocialPost) {
-            pk = await this.lookupSocialId(pk)
-        }
-
-        const existingAnnotation = await this.getAnnotationByPk(pk)
+    async editAnnotation(_: any, url: string, comment: string, color: string) {
+        const existingAnnotation = await this.getAnnotationByPk(url, {
+            url: url,
+        })
 
         if (!existingAnnotation?.comment?.length) {
             if (this.options.analyticsBG) {
@@ -444,7 +451,7 @@ export default class DirectLinkingBackground {
             }
         }
 
-        return this.annotationStorage.editAnnotation(pk, comment, color)
+        return this.annotationStorage.editAnnotation(url, comment, color)
     }
 
     async deleteAnnotation(_, pk, isSocialPost?: boolean) {

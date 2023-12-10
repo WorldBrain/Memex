@@ -42,6 +42,7 @@
         "contextMenus",
         "tabs",
         "webNavigation",
+        "webRequest",
         "notifications",
         "unlimitedStorage",
         "storage",

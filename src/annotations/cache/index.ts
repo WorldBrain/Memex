@@ -65,12 +65,16 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     async initializeAsync() {
         // Call your async function here
         const syncSettingsBG = this.deps.syncSettingsBG
-        const syncSettings = await createSyncSettingsStore({ syncSettingsBG })
-        const highlightColorSettings = await syncSettings.highlightColors.get(
-            'highlightColors',
-        )
+        if (syncSettingsBG != null) {
+            const syncSettings = await createSyncSettingsStore({
+                syncSettingsBG,
+            })
+            const highlightColorSettings =
+                syncSettings &&
+                (await syncSettings?.highlightColors.get('highlightColors'))
 
-        this.highlightColorSettings = highlightColorSettings
+            this.highlightColorSettings = highlightColorSettings
+        }
     }
 
     private generateAnnotationId = (): string =>
@@ -531,7 +535,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         let nextUnifiedListIds = [...previous.unifiedListIds]
         let privacyLevel = updates.privacyLevel
 
-        if (previous.privacyLevel === updates.privacyLevel) {
+        if (opts?.forceListUpdate) {
+            nextUnifiedListIds = [...updates.unifiedListIds]
+        } else if (previous.privacyLevel === updates.privacyLevel) {
             nextUnifiedListIds = [...updates.unifiedListIds]
 
             // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots

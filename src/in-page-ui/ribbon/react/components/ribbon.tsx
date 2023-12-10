@@ -348,6 +348,8 @@ export default class Ribbon extends Component<Props, State> {
         const topRight = this.props.ribbonPosition === 'topRight'
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
 
+        RGBAobjectToString
+
         return (
             <PopoutBox
                 targetElementRef={this.tutorialButtonRef.current}

@@ -6,6 +6,7 @@ import type {
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
 import { RGBAColor } from './cache/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 // export interface Annotation {
 //     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
@@ -42,6 +43,7 @@ export interface Annotation {
     isBookmarked?: boolean
     isSocialPost?: boolean
     isBulkShareProtected?: boolean
+    userId?: string
 }
 
 export interface NewAnnotationOptions {

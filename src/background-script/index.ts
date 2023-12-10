@@ -66,6 +66,7 @@ interface Dependencies {
         | 'auth'
         | 'customLists'
         | 'contentSharing'
+        | 'pkmSyncBG'
     >
 }
 

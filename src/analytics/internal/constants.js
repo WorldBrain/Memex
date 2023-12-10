@@ -94,7 +94,6 @@ export const EVENT_NAMES = {
     CLICK_REPLY_BUTTON: 'clickReplyButton',
     CLICK_SHARE_BUTTON: 'clickShareButton',
     LEARN_MORE_CROWD_FUNDING: 'learnMoreCrowdFunding',
-    TAGGING: 'tagging',
     BOOKMARK: 'bookmark',
     BLACKLIST: 'blacklist',
     ADDRESS_BAR_SEARCH: 'addressBarSearch',
