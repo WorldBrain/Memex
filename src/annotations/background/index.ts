@@ -31,6 +31,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 import { AuthBackground } from 'src/authentication/background'
+import { RGBAColor } from '@worldbrain/memex-common/lib/annotations/types'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -431,7 +432,7 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async editAnnotation(_, url, comment, color) {
+    async editAnnotation(_: any, url: string, comment: string, color: string) {
         const existingAnnotation = await this.getAnnotationByPk(url, {
             url: url,
         })
