@@ -150,6 +150,13 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     sidebarWidth?: string
     sidebarRightBorderPosition?: number
     spaceTitleEditValue?: string
+    existingFeedSources?: {
+        feedTitle: string
+        feedUrl: string
+        feedFavIcon: string
+        type: 'substack'
+        confirmState?: TaskState
+    }[]
 
     // Indicates what is the currently selected space in the leaf screen
     // for the side bar, also known as the isolated view. When a space
@@ -311,6 +318,16 @@ interface SidebarEvents {
         noteId: string
         color: RGBAColor
         colorId: string
+    }
+    saveFeedSources: {
+        sources: string
+    }
+    loadFeedSources: {
+        sources: {
+            feedTitle: string
+            feedUrl: string
+            type: 'substack'
+        }[]
     }
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null

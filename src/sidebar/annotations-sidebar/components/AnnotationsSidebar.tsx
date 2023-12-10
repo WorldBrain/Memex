@@ -252,6 +252,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setRabbitHoleBetaFeatureAccess?: (permission) => void
     requestRabbitHoleBetaFeatureAccess?: (reasonText) => void
     setSummaryMode: (tab) => void
+    saveFeedSources: (sources) => void
+    loadFeedSources: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -276,6 +278,8 @@ interface AnnotationsSidebarState {
     hoveredListId: string | null
     copiedVideoLink: boolean
     onboardingReasonContainer?: string
+    showFeedSourcesMenu?: boolean
+    feedSourcesTextAreaContent?: string
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -295,6 +299,7 @@ export class AnnotationsSidebar extends React.Component<
     private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
     private shareInviteButtonRef = React.createRef<HTMLDivElement>()
     private spaceTitleEditFieldRef = React.createRef<HTMLInputElement>()
+    private addSourcesButtonRef = React.createRef<HTMLDivElement>()
     private spaceContextBtnRefs: {
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
@@ -324,6 +329,8 @@ export class AnnotationsSidebar extends React.Component<
         hoveredListId: null,
         copiedVideoLink: false,
         onboardingReasonContainer: null,
+        showFeedSourcesMenu: false,
+        feedSourcesTextAreaContent: '',
     }
 
     async addYoutubeTimestampToEditor(commentText) {
@@ -1993,73 +2000,103 @@ export class AnnotationsSidebar extends React.Component<
                         {!this.props.selectedTextAIPreview && (
                             <OptionsContainer>
                                 <OptionsContainerLeft>
-                                    <DropdownMenuBtnSmall
-                                        elementHeight="fit-content"
-                                        hideDescriptionInPreview
-                                        menuItems={[
-                                            {
-                                                id: 'summarize',
-                                                name: 'Summarize',
-                                                info: 'Best for summarisations',
-                                            },
-                                            {
-                                                id: 'chapters',
-                                                name: 'Chapters',
-                                                info:
-                                                    'Get chapter overview and summaries',
-                                            },
-                                            {
-                                                id: 'Question',
-                                                name: 'General Question',
-                                                info:
-                                                    'Unrelated to the content',
-                                            },
-                                        ]}
-                                        onMenuItemClick={async (
-                                            props,
-                                            index,
-                                        ) => {
-                                            let queryMode
-                                            if (index === 0) {
-                                                queryMode = 'summarize'
-                                            }
-                                            if (index === 1) {
-                                                queryMode = 'chapterSummary'
-                                            }
-                                            if (index === 2) {
-                                                queryMode = 'question'
-                                            }
-                                            this.props.setQueryMode(queryMode)
-
-                                            if (index === 0) {
-                                                await this.props.queryAIwithPrompt(
-                                                    this.props.prompt,
-                                                )
-                                            }
-                                            if (index === 1) {
-                                                await this.props.getVideoChapters()
-                                            }
-
-                                            if (index === 2) {
-                                                await this.props.queryAIwithPrompt(
-                                                    this.props.prompt,
-                                                    undefined,
+                                    {this.props.activeAITab ===
+                                        'InFollowedFeeds' ||
+                                    this.props.activeAITab ===
+                                        'ExistingKnowledge' ? (
+                                        <>
+                                            <PrimaryAction
+                                                type="tertiary"
+                                                size="small"
+                                                onClick={async () => {
+                                                    this.props.loadFeedSources()
+                                                    this.setState({
+                                                        showFeedSourcesMenu: !this
+                                                            .state
+                                                            .showFeedSourcesMenu,
+                                                    })
+                                                }}
+                                                icon={'plus'}
+                                                iconColor="prime1"
+                                                label="Add Source"
+                                                innerRef={
+                                                    this.addSourcesButtonRef
+                                                }
+                                            />
+                                            {this.renderSourcesMenu()}
+                                        </>
+                                    ) : (
+                                        <DropdownMenuBtnSmall
+                                            elementHeight="fit-content"
+                                            hideDescriptionInPreview
+                                            menuItems={[
+                                                {
+                                                    id: 'summarize',
+                                                    name: 'Summarize',
+                                                    info:
+                                                        'Best for summarisations',
+                                                },
+                                                {
+                                                    id: 'chapters',
+                                                    name: 'Chapters',
+                                                    info:
+                                                        'Get chapter overview and summaries',
+                                                },
+                                                {
+                                                    id: 'Question',
+                                                    name: 'General Question',
+                                                    info:
+                                                        'Unrelated to the content',
+                                                },
+                                            ]}
+                                            onMenuItemClick={async (
+                                                props,
+                                                index,
+                                            ) => {
+                                                let queryMode
+                                                if (index === 0) {
+                                                    queryMode = 'summarize'
+                                                }
+                                                if (index === 1) {
+                                                    queryMode = 'chapterSummary'
+                                                }
+                                                if (index === 2) {
+                                                    queryMode = 'question'
+                                                }
+                                                this.props.setQueryMode(
                                                     queryMode,
                                                 )
+
+                                                if (index === 0) {
+                                                    await this.props.queryAIwithPrompt(
+                                                        this.props.prompt,
+                                                    )
+                                                }
+                                                if (index === 1) {
+                                                    await this.props.getVideoChapters()
+                                                }
+
+                                                if (index === 2) {
+                                                    await this.props.queryAIwithPrompt(
+                                                        this.props.prompt,
+                                                        undefined,
+                                                        queryMode,
+                                                    )
+                                                }
+                                            }}
+                                            initSelectedIndex={
+                                                this.props.queryMode ===
+                                                'chapterSummary'
+                                                    ? 1
+                                                    : 0
                                             }
-                                        }}
-                                        initSelectedIndex={
-                                            this.props.queryMode ===
-                                            'chapterSummary'
-                                                ? 1
-                                                : 0
-                                        }
-                                        selectedState={
-                                            this.props.queryMode ===
-                                                'chapterSummary' && 1
-                                        }
-                                        keepSelectedState
-                                    />
+                                            selectedState={
+                                                this.props.queryMode ===
+                                                    'chapterSummary' && 1
+                                            }
+                                            keepSelectedState
+                                        />
+                                    )}
                                     <DropdownMenuBtnSmall
                                         elementHeight="fit-content"
                                         hideDescriptionInPreview
@@ -2222,6 +2259,74 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    renderSourcesMenu = () => {
+        if (this.state.showFeedSourcesMenu) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.addSourcesButtonRef.current}
+                    strategy="absolute"
+                    placement="bottom"
+                    offsetX={5}
+                    offsetY={-5}
+                    closeComponent={() => {
+                        this.setState({ showFeedSourcesMenu: false })
+                    }}
+                    width="380px"
+                >
+                    <TextAreaContainer>
+                        <TextArea
+                            placeholder="Add new RSS feed links or domains, one per line"
+                            onChange={(event) => {
+                                this.setState({
+                                    feedSourcesTextAreaContent: (event.target as HTMLInputElement)
+                                        .value,
+                                })
+                            }}
+                        />
+                        <SourcesButtonRow>
+                            <PrimaryAction
+                                type="forth"
+                                icon={'plus'}
+                                iconColor="prime1"
+                                size="small"
+                                onClick={() => {
+                                    this.props.saveFeedSources(
+                                        this.state.feedSourcesTextAreaContent,
+                                    )
+                                    console.log(
+                                        'state',
+                                        this.state.feedSourcesTextAreaContent,
+                                    )
+                                    this.setState({
+                                        feedSourcesTextAreaContent: null,
+                                    })
+                                }}
+                                label="Add Sources"
+                            />
+                        </SourcesButtonRow>
+                    </TextAreaContainer>
+                    <ExistingSourcesList>
+                        {this.props.existingFeedSources?.map((source) => (
+                            <ExistingSourcesListItem>
+                                <ExistingSourcesListItemTitle>
+                                    {source.confirmState === 'error'
+                                        ? '⚠️ Error adding source'
+                                        : source.feedTitle}
+                                </ExistingSourcesListItemTitle>
+                                <ExistingSourcesListItemUrl>
+                                    {source.feedUrl?.replace('https://', '')}
+                                </ExistingSourcesListItemUrl>
+                                {/* <ExistingSourcesListItemImage
+                                    src={source.favicon}
+                                /> */}
+                            </ExistingSourcesListItem>
+                        ))}
+                    </ExistingSourcesList>
+                </PopoutBox>
+            )
+        }
+    }
+
     renderRabbitHoleList() {
         const loaderBox = () => {
             return (
@@ -2341,12 +2446,30 @@ export class AnnotationsSidebar extends React.Component<
                         {this.props.activeSuggestionsTab ===
                             'OtherSuggestions' && (
                             <SuggestionsList>
+                                <AddSourcesContainer>
+                                    <PrimaryAction
+                                        type="tertiary"
+                                        size="medium"
+                                        onClick={async () => {
+                                            this.props.loadFeedSources()
+                                            this.setState({
+                                                showFeedSourcesMenu: !this.state
+                                                    .showFeedSourcesMenu,
+                                            })
+                                        }}
+                                        icon={'plus'}
+                                        iconColor="prime1"
+                                        label="Sources"
+                                        innerRef={this.addSourcesButtonRef}
+                                    />
+                                    {this.renderSourcesMenu()}
+                                </AddSourcesContainer>
                                 {OtherSuggestionsResults.map((item) => {
                                     return this.renderSuggestionsListItem(item)
                                 })}
                                 {OtherSuggestionsResults.length === 0 &&
                                     EmptyMessage(
-                                        'No suitable suggestions found in Spaces you follow',
+                                        'No suitable suggestions found in feeds & Spaces you follow',
                                     )}
                             </SuggestionsList>
                         )}
@@ -2447,6 +2570,10 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderBetaAccessOnboarding() {
+        console.log(
+            'this.props.rabbitHoleBetaFeatureAccess',
+            this.props.rabbitHoleBetaFeatureAccess,
+        )
         if (this.props.rabbitHoleBetaFeatureAccess === 'denied') {
             return (
                 <OnboardingContainer>
@@ -2454,9 +2581,9 @@ export class AnnotationsSidebar extends React.Component<
                         🐇{'  '} Enter the Rabbit Hole!
                     </OnboardingTitle>
                     <OnboardingSubtitle>
-                        Get related content recommenations and ask questions
-                        across all of your saved pages, annotations and from
-                        blogs/RSS feeds you follow.
+                        Get related content recommendations & Ask questions
+                        across all of your saved pages, annotations and your
+                        most trusted feeds, writers and researchers.
                         <br />
                     </OnboardingSubtitle>
                     <VideoFrame
@@ -2494,10 +2621,12 @@ export class AnnotationsSidebar extends React.Component<
         } else if (this.props.rabbitHoleBetaFeatureAccess === 'requested') {
             return (
                 <OnboardingContainer>
-                    <OnboardingTitle>You're on the waitlist</OnboardingTitle>
+                    <OnboardingTitle>
+                        🐇 {'  '}You're on the waitlist for Rabbit Hole
+                    </OnboardingTitle>
                     <OnboardingSubtitle>
                         Skip the line by subscribing to our yearly or lifetime
-                        plan.
+                        plans.
                     </OnboardingSubtitle>
                     <PrimaryAction
                         onClick={() => {
@@ -2506,7 +2635,7 @@ export class AnnotationsSidebar extends React.Component<
                                 '_blank',
                             )
                         }}
-                        label="Subscribe"
+                        label="Get instant access"
                         icon="stars"
                         type="primary"
                         size="medium"
@@ -2547,7 +2676,7 @@ export class AnnotationsSidebar extends React.Component<
         } else if (this.props.rabbitHoleBetaFeatureAccess === 'granted') {
             return (
                 <OnboardingContainer>
-                    <OnboardingTitle>You're in!</OnboardingTitle>
+                    <OnboardingTitle>Welcome to Rabbit Hole</OnboardingTitle>
                     <OnboardingSubtitle>
                         This feature is early so watch this short video for a
                         few important notes before you get started
@@ -2621,10 +2750,11 @@ export class AnnotationsSidebar extends React.Component<
                     <PrimaryAction
                         onClick={async () => {
                             const url = downloadUrlRef.current.value
-                            window.open(url, '_blank')
                             this.props.setRabbitHoleBetaFeatureAccess(
                                 'downloadStarted',
                             )
+                            window.open(url, '_blank')
+                            console.log('adasdadsds')
                         }}
                         label={`Download for ${OS}`}
                         icon="stars"
@@ -2648,11 +2778,15 @@ export class AnnotationsSidebar extends React.Component<
                 <OnboardingContainer>
                     <OnboardingTitle>
                         <LoadingIndicator size={20} />
-                        Download Started
+                        Waiting for Desktop app
                     </OnboardingTitle>
                     <OnboardingSubtitle>
-                        Memex is now waiting for the Desktop app to be installed
-                        & started, and then will automatically connect to it
+                        When the desktop app is installed & started, Memex will
+                        automatically connect to it & continue.
+                        <br />
+                        <br />
+                        For questions reach out to us via the live chat in the
+                        bottom right corner on the ? icon.
                     </OnboardingSubtitle>
                 </OnboardingContainer>
             )
@@ -2674,7 +2808,7 @@ export class AnnotationsSidebar extends React.Component<
                                 'downloadStarted',
                             )
                         }}
-                        label="Finish!"
+                        label="Retry"
                         icon="longArrowRight"
                         type="primary"
                         size="medium"
@@ -2686,17 +2820,17 @@ export class AnnotationsSidebar extends React.Component<
         ) {
             return (
                 <OnboardingContainer>
-                    <OnboardingTitle>Indexing started!</OnboardingTitle>
+                    <OnboardingTitle>Connected & Ready to Sync</OnboardingTitle>
                     <OnboardingSubtitle>
-                        The desktop app has now successfully connected to your
-                        extension and started to index your saved & followed
-                        pages. It may take a while for all results to show up
-                        and your computer may fan up for a bit.
+                        Every page you save or rss feed you follow, will now get
+                        locally indexed.
                     </OnboardingSubtitle>
-
                     <OnboardingH2Title>
                         Rewatch Tutorial Video
                     </OnboardingH2Title>
+                    <OnboardingSubtitle>
+                        Learn how to use Rabbithole & some important notes
+                    </OnboardingSubtitle>
                     <VideoFrame
                         // Welcome message and more detailed intro into the feature
                         src={'https://share.descript.com/embed/wm9tGYFdND7'}
@@ -2715,7 +2849,7 @@ export class AnnotationsSidebar extends React.Component<
                     />
                 </OnboardingContainer>
             )
-        } else if (this.props.rabbitHoleBetaFeatureAccess === 'onboarded') {
+        } else {
             return
         }
     }
@@ -2736,6 +2870,10 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.activeTab === 'rabbitHole') {
+            console.log(
+                'this.props.rabbitHoleBetaFeatureAccess222',
+                this.props.rabbitHoleBetaFeatureAccess,
+            )
             if (this.props.rabbitHoleBetaFeatureAccess == null) {
                 return (
                     <LoaderBox>
@@ -3739,6 +3877,67 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const AddSourcesContainer = styled.div`
+    position: absolute;
+    right: 0px;
+    top: 0px;
+`
+
+const TextAreaContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: fill-available;
+    width: -moz-available;
+    height: fit-content;
+    position: relative;
+    padding: 5px;
+`
+
+const SourcesButtonRow = styled.div`
+    padding: 10px 10px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+`
+
+const ExistingSourcesList = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    max-height: 500px;
+    overflow: scroll;
+`
+
+const ExistingSourcesListItem = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: space-between;
+    padding: 10px 20px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+    cursor: pointer;
+    grid-gap: 5px;
+    flex-direction: column;
+    min-width: 10%;
+    flex: 1;
+`
+
+const ExistingSourcesListItemImage = styled.div`
+    border-radius: 50px;
+    height: 50px;
+    width: 50px;
+`
+
+const ExistingSourcesListItemTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-weight: 500;
+    font-size: 14px;
+`
+
+const ExistingSourcesListItemUrl = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-weight: 400;
+    font-size: 14px;
+`
+
 const ResultsBodyBox = styled.div`
     display: flex;
     flex-direction: column;
@@ -3926,6 +4125,7 @@ const SuggestionsList = styled.div`
     width: -moz-available;
     overflow: scroll;
     padding-bottom: 150px;
+    position: relative;
 `
 
 const SuggestionsCardContainer = styled(ItemBox)`

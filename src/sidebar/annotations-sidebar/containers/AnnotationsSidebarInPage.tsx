@@ -296,6 +296,11 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 event.commentText,
             )
             return true
+        } else if (event.action === 'rabbit_hole_open') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'rabbitHole',
+            })
+            return true
         }
 
         // Don't handle any external action that depend on cache until init logic has completed

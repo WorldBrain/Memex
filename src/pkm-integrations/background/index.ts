@@ -20,8 +20,10 @@ export class PKMSyncBackgroundModule {
             url: 'http://localhost:11922',
         })
         this.remoteFunctions = {
-            addRSSfeedSource: this.addRSSfeedSource,
+            addFeedSources: this.addFeedSources,
             checkConnectionStatus: this.checkConnectionStatus,
+            loadFeedSources: this.loadFeedSources,
+            checkFeedSource: this.checkFeedSource,
         }
     }
 
@@ -37,8 +39,9 @@ export class PKMSyncBackgroundModule {
 
     async pushRabbitHoleUpdate(entryData) {
         if (await this.backendNew.isConnected()) {
+            console.log('entryData', entryData)
             const document = {
-                createdWhen: Math.floor(entryData.createdWhen.getTime() / 1000),
+                createdWhen: entryData.createdWhen,
                 creatorId: entryData.creatorId,
                 pageTitle: entryData.pageTitle,
                 fullUrl: entryData.fullUrl,
@@ -49,12 +52,90 @@ export class PKMSyncBackgroundModule {
             await this.backendNew.vectorIndexDocument(document)
         }
     }
-    addRSSfeedSource = async (feedUrl: string, isSubstack: boolean) => {
+    loadFeedSources = async () => {
         const backend = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
+        return await backend.loadFeedSources()
+    }
+    addFeedSources = async (
+        feedSources: {
+            feedUrl: string
+            feedTitle: string
+            type?: 'substack'
+            feedFavIcon?: string
+        }[],
+    ) => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+
+        console.log('feedSources', feedSources)
+
         if (await backend.isConnected()) {
-            await backend.addRSSfeedSource(feedUrl, isSubstack)
+            await backend.addFeedSources(feedSources)
+        }
+    }
+    checkFeedSource = async (
+        feedUrl: string,
+    ): Promise<{
+        feedUrl: string
+        feedTitle: string
+        feedFavIcon: string
+    }> => {
+        try {
+            // Initialize source object with null values
+            let source = {
+                feedUrl: null,
+                feedTitle: null,
+                feedFavIcon: null,
+            }
+            // Fetch the feed URL
+            const response = await fetch(feedUrl)
+            // Get the content type of the response
+            const contentType = response.headers.get('content-type')
+
+            // Check if the content type is XML
+            if (
+                contentType &&
+                (contentType.includes('rss') || contentType.includes('xml'))
+            ) {
+                // If it is, set the feed URL and title in the source object
+                source.feedUrl = feedUrl
+                const text = await response.text()
+                const title = text.match(/<title>(.*?)<\/title>/)[1]
+                source.feedTitle = title
+                // Return the source object
+                return source
+            } else {
+                // If it's not XML, try fetching the feed URL with '/feed' appended
+                const url = new URL(feedUrl)
+                feedUrl = `${url.protocol}//${url.hostname}/feed`
+                source.feedUrl = feedUrl
+                const response = await fetch(feedUrl)
+
+                const contentType = response.headers.get('content-type')
+                console.log('contentType2', contentType.includes('xml'))
+
+                // Check if the new content type is XML
+                if (
+                    contentType &&
+                    (contentType.includes('rss') || contentType.includes('xml'))
+                ) {
+                    // If it is, set the feed URL and title in the source object
+                    const text = await response.text()
+                    const title = text.match(/<title>(.*?)<\/title>/)[1]
+                    source.feedTitle = title
+                    console.log('source', source)
+                    // Return the source object
+                    return source
+                } else {
+                    // If it's still not XML, throw an error
+                    throw new Error('not-found')
+                }
+            }
+        } catch (error) {
+            console.error(`Error checking feed source: ${feedUrl}`, error)
         }
     }
 

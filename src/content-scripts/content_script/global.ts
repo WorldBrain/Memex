@@ -952,6 +952,7 @@ export async function main(
                 collectionsBG,
                 bgScriptBG,
                 pageInfo,
+                inPageUI,
             )
 
             // reload content script injections
@@ -1083,6 +1084,7 @@ export async function main(
         collectionsBG,
         bgScriptBG,
         pageInfo,
+        inPageUI,
     )
 
     // special case bc we want the listener to be active on page load
@@ -1487,6 +1489,7 @@ export async function injectCustomUIperPage(
     collectionsBG,
     bgScriptBG,
     pageInfo,
+    inPageUI,
 ) {
     if (window.location.hostname === 'www.youtube.com') {
         const existingButtons = document.getElementsByClassName(
@@ -1511,7 +1514,14 @@ export async function injectCustomUIperPage(
         window.location.hostname.includes('.substack.com') ||
         checkIfSubstackHeader()
     ) {
-        injectSubstackButtons(pkmSyncBG)
+        const openSidebarInRabbitHole = async () => {
+            console.log('exec', inPageUI)
+            inPageUI.showSidebar({
+                action: 'rabbit_hole_open',
+            })
+        }
+
+        injectSubstackButtons(pkmSyncBG, browser, openSidebarInRabbitHole)
     }
 
     if (window.location.href.includes('web.telegram.org/')) {

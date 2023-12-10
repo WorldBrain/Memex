@@ -1,13 +1,24 @@
 import { runtime } from 'webextension-polyfill'
 import { indexRSSfeed } from './utils'
 
-export function injectSubstackButtons(pkmSyncBG) {
+export function injectSubstackButtons(
+    pkmSyncBG,
+    browser,
+    openSidebarInRabbitHole,
+) {
     const existingMemexButtons = document.getElementById('memexButtons')
     if (existingMemexButtons) {
         existingMemexButtons.remove()
     }
     const url = new URL(window.location.href)
     const feedUrl = `${url.protocol}//${url.hostname}`
+
+    const feedSources = [
+        {
+            feedUrl,
+            type: 'substack', // giving this metadata bc this page under the hood is a substack page, and that is processed in a different way
+        },
+    ]
 
     const NavBarButtons = document.getElementsByClassName('navbar-buttons')
     const memexButtons = document.createElement('div')
@@ -28,8 +39,18 @@ export function injectSubstackButtons(pkmSyncBG) {
     memexButtons.style.cursor = 'pointer'
     memexButtons.innerText = 'Follow with Memex'
     memexButtons.onclick = async () => {
-        memexButtons.innerText = 'Followed!'
-        await indexRSSfeed(feedUrl, pkmSyncBG, true)
+        const rabbitHoleEnabled = await browser.storage.local.get(
+            'rabbitHoleBetaFeatureAccessOnboardingDone',
+        )
+
+        console.log(rabbitHoleEnabled.rabbitHoleBetaFeatureAccessOnboardingDone)
+
+        if (!rabbitHoleEnabled.rabbitHoleBetaFeatureAccessOnboardingDone) {
+            openSidebarInRabbitHole()
+        } else {
+            memexButtons.innerText = 'Followed!'
+            await indexRSSfeed(feedSources, pkmSyncBG)
+        }
     }
 
     // MemexIconDisplay

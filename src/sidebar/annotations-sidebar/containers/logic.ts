@@ -1449,6 +1449,125 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({ selectedShareMenuPageLinkList: { $set: null } })
     }
+    saveFeedSources: EventHandler<'saveFeedSources'> = async ({
+        event,
+        previousState,
+    }) => {
+        const sources =
+            event.sources?.includes(',') || event.sources?.includes('\n')
+                ? event.sources?.split(/[\n,]+/).map((source) => source.trim())
+                : [event.sources]
+
+        let feedSourcesToCheck = sources
+        console.log('feedSourcesToCheck', feedSourcesToCheck)
+        if (feedSourcesToCheck?.length === 0) {
+            return
+        }
+        let updatedSources = [...previousState.existingFeedSources]
+        const feedSourcePromises = feedSourcesToCheck.map(
+            async (inputFeedUrl) => {
+                if (
+                    inputFeedUrl &&
+                    previousState.existingFeedSources.some(
+                        (source) => source.feedUrl === inputFeedUrl,
+                    )
+                ) {
+                    return
+                }
+                let response
+                response = await this.options.pkmSyncBG.checkFeedSource(
+                    inputFeedUrl,
+                )
+
+                let title = response?.feedTitle ?? null
+                let feedUrl = response?.feedUrl
+
+                if (title?.includes('[CDATA')) {
+                    title = title.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
+                }
+
+                const updatedSource = {
+                    feedTitle: title ?? feedUrl,
+                    feedUrl: feedUrl,
+                    type: null,
+                    confirmState: title ? 'success' : 'error',
+                    feedFavIcon: null,
+                }
+
+                // Find the index of the existing source with the same feedUrl
+                const existingSourceIndex = updatedSources.findIndex(
+                    (src) => src.feedUrl === feedUrl,
+                )
+
+                // If the source does not exist in the updatedSources array, add it to the beginning
+                if (existingSourceIndex === -1) {
+                    console.log(existingSourceIndex)
+                    updatedSources.unshift(updatedSource)
+                } else {
+                    // If the source already exists, do not add it again
+                    return
+                }
+
+                console.log('updatedSource', updatedSource)
+                console.log('updatedSourceS', updatedSources)
+
+                this.emitMutation({
+                    existingFeedSources: { $set: updatedSources },
+                })
+
+                return updatedSource
+            },
+        )
+        let results
+
+        try {
+            results = await Promise.all(feedSourcePromises)
+
+            console.log('results', results)
+            results = results?.filter(
+                (result) => result && result.confirmState !== 'error',
+            )
+
+            console.log('results', results)
+        } catch (e) {
+            console.log('e', e)
+        }
+
+        // // Remove duplicates from updatedSources based on feedUrl
+        // updatedSources = updatedSources.reduce((unique, item) => {
+        //     // If the feedUrl already exists in the unique array, return the unique array as is
+        //     return unique.some((feed) => feed.feedUrl === item.feedUrl)
+        //         ? unique
+        //         : // If the feedUrl does not exist in the unique array, add the item to the unique array
+        //           [...unique, item]
+        // }, [])
+
+        // this.emitMutation({
+        //     existingFeedSources: { $set: updatedSources },
+        // })
+        console.log('feedSources', results)
+        await this.options.pkmSyncBG.addFeedSources(results)
+    }
+    loadFeedSources: EventHandler<'saveFeedSources'> = async ({
+        event,
+        previousState,
+    }) => {
+        const feedSources = await this.options.pkmSyncBG.loadFeedSources()
+
+        this.emitMutation({
+            existingFeedSources: { $set: feedSources },
+        })
+    }
+    checkRSSSource: EventHandler<'saveFeedSources'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.options.pkmSyncBG.loadFeedSources()
+
+        this.emitMutation({
+            existingFeedSources: { $set: event.sources },
+        })
+    }
 
     validateSpaceName(name: string, listIdToSkip?: number) {
         const validationResult = validateSpaceName(
@@ -1499,12 +1618,11 @@ export class SidebarContainerLogic extends UILogic<
     setRabbitHoleBetaFeatureAccess: EventHandler<
         'setRabbitHoleBetaFeatureAccess'
     > = async ({ event }) => {
-        this.emitMutation({
-            rabbitHoleBetaFeatureAccess: { $set: event.permission },
-        })
-
         if (event.permission === 'onboarding') {
             const url = await downloadMemexDesktop()
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: { $set: event.permission },
+            })
 
             this.emitMutation({
                 desktopAppDownloadLink: { $set: url },
@@ -1512,8 +1630,13 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         if (event.permission === 'downloadStarted') {
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: {
+                    $set: 'downloadStarted',
+                },
+            })
+            console.log('downloadStarted')
             const desktopAppRunning = await this.checkIfDesktopAppIsRunning()
-            console.log('desktopAppRunning', desktopAppRunning)
             if (desktopAppRunning) {
                 this.emitMutation({
                     rabbitHoleBetaFeatureAccess: {
@@ -1524,6 +1647,11 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         if (event.permission === 'onboarded') {
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: {
+                    $set: 'onboarded',
+                },
+            })
             await browser.storage.local.set({
                 rabbitHoleBetaFeatureAccessOnboardingDone: true,
             })
@@ -1543,7 +1671,6 @@ export class SidebarContainerLogic extends UILogic<
                 console.error(
                     'Trying to connect to Desktop App but not yet available',
                 )
-                continue
             }
             if (backend) {
                 isConnected = true
@@ -2335,8 +2462,10 @@ export class SidebarContainerLogic extends UILogic<
         let unifiedAnnotation
         for (const id in this.options.annotationsCache.annotations.byId) {
             if (
+                this.options.annotationsCache.annotations.byId[id].unifiedId ===
+                    event.unifiedAnnotationId ||
                 this.options.annotationsCache.annotations.byId[id].localId ===
-                event.unifiedAnnotationId
+                    event.unifiedAnnotationId
             ) {
                 unifiedAnnotation = this.options.annotationsCache.annotations
                     .byId[id]
@@ -2566,6 +2695,9 @@ export class SidebarContainerLogic extends UILogic<
             }
             const results = await this.options.customListsBG.findSimilarBackground(
                 previousState.prompt || prompt,
+                normalizeUrl(this.previousState.fullPageUrl, {
+                    skipProtocolTrim: true,
+                }),
             )
 
             let extractedData
@@ -2603,6 +2735,8 @@ export class SidebarContainerLogic extends UILogic<
 
             textToAnalyse = JSON.stringify(extractedData)
             isContentSearch = true
+
+            console.log('extractedData', results)
 
             await this.updateSuggestionResults(results)
         }
@@ -3066,6 +3200,9 @@ export class SidebarContainerLogic extends UILogic<
                         'onboarded'
                 )
             ) {
+                this.emitMutation({
+                    suggestionsResultsLoadState: { $set: 'success' },
+                })
                 return
             }
 
@@ -3084,18 +3221,27 @@ export class SidebarContainerLogic extends UILogic<
             // add step to summmarise page and extract key information suitable for similiarity search
 
             let results
+            console.log('beforereuslts')
             results = await this.options.customListsBG.findSimilarBackground(
                 currentPageContent,
                 normalizeUrl(previousState.fullPageUrl, {
                     skipProtocolTrim: true,
                 }),
             )
+            if (results.length === 0) {
+                console.log('results3')
+                this.emitMutation({
+                    suggestionsResultsLoadState: { $set: 'success' },
+                })
+            }
             if (results === 'not-connected') {
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'error' },
                 })
                 return
             }
+
+            console.log('comes through hree')
 
             await this.updateSuggestionResults(results)
 
@@ -3137,148 +3283,152 @@ export class SidebarContainerLogic extends UILogic<
             localId?: number | null
         }
 
-        for (let result of Object.values(results)) {
-            let space: spaceItem
-            let pageData
-            let pageToDisplay: SuggestionCard
+        if (results) {
+            for (let result of Object.values(results)) {
+                let space: spaceItem
+                let pageData
+                let pageToDisplay: SuggestionCard
 
-            if (userId != result.creatorId) {
-                const followedPageListData = []
-                const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
-                    result.fullUrl,
-                )
-
-                for (let spaceItemKey in spacesData) {
-                    let spaceItem = spacesData[spaceItemKey]
-                    space = {
-                        name: spaceItem.name,
-                        remoteId: spaceItem.sharedList,
-                        unifiedId: null,
-                        isShared: false,
-                        localId: null,
-                        id: null,
-                    }
-                    followedPageListData.push(space)
-                }
-
-                pageToDisplay = {
-                    fullUrl: result.fullUrl,
-                    pageTitle: result.pageTitle,
-                    contentText: result.contentText,
-                    contentType: result.contentType,
-                    creatorId: result.creatorId,
-                    spaces: followedPageListData,
-                    sourceApplication: result.sourceApplication,
-                }
-            } else {
-                if (
-                    result.contentType === 'page' ||
-                    result.contentType === 'rss-feed-item'
-                ) {
-                    const pageListData = []
-                    pageData = await this.options.customListsBG.findPageByUrl(
-                        normalizeUrl(result.fullUrl),
+                if (userId != result.creatorId) {
+                    const followedPageListData = []
+                    const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
+                        result.fullUrl,
                     )
 
-                    if (pageData) {
-                        const pageLists = await this.options.customListsBG.fetchPageLists(
-                            { url: pageData?.fullUrl },
-                        )
-
-                        if (pageLists.length > 0) {
-                            for (let pageList of pageLists) {
-                                const list = await this.options.annotationsCache.getListByLocalId(
-                                    pageList,
-                                )
-                                space = {
-                                    name: list.name,
-                                    remoteId: list.remoteId,
-                                    unifiedId: list.unifiedId,
-                                    isShared: !list.isPrivate,
-                                    localId: list.localId,
-                                    id: list.localId,
-                                }
-                                pageListData.push(space)
-                            }
+                    for (let spaceItemKey in spacesData) {
+                        let spaceItem = spacesData[spaceItemKey]
+                        space = {
+                            name: spaceItem.name,
+                            remoteId: spaceItem.sharedList,
+                            unifiedId: null,
+                            isShared: false,
+                            localId: null,
+                            id: null,
                         }
+                        followedPageListData.push(space)
                     }
 
                     pageToDisplay = {
-                        fullUrl: pageData?.fullUrl || result?.fullUrl,
-                        pageTitle: pageData?.fullTitle || result?.pageTitle,
+                        fullUrl: result.fullUrl,
+                        pageTitle: result.pageTitle,
                         contentText: result.contentText,
                         contentType: result.contentType,
-                        creatorId: userId,
-                        spaces: pageListData ?? null,
+                        creatorId: result.creatorId,
+                        spaces: followedPageListData,
+                        sourceApplication: result.sourceApplication,
                     }
-                } else if (result.contentType === 'annotation') {
-                    try {
-                        const annotationUrl = normalizeUrl(
-                            result.fullUrl,
-                        ).split('/#')[0]
-
-                        const normalizedUrl = normalizeUrl(result.fullUrl, {
-                            stripHash: false,
-                        })
-
-                        let annotationRawData = await this.options.annotationsBG.getAnnotationByPk(
-                            {
-                                url: result.fullUrl.replace('https://', ''),
-                            },
+                } else {
+                    if (
+                        result.contentType === 'page' ||
+                        result.contentType === 'rss-feed-item'
+                    ) {
+                        const pageListData = []
+                        pageData = await this.options.customListsBG.findPageByUrl(
+                            normalizeUrl(result.fullUrl),
                         )
 
-                        // Convert the string to a Date object
-                        let createdWhenDate = new Date(
-                            annotationRawData.createdWhen,
-                        )
+                        if (pageData) {
+                            const pageLists = await this.options.customListsBG.fetchPageLists(
+                                { url: pageData?.fullUrl },
+                            )
 
-                        // Now you can use getTime method
-                        annotationRawData.createdWhen = Math.floor(
-                            createdWhenDate.getTime(),
-                        )
-                        let lastEditedDate = new Date(
-                            annotationRawData.lastEdited,
-                        )
-
-                        // Now you can use getTime method
-                        annotationRawData.lastEdited = Math.floor(
-                            lastEditedDate.getTime(),
-                        )
-                        annotationRawData.lists = []
-
-                        const annotationForCache = cacheUtils.reshapeAnnotationForCache(
-                            annotationRawData,
-                            annotationRawData.createdWhen,
-                        )
-                        const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
-                            annotationForCache,
-                        )
-
-                        if (annotationsCacheVersion) {
-                            pageToDisplay = {
-                                fullUrl: annotationUrl,
-                                pageTitle: result.pageTitle ?? annotationUrl,
-                                body: annotationRawData?.body ?? null,
-                                comment: annotationRawData?.comment ?? null,
-                                contentType: result.contentType,
-                                creatorId: result.creatorId,
-                                unifiedId: annotationsCacheVersion.unifiedId,
+                            if (pageLists.length > 0) {
+                                for (let pageList of pageLists) {
+                                    const list = await this.options.annotationsCache.getListByLocalId(
+                                        pageList,
+                                    )
+                                    space = {
+                                        name: list.name,
+                                        remoteId: list.remoteId,
+                                        unifiedId: list.unifiedId,
+                                        isShared: !list.isPrivate,
+                                        localId: list.localId,
+                                        id: list.localId,
+                                    }
+                                    pageListData.push(space)
+                                }
                             }
                         }
-                    } catch (e) {
-                        console.log('Error', e)
+
+                        pageToDisplay = {
+                            fullUrl: pageData?.fullUrl || result?.fullUrl,
+                            pageTitle: pageData?.fullTitle || result?.pageTitle,
+                            contentText: result.contentText,
+                            contentType: result.contentType,
+                            creatorId: userId,
+                            spaces: pageListData ?? null,
+                        }
+                    } else if (result.contentType === 'annotation') {
+                        try {
+                            const annotationUrl = normalizeUrl(
+                                result.fullUrl,
+                            ).split('/#')[0]
+
+                            const normalizedUrl = normalizeUrl(result.fullUrl, {
+                                stripHash: false,
+                            })
+
+                            let annotationRawData = await this.options.annotationsBG.getAnnotationByPk(
+                                {
+                                    url: result.fullUrl.replace('https://', ''),
+                                },
+                            )
+
+                            // Convert the string to a Date object
+                            let createdWhenDate = new Date(
+                                annotationRawData.createdWhen,
+                            )
+
+                            // Now you can use getTime method
+                            annotationRawData.createdWhen = Math.floor(
+                                createdWhenDate.getTime(),
+                            )
+                            let lastEditedDate = new Date(
+                                annotationRawData.lastEdited,
+                            )
+
+                            // Now you can use getTime method
+                            annotationRawData.lastEdited = Math.floor(
+                                lastEditedDate.getTime(),
+                            )
+                            annotationRawData.lists = []
+
+                            const annotationForCache = cacheUtils.reshapeAnnotationForCache(
+                                annotationRawData,
+                                annotationRawData.createdWhen,
+                            )
+                            const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
+                                annotationForCache,
+                            )
+
+                            if (annotationsCacheVersion) {
+                                pageToDisplay = {
+                                    fullUrl: annotationUrl,
+                                    pageTitle:
+                                        result.pageTitle ?? annotationUrl,
+                                    body: annotationRawData?.body ?? null,
+                                    comment: annotationRawData?.comment ?? null,
+                                    contentType: result.contentType,
+                                    creatorId: result.creatorId,
+                                    unifiedId:
+                                        annotationsCacheVersion.unifiedId,
+                                }
+                            }
+                        } catch (e) {
+                            console.log('Error', e)
+                        }
                     }
                 }
-            }
-            if (pageToDisplay) {
-                resultsArray.push(pageToDisplay)
+                if (pageToDisplay) {
+                    resultsArray.push(pageToDisplay)
+                }
             }
         }
 
         // next step is to fetch the respective user data from the creators, potentially load them async after reuslts already display
 
         this.emitMutation({
-            suggestionsResults: { $set: resultsArray },
+            suggestionsResults: { $set: resultsArray ?? [] },
             suggestionsResultsLoadState: { $set: 'success' },
         })
 

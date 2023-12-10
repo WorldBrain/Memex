@@ -507,7 +507,6 @@ export default class AnnotationStorage extends StorageModule {
 
     async getAnnotationByPk({ url }: { url: string }) {
         if (url.length > 0) {
-            console.log('url', url)
             const annotation = this.operation('findAnnotationByUrl', { url })
             return annotation
         }

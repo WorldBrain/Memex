@@ -851,6 +851,14 @@ export class AnnotationsSidebarContainer<
                             setAIModel={(AImodel) => {
                                 this.processEvent('setAIModel', AImodel)
                             }}
+                            saveFeedSources={(feedSources) => {
+                                this.processEvent('saveFeedSources', {
+                                    sources: feedSources,
+                                })
+                            }}
+                            loadFeedSources={() => {
+                                this.processEvent('loadFeedSources', null)
+                            }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}

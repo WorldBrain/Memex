@@ -139,6 +139,6 @@ export async function createRabbitHoleEntry(
     await pkmSyncBG.pushRabbitHoleUpdate(entryData, checkForFilteredSpaces)
 }
 
-export async function addRSSfeedSource(feedUrl, pkmSyncBG, isSubstack) {
-    await pkmSyncBG.addRSSfeedSource(feedUrl, isSubstack)
+export async function addFeedSources(feedSources, pkmSyncBG) {
+    await pkmSyncBG.addFeedSources(feedSources)
 }

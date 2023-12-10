@@ -148,6 +148,8 @@ export class MemexLocalBackend {
                 fullHTML: document.fullHTML,
                 syncKey: syncKey,
             }
+
+            console.log('body', body)
             const response = await fetch(`${this.url}/add_page`, {
                 method: 'PUT',
                 headers: {
@@ -167,11 +169,13 @@ export class MemexLocalBackend {
     async findSimilar(document?, fullUrl?): Promise<any> {
         const syncKey = await getPkmSyncKey()
 
-        const body = JSON.stringify({
+        const body = {
             contentText: document,
             fullUrl: fullUrl,
             syncKey: syncKey,
-        })
+        }
+
+        console.log('body', body)
 
         try {
             const response = await fetch(`${this.url}/get_similar`, {
@@ -179,7 +183,7 @@ export class MemexLocalBackend {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: body,
+                body: JSON.stringify(body),
             })
 
             if (response.ok) {
@@ -194,16 +198,50 @@ export class MemexLocalBackend {
             return 'not-connected'
         }
     }
-    async addRSSfeedSource(feedUrl, isSubstack): Promise<any> {
+    async addFeedSources(
+        feedSources: {
+            feedUrl: string
+            feedTitle: string
+            type?: 'substack'
+            feedFavIcon?: string
+        }[],
+    ): Promise<any> {
+        const syncKey = await getPkmSyncKey()
+
+        console.log('feedSources', feedSources)
+
+        const body = JSON.stringify({
+            feedSources: feedSources,
+            syncKey: syncKey,
+        })
+
+        console.log('body', body)
+
+        const response = await fetch(`${this.url}/add_feed_source`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
+
+        if (response.ok) {
+            const responseObj = await response.json()
+            return responseObj
+        }
+
+        if (!response.ok || response.status !== 200) {
+            throw new Error(`Error getting all RSS feeds: ${response.status}`)
+        }
+    }
+    async loadFeedSources(): Promise<any> {
         const syncKey = await getPkmSyncKey()
 
         const body = JSON.stringify({
-            feedUrl: feedUrl,
             syncKey: syncKey,
-            isSubstack: isSubstack,
         })
 
-        const response = await fetch(`${this.url}/add_rss_feed_source`, {
+        const response = await fetch(`${this.url}/load_feed_sources`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

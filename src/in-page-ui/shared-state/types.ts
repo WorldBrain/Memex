@@ -18,6 +18,7 @@ export type InPageUISidebarAction =
     | 'show_my_annotations'
     | 'check_sidebar_status'
     | 'show_page_summary'
+    | 'rabbit_hole_open'
     | 'youtube_timestamp'
     | 'share_page'
     | 'set_focus_mode'
