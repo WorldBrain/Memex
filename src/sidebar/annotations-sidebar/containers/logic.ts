@@ -1449,6 +1449,29 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({ selectedShareMenuPageLinkList: { $set: null } })
     }
+
+    processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({
+        event,
+    }) => {
+        const fileContent = event.fileString
+        const parser = new DOMParser()
+        const xmlDoc = parser.parseFromString(fileContent, 'text/xml')
+
+        const feedsNode = Array.from(
+            xmlDoc.getElementsByTagName('outline'),
+        ).find((node) => node.getAttribute('text') === 'Feeds')
+        const feedSources = Array.from(feedsNode.children).map((node) => ({
+            feedTitle: node.getAttribute('title'),
+            feedUrl: node.getAttribute('xmlUrl'),
+        }))
+
+        this.emitMutation({
+            existingFeedSources: { $set: feedSources },
+        })
+
+        await this.options.pkmSyncBG.addFeedSources(feedSources)
+    }
+
     saveFeedSources: EventHandler<'saveFeedSources'> = async ({
         event,
         previousState,
@@ -1467,11 +1490,13 @@ export class SidebarContainerLogic extends UILogic<
         const feedSourcePromises = feedSourcesToCheck.map(
             async (inputFeedUrl) => {
                 if (
-                    inputFeedUrl &&
-                    previousState.existingFeedSources.some(
-                        (source) => source.feedUrl === inputFeedUrl,
-                    )
+                    !inputFeedUrl ||
+                    (inputFeedUrl &&
+                        previousState.existingFeedSources.some(
+                            (source) => source.feedUrl === inputFeedUrl,
+                        ))
                 ) {
+                    console.log('feedurlempty')
                     return
                 }
                 let response
@@ -1507,7 +1532,11 @@ export class SidebarContainerLogic extends UILogic<
                 )
 
                 // If the source does not exist in the updatedSources array, add it to the beginning
-                if (existingSourceIndex === -1) {
+                if (
+                    existingSourceIndex === -1 &&
+                    updatedSource.feedUrl &&
+                    updatedSource.feedTitle
+                ) {
                     console.log(existingSourceIndex)
                     updatedSources.unshift(updatedSource)
                 } else {
@@ -1530,12 +1559,9 @@ export class SidebarContainerLogic extends UILogic<
         try {
             results = await Promise.all(feedSourcePromises)
 
-            console.log('results', results)
             results = results?.filter(
-                (result) => result && result.confirmState !== 'error',
+                (result) => result != null && result.confirmState !== 'error',
             )
-
-            console.log('results', results)
         } catch (e) {
             console.log('e', e)
         }
@@ -1552,7 +1578,6 @@ export class SidebarContainerLogic extends UILogic<
         // this.emitMutation({
         //     existingFeedSources: { $set: updatedSources },
         // })
-        console.log('feedSources', results)
         await this.options.pkmSyncBG.addFeedSources(results)
     }
     loadFeedSources: EventHandler<'saveFeedSources'> = async ({
@@ -2692,9 +2717,12 @@ export class SidebarContainerLogic extends UILogic<
             }
             const results = await this.options.customListsBG.findSimilarBackground(
                 previousState.prompt || prompt,
-                normalizeUrl(this.previousState.fullPageUrl, {
-                    skipProtocolTrim: true,
-                }),
+                normalizeUrl(
+                    this.previousState?.fullPageUrl || this.fullPageUrl,
+                    {
+                        skipProtocolTrim: true,
+                    },
+                ),
             )
 
             let extractedData

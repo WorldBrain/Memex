@@ -313,6 +313,7 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    processFileImportFeeds: { fileString: string }
     getHighlightColorSettings: null
     saveHighlightColor: {
         noteId: string
