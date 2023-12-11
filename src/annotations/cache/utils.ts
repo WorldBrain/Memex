@@ -126,6 +126,7 @@ export const reshapeLocalListForCache = (
     return {
         type,
         name: list.name,
+        order: list.order,
         localId: list.id,
         remoteId: list.remoteId,
         creator: opts.extraData?.creator,
@@ -157,6 +158,7 @@ export const reshapeFollowedListForCache = (
     hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
     parentUnifiedId: null,
     parentLocalId: null,
+    order: 0,
     ...(opts.extraData ?? {}),
 })
 

@@ -19,6 +19,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
 import {
+    defaultTreeNodeSorter,
     forEachTreeTraverse,
     mapTreeTraverse,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
@@ -125,9 +126,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     getListsByParentId: PageAnnotationsCacheInterface['getListsByParentId'] = (
         unifiedId,
     ) => {
-        return normalizedStateToArray(this.lists).filter(
-            (list) => list.parentUnifiedId === unifiedId,
-        )
+        return [
+            ...normalizedStateToArray(this.lists).filter(
+                (list) => list.parentUnifiedId === unifiedId,
+            ),
+        ].sort(defaultTreeNodeSorter)
     }
 
     private prepareListForCaching = (
@@ -637,6 +640,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const nextList: UnifiedList = {
             ...previousList,
             name: updates.name ?? previousList.name,
+            order: updates.order ?? previousList.order,
             remoteId: updates.remoteId ?? previousList.remoteId,
             collabKey: updates.collabKey ?? previousList.collabKey,
             isPrivate: updates.isPrivate ?? previousList.isPrivate,

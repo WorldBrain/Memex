@@ -1,5 +1,6 @@
 import type { LoadPageAnnotationRefsForListsResult } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import type { Orderable } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type {
     SharedAnnotation,
     SharedAnnotationReference,
@@ -8,7 +9,7 @@ import type {
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { ListShareResult } from 'src/content-sharing/background/types'
 
-export interface PageList {
+export interface PageList extends Orderable {
     id: number
     name: string
     remoteId?: string

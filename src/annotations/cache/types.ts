@@ -6,6 +6,7 @@ import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import type { Anchor } from 'src/highlighting/types'
 import type { Annotation } from '../types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { Orderable } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 
 export interface PageAnnotationsCacheEvents {
     updatedPageData: (
@@ -73,6 +74,7 @@ export interface PageAnnotationsCacheInterface {
                     | 'sharedListEntryId'
                     | 'parentUnifiedId'
                     | 'isPrivate'
+                    | 'order'
                 >
             >,
     ) => void
@@ -88,6 +90,7 @@ export interface PageAnnotationsCacheInterface {
     getAnnotationByRemoteId: (remoteId: string) => UnifiedAnnotation | null
     getListByLocalId: (localId: number) => UnifiedList | null
     getListByRemoteId: (remoteId: string) => UnifiedList | null
+    /** Gets all children of the parent, sorted by their order. */
     getListsByParentId: (
         unifiedId: UnifiedList['unifiedId'] | null,
     ) => UnifiedList[]
@@ -132,7 +135,7 @@ export type UnifiedAnnotationForCache = Omit<
         localListIds: number[]
     }
 
-type CoreUnifiedList<T> = {
+interface CoreUnifiedList<T> extends Orderable {
     // Core list data
     unifiedId: string
     localId?: number

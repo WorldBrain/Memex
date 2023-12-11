@@ -69,6 +69,7 @@ export default class CustomListBackground {
             createCustomList: this.createCustomList,
             deleteListTree: this.deleteListTree,
             updateListTreeParent: this.updateListTreeParent,
+            updateListTreeOrder: this.updateListTreeOrder,
             insertPageToList: async (params) => {
                 const currentTab = await this.options.queryTabs?.({
                     active: true,
@@ -197,6 +198,7 @@ export default class CustomListBackground {
         return {
             name: sharedList.title,
             id: sharedList.createdWhen,
+            order: 1, // TODO nested-lists: Update this
             remoteId: sharedList.reference.id.toString(),
             createdAt: new Date(sharedList.createdWhen),
             isOwned: sharedList.creator.id === currentUser.id,
@@ -227,6 +229,7 @@ export default class CustomListBackground {
 
         return lists.map((list) => ({
             ...list,
+            order: treeDataByList[list.id]?.order ?? 0,
             parentListId: treeDataByList[list.id]?.parentListId ?? null,
             pathListIds: extractMaterializedPathIds(
                 treeDataByList[list.id]?.path ?? '',
@@ -400,7 +403,7 @@ export default class CustomListBackground {
         const siblingListTrees = await this.storage.getTreeDataForLists({
             localListIds: siblingListIds,
         })
-        const orderedItems = Object.values(siblingListTrees)
+        const orderedSiblingItems = Object.values(siblingListTrees)
             .sort(defaultTreeNodeSorter)
             .map((tree) => ({
                 id: tree.id,
@@ -409,8 +412,8 @@ export default class CustomListBackground {
 
         // TODO: Implement sibling updates if in changes
         const changes = insertOrderedItemBeforeIndex(
-            orderedItems,
-            '',
+            orderedSiblingItems,
+            localListId,
             intendedIndexAmongSiblings,
         )
 

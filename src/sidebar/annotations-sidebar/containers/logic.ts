@@ -3251,6 +3251,7 @@ export class SidebarContainerLogic extends UILogic<
             const listCommon = {
                 remoteId: event.sharedListId,
                 name: sharedList.title,
+                order: 1, // TODO nested-lists: Set this
                 creator: sharedList.creator,
                 description: sharedList.description,
                 localId: localListData?.localListId ?? undefined,
@@ -3527,6 +3528,7 @@ export class SidebarContainerLogic extends UILogic<
             const cacheListData: UnifiedListForCache<'page-link'> = {
                 type: 'page-link',
                 name: listTitle,
+                order: 1, // TODO nested-lists: Update this
                 creator: currentUser,
                 localId: localListId,
                 collabKey: collabKey.toString(),

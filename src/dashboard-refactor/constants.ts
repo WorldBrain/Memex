@@ -81,3 +81,5 @@ export const PAGE_SEARCH_DUMMY_DAY = -1
 export const FILTER_PICKERS_LIMIT = 20
 
 export const MISSING_PDF_QUERY_PARAM = 'missing-pdf'
+
+export const LIST_REORDER_EL_POST = '-reorder'

@@ -1,7 +1,10 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
-import { sizeConstants } from 'src/dashboard-refactor/constants'
+import {
+    LIST_REORDER_EL_POST,
+    sizeConstants,
+} from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
@@ -64,6 +67,10 @@ import {
 } from 'src/bulk-edit/utils'
 import type { DragToListAction } from './lists-sidebar/types'
 import { forEachTreeClimb } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import {
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -3491,6 +3498,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     unifiedAnnotationIds: [],
                     hasRemoteAnnotationsToLoad: false,
                     isPrivate: true,
+                    order: 0, // TODO nested-lists: Figure out how to calc this here
                     creator:
                         previousState.currentUser != null
                             ? {
@@ -3635,18 +3643,29 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    dropOnListItem: EventHandler<'dropOnListItem'> = async ({
-        event,
-        previousState,
-    }) => {
-        let action: DragToListAction<any>
+    private parseDragDropAction<T extends 'page' | 'list'>(
+        dataTransfer: DataTransfer,
+    ): DragToListAction<T> | null {
+        let action: DragToListAction<T>
         try {
-            action = JSON.parse(event.dataTransfer.getData('text/plain'))
+            action = JSON.parse(dataTransfer.getData('text/plain'))
             if (!['page', 'list'].includes(action?.type)) {
                 throw new Error('Unexpected data received')
             }
         } catch (err) {
             console.error('Error parsing ondrop event data transfer data:', err)
+            return null
+        }
+
+        return action
+    }
+
+    dropOnListItem: EventHandler<'dropOnListItem'> = async ({
+        event,
+        previousState,
+    }) => {
+        const action = this.parseDragDropAction<any>(event.dataTransfer)
+        if (!action) {
             return
         }
 
@@ -3659,6 +3678,18 @@ export class DashboardLogic extends UILogic<State, Events> {
                 if (action.type === 'page') {
                     await this.handleDropPageOnListItem(
                         event.listId,
+                        action,
+                        previousState,
+                    )
+                    return
+                }
+                if (event.listId.endsWith(LIST_REORDER_EL_POST)) {
+                    const cleanedListId = event.listId.slice(
+                        0,
+                        event.listId.length - LIST_REORDER_EL_POST.length,
+                    )
+                    await this.handleDropListOnReorderLine(
+                        cleanedListId,
                         action,
                         previousState,
                     )
@@ -3695,6 +3726,167 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         )
         if (listData.localId == null || dropTargetListData.localId == null) {
+            return
+        }
+
+        // Block any attempts at adding ancestor as child
+        let isListAncestorOfTargetList = false
+        forEachTreeClimb({
+            startingNode: dropTargetListData,
+            getParent: (node) =>
+                this.options.annotationsCache.lists.byId[
+                    node.parentUnifiedId
+                ] ?? null,
+            cb: (node, i) => {
+                isListAncestorOfTargetList =
+                    isListAncestorOfTargetList || node.unifiedId === listId
+            },
+            shouldEndEarly: () => isListAncestorOfTargetList,
+        })
+        if (isListAncestorOfTargetList) {
+            throw new Error(
+                'Cannot make list a child of a descendent - this would result in a cycle',
+            )
+        }
+
+        this.emitMutation({
+            listsSidebar: {
+                dragOverListId: { $set: undefined },
+                lists: {
+                    byId: {
+                        [dropTargetListId]: {
+                            wasListDropped: { $set: true },
+                        },
+                    },
+                },
+            },
+        })
+
+        this.options.annotationsCache.updateList({
+            unifiedId: listId,
+            parentUnifiedId: dropTargetListId,
+        })
+
+        setTimeout(() => {
+            this.emitMutation({
+                listsSidebar: {
+                    lists: {
+                        byId: {
+                            [dropTargetListId]: {
+                                wasListDropped: { $set: false },
+                            },
+                        },
+                    },
+                },
+            })
+        }, 2000)
+
+        await this.options.listsBG.updateListTreeParent({
+            localListId: listData.localId!,
+            parentListId: dropTargetListData.localId!,
+        })
+    }
+
+    private async handleDropListOnReorderLine(
+        dropTargetListId: string,
+        { listId }: DragToListAction<'list'>,
+        previousState: State,
+    ): Promise<void> {
+        if (listId == null || dropTargetListId === listId) {
+            this.emitMutation({
+                listsSidebar: { dragOverListId: { $set: undefined } },
+            })
+            return
+        }
+
+        const { annotationsCache } = this.options
+        const targetList =
+            previousState.listsSidebar.lists.byId[dropTargetListId]
+        const draggedList = previousState.listsSidebar.lists.byId[listId]
+        const targetSiblingLists = annotationsCache.getListsByParentId(
+            targetList.parentUnifiedId,
+        )
+
+        // Siblings only need to be re-ordered
+        if (targetList.parentUnifiedId === draggedList.parentUnifiedId) {
+            console.log('reorder only - siblings:', targetSiblingLists)
+            const index = targetSiblingLists.findIndex(
+                (list) => list.unifiedId === dropTargetListId,
+            )
+            const order = insertOrderedItemBeforeIndex(
+                targetSiblingLists.map((list) => ({
+                    id: list.unifiedId,
+                    key: list.order,
+                })),
+                draggedList.unifiedId,
+                index,
+            ).create.key
+            if (order !== draggedList.order) {
+                annotationsCache.updateList({
+                    unifiedId: draggedList.unifiedId,
+                    order,
+                })
+                await this.options.listsBG.updateListTreeOrder({
+                    localListId: draggedList.localId!,
+                    siblingListIds: targetSiblingLists.map(
+                        (list) => list.localId!,
+                    ),
+                    intendedIndexAmongSiblings: index,
+                })
+            }
+            this.emitMutation({
+                listsSidebar: { dragOverListId: { $set: undefined } },
+            })
+            return
+        }
+
+        console.log('reorder + tree move')
+        this.emitMutation({
+            listsSidebar: { dragOverListId: { $set: undefined } },
+        })
+        return
+
+        const listData = getListData(listId, previousState, {
+            mustBeLocal: true,
+            source: 'dropOnListItem',
+        })
+        const dropTargetListData = getListData(
+            dropTargetListId,
+            previousState,
+            {
+                mustBeLocal: true,
+                source: 'dropOnListItem',
+            },
+        )
+        if (listData.localId == null || dropTargetListData.localId == null) {
+            return
+        }
+
+        // If they're siblings, we simply need to do a reordering
+        if (listData.parentUnifiedId === dropTargetListData.parentUnifiedId) {
+            const siblings = annotationsCache.getListsByParentId(
+                listData.parentUnifiedId,
+            )
+            const newIndex = siblings.findIndex(
+                (list) => list.unifiedId === dropTargetListData.unifiedId,
+            )
+            const reorderResult = insertOrderedItemBeforeIndex(
+                siblings.map((list) => ({
+                    id: list.unifiedId,
+                    key: list.order,
+                })),
+                '',
+                newIndex,
+            )
+            this.options.annotationsCache.updateList({
+                unifiedId: listId,
+                order: reorderResult.create.key,
+            })
+            await this.options.listsBG.updateListTreeOrder({
+                localListId: listData.localId!,
+                siblingListIds: siblings.map((list) => list.localId),
+                intendedIndexAmongSiblings: newIndex,
+            })
             return
         }
 
@@ -4128,6 +4320,9 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const { annotationsCache, listsBG, authBG } = this.options
         const parentList = annotationsCache.lists.byId[event.parentListId]
+        const siblingLists = annotationsCache.getListsByParentId(
+            event.parentListId,
+        )
         const newListName = previousState.listsSidebar.listTrees.byId[
             event.parentListId
         ].newNestedListValue.trim()
@@ -4158,6 +4353,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                     parentListId: parentList.localId!,
                 })
                 const user = await authBG.getCurrentUser()
+                const order = pushOrderedItem(
+                    siblingLists.map((list) => ({
+                        id: list.unifiedId,
+                        key: list.order,
+                    })),
+                    '',
+                ).create.key
                 annotationsCache.addList({
                     type: 'user-list',
                     name: newListName,
@@ -4173,6 +4375,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         parentList.localId!,
                     ],
                     isPrivate: true,
+                    order,
                 })
 
                 this.emitMutation({

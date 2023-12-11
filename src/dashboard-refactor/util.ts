@@ -67,7 +67,7 @@ export const getListData = (
     listId: UnifiedList['unifiedId'],
     { listsSidebar }: Pick<RootState, 'listsSidebar'>,
     opts?: { mustBeLocal?: boolean; source?: keyof Events },
-): UnifiedList => {
+): Omit<UnifiedList, 'order'> => {
     // TODO: Deal with these static lists better, without needing to do this
     if (Object.values(SPECIAL_LIST_STRING_IDS).includes(listId)) {
         const name =
