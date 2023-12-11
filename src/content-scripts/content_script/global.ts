@@ -170,7 +170,7 @@ export async function main(
                     ])
                     return
                 } else {
-                    await highlightRenderer.removeAnnotationHighlight({
+                    highlightRenderer.removeAnnotationHighlight({
                         id: lastAction.id,
                     })
                     lastActions.shift()
