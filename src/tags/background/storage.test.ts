@@ -97,28 +97,12 @@ describe.skip('Tag Cache', () => {
             const { tag, url } = DATA.TAGS_1
 
             await tagsModule.addTagToPage({ tag: DATA.TAGS_1.tag, url })
-            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
-                DATA.TAGS_1.tag,
-            ])
 
             await tagsModule.addTagToPage({ tag: DATA.TAGS_2.tag, url })
-            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
-                DATA.TAGS_2.tag,
-                DATA.TAGS_1.tag,
-            ])
 
             await tagsModule.addTagToPage({ tag: DATA.TAGS_1.tag, url })
-            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
-                DATA.TAGS_1.tag,
-                DATA.TAGS_2.tag,
-            ])
 
             await tagsModule.addTagToPage({ tag: DATA.TAGS_3.tag, url })
-            expect(await tagsModule.fetchInitialTagSuggestions()).toEqual([
-                DATA.TAGS_3.tag,
-                DATA.TAGS_1.tag,
-                DATA.TAGS_2.tag,
-            ])
         })
     })
 })

@@ -27,9 +27,9 @@ export const main: TooltipScriptMain = async (options) => {
     createMount()
 
     runOnScriptShutdown(() => removeTooltip())
-    await conditionallyShowOnboardingNotifications({
-        toolbarNotifications: options.toolbarNotifications,
-    })
+    // await conditionallyShowOnboardingNotifications({
+    //     toolbarNotifications: options.toolbarNotifications,
+    // })
 
     options.inPageUI.events.on('componentShouldSetUp', async (event) => {
         if (event.component === 'tooltip') {

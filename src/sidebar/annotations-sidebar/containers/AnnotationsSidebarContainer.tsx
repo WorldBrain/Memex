@@ -65,6 +65,8 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -79,6 +81,7 @@ export interface Props extends SidebarContainerOptions {
     saveHighlightColorSettings?: (newState) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
+    pkmSyncBG?: PkmSyncInterface
 }
 
 export class AnnotationsSidebarContainer<
@@ -114,6 +117,8 @@ export class AnnotationsSidebarContainer<
                 },
                 imageSupport: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
+                storage: props.storageAPI,
+                pkmSyncBG: props.pkmSyncBG,
             }),
         )
 
@@ -846,6 +851,14 @@ export class AnnotationsSidebarContainer<
                             setAIModel={(AImodel) => {
                                 this.processEvent('setAIModel', AImodel)
                             }}
+                            saveFeedSources={(feedSources) => {
+                                this.processEvent('saveFeedSources', {
+                                    sources: feedSources,
+                                })
+                            }}
+                            loadFeedSources={() => {
+                                this.processEvent('loadFeedSources', null)
+                            }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}
@@ -858,6 +871,11 @@ export class AnnotationsSidebarContainer<
                                     color: color,
                                 })
                             }}
+                            onGoToAnnotation={async (unifiedAnnotationId) =>
+                                this.processEvent('goToAnnotationInNewTab', {
+                                    unifiedAnnotationId,
+                                })
+                            }
                             saveHighlightColorSettings={(newState) => {
                                 this.processEvent(
                                     'saveHighlightColorSettings',
@@ -1312,6 +1330,21 @@ export class AnnotationsSidebarContainer<
                                     tab,
                                 })
                             }}
+                            setSummaryMode={(tab) => (event) => {
+                                this.processEvent('setSummaryMode', {
+                                    tab,
+                                })
+                            }}
+                            setActiveSuggestionsTab={(tab) => (event) => {
+                                this.processEvent('setActiveSuggestionsTab', {
+                                    tab,
+                                })
+                            }}
+                            setActiveAITab={(tab) => (event) => {
+                                this.processEvent('setActiveAITab', {
+                                    tab,
+                                })
+                            }}
                             expandFollowedListNotes={(unifiedListId) =>
                                 this.processEvent('expandListAnnotations', {
                                     unifiedListId,
@@ -1375,6 +1408,18 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             fetchLocalHTML={this.state.fetchLocalHTML}
+                            setRabbitHoleBetaFeatureAccess={(permission) =>
+                                this.processEvent(
+                                    'setRabbitHoleBetaFeatureAccess',
+                                    { permission },
+                                )
+                            }
+                            requestRabbitHoleBetaFeatureAccess={(reasonText) =>
+                                this.processEvent(
+                                    'requestRabbitHoleBetaFeatureAccess',
+                                    { reasonText },
+                                )
+                            }
                         />
                     </Rnd>
                 </ContainerStyled>

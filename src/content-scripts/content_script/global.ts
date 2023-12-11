@@ -29,9 +29,7 @@ import {
 } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import AnnotationsManager from 'src/annotations/annotations-manager'
-import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
-import ToolbarNotifications from 'src/toolbar-notification/content_script'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as sidebarUtils from 'src/sidebar-overlay/utils'
 import * as constants from '../constants'
@@ -82,7 +80,6 @@ import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/renderer'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
-import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
@@ -95,6 +92,18 @@ import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshot
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
+import { injectTelegramCustomUI } from './injectionUtils/telegram'
+import { renderSpacesBar } from './injectionUtils/utils'
+import {
+    getTimestampedNoteWithAIsummaryForYoutubeNotes,
+    loadYoutubeButtons,
+} from './injectionUtils/youtube'
+import {
+    injectTwitterProfileUI,
+    trackTwitterMessageList,
+} from './injectionUtils/twitter'
+import { injectSubstackButtons } from './injectionUtils/substack'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -112,6 +121,10 @@ export async function main(
     }
     params.loadRemotely = params.loadRemotely ?? true
 
+    setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
+    setupPageContentRPC()
+    // TODO: potential are for improvement, setup RPC earlier or later
+
     const isPdfViewerRunning = params.getContentFingerprints != null
     if (isPdfViewerRunning) {
         setupPdfViewerListeners({
@@ -127,14 +140,9 @@ export async function main(
 
     let keysPressed = []
 
-    document.addEventListener('keydown', (event) => {
-        undoAnnotationHistory(event)
-    })
-
-    document.addEventListener('keyup', (event) => {
-        keysPressed.filter((item) => item != event.key)
-    })
-
+    ////////////////////////////////////////////
+    // INITIALISE ALL VARIABLES AND FUNCTIONS
+    ////////////////////////////////////////////
     const undoAnnotationHistory = async (event) => {
         if (
             event.target.nodeName === 'INPUT' ||
@@ -184,9 +192,6 @@ export async function main(
         }
     }
 
-    setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
-    setupPageContentRPC()
-
     const pageInfo = new PageInfo(params)
 
     // 1. Create a local object with promises to track each content script
@@ -203,6 +208,7 @@ export async function main(
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
     const authBG = runInBackground<AuthRemoteFunctionsInterface>()
     const bgScriptBG = runInBackground<RemoteBGScriptInterface>()
+    const pkmSyncBG = runInBackground<PKMSyncBackgroundModule>()
     const summarizeBG = runInBackground<SummarizationInterface<'caller'>>()
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
@@ -211,7 +217,6 @@ export async function main(
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
-    const tagsBG = runInBackground<RemoteTagsInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
     >()
@@ -220,27 +225,17 @@ export async function main(
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
     >()
-    const remoteFunctionRegistry = new RemoteFunctionRegistry()
     const annotationsManager = new AnnotationsManager()
-    const toolbarNotifications = new ToolbarNotifications()
-    toolbarNotifications.registerRemoteFunctions(remoteFunctionRegistry)
 
     // loadInitialSettings
-
     const syncSettings = createSyncSettingsStore({
         syncSettingsBG: syncSettingsBG,
     })
-
     const isAutoAddStorage = await syncSettings.extension.get(
         'shouldAutoAddSpaces',
     )
 
-    if (isAutoAddStorage == null) {
-        await syncSettings.extension.set('shouldAutoAddSpaces', true)
-    }
-
     // 2.5 load cache
-
     const _currentUser = await authBG.getCurrentUser()
     const currentUser: UserReference = _currentUser
         ? { type: 'user-reference', id: _currentUser.id }
@@ -249,7 +244,6 @@ export async function main(
     const annotationsCache = new PageAnnotationsCache({
         syncSettingsBG: syncSettingsBG,
     })
-    window['__annotationsCache'] = annotationsCache
 
     const loadCacheDataPromise = hydrateCacheForPageAnnotations({
         fullPageUrl,
@@ -438,10 +432,6 @@ export async function main(
         },
     })
 
-    await loadCacheDataPromise
-        .then(inPageUI.cacheLoadPromise.resolve)
-        .catch(inPageUI.cacheLoadPromise.reject)
-
     const pageHasBookark =
         (await bookmarks.pageHasBookmark(fullPageUrl)) ||
         (await collectionsBG
@@ -450,7 +440,8 @@ export async function main(
         (await annotationsBG
             .getAllAnnotationsByUrl({ url: fullPageUrl })
             .then((annotations) => annotations.length > 0))
-    await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
+
+    const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
 
     async function saveHighlight(
         shouldShare: boolean,
@@ -458,10 +449,9 @@ export async function main(
         screenshotImage?,
         imageSupport?,
         highlightColor?: { color: RGBAColor; id: string; label: string },
-    ): Promise<AutoPk> {
-        let highlightId: AutoPk
+    ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         try {
-            highlightId = await highlightRenderer.saveAndRenderHighlight({
+            const result = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
                 onClick: ({ annotationId, openInEdit }) =>
                     inPageUI.showSidebar({
@@ -479,12 +469,15 @@ export async function main(
                 imageSupport,
                 highlightColor,
             })
+            const annotationId = result.annotationId
+            const createPromise = result.createPromise
+
+            return { annotationId, createPromise }
         } catch (err) {
             captureException(err)
             await inPageUI.toggleErrorMessage({ type: 'annotation' })
             throw err
         }
-        return highlightId
     }
 
     const annotationsFunctions = {
@@ -502,6 +495,11 @@ export async function main(
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
+            }
+            if (inPageUI.componentsShown.sidebar) {
+                inPageUI.showSidebar({
+                    action: 'show_annotation',
+                })
             }
             let screenshotGrabResult
             if (
@@ -522,31 +520,29 @@ export async function main(
                     return
                 }
 
-                await saveHighlight(
+                const results = await saveHighlight(
                     shouldShare,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
                     highlightColorSetting,
                 )
+
+                await results.createPromise
             } else if (
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                await saveHighlight(
+                const results = await saveHighlight(
                     shouldShare,
                     null,
                     null,
                     null,
                     highlightColorSetting,
                 )
+                await results.createPromise
             }
 
-            if (inPageUI.componentsShown.sidebar) {
-                inPageUI.showSidebar({
-                    action: 'show_annotation',
-                })
-            }
             await inPageUI.hideTooltip()
             if (analyticsBG) {
                 try {
@@ -592,12 +588,15 @@ export async function main(
                     return
                 }
 
-                const annotationId = await saveHighlight(
+                const result = await saveHighlight(
                     shouldShare,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
                 )
+
+                const annotationId = result.annotationId
+                const createPromise = result.createPromise
                 await inPageUI.showSidebar(
                     annotationId
                         ? {
@@ -611,11 +610,15 @@ export async function main(
                               commentText: commentText ?? '',
                           },
                 )
+                await createPromise
             } else if (
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                const annotationId = await saveHighlight(shouldShare)
+                const result = await saveHighlight(shouldShare)
+
+                const annotationId = result.annotationId
+                const createPromise = result.createPromise
                 await inPageUI.showSidebar(
                     annotationId
                         ? {
@@ -629,6 +632,7 @@ export async function main(
                               commentText: commentText ?? '',
                           },
                 )
+                await createPromise
             } else if (window.location.href.includes('youtube.com')) {
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
@@ -750,64 +754,6 @@ export async function main(
         return image
     }
 
-    // if (window.location.hostname === 'www.youtube.com') {
-    //     injectYoutubeButtonMenu(annotationsFunctions)
-    //     injectYoutubeContextMenu(annotationsFunctions)
-    // }
-
-    if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
-        const email = _currentUser.email
-
-        const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
-        const url = `${baseUrl}` + '/stripe-subscriptions'
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {},
-            body: JSON.stringify({
-                email,
-            }),
-        })
-
-        const isSubscribed = await response.json()
-        const pageLimit = isSubscribed.planLimit
-        const AIlimit = isSubscribed.aiQueries
-
-        if (
-            isSubscribed.status === 'active' ||
-            isSubscribed.status === 'already-setup'
-        ) {
-            await upgradePlan(pageLimit, AIlimit)
-        }
-    }
-    if (
-        fullPageUrl === 'https://memex.garden/upgradeStaging' ||
-        fullPageUrl === 'https://memex.garden/upgradeNotification' ||
-        fullPageUrl === 'https://memex.garden/upgrade' ||
-        fullPageUrl.startsWith('https://memex.garden/') ||
-        fullPageUrl === 'https://memex.garden/copilot' ||
-        fullPageUrl === 'https://memex.garden/hivemind'
-    ) {
-        setInterval(() => {
-            const elements = document.querySelectorAll('#UpgradeButton')
-
-            for (let element of elements) {
-                const currentHref = element.getAttribute('href')
-                if (!currentHref.includes('prefilled_email')) {
-                    element.setAttribute(
-                        'href',
-                        `${currentHref}?prefilled_email=${_currentUser.email}`,
-                    )
-                }
-            }
-        }, 200)
-    }
-
     async function getHighlightColorSettings() {
         const syncSettings = createSyncSettingsStore({ syncSettingsBG })
         const highlightColorStore = syncSettings.highlightColors
@@ -834,6 +780,7 @@ export async function main(
     // 4. Create a contentScriptRegistry object with functions for each content script
     // component, that when run, initialise the respective component with its
     // dependencies
+
     const contentScriptRegistry: ContentScriptRegistry = {
         async registerRibbonScript(execute): Promise<void> {
             await execute({
@@ -843,7 +790,6 @@ export async function main(
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 annotationsCache,
-                tags: tagsBG,
                 customLists: collectionsBG,
                 authBG,
                 bgScriptBG,
@@ -911,13 +857,13 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
+                pkmSyncBG,
             })
             components.sidebar?.resolve()
         },
         async registerTooltipScript(execute): Promise<void> {
             await execute({
                 inPageUI,
-                toolbarNotifications,
                 createHighlight: annotationsFunctions.createHighlight({
                     category: 'Highlights',
                     action: 'createFromTooltip',
@@ -941,16 +887,9 @@ export async function main(
         },
     }
 
-    globalThis['contentScriptRegistry'] = contentScriptRegistry
-
-    // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
-    // so it is included in this global content script where it adds less than 500kb.
-    await contentScriptRegistry.registerHighlightingScript(highlightMain)
-
     // 5. Registers remote functions that can be used to interact with components
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
-
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
         ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
@@ -966,8 +905,17 @@ export async function main(
         removeTooltip: async () => inPageUI.removeTooltip(),
         insertOrRemoveTooltip: async () => inPageUI.toggleTooltip(),
         goToHighlight: async (annotationCacheId) => {
-            const unifiedAnnotation =
-                annotationsCache.annotations.byId[annotationCacheId]
+            let unifiedAnnotation
+            for (const id in annotationsCache.annotations.byId) {
+                if (
+                    annotationsCache.annotations.byId[id].localId ===
+                    annotationCacheId
+                ) {
+                    unifiedAnnotation = annotationsCache.annotations.byId[id]
+                    break
+                }
+            }
+
             if (!unifiedAnnotation) {
                 console.warn(
                     "Tried to go to highlight in new page that doesn't exist in cache",
@@ -996,58 +944,18 @@ export async function main(
             if (isPdfViewerRunning) {
                 return
             }
-
             await inPageUI.hideRibbon()
 
-            if (window.location.href.includes('web.telegram.org/')) {
-                const existingContainer = document.getElementById(
-                    `spacesBarContainer`,
-                )
+            await this.injectCustomUIperPage(
+                annotationsFunctions,
+                pkmSyncBG,
+                collectionsBG,
+                bgScriptBG,
+                pageInfo,
+                inPageUI,
+            )
 
-                if (existingContainer) {
-                    existingContainer.remove()
-                }
-
-                await injectTelegramCustomUI(
-                    collectionsBG,
-                    bgScriptBG,
-                    window.location.href,
-                )
-            }
-            if (
-                (window.location.href.includes('twitter.com/') ||
-                    window.location.href.includes('x.com/')) &&
-                !window.location.href.includes('/status/')
-            ) {
-                await pageInfo.setTwitterFullUrl(null)
-
-                if (window.location.href.includes('/messages')) {
-                    const url = await pageInfo.getFullPageUrl()
-
-                    const existingContainer = document.getElementById(
-                        `spacesBarContainer_${url}`,
-                    )
-                    if (!existingContainer) {
-                        await trackTwitterMessageList(collectionsBG, bgScriptBG)
-                    }
-                } else {
-                    await injectTwitterProfileUI(
-                        collectionsBG,
-                        bgScriptBG,
-                        await pageInfo.getFullPageUrl(),
-                    )
-                }
-            }
-            if (window.location.hostname === 'www.youtube.com') {
-                const existingButtons = document.getElementsByClassName(
-                    'memex-youtube-buttons',
-                )[0]
-
-                if (existingButtons) {
-                    existingButtons.remove()
-                }
-                loadYoutubeButtons(annotationsFunctions)
-            }
+            // reload content script injections
 
             const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
             if (isPageBlacklisted || !isSidebarEnabled) {
@@ -1070,9 +978,18 @@ export async function main(
             await pageInfo.refreshIfNeeded()
         },
     })
+
     // 6. Setup other interactions with this page (things that always run)
     // setupScrollReporter()
+    const loadContentScript = createContentScriptLoader({
+        contentScriptsBG,
+        loadRemotely: params.loadRemotely,
+    })
 
+    // 7. check if highlights are enabled
+    const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
+
+    // 8. initialise keyboard shortcuts
     initKeyboardShortcuts({
         inPageUI,
         createHighlight: annotationsFunctions.createHighlight({
@@ -1087,30 +1004,9 @@ export async function main(
         getHighlightColorsSettings: getHighlightColorSettings,
         saveHighlightColorsSettings: saveHighlightColorSettings,
     })
-    const loadContentScript = createContentScriptLoader({
-        contentScriptsBG,
-        loadRemotely: params.loadRemotely,
-    })
-    if (
-        shouldIncludeSearchInjection(
-            window.location.hostname,
-            window.location.href,
-        )
-    ) {
-        await contentScriptRegistry.registerSearchInjectionScript(
-            searchInjectionMain,
-        )
-    }
 
-    const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
-    if (areHighlightsEnabled) {
-        inPageUI.showHighlights()
-        if (!annotationsCache.isEmpty) {
-            inPageUI.loadComponent('sidebar')
-        }
-    }
+    // 9. Check for page activity status
 
-    const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
     const {
         status: pageActivityStatus,
     } = await pageActivityIndicatorBG.getPageActivityStatus(fullPageUrl)
@@ -1119,7 +1015,29 @@ export async function main(
         pageActivityStatus === 'no-annotations' ||
         pageActivityStatus === 'has-annotations'
 
-    if ((isSidebarEnabled && !isPageBlacklisted) || hasActivity) {
+    ////////////////////////////////////////////
+    // EXECUTE PROGRESSIVE LOADING SEQUENCES
+    ////////////////////////////////////////////
+
+    globalThis['contentScriptRegistry'] = contentScriptRegistry
+    window['__annotationsCache'] = annotationsCache
+
+    await loadCacheDataPromise
+        .then(inPageUI.cacheLoadPromise.resolve)
+        .catch(inPageUI.cacheLoadPromise.reject)
+
+    // N.B. Building the highlighting script as a seperate content script results in ~6Mb of duplicated code bundle,
+    // so it is included in this global content script where it adds less than 500kb.
+    await contentScriptRegistry.registerHighlightingScript(highlightMain)
+
+    if (areHighlightsEnabled) {
+        inPageUI.showHighlights()
+        if (!annotationsCache.isEmpty) {
+            inPageUI.loadComponent('sidebar')
+        }
+    }
+
+    if (isSidebarEnabled && !isPageBlacklisted) {
         await inPageUI.loadComponent('ribbon', {
             keepRibbonHidden: !isSidebarEnabled,
             showPageActivityIndicator: hasActivity,
@@ -1127,20 +1045,50 @@ export async function main(
         if (await tooltipUtils.getTooltipState()) {
             await inPageUI.setupTooltip()
         }
+    } else {
+        if (hasActivity) {
+            await inPageUI.loadComponent('ribbon', {
+                keepRibbonHidden: !isSidebarEnabled,
+                showPageActivityIndicator: hasActivity,
+            })
+            if (await tooltipUtils.getTooltipState()) {
+                await inPageUI.setupTooltip()
+            }
+        }
     }
 
     setupWebUIActions({ contentScriptsBG, bgScriptBG, pageActivityIndicatorBG })
 
-    if (window.location.hostname === 'www.youtube.com') {
-        loadYoutubeButtons(annotationsFunctions)
-    }
-    if (window.location.href.includes('web.telegram.org/')) {
-        await injectTelegramCustomUI(
-            collectionsBG,
-            bgScriptBG,
-            window.location.href,
-        )
+    await bookmarks.setBookmarkStatusInBrowserIcon(pageHasBookark, fullPageUrl)
 
+    if (isAutoAddStorage == null) {
+        await syncSettings.extension.set('shouldAutoAddSpaces', true)
+    }
+    ////////////////////////////////////////////
+    // ADD ANY LISTENERS
+    ////////////////////////////////////////////
+    document.addEventListener('keydown', (event) => {
+        undoAnnotationHistory(event)
+    })
+
+    document.addEventListener('keyup', (event) => {
+        keysPressed.filter((item) => item != event.key)
+    })
+
+    ////////////////////////////////////////////
+    // CHECK CURRENT PAGE IF NEED BE TO INJECT CUSTOM UI
+    ////////////////////////////////////////////
+    await this.injectCustomUIperPage(
+        annotationsFunctions,
+        pkmSyncBG,
+        collectionsBG,
+        bgScriptBG,
+        pageInfo,
+        inPageUI,
+    )
+
+    // special case bc we want the listener to be active on page load
+    if (window.location.href.includes('web.telegram.org/')) {
         annotationsCache.events.on('updatedPageData', (url, pageListIds) => {
             let spacesBar: HTMLElement
             let existingContainer: HTMLElement
@@ -1164,21 +1112,12 @@ export async function main(
             }
         })
     }
-    if (
-        window.location.href.includes('twitter.com/') ||
-        (window.location.href.includes('x.com/') &&
-            !window.location.href.includes('/status/'))
-    ) {
-        if (window.location.href.includes('/messages')) {
-            await trackTwitterMessageList(collectionsBG, bgScriptBG)
-        } else {
-            await injectTwitterProfileUI(
-                collectionsBG,
-                bgScriptBG,
-                await pageInfo.getFullPageUrl(),
-            )
-        }
 
+    if (
+        (window.location.href.includes('twitter.com/') ||
+            window.location.href.includes('x.com/')) &&
+        !window.location.href.includes('/status/')
+    ) {
         annotationsCache.events.on('updatedPageData', (url, pageListIds) => {
             const pageListIdURL = 'https://' + url
 
@@ -1209,6 +1148,70 @@ export async function main(
                 existingContainer.appendChild(spacesBar)
             }
         })
+    }
+
+    if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+        const email = _currentUser.email
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+        const url = `${baseUrl}` + '/stripe-subscriptions'
+
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {},
+            body: JSON.stringify({
+                email,
+            }),
+        })
+
+        const isSubscribed = await response.json()
+        const pageLimit = isSubscribed.planLimit
+        const AIlimit = isSubscribed.aiQueries
+
+        if (
+            isSubscribed.status === 'active' ||
+            isSubscribed.status === 'already-setup'
+        ) {
+            await upgradePlan(pageLimit, AIlimit)
+        }
+    }
+    if (
+        fullPageUrl === 'https://memex.garden/upgradeStaging' ||
+        fullPageUrl === 'https://memex.garden/upgradeNotification' ||
+        fullPageUrl === 'https://memex.garden/upgrade' ||
+        fullPageUrl.startsWith('https://memex.garden/') ||
+        fullPageUrl === 'https://memex.garden/copilot' ||
+        fullPageUrl === 'https://memex.garden/hivemind'
+    ) {
+        setInterval(() => {
+            const elements = document.querySelectorAll('#UpgradeButton')
+
+            for (let element of elements) {
+                const currentHref = element.getAttribute('href')
+                if (!currentHref.includes('prefilled_email')) {
+                    element.setAttribute(
+                        'href',
+                        `${currentHref}?prefilled_email=${_currentUser.email}`,
+                    )
+                }
+            }
+        }, 200)
+    }
+
+    if (
+        shouldIncludeSearchInjection(
+            window.location.hostname,
+            window.location.href,
+        )
+    ) {
+        await contentScriptRegistry.registerSearchInjectionScript(
+            searchInjectionMain,
+        )
     }
 
     if (analyticsBG && hasActivity) {
@@ -1405,909 +1408,6 @@ class PageInfo {
     }
 }
 
-export async function injectTelegramCustomUI(
-    collectionsBG,
-    bgScriptBG: RemoteBGScriptInterface,
-    url: string,
-) {
-    try {
-        const textField = document.getElementsByClassName(
-            'input-message-input',
-        )[0]
-        if (textField) {
-            textField.classList.add('mousetrap')
-        }
-
-        let selector
-
-        selector = '[class="topbar"]'
-
-        const maxRetries = 10
-        const delayInMilliseconds = 500 // adjust this based on your needs
-
-        const userNameBox = (
-            await findClassElementSWithRetries(
-                'topbar',
-                maxRetries,
-                delayInMilliseconds,
-            )
-        )[0] as HTMLElement
-
-        if (userNameBox != null) {
-            let spacesBar: HTMLElement
-            let spacesBarContainer = document.createElement('div')
-            spacesBarContainer.id = 'spacesBarContainer'
-            spacesBarContainer.style.width = '100%'
-            spacesBarContainer.style.zIndex = '3'
-            spacesBarContainer.style.height = 'fit-content'
-            spacesBarContainer.style.overflow = 'scroll'
-            spacesBarContainer.style.padding = '10px 15px 15px 15px'
-            spacesBarContainer.style.width = '100%'
-
-            userNameBox.insertAdjacentElement('afterend', spacesBarContainer)
-
-            const pageLists = await fetchListDataForSocialProfiles(
-                collectionsBG,
-                url,
-            )
-
-            if (pageLists != null && pageLists.length > 0) {
-                spacesBar = renderSpacesBar(pageLists, bgScriptBG)
-
-                spacesBarContainer.appendChild(spacesBar)
-            } else {
-                return
-            }
-        }
-    } catch (error) {
-        console.error(error.message)
-    }
-}
-
-export async function getActiveTwitterUserName(
-    maxRetries,
-    delayInMilliseconds,
-) {
-    const filteredElements = await findElementWithRetries(
-        '[aria-selected="true"]',
-        maxRetries,
-        delayInMilliseconds,
-    )
-
-    return filteredElements
-}
-
-export async function trackTwitterMessageList(
-    collectionsBG,
-    bgScriptBG: RemoteBGScriptInterface,
-) {
-    const maxRetries = 40
-    const delayInMilliseconds = 500
-
-    const tabListDiv = (await findElementWithRetries(
-        '[role="tablist"]',
-        maxRetries,
-        delayInMilliseconds,
-    )) as HTMLElement
-
-    if (tabListDiv) {
-        // Your main logic encapsulated in a function
-        const processNode = async (node) => {
-            if (!node?.textContent.includes(`’s message with`)) {
-                const userName =
-                    node?.textContent.split('@')[1]?.split('·')[0] ?? ''
-
-                if (userName) {
-                    let fullUrl = `https://twitter.com/${userName}`
-
-                    let spacesBarContainer = document.createElement('div')
-                    spacesBarContainer.id = `spacesBarContainer_${fullUrl}`
-                    spacesBarContainer.style.display = 'flex'
-
-                    const pageLists = await fetchListDataForSocialProfiles(
-                        collectionsBG,
-                        fullUrl,
-                    )
-
-                    if (pageLists != null && pageLists.length > 0) {
-                        const spacesBar = renderSpacesBar(
-                            pageLists,
-                            bgScriptBG,
-                            fullUrl,
-                        ) as HTMLElement
-                        spacesBar.style.flexWrap = 'wrap'
-                        spacesBarContainer.style.marginTop = '5px'
-                        spacesBarContainer.appendChild(spacesBar)
-                    }
-                    let element = node as HTMLElement
-                    let conversationElement = element.querySelector(
-                        '[data-testid="conversation"]',
-                    ) as HTMLElement
-
-                    if (conversationElement) {
-                        conversationElement.insertAdjacentElement(
-                            'beforeend',
-                            spacesBarContainer,
-                        )
-                    }
-                }
-            }
-        }
-
-        // Initial processing
-        tabListDiv.childNodes.forEach((node) => processNode(node))
-
-        // Mutation Observer
-        const observer = new MutationObserver((mutationsList, observer) => {
-            for (let mutation of mutationsList) {
-                if (mutation.type === 'childList') {
-                    mutation.addedNodes.forEach((node) => {
-                        if (node.nodeType === Node.ELEMENT_NODE) {
-                            processNode(node)
-                        }
-                    })
-                }
-            }
-        })
-
-        observer.observe(tabListDiv, { childList: true })
-    }
-}
-
-export async function injectTwitterProfileUI(
-    collectionsBG,
-    bgScriptBG: RemoteBGScriptInterface,
-    url: string,
-) {
-    const maxRetries = 40
-    const delayInMilliseconds = 500 // adjust this based on your needs
-    let pageType: string
-
-    try {
-        let userNameBox: HTMLElement
-        const selector = '[data-testid="UserDescription"]'
-        userNameBox = (await findElementWithRetries(
-            selector,
-            maxRetries,
-            delayInMilliseconds,
-        )) as HTMLElement
-
-        if (userNameBox != null) {
-            let spacesBar: HTMLElement
-            let spacesBarContainer = document.createElement('div')
-            spacesBarContainer.id = `spacesBarContainer_${url}`
-            spacesBarContainer.style.marginTop = '5px'
-
-            userNameBox.insertAdjacentElement('beforeend', spacesBarContainer)
-
-            const pageLists = await fetchListDataForSocialProfiles(
-                collectionsBG,
-                url,
-            )
-
-            if (pageLists != null && pageLists.length > 0) {
-                spacesBar = renderSpacesBar(pageLists, bgScriptBG, url)
-                spacesBarContainer.appendChild(spacesBar)
-                userNameBox.style.marginBottom = '10px'
-            } else {
-                return
-            }
-        }
-    } catch (error) {
-        console.error(error.message)
-    }
-    return
-}
-
-async function fetchListDataForSocialProfiles(collectionsBG, fullUrl: string) {
-    const lists = await collectionsBG.fetchPageListEntriesByUrl({
-        url: fullUrl,
-    })
-    if (lists.length > 0) {
-        const updatedLists = await Promise.all(
-            lists
-                .filter((list) => list.listId !== 20201014)
-                .map(async (list) => {
-                    const listData = await collectionsBG.fetchListById({
-                        id: list.listId,
-                    })
-                    ;(list as any).name = listData.name // Add the list name to the original list object.
-                    return list
-                }),
-        )
-        return updatedLists
-    }
-}
-
-async function findElementWithRetries(selector, retries, delay) {
-    return new Promise((resolve, reject) => {
-        const attempt = () => {
-            const element = document.querySelector(selector)
-
-            if (element) {
-                resolve(element)
-            } else if (retries > 0) {
-                setTimeout(() => {
-                    retries--
-                    attempt()
-                }, delay)
-            } else {
-                reject(new Error('Element not found after maximum retries.'))
-            }
-        }
-
-        attempt()
-    })
-}
-
-async function findElementSWithRetries(selector, retries, delay) {
-    return new Promise((resolve, reject) => {
-        const attempt = () => {
-            const element = document.querySelectorAll(selector)
-
-            if (element) {
-                resolve(element)
-            } else if (retries > 0) {
-                setTimeout(() => {
-                    retries--
-                    attempt()
-                }, delay)
-            } else {
-                reject(new Error('Element not found after maximum retries.'))
-            }
-        }
-
-        attempt()
-    })
-}
-async function findClassElementSWithRetries(className, retries, delay) {
-    return new Promise((resolve, reject) => {
-        const attempt = () => {
-            const element = document.getElementsByClassName(className)
-            if (element) {
-                resolve(element)
-            } else if (retries > 0) {
-                setTimeout(() => {
-                    retries--
-                    attempt()
-                }, delay)
-            } else {
-                reject(new Error('Element not found after maximum retries.'))
-            }
-        }
-
-        attempt()
-    })
-}
-
-function renderSpacesBar(
-    lists: UnifiedList[],
-    bgScriptBG: RemoteBGScriptInterface,
-    url?: string,
-) {
-    let spacesBar: HTMLElement
-
-    if (url) {
-        spacesBar = document.getElementById(`spacesBar_${url}`)
-    } else {
-        spacesBar = document.getElementById(`spacesBar`)
-    }
-
-    if (!spacesBar) {
-        spacesBar = document.createElement('div')
-    } else {
-        spacesBar.innerHTML = ''
-    }
-
-    if (lists.length > 0) {
-        spacesBar.id = url ? `spacesBar_${url}` : `spacesBar`
-        spacesBar.style.display = 'flex'
-        spacesBar.style.alignItems = 'center'
-        spacesBar.style.gap = '5px'
-        spacesBar.style.flexWrap = 'wrap'
-    } else {
-        spacesBar.id = url ? `spacesBar_${url}` : `spacesBar`
-        spacesBar.style.display = 'flex'
-        spacesBar.style.alignItems = 'center'
-        spacesBar.style.gap = '0px'
-        spacesBar.style.marginTop = '0px'
-    }
-
-    lists.forEach((list) => {
-        const listDiv = document.createElement('div')
-        listDiv.style.background = '#C6F0D4'
-        listDiv.style.padding = '3px 10px'
-        listDiv.style.marginTop = '5px'
-        listDiv.style.borderRadius = '5px'
-        listDiv.style.cursor = 'pointer'
-        listDiv.style.color = '#12131B'
-        listDiv.style.fontSize = '14px'
-        listDiv.style.display = 'flex'
-        listDiv.style.alignItems = 'center'
-        listDiv.style.fontFamily = 'Arial'
-        listDiv.innerText = list.name // assuming 'name' is a property of the list items
-        listDiv.addEventListener('click', (event) => {
-            event.preventDefault()
-            event.stopPropagation()
-            bgScriptBG.openOverviewTab({
-                // TODO: fix type but list.localId is not working. Tetst by clicking on the pills in telegram/twitter. They should jump to the right space in the dashboard
-                /** @ts-ignore */
-                selectedSpace: list.listId || list.localId,
-            })
-        })
-        spacesBar.appendChild(listDiv)
-    })
-
-    return spacesBar
-}
-
-export function loadYoutubeButtons(annotationsFunctions) {
-    const below = document.querySelector('#below')
-    const player = document.querySelector('#player')
-    const url = new URL(window.location.href)
-    const videoPath = url.pathname + '?v=' + url.searchParams.get('v')
-    const selector = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
-    const chapterContainer = document.querySelectorAll(selector)
-    let hasChapterContainer = chapterContainer.length > 0
-
-    if (below) {
-        injectYoutubeButtonMenu(annotationsFunctions)
-    }
-    if (player) {
-        injectYoutubeContextMenu(annotationsFunctions)
-    }
-
-    if (!below || !player || !hasChapterContainer) {
-        // Create a new MutationObserver instance
-        const observer = new MutationObserver(function (
-            mutationsList,
-            observer,
-        ) {
-            mutationsList.forEach(function (mutation) {
-                mutation.addedNodes.forEach((node) => {
-                    // Check if the added node is an HTMLElement
-                    if (!player) {
-                        if (node instanceof HTMLElement) {
-                            // Check if the "player" element is in the added node or its descendants
-                            if (node.querySelector('#player')) {
-                                injectYoutubeContextMenu(annotationsFunctions)
-
-                                if (below && player && hasChapterContainer) {
-                                    observer.disconnect()
-                                }
-                            }
-                        }
-                    }
-                    if (!below) {
-                        if (node instanceof HTMLElement) {
-                            // Check if the "below" element is in the added node or its descendants
-                            if (node.querySelector('#below')) {
-                                injectYoutubeButtonMenu(annotationsFunctions)
-
-                                if (below && player && hasChapterContainer) {
-                                    observer.disconnect()
-                                }
-                            }
-                        }
-                    }
-                    if (!hasChapterContainer) {
-                        if (node instanceof HTMLElement) {
-                            // Check if the "below" element is in the added node or its descendants
-                            if (
-                                node.classList.contains(
-                                    'yt-core-attributed-string__link',
-                                )
-                            ) {
-                                if (
-                                    node
-                                        .getAttribute('href')
-                                        .startsWith(videoPath)
-                                ) {
-                                    const selector2 = `#description-inline-expander .yt-core-attributed-string__link[href^="${videoPath}"]`
-                                    const chapterTimestamps = document.querySelectorAll(
-                                        selector2,
-                                    )
-                                    const chapterBlocks = []
-                                    hasChapterContainer = true
-                                    Array.from(chapterTimestamps).forEach(
-                                        (block, i) => {
-                                            const chapteblock =
-                                                block.parentElement
-                                            chapterBlocks.push(chapteblock)
-                                        },
-                                    )
-
-                                    const firstBlock = chapterBlocks[0]
-
-                                    const buttonIcon = runtime.getURL(
-                                        '/img/memex-icon.svg',
-                                    )
-
-                                    const newBlock = document.createElement(
-                                        'div',
-                                    )
-                                    newBlock.style.display = 'flex'
-                                    newBlock.style.alignItems = 'center'
-                                    newBlock.style.marginTop = '10px'
-                                    newBlock.style.marginBottom = '10px'
-                                    newBlock.style.flexWrap = 'wrap'
-                                    newBlock.style.gap = '15px'
-                                    newBlock.style.width = 'fit-content'
-                                    newBlock.style.height = 'fit-content'
-                                    newBlock.style.padding =
-                                        '10px 16px 10px 16px'
-                                    newBlock.style.borderRadius = '5px'
-                                    newBlock.style.backgroundColor = '#12131B'
-                                    newBlock.style.color = '#C6F0D4'
-                                    newBlock.style.fontSize = '14px'
-                                    newBlock.style.fontFamily = 'Arial'
-                                    newBlock.style.cursor = 'pointer'
-                                    newBlock.onclick = () => {
-                                        annotationsFunctions.openChapterSummary()
-                                    }
-                                    newBlock.innerHTML = `<img src=${buttonIcon} style="height: 23px; padding-left: 2px; display: flex; grid-gap:5px; width: auto"/> <div style="white-space: nowrap">Summarize Chapters</div>`
-
-                                    firstBlock.insertAdjacentElement(
-                                        'beforebegin',
-                                        newBlock,
-                                    )
-                                    injectYoutubeButtonMenu(
-                                        annotationsFunctions,
-                                    )
-
-                                    if (below && player && chapterContainer) {
-                                        observer.disconnect()
-                                    }
-                                }
-                            }
-                        }
-                    }
-                })
-            })
-        })
-
-        // Start observing mutations to the document body
-        observer.observe(document.body, { childList: true, subtree: true })
-    }
-}
-
-export function injectYoutubeContextMenu(annotationsFunctions: any) {
-    const config = { attributes: true, childList: true, subtree: true }
-    const icon = runtime.getURL('/img/memex-icon.svg')
-
-    const observer = new MutationObserver((mutation) => {
-        const targetObject = mutation[0]
-        if (
-            (targetObject.target as HTMLElement).className ===
-            'ytp-popup ytp-contextmenu'
-        ) {
-            const panel = document.getElementsByClassName('ytp-panel-menu')[1]
-            const newEntry = document.createElement('div')
-            newEntry.setAttribute('class', 'ytp-menuitem')
-            newEntry.onclick = () =>
-                annotationsFunctions.createAnnotation()(
-                    false,
-                    false,
-                    false,
-                    getTimestampNoteContentForYoutubeNotes(),
-                )
-            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to current time</div>`
-            panel.prepend(newEntry)
-            // panel.style.height = "320px"
-            observer.disconnect()
-        }
-    })
-
-    observer.observe(document, config)
-}
-
-export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
-    includeLastFewSecs,
-) {
-    const videoId = new URL(window.location.href).searchParams.get('v')
-    const isStaging =
-        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-        process.env.NODE_ENV === 'development'
-
-    const baseUrl = isStaging
-        ? 'https://cloudflare-memex-staging.memex.workers.dev'
-        : 'https://cloudfare-memex.memex.workers.dev'
-
-    const normalisedYoutubeURL = 'https://www.youtube.com/watch?v=' + videoId
-
-    const [startTimeURL] = getHTML5VideoTimestamp(includeLastFewSecs)
-    const [endTimeURL] = getHTML5VideoTimestamp(0)
-
-    const startTimeSecs = parseFloat(
-        new URL(startTimeURL).searchParams.get('t'),
-    )
-    const endTimeSecs = parseFloat(new URL(endTimeURL).searchParams.get('t'))
-
-    return [startTimeSecs, endTimeSecs]
-}
-
-export function getTimestampNoteContentForYoutubeNotes(
-    includeLastFewSecs?: number,
-) {
-    let videoTimeStampForComment: string | null
-
-    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp(
-        includeLastFewSecs ?? 0,
-    )
-
-    if (videoURLWithTime != null) {
-        videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
-
-        return videoTimeStampForComment
-    } else {
-        return null
-    }
-}
-
-export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
-    const YTchapterContainer = document.getElementsByClassName(
-        'ytp-chapter-container',
-    )
-
-    if (YTchapterContainer.length > 0) {
-        let container = YTchapterContainer[0] as HTMLElement
-        container.style.display = 'flex'
-        container.style.flex = '1'
-        container.style.width = '250px'
-    }
-
-    const existingMemexButtons = document.getElementsByClassName(
-        'memex-youtube-buttons',
-    )
-    if (existingMemexButtons.length > 0) {
-        existingMemexButtons[0].remove()
-    }
-
-    const panel = document.getElementsByClassName('ytp-time-display')[0]
-    // Memex Button Container
-    const memexButtons = document.createElement('div')
-    memexButtons.style.display = 'flex'
-    memexButtons.style.alignItems = 'center'
-    memexButtons.style.margin = '10px 0px'
-    memexButtons.style.borderRadius = '6px'
-    memexButtons.style.border = '1px solid #3E3F47'
-    memexButtons.style.overflow = 'hidden'
-    memexButtons.style.overflowX = 'scroll'
-    memexButtons.style.backgroundColor = '#12131B'
-    memexButtons.setAttribute('class', 'memex-youtube-buttons no-scrollbar')
-    // Create a <style> element
-    const style = document.createElement('style')
-
-    // Add your CSS as a string
-    style.textContent = `
-        .no-scrollbar::-webkit-scrollbar {
-            display: none;
-        }
-        .no-scrollbar {
-            scrollbar-width: none;
-        }
-        `
-
-    // Assuming `memexButtons` is your DOM element
-
-    document.head.appendChild(style)
-
-    // Add screenshot Button
-    const screenshotButton = document.createElement('div')
-    screenshotButton.setAttribute('class', 'ytp-menuitem')
-    screenshotButton.onclick = async () => {
-        await annotationsFunctions.createTimestampWithScreenshot()
-    }
-    screenshotButton.style.display = 'flex'
-    screenshotButton.style.alignItems = 'center'
-    screenshotButton.style.cursor = 'pointer'
-    screenshotButton.style.borderLeft = '1px solid #24252C'
-
-    screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner"  style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Screenshot</div>`
-
-    // Add Note Button
-    const annotateButton = document.createElement('div')
-    annotateButton.setAttribute('class', 'ytp-menuitem')
-    annotateButton.onclick = async () => {
-        const secondsInPastFieldNote = document.getElementById(
-            'secondsInPastFieldNote',
-        ) as HTMLInputElement
-        const secondsInPastContainerNote = document.getElementById(
-            'secondsInPastContainerNote',
-        ) as HTMLInputElement
-
-        const includeLastFewSecs = secondsInPastFieldNote.value
-            ? parseInt(secondsInPastFieldNote.value)
-            : 0
-
-        await globalThis['browser'].storage.local.set({
-            ['noteSecondsStorage']: includeLastFewSecs,
-        })
-
-        annotationsFunctions.createAnnotation()(
-            false,
-            false,
-            false,
-            getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
-            includeLastFewSecs,
-        )
-    }
-    annotateButton.style.display = 'flex'
-    annotateButton.style.alignItems = 'center'
-    annotateButton.style.cursor = 'pointer'
-    annotateButton.style.borderLeft = '1px solid #24252C'
-
-    annotateButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Timestamped Note</div>`
-
-    // Summarize Button
-    const summarizeButton = document.createElement('div')
-    summarizeButton.setAttribute('class', 'ytp-menuitem')
-    summarizeButton.onclick = () => annotationsFunctions.askAI()(false, false)
-    summarizeButton.style.display = 'flex'
-    summarizeButton.style.alignItems = 'center'
-    summarizeButton.style.cursor = 'pointer'
-    summarizeButton.style.borderLeft = '1px solid #24252C'
-    summarizeButton.innerHTML = `<div class="ytp-menuitem-label" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Summarize Video</div>`
-
-    // Textfield for Smart Note
-    const textField = document.createElement('input')
-    textField.id = 'secondsInPastSetting'
-    const smartNoteSecondsStorage = await globalThis[
-        'browser'
-    ].storage.local.get('smartNoteSecondsStorage')
-
-    const smartNoteSeconds = smartNoteSecondsStorage.smartNoteSecondsStorage
-
-    if (smartNoteSeconds) {
-        textField.value = smartNoteSeconds
-    }
-    textField.setAttribute('type', 'text')
-    textField.setAttribute('placeholder', '60s')
-    textField.style.height = '100%'
-    textField.style.width = '84px'
-    textField.style.borderRadius = '6px'
-    textField.style.padding = '5px 10px'
-    textField.style.overflow = 'hidden'
-    textField.style.background = 'transparent'
-    textField.style.outline = 'none'
-    textField.style.color = '#f4f4f4'
-    textField.style.textAlign = 'center'
-    textField.style.position = 'absolute'
-
-    // Textfield for Regular Note
-    const textFieldNote = document.createElement('input')
-    textFieldNote.id = 'secondsInPastFieldNote'
-
-    const noteSecondsStorage = await globalThis['browser'].storage.local.get(
-        'noteSecondsStorage',
-    )
-
-    const noteSeconds = noteSecondsStorage.noteSecondsStorage
-
-    if (noteSeconds) {
-        textFieldNote.value = noteSeconds
-    }
-
-    textFieldNote.setAttribute('type', 'text')
-    textFieldNote.setAttribute('placeholder', '0s')
-    textFieldNote.style.height = '100%'
-    textFieldNote.style.width = '84px'
-    textFieldNote.style.borderRadius = '6px'
-    textFieldNote.style.padding = '5px 10px'
-    textFieldNote.style.overflow = 'hidden'
-    textFieldNote.style.background = 'transparent'
-    textFieldNote.style.outline = 'none'
-    textFieldNote.style.color = '#f4f4f4'
-    textFieldNote.style.textAlign = 'center'
-    textFieldNote.style.position = 'absolute'
-
-    // Stop click event propagation on the textfield to its parent
-    textFieldNote.addEventListener('click', (event) => {
-        event.stopPropagation()
-    })
-
-    // Add keyup event to the textfield for the "Enter" key
-    textFieldNote.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter' || event.keyCode === 13) {
-            annotateButton.click()
-        }
-    })
-
-    textField.addEventListener('keyup', (event) => {
-        if (event.key === 'Enter' || event.keyCode === 13) {
-            AItimeStampButton.click()
-        }
-    })
-
-    // Set maxLength to 3 to limit input to 999
-    textField.setAttribute('maxlength', '3')
-    textFieldNote.setAttribute('maxlength', '3')
-
-    // Optional: use pattern attribute for native validation
-    textField.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
-    textFieldNote.setAttribute('pattern', '\\d{1,3}') // 1 to 3 digit numbers
-
-    textField.addEventListener('input', (event) => {
-        let value = (event.target as HTMLInputElement).value
-
-        // Replace non-digit characters
-        value = value.replace(/[^0-9]/g, '')
-
-        // If number is greater than 999, set it to 999
-        if (parseInt(value) > 999) {
-            value = '999'
-        }
-
-        ;(event.target as HTMLInputElement).value = value
-    })
-
-    textFieldNote.addEventListener('input', (event) => {
-        let value = (event.target as HTMLInputElement).value
-
-        // Replace non-digit characters
-        value = value.replace(/[^0-9]/g, '')
-
-        // If number is greater than 999, set it to 999
-        if (parseInt(value) > 999) {
-            value = '999'
-        }
-
-        ;(event.target as HTMLInputElement).value = value
-    })
-
-    // Rewind Icon
-    const rewindIcon = runtime.getURL('/img/historyYoutubeInjection.svg')
-    const rewindIconEl = document.createElement('img')
-    rewindIconEl.src = rewindIcon
-    rewindIconEl.style.height = '18px'
-    rewindIconEl.style.margin = '0 10px 0 10px'
-    // Rewind Icon
-    const rewindIcon2 = runtime.getURL('/img/historyYoutubeInjection.svg')
-    const rewindIconEl2 = document.createElement('img')
-    rewindIconEl2.src = rewindIcon2
-    rewindIconEl2.style.height = '18px'
-    rewindIconEl2.style.margin = '0 10px 0 10px'
-
-    // TextField ADd NOTE Container
-    const textFieldContainerNote = document.createElement('div')
-    textFieldContainerNote.id = 'secondsInPastContainerNote'
-    textFieldContainerNote.appendChild(rewindIconEl2)
-    textFieldContainerNote.appendChild(textFieldNote)
-    textFieldContainerNote.style.display = 'flex'
-    textFieldContainerNote.style.alignItems = 'center'
-    textFieldContainerNote.style.margin = '0 10px'
-    textFieldContainerNote.style.borderRadius = '6px'
-    textFieldContainerNote.style.outline = '1px solid #3E3F47'
-    textFieldContainerNote.style.overflow = 'hidden'
-    textFieldContainerNote.style.background = '#1E1F26'
-    textFieldContainerNote.style.width = '84px'
-    textFieldContainerNote.style.height = '26px'
-    textFieldContainerNote.style.position = 'relative'
-
-    textFieldContainerNote.addEventListener('click', (event) => {
-        event.stopPropagation()
-    })
-
-    // TextField Smart Note Container
-    const textFieldContainer = document.createElement('div')
-    textFieldContainer.id = 'secondsInPastSettingContainer'
-    textFieldContainer.appendChild(rewindIconEl)
-    textFieldContainer.appendChild(textField)
-    textFieldContainer.style.display = 'flex'
-    textFieldContainer.style.alignItems = 'center'
-    textFieldContainer.style.margin = '0 10px'
-    textFieldContainer.style.borderRadius = '6px'
-    textFieldContainer.style.outline = '1px solid #3E3F47'
-    textFieldContainer.style.overflow = 'hidden'
-    textFieldContainer.style.background = '#1E1F26'
-    textFieldContainer.style.width = '84px'
-    textFieldContainer.style.height = '26px'
-    textFieldContainer.style.position = 'relative'
-
-    textFieldContainer.addEventListener('click', (event) => {
-        event.stopPropagation()
-    })
-
-    // AI timestamp Button
-    const AItimeStampButton = document.createElement('div')
-    AItimeStampButton.id = 'AItimeStampButton'
-    AItimeStampButton.setAttribute('class', 'ytp-menuitem')
-
-    AItimeStampButton.onclick = async () => {
-        const secondsInPastField = document.getElementById(
-            'secondsInPastSetting',
-        ) as HTMLInputElement
-        const secondsInPastSettingContainer = document.getElementById(
-            'secondsInPastSettingContainer',
-        ) as HTMLInputElement
-
-        const includeLastFewSecs = secondsInPastField.value
-            ? parseInt(secondsInPastField.value)
-            : 60
-        await globalThis['browser'].storage.local.set({
-            ['smartNoteSecondsStorage']: includeLastFewSecs,
-        })
-
-        annotationsFunctions.createTimestampWithAISummary(includeLastFewSecs)(
-            false,
-            false,
-            false,
-            getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
-        )
-    }
-    AItimeStampButton.style.borderLeft = '1px solid #24252C'
-
-    AItimeStampButton.style.display = 'flex'
-    AItimeStampButton.style.alignItems = 'center'
-    AItimeStampButton.style.cursor = 'pointer'
-
-    AItimeStampButton.innerHTML = `<div class="ytp-menuitem-label"  id="AItimeStampButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Smart Note</div>`
-    AItimeStampButton.appendChild(textFieldContainer)
-    annotateButton.appendChild(textFieldContainerNote)
-
-    // MemexIconDisplay
-    const memexIcon = runtime.getURL('/img/memex-icon.svg')
-    const memexIconEl = document.createElement('img')
-    memexIconEl.src = memexIcon
-    memexButtons.appendChild(memexIconEl)
-    memexIconEl.style.margin = '0 10px 0 15px'
-    memexIconEl.style.height = '20px'
-
-    // TimestampIcon
-    const timestampIcon = runtime.getURL('/img/clockForYoutubeInjection.svg')
-    const timeStampEl = document.createElement('img')
-    timeStampEl.src = timestampIcon
-    timeStampEl.style.height = '20px'
-    timeStampEl.style.margin = '0 10px 0 10px'
-    annotateButton.insertBefore(timeStampEl, annotateButton.firstChild)
-    // TimestampIcon
-    const cameraIcon = runtime.getURL('/img/cameraIcon.svg')
-    const cameraIconEl = document.createElement('img')
-    cameraIconEl.src = cameraIcon
-    cameraIconEl.style.height = '20px'
-    cameraIconEl.style.margin = '0 10px 0 10px'
-    screenshotButton.insertBefore(cameraIconEl, screenshotButton.firstChild)
-
-    // AI timestamp icon
-    const AItimestampIcon = runtime.getURL('/img/starsYoutube.svg')
-    const AItimestampIconEl = document.createElement('img')
-    AItimestampIconEl.src = AItimestampIcon
-    AItimestampIconEl.style.height = '20px'
-    AItimestampIconEl.style.margin = '0 10px 0 10px'
-    AItimeStampButton.insertBefore(
-        AItimestampIconEl,
-        AItimeStampButton.firstChild,
-    )
-
-    // SummarizeIcon
-    const summarizeIcon = runtime.getURL(
-        '/img/summarizeIconForYoutubeInjection.svg',
-    )
-    const summarizeIconEl = document.createElement('img')
-    summarizeIconEl.src = summarizeIcon
-    summarizeIconEl.style.height = '20px'
-    summarizeIconEl.style.margin = '0 5px 0 10px'
-    summarizeButton.insertBefore(summarizeIconEl, summarizeButton.firstChild)
-
-    // Appending the right buttons
-    memexButtons.appendChild(annotateButton)
-    memexButtons.appendChild(AItimeStampButton)
-    memexButtons.appendChild(summarizeButton)
-    memexButtons.appendChild(screenshotButton)
-    memexButtons.style.color = '#f4f4f4'
-    memexButtons.style.width = 'fit-content'
-    const aboveFold = document.getElementById('below')
-    const existingButtons = document.getElementsByClassName(
-        'memex-youtube-buttons',
-    )[0]
-
-    if (existingButtons) {
-        existingButtons.remove()
-    }
-
-    aboveFold.insertAdjacentElement('afterbegin', memexButtons)
-}
-
 export function setupWebUIActions(args: {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
@@ -2380,5 +1480,85 @@ export function setupWebUIActions(args: {
                     detail.isCollaboratorLink || detail.isOwnLink,
             })
         })
+    }
+}
+
+export async function injectCustomUIperPage(
+    annotationsFunctions,
+    pkmSyncBG,
+    collectionsBG,
+    bgScriptBG,
+    pageInfo,
+    inPageUI,
+) {
+    if (window.location.hostname === 'www.youtube.com') {
+        const existingButtons = document.getElementsByClassName(
+            'memex-youtube-buttons',
+        )[0]
+
+        if (existingButtons) {
+            existingButtons.remove()
+        }
+        loadYoutubeButtons(annotationsFunctions)
+    }
+
+    const checkIfSubstackHeader = () => {
+        const headerLinks = document.head.getElementsByTagName('link')
+        for (let link of headerLinks) {
+            if (link.href.startsWith('https://substackcdn.com')) {
+                return true
+            }
+        }
+    }
+    if (
+        window.location.hostname.includes('.substack.com') ||
+        checkIfSubstackHeader()
+    ) {
+        const openSidebarInRabbitHole = async () => {
+            console.log('exec', inPageUI)
+            inPageUI.showSidebar({
+                action: 'rabbit_hole_open',
+            })
+        }
+
+        injectSubstackButtons(pkmSyncBG, browser, openSidebarInRabbitHole)
+    }
+
+    if (window.location.href.includes('web.telegram.org/')) {
+        const existingContainer = document.getElementById(`spacesBarContainer`)
+
+        if (existingContainer) {
+            existingContainer.remove()
+        }
+
+        await injectTelegramCustomUI(
+            collectionsBG,
+            bgScriptBG,
+            window.location.href,
+        )
+    }
+
+    if (
+        (window.location.href.includes('twitter.com/') ||
+            window.location.href.includes('x.com/')) &&
+        !window.location.href.includes('/status/')
+    ) {
+        await pageInfo.setTwitterFullUrl(null)
+
+        if (window.location.href.includes('/messages')) {
+            const url = await pageInfo.getFullPageUrl()
+            const existingContainer = document.getElementById(
+                `spacesBarContainer_${url}`,
+            )
+            if (!existingContainer) {
+                await trackTwitterMessageList(collectionsBG, bgScriptBG)
+            }
+        } else {
+            await injectTwitterProfileUI(
+                collectionsBG,
+                bgScriptBG,
+                await pageInfo.getFullPageUrl(),
+            )
+        }
     }
 }

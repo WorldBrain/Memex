@@ -144,9 +144,9 @@ describe('Annotations storage', () => {
                 const stripTerms = (comment) =>
                     omitBy(comment, (value, key) => endsWith(key, '_terms'))
 
-                const oldComment = await annotationStorage.getAnnotationByPk(
-                    DATA.comment.url,
-                )
+                const oldComment = await annotationStorage.getAnnotationByPk({
+                    url: DATA.comment.url,
+                })
                 expect(stripTerms(oldComment)).toEqual({
                     ...DATA.comment,
                     lastEdited: expect.any(Date),
@@ -157,9 +157,9 @@ describe('Annotations storage', () => {
                     'Edited comment',
                     'one',
                 )
-                const newComment = await annotationStorage.getAnnotationByPk(
-                    DATA.comment.url,
-                )
+                const newComment = await annotationStorage.getAnnotationByPk({
+                    url: DATA.comment.url,
+                })
                 expect(stripTerms(newComment)).toEqual({
                     ...DATA.comment,
                     lastEdited: expect.any(Date),
@@ -173,17 +173,17 @@ describe('Annotations storage', () => {
             test('add comment to highlight', async () => {
                 const { annotationStorage } = await setupTest()
 
-                const oldHighlight = await annotationStorage.getAnnotationByPk(
-                    DATA.highlight.url,
-                )
+                const oldHighlight = await annotationStorage.getAnnotationByPk({
+                    url: DATA.highlight.url,
+                })
                 await annotationStorage.editAnnotation(
                     DATA.highlight.url,
                     'Adding a comment to the highlight.',
                     'two',
                 )
-                const newHighlight = await annotationStorage.getAnnotationByPk(
-                    DATA.highlight.url,
-                )
+                const newHighlight = await annotationStorage.getAnnotationByPk({
+                    url: DATA.highlight.url,
+                })
 
                 checkIsDefined(oldHighlight)
                 checkIsDefined(newHighlight)
@@ -281,12 +281,12 @@ describe('Annotations storage', () => {
                 const { annotationStorage } = await setupTest()
 
                 const url = DATA.directLink.url
-                const directLink = await annotationStorage.getAnnotationByPk(
-                    url,
-                )
+                const directLink = await annotationStorage.getAnnotationByPk({
+                    url: url,
+                })
                 await annotationStorage.deleteAnnotation(url)
                 const afterDeletion = await annotationStorage.getAnnotationByPk(
-                    url,
+                    { url: url },
                 )
 
                 expect(directLink).toBeDefined()
