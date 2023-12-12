@@ -59,6 +59,7 @@ import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
 import type {
     PageAnnotationsCacheEvents,
     RGBAColor,
+    UnifiedList,
 } from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
@@ -3875,43 +3876,36 @@ export class DashboardLogic extends UILogic<State, Events> {
                         0,
                         event.listId.length - LIST_REORDER_EL_POST.length,
                     )
-                    await this.handleDropListOnReorderLine(
-                        cleanedListId,
+                    await this.handleDropOnReorderLine(
                         action,
+                        cleanedListId,
                         previousState,
                     )
                     return
                 }
-                await this.handleDropListOnListItem(
+
+                await this.performListTreeMove(
+                    action.listId,
                     event.listId,
-                    action,
                     previousState,
                 )
             },
         )
     }
 
-    private async handleDropListOnListItem(
-        dropTargetListId: string,
-        { listId }: DragToListAction<'list'>,
+    private async performListTreeMove(
+        listId: UnifiedList['unifiedId'],
+        newParentListId: UnifiedList['unifiedId'],
         previousState: State,
-    ): Promise<void> {
-        if (listId == null) {
-            return
-        }
-
+    ) {
         const listData = getListData(listId, previousState, {
             mustBeLocal: true,
             source: 'dropOnListItem',
         })
-        const dropTargetListData = getListData(
-            dropTargetListId,
-            previousState,
-            {
-                mustBeLocal: true,
-                source: 'dropOnListItem',
-            },
-        )
+        const dropTargetListData = getListData(newParentListId, previousState, {
+            mustBeLocal: true,
+            source: 'dropOnListItem',
+        })
         if (listData.localId == null || dropTargetListData.localId == null) {
             return
         }
@@ -3931,6 +3925,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             shouldEndEarly: () => isListAncestorOfTargetList,
         })
         if (isListAncestorOfTargetList) {
+            this.emitMutation({
+                listsSidebar: { dragOverListId: { $set: undefined } },
+            })
             throw new Error(
                 'Cannot make list a child of a descendent - this would result in a cycle',
             )
@@ -3941,7 +3938,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 dragOverListId: { $set: undefined },
                 lists: {
                     byId: {
-                        [dropTargetListId]: {
+                        [newParentListId]: {
                             wasListDropped: { $set: true },
                         },
                     },
@@ -3951,7 +3948,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.options.annotationsCache.updateList({
             unifiedId: listId,
-            parentUnifiedId: dropTargetListId,
+            parentUnifiedId: newParentListId,
         })
 
         setTimeout(() => {
@@ -3959,7 +3956,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 listsSidebar: {
                     lists: {
                         byId: {
-                            [dropTargetListId]: {
+                            [newParentListId]: {
                                 wasListDropped: { $set: false },
                             },
                         },
@@ -3974,9 +3971,52 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    private async handleDropListOnReorderLine(
-        dropTargetListId: string,
+    private async performListTreeReorder(
+        listId: UnifiedList['unifiedId'],
+        nextListIdInOrder: UnifiedList['unifiedId'],
+        previousState: State,
+    ): Promise<void> {
+        const { annotationsCache } = this.options
+        const targetList =
+            previousState.listsSidebar.lists.byId[nextListIdInOrder]
+        const draggedList = previousState.listsSidebar.lists.byId[listId]
+
+        const targetSiblingLists = annotationsCache.getListsByParentId(
+            targetList.parentUnifiedId,
+        )
+        console.log('reorder only - siblings:', targetSiblingLists)
+        const index = targetSiblingLists.findIndex(
+            (list) => list.unifiedId === nextListIdInOrder,
+        )
+        const order = insertOrderedItemBeforeIndex(
+            targetSiblingLists.map((list) => ({
+                id: list.unifiedId,
+                key: list.order,
+            })),
+            draggedList.unifiedId,
+            index,
+        ).create.key
+
+        if (order !== draggedList.order) {
+            annotationsCache.updateList({
+                unifiedId: draggedList.unifiedId,
+                order,
+            })
+            await this.options.listsBG.updateListTreeOrder({
+                localListId: draggedList.localId!,
+                siblingListIds: targetSiblingLists.map((list) => list.localId!),
+                intendedIndexAmongSiblings: index,
+            })
+        }
+
+        this.emitMutation({
+            listsSidebar: { dragOverListId: { $set: undefined } },
+        })
+    }
+
+    private async handleDropOnReorderLine(
         { listId }: DragToListAction<'list'>,
+        dropTargetListId: string,
         previousState: State,
     ): Promise<void> {
         if (listId == null || dropTargetListId === listId) {
@@ -3986,153 +4026,24 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        const { annotationsCache } = this.options
         const targetList =
             previousState.listsSidebar.lists.byId[dropTargetListId]
         const draggedList = previousState.listsSidebar.lists.byId[listId]
-        const targetSiblingLists = annotationsCache.getListsByParentId(
-            targetList.parentUnifiedId,
-        )
 
-        // Siblings only need to be re-ordered
-        if (targetList.parentUnifiedId === draggedList.parentUnifiedId) {
-            console.log('reorder only - siblings:', targetSiblingLists)
-            const index = targetSiblingLists.findIndex(
-                (list) => list.unifiedId === dropTargetListId,
+        // If we're reodering a list to live under a different parent, we need to do a tree-move first
+        if (targetList.parentUnifiedId !== draggedList.parentUnifiedId) {
+            await this.performListTreeMove(
+                listId,
+                targetList.parentUnifiedId,
+                previousState,
             )
-            const order = insertOrderedItemBeforeIndex(
-                targetSiblingLists.map((list) => ({
-                    id: list.unifiedId,
-                    key: list.order,
-                })),
-                draggedList.unifiedId,
-                index,
-            ).create.key
-            if (order !== draggedList.order) {
-                annotationsCache.updateList({
-                    unifiedId: draggedList.unifiedId,
-                    order,
-                })
-                await this.options.listsBG.updateListTreeOrder({
-                    localListId: draggedList.localId!,
-                    siblingListIds: targetSiblingLists.map(
-                        (list) => list.localId!,
-                    ),
-                    intendedIndexAmongSiblings: index,
-                })
-            }
-            this.emitMutation({
-                listsSidebar: { dragOverListId: { $set: undefined } },
-            })
-            return
         }
 
-        console.log('reorder + tree move')
-        this.emitMutation({
-            listsSidebar: { dragOverListId: { $set: undefined } },
-        })
-        return
-
-        const listData = getListData(listId, previousState, {
-            mustBeLocal: true,
-            source: 'dropOnListItem',
-        })
-        const dropTargetListData = getListData(
+        await this.performListTreeReorder(
+            listId,
             dropTargetListId,
             previousState,
-            {
-                mustBeLocal: true,
-                source: 'dropOnListItem',
-            },
         )
-        if (listData.localId == null || dropTargetListData.localId == null) {
-            return
-        }
-
-        // If they're siblings, we simply need to do a reordering
-        if (listData.parentUnifiedId === dropTargetListData.parentUnifiedId) {
-            const siblings = annotationsCache.getListsByParentId(
-                listData.parentUnifiedId,
-            )
-            const newIndex = siblings.findIndex(
-                (list) => list.unifiedId === dropTargetListData.unifiedId,
-            )
-            const reorderResult = insertOrderedItemBeforeIndex(
-                siblings.map((list) => ({
-                    id: list.unifiedId,
-                    key: list.order,
-                })),
-                '',
-                newIndex,
-            )
-            this.options.annotationsCache.updateList({
-                unifiedId: listId,
-                order: reorderResult.create.key,
-            })
-            await this.options.listsBG.updateListTreeOrder({
-                localListId: listData.localId!,
-                siblingListIds: siblings.map((list) => list.localId),
-                intendedIndexAmongSiblings: newIndex,
-            })
-            return
-        }
-
-        // Block any attempts at adding ancestor as child
-        let isListAncestorOfTargetList = false
-        forEachTreeClimb({
-            startingNode: dropTargetListData,
-            getParent: (node) =>
-                this.options.annotationsCache.lists.byId[
-                    node.parentUnifiedId
-                ] ?? null,
-            cb: (node, i) => {
-                isListAncestorOfTargetList =
-                    isListAncestorOfTargetList || node.unifiedId === listId
-            },
-            shouldEndEarly: () => isListAncestorOfTargetList,
-        })
-        if (isListAncestorOfTargetList) {
-            throw new Error(
-                'Cannot make list a child of a descendent - this would result in a cycle',
-            )
-        }
-
-        this.emitMutation({
-            listsSidebar: {
-                dragOverListId: { $set: undefined },
-                lists: {
-                    byId: {
-                        [dropTargetListId]: {
-                            wasListDropped: { $set: true },
-                        },
-                    },
-                },
-            },
-        })
-
-        this.options.annotationsCache.updateList({
-            unifiedId: listId,
-            parentUnifiedId: dropTargetListId,
-        })
-
-        setTimeout(() => {
-            this.emitMutation({
-                listsSidebar: {
-                    lists: {
-                        byId: {
-                            [dropTargetListId]: {
-                                wasListDropped: { $set: false },
-                            },
-                        },
-                    },
-                },
-            })
-        }, 2000)
-
-        await this.options.listsBG.updateListTreeParent({
-            localListId: listData.localId!,
-            parentListId: dropTargetListData.localId!,
-        })
     }
 
     private async handleDropPageOnListItem(
