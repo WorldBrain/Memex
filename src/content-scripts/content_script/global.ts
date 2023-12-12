@@ -170,7 +170,7 @@ export async function main(
                     ])
                     return
                 } else {
-                    await highlightRenderer.removeAnnotationHighlight({
+                    highlightRenderer.removeAnnotationHighlight({
                         id: lastAction.id,
                     })
                     lastActions.shift()
@@ -857,7 +857,7 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
-                pkmSyncBG,
+                pkmSyncBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -1154,7 +1154,7 @@ export async function main(
         const isStaging =
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
-        const email = _currentUser.email
+        const email = _currentUser?.email
 
         const baseUrl = isStaging
             ? 'https://cloudflare-memex-staging.memex.workers.dev'
@@ -1521,7 +1521,12 @@ export async function injectCustomUIperPage(
             })
         }
 
-        injectSubstackButtons(pkmSyncBG, browser, openSidebarInRabbitHole)
+        injectSubstackButtons(
+            pkmSyncBG,
+            browser.storage,
+            openSidebarInRabbitHole,
+            browser.runtime,
+        )
     }
 
     if (window.location.href.includes('web.telegram.org/')) {

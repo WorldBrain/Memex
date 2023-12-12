@@ -3,7 +3,7 @@ export interface PkmSyncInterface {
         feedSources: {
             feedUrl: string
             feedTitle: string
-            type?: 'substack'
+            type?: 'substack' | string
             feedFavIcon?: string
         }[],
     ): Promise<void>
@@ -12,7 +12,7 @@ export interface PkmSyncInterface {
     ): Promise<{
         feedUrl: string
         feedTitle: string
-        feedFavIcon: string
+        feedFavIcon?: string
     }>
     checkConnectionStatus(): Promise<boolean | 'not-available'>
     loadFeedSources(): Promise<

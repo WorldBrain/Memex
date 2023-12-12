@@ -1420,6 +1420,11 @@ export class AnnotationsSidebarContainer<
                                     { reasonText },
                                 )
                             }
+                            processFileImportFeeds={(fileString) => {
+                                this.processEvent('processFileImportFeeds', {
+                                    fileString: fileString,
+                                })
+                            }}
                         />
                     </Rnd>
                 </ContainerStyled>

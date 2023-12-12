@@ -254,6 +254,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setSummaryMode: (tab) => void
     saveFeedSources: (sources) => void
     loadFeedSources: () => void
+    processFileImportFeeds: (fileContent) => void
 }
 
 interface AnnotationsSidebarState {
@@ -280,6 +281,7 @@ interface AnnotationsSidebarState {
     onboardingReasonContainer?: string
     showFeedSourcesMenu?: boolean
     feedSourcesTextAreaContent?: string
+    fileDragOverFeedField?: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -331,6 +333,7 @@ export class AnnotationsSidebar extends React.Component<
         onboardingReasonContainer: null,
         showFeedSourcesMenu: false,
         feedSourcesTextAreaContent: '',
+        fileDragOverFeedField: false,
     }
 
     async addYoutubeTimestampToEditor(commentText) {
@@ -1609,36 +1612,31 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <SummarySection>
-                {(this.props.activeAITab === 'ExistingKnowledge' ||
-                    this.props.activeAITab === 'InFollowedFeeds') &&
-                    this.props.pageSummary.length > 0 && (
-                        <SuggestionsListSwitcher>
-                            <SuggestionsSwitcherButton
-                                onClick={this.props.setSummaryMode('Answer')}
-                                active={
-                                    this.props.summaryModeActiveTab === 'Answer'
-                                }
+                {this.props.activeAITab !== 'ThisPage' && (
+                    <SuggestionsListSwitcher>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setSummaryMode('Answer')}
+                            active={
+                                this.props.summaryModeActiveTab === 'Answer'
+                            }
+                        >
+                            Answer
+                        </SuggestionsSwitcherButton>
+                        <SuggestionsSwitcherButton
+                            onClick={this.props.setSummaryMode('References')}
+                            active={
+                                this.props.summaryModeActiveTab === 'References'
+                            }
+                        >
+                            References
+                            <SuggestionsCounter
+                                hasResults={referencesCounter.length}
                             >
-                                Answer
-                            </SuggestionsSwitcherButton>
-                            <SuggestionsSwitcherButton
-                                onClick={this.props.setSummaryMode(
-                                    'References',
-                                )}
-                                active={
-                                    this.props.summaryModeActiveTab ===
-                                    'References'
-                                }
-                            >
-                                References
-                                <SuggestionsCounter
-                                    hasResults={referencesCounter.length}
-                                >
-                                    {referencesCounter.length}
-                                </SuggestionsCounter>
-                            </SuggestionsSwitcherButton>
-                        </SuggestionsListSwitcher>
-                    )}
+                                {referencesCounter.length}
+                            </SuggestionsCounter>
+                        </SuggestionsSwitcherButton>
+                    </SuggestionsListSwitcher>
+                )}
                 {this.props.summaryModeActiveTab === 'References' &&
                     this.renderRabbitHoleList()}
                 {this.props.summaryModeActiveTab === 'Answer' && (
@@ -1939,7 +1937,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.AIsuggestions?.length > 0
                             }
                         >
-                            <TextField
+                            <TextArea
                                 placeholder={
                                     this.props.prompt ??
                                     this.props.activeTab === 'rabbitHole'
@@ -1947,10 +1945,7 @@ export class AnnotationsSidebar extends React.Component<
                                         : 'Type a prompt like "Summarize in 2 paragraphs"'
                                 }
                                 value={this.props.prompt}
-                                icon="feed"
-                                element={null}
-                                iconSize="18px"
-                                height="40px"
+                                icon="stars"
                                 onChange={async (event) => {
                                     await this.props.updatePromptState(
                                         (event.target as HTMLInputElement)
@@ -1958,7 +1953,10 @@ export class AnnotationsSidebar extends React.Component<
                                     )
                                 }}
                                 onKeyDown={async (event) => {
-                                    if (event.key === 'Enter') {
+                                    if (
+                                        event.key === 'Enter' &&
+                                        !event.shiftKey
+                                    ) {
                                         await this.props.queryAIwithPrompt(
                                             this.props.prompt,
                                         )
@@ -2283,16 +2281,65 @@ export class AnnotationsSidebar extends React.Component<
                     }}
                     width="380px"
                 >
-                    <TextAreaContainer>
-                        <TextArea
-                            placeholder="Add new RSS feed links or domains, one per line"
-                            onChange={(event) => {
-                                this.setState({
-                                    feedSourcesTextAreaContent: (event.target as HTMLInputElement)
-                                        .value,
-                                })
-                            }}
-                        />
+                    <TextAreaContainer
+                        onDragOver={(event) => {
+                            this.setState({ fileDragOverFeedField: true })
+                        }}
+                    >
+                        {this.state.fileDragOverFeedField ? (
+                            <DownloadDropArea
+                                onDragOver={(event) => {
+                                    event.preventDefault()
+                                }}
+                                onDrop={(event) => {
+                                    event.preventDefault()
+                                    console.log('drop')
+                                    console.log('event', event)
+                                    const file = event.dataTransfer.files[0]
+                                    const reader = new FileReader()
+
+                                    console.log('file', file)
+                                    reader.onload = (event) => {
+                                        const fileContent = event.target
+                                            .result as string
+                                        console.log('fileContent', fileContent)
+                                        this.props.processFileImportFeeds(
+                                            fileContent,
+                                        )
+                                    }
+                                    reader.readAsText(file)
+                                    this.setState({
+                                        fileDragOverFeedField: false,
+                                    })
+                                }}
+                                onDragLeave={(event) => {
+                                    this.setState({
+                                        fileDragOverFeedField: false,
+                                    })
+                                }}
+                            >
+                                <Icon
+                                    filePath={icons.filePDF}
+                                    heightAndWidth="30px"
+                                    color="greyScale5"
+                                    hoverOff
+                                />
+                                Drop it like it's hot!
+                            </DownloadDropArea>
+                        ) : (
+                            <TextArea
+                                placeholder={
+                                    'Add new RSS feed links or domains, one per line.\nOR drag a OPML file here to import feeds.'
+                                }
+                                onChange={(event) => {
+                                    this.setState({
+                                        feedSourcesTextAreaContent: (event.target as HTMLInputElement)
+                                            .value,
+                                    })
+                                }}
+                                height="100px"
+                            />
+                        )}
                         <SourcesButtonRow>
                             <PrimaryAction
                                 type="forth"
@@ -2301,10 +2348,6 @@ export class AnnotationsSidebar extends React.Component<
                                 size="small"
                                 onClick={() => {
                                     this.props.saveFeedSources(
-                                        this.state.feedSourcesTextAreaContent,
-                                    )
-                                    console.log(
-                                        'state',
                                         this.state.feedSourcesTextAreaContent,
                                     )
                                     this.setState({
@@ -2324,7 +2367,12 @@ export class AnnotationsSidebar extends React.Component<
                                         : source.feedTitle}
                                 </ExistingSourcesListItemTitle>
                                 <ExistingSourcesListItemUrl>
-                                    {source.feedUrl?.replace('https://', '')}
+                                    {source.feedUrl?.length === 0
+                                        ? 'No URL Added'
+                                        : source.feedUrl?.replace(
+                                              'https://',
+                                              '',
+                                          )}
                                 </ExistingSourcesListItemUrl>
                                 {/* <ExistingSourcesListItemImage
                                     src={source.favicon}
@@ -2383,7 +2431,8 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <AnnotationsSectionStyled>
                 {((this.props.activeAITab !== 'ExistingKnowledge' &&
-                    this.props.activeAITab !== 'InFollowedFeeds') ||
+                    this.props.activeAITab !== 'InFollowedFeeds' &&
+                    this.props.activeTab !== 'summary') ||
                     this.props.activeTab === 'rabbitHole') && (
                     <SuggestionsListSwitcher>
                         <SuggestionsSwitcherButton
@@ -2417,6 +2466,29 @@ export class AnnotationsSidebar extends React.Component<
                             >
                                 {OtherSuggestionsResults.length}
                             </SuggestionsCounter>
+                            <AddSourceIconContainer>
+                                <TooltipBox
+                                    tooltipText="Add new recommendation sources"
+                                    placement="bottom-end"
+                                >
+                                    <Icon
+                                        filePath={icons.plus}
+                                        heightAndWidth="20px"
+                                        color="prime1"
+                                        containerRef={this.addSourcesButtonRef}
+                                        hoverOff
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            this.setState({
+                                                showFeedSourcesMenu: !this.state
+                                                    .showFeedSourcesMenu,
+                                            })
+                                            this.props.loadFeedSources()
+                                        }}
+                                    />
+                                </TooltipBox>
+                                {this.renderSourcesMenu()}
+                            </AddSourceIconContainer>
                         </SuggestionsSwitcherButton>
                     </SuggestionsListSwitcher>
                 )}
@@ -2426,17 +2498,22 @@ export class AnnotationsSidebar extends React.Component<
                     <EmptyMessageContainer>
                         <IconBox heightAndWidth="40px">
                             <Icon
-                                filePath={icons.stop}
+                                filePath={icons.globe}
                                 heightAndWidth="20px"
                                 color="prime1"
                                 hoverOff
                             />
                         </IconBox>
                         <InfoText>
-                            The deskop app is not connected.
+                            <InfoTextTitle>
+                                Memex can't connect to the desktop app
+                            </InfoTextTitle>
                             <br />
-                            Make sure it is running or reach out to support via
-                            the live chat.
+                            Make sure it is running and refresh the sync key if
+                            needed.
+                            <br /> For help reach out to support via the live
+                            chat that you find on the ? in the bottom right
+                            corner.
                         </InfoText>
                     </EmptyMessageContainer>
                 ) : (
@@ -2456,24 +2533,26 @@ export class AnnotationsSidebar extends React.Component<
                         {this.props.activeSuggestionsTab ===
                             'OtherSuggestions' && (
                             <SuggestionsList>
-                                <AddSourcesContainer>
-                                    <PrimaryAction
-                                        type="tertiary"
-                                        size="medium"
-                                        onClick={async () => {
-                                            this.props.loadFeedSources()
-                                            this.setState({
-                                                showFeedSourcesMenu: !this.state
-                                                    .showFeedSourcesMenu,
-                                            })
-                                        }}
-                                        icon={'plus'}
-                                        iconColor="prime1"
-                                        label="Sources"
-                                        innerRef={this.addSourcesButtonRef}
-                                    />
-                                    {this.renderSourcesMenu()}
-                                </AddSourcesContainer>
+                                {OtherSuggestionsResults.length === 0 && (
+                                    <AddSourcesContainer>
+                                        <PrimaryAction
+                                            type="tertiary"
+                                            size="medium"
+                                            onClick={async () => {
+                                                this.props.loadFeedSources()
+                                                this.setState({
+                                                    showFeedSourcesMenu: !this
+                                                        .state
+                                                        .showFeedSourcesMenu,
+                                                })
+                                            }}
+                                            icon={'plus'}
+                                            iconColor="prime1"
+                                            label="Sources"
+                                            innerRef={this.addSourcesButtonRef}
+                                        />
+                                    </AddSourcesContainer>
+                                )}
                                 {OtherSuggestionsResults.map((item) => {
                                     return this.renderSuggestionsListItem(item)
                                 })}
@@ -3889,6 +3968,34 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const InfoTextTitle = styled.div`
+    font-size: 16px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.greyScale7};
+`
+
+const DownloadDropArea = styled.div`
+    width: fill-available;
+    width: -moz-available;
+    height: fill-available;
+    height: -moz-available;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 10px;
+    padding: 30px;
+    transition: 0.5s ease-in-out opacity;
+    color: ${(props) => props.theme.colors.greyScale6};
+    outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+    background-color: ${(props) => props.theme.colors.greyScale2};
+    border-radius: 8px;
+
+    & * {
+        user-select: none;
+    }
+`
+
 const AddSourcesContainer = styled.div`
     position: absolute;
     right: 0px;
@@ -3908,6 +4015,10 @@ const TextAreaContainer = styled.div`
 const SourcesButtonRow = styled.div`
     padding: 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+
+    &:last-child {
+        border-bottom: none;
+    }
 `
 
 const ExistingSourcesList = styled.div`
@@ -4043,12 +4154,21 @@ const SuggestionsSwitcherButton = styled.div<{ active }>`
     justify-content: center;
     user-select: none;
     grid-gap: 5px;
+    position: relative;
 
     ${(props) =>
         props.active &&
         css`
             border-bottom: 2px solid ${props.theme.colors.prime2};
         `}
+`
+
+const AddSourceIconContainer = styled.div`
+    display: flex;
+    align-items: center;
+    position: absolute;
+    right: 5px;
+    cursor: pointer;
 `
 
 const SuggestionsCounter = styled.div<{ hasResults }>`
@@ -4460,7 +4580,7 @@ const BlurContainer = styled.div`
 const QueryContainer = styled.div<{
     AIDropDownShown: boolean
 }>`
-    height: 40px;
+    height: fit-content;
     padding: 15px 15px 10px 15px;
     display: flex;
     flex-direction: column;
