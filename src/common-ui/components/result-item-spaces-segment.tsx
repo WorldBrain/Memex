@@ -7,13 +7,13 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import { padding } from 'polished'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 export interface Props extends Pick<HTMLProps<HTMLDivElement>, 'onMouseEnter'> {
-    onEditBtnClick: React.MouseEventHandler
     lists: Array<{
         id: number
         name: string | JSX.Element
         isShared: boolean
-        type: 'page-link' | 'user-list' | 'special-list'
+        type: 'page-link' | 'user-list' | 'special-list' | 'rss-feed'
     }>
+    onEditBtnClick?: React.MouseEventHandler
     onListClick?: (localListId: number) => void
     renderSpacePicker?: () => JSX.Element
     filteredbyListID?: number
@@ -88,57 +88,56 @@ export default function ListsSegment({
         <Container padding={padding} {...props}>
             <ListsContainer newLineOrientation={newLineOrientation === true}>
                 <SpacesListContainer>
-                    {lists
-                        .filter(
-                            (l) =>
-                                !Object.values(SPECIAL_LIST_IDS).includes(
-                                    l.id,
-                                ) && l.id !== filteredbyListID,
-                        )
-                        .slice(0)
-                        .map((space) => {
-                            return (
-                                <ListSpaceContainer
-                                    key={space.id}
-                                    onClick={(e) => {
-                                        e.stopPropagation()
-                                        onListClick(space.id)
-                                    }}
-                                    isLoading={
-                                        space.name == null && space != null
-                                    }
-                                    title={space.name}
-                                >
-                                    {' '}
-                                    {space.type === 'page-link' && (
+                    {lists.slice(0).map((space) => {
+                        return (
+                            <ListSpaceContainer
+                                key={space.id}
+                                onClick={(e) => {
+                                    e.stopPropagation()
+                                    onListClick(space.id)
+                                }}
+                                isLoading={space.name == null && space != null}
+                                title={space.name}
+                                spaceId={space.id ?? null}
+                            >
+                                {' '}
+                                {space.type === 'page-link' && (
+                                    <Icon
+                                        heightAndWidth="16px"
+                                        hoverOff
+                                        icon="link"
+                                        color="greyScale5"
+                                    />
+                                )}
+                                {space.type === 'rss-feed' && (
+                                    <Icon
+                                        heightAndWidth="16px"
+                                        hoverOff
+                                        icon="feed"
+                                        color="greyScale5"
+                                    />
+                                )}
+                                {space.isShared &&
+                                    space.type !== 'page-link' && (
                                         <Icon
                                             heightAndWidth="16px"
                                             hoverOff
-                                            icon="link"
+                                            icon="peopleFine"
                                             color="greyScale5"
                                         />
                                     )}
-                                    {space.isShared &&
-                                        space.type !== 'page-link' && (
-                                            <Icon
-                                                heightAndWidth="16px"
-                                                hoverOff
-                                                icon="peopleFine"
-                                                color="greyScale5"
-                                            />
-                                        )}
-                                    <SpaceName>{space.name}</SpaceName>
-                                </ListSpaceContainer>
-                            )
-                        })}
-                    <AddSpacesButton
+                                <SpaceName>{space.name}</SpaceName>
+                            </ListSpaceContainer>
+                        )
+                    })}
+                    {/* <AddSpacesButton
                         hasNoLists={lists.length === 0}
                         onEditBtnClick={onEditBtnClick}
                         renderSpacePicker={renderSpacePicker}
                         tabIndex={tabIndex}
                         newLineOrientation={newLineOrientation}
                         spacePickerButtonRef={spacePickerButtonRef}
-                    />
+                    /> */}
                 </SpacesListContainer>
             </ListsContainer>
         </Container>
@@ -188,6 +187,7 @@ const loading = keyframes`
 const ListSpaceContainer = styled.div<{
     onClick: React.MouseEventHandler
     isLoading: boolean
+    spaceId: number
 }>`
     background-color: ${(props) => props.theme.colors.greyScale3};
     color: ${(props) => props.theme.colors.greyScale6};
@@ -199,7 +199,7 @@ const ListSpaceContainer = styled.div<{
     height: 20px;
     margin: 2px 4px 2px 0;
     display: flex;
-    cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
+    cursor: ${(props) => (props.spaceId ? 'pointer' : 'default')};
     align-items: center;
     white-space: nowrap;
     font-family: 'Satoshi', sans-serif;

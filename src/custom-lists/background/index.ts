@@ -28,6 +28,7 @@ import { extractMaterializedPathIds } from 'src/content-sharing/utils'
 import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
 import { insertOrderedItemBeforeIndex } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { defaultTreeNodeSorter } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 
 const limitSuggestionsStorageLength = 25
 
@@ -71,17 +72,22 @@ export default class CustomListBackground {
             updateListTreeParent: this.updateListTreeParent,
             updateListTreeOrder: this.updateListTreeOrder,
             insertPageToList: async (params) => {
-                const currentTab = await this.options.queryTabs?.({
-                    active: true,
-                    currentWindow: true,
-                })
-                params.tabId = currentTab?.[0]?.id
+                if (!params.indexUrl) {
+                    const currentTab = await this.options.queryTabs?.({
+                        active: true,
+                        currentWindow: true,
+                    })
+                    params.tabId = currentTab?.[0]?.id
+                }
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
+            findPageByUrl: this.findPageByUrl,
             removePageFromList: this.removePageFromList,
+            removeAllListPages: this.removeAllListPages,
             fetchAllLists: this.fetchAllLists,
             fetchListById: this.fetchListById,
+            findSimilarBackground: this.findSimilarBackground,
             fetchAnnotationRefsForRemoteListsOnPage: this
                 .fetchAnnotationRefsForRemoteListsOnPage,
             fetchSharedListDataWithPageAnnotations: this
@@ -240,6 +246,23 @@ export default class CustomListBackground {
 
     fetchListById = async ({ id }: { id: number }) => {
         return this.storage.fetchListWithPagesById(id)
+    }
+
+    findSimilarBackground = async (
+        currentPageContent?: string,
+        fullUrl?: string,
+    ) => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+        const results = await backend.findSimilar(currentPageContent, fullUrl)
+
+        return results
+    }
+    findPageByUrl = async (normalizedUrl: string) => {
+        const pageData = await this.storage.findPageByUrl(normalizedUrl)
+
+        return pageData
     }
 
     fetchListByName = async ({ name }: { name: string }) => {
@@ -552,6 +575,11 @@ export default class CustomListBackground {
         return this.storage.removePageFromList({
             listId: id,
             pageUrl: normalizeUrl(url),
+        })
+    }
+    removeAllListPages = async (listId: number) => {
+        return this.storage.removeAllListPages({
+            listId: listId,
         })
     }
 

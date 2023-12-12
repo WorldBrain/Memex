@@ -12,7 +12,6 @@ export const ONBOARDING_QUERY_PARAMS = {
 export const FLOWS = {
     annotation: 'annotation',
     powerSearch: 'powerSearch',
-    tagging: 'tagging',
     backup: 'backup',
 }
 
@@ -21,7 +20,6 @@ export const STORAGE_KEYS = {
     onboardingFlows: {
         [FLOWS.annotation]: 'step-one-annotations',
         [FLOWS.powerSearch]: 'step-two-power-search',
-        [FLOWS.tagging]: 'step-three-tagging',
         [FLOWS.backup]: 'step-four-backup',
     },
 }

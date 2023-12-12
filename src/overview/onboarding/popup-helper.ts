@@ -9,10 +9,6 @@ const openOptionsRPC = remoteFunction('openOptionsTab')
  * whether the in page notification for tagging is shown.
  */
 const _checkTaggingStageStatus = async () => {
-    const taggingStage = await fetchOnboardingStage(FLOWS.tagging)
-    if (taggingStage === STAGES.tagging.notifiedTagPage) {
-        return true
-    }
     return false
 }
 
@@ -28,7 +24,6 @@ export const checkForTaggingStage = async () => {
         return
     }
 
-    await setOnboardingStage(FLOWS.tagging, STAGES.done)
     setTimeout(async () => {
         openOptionsRPC('overview')
     }, 1000)

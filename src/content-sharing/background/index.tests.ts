@@ -252,6 +252,7 @@ export class SharingTestHelper {
             null,
             this.annotations[options.id].localId,
             options.comment,
+            'two',
         )
         this.annotations[options.id].comment = options.comment
     }

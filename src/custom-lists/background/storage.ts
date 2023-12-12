@@ -761,6 +761,11 @@ export default class CustomListStorage extends StorageModule {
             // updatedAt,
         })
     }
+    async findPageByUrl(normalizedUrl: string) {
+        return await this.operation('findPageByUrl', {
+            url: normalizedUrl,
+        })
+    }
 
     async createOrUpdateListDescription({
         listId,
@@ -967,6 +972,9 @@ export default class CustomListStorage extends StorageModule {
         }
 
         return this.operation('deleteListEntriesById', { listId, pageUrl })
+    }
+    async removeAllListPages({ listId }: { listId: number }) {
+        return this.operation('deleteListEntriesByListId', { listId })
     }
 
     async deleteListDescriptions({

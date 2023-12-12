@@ -6,6 +6,7 @@ import type { PageList } from 'src/custom-lists/background/types'
 import type { Annotation, SharedAnnotationWithRefs } from '../types'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedAnnotationForCache,
     UnifiedList,
@@ -64,6 +65,7 @@ export const reshapeAnnotationForCache = (
             shouldShare: annot.isShared,
             isBulkShareProtected: annot.isBulkShareProtected,
         }),
+        color: annot.color as RGBAColor,
         ...(opts.extraData ?? {}),
     }
 }
@@ -89,6 +91,7 @@ export const reshapeSharedAnnotationForCache = (
         lastEdited: annot.updatedWhen,
         createdWhen: annot.createdWhen,
         privacyLevel: AnnotationPrivacyLevels.SHARED,
+        color: annot.color as RGBAColor,
         ...(opts.extraData ?? {}),
     }
 }

@@ -143,6 +143,7 @@ export async function setupBackgroundIntegrationTest(
             get: () => null,
             onUpdated: { addListener: () => {} },
             onRemoved: { addListener: () => {} },
+            onUpdated: { addListener: () => {} },
         },
         contextMenus: {
             create: () => {},

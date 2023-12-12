@@ -11,4 +11,5 @@ export interface SyncSettingsStoreInterface {
     searchInjection: SettingStore<SyncSettingsByFeature['searchInjection']>
     activityIndicator: SettingStore<SyncSettingsByFeature['activityIndicator']>
     openAI: SettingStore<SyncSettingsByFeature['openAI']>
+    highlightColors: SettingStore<SyncSettingsByFeature['highlightColors']>
 }

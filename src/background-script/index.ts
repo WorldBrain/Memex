@@ -64,6 +64,9 @@ interface Dependencies {
         | 'syncSettings'
         | 'summarizeBG'
         | 'auth'
+        | 'customLists'
+        | 'contentSharing'
+        | 'pkmSyncBG'
     >
 }
 

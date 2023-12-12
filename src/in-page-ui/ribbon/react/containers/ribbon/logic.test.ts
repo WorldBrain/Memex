@@ -78,7 +78,6 @@ describe('Ribbon logic', () => {
             annotationsManager,
             bgScriptBG: backgroundModules.bgScript['remoteFunctions'],
             bookmarks: backgroundModules.bookmarks.remoteFunctions,
-            tags: backgroundModules.tags.remoteFunctions,
             pageActivityIndicatorBG:
                 backgroundModules.pageActivityIndicator.remoteFunctions,
             contentSharing: backgroundModules.contentSharing.remoteFunctions,
@@ -228,9 +227,7 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('setShowListsPicker', { value: false })
 
         expect(arePopupsOpen).toBe(false)
-        await ribbon.processEvent('setShowTagsPicker', { value: true })
         expect(arePopupsOpen).toBe(true)
-        await ribbon.processEvent('setShowTagsPicker', { value: false })
 
         expect(arePopupsOpen).toBe(false)
         await ribbon.processEvent('setShowSearchBox', { value: true })
@@ -776,24 +773,13 @@ describe('Ribbon logic', () => {
     it('should fire event on adding add new tags', async ({ device }) => {
         let addedTag: string
         const { ribbon, analytics } = await setupTest(device, {
-            dependencies: {
-                tags: {
-                    ...device.backgroundModules.tags.remoteFunctions,
-                    updateTagForPage: ({ added }) => {
-                        addedTag = added
-                    },
-                } as any,
-            },
+            dependencies: {},
         })
 
         await ribbon.init()
 
         expect(addedTag).toEqual(undefined)
         expect(analytics.popNew()).toEqual([])
-
-        await ribbon.processEvent('updateTags', {
-            value: { added: 'test', deleted: null, selected: [] },
-        })
 
         expect(addedTag).toEqual('test')
         expect(analytics.popNew()).toEqual([
@@ -835,21 +821,5 @@ describe('Ribbon logic', () => {
         await ribbon.processEvent('hydrateStateFromDB', { url: newURL })
         expect(ribbon.state.bookmark.isBookmarked).toBe(false)
         expect(ribbon.state.fullPageUrl).toEqual(newURL)
-    })
-
-    it('should check whether tags migration is done to signal showing of tags UI on init', async ({
-        device,
-    }) => {
-        const { ribbon, syncSettings } = await setupTest(device)
-
-        await syncSettings.extension.set('areTagsMigratedToSpaces', false)
-        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(false)
-        await ribbon.init()
-        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(true)
-
-        await syncSettings.extension.set('areTagsMigratedToSpaces', true)
-        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(true)
-        await ribbon.init()
-        expect(ribbon.state.tagging.shouldShowTagsUIs).toBe(false)
     })
 })

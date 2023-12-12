@@ -23,11 +23,14 @@ import {
     forEachTreeTraverse,
     mapTreeTraverse,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
     events?: TypedEventEmitter<PageAnnotationsCacheEvents>
     debug?: boolean
+    syncSettingsBG?: RemoteSyncSettingsInterface
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
@@ -55,9 +58,28 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         UnifiedAnnotation['unifiedId']
     >()
 
+    private highlightColorSettings
+
     constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
         deps.events = deps.events ?? new EventEmitter()
+
+        this.initializeAsync()
+    }
+
+    async initializeAsync() {
+        // Call your async function here
+        const syncSettingsBG = this.deps.syncSettingsBG
+        if (syncSettingsBG != null) {
+            const syncSettings = await createSyncSettingsStore({
+                syncSettingsBG,
+            })
+            const highlightColorSettings =
+                syncSettings &&
+                (await syncSettings?.highlightColors.get('highlightColors'))
+
+            this.highlightColorSettings = highlightColorSettings
+        }
     }
 
     private generateAnnotationId = (): string =>
@@ -179,6 +201,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         opts: { now: number },
     ): UnifiedAnnotation => {
         const unifiedAnnotationId = this.generateAnnotationId()
+        if (annotation.color != null) {
+            const annotColorObject = this.highlightColorSettings?.find(
+                (item) => item.id === annotation.color,
+            )?.color
+
+            annotation.color = annotColorObject
+        }
+
         if (annotation.remoteId != null) {
             this.remoteAnnotIdsToCacheIds.set(
                 annotation.remoteId,
@@ -397,10 +427,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const seedData = [...annotations]
             .sort(this.deps.sortingFn)
             .map((annot) => this.prepareAnnotationForCaching(annot, { now }))
+
         this.annotations = initNormalizedState({
             seedData,
             getId: (annot) => annot.unifiedId,
         })
+
         this.events.emit('newAnnotationsState', this.annotations)
 
         return { unifiedIds: seedData.map((annot) => annot.unifiedId) }
@@ -556,7 +588,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         let nextUnifiedListIds = [...previous.unifiedListIds]
         let privacyLevel = updates.privacyLevel
 
-        if (previous.privacyLevel === updates.privacyLevel) {
+        if (opts?.forceListUpdate) {
+            nextUnifiedListIds = [...updates.unifiedListIds]
+        } else if (previous.privacyLevel === updates.privacyLevel) {
             nextUnifiedListIds = [...updates.unifiedListIds]
 
             // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots
@@ -603,6 +637,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             )
         }
 
+        // if (updates.color != null) {
+        //     const annotColorObject = this.highlightColorSettings.find(
+        //         (item) => item.id === updates.color,
+        //     )?.color
+
+        //     updates.color = annotColorObject
+        // }
+
         const next: UnifiedAnnotation = {
             ...previous,
             privacyLevel,
@@ -612,6 +654,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             lastEdited: opts?.updateLastEditedTimestamp
                 ? opts?.now ?? Date.now()
                 : previous.lastEdited,
+            color: updates.color ?? previous.color,
         }
 
         this.updateCachedListAnnotationRefsForAnnotationUpdate(previous, next)

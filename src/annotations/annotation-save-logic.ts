@@ -10,6 +10,7 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { RGBAColor } from './cache/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -25,11 +26,13 @@ type AnnotationCreateData = {
     createdWhen?: Date
     selector?: Anchor
     localListIds?: number[]
+    color?: RGBAColor | string | string
 } & ({ body: string; comment?: string } | { body?: string; comment: string })
 
 interface AnnotationUpdateData {
     localId: string
     comment: string | null
+    color?: RGBAColor | string | string
 }
 
 export interface SaveAnnotationParams<
@@ -86,6 +89,12 @@ export async function createAnnotation({
 > {
     let remoteAnnotationId: string = null
 
+    let syncSettings: SyncSettingsStore<'extension'>
+
+    syncSettings = createSyncSettingsStore({
+        syncSettingsBG: syncSettingsBG,
+    })
+
     return {
         remoteAnnotationId,
         savePromise: (async () => {
@@ -102,11 +111,28 @@ export async function createAnnotation({
                         .replace(/\\\(/g, '(')
                         .replace(/\\\)/g, ')'),
                     body: annotationData.body,
+                    color: annotationData.color,
                 },
                 { skipPageIndexing },
             )
 
-            if (shareOpts?.shouldShare) {
+            const shouldShareSettings = await syncSettings.extension.get(
+                'shouldAutoAddSpaces',
+            )
+
+            let privacyLevel
+            if (shouldShareSettings) {
+                privacyLevel = 200
+            }
+
+            if (shouldShareSettings) {
+                await contentSharingBG.shareAnnotation({
+                    annotationUrl,
+                    remoteAnnotationId,
+                    shareToParentPageLists: true,
+                    skipPrivacyLevelUpdate: false,
+                })
+            } else if (shareOpts?.shouldShare) {
                 await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
@@ -118,7 +144,8 @@ export async function createAnnotation({
             await contentSharingBG.setAnnotationPrivacyLevel({
                 annotationUrl,
                 privacyLevel:
-                    privacyLevelOverride ?? shareOptsToPrivacyLvl(shareOpts),
+                    (privacyLevel || privacyLevelOverride) ??
+                    shareOptsToPrivacyLvl(shareOpts),
             })
 
             if (annotationData.localListIds?.length) {
@@ -197,6 +224,7 @@ export async function updateAnnotation({
                         .replace(/\\\]/g, ']')
                         .replace(/\\\(/g, '(')
                         .replace(/\\\)/g, ')'),
+                    annotationData.color,
                 )
             }
 

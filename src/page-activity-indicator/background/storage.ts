@@ -7,6 +7,7 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import type { FollowedList, FollowedListEntry } from './types'
 import { getFollowedListEntryIdentifier } from './utils'
+import { createRabbitHoleEntry } from 'src/pkm-integrations/background/backend/utils'
 
 interface InvokeCloudSyncFlag {
     /**
@@ -154,6 +155,21 @@ export default class PageActivityIndicatorStorage extends StorageModule {
             'followedListEntry',
             doc,
         )
+
+        try {
+            const syncItem = {
+                pageTitle: data.entryTitle,
+                fullUrl: 'https://' + data.normalizedPageUrl,
+                createdWhen: data.createdWhen,
+                creatorId: data.creator,
+                contentType: 'page',
+                fullHTML: null,
+            }
+            // send to local server
+            createRabbitHoleEntry(syncItem, this.options.pkmSyncBG)
+        } catch (e) {
+            console.error(e)
+        }
         return object.id
     }
 

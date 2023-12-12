@@ -53,9 +53,13 @@ import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
 import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
-import type { PageAnnotationsCacheEvents } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheEvents,
+    RGBAColor,
+} from 'src/annotations/cache/types'
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
@@ -114,7 +118,11 @@ export const removeAllResultOccurrencesOfPage = (
 export class DashboardLogic extends UILogic<State, Events> {
     personalCloudEvents: TypedRemoteEventEmitter<'personalCloud'>
     syncSettings: SyncSettingsStore<
-        'contentSharing' | 'dashboard' | 'extension' | 'activityIndicator'
+        | 'contentSharing'
+        | 'dashboard'
+        | 'extension'
+        | 'activityIndicator'
+        | 'highlightColors'
     >
     currentSearchID = 0
 
@@ -389,6 +397,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 pendingRemoteChangeCount: null,
                 lastSuccessfulSyncDate: null,
             },
+            highlightColors: null,
         }
     }
 
@@ -510,7 +519,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                 (from && from.length) ||
                 (to && to.length)
             ) {
-                const selectedListId = selectedSpace
+                let selectedListId
+                selectedListId = selectedSpace
                     ? this.options.annotationsCache.getListByLocalId(
                           selectedSpace,
                       )?.unifiedId ?? null
@@ -537,6 +547,22 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             this.emitMutation({
                 themeVariant: { $set: themeVariant },
+            })
+
+            let syncSettings: SyncSettingsStore<'highlightColors'>
+
+            syncSettings = createSyncSettingsStore({
+                syncSettingsBG: this.options.syncSettingsBG,
+            })
+
+            const highlightColorSettings = await syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            this.emitMutation({
+                highlightColors: {
+                    $set: JSON.stringify(highlightColorSettings),
+                },
             })
         })
     }
@@ -1374,6 +1400,151 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+
+    getHighlightColorSettings: EventHandler<
+        'getHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        let highlightColorJSON
+        if (previousState.highlightColors) {
+            highlightColorJSON = JSON.parse(previousState.highlightColors)
+        } else {
+            const highlightColors = await this.syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            if (highlightColors) {
+                highlightColorJSON = highlightColors
+            } else {
+                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+                await this.syncSettings.highlightColors.set(
+                    'highlightColors',
+                    highlightColorJSON,
+                )
+            }
+        }
+
+        this.emitMutation({
+            highlightColors: { $set: highlightColorJSON },
+        })
+
+        return highlightColorJSON
+    }
+    saveHighlightColorSettings: EventHandler<
+        'saveHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        const newState = JSON.parse(event.newState)
+        await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        // console.log('newStae', newState)
+
+        // const changedColors = newState
+        //     .map((newItem, index) => {
+        //         const oldItem = JSON.parse(previousState.highlightColors)[index]
+        //         if (
+        //             oldItem &&
+        //             newItem.id === oldItem.id &&
+        //             JSON.stringify(newItem.color) !==
+        //                 JSON.stringify(oldItem.color)
+        //         ) {
+        //             return {
+        //                 id: oldItem.id,
+        //                 oldColor: oldItem.color,
+        //                 newColor: newItem.color,
+        //             }
+        //         }
+        //     })
+        //     .filter((item) => item != null)
+
+        // console.log('changedColors', changedColors)
+
+        // for (let color of changedColors) {
+        //     const annotationLocalIds = await this.options.annotationsBG.listAnnotationIdsByColor(
+        //         color.id,
+        //     )
+
+        //     console.log('annotationLocalIds', annotationLocalIds)
+
+        //     const annotations = []
+
+        //     for (let annotationLocalId of annotationLocalIds) {
+        //         annotations.push(
+        //             await this.options.annotationsCache.getAnnotationByLocalId(
+        //                 annotationLocalId,
+        //             ),
+        //         )
+        //     }
+
+        //     console.log('annotations', annotations)
+
+        //     for (let annotation of annotations) {
+        //         this.options.annotationsCache.updateAnnotation({
+        //             comment: annotation.comment,
+        //             privacyLevel: annotation.privacyLevel,
+        //             unifiedListIds: annotation.unifiedListIds,
+        //             unifiedId: annotation,
+        //             color: color.newColor,
+        //         })
+        //     }
+        // }
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
+        })
+    }
+    saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
+        event,
+        previousState,
+    }) => {
+        const { ...existing } = previousState.searchResults.noteData.byId[
+            event.noteId
+        ]
+
+        await executeUITask(
+            this,
+            (taskState) => ({
+                searchResults: { noteUpdateState: { $set: taskState } },
+            }),
+            async () => {
+                // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+                // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+                //  to make a SAS annotation private protected upon save btn press
+
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [event.noteId]: {
+                                    comment: { $set: existing.comment },
+                                    color: { $set: event.color as RGBAColor },
+                                },
+                            },
+                        },
+                    },
+                    modals: {
+                        confirmPrivatizeNoteArgs: { $set: null },
+                    },
+                })
+
+                const unifiedListIds = new Set(existing.lists)
+
+                // this.options.annotationsCache.updateAnnotation({
+                //     comment: existing.comment,
+                //     color: event.color,
+                //     unifiedId: event.unifiedId,
+                // })
+
+                await updateAnnotation({
+                    annotationData: {
+                        localId: event.noteId,
+                        comment: existing.comment,
+                        color: event.color,
+                    },
+                    annotationsBG: this.options.annotationsBG,
+                    contentSharingBG: this.options.contentShareBG,
+                })
+            },
+        )
+    }
     /* END - modal event handlers */
 
     /* START - search result event handlers */
@@ -1620,13 +1791,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     clearInbox: EventHandler<'clearInbox'> = async () => {
-        const listContent = await this.options.listsBG.fetchListById({
-            id: SPECIAL_LIST_IDS.INBOX,
+        this.emitMutation({
+            loadState: { $set: 'running' },
+            listsSidebar: {
+                inboxUnreadCount: { $set: 0 },
+            },
         })
-        const pages = listContent.pages
-        const filterOutPages = (pages: string[]) =>
-            pages.filter((page) => page === '')
-
+        await this.options.listsBG.removeAllListPages(SPECIAL_LIST_IDS.INBOX)
         this.emitMutation({
             searchResults: {
                 results: {
@@ -1645,17 +1816,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        for (let page of pages) {
-            await this.options.listsBG.removePageFromList({
-                id: SPECIAL_LIST_IDS.INBOX,
-                url: page,
-            })
-        }
-
         this.emitMutation({
             searchResults: {
                 clearInboxLoadState: { $set: 'pristine' },
             },
+            loadState: { $set: 'pristine' },
         })
     }
 
@@ -2215,6 +2380,16 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
         )
 
+        let syncSettings: SyncSettingsStore<'extension'>
+
+        syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.options.syncSettingsBG,
+        })
+
+        const shouldShareSettings = await syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+
         await executeUITask(
             this,
             (taskState) => ({
@@ -2225,6 +2400,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
+                let shouldShare
+
+                if (shouldShareSettings) {
+                    shouldShare = 200
+                }
+
                 const { savePromise } = await createAnnotation({
                     annotationData: {
                         comment: formState.inputValue,
@@ -2232,7 +2413,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         localListIds: listsToAdd.map((list) => list.localId),
                     },
                     shareOpts: {
-                        shouldShare: event.shouldShare,
+                        shouldShare: shouldShare || event.shouldShare,
                         isBulkShareProtected: event.isProtected,
                         shouldCopyShareLink: event.shouldShare,
                     },
@@ -2840,10 +3021,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
-            modals: {
-                confirmPrivatizeNoteArgs: { $set: null },
-                confirmSelectNoteSpaceArgs: { $set: null },
-            },
+            // modals: {
+            //     confirmPrivatizeNoteArgs: { $set: null },
+            //     confirmSelectNoteSpaceArgs: { $set: null },
+            // },
         })
     }
 
@@ -2966,6 +3147,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             !!event.keepListsIfUnsharing,
                                     },
                                     lists: { $set: lists },
+                                    color: { $set: event.color as RGBAColor },
                                 },
                             },
                         },
@@ -2979,6 +3161,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     annotationData: {
                         localId: event.noteId,
                         comment: editNoteForm.inputValue,
+                        color: event.color,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
@@ -3573,14 +3756,18 @@ export class DashboardLogic extends UILogic<State, Events> {
                 : event.listId
 
         if (listIdToSet != null) {
-            const listData = getListData(listIdToSet, previousState, {
-                mustBeLocal: true,
-                source: 'setSelectedListId',
-            })
-            this.updateQueryStringParameter(
-                'selectedSpace',
-                listData.localId!.toString(),
-            )
+            if (listIdToSet === '20201014' || listIdToSet === '20201015') {
+                this.updateQueryStringParameter('selectedSpace', listIdToSet)
+            } else {
+                const listData = getListData(listIdToSet, previousState, {
+                    mustBeLocal: true,
+                    source: 'setSelectedListId',
+                })
+                this.updateQueryStringParameter(
+                    'selectedSpace',
+                    listData.localId!.toString(),
+                )
+            }
         } else {
             this.updateQueryStringParameter('selectedSpace', null)
         }
