@@ -946,7 +946,7 @@ export async function main(
             }
             await inPageUI.hideRibbon()
 
-            await this.injectCustomUIperPage(
+            await injectCustomUIperPage(
                 annotationsFunctions,
                 pkmSyncBG,
                 collectionsBG,
@@ -1078,7 +1078,7 @@ export async function main(
     ////////////////////////////////////////////
     // CHECK CURRENT PAGE IF NEED BE TO INJECT CUSTOM UI
     ////////////////////////////////////////////
-    await this.injectCustomUIperPage(
+    await injectCustomUIperPage(
         annotationsFunctions,
         pkmSyncBG,
         collectionsBG,
