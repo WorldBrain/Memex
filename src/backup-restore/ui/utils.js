@@ -7,6 +7,7 @@ export async function redirectToGDriveLogin() {
         provider: 'googledrive',
     })
 }
+import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
 
 export const getStringFromResponseBody = async (response) => {
     const { value } = await response.body.getReader().read()
@@ -15,10 +16,30 @@ export const getStringFromResponseBody = async (response) => {
 
 export const checkServerStatus = async () => {
     try {
-        const response = await fetch(LOCAL_SERVER_ENDPOINTS.STATUS)
-        const serverStatus = await getStringFromResponseBody(response)
-        if (serverStatus === 'running') {
-            return true
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+        })
+
+        try {
+            const response = await fetch(LOCAL_SERVER_ENDPOINTS.STATUS, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body,
+            })
+
+            if (response.status === 200) {
+                return true
+            } else if (response.status === 500) {
+                return false
+            } else {
+                return false
+            }
+        } catch (e) {
+            return false
         }
     } catch (err) {
         return false

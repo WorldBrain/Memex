@@ -70,11 +70,7 @@ export class PKMSyncBackgroundModule {
             url: 'http://localhost:11922',
         })
 
-        console.log('feedSources', feedSources)
-
-        if (await backend.isConnected()) {
-            await backend.addFeedSources(feedSources)
-        }
+        await backend.addFeedSources(feedSources)
     }
     checkFeedSource = async (
         feedUrl: string,

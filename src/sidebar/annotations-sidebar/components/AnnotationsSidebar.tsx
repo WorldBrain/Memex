@@ -2350,10 +2350,6 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.saveFeedSources(
                                         this.state.feedSourcesTextAreaContent,
                                     )
-                                    console.log(
-                                        'state',
-                                        this.state.feedSourcesTextAreaContent,
-                                    )
                                     this.setState({
                                         feedSourcesTextAreaContent: null,
                                     })
@@ -2487,10 +2483,11 @@ export class AnnotationsSidebar extends React.Component<
                                                 showFeedSourcesMenu: !this.state
                                                     .showFeedSourcesMenu,
                                             })
+                                            this.props.loadFeedSources()
                                         }}
                                     />
-                                    {this.renderSourcesMenu()}
                                 </TooltipBox>
+                                {this.renderSourcesMenu()}
                             </AddSourceIconContainer>
                         </SuggestionsSwitcherButton>
                     </SuggestionsListSwitcher>
@@ -2501,17 +2498,22 @@ export class AnnotationsSidebar extends React.Component<
                     <EmptyMessageContainer>
                         <IconBox heightAndWidth="40px">
                             <Icon
-                                filePath={icons.stop}
+                                filePath={icons.globe}
                                 heightAndWidth="20px"
                                 color="prime1"
                                 hoverOff
                             />
                         </IconBox>
                         <InfoText>
-                            The deskop app is not connected.
+                            <InfoTextTitle>
+                                Memex can't connect to the desktop app
+                            </InfoTextTitle>
                             <br />
-                            Make sure it is running or reach out to support via
-                            the live chat.
+                            Make sure it is running and refresh the sync key if
+                            needed.
+                            <br /> For help reach out to support via the live
+                            chat that you find on the ? in the bottom right
+                            corner.
                         </InfoText>
                     </EmptyMessageContainer>
                 ) : (
@@ -3966,6 +3968,12 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const InfoTextTitle = styled.div`
+    font-size: 16px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.greyScale7};
+`
+
 const DownloadDropArea = styled.div`
     width: fill-available;
     width: -moz-available;
@@ -4160,6 +4168,7 @@ const AddSourceIconContainer = styled.div`
     align-items: center;
     position: absolute;
     right: 5px;
+    cursor: pointer;
 `
 
 const SuggestionsCounter = styled.div<{ hasResults }>`

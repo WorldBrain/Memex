@@ -323,13 +323,7 @@ interface SidebarEvents {
     saveFeedSources: {
         sources: string
     }
-    loadFeedSources: {
-        sources: {
-            feedTitle: string
-            feedUrl: string
-            type: 'substack'
-        }[]
-    }
+    loadFeedSources: null
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
@@ -554,6 +548,7 @@ export interface SuggestionCard {
     comment?: string
     unifiedId?: UnifiedAnnotation['unifiedId']
     sourceApplication?: string
+    distance?: number
 }
 
 export interface ListInstance {

@@ -1452,6 +1452,7 @@ export class SidebarContainerLogic extends UILogic<
 
     processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({
         event,
+        previousState,
     }) => {
         const fileContent = event.fileString
         const parser = new DOMParser()
@@ -1463,10 +1464,21 @@ export class SidebarContainerLogic extends UILogic<
         const feedSources = Array.from(feedsNode.children).map((node) => ({
             feedTitle: node.getAttribute('title'),
             feedUrl: node.getAttribute('xmlUrl'),
+            feedFavicon: null,
+            type: 'substack',
+            confirmState: 'success',
         }))
 
+        const allFeedSources = [
+            ...feedSources,
+            ...previousState.existingFeedSources,
+        ]
+
+        console.log('allFeedSources', allFeedSources)
         this.emitMutation({
-            existingFeedSources: { $set: feedSources },
+            existingFeedSources: {
+                $set: allFeedSources,
+            },
         })
 
         await this.options.pkmSyncBG.addFeedSources(feedSources)
@@ -1482,7 +1494,6 @@ export class SidebarContainerLogic extends UILogic<
                 : [event.sources]
 
         let feedSourcesToCheck = sources
-        console.log('feedSourcesToCheck', feedSourcesToCheck)
         if (feedSourcesToCheck?.length === 0) {
             return
         }
@@ -1500,9 +1511,12 @@ export class SidebarContainerLogic extends UILogic<
                     return
                 }
                 let response
+                console.log('response1')
                 response = await this.options.pkmSyncBG.checkFeedSource(
                     inputFeedUrl,
                 )
+
+                console.log('response', response)
 
                 let title = response?.feedTitle ?? null
                 let feedUrl = response?.feedUrl
@@ -1580,11 +1594,13 @@ export class SidebarContainerLogic extends UILogic<
         // })
         await this.options.pkmSyncBG.addFeedSources(results)
     }
-    loadFeedSources: EventHandler<'saveFeedSources'> = async ({
+    loadFeedSources: EventHandler<'loadFeedSources'> = async ({
         event,
         previousState,
     }) => {
         const feedSources = await this.options.pkmSyncBG.loadFeedSources()
+
+        console.log('feedSources', feedSources)
 
         this.emitMutation({
             existingFeedSources: { $set: feedSources },
@@ -1714,8 +1730,8 @@ export class SidebarContainerLogic extends UILogic<
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
 
-        const email = (await this.options.authBG.getCurrentUser()).email
-        const userId = (await this.options.authBG.getCurrentUser()).id
+        const email = (await this.options.authBG.getCurrentUser())?.email
+        const userId = (await this.options.authBG.getCurrentUser())?.id
 
         const baseUrl = isStaging
             ? 'https://cloudflare-memex-staging.memex.workers.dev'
@@ -3246,7 +3262,6 @@ export class SidebarContainerLogic extends UILogic<
             // add step to summmarise page and extract key information suitable for similiarity search
 
             let results
-            console.log('beforereuslts')
             results = await this.options.customListsBG.findSimilarBackground(
                 currentPageContent,
                 normalizeUrl(previousState.fullPageUrl, {
@@ -3254,19 +3269,16 @@ export class SidebarContainerLogic extends UILogic<
                 }),
             )
             if (results.length === 0) {
-                console.log('results3')
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'success' },
                 })
             }
-            if (results === 'not-connected') {
+            if (results === 'not-connected' || results === 'not-allowed') {
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'error' },
                 })
                 return
             }
-
-            console.log('comes through hree')
 
             await this.updateSuggestionResults(results)
 
@@ -3294,7 +3306,7 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    async updateSuggestionResults(results: SuggestionCard[]) {
+    async updateSuggestionResults(resultsInput: SuggestionCard[]) {
         const resultsArray: SuggestionCard[] = []
         const user = await this.options.authBG.getCurrentUser()
         const userId = user?.id
@@ -3308,13 +3320,37 @@ export class SidebarContainerLogic extends UILogic<
             localId?: number | null
         }
 
+        // Filter the resultsArray to only have one item from the same URL, and take the one with the lowest "distance" value
+        const results = resultsInput.reduce(
+            (acc: SuggestionCard[], curr: SuggestionCard) => {
+                const existing = acc.find(
+                    (item) => item.fullUrl === curr.fullUrl,
+                )
+                if (!existing) {
+                    return acc.concat([curr])
+                } else if (existing.distance > curr.distance) {
+                    return acc
+                        .filter((item) => item.fullUrl !== curr.fullUrl)
+                        .concat([curr])
+                } else {
+                    return acc
+                }
+            },
+            [],
+        )
+
+        console.log('results    ', results)
+
         if (results) {
             for (let result of Object.values(results)) {
                 let space: spaceItem
                 let pageData
                 let pageToDisplay: SuggestionCard
 
-                if (userId != result.creatorId) {
+                if (
+                    userId != result.creatorId &&
+                    result.contentType === 'page'
+                ) {
                     const followedPageListData = []
                     const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
                         result.fullUrl,
