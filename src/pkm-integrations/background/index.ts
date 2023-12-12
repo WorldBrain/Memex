@@ -1,12 +1,9 @@
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
-import { checkServerStatus } from '../../backup-restore/ui/utils'
 import { MemexLocalBackend } from '../background/backend'
-import { marked } from 'marked'
 import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'
-import { sleepPromise } from 'src/util/promises'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -77,7 +74,7 @@ export class PKMSyncBackgroundModule {
     ): Promise<{
         feedUrl: string
         feedTitle: string
-        feedFavIcon: string
+        feedFavIcon?: string
     }> => {
         try {
             // Initialize source object with null values

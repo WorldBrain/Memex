@@ -154,8 +154,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         feedTitle: string
         feedUrl: string
         feedFavIcon?: string
-        type?: 'substack'
-        confirmState?: TaskState
+        type?: 'substack' | string
+        confirmState?: TaskState | string
     }[]
 
     // Indicates what is the currently selected space in the leaf screen

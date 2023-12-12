@@ -263,6 +263,7 @@ export class MemexLocalBackend {
 
         if (!response.ok || response.status !== 200) {
             throw new Error(`Error getting all RSS feeds: ${response.status}`)
+            return 'error'
         }
     }
     async loadFeedSources(): Promise<any> {

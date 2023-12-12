@@ -50,7 +50,11 @@ export function injectSubstackButtons(
         } else {
             memexButtons.onclick = () => {}
             memexButtons.innerText = 'Followed!'
-            await indexRSSfeed(feedSources, pkmSyncBG)
+            const indexFeed = await indexRSSfeed(feedSources, pkmSyncBG)
+
+            if (indexFeed === 'error') {
+                memexButtons.innerText = 'Error following feed'
+            }
         }
     }
 
