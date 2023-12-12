@@ -206,14 +206,15 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             .map((root) =>
                 mapTreeTraverse({
                     root,
-                    strategy: 'bfs',
+                    strategy: 'dfs',
                     getChildren: (list) =>
                         this.props.ownListsGroup.listData
                             .filter(
                                 (_list) =>
                                     _list.parentUnifiedId === list.unifiedId,
                             )
-                            .sort(defaultTreeNodeSorter),
+                            .sort(defaultTreeNodeSorter)
+                            .reverse(),
                     cb: (list) => {
                         const parentListTreeState = this.props.listTrees.byId[
                             list.parentUnifiedId
