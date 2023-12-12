@@ -95,6 +95,7 @@ export interface RemoteCollectionsInterface {
         args: {
             name: string
             id?: number
+            order?: number
             parentListId?: number
             createdAt?: Date
             dontTrack?: boolean

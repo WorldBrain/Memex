@@ -32,6 +32,7 @@ async function insertTestData({
             type: list.type,
             name: list.name,
             id: list.id,
+            order: list.order,
             collabKey: sharedListMetadata?.remoteId,
             remoteListId: sharedListMetadata?.remoteId,
         })

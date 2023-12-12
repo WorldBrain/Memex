@@ -532,6 +532,7 @@ export default class CustomListStorage extends StorageModule {
         parentListId?: number
         pathIds?: number[]
         now?: number
+        order?: number
         isLink?: boolean
         isOnlyChild?: boolean
         skipSyncEntry?: boolean
@@ -543,20 +544,25 @@ export default class CustomListStorage extends StorageModule {
             )
         }
 
-        // Look up all sibling nodes to determine order of this one
-        const siblingNodes: ListTree[] =
-            !params.isOnlyChild && params.parentListId != null
-                ? await this.operation('findListTreesByParentListId', {
-                      parentListId: params.parentListId,
-                  })
-                : []
-        const order = pushOrderedItem(
-            siblingNodes.map((node) => ({
-                id: node.id,
-                key: node.order,
-            })),
-            '',
-        ).create.key
+        let order: number
+        if (params.order != null) {
+            order = params.order
+        } else {
+            // Look up all sibling nodes to determine order of this one
+            const siblingNodes: ListTree[] =
+                !params.isOnlyChild && params.parentListId != null
+                    ? await this.operation('findListTreesByParentListId', {
+                          parentListId: params.parentListId,
+                      })
+                    : []
+            order = pushOrderedItem(
+                siblingNodes.map((node) => ({
+                    id: node.id,
+                    key: node.order,
+                })),
+                '',
+            ).create.key
+        }
 
         const now = params.now ?? Date.now()
         const listTree: Omit<ListTree, 'id'> = {

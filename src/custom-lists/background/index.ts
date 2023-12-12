@@ -366,6 +366,7 @@ export default class CustomListBackground {
         name,
         id: _id,
         type,
+        order,
         createdAt,
         dontTrack,
         parentListId,
@@ -389,6 +390,7 @@ export default class CustomListBackground {
             },
         )
         await this.createListTree({
+            order,
             localListId,
             parentListId,
             now: createdAt?.getTime(),
@@ -400,6 +402,7 @@ export default class CustomListBackground {
     createListTree = async (args: {
         localListId: number
         parentListId?: number
+        order?: number
         now?: number
     }): Promise<{ treeId: number }> => {
         const pathIds =
@@ -411,6 +414,7 @@ export default class CustomListBackground {
         const { id: treeId } = await this.storage.createListTree({
             localListId: args.localListId,
             parentListId: args.parentListId,
+            order: args.order,
             now: args.now,
             pathIds,
         })
