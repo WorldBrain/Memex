@@ -221,7 +221,13 @@ export default class CustomListStorage extends StorageModule {
                 updateListTreeOrder: {
                     collection: CustomListStorage.LIST_TREES_COLL,
                     operation: 'updateObjects',
-                    args: [{ listId: '$listId:int' }, { order: '$order:int' }],
+                    args: [
+                        { listId: '$listId:int' },
+                        {
+                            order: '$order:int',
+                            updatedWhen: '$updatedWhen:number',
+                        },
+                    ],
                 },
                 deleteList: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,

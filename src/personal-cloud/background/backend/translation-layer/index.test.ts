@@ -1959,7 +1959,206 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
-        it('should reorder custom list trees', async () => {
+        it('should update order of custom list trees', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.second)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.third)
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.fourth)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.second)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.third)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.first)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.second)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.third)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fourth)
+            await setups[0].storageManager
+                .collection('customListTrees')
+                .createObject(LOCAL_TEST_DATA_V24.customListTrees.fifth)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testLists = remoteData.personalList
+            const testListTrees = remoteData.personalListTree
+            const testListShares = remoteData.personalListShare
+
+            const siblingListIds = [
+                LOCAL_TEST_DATA_V24.customListTrees.first.listId,
+                LOCAL_TEST_DATA_V24.customListTrees.second.listId,
+                LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                LOCAL_TEST_DATA_V24.customListTrees.fourth.listId,
+                LOCAL_TEST_DATA_V24.customListTrees.fifth.listId,
+            ]
+            const nowA = 12345
+            const nowB = 12346
+            const nowC = 12347
+            // Move the first to be the third
+            await setups[0].backgroundModules.customLists.updateListTreeOrder({
+                localListId: LOCAL_TEST_DATA_V24.customListTrees.first.listId,
+                intendedIndexAmongSiblings: 2,
+                siblingListIds,
+                now: nowA,
+            })
+            // Move the fourth to be the first
+            await setups[0].backgroundModules.customLists.updateListTreeOrder({
+                localListId: LOCAL_TEST_DATA_V24.customListTrees.fourth.listId,
+                intendedIndexAmongSiblings: 0,
+                siblingListIds,
+                now: nowB,
+            })
+            // Move the third to be the first
+            await setups[0].backgroundModules.customLists.updateListTreeOrder({
+                localListId: LOCAL_TEST_DATA_V24.customListTrees.third.listId,
+                intendedIndexAmongSiblings: 1,
+                siblingListIds,
+                now: nowC,
+            })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalList',
+                    'personalListTree',
+                    'sharedListTree',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalListTree', testListTrees.first.id],
+                    [DataChangeType.Modify, 'personalListTree', testListTrees.fourth.id],
+                    [DataChangeType.Modify, 'personalListTree', testListTrees.third.id],
+                ], { skipChanges: 13 }),
+                personalBlockStats: [],
+                personalList: [testLists.first, testLists.second, testLists.third, testLists.fourth],
+                personalListTree: [{
+                    ...testListTrees.first,
+                    order: 15,
+                    updatedWhen: nowA,
+                }, testListTrees.second, {
+                    ...testListTrees.third,
+                    order: 7,
+                    updatedWhen: nowC,
+                }, {
+                    ...testListTrees.fourth,
+                    order: 5,
+                    updatedWhen: nowB,
+                }, testListTrees.fifth],
+                sharedListTree: [
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: 15,
+                        sharedList: testListShares.first.remoteId,
+                        updatedWhen: nowA,
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTrees.second.order,
+                        sharedList: testListShares.second.remoteId,
+                        parentListId:testListShares.first.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId),
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: 7,
+                        sharedList: testListShares.third.remoteId,
+                        parentListId:testListShares.first.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId),
+                        updatedWhen: nowC,
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: 5,
+                        sharedList: testListShares.fourth.remoteId,
+                        parentListId:testListShares.third.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId, testListShares.third.remoteId),
+                        updatedWhen: nowB,
+                    }),
+                    expect.objectContaining({
+                        creator: TEST_USER.id,
+                        order: testListTrees.fifth.order,
+                        linkTarget: testListShares.first.remoteId,
+                        parentListId:testListShares.second.remoteId,
+                        path: buildMaterializedPath(testListShares.first.remoteId, testListShares.second.remoteId),
+                    }),
+                ],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: {
+                    ...LOCAL_TEST_DATA_V24.customListTrees.first,
+                    order: 15,
+                    updatedWhen: nowA,
+                } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: {
+                    ...LOCAL_TEST_DATA_V24.customListTrees.third ,
+                    order: 7,
+                    updatedWhen: nowC,
+                } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: {
+                    ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                    order: 5,
+                    updatedWhen: nowB,
+                } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: LOCAL_TEST_DATA_V24.customListTrees.fifth },
+                // TODO: Figure out why these ones get re-downloaded (the last one actually isn't - what's different?)
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: {
+                    ...LOCAL_TEST_DATA_V24.customListTrees.first,
+                    order: 15,
+                    updatedWhen: nowA,
+                } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: {
+                    ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
+                    order: 5,
+                    updatedWhen: nowB,
+                } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'customListTrees', object: {
+                    ...LOCAL_TEST_DATA_V24.customListTrees.third,
+                    order: 7,
+                    updatedWhen: nowC,
+                } },
+            ], { skip: 8 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should be able to move custom list trees', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -2304,7 +2503,7 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
-        it('should reorder custom list trees when tree data does not yet exist (pre-nested lists data)', async () => {
+        it('should move custom list trees when tree data does not yet exist (pre-nested lists data)', async () => {
             const {
                 setups,
                 serverIdCapturer,
@@ -2524,7 +2723,7 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
-        it('should not allow reordering of custom list trees that introduces a cycle', async () => {
+        it('should not allow move of custom list tree that introduces a cycle', async () => {
             const {
                 setups,
                 serverIdCapturer,
