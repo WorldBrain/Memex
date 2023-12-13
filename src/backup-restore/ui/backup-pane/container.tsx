@@ -142,16 +142,16 @@ export default class BackupSettingsContainer extends Component<Props> {
     render() {
         return (
             <div>
-                {this.state.isDumpModalShown && (
-                    <Overlay services={this.props.services}>
-                        <DataDumper
-                            supportLink={'mailto:' + SUPPORT_EMAIL}
-                            services={this.props.services}
-                            onComplete={this.hideDumpModal}
-                            onCancel={this.hideDumpModal}
-                        />
-                    </Overlay>
-                )}
+                {/* {this.state.isDumpModalShown && (
+                    // <Overlay services={this.props.services}>
+                    //     <DataDumper
+                    //         supportLink={'mailto:' + SUPPORT_EMAIL}
+                    //         services={this.props.services}
+                    //         onComplete={this.hideDumpModal}
+                    //         onCancel={this.hideDumpModal}
+                    //     />
+                    // </Overlay>
+                )} */}
                 <div className={styles.screenContainer}>
                     {this.renderScreen()}
                 </div>
