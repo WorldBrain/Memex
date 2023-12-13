@@ -1,15 +1,13 @@
 import React, { createRef, useRef } from 'react'
 import styled, { css } from 'styled-components'
-import { Layers } from '@styled-icons/feather'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { runtime } from 'webextension-polyfill'
-import { browser } from 'webextension-polyfill-ts'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onPress: () => void
@@ -377,7 +375,7 @@ class EntryRow extends React.Component<Props> {
     }
 }
 
-export const ActOnAllTabsButton = styled(Layers)`
+export const ActOnAllTabsButton = styled.div`
     pointer-events: auto !important;
 `
 

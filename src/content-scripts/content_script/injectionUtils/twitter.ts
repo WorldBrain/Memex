@@ -1,5 +1,6 @@
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { renderSpacesBar } from './utils'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 
 export async function getActiveTwitterUserName(
     maxRetries,
@@ -15,7 +16,7 @@ export async function getActiveTwitterUserName(
 }
 
 export async function trackTwitterMessageList(
-    collectionsBG,
+    collectionsBG: RemoteCollectionsInterface,
     bgScriptBG: RemoteBGScriptInterface,
 ) {
     const maxRetries = 40

@@ -84,7 +84,12 @@ export function renderSpacesBar(
 
 export async function indexRSSfeed(feedSources, pkmSyncBG) {
     try {
-        await pkmSyncBG.addFeedSources(feedSources)
+        try {
+            return await pkmSyncBG.addFeedSources(feedSources)
+        } catch (e) {
+            console.log('error', e)
+            return 'error'
+        }
     } catch (error) {
         console.error('Error:', error)
     }

@@ -11,10 +11,7 @@ import LoadingBlocker from '../../../common-ui/components/loading-blocker'
 import * as logic from 'src/backup-restore/ui/backup-pane/container.logic'
 import RestoreWhere from 'src/backup-restore/ui/backup-pane/panes/restore-where'
 import RestoreRunning from 'src/backup-restore/ui/backup-pane/panes/restore-running'
-import Overlay from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
 import type { UIServices } from 'src/services/ui/types'
-import DataDumper from 'src/personal-cloud/ui/components/data-dumper'
-import { SUPPORT_EMAIL } from 'src/constants'
 import { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 
@@ -142,16 +139,16 @@ export default class BackupSettingsContainer extends Component<Props> {
     render() {
         return (
             <div>
-                {this.state.isDumpModalShown && (
-                    <Overlay services={this.props.services}>
-                        <DataDumper
-                            supportLink={'mailto:' + SUPPORT_EMAIL}
-                            services={this.props.services}
-                            onComplete={this.hideDumpModal}
-                            onCancel={this.hideDumpModal}
-                        />
-                    </Overlay>
-                )}
+                {/* {this.state.isDumpModalShown && (
+                    // <Overlay services={this.props.services}>
+                    //     <DataDumper
+                    //         supportLink={'mailto:' + SUPPORT_EMAIL}
+                    //         services={this.props.services}
+                    //         onComplete={this.hideDumpModal}
+                    //         onCancel={this.hideDumpModal}
+                    //     />
+                    // </Overlay>
+                )} */}
                 <div className={styles.screenContainer}>
                     {this.renderScreen()}
                 </div>

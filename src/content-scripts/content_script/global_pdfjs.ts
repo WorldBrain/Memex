@@ -1,4 +1,5 @@
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
+import html2canvas from 'html2canvas'
 import * as Global from './global'
 import {
     FingerprintSchemeType,
@@ -59,38 +60,40 @@ const getContentFingerprints: GetContentFingerprints = async () => {
     return contentFingerprints
 }
 
-Global.main({ loadRemotely: false, getContentFingerprints }).then(
-    async (inPageUI) => {
-        // DEBUG: Use this in console to debug screenshot UX
-        // ;(window as any)['promptPdfScreenshot'] = promptPdfScreenshot
-        // // DEBUG: Uncomment to trigger screenshot as soon as PDF is loaded
-        // setTimeout(() => {
-        //     promptPdfScreenshot()
-        // }, 0)
-        // ;(window as any)['testPdfScreenshotAnchoring'] = () => {
-        //     const anchor: PdfScreenshotAnchor = {
-        //         pageNumber: 2,
-        //         position: [91.19998168945312, 122.19999694824219],
-        //         dimensions: [634, 388],
-        //     }
-        //     return anchorPdfScreenshot(anchor)
-        // }
+Global.main({
+    loadRemotely: false,
+    getContentFingerprints,
+    htmlElToCanvasEl: (el) => html2canvas(el),
+}).then(async (inPageUI) => {
+    // DEBUG: Use this in console to debug screenshot UX
+    // ;(window as any)['promptPdfScreenshot'] = promptPdfScreenshot
+    // // DEBUG: Uncomment to trigger screenshot as soon as PDF is loaded
+    // setTimeout(() => {
+    //     promptPdfScreenshot()
+    // }, 0)
+    // ;(window as any)['testPdfScreenshotAnchoring'] = () => {
+    //     const anchor: PdfScreenshotAnchor = {
+    //         pageNumber: 2,
+    //         position: [91.19998168945312, 122.19999694824219],
+    //         dimensions: [634, 388],
+    //     }
+    //     return anchorPdfScreenshot(anchor)
+    // }
 
-        makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
-            extractPDFContents: async () => {
-                const searchParams = new URLSearchParams(location.search)
-                const filePath = searchParams.get('file')
+    makeRemotelyCallableType<InPDFPageUIContentScriptRemoteInterface>({
+        extractPDFContents: async () => {
+            const searchParams = new URLSearchParams(location.search)
+            const filePath = searchParams.get('file')
 
-                if (!filePath?.length) {
-                    return null
-                }
+            if (!filePath?.length) {
+                return null
+            }
 
-                const pdf: PDFDocumentProxy = await (globalThis as any)[
-                    'pdfjsLib'
-                ].getDocument(filePath).promise
-                return extractDataFromPDFDocument(pdf)
-            },
-        })
-        await inPageUI.showSidebar()
-    },
-)
+            const pdf: PDFDocumentProxy = await (globalThis as any)[
+                'pdfjsLib'
+            ].getDocument(filePath).promise
+            return extractDataFromPDFDocument(pdf)
+        },
+    })
+    await inPageUI.showSidebar()
+})

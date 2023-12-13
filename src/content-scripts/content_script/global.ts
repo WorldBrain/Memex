@@ -15,7 +15,6 @@ import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
     remoteFunction,
     runInBackground,
-    RemoteFunctionRegistry,
     makeRemotelyCallableType,
     setupRpcConnection,
 } from 'src/util/webextensionRPC'
@@ -113,6 +112,7 @@ export async function main(
     params: {
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
+        htmlElToCanvasEl?: (el: HTMLElement) => Promise<HTMLCanvasElement>
     } = {},
 ): Promise<SharedInPageUIState> {
     const isRunningInFirefox = checkBrowser() === 'firefox'
@@ -170,7 +170,7 @@ export async function main(
                     ])
                     return
                 } else {
-                    await highlightRenderer.removeAnnotationHighlight({
+                    highlightRenderer.removeAnnotationHighlight({
                         id: lastAction.id,
                     })
                     lastActions.shift()
@@ -480,6 +480,11 @@ export async function main(
         }
     }
 
+    const captureScreenshot = () =>
+        browser.tabs.captureVisibleTab(undefined, {
+            format: 'png',
+        })
+
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
@@ -510,7 +515,10 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
-                    browser,
+                    {
+                        captureScreenshot,
+                        htmlElToCanvasEl: params.htmlElToCanvasEl,
+                    },
                 )
 
                 if (
@@ -578,7 +586,10 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
-                    browser,
+                    {
+                        captureScreenshot,
+                        htmlElToCanvasEl: params.htmlElToCanvasEl,
+                    },
                 )
 
                 if (
@@ -724,7 +735,9 @@ export async function main(
             )[0] as HTMLElement
 
             if (screenshotTarget) {
-                const dataURL = await captureScreenshot(screenshotTarget)
+                const dataURL = await captureScreenshotFromHTMLVideo(
+                    screenshotTarget,
+                )
                 inPageUI.showSidebar({
                     action: 'create_youtube_timestamp_with_screenshot',
                     imageData: dataURL,
@@ -737,7 +750,7 @@ export async function main(
         },
     }
 
-    async function captureScreenshot(screenshotTarget) {
+    async function captureScreenshotFromHTMLVideo(screenshotTarget) {
         let canvas = document.createElement('canvas')
         let height = screenshotTarget.offsetHeight
         let width = screenshotTarget.offsetWidth
@@ -857,7 +870,7 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
-                pkmSyncBG,
+                pkmSyncBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -946,7 +959,7 @@ export async function main(
             }
             await inPageUI.hideRibbon()
 
-            await this.injectCustomUIperPage(
+            await injectCustomUIperPage(
                 annotationsFunctions,
                 pkmSyncBG,
                 collectionsBG,
@@ -1078,7 +1091,7 @@ export async function main(
     ////////////////////////////////////////////
     // CHECK CURRENT PAGE IF NEED BE TO INJECT CUSTOM UI
     ////////////////////////////////////////////
-    await this.injectCustomUIperPage(
+    await injectCustomUIperPage(
         annotationsFunctions,
         pkmSyncBG,
         collectionsBG,
@@ -1154,7 +1167,7 @@ export async function main(
         const isStaging =
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
-        const email = _currentUser.email
+        const email = _currentUser?.email
 
         const baseUrl = isStaging
             ? 'https://cloudflare-memex-staging.memex.workers.dev'
@@ -1521,7 +1534,12 @@ export async function injectCustomUIperPage(
             })
         }
 
-        injectSubstackButtons(pkmSyncBG, browser, openSidebarInRabbitHole)
+        injectSubstackButtons(
+            pkmSyncBG,
+            browser.storage,
+            openSidebarInRabbitHole,
+            browser.runtime,
+        )
     }
 
     if (window.location.href.includes('web.telegram.org/')) {

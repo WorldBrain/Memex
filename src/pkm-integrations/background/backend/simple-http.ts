@@ -12,8 +12,21 @@ export class MemexLocalBackend {
     }
 
     async isConnected() {
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+        })
+
         try {
-            const response = await fetch(`${this.url}/status`)
+            const response = await fetch(`${this.url}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body,
+            })
+
             if (response.status === 200) {
                 return true
             } else if (response.status === 500) {
@@ -26,9 +39,20 @@ export class MemexLocalBackend {
         }
     }
     async isReadyToSync() {
-        console.log('isReadyToSync', this.url)
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+        })
+
         try {
-            const response = await fetch(`${this.url}/status`)
+            const response = await fetch(`${this.url}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body,
+            })
             if (response.status === 200) {
                 return true
             } else if (response.status === 500) {
@@ -111,6 +135,8 @@ export class MemexLocalBackend {
         const syncKey = await getPkmSyncKey()
         let body
 
+        console.log('syncKey', syncKey)
+
         if (document.contentType === 'annotation') {
             body = {
                 sourceApplication: 'Memex',
@@ -188,7 +214,12 @@ export class MemexLocalBackend {
 
             if (response.ok) {
                 const responseObj = await response.json()
+                console.log('responseObj', responseObj)
                 return responseObj
+            }
+
+            if (response.status === 403) {
+                return 'not-allowed'
             }
 
             if (!response.ok || response.status !== 200) {
@@ -208,7 +239,7 @@ export class MemexLocalBackend {
     ): Promise<any> {
         const syncKey = await getPkmSyncKey()
 
-        console.log('feedSources', feedSources)
+        console.log('feedSources', feedSources, syncKey)
 
         const body = JSON.stringify({
             feedSources: feedSources,
@@ -232,10 +263,13 @@ export class MemexLocalBackend {
 
         if (!response.ok || response.status !== 200) {
             throw new Error(`Error getting all RSS feeds: ${response.status}`)
+            return 'error'
         }
     }
     async loadFeedSources(): Promise<any> {
         const syncKey = await getPkmSyncKey()
+
+        console.log('loaaaaa', syncKey)
 
         const body = JSON.stringify({
             syncKey: syncKey,

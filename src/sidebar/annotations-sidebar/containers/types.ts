@@ -154,8 +154,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         feedTitle: string
         feedUrl: string
         feedFavIcon?: string
-        type?: 'substack'
-        confirmState?: TaskState
+        type?: 'substack' | string
+        confirmState?: TaskState | string
     }[]
 
     // Indicates what is the currently selected space in the leaf screen
@@ -313,6 +313,7 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    processFileImportFeeds: { fileString: string }
     getHighlightColorSettings: null
     saveHighlightColor: {
         noteId: string
@@ -322,13 +323,7 @@ interface SidebarEvents {
     saveFeedSources: {
         sources: string
     }
-    loadFeedSources: {
-        sources: {
-            feedTitle: string
-            feedUrl: string
-            type: 'substack'
-        }[]
-    }
+    loadFeedSources: null
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
@@ -553,6 +548,7 @@ export interface SuggestionCard {
     comment?: string
     unifiedId?: UnifiedAnnotation['unifiedId']
     sourceApplication?: string
+    distance?: number
 }
 
 export interface ListInstance {

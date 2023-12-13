@@ -1,10 +1,6 @@
 import React, { ChangeEventHandler } from 'react'
 import styled, { css } from 'styled-components'
-import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
-import { Loader, Search as SearchIcon } from '@styled-icons/feather'
-import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { browser } from 'webextension-polyfill-ts'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 

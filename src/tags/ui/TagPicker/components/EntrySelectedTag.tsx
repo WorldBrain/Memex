@@ -1,9 +1,6 @@
 import React, { ChangeEvent } from 'react'
 import styled from 'styled-components'
-import { X as XIcon } from '@styled-icons/feather'
 import { ActiveTag } from './ActiveTag'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import * as icons from 'src/common-ui/components/design-library/icons'
 
 interface Props {
     dataAttributeName: string
