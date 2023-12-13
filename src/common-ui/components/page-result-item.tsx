@@ -53,6 +53,7 @@ class PageResultItem extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                             </div>
                         </div>
                     </div>
+                    {this.props.tags.length > 0 ? this.props.tagHolder : null}
                 </div>
             </React.Fragment>
         )

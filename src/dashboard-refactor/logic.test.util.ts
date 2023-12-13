@@ -184,6 +184,7 @@ export async function setupTest(
         ) as any,
         localStorage: device.browserAPIs.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
+        tagsBG: device.backgroundModules.tags.remoteFunctions,
         syncSettingsBG: device.backgroundModules.syncSettings.remoteFunctions,
         pageIndexingBG: device.backgroundModules.pages.remoteFunctions as any,
         pageActivityIndicatorBG:

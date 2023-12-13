@@ -19,6 +19,8 @@ const searchModule = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.search
 const customLists = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.customLists
+const tags = (setup: BackgroundIntegrationTestSetup) =>
+    setup.backgroundModules.tags
 const bookmarks = (setup: BackgroundIntegrationTestSetup) =>
     setup.backgroundModules.bookmarks
 
@@ -412,6 +414,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 fullUrl: DATA.PAGE_1.fullUrl,
                                 tabId: DATA.TEST_TAB_1.id,
                                 timestamp: DATA.VISIT_4,
+                            })
+                            await tags(setup).addTagToExistingUrl({
+                                url: DATA.PAGE_1.fullUrl,
+                                tag: DATA.TAG_1,
                             })
                         },
                         expectedStorageChanges: {

@@ -2,6 +2,7 @@ import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
 import ProgressManager from './progress-manager'
 import getImportStateManager from './state-manager'
 import browser from 'webextension-polyfill'
+import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
@@ -29,6 +30,7 @@ export default class ImportConnectionHandler {
     constructor(options: {
         port: any
         quick?: boolean
+        tagsModule: TagsBackground
         customListsModule: CustomListBackground
         bookmarks: BookmarksBackground
         pages: PageIndexingBackground
@@ -44,6 +46,7 @@ export default class ImportConnectionHandler {
             concurrency: DEF_CONCURRENCY,
             observer: this.itemObserver,
             stateManager: getImportStateManager(),
+            tagsModule: options.tagsModule,
             customListsModule: options.customListsModule,
             bookmarks: options.bookmarks,
             pages: options.pages,

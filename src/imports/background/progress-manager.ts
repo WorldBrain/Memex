@@ -2,6 +2,7 @@ import promiseLimit from 'promise-limit'
 import noop from 'lodash/fp/noop'
 
 import ItemProcessor from './item-processor'
+import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
@@ -38,6 +39,7 @@ export default class ImportProgressManager {
     constructor(
         private options: {
             pages: PageIndexingBackground
+            tagsModule: TagsBackground
             customListsModule: CustomListBackground
             bookmarks: BookmarksBackground
             concurrency?: any
@@ -92,6 +94,7 @@ export default class ImportProgressManager {
      */
     _processItem = (chunkKey) => async ([encodedUrl, importItem]) => {
         const processor = new this._Processor({
+            tagsModule: this.options.tagsModule,
             customListsModule: this.options.customListsModule,
             pages: this.options.pages,
             bookmarks: this.options.bookmarks,

@@ -1,0 +1,70 @@
+@value colors: 'src/common-ui/colors.css';
+@value color4,
+color6,
+color2 from colors;
+
+.container {
+    display: flex;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    flex-direction: row;
+    width: 100%;
+}
+
+.title {
+    font-weight: 600;
+    color: color4;
+    font-size: 18px;
+}
+
+.notifContainer {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.tutorial {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    margin-top: 30px;
+    margin-bottom: 10px;
+}
+
+.instructions {
+    color: color6;
+    margin-top: 15px;
+    padding: 0 80px;
+    line-height: 20px;
+}
+
+.keyboardM {
+    box-shadow: 0px 1px 4px #bababa;
+    font-size: 25px;
+    color: color4;
+    background-color: white;
+    width: 45px;
+    height: 45px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: 600;
+    border-radius: 3px;
+}
+
+.keyboardPlus {
+    color: color4;
+    font-size: 20px;
+    margin: 0 15px;
+    display: flex;
+    align-items: center;
+    font-weight: 500;
+    height: 45px;
+    vertical-align: middle;
+}
+
+.keyboardSpace {
+    composes: keyboardM;
+    width: 180px;
+}

@@ -1,0 +1,37 @@
+.logo {
+    composes: logoSquared from 'src/common-ui/icons.css';
+    height: 20px;
+    vertical-align: bottom;
+    width: 20px;
+}
+
+.title {
+    display: flex;
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    flex-direction: row;
+    width: 100%;
+}
+
+.notifContainer {
+    width: fit-content;
+    margin: 10px auto;
+    margin-top: 20px;
+    text-align: left;
+}
+
+.selectIcon {
+    height: 30px;
+    vertical-align: super;
+}
+
+.notifText {
+    font-size: 16px;
+    text-align: center;
+    display: inline-block;
+    vertical-align: top;
+    margin-top: 3px;
+    margin-bottom: 23px;
+    margin-left: 15px;
+}

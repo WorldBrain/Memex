@@ -4,6 +4,7 @@ import { BookmarksInterface } from 'src/bookmarks/background/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { SubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { FeaturesInterface } from 'src/features/background/feature-opt-ins'
+import { RemoteTagsInterface } from 'src/tags/background/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { RemoteReaderInterface } from 'src/reader/types'
 import { AnnotationInterface } from 'src/annotations/background/types'
@@ -26,6 +27,7 @@ export interface RemoteFunctionImplementations<
     subscription: SubscriptionsService
     // features: FeaturesInterface
     featuresBeta: FeaturesBetaInterface
+    tags: RemoteTagsInterface
     collections: RemoteCollectionsInterface
     copyPaster: RemoteCopyPasterInterface
     readablePageArchives: RemoteReaderInterface
@@ -46,6 +48,7 @@ export const remoteFunctions: RemoteFunctionImplementations<'caller'> = {
     subscription: runInBackground(),
     // features: runInBackground(),
     featuresBeta: runInBackground(),
+    tags: runInBackground(),
     pageActivityIndicator: runInBackground(),
     collections: runInBackground(),
     copyPaster: runInBackground(),
@@ -63,6 +66,7 @@ export const subscription = remoteFunctions.subscription
 // export const features = remoteFunctions.features
 export const features = {} as any
 export const featuresBeta = remoteFunctions.featuresBeta
+export const tags = remoteFunctions.tags
 export const collections = remoteFunctions.collections
 export const pageActivityIndicator = remoteFunctions.pageActivityIndicator
 export const copyPaster = remoteFunctions.copyPaster

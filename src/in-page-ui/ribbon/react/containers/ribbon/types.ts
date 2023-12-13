@@ -2,6 +2,7 @@ import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in
 import type AnnotationsManager from 'src/annotations/annotations-manager'
 import type { BookmarksInterface } from 'src/bookmarks/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'

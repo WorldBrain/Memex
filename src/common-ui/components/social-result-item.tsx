@@ -136,6 +136,7 @@ class SocialResultItem extends PureComponent<Omit<Props, 'goToAnnotation'>> {
                         </div>
                     </div>
                     <div className={styles.bottomRow}>
+                        {!this.props.isOverview && this.props.tagHolder}
                         <ResultItemActions {...this.props} />
                     </div>
                 </div>

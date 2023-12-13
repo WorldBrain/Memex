@@ -3,6 +3,7 @@ import styled, { css } from 'styled-components'
 
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { fonts } from 'src/dashboard-refactor/styles'
+import TagPicker from 'src/tags/ui/TagPicker'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import DomainPicker from './DomainPicker/'
@@ -11,6 +12,7 @@ import DatePicker, {
 } from 'src/overview/search-bar/components/DateRangeSelection'
 import type { SearchFilterLabel, SearchFilterType } from '../types'
 import { DomainPickerDependencies } from './DomainPicker/logic'
+import { TagPickerDependencies } from 'src/tags/ui/TagPicker/logic'
 import { Icon } from 'src/dashboard-refactor/styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
@@ -36,6 +38,7 @@ export interface FiltersBarProps {
     toggleDatesFilter: () => void
     toggleSpaceFilter: () => void
     toggleDomainsFilter: () => void
+    tagPickerProps?: TagPickerDependencies
     datePickerProps: DateRangeSelectionProps
     spacePickerProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
@@ -55,6 +58,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
         isFiltered: boolean,
         filterIcons: IconKeys,
         filterProps:
+            | TagPickerDependencies
             | SpacePickerDependencies
             | DateRangeSelectionProps
             | DomainPickerDependencies,

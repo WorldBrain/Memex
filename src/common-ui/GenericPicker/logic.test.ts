@@ -80,7 +80,12 @@ const setupLogicHelper = async ({
     const backendEntryUpdate: PickerUpdateHandler = async ({
         added,
         deleted,
-    }) => null
+    }) =>
+        device.backgroundModules.tags.updateTagForPage({
+            added,
+            deleted,
+            url: url ?? TESTURL,
+        })
 
     if (!queryEntries) {
         queryEntries = queryEntryResults
@@ -399,5 +404,104 @@ describe('GenericPickerLogic', () => {
         expect(() => entryPickerLogic.validateEntry('   ')).toThrowError(
             `Test Validation: Can't add entry with only whitespace`,
         )
+    })
+
+    it('should correctly add entry ', async ({ device }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+        })
+
+        const entriesBefore = await device.backgroundModules.tags.fetchPageTags(
+            {
+                url: TESTURL,
+            },
+        )
+        await testLogic.processEvent('resultEntryPress', {
+            entry: { name: 'sugg1', focused: false, selected: false },
+        })
+        await entryPickerLogic.processingUpstreamOperation
+
+        const entriesAfter = await device.backgroundModules.tags.fetchPageTags({
+            url: TESTURL,
+        })
+
+        expect(entriesBefore).toEqual([])
+        expect(entriesAfter).toEqual(['sugg1'])
+    })
+
+    it('should correctly add entry to all tabs', async ({ device }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+            initialSuggestions,
+        })
+
+        const { tags } = device.backgroundModules
+
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual([])
+        expect(testLogic.state.selectedEntries).toEqual([])
+
+        await testLogic.processEvent('resultEntryAllPress', {
+            entry: { name: 'sugg1', focused: false, selected: false },
+        })
+        await entryPickerLogic.processingUpstreamOperation
+
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual(['sugg1'])
+        expect(testLogic.state.selectedEntries).toEqual(['sugg1'])
+    })
+
+    it('should correctly add a new entry to all tabs', async ({ device }) => {
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            device,
+        })
+
+        const { tags } = device.backgroundModules
+
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual([])
+        expect(testLogic.state.selectedEntries).toEqual([])
+
+        await testLogic.processEvent('newEntryAllPress', {
+            entry: 'sugg1',
+        })
+        await entryPickerLogic.processingUpstreamOperation
+
+        expect(await tags.fetchPageTags({ url: TESTURL })).toEqual(['sugg1'])
+        expect(testLogic.state.selectedEntries).toEqual(['sugg1'])
+    })
+
+    it('should be in the right state after an error adding a entry', async ({
+        device,
+    }) => {
+        const initialSuggestions = ['sugg1', 'sugg2']
+        const testError = Error('test error')
+        const onUpdateEntrySelection = async () => {
+            throw testError
+        }
+        const { testLogic, entryPickerLogic } = await setupLogicHelper({
+            onUpdateEntrySelection,
+            device,
+            initialSuggestions,
+        })
+
+        const entriesBefore = await device.backgroundModules.tags.fetchPageTags(
+            {
+                url: TESTURL,
+            },
+        )
+
+        await expect(
+            testLogic.processEvent('resultEntryPress', {
+                entry: { name: 'sugg1', focused: false, selected: false },
+            }),
+        ).rejects.toEqual(testError)
+
+        const entriesAfter = await device.backgroundModules.tags.fetchPageTags({
+            url: TESTURL,
+        })
+
+        expect(entriesBefore).toEqual([])
+        expect(entriesAfter).toEqual([])
     })
 })

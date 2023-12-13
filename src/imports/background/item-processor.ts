@@ -3,6 +3,7 @@ import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { normalizeTimestamp } from './utils'
+import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
@@ -81,6 +82,7 @@ export default class ImportItemProcessor {
 
     constructor(
         private options: {
+            tagsModule: TagsBackground
             pages: PageIndexingBackground
             bookmarks: BookmarksBackground
             customListsModule: CustomListBackground
@@ -131,6 +133,14 @@ export default class ImportItemProcessor {
                         url,
                         suppressVisitCreation: true,
                     })
+                }),
+                ...tags.map(async (tag) => {
+                    await this.options.tagsModule
+                        .addTagToExistingUrl({
+                            url,
+                            tag,
+                        })
+                        .catch((e) => {}) // Lots of outside tags may violate our tag validity pattern; catch them and try others
                 }),
             ])
         } catch (e) {

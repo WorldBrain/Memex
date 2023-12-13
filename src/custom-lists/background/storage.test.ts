@@ -349,7 +349,12 @@ describe('Custom List Integrations', () => {
         })
 
         test('should not be able to create inbox list entries for pages once already read', async () => {
-            const { bookmarks, customLists, directLinking } = await setupTest({
+            const {
+                tags,
+                bookmarks,
+                customLists,
+                directLinking,
+            } = await setupTest({
                 skipTestData: true,
             })
             const url1 = 'https://test.com'
@@ -396,12 +401,14 @@ describe('Custom List Integrations', () => {
             // Tag a page - new inbox entry should be created - tag again after deleting entry - no new entry created
             setMockFetchPage(url1)
             await checkInboxEntry(url1, { shouldExist: false })
+            await tags.addTagToPage({ url: url1, tag: 'test' })
             await checkInboxEntry(url1, { shouldExist: true })
             await customLists.removePageFromList({
                 id: SPECIAL_LIST_IDS.INBOX,
                 url: url1,
             })
             await checkInboxEntry(url1, { shouldExist: false })
+            await tags.addTagToPage({ url: url1, tag: 'test' })
             await checkInboxEntry(url1, { shouldExist: false })
 
             // Bookmark a page - new inbox entry should be created - re-bookmark after deleting entry - no new entry created

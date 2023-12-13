@@ -11,6 +11,7 @@ import {
 import {
     contentSharing,
     auth,
+    tags,
     collections,
 } from 'src/util/remote-functions-background'
 // import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
@@ -75,6 +76,7 @@ interface State {
 
 class AnnotationList extends Component<Props, State> {
     private authBG = auth
+    private tagsBG = tags
     private collectionsBG = collections
     private contentShareBG = contentSharing
 
