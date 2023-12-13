@@ -63,7 +63,7 @@ const getContentFingerprints: GetContentFingerprints = async () => {
 Global.main({
     loadRemotely: false,
     getContentFingerprints,
-    _html2canvas: html2canvas,
+    htmlElToCanvasEl: (el) => html2canvas(el),
 }).then(async (inPageUI) => {
     // DEBUG: Use this in console to debug screenshot UX
     // ;(window as any)['promptPdfScreenshot'] = promptPdfScreenshot

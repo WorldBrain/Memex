@@ -15,7 +15,6 @@ import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
     remoteFunction,
     runInBackground,
-    RemoteFunctionRegistry,
     makeRemotelyCallableType,
     setupRpcConnection,
 } from 'src/util/webextensionRPC'
@@ -104,7 +103,6 @@ import {
     trackTwitterMessageList,
 } from './injectionUtils/twitter'
 import { injectSubstackButtons } from './injectionUtils/substack'
-import type html2canvas from 'html2canvas'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -114,7 +112,7 @@ export async function main(
     params: {
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
-        _html2canvas?: typeof html2canvas
+        htmlElToCanvasEl?: (el: HTMLElement) => Promise<HTMLCanvasElement>
     } = {},
 ): Promise<SharedInPageUIState> {
     const isRunningInFirefox = checkBrowser() === 'firefox'
@@ -482,6 +480,11 @@ export async function main(
         }
     }
 
+    const captureScreenshot = () =>
+        browser.tabs.captureVisibleTab(undefined, {
+            format: 'png',
+        })
+
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
@@ -513,8 +516,8 @@ export async function main(
                     document,
                     pdfViewer,
                     {
-                        browserAPI: browser,
-                        _html2canvas: params._html2canvas,
+                        captureScreenshot,
+                        htmlElToCanvasEl: params.htmlElToCanvasEl,
                     },
                 )
 
@@ -584,8 +587,8 @@ export async function main(
                     document,
                     pdfViewer,
                     {
-                        browserAPI: browser,
-                        _html2canvas: params._html2canvas,
+                        captureScreenshot,
+                        htmlElToCanvasEl: params.htmlElToCanvasEl,
                     },
                 )
 
@@ -732,7 +735,9 @@ export async function main(
             )[0] as HTMLElement
 
             if (screenshotTarget) {
-                const dataURL = await captureScreenshot(screenshotTarget)
+                const dataURL = await captureScreenshotFromHTMLVideo(
+                    screenshotTarget,
+                )
                 inPageUI.showSidebar({
                     action: 'create_youtube_timestamp_with_screenshot',
                     imageData: dataURL,
@@ -745,7 +750,7 @@ export async function main(
         },
     }
 
-    async function captureScreenshot(screenshotTarget) {
+    async function captureScreenshotFromHTMLVideo(screenshotTarget) {
         let canvas = document.createElement('canvas')
         let height = screenshotTarget.offsetHeight
         let width = screenshotTarget.offsetWidth
