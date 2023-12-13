@@ -22,7 +22,6 @@ import { AuthContextInterface } from 'src/authentication/background/types'
 import { userAuthorizedForReadwise } from './utils'
 import analytics from 'src/analytics'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { directoryOpen } from 'browser-fs-access'
 
 class ReadwiseSettingsContainer extends React.Component<
     AuthContextInterface & { showSubscriptionModal: () => void }

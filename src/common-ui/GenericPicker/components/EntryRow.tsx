@@ -1,6 +1,5 @@
 import React, { SyntheticEvent } from 'react'
 import styled, { css } from 'styled-components'
-import { Layers } from '@styled-icons/feather'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { DisplayEntry } from '../types'
@@ -81,7 +80,7 @@ class EntryRow extends React.Component<Props> {
     }
 }
 
-export const ActOnAllTabsButton = styled(Layers)`
+export const ActOnAllTabsButton = styled.div`
     pointer-events: auto !important;
 `
 

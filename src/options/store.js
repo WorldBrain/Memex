@@ -1,5 +1,4 @@
 import { createStore, combineReducers, compose, applyMiddleware } from 'redux'
-import { createEpicMiddleware, combineEpics } from 'redux-observable'
 import thunk from 'redux-thunk'
 
 import initSentry from '../util/raven'
@@ -42,8 +41,6 @@ const rootReducer = combineReducers({
     results,
 })
 
-const rootEpic = combineEpics(...Object.values(overviewPage.epics))
-
 /**
  * Used to transform the redux state before sending to raven, filtering out
  * anything we don't need to know.
@@ -63,7 +60,7 @@ const stateTransformer = ({ overview, ...state }) => ({
 })
 
 export default function configureStore({ ReduxDevTools = undefined } = {}) {
-    const middlewares = [createEpicMiddleware(rootEpic), thunk]
+    const middlewares = [thunk]
 
     initSentry({ reduxMiddlewares: middlewares, stateTransformer })
 
