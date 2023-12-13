@@ -4,7 +4,6 @@ import { BackgroundModules } from 'src/background-script/setup'
 type IntegrationTestDataCollection =
     | 'pages'
     | 'bookmarks'
-    | 'tags'
     | 'customLists'
     | 'pageListEntries'
     | 'annotations'
@@ -58,12 +57,6 @@ export async function insertIntegrationTestData(
             fullUrl: pages[0].url,
             timestamp: new Date('2019-10-10').getTime(),
             skipIndexing: true,
-        })
-    }
-    if (includeCollection('tags')) {
-        await backgroundModules.tags.addTagToExistingUrl({
-            tag: 'my-tag',
-            url: pages[0].url,
         })
     }
 

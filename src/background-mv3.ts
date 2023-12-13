@@ -182,7 +182,6 @@ async function main() {
         notifications: { create: createNotification } as any,
         bookmarks: backgroundModules.bookmarks.remoteFunctions,
         featuresBeta: backgroundModules.featuresBeta,
-        tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
         readablePageArchives: backgroundModules.readable.remoteFunctions,
         copyPaster: backgroundModules.copyPaster.remoteFunctions,

@@ -52,7 +52,6 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         const progress = new Progress({
             stateManager,
             pages: null,
-            tagsModule: {} as any,
             customListsModule: {} as any,
             bookmarks: {} as any,
             observer,
@@ -88,7 +87,6 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         const progress = new Progress({
             stateManager,
             pages: null,
-            tagsModule: {} as any,
             customListsModule: {} as any,
             bookmarks: {} as any,
             observer,
@@ -116,7 +114,6 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         const progress = new Progress({
             stateManager,
             pages: null,
-            tagsModule: {} as any,
             customListsModule: {} as any,
             bookmarks: {} as any,
             observer,

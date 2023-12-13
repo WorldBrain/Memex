@@ -12,7 +12,7 @@ import { ClickHandler } from 'src/popup/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
-import { notifications, tags } from 'src/util/remote-functions-background'
+import { notifications } from 'src/util/remote-functions-background'
 import * as Raven from 'src/util/raven'
 
 export interface Props {
@@ -157,25 +157,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    private get addTagRPC() {
-        if (this.props.fromOverview) {
-            return tags.addTagToExistingUrl
-        }
-
-        let rpcName
-        if (this.props.isSocialPost) {
-            rpcName = 'addTagForTweet'
-        } else if (this.props.isForAnnotation) {
-            rpcName = 'addAnnotationTag'
-        } else if (this.props.fromOverview) {
-            rpcName = 'addTag'
-        } else {
-            rpcName = 'addPageTag'
-        }
-
-        return remoteFunction(rpcName)
-    }
-
     private get delTagRPCName(): string {
         if (this.props.isSocialPost) {
             return 'delTagForTweet'
@@ -274,154 +255,6 @@ class IndexDropdownContainer extends Component<Props, State> {
         }
     }
 
-    /**
-     * Used for 'Enter' presses or 'Add new tag' clicks.
-     */
-    private addTag = async () => {
-        await this.props.onTagClickCb()
-
-        const newTag = this.getSearchVal()
-        this.props.onFilterAdd(newTag)
-
-        if (this.allowIndexUpdate) {
-            try {
-                if (this.props.allTabs) {
-                    this.setState((state) => ({
-                        multiEdit: state.multiEdit.add(newTag),
-                    }))
-                    await this.addTagsToOpenTabsRPC({ name: newTag })
-                } else {
-                    await this.addTagRPC({
-                        url: this.props.url,
-                        tag: newTag,
-                        tabId: this.props.tabId,
-                    })
-                }
-            } catch (err) {
-                this.handleError(err)
-                this.props.onFilterDel(newTag)
-            }
-        }
-        await this.storeTrackEvent(true)
-
-        this.inputEl.focus()
-
-        // Clear the component state.
-        this.setState({
-            searchVal: '',
-            focused: -1,
-            clearFieldBtn: false,
-        })
-
-        if (this.props.source === 'tag') {
-            const tagSuggestions = await getLocalStorage(
-                TAG_SUGGESTIONS_KEY,
-                [],
-            )
-
-            if (!tagSuggestions.includes(newTag)) {
-                tagSuggestions.push(newTag)
-                await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
-            }
-        }
-    }
-
-    private async handleSingleTagEdit(tag: any) {
-        const pageHasTag = this.pageHasTag(tag, true)
-        let updateState
-        let revertState
-        let updateDb
-
-        if (pageHasTag) {
-            updateState = this.props.onFilterDel
-            revertState = this.props.onFilterAdd
-            updateDb = this.delTagRPC
-        } else {
-            updateState = this.props.onFilterAdd
-            revertState = this.props.onFilterDel
-            updateDb = this.addTagRPC
-        }
-
-        try {
-            if (this.allowIndexUpdate) {
-                await updateDb({
-                    url: this.props.url,
-                    tag,
-                    tabId: this.props.tabId,
-                    fromOverview: this.props.fromOverview,
-                })
-            }
-            updateState(tag)
-            await this.storeTrackEvent(!pageHasTag)
-        } catch (err) {
-            this.handleError(err)
-            revertState(tag)
-        }
-    }
-
-    private async handleMultiTagEdit(tag: string) {
-        const multiEdit = this.state.multiEdit
-        let opPromise: Promise<any>
-
-        if (!multiEdit.has(tag)) {
-            multiEdit.add(tag)
-            opPromise = this.addTagsToOpenTabsRPC({ name: tag })
-        } else {
-            multiEdit.delete(tag)
-            opPromise = this.delTagsFromOpenTabsRPC({ name: tag })
-        }
-
-        // Allow state update to happen optimistically before async stuff is done
-        this.setState(() => ({ multiEdit }))
-        await opPromise
-    }
-
-    /**
-     * Used for clicks on displayed tags. Will either add or remove tags to the page
-     * depending on their current status as assoc. tags or not.
-     */
-    private handleTagSelection = (index: number) => async (event) => {
-        await this.props.onTagClickCb()
-
-        const tag =
-            this.state.searchVal.length > 0
-                ? this.state.displayFilters[index]
-                : [
-                      ...new Set([
-                          ...this.state.filters,
-                          ...this.state.excFilters,
-                          ...this.state.displayFilters,
-                      ]),
-                  ][index]
-
-        if (this.props.allTabs) {
-            await this.handleMultiTagEdit(tag)
-        } else {
-            await this.handleSingleTagEdit(tag)
-        }
-
-        this.inputEl.focus()
-
-        // Clear the component state.
-        this.setState({
-            searchVal: '', // Clear the search field.
-            focused: -1,
-            clearFieldBtn: false,
-        })
-
-        if (this.props.source === 'tag') {
-            const tagSuggestions = await getLocalStorage(
-                TAG_SUGGESTIONS_KEY,
-                [],
-            )
-
-            if (!tagSuggestions.includes(tag)) {
-                tagSuggestions.push(tag)
-                await setLocalStorage(TAG_SUGGESTIONS_KEY, [...tagSuggestions])
-            }
-        }
-    }
-
     private handleExcTagSelection = (index: number) => (event) => {
         const tag =
             this.state.searchVal.length > 0
@@ -459,18 +292,6 @@ class IndexDropdownContainer extends Component<Props, State> {
     private handleSearchEnterPress = (
         event: React.KeyboardEvent<HTMLInputElement>,
     ) => {
-        if (
-            this.canCreateTag() &&
-            this.state.focused === -1 &&
-            this.state.displayFilters.length === 0
-        ) {
-            return this.addTag()
-        }
-
-        if (this.state.displayFilters.length && this.state.focused !== -1) {
-            return this.handleTagSelection(this.state.focused)(event)
-        }
-
         return null
     }
 
@@ -586,7 +407,6 @@ class IndexDropdownContainer extends Component<Props, State> {
                 <IndexDropdownRow
                     {...tag}
                     key={i}
-                    onClick={this.handleTagSelection(i)}
                     onExcClick={this.handleExcTagSelection(i)}
                     {...this.props}
                     scrollIntoView={this.scrollElementIntoViewIfNeeded}
@@ -600,7 +420,6 @@ class IndexDropdownContainer extends Component<Props, State> {
                 <IndexDropdownNewRow
                     key="+"
                     value={this.state.searchVal}
-                    onClick={this.addTag}
                     focused={
                         this.state.focused === this.state.displayFilters.length
                     }

@@ -49,8 +49,6 @@ export interface Props extends Partial<SocialPage> {
     isSocial?: boolean
     annotations?: any[]
     annotsCount?: number
-    tagHolder: ReactNode
-    tagManager: ReactNode
     listManager: ReactNode
     copyPasterManager: ReactNode
     onTagBtnClick: MouseEventHandler
@@ -140,7 +138,6 @@ class ResultItem extends PureComponent<Props> {
             >
                 <div className={styles.resultBoxItem}>
                     {this.props.isDeleting && <LoadingIndicator />}
-                    {this.props.tagManager}
                     {this.props.listManager}
                     {this.props.copyPasterManager}
                     <div

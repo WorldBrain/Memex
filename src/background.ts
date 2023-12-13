@@ -195,7 +195,6 @@ export async function main(): Promise<void> {
         bookmarks: backgroundModules.bookmarks.remoteFunctions,
         // features: backgroundModules.features,
         featuresBeta: backgroundModules.featuresBeta,
-        tags: backgroundModules.tags.remoteFunctions,
         collections: backgroundModules.customLists.remoteFunctions,
         pageActivityIndicator:
             backgroundModules.pageActivityIndicator.remoteFunctions,

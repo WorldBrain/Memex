@@ -1539,26 +1539,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageTags: EventHandler<'setPageTags'> = async ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                pageData: {
-                    byId: {
-                        [event.id]: {
-                            tags: { $apply: updatePickerValues(event) },
-                        },
-                    },
-                },
-            },
-        })
-
-        await this.options.tagsBG.updateTagForPage({
-            url: event.fullPageUrl,
-            deleted: event.deleted,
-            added: event.added,
-        })
-    }
-
     setPageLists: EventHandler<'setPageLists'> = async ({
         event,
         previousState,

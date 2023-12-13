@@ -40,11 +40,6 @@ export class StorexHubBackground {
                 fullUrl: string
                 time: number
             }) => Promise<void>
-            addTags: (params: {
-                normalizedUrl: string
-                fullUrl: string
-                tags: string[]
-            }) => Promise<void>
             addToLists: (params: {
                 normalizedUrl: string
                 fullUrl: string
@@ -173,22 +168,6 @@ export class StorexHubBackground {
                 status: 'internal-error',
                 errorStatus: 'could-not-bookmark',
                 errorText: `Error while bookmarking page: ${e}`,
-            }
-        }
-
-        try {
-            if (args.tags) {
-                await this.dependencies.addTags({
-                    fullUrl,
-                    normalizedUrl,
-                    tags: args.tags,
-                })
-            }
-        } catch (e) {
-            return {
-                status: 'internal-error',
-                errorStatus: 'could-not-tag',
-                errorText: `Error while adding tags to page: ${e}`,
             }
         }
 

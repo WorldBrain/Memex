@@ -6,7 +6,6 @@ import reduce from 'lodash/fp/reduce'
 import { selectors as opt } from 'src/options/settings'
 import { LoadingIndicator, ResultItem } from 'src/common-ui/components'
 import ResultList from './ResultList'
-import { TagHolder } from 'src/common-ui/components/'
 import * as constants from '../constants'
 import { RootState } from 'src/options/types'
 import { Result, ResultsByUrl } from '../../types'
@@ -18,11 +17,9 @@ import { selectors as sidebarLeft } from '../../sidebar-left'
 import { actions as filterActs, selectors as filters } from 'src/search-filters'
 import { PageUrlsByDay } from 'src/search/background/types'
 import { getLocalStorage } from 'src/util/storage'
-import { TAG_SUGGESTIONS_KEY } from 'src/constants'
 import niceTime from 'src/util/nice-time'
 import { Annotation } from 'src/annotations/types'
-import TagPicker from 'src/tags/ui/TagPicker'
-import { auth, tags, collections } from 'src/util/remote-functions-background'
+import { auth, collections } from 'src/util/remote-functions-background'
 import { HoverBoxDashboard as HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import { ContentSharingInterface } from 'src/content-sharing/background/types'
@@ -32,7 +29,6 @@ import { formateCalendarTime } from '@worldbrain/memex-common/lib/utils/date-tim
 const styles = require('./ResultList.css')
 
 interface LocalState {
-    tagSuggestions: string[]
     activeTagPickerNoteId: string | undefined
     activeListPickerNoteId: string | undefined
     activeShareMenuNoteId: string | undefined
@@ -117,7 +113,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
         this.copyPasterBtnRefs.push(el)
 
     state: LocalState = {
-        tagSuggestions: [],
         activeTagPickerNoteId: undefined,
         activeListPickerNoteId: undefined,
         activeShareMenuNoteId: undefined,
@@ -125,9 +120,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
     }
 
     async componentDidMount() {
-        const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
-        this.setState({ tagSuggestions: tagSuggestions.reverse() })
-
         document.addEventListener('click', this.handleOutsideClick, false)
         this.props.setBetaFeaturesEnabled(true)
     }
@@ -162,23 +154,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
         if (!clickedListDiv && !wereAnyClicked(this.listBtnRefs)) {
             this.props.resetActiveListIndex()
         }
-    }
-
-    handleTagUpdate = (index: number) => async ({ added, deleted }) => {
-        const url = this.props.searchResults[index].fullUrl
-        const backendResult = tags.updateTagForPage({
-            added,
-            deleted,
-            url,
-        })
-
-        if (added) {
-            this.props.addTag(index)(added)
-        }
-        if (deleted) {
-            return this.props.delTag(index)(deleted)
-        }
-        return backendResult
     }
 
     handleListUpdate = (index: number) => async ({ added, deleted }) => {
@@ -220,26 +195,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
         )
     }
 
-    private renderTagsManager(
-        { shouldDisplayTagPopup, tags: selectedTags }: Result,
-        index,
-    ) {
-        if (!shouldDisplayTagPopup) {
-            return null
-        }
-
-        return (
-            <HoverBox>
-                <div ref={(ref) => this.setTagDivRef(ref)}>
-                    <TagPicker
-                        onUpdateEntrySelection={this.handleTagUpdate(index)}
-                        initialSelectedEntries={async () => selectedTags}
-                    />
-                </div>
-            </HoverBox>
-        )
-    }
-
     private renderCopyPasterManager(doc: Result, index) {
         if (!doc.shouldDisplayCopyPasterPopup) {
             return null
@@ -255,17 +210,6 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
             </HoverBox>
         )
     }
-
-    private renderTagHolder = ({ tags: currentTags }, resultIndex) => (
-        <TagHolder
-            tags={[...new Set([...currentTags])]}
-            maxTagsLimit={constants.SHOWN_TAGS_LIMIT}
-            setTagManagerRef={this.trackDropdownRef}
-            handlePillClick={this.props.handlePillClick}
-            handleTagBtnClick={this.props.handleTagBtnClick(resultIndex)}
-            env={'overview'}
-        />
-    )
 
     private formatTime(date: number): string {
         return formateCalendarTime(date, {
@@ -300,9 +244,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 setTagButtonRef={this.setTagButtonRef}
                 setListButtonRef={this.setListButtonRef}
                 setCopyPasterButtonRef={this.setCopyPasterButtonRef}
-                tagHolder={this.renderTagHolder(doc, index)}
                 setUrlDragged={this.props.setUrlDragged}
-                tagManager={this.renderTagsManager(doc, index)}
                 listManager={this.renderListsManager(doc, index)}
                 copyPasterManager={this.renderCopyPasterManager(doc, index)}
                 resetUrlDragged={this.props.resetUrlDragged}

@@ -16,7 +16,6 @@ import type {
     RootState as SyncModalState,
     Events as SyncModalEvents,
 } from './header/sync-status-menu/types'
-import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { SearchInterface } from 'src/search/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
@@ -88,7 +87,6 @@ export interface DashboardDependencies {
     analytics: Analytics
     theme: MemexTheme
     analyticsBG: AnalyticsCoreInterface
-    tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface

@@ -54,20 +54,6 @@ describe('Search index integration', () => {
             pageDoc: DATA.PAGE_1,
             visits: [DATA.VISIT_1],
         })
-
-        // Add some test tags
-        await params.tags.addTagToExistingUrl({
-            url: DATA.PAGE_3.url,
-            tag: 'good',
-        })
-        await params.tags.addTagToExistingUrl({
-            url: DATA.PAGE_3.url,
-            tag: 'quality',
-        })
-        await params.tags.addTagToExistingUrl({
-            url: DATA.PAGE_2.url,
-            tag: 'quality',
-        })
     }
 
     // NOTE: this test data setup logic is separate as adding it to the main logic above failed a bunch of these tests.
@@ -652,18 +638,12 @@ describe('Search index integration', () => {
         })
 
         test('tag adding affects search', async () => {
-            const { search, tags } = await setupTest()
+            const { search } = await setupTest()
             const { docs: before } = await search({ tags: ['quality'] })
             expect(before.length).toBe(2)
             expect(before).not.toEqual(
                 expect.arrayContaining([[DATA.PAGE_ID_1, DATA.VISIT_1]]),
             )
-
-            // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await tags.addTagToExistingUrl({
-                url: DATA.PAGE_1.url,
-                tag: 'quality',
-            })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(3)
@@ -673,14 +653,12 @@ describe('Search index integration', () => {
         })
 
         test('tag deleting affects search', async () => {
-            const { search, tags } = await setupTest()
+            const { search } = await setupTest()
             const { docs: before } = await search({ tags: ['quality'] })
             expect(before.length).toBe(2)
             expect(before).toEqual(
                 expect.arrayContaining([[DATA.PAGE_ID_2, DATA.VISIT_2]]),
             )
-
-            await tags.delTag({ url: DATA.PAGE_2.url, tag: 'quality' })
 
             const { docs: after } = await search({ tags: ['quality'] })
             expect(after.length).toBe(1)

@@ -27,15 +27,10 @@ import { deriveStatusIconColor } from './header/sync-status-menu/util'
 import { FILTER_PICKERS_LIMIT } from './constants'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
-import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
+import { getListShareUrl } from 'src/content-sharing/utils'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
-import {
-    SPECIAL_LIST_IDS,
-    SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
-import PdfLocator from './components/PdfLocator'
 import ConfirmModal from 'src/common-ui/components/ConfirmModal'
 import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
 import {
@@ -51,9 +46,6 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SearchCopyPaster from './search-results/components/search-copy-paster'
 import ExpandAllNotes from './search-results/components/expand-all-notes'
-import SyncStatusMenu from './header/sync-status-menu'
-import { SETTINGS_URL } from 'src/constants'
-import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
@@ -62,10 +54,7 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
-import {
-    MemexTheme,
-    MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import { RGBAColor } from 'src/annotations/cache/types'
@@ -113,7 +102,6 @@ export class DashboardContainer extends StatefulUIElement<
         | 'searchBG'
         | 'backupBG'
         | 'listsBG'
-        | 'tagsBG'
         | 'authBG'
         | 'openCollectionPage'
         | 'summarizeBG'
@@ -141,7 +129,6 @@ export class DashboardContainer extends StatefulUIElement<
         searchBG: runInBackground(),
         backupBG: runInBackground(),
         listsBG: runInBackground(),
-        tagsBG: runInBackground(),
         authBG: runInBackground(),
         annotationsCache: new PageAnnotationsCache({
             syncSettingsBG: runInBackground(),
@@ -297,32 +284,6 @@ export class DashboardContainer extends StatefulUIElement<
                             domains: updatePickerValues(args)(args.selected),
                         }),
                 }}
-                tagPickerProps={
-                    searchResults.shouldShowTagsUIs && {
-                        onClickOutside: toggleTagsFilter,
-                        initialSelectedEntries: () =>
-                            searchFilters.tagsIncluded,
-                        queryEntries: (query) =>
-                            searchBG.suggest({
-                                query,
-                                type: 'tag',
-                                limit: FILTER_PICKERS_LIMIT,
-                            }),
-                        loadDefaultSuggestions: () =>
-                            searchBG.extendedSuggest({
-                                type: 'tag',
-                                limit: FILTER_PICKERS_LIMIT,
-                                notInclude: [
-                                    ...searchFilters.tagsIncluded,
-                                    ...searchFilters.tagsExcluded,
-                                ],
-                            }),
-                        onUpdateEntrySelection: (args) =>
-                            this.processEvent('setTagsIncluded', {
-                                tags: updatePickerValues(args)(args.selected),
-                            }),
-                    }
-                }
                 spacePickerProps={{
                     authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,

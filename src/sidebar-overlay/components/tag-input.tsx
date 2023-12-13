@@ -1,7 +1,6 @@
 import * as React from 'react'
 
 import TagHolder from './tag-holder'
-import TagPicker from 'src/tags/ui/TagPicker'
 import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 
 interface Props {
@@ -35,15 +34,7 @@ const TagInput = ({
             }
         }
 
-        tagPicker = (
-            <HoverBox>
-                <TagPicker
-                    onUpdateEntrySelection={handleTagsUpdate}
-                    initialSelectedEntries={async () => initialSelectedEntries}
-                    onClickOutside={() => setTagInputActive(false)}
-                />
-            </HoverBox>
-        )
+        tagPicker = <HoverBox></HoverBox>
     }
 
     return (

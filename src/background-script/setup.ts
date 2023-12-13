@@ -10,7 +10,6 @@ import EventLogBackground from 'src/analytics/internal/background'
 import JobSchedulerBackground from 'src/job-scheduler/background'
 import { jobs } from 'src/job-scheduler/background/jobs'
 import CustomListBackground from 'src/custom-lists/background'
-import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
 import { PKMSyncBackgroundModule } from '../pkm-integrations/background'
@@ -126,7 +125,6 @@ export interface BackgroundModules {
     eventLog: EventLogBackground
     customLists: CustomListBackground
     jobScheduler: JobSchedulerBackground
-    tags: TagsBackground
     bookmarks: BookmarksBackground
     backupModule: backup.BackupBackgroundModule
     pkmSyncModule: PKMSyncBackgroundModule
@@ -299,16 +297,6 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         bookmarks,
         analyticsBG,
-    })
-
-    const tags = new TagsBackground({
-        storageManager,
-        pages,
-        tabManagement,
-        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-        searchBackgroundModule: search,
-        analytics,
-        localBrowserStorage: options.browserAPIs.storage.local,
     })
 
     const reader = new ReaderBackground({ storageManager })
@@ -630,7 +618,6 @@ export function createBackgroundModules(options: {
         pageActivityIndicator,
         summarizeBG,
         customLists,
-        tags,
         bookmarks,
         tabManagement,
         readwise,
@@ -665,21 +652,6 @@ export function createBackgroundModules(options: {
                         timestamp: bookmark.time,
                     })
                 }
-            },
-            addTags: async (params) => {
-                const existingTags = await tags.storage.fetchPageTags({
-                    url: params.normalizedUrl,
-                })
-                await Promise.all(
-                    params.tags.map(async (tag) => {
-                        if (!existingTags.includes(tag)) {
-                            await tags.addTagToPage({
-                                url: params.fullUrl,
-                                tag,
-                            })
-                        }
-                    }),
-                )
             },
             addToLists: async (params) => {
                 const existingEntries = await customLists.storage.fetchListIdsByUrl(
@@ -753,7 +725,6 @@ export async function setupBackgroundModules(
     )
     setupImportBackgroundModule({
         pages: backgroundModules.pages,
-        tagsModule: backgroundModules.tags,
         customListsModule: backgroundModules.customLists,
         bookmarks: backgroundModules.bookmarks,
     })
@@ -813,7 +784,6 @@ export function getBackgroundStorageModules(
         eventLog: backgroundModules.eventLog.storage,
         search: backgroundModules.search.storage,
         social: backgroundModules.social.storage,
-        tags: backgroundModules.tags.storage,
         clientSyncLog: __deprecatedModules.clientSyncLogStorage,
         syncInfo: __deprecatedModules.syncInfoStorage,
         pages: backgroundModules.pages.storage,
