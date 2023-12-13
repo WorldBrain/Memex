@@ -307,6 +307,7 @@
         "webextension-polyfill-ts": "^0.8.8",
         "webpack": "^4.27.2",
         "webpack-build-notifier": "^0.1.25",
+        "webpack-bundle-analyzer": "^4.10.1",
         "webpack-chrome-extension-reloader": "^0.8.3",
         "webpack-cli": "^3.1.0",
         "webpack-merge": "^4.2.2",

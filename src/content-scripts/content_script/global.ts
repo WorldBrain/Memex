@@ -104,6 +104,7 @@ import {
     trackTwitterMessageList,
 } from './injectionUtils/twitter'
 import { injectSubstackButtons } from './injectionUtils/substack'
+import type html2canvas from 'html2canvas'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -113,6 +114,7 @@ export async function main(
     params: {
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
+        _html2canvas?: typeof html2canvas
     } = {},
 ): Promise<SharedInPageUIState> {
     const isRunningInFirefox = checkBrowser() === 'firefox'
@@ -510,7 +512,10 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
-                    browser,
+                    {
+                        browserAPI: browser,
+                        _html2canvas: params._html2canvas,
+                    },
                 )
 
                 if (
@@ -578,7 +583,10 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
-                    browser,
+                    {
+                        browserAPI: browser,
+                        _html2canvas: params._html2canvas,
+                    },
                 )
 
                 if (
