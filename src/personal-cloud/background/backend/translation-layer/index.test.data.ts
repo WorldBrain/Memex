@@ -10,6 +10,7 @@ import {
     FingerprintSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { buildMaterializedPath } from '@worldbrain/memex-common/lib/content-sharing/utils'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -380,7 +381,7 @@ export const LOCAL_TEST_DATA_V24 = {
             id: 1,
             listId: LOCAL_LISTS_V24.first.id,
             linkTarget: null,
-            parentListId: null,
+            parentListId: ROOT_NODE_PARENT_ID,
             path: null,
             order: 5,
             createdWhen: 1698124786131,
@@ -1122,7 +1123,7 @@ export const REMOTE_TEST_DATA_V24 = {
         first: {
             id: 1,
             personalList: REMOTE_LISTS_V24.first.id,
-            parentListId: null,
+            parentListId: ROOT_NODE_PARENT_ID,
             path: null,
             localId: LOCAL_TEST_DATA_V24.customListTrees.first.id,
             localPath: LOCAL_TEST_DATA_V24.customListTrees.first.path,

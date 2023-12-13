@@ -37,10 +37,21 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import { forEachTreeClimbAsync } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import {
+    ROOT_NODE_PARENT_ID,
+    forEachTreeClimbAsync,
+} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { OperationBatch } from '@worldbrain/storex'
 import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
+
+const cleanListTree = (listTree: ListTree) => ({
+    ...listTree,
+    parentListId:
+        listTree.parentListId === ROOT_NODE_PARENT_ID
+            ? null
+            : listTree.parentListId,
+})
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
@@ -89,11 +100,6 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'countObjects',
                     args: { listId: '$listId:int' },
-                },
-                findListTreeById: {
-                    collection: CustomListStorage.LIST_TREES_COLL,
-                    operation: 'findObject',
-                    args: { id: '$id:int' },
                 },
                 findListTreeByListId: {
                     collection: CustomListStorage.LIST_TREES_COLL,
@@ -549,18 +555,18 @@ export default class CustomListStorage extends StorageModule {
                 `List does not exist to create list tree data for: ${params}`,
             )
         }
+        const parentListId = params.parentListId ?? ROOT_NODE_PARENT_ID
 
         let order: number
         if (params.order != null) {
             order = params.order
         } else {
             // Look up all sibling nodes to determine order of this one
-            const siblingNodes: ListTree[] =
-                !params.isOnlyChild && params.parentListId != null
-                    ? await this.operation('findListTreesByParentListId', {
-                          parentListId: params.parentListId,
-                      })
-                    : []
+            const siblingNodes: ListTree[] = !params.isOnlyChild
+                ? await this.operation('findListTreesByParentListId', {
+                      parentListId,
+                  })
+                : []
             order = pushOrderedItem(
                 siblingNodes.map((node) => ({
                     id: node.id,
@@ -572,9 +578,9 @@ export default class CustomListStorage extends StorageModule {
 
         const now = params.now ?? Date.now()
         const listTree: Omit<ListTree, 'id'> = {
+            parentListId,
             listId: params.isLink ? null : params.localListId,
             linkTarget: params.isLink ? params.localListId : null,
-            parentListId: params.parentListId ?? null,
             path: params.pathIds?.length
                 ? buildMaterializedPath(...params.pathIds)
                 : null,
@@ -610,7 +616,7 @@ export default class CustomListStorage extends StorageModule {
                 { listId: parentListId },
             )
             parentListId = currentNode?.parentListId
-            if (parentListId == null) {
+            if (parentListId === ROOT_NODE_PARENT_ID || parentListId == null) {
                 break
             }
             pathIds.unshift(parentListId)
@@ -626,7 +632,7 @@ export default class CustomListStorage extends StorageModule {
             { parentListId: params.parentListId },
         )
         // TODO: Maybe order them
-        return listTrees
+        return listTrees.map(cleanListTree)
     }
 
     async getTreeDataForList(params: {
@@ -636,7 +642,7 @@ export default class CustomListStorage extends StorageModule {
             'findListTreeByListId',
             { listId: params.localListId },
         )
-        return currentNode
+        return currentNode ? cleanListTree(currentNode) : null
     }
 
     async getTreeDataForLists(params: {
@@ -646,7 +652,9 @@ export default class CustomListStorage extends StorageModule {
             'findListTreesByLocalListIds',
             { listIds: params.localListIds },
         )
-        return fromPairs(listTrees.map((tree) => [tree.listId, tree]))
+        return fromPairs(
+            listTrees.map((tree) => [tree.listId, cleanListTree(tree)]),
+        )
     }
 
     async updateListTreeParent(params: {
@@ -690,7 +698,7 @@ export default class CustomListStorage extends StorageModule {
                 }),
             isNodeALeaf: (node) => node.linkTarget != null,
             updateNodesParent: (node, parentNode) => {
-                node.parentListId = parentNode?.listId ?? null
+                node.parentListId = parentNode?.listId ?? ROOT_NODE_PARENT_ID
                 node.path =
                     parentNode != null
                         ? buildMaterializedPath(
@@ -741,6 +749,7 @@ export default class CustomListStorage extends StorageModule {
         await forEachTreeClimbAsync({
             startingNode,
             getParent: (node) =>
+                node.parentListId !== ROOT_NODE_PARENT_ID &&
                 node.parentListId != null
                     ? this.getTreeDataForList({
                           localListId: node.parentListId,

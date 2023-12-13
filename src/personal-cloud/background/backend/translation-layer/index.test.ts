@@ -46,6 +46,7 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import cloneDeep from 'lodash/cloneDeep'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -2302,7 +2303,7 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: testListTreesA.first.order,
                         sharedList: testListSharesA.first.remoteId,
-                        // parentListId: null,
+                        parentListId: ROOT_NODE_PARENT_ID,
                         // path: null,
                         createdWhen: expect.any(Number),
                         updatedWhen: expect.any(Number),
@@ -2360,7 +2361,7 @@ describe('Personal cloud translation layer', () => {
             listTreesData.second = {
                 ...listTreesData.second,
                 updatedWhen: nowB,
-                parentListId: null,
+                parentListId: ROOT_NODE_PARENT_ID,
                 path: null,
             }
             listTreesData.third = {
@@ -2412,7 +2413,7 @@ describe('Personal cloud translation layer', () => {
                         // localPath: listTreesData.second.path,
                         // localParentId: listTreesData.second.parentListId,
                         path: undefined,
-                        parentListId: undefined,
+                        parentListId: ROOT_NODE_PARENT_ID,
                         localPath: undefined,
                         localParentId: undefined,
                     },
@@ -2439,7 +2440,7 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: testListTreesB.first.order,
                         sharedList: testListSharesB.first.remoteId,
-                        // parentListId: null,
+                        parentListId: ROOT_NODE_PARENT_ID,
                         // path: null,
                         createdWhen: expect.any(Number),
                         updatedWhen: expect.any(Number),
@@ -2449,7 +2450,7 @@ describe('Personal cloud translation layer', () => {
                         creator: TEST_USER.id,
                         order: testListTreesB.second.order,
                         sharedList: testListSharesB.second.remoteId,
-                        // parentListId: null,
+                        parentListId: ROOT_NODE_PARENT_ID,
                         // path: null,
                         createdWhen: expect.any(Number),
                         updatedWhen: expect.any(Number),
