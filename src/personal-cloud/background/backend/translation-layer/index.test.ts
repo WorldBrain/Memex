@@ -47,6 +47,7 @@ import {
 } from 'src/content-sharing/utils'
 import cloneDeep from 'lodash/cloneDeep'
 import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import type { ListTree } from 'src/custom-lists/background/types'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -2564,11 +2565,11 @@ describe('Personal cloud translation layer', () => {
                 parentListId: LOCAL_TEST_DATA_V24.customListTrees.third.listId,
                 now: nowA,
             })
-            expect(
-                await setups[0].storageManager
-                    .collection('customListTrees')
-                    .findAllObjects({}),
-            ).toEqual(
+
+            const localData: ListTree[] = await setups[0].storageManager
+                .collection('customListTrees')
+                .findAllObjects({})
+            expect(localData).toEqual(
                 [
                     LOCAL_TEST_DATA_V24.customListTrees.first,
                     LOCAL_TEST_DATA_V24.customListTrees.second,
@@ -2582,6 +2583,9 @@ describe('Personal cloud translation layer', () => {
                 })),
             )
 
+            // Third list gets made a sibling of the second, thus it should be inserted in the first position
+            expect(localData[2].order).toBeLessThan(localData[1].order)
+
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -2589,14 +2593,21 @@ describe('Personal cloud translation layer', () => {
             const testListTrees = remoteData.personalListTree
             const testListShares = remoteData.personalListShare
 
+            const cloudData = await getDatabaseContents(
+                ['personalDataChange', 'personalListTree', 'sharedListTree'],
+                { getWhere: getPersonalWhere },
+            )
+
+            // Again, check order of third and second siblings but on cloud-side
+            expect(cloudData.personalListTree[2].order).toBeLessThan(
+                cloudData.personalListTree[1].order,
+            )
+            expect(cloudData.sharedListTree[2].order).toBeLessThan(
+                cloudData.sharedListTree[1].order,
+            )
+
             // prettier-ignore
-            expect(
-                await getDatabaseContents([
-                    'personalDataChange',
-                    'personalListTree',
-                    'sharedListTree',
-                ], { getWhere: getPersonalWhere }),
-            ).toEqual({
+            expect(cloudData).toEqual({
                 ...personalDataChanges(remoteData, [
                     [DataChangeType.Create, 'personalListTree', testListTrees.first.id],
                     [DataChangeType.Create, 'personalListTree', testListTrees.second.id],
@@ -2624,28 +2635,25 @@ describe('Personal cloud translation layer', () => {
                 sharedListTree: [
                     expect.objectContaining({
                         creator: TEST_USER.id,
-                        order: 1,
+                        parentListId: ROOT_NODE_PARENT_ID,
                         sharedList: testListShares.first.remoteId,
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
-                        order: 1,
                         sharedList: testListShares.second.remoteId,
-                        parentListId:testListShares.first.remoteId,
+                        parentListId: testListShares.first.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
-                        order: 1,
                         sharedList: testListShares.third.remoteId,
-                        parentListId:testListShares.first.remoteId,
+                        parentListId: testListShares.first.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId),
                     }),
                     expect.objectContaining({
                         creator: TEST_USER.id,
-                        order: 1,
                         sharedList: testListShares.fourth.remoteId,
-                        parentListId:testListShares.third.remoteId,
+                        parentListId: testListShares.third.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId, testListShares.third.remoteId),
                     }),
                 ],

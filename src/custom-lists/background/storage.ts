@@ -26,7 +26,10 @@ import {
     trackSpaceEntryCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { pushOrderedItem } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import {
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 import {
     isPkmSyncEnabled,
     sharePageWithPKM,
@@ -546,8 +549,8 @@ export default class CustomListStorage extends StorageModule {
         now?: number
         order?: number
         isLink?: boolean
-        isOnlyChild?: boolean
         skipSyncEntry?: boolean
+        shouldInsertAsFirstSibling?: boolean
     }): Promise<ListTree> {
         const existingList = await this.fetchListById(params.localListId)
         if (!existingList) {
@@ -562,18 +565,20 @@ export default class CustomListStorage extends StorageModule {
             order = params.order
         } else {
             // Look up all sibling nodes to determine order of this one
-            const siblingNodes: ListTree[] = !params.isOnlyChild
-                ? await this.operation('findListTreesByParentListId', {
-                      parentListId,
-                  })
-                : []
-            order = pushOrderedItem(
-                siblingNodes.map((node) => ({
-                    id: node.id,
-                    key: node.order,
-                })),
-                '',
-            ).create.key
+            const siblingNodes: ListTree[] = await this.operation(
+                'findListTreesByParentListId',
+                {
+                    parentListId,
+                },
+            )
+            const items = siblingNodes.map((node) => ({
+                id: node.id,
+                key: node.order,
+            }))
+            order =
+                params.shouldInsertAsFirstSibling && items.length > 0
+                    ? insertOrderedItemBeforeIndex(items, '', 0).create.key
+                    : pushOrderedItem(items, '').create.key
         }
 
         const now = params.now ?? Date.now()
@@ -688,9 +693,9 @@ export default class CustomListStorage extends StorageModule {
                                   parentNode.listId,
                               ]
                             : undefined,
-                    isOnlyChild: true,
                     now: params.now,
                     skipSyncEntry: true,
+                    shouldInsertAsFirstSibling: true,
                 }),
             getChildrenOfNode: (node) =>
                 this.getTreesByParent({
