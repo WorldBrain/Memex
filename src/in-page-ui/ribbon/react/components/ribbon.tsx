@@ -68,6 +68,7 @@ export interface Props extends RibbonSubcomponentProps {
     toggleFeed: () => void
     showFeed: boolean
     toggleAskAI: () => void
+    toggleRabbitHole: () => void
     openPDFinViewer: () => void
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
@@ -1333,7 +1334,7 @@ export default class Ribbon extends Component<Props, State> {
                         <PrimaryAction
                             size={'medium'}
                             type="tertiary"
-                            label={'Share Page'}
+                            label={'Share'}
                             fontColor={'greyScale8'}
                             onClick={null}
                             icon={'invite'}
@@ -1415,7 +1416,7 @@ export default class Ribbon extends Component<Props, State> {
                     <PrimaryAction
                         size={'medium'}
                         type="tertiary"
-                        label={'Summarize'}
+                        label={'Ask'}
                         fontColor={'greyScale8'}
                         onClick={() => this.props.toggleAskAI()}
                         icon={'stars'}
@@ -1423,6 +1424,43 @@ export default class Ribbon extends Component<Props, State> {
                 ) : (
                     <Icon
                         onClick={() => this.props.toggleAskAI()}
+                        color={'greyScale6'}
+                        heightAndWidth="20px"
+                        filePath={icons.stars}
+                    />
+                )}
+            </TooltipBox>
+        )
+    }
+    renderRabbitHoleTriggerButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
+        return (
+            <TooltipBox
+                tooltipText={'Go down the Rabbit Hole'}
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left'
+                        : topRight
+                        ? 'bottom'
+                        : bottomRight
+                        ? 'top'
+                        : 'left'
+                }
+                offsetX={10}
+            >
+                {(topRight || bottomRight) &&
+                !this.props.sidebar.isSidebarOpen ? (
+                    <PrimaryAction
+                        size={'medium'}
+                        type="tertiary"
+                        label={`🐇 Rabbit Hole`}
+                        fontColor={'greyScale8'}
+                        onClick={() => this.props.toggleRabbitHole()}
+                    />
+                ) : (
+                    <Icon
+                        onClick={() => this.props.toggleRabbitHole()}
                         color={'greyScale6'}
                         heightAndWidth="20px"
                         filePath={icons.stars}
@@ -1769,6 +1807,9 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.renderAItriggerButton()}
                                             {!this.props.sidebar
                                                 .isSidebarOpen &&
+                                                this.renderRabbitHoleTriggerButton()}
+                                            {!this.props.sidebar
+                                                .isSidebarOpen &&
                                                 this.renderSharePageButton()}
 
                                             {!this.props.sidebar
@@ -1840,6 +1881,8 @@ export default class Ribbon extends Component<Props, State> {
                                     {!this.props.sidebar.isSidebarOpen &&
                                         this.renderSidebarToggle()}
                                     {this.renderSearchButton()}
+                                    {!this.props.sidebar.isSidebarOpen &&
+                                        this.renderRabbitHoleTriggerButton()}
                                     {!this.props.sidebar.isSidebarOpen &&
                                         this.renderAItriggerButton()}
                                     {this.renderPDFReaderButton()}
