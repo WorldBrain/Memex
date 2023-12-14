@@ -282,6 +282,7 @@ interface AnnotationsSidebarState {
     showFeedSourcesMenu?: boolean
     feedSourcesTextAreaContent?: string
     fileDragOverFeedField?: boolean
+    addExistingSourcesOptions?: 'pristine' | 'existingKnowledge' | 'twitter'
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -334,6 +335,7 @@ export class AnnotationsSidebar extends React.Component<
         showFeedSourcesMenu: false,
         feedSourcesTextAreaContent: '',
         fileDragOverFeedField: false,
+        addExistingSourcesOptions: 'pristine',
     }
 
     async addYoutubeTimestampToEditor(commentText) {
@@ -2031,7 +2033,6 @@ export class AnnotationsSidebar extends React.Component<
                                                     this.addSourcesButtonRef
                                                 }
                                             />
-                                            {this.renderSourcesMenu()}
                                         </>
                                     ) : (
                                         <DropdownMenuBtnSmall
@@ -2196,6 +2197,12 @@ export class AnnotationsSidebar extends React.Component<
                                             </TooltipBox>
                                         )}
                                 </OptionsContainerLeft>
+                                {this.renderSourcesMenu(
+                                    this.props.activeAITab ===
+                                        'ExistingKnowledge'
+                                        ? 'existingKnowledge'
+                                        : 'isFollowed',
+                                )}
                                 <OptionsContainerRight>
                                     {this.props.pageSummary?.length > 0 && (
                                         <TooltipBox
@@ -2267,121 +2274,206 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    renderSourcesMenu = () => {
+    renderSourcesMenu = (mode: 'existingKnowledge' | 'isFollowed') => {
         if (this.state.showFeedSourcesMenu) {
-            return (
-                <PopoutBox
-                    targetElementRef={this.addSourcesButtonRef.current}
-                    strategy="absolute"
-                    placement="bottom"
-                    offsetX={5}
-                    offsetY={-5}
-                    closeComponent={() => {
-                        this.setState({ showFeedSourcesMenu: false })
-                    }}
-                    width="380px"
-                >
-                    <TextAreaContainer
-                        onDragOver={(event) => {
-                            this.setState({ fileDragOverFeedField: true })
+            if (mode === 'isFollowed') {
+                return (
+                    <PopoutBox
+                        targetElementRef={this.addSourcesButtonRef.current}
+                        strategy="absolute"
+                        placement="bottom"
+                        offsetX={5}
+                        offsetY={-5}
+                        closeComponent={() => {
+                            this.setState({ showFeedSourcesMenu: false })
                         }}
+                        width="380px"
                     >
-                        {this.state.fileDragOverFeedField ? (
-                            <DownloadDropArea
-                                onDragOver={(event) => {
-                                    event.preventDefault()
-                                }}
-                                onDrop={(event) => {
-                                    event.preventDefault()
-                                    console.log('drop')
-                                    console.log('event', event)
-                                    const file = event.dataTransfer.files[0]
-                                    const reader = new FileReader()
+                        <TextAreaContainer
+                            onDragOver={(event) => {
+                                this.setState({ fileDragOverFeedField: true })
+                            }}
+                        >
+                            {this.state.fileDragOverFeedField ? (
+                                <DownloadDropArea
+                                    onDragOver={(event) => {
+                                        event.preventDefault()
+                                    }}
+                                    onDrop={(event) => {
+                                        event.preventDefault()
+                                        console.log('drop')
+                                        console.log('event', event)
+                                        const file = event.dataTransfer.files[0]
+                                        const reader = new FileReader()
 
-                                    console.log('file', file)
-                                    reader.onload = (event) => {
-                                        const fileContent = event.target
-                                            .result as string
-                                        console.log('fileContent', fileContent)
-                                        this.props.processFileImportFeeds(
-                                            fileContent,
+                                        console.log('file', file)
+                                        reader.onload = (event) => {
+                                            const fileContent = event.target
+                                                .result as string
+                                            console.log(
+                                                'fileContent',
+                                                fileContent,
+                                            )
+                                            this.props.processFileImportFeeds(
+                                                fileContent,
+                                            )
+                                        }
+                                        reader.readAsText(file)
+                                        this.setState({
+                                            fileDragOverFeedField: false,
+                                        })
+                                    }}
+                                    onDragLeave={(event) => {
+                                        this.setState({
+                                            fileDragOverFeedField: false,
+                                        })
+                                    }}
+                                >
+                                    <Icon
+                                        filePath={icons.filePDF}
+                                        heightAndWidth="30px"
+                                        color="greyScale5"
+                                        hoverOff
+                                    />
+                                    Drop it like it's hot!
+                                </DownloadDropArea>
+                            ) : (
+                                <TextArea
+                                    placeholder={
+                                        'Add new RSS feed links or domains, one per line.\nOR drag a OPML file here to import feeds.'
+                                    }
+                                    onChange={(event) => {
+                                        this.setState({
+                                            feedSourcesTextAreaContent: (event.target as HTMLInputElement)
+                                                .value,
+                                        })
+                                    }}
+                                    height="100px"
+                                />
+                            )}
+                            <SourcesButtonRow>
+                                <PrimaryAction
+                                    type="forth"
+                                    icon={'plus'}
+                                    iconColor="prime1"
+                                    size="small"
+                                    onClick={() => {
+                                        this.props.saveFeedSources(
+                                            this.state
+                                                .feedSourcesTextAreaContent,
+                                        )
+                                        this.setState({
+                                            feedSourcesTextAreaContent: null,
+                                        })
+                                    }}
+                                    label="Add Feeds"
+                                />
+                                <PrimaryAction
+                                    onClick={() =>
+                                        window.open(
+                                            'https://airtable.com/appfDNclcUe1q8CIN/shrKuLb0y1kn8Afvl',
+                                            '_blank',
                                         )
                                     }
-                                    reader.readAsText(file)
-                                    this.setState({
-                                        fileDragOverFeedField: false,
-                                    })
-                                }}
-                                onDragLeave={(event) => {
-                                    this.setState({
-                                        fileDragOverFeedField: false,
-                                    })
-                                }}
-                            >
-                                <Icon
-                                    filePath={icons.filePDF}
-                                    heightAndWidth="30px"
-                                    color="greyScale5"
-                                    hoverOff
+                                    label="Request More Source Types"
+                                    icon={'helpIcon'}
+                                    type="tertiary"
+                                    size="small"
                                 />
-                                Drop it like it's hot!
-                            </DownloadDropArea>
-                        ) : (
-                            <TextArea
-                                placeholder={
-                                    'Add new RSS feed links or domains, one per line.\nOR drag a OPML file here to import feeds.'
-                                }
-                                onChange={(event) => {
-                                    this.setState({
-                                        feedSourcesTextAreaContent: (event.target as HTMLInputElement)
-                                            .value,
-                                    })
-                                }}
-                                height="100px"
-                            />
-                        )}
-                        <SourcesButtonRow>
-                            <PrimaryAction
-                                type="forth"
-                                icon={'plus'}
-                                iconColor="prime1"
-                                size="small"
-                                onClick={() => {
-                                    this.props.saveFeedSources(
-                                        this.state.feedSourcesTextAreaContent,
-                                    )
-                                    this.setState({
-                                        feedSourcesTextAreaContent: null,
-                                    })
-                                }}
-                                label="Add Sources"
-                            />
-                        </SourcesButtonRow>
-                    </TextAreaContainer>
-                    <ExistingSourcesList>
-                        {this.props.existingFeedSources?.map((source) => (
-                            <ExistingSourcesListItem>
-                                <ExistingSourcesListItemTitle>
-                                    {source.confirmState === 'error'
-                                        ? '⚠️ Error adding source'
-                                        : source.feedTitle}
-                                </ExistingSourcesListItemTitle>
-                                <ExistingSourcesListItemUrl>
-                                    {source.feedUrl?.length === 0
-                                        ? 'No URL Added'
-                                        : source.feedUrl?.replace(
-                                              'https://',
-                                              '',
-                                          )}
-                                </ExistingSourcesListItemUrl>
-                                {/* <ExistingSourcesListItemImage
+                            </SourcesButtonRow>
+                        </TextAreaContainer>
+                        <ExistingSourcesList>
+                            {this.props.existingFeedSources?.map((source) => (
+                                <ExistingSourcesListItem>
+                                    <ExistingSourcesListItemTitle>
+                                        {source.confirmState === 'error'
+                                            ? '⚠️ Error adding source'
+                                            : source.feedTitle}
+                                    </ExistingSourcesListItemTitle>
+                                    <ExistingSourcesListItemUrl>
+                                        {source.feedUrl?.length === 0
+                                            ? 'No URL Added'
+                                            : source.feedUrl?.replace(
+                                                  'https://',
+                                                  '',
+                                              )}
+                                    </ExistingSourcesListItemUrl>
+                                    {/* <ExistingSourcesListItemImage
                                     src={source.favicon}
                                 /> */}
-                            </ExistingSourcesListItem>
-                        ))}
-                    </ExistingSourcesList>
-                </PopoutBox>
-            )
+                                </ExistingSourcesListItem>
+                            ))}
+                        </ExistingSourcesList>
+                    </PopoutBox>
+                )
+            }
+            if (mode === 'existingKnowledge') {
+                return (
+                    <PopoutBox
+                        targetElementRef={this.addSourcesButtonRef.current}
+                        strategy="absolute"
+                        placement="bottom"
+                        offsetX={5}
+                        offsetY={-5}
+                        closeComponent={() => {
+                            this.setState({ showFeedSourcesMenu: false })
+                        }}
+                        width={
+                            this.props.activeAITab === 'ExistingKnowledge'
+                                ? '300px'
+                                : '380px'
+                        }
+                    >
+                        {this.state.addExistingSourcesOptions ===
+                            'pristine' && (
+                            <ExistingKnowledgeContainer>
+                                We don't have more sources for personal data
+                                yet, please suggest some here.
+                                {/* <PrimaryAction
+                                    onClick={() => {
+                                        null
+                                    }}
+                                    label="Import Saves & Annotations"
+                                    type="tertiary"
+                                    fullWidth
+                                    size="medium"
+                                    icon={'arrowDown'}
+                                    contentAlign="left"
+                                /> */}
+                                <PrimaryAction
+                                    onClick={() =>
+                                        window.open(
+                                            'https://airtable.com/appfDNclcUe1q8CIN/shrKuLb0y1kn8Afvl',
+                                            '_blank',
+                                        )
+                                    }
+                                    label="Request Sources"
+                                    type="secondary"
+                                    fullWidth
+                                    size="small"
+                                    icon={'helpIcon'}
+                                />
+                            </ExistingKnowledgeContainer>
+                        )}
+                        {/* {this.state.addExistingSourcesOptions ===
+                            'existingBookmarksAndNotes' && (
+                            <ExistingSourcesList>
+                                <LoadingIndicator size={30} />
+                                Bookmark & Notes are now importing, this may
+                                take a while.
+                            </ExistingSourcesList>
+                        )} */}
+                        {/* {this.state.addExistingSourcesOptions ===
+                            'Twitter' && (
+                            <ExistingSourcesList>
+                                <LoadingIndicator size={30} />
+                                Bookmark & Notes are now importing, this may
+                                take a while.
+                            </ExistingSourcesList>
+                        )} */}
+                    </PopoutBox>
+                )
+            }
         }
     }
 
@@ -2487,7 +2579,7 @@ export class AnnotationsSidebar extends React.Component<
                                         }}
                                     />
                                 </TooltipBox>
-                                {this.renderSourcesMenu()}
+                                {this.renderSourcesMenu('isFollowed')}
                             </AddSourceIconContainer>
                         </SuggestionsSwitcherButton>
                     </SuggestionsListSwitcher>
@@ -4015,7 +4107,8 @@ const TextAreaContainer = styled.div`
 const SourcesButtonRow = styled.div`
     padding: 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
-
+    display: flex;
+    justify-content: space-between;
     &:last-child {
         border-bottom: none;
     }
@@ -4024,10 +4117,17 @@ const SourcesButtonRow = styled.div`
 const ExistingSourcesList = styled.div`
     display: flex;
     flex-direction: column;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     width: 100%;
     height: fit-content;
-    max-height: 500px;
+    max-height: 300px;
     overflow: scroll;
+    padding: 10px;
+    width: fill-available;
+    width: -moz-available;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-weight: 400;
+    font-size: 14px;
 `
 
 const ExistingSourcesListItem = styled.div`
@@ -4037,10 +4137,25 @@ const ExistingSourcesListItem = styled.div`
     padding: 10px 20px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     cursor: pointer;
-    grid-gap: 5px;
     flex-direction: column;
     min-width: 10%;
     flex: 1;
+`
+
+const ExistingKnowledgeContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    max-height: 300px;
+    overflow: scroll;
+    padding: 10px 20px;
+    width: fill-available;
+    width: -moz-available;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-weight: 400;
+    font-size: 14px;
+    grid-gap: 10px;
 `
 
 const ExistingSourcesListItemImage = styled.div`
@@ -4152,7 +4267,6 @@ const SuggestionsSwitcherButton = styled.div<{ active }>`
     font-size: 13px;
     cursor: pointer;
     justify-content: center;
-    user-select: none;
     grid-gap: 5px;
     position: relative;
 
@@ -4405,6 +4519,9 @@ const AIContainerNotif = styled.div`
     width: 100%;
     margin: 30px 0px;
     flex-direction: column;
+    padding: 20px 60px;
+    width: fill-available;
+    width: -moz-available;
 `
 
 const AIContainerNotifTitle = styled.div`
