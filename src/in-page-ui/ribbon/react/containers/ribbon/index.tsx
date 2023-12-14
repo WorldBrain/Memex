@@ -163,6 +163,9 @@ export default class RibbonContainer extends StatefulUIElement<
                 toggleAskAI={() => {
                     this.processEvent('toggleAskAI', null)
                 }}
+                toggleRabbitHole={() => {
+                    this.processEvent('toggleRabbitHole', null)
+                }}
                 toggleShowTutorial={() => {
                     this.processEvent('toggleShowTutorial', null)
                 }}
