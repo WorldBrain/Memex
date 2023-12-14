@@ -2521,7 +2521,7 @@ export class AnnotationsSidebar extends React.Component<
         )
 
         return (
-            <AnnotationsSectionStyled>
+            <SuggestionsSectionStyled>
                 {((this.props.activeAITab !== 'ExistingKnowledge' &&
                     this.props.activeAITab !== 'InFollowedFeeds' &&
                     this.props.activeTab !== 'summary') ||
@@ -2656,7 +2656,7 @@ export class AnnotationsSidebar extends React.Component<
                         )}
                     </>
                 )}
-            </AnnotationsSectionStyled>
+            </SuggestionsSectionStyled>
         )
     }
 
@@ -5647,7 +5647,7 @@ const NewAnnotationSection = styled.section`
     margin-top: 5px;
 `
 
-const AnnotationsSectionStyled = styled.div`
+const SuggestionsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
         'liga' off;
@@ -5660,6 +5660,26 @@ const AnnotationsSectionStyled = styled.div`
     flex: 1;
     z-index: 19;
     overflow: hidden;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
+const AnnotationsSectionStyled = styled.div`
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: fill-available;
+    flex: 1;
+    z-index: 19;
+    overflow: scroll;
 
     scrollbar-width: none;
 
