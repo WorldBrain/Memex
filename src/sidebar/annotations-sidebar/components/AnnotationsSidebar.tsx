@@ -1640,8 +1640,10 @@ export class AnnotationsSidebar extends React.Component<
                     </SuggestionsListSwitcher>
                 )}
                 {this.props.summaryModeActiveTab === 'References' &&
+                    this.props.activeAITab !== 'ThisPage' &&
                     this.renderRabbitHoleList()}
-                {this.props.summaryModeActiveTab === 'Answer' && (
+                {(this.props.summaryModeActiveTab === 'Answer' ||
+                    this.props.activeAITab === 'ThisPage') && (
                     <SummaryContainer
                         isSummaryShown={
                             this.props.activeTab === 'summary' ||
@@ -2751,10 +2753,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderBetaAccessOnboarding() {
-        console.log(
-            'this.props.rabbitHoleBetaFeatureAccess',
-            this.props.rabbitHoleBetaFeatureAccess,
-        )
         if (this.props.rabbitHoleBetaFeatureAccess === 'denied') {
             return (
                 <OnboardingContainer>
@@ -2806,18 +2804,17 @@ export class AnnotationsSidebar extends React.Component<
                         🐇 {'  '}You're on the waitlist for Rabbit Hole
                     </OnboardingTitle>
                     <OnboardingSubtitle>
-                        Skip the line by subscribing to our yearly or lifetime
-                        plans.
+                        Skip the line by booking an onboarding call with us.
                     </OnboardingSubtitle>
                     <PrimaryAction
                         onClick={() => {
                             window.open(
-                                'https://memex.garden/upgrade',
+                                'https://links.memex.garden/20min-onboarding',
                                 '_blank',
                             )
                         }}
-                        label="Get instant access"
-                        icon="stars"
+                        label="Book Onboarding Call"
+                        icon="phone"
                         type="primary"
                         size="medium"
                     />
