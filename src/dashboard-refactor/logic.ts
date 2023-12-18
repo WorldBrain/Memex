@@ -3852,6 +3852,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        const { annotationsCache } = this.options
         const action = this.parseDragDropAction<any>(event.dataTransfer)
         if (!action) {
             return
@@ -3884,11 +3885,27 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                await this.performListTreeMove(
-                    action.listId,
-                    event.listId,
-                    previousState,
-                )
+                const listToMove = annotationsCache.lists.byId[action.listId]
+                // We only actualy want to perform the move if being dropped on a different parent list
+                if (listToMove.parentUnifiedId !== event.listId) {
+                    await this.performListTreeMove(
+                        action.listId,
+                        event.listId,
+                        previousState,
+                    )
+                }
+
+                const targetSiblingLists = annotationsCache
+                    .getListsByParentId(event.listId)
+                    .filter((list) => list.unifiedId !== action.listId)
+                // Ensure the moved list is ordered as the first among existing siblings
+                if (targetSiblingLists.length > 0) {
+                    await this.performListTreeReorder(
+                        action.listId,
+                        targetSiblingLists[0].unifiedId,
+                        previousState,
+                    )
+                }
             },
         )
     }
@@ -3898,6 +3915,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         newParentListId: UnifiedList['unifiedId'],
         previousState: State,
     ) {
+        const { annotationsCache } = this.options
         const listData = getListData(listId, previousState, {
             mustBeLocal: true,
             source: 'dropOnListItem',
@@ -3915,9 +3933,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         forEachTreeClimb({
             startingNode: dropTargetListData,
             getParent: (node) =>
-                this.options.annotationsCache.lists.byId[
-                    node.parentUnifiedId
-                ] ?? null,
+                annotationsCache.lists.byId[node.parentUnifiedId] ?? null,
             cb: (node, i) => {
                 isListAncestorOfTargetList =
                     isListAncestorOfTargetList || node.unifiedId === listId
@@ -3946,7 +3962,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
 
-        this.options.annotationsCache.updateList({
+        annotationsCache.updateList({
             unifiedId: listId,
             parentUnifiedId: newParentListId,
         })
@@ -3981,21 +3997,24 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState.listsSidebar.lists.byId[nextListIdInOrder]
         const draggedList = previousState.listsSidebar.lists.byId[listId]
 
-        const targetSiblingLists = annotationsCache.getListsByParentId(
-            targetList.parentUnifiedId,
-        )
-        console.log('reorder only - siblings:', targetSiblingLists)
+        const targetSiblingLists = targetList
+            ? annotationsCache.getListsByParentId(targetList.parentUnifiedId)
+            : []
         const index = targetSiblingLists.findIndex(
             (list) => list.unifiedId === nextListIdInOrder,
         )
-        const order = insertOrderedItemBeforeIndex(
-            targetSiblingLists.map((list) => ({
-                id: list.unifiedId,
-                key: list.order,
-            })),
-            draggedList.unifiedId,
-            index,
-        ).create.key
+        const items = targetSiblingLists.map((list) => ({
+            id: list.unifiedId,
+            key: list.order,
+        }))
+        const order =
+            index === -1
+                ? pushOrderedItem(items, draggedList.unifiedId).create.key
+                : insertOrderedItemBeforeIndex(
+                      items,
+                      draggedList.unifiedId,
+                      index,
+                  ).create.key
 
         if (order !== draggedList.order) {
             annotationsCache.updateList({
