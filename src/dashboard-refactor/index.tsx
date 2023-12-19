@@ -68,6 +68,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
+import { RGBAColor } from 'src/annotations/cache/types'
 
 const memexIconDarkMode = browser.runtime.getURL('img/memexIconDarkMode.svg')
 const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
@@ -142,7 +143,9 @@ export class DashboardContainer extends StatefulUIElement<
         listsBG: runInBackground(),
         tagsBG: runInBackground(),
         authBG: runInBackground(),
-        annotationsCache: new PageAnnotationsCache({}),
+        annotationsCache: new PageAnnotationsCache({
+            syncSettingsBG: runInBackground(),
+        }),
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
         imageSupport: runInBackground(),
@@ -645,6 +648,28 @@ export class DashboardContainer extends StatefulUIElement<
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
                 listData={listsSidebar.lists}
+                saveHighlightColor={(
+                    id,
+                    color: RGBAColor | string,
+                    unifiedId,
+                ) => {
+                    {
+                        this.processEvent('saveHighlightColor', {
+                            noteId: id,
+                            color: color,
+                            unifiedId: unifiedId,
+                        })
+                    }
+                }}
+                saveHighlightColorSettings={(newState) => {
+                    this.processEvent('saveHighlightColorSettings', {
+                        newState: newState,
+                    })
+                }}
+                getHighlightColorSettings={() =>
+                    this.processEvent('getHighlightColorSettings', null)
+                }
+                highlightColorSettings={this.state.highlightColors}
                 getListDetailsById={this.getListDetailsById}
                 youtubeService={this.youtubeService}
                 toggleSortMenuShown={() =>
@@ -1537,6 +1562,30 @@ export class DashboardContainer extends StatefulUIElement<
                                     activePage: false,
                                 })
                             }
+                            saveHighlightColor={(id, color, unifiedId) => {
+                                {
+                                    this.processEvent('saveHighlightColor', {
+                                        noteId: id,
+                                        color: color,
+                                        unifiedId: unifiedId,
+                                    })
+                                }
+                            }}
+                            saveHighlightColorSettings={(newState) => {
+                                this.processEvent(
+                                    'saveHighlightColorSettings',
+                                    {
+                                        newState: newState,
+                                    },
+                                )
+                            }}
+                            getHighlightColorSettings={() =>
+                                this.processEvent(
+                                    'getHighlightColorSettings',
+                                    null,
+                                )
+                            }
+                            highlightColorSettings={this.state.highlightColors}
                         />
                     </MainFrame>
                     {this.renderModals()}

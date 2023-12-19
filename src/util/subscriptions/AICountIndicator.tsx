@@ -193,75 +193,95 @@ export class AICounterIndicator extends React.Component<Props, State> {
             >
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>
-                        <TitleAreaContainer>
-                            {this.props.isTrial && (
-                                <InfoTooltipTitle>
-                                    <strong>Trial</strong> ends in{' '}
-                                    {this.daysRemainingToComplete30()} days.
-                                </InfoTooltipTitle>
-                            )}
-
-                            {(this.state.openAIKey == null ||
-                                this.state.openAIKey?.length === 0) &&
-                                this.state.totalCount < 10000 &&
-                                !this.props.isTrial && (
+                        {(this.props.isTrial ||
+                            this.state.totalCount < 10000) && (
+                            <TitleAreaContainer>
+                                {this.props.isTrial && (
                                     <InfoTooltipTitle>
-                                        <strong>{this.leftOverBlocks}</strong>{' '}
-                                        AI queries left this month
+                                        <strong>Trial</strong> ends in{' '}
+                                        {this.daysRemainingToComplete30()} days.
                                     </InfoTooltipTitle>
                                 )}
-                            <PrimaryAction
-                                label="Upgrade"
-                                icon={'longArrowRight'}
-                                padding="0px 5px 0 10px"
-                                onClick={() => {
-                                    window.open(
-                                        this.whichCheckOutURL(),
-                                        '_blank',
-                                    )
-                                }}
-                                size="medium"
-                                type="primary"
-                                iconPosition="right"
-                            />
-                        </TitleAreaContainer>
-                        <InfoTooltipSubTitleBox>
-                            {this.leftOverBlocks === 0 && (
-                                <InfoTooltipSubTitle>
-                                    You can't make any more AI summaries or
-                                    queries.
-                                    <br />
-                                    Resets in {this.daysUntilNextMonth()} days.
-                                    <br />
-                                    <br />
-                                    Add your OpenAI AI key for unlimited queries
-                                    at your own cost.
-                                </InfoTooltipSubTitle>
-                            )}
-                            {this.leftOverBlocks > 0 && !this.props.isTrial && (
-                                <InfoTooltipSubTitle>
-                                    Resets in {this.daysUntilNextMonth()} days.
-                                    <br /> <br />
-                                    Add your OpenAI AI key for unlimited queries
-                                    at your own cost.
-                                </InfoTooltipSubTitle>
-                            )}
-                            {this.props.isTrial && (
-                                <InfoTooltipSubTitle>
-                                    Make as many AI queries & summaries you
-                                    want.
-                                    <br />
-                                    After the trial: 60 days
-                                    money-back-guarantee and a free tier with 25
-                                    AI queries per month.
-                                </InfoTooltipSubTitle>
-                            )}
-                        </InfoTooltipSubTitleBox>
+
+                                {(this.state.openAIKey == null ||
+                                    this.state.openAIKey?.length === 0) &&
+                                    this.state.totalCount < 10000 &&
+                                    !this.props.isTrial && (
+                                        <InfoTooltipTitle>
+                                            <strong>
+                                                {this.leftOverBlocks}
+                                            </strong>{' '}
+                                            AI queries left this month
+                                        </InfoTooltipTitle>
+                                    )}
+                                {(this.state.totalCount < 10000 ||
+                                    this.props.isTrial) && (
+                                    <PrimaryAction
+                                        label="Upgrade"
+                                        icon={'longArrowRight'}
+                                        padding="0px 5px 0 10px"
+                                        onClick={() => {
+                                            window.open(
+                                                this.whichCheckOutURL(),
+                                                '_blank',
+                                            )
+                                        }}
+                                        size="medium"
+                                        type="primary"
+                                        iconPosition="right"
+                                    />
+                                )}
+                            </TitleAreaContainer>
+                        )}
+                        {(this.leftOverBlocks === 0 ||
+                            (!this.props.isTrial &&
+                                this.state.totalCount < 10000) ||
+                            this.props.isTrial) && (
+                            <InfoTooltipSubTitleBox>
+                                {!this.props.isTrial &&
+                                    this.leftOverBlocks === 0 && (
+                                        <InfoTooltipSubTitle>
+                                            You can't make any more AI summaries
+                                            or queries.
+                                            <br />
+                                            <strong>
+                                                Resets in{' '}
+                                                {this.daysUntilNextMonth()}{' '}
+                                                days.
+                                            </strong>
+                                        </InfoTooltipSubTitle>
+                                    )}
+                                {!this.props.isTrial &&
+                                    this.state.totalCount < 10000 && (
+                                        <InfoTooltipSubTitle>
+                                            <strong>
+                                                Resets in{' '}
+                                                {this.daysUntilNextMonth()}{' '}
+                                                days.
+                                            </strong>
+                                            <br />
+                                            Add OpenAI AI key for ♾️ queries at
+                                            your own cost + GPT-4 support.
+                                        </InfoTooltipSubTitle>
+                                    )}
+                                {this.props.isTrial && (
+                                    <InfoTooltipSubTitle>
+                                        Make as many AI queries & summaries you
+                                        want.
+                                        <br />
+                                        After the trial: 60 days
+                                        money-back-guarantee and a free tier
+                                        with 25 AI queries per month.
+                                    </InfoTooltipSubTitle>
+                                )}
+                            </InfoTooltipSubTitleBox>
+                        )}
                     </InfoTooltipTitleArea>
                     <OpenAIKeyContainer>
                         <OpenAIKeyTitle>OpenAI API Key</OpenAIKeyTitle>
                         <OpenAIKeySubTitle>
-                            Add API key for unlimited queries at your own cost.
+                            Add OpenAI AI key for ♾️ queries at your own cost +
+                            GPT-4 support.
                         </OpenAIKeySubTitle>
                         <KeyBox>
                             <TextField
@@ -402,7 +422,9 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         <CounterContainer
                             progress={progressPercentNumber}
                             ref={this.tooltipButtonRef}
-                            onClick={() => this.setState({ showTooltip: true })}
+                            onClick={() => {
+                                this.setState({ showTooltip: true })
+                            }}
                         >
                             <InnerContainer>
                                 {' '}
@@ -411,6 +433,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                     : this.leftOverBlocks}
                             </InnerContainer>
                         </CounterContainer>
+                        {this.state.showTooltip && this.renderTooltip()}
                     </TooltipBox>
                 </>
             )
@@ -469,7 +492,7 @@ const InfoTooltipSubTitleBox = styled.div`
     padding: 20px;
 `
 const InfoTooltipSubTitle = styled.div`
-    color: ${(props) => props.theme.colors.greyScale5};
+    color: ${(props) => props.theme.colors.greyScale6};
     font-size: 16px;
     line-height: 24px;
 `

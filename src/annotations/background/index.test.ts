@@ -259,6 +259,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 {},
                                 annotUrl,
                                 'updated comment',
+                                'one',
                             )
                         },
                         expectedStorageChanges: {
@@ -389,6 +390,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 {},
                                 annotUrl,
                                 'updated comment',
+                                'two',
                             )
                         },
                         expectedStorageChanges: {

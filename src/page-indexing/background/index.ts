@@ -359,7 +359,7 @@ export class PageIndexingBackground {
 
     /**
      * Adds/updates a page + associated visit (pages never exist without either an assoc.
-     * visit or bookmark in current model).
+     * visit or bookmark in cutags/background/storage.test.tsrrent model).
      */
     async addPage({
         visits = [],
@@ -387,7 +387,7 @@ export class PageIndexingBackground {
         await this.createOrUpdatePage(pageData)
     }
 
-    async _deletePages(query: object) {
+    async _deletePages(query: object): Promise<{ info: any }[]> {
         const pages = await this.options.storageManager
             .collection('pages')
             .findObjects<PipelineRes>(query)
@@ -479,8 +479,13 @@ export class PageIndexingBackground {
         opts: PageCreationOpts = {},
     ) {
         const { favIconURI } = pageData
-        pageData = this.removeAnyUnregisteredFields(pageData)
+
+        const originalHTML = pageData.htmlBody // adding this to keep the fullHTML in the processing pipeline
+        pageData = this.removeAnyUnregisteredFields(pageData) // this was already here
+        pageData.htmlBody = originalHTML // this is added too
         const allContentInfo = await this.getContentInfoForPages()
+        const userData = await this.options.authBG.authService.getCurrentUser()
+        const userId = userData?.id
 
         const pageContentInfo = allContentInfo[pageData.url]
         const contentIdentifier = pageContentInfo?.primaryIdentifier
@@ -494,7 +499,7 @@ export class PageIndexingBackground {
         if (existingPage) {
             await this.storage.updatePage(pageData, existingPage)
         } else {
-            await this.storage.createPage(pageData, allContentInfo)
+            await this.storage.createPage(pageData, pageContentInfo, userId)
         }
 
         if (contentIdentifier) {
@@ -562,7 +567,7 @@ export class PageIndexingBackground {
         //     so we don't have to do this dance
 
         const isPdf = isMemexPageAPdf({ url: props.fullUrl })
-        if (!isPdf) {
+        if (!isPdf && !props.tabId) {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
                 props.tabId = foundTabId
@@ -706,18 +711,22 @@ export class PageIndexingBackground {
                 return { ...existingPage, isExisting: true }
             }
 
-            const {
-                content,
-                htmlBody,
-                favIconURI,
-            } = await this.options.fetchPageData(props.fullUrl)
+            let content
+            let htmlBody
+            let favIconURI
+
+            const pageData = await this.options.fetchPageData(props.fullUrl)
+            content = pageData.content
+            htmlBody = pageData.htmlBody
+            favIconURI = pageData.favIconURI
+
             await this.storeDocContent(normalizeUrl(props.fullUrl), {
                 htmlBody,
             })
 
             pageDoc.favIconURI = favIconURI
-            pageDoc.content.title = content.title
-            pageDoc.content.fullText = content.fullText
+            pageDoc.content.title = content?.title || props.metaData.pageTitle
+            pageDoc.content.fullText = content?.fullText
         } else {
             const pdfData = await this.options.fetchPdfData(props.fullUrl)
             const baseLocator = await this.initContentIdentifier({

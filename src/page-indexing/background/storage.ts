@@ -6,7 +6,7 @@ import {
 } from '@worldbrain/storex-pattern-modules'
 import { COLLECTION_DEFINITIONS as PAGE_COLLECTION_DEFINITIONS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { PipelineRes, VisitInteraction } from 'src/search'
+import { PageCreationProps, PipelineRes, VisitInteraction } from 'src/search'
 import { initErrHandler } from 'src/search/storage'
 import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import {
@@ -24,9 +24,11 @@ import {
     LocationSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
+    createRabbitHoleEntry,
     isPkmSyncEnabled,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -167,7 +169,11 @@ export default class PageStorage extends StorageModule {
         }
     }
 
-    async createPage(pageData: PipelineRes, pageContentInfo?: any) {
+    async createPage(
+        pageData: PipelineRes,
+        pageContentInfo?: any,
+        userId?: Promise<AuthenticatedUser> | string | null,
+    ) {
         const normalizedUrl = normalizeUrl(pageData.url, {})
 
         await this.operation('createPage', {
@@ -195,6 +201,7 @@ export default class PageStorage extends StorageModule {
                         pageTitle: pageData.fullTitle,
                         createdWhen: Date.now(),
                         pkmSyncType: 'page',
+                        contentText: pageData.htmlBody,
                     }
                 }
 
@@ -203,6 +210,17 @@ export default class PageStorage extends StorageModule {
                 console.error(e)
             }
         }
+        try {
+            const dataToSave = {
+                fullUrl: pageData.fullUrl,
+                pageTitle: pageData.fullTitle,
+                createdWhen: Math.floor(Date.now() / 1000),
+                creatorId: userId.toString(),
+                contentType: 'page',
+                fullHTML: pageData?.htmlBody,
+            }
+            createRabbitHoleEntry(dataToSave, this.options.pkmSyncBG)
+        } catch (e) {}
     }
 
     async updatePage(newPageData: PipelineRes, existingPage: PipelineRes) {

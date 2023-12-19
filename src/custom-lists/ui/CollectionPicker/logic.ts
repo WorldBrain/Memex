@@ -779,6 +779,7 @@ export default class SpacePickerLogic extends UILogic<
                     this.dependencies.annotationsCache.lists,
                 )
             }
+
             await entrySelectPromise
         } catch (e) {
             this.selectedListIds = previousState.selectedListIds

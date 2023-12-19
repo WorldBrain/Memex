@@ -21,9 +21,28 @@ export class MemexLocalBackend extends BackupBackend {
     }
 
     async isConnected() {
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+        })
+
         try {
-            const response = await fetch(`${this.url}/status`)
-            return response.status === 200
+            const response = await fetch(`${this.url}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body,
+            })
+
+            if (response.status === 200) {
+                return true
+            } else if (response.status === 500) {
+                return false
+            } else {
+                return false
+            }
         } catch (e) {
             return false
         }

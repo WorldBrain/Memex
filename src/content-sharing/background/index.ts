@@ -120,9 +120,9 @@ export default class ContentSharingBackground {
                 getAnnotation: (annotationUrl) =>
                     options
                         .getBgModules()
-                        .directLinking.annotationStorage.getAnnotationByPk(
-                            annotationUrl,
-                        ),
+                        .directLinking.annotationStorage.getAnnotationByPk({
+                            url: annotationUrl,
+                        }),
                 getAnnotations: (annotationUrls) =>
                     options
                         .getBgModules()
@@ -279,11 +279,7 @@ export default class ContentSharingBackground {
                     localIds: callOptions.annotationUrls,
                 })
             },
-            getListShareMetadata: async (params) => {
-                return this.storage.getListShareMetadata({
-                    localIds: params.localListIds,
-                })
-            },
+            getListShareMetadata: this.getListShareMetadata,
             updateListPrivacy: async (params) => {
                 return this.storage.updateListPrivacy({
                     localId: params.localListId,
@@ -796,6 +792,14 @@ export default class ContentSharingBackground {
                 privacyLevel,
             },
         }
+    }
+
+    getListShareMetadata: ContentSharingInterface['getListShareMetadata'] = async (
+        params,
+    ) => {
+        return this.storage.getListShareMetadata({
+            localIds: params.localListIds,
+        })
     }
 
     // OLD direct linking method

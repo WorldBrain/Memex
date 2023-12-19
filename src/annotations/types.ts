@@ -5,6 +5,8 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { UserPublicDetails } from '@worldbrain/memex-common/lib/user-management/types'
+import { RGBAColor } from './cache/types'
+import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 // export interface Annotation {
 //     /** Unique URL for this annotation. Used as more of an ID; probably not for display. */
@@ -32,14 +34,16 @@ export interface Annotation {
     createdWhen?: Date
     lastEdited?: Date
     comment?: string
+    color?: RGBAColor | string
     _body_terms?: string[]
     _comment_terms?: string[]
-    tags: string[]
-    lists: number[]
+    tags?: string[]
+    lists?: number[]
     isShared?: boolean
     isBookmarked?: boolean
     isSocialPost?: boolean
     isBulkShareProtected?: boolean
+    userId?: string
 }
 
 export interface NewAnnotationOptions {
@@ -60,6 +64,7 @@ export interface AnnotationsManagerInterface {
         lists: number[]
         bookmarked?: boolean
         isSocialPost?: boolean
+        color?: RGBAColor | string
     }): Promise<Annotation>
     fetchAnnotationsWithTags(
         url: string,
@@ -118,4 +123,5 @@ export type SharedAnnotationWithRefs = SharedAnnotation & {
     creatorReference: UserReference
     creator?: UserPublicDetails
     selector?: Anchor
+    color?: RGBAColor | string
 }

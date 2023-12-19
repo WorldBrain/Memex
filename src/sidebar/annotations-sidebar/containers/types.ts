@@ -25,6 +25,7 @@ import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annot
 import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type {
     PageAnnotationsCacheInterface,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
@@ -100,7 +101,18 @@ export interface EditForms {
     [annotationUrl: string]: EditForm
 }
 
-export type SidebarTab = 'annotations' | 'spaces' | 'feed' | 'summary'
+export type SidebarTab =
+    | 'annotations'
+    | 'spaces'
+    | 'feed'
+    | 'summary'
+    | 'rabbitHole'
+export type SidebarAITab = 'ThisPage' | 'ExistingKnowledge' | 'InFollowedFeeds'
+
+export type SuggestionsTab =
+    | 'MySuggestions'
+    | 'RSSsuggestions'
+    | 'OtherSuggestions'
 
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
@@ -123,8 +135,14 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     hasKey: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
+    highlightColors: string
+    suggestionsResults: SuggestionCard[]
+    suggestionsResultsLoadState: TaskState
 
     activeTab: SidebarTab
+    activeAITab: SidebarAITab
+    summaryModeActiveTab: 'Answer' | 'References'
+    activeSuggestionsTab: SuggestionsTab
     showChapters: boolean
     pillVisibility: string
     renameListErrorMessage: string | null
@@ -132,6 +150,13 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     sidebarWidth?: string
     sidebarRightBorderPosition?: number
     spaceTitleEditValue?: string
+    existingFeedSources?: {
+        feedTitle: string
+        feedUrl: string
+        feedFavIcon?: string
+        type?: 'substack' | string
+        confirmState?: TaskState | string
+    }[]
 
     // Indicates what is the currently selected space in the leaf screen
     // for the side bar, also known as the isolated view. When a space
@@ -149,6 +174,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     /** Mirrors the annotations cache state of the same name */
     pageListIds: Set<UnifiedList['unifiedId']>
     lists: PageAnnotationsCacheInterface['lists']
+
     annotations: PageAnnotationsCacheInterface['annotations']
 
     pageSummary: string
@@ -191,14 +217,27 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showSocialSearch: boolean
     shouldShowTagsUIs: boolean
     showUpgradeModal: boolean
+    desktopAppDownloadLink: string
 
     annotCount?: number
     showLengthError?: boolean
     youtubeTranscriptSummary?: string
     youtubeTranscriptSummaryloadState: TaskState
     fetchLocalHTML: boolean
+    rabbitHoleBetaFeatureAccess:
+        | 'denied'
+        | 'granted'
+        | 'grantedBcOfSubscription'
+        | 'requested'
+        | 'tutorial'
+        | 'onboarded'
+        | 'onboarding'
+        | 'downloadStarted'
+        | 'helperConnectionDenied'
+        | 'helperConnectionSuccess'
+        | null
 
-    // Search result props
+    // Search result propsallowed
     shouldShowCount: boolean
     isInvalidSearch: boolean
     totalResultCount: number
@@ -274,6 +313,18 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    processFileImportFeeds: { fileString: string }
+    getHighlightColorSettings: null
+    saveHighlightColor: {
+        noteId: string
+        color: RGBAColor
+        colorId: string
+    }
+    saveFeedSources: {
+        sources: string
+    }
+    loadFeedSources: null
+    saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
         imageData: string
@@ -291,6 +342,15 @@ interface SidebarEvents {
         textToProcess?: string
         url?: string
         prompt?: string
+    }
+    setActiveSuggestionsTab: {
+        tab: SuggestionsTab
+    }
+    setSummaryMode: {
+        tab: 'Answer' | 'References'
+    }
+    setActiveAITab: {
+        tab: SidebarAITab
     }
     askAIviaInPageInteractions: {
         textToProcess?: string
@@ -406,7 +466,7 @@ interface SidebarEvents {
     }
 
     goToAnnotationInNewTab: {
-        unifiedAnnotationId: UnifiedAnnotation['unifiedId']
+        unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
     }
 
     // Misc events
@@ -440,6 +500,20 @@ interface SidebarEvents {
     setAllNotesShareMenuShown: { shown: boolean }
 
     createPageLink: { forceCreate?: boolean }
+    setRabbitHoleBetaFeatureAccess: {
+        permission:
+            | 'denied'
+            | 'granted'
+            | 'requested'
+            | 'tutorial'
+            | 'onboarded'
+            | 'onboarding'
+            | 'downloadStarted'
+            | 'helperConnectionDenied'
+            | 'helperConnectionSuccess'
+            | null
+    }
+    requestRabbitHoleBetaFeatureAccess: { reasonText: string }
 }
 
 export type SidebarContainerEvents = UIEvent<
@@ -461,6 +535,20 @@ export interface AnnotationCardInstance {
     isCommentEditing: boolean
     cardMode: AnnotationCardMode
     comment: string
+    color: string
+}
+export interface SuggestionCard {
+    fullUrl: UnifiedAnnotation['unifiedId']
+    pageTitle: string
+    contentText?: string
+    contentType: 'page' | 'annotation' | 'rss-feed-item'
+    creatorId?: UserReference['id']
+    spaces?: any
+    body?: string
+    comment?: string
+    unifiedId?: UnifiedAnnotation['unifiedId']
+    sourceApplication?: string
+    distance?: number
 }
 
 export interface ListInstance {

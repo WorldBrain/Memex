@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react'
 import styled from 'styled-components'
 import { DisplayEntry } from '../types'
-import { StyledIconBase } from '@styled-icons/styled-icon'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
 
 interface Props {
@@ -55,15 +54,5 @@ const StyledContainer = styled.div`
 
     &::-webkit-scrollbar {
         display: none;
-    }
-`
-
-const FilterHelp = styled.div`
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.white};
-    padding: 6px 2px;
-    ${StyledIconBase} {
-        stroke-width: 2px;
-        margin: 0 3px;
     }
 `

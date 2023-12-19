@@ -19,6 +19,7 @@ import { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
+    createRabbitHoleEntry,
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
@@ -144,6 +145,7 @@ export default class AnnotationStorage extends StorageModule {
                     { url: '$url:pk' },
                     {
                         comment: '$comment:string',
+                        color: '$color:string',
                         lastEdited: '$lastEdited:any',
                     },
                 ],
@@ -186,6 +188,11 @@ export default class AnnotationStorage extends StorageModule {
                 collection: AnnotationStorage.ANNOTS_COLL,
                 operation: 'findObjects',
                 args: { pageUrl: '$pageUrl:string' },
+            },
+            listAnnotationIdsByColor: {
+                collection: AnnotationStorage.ANNOTS_COLL,
+                operation: 'findObjects',
+                args: { color: '$color:string' },
             },
             listAnnotationsByPageUrls: {
                 collection: AnnotationStorage.ANNOTS_COLL,
@@ -301,6 +308,13 @@ export default class AnnotationStorage extends StorageModule {
             'listAnnotationsByPageUrls',
             { pageUrls },
         )
+
+        return annotations
+    }
+    async listAnnotationIdsByColor(color: string) {
+        const annotations = await this.operation('listAnnotationIdsByColor', {
+            color,
+        })
 
         return annotations
     }
@@ -491,8 +505,11 @@ export default class AnnotationStorage extends StorageModule {
         }
     }
 
-    async getAnnotationByPk(url: string): Promise<Annotation> {
-        return this.operation('findAnnotationByUrl', { url })
+    async getAnnotationByPk({ url }: { url: string }) {
+        if (url.length > 0) {
+            const annotation = this.operation('findAnnotationByUrl', { url })
+            return annotation
+        }
     }
 
     async getAllAnnotationsByUrl(params: AnnotSearchParams) {
@@ -509,6 +526,8 @@ export default class AnnotationStorage extends StorageModule {
         url,
         comment,
         selector,
+        color,
+        userId,
         createdWhen = new Date(),
     }: Omit<Annotation, 'tags' | 'lists'>) {
         if (!body?.length && !comment?.length) {
@@ -516,8 +535,8 @@ export default class AnnotationStorage extends StorageModule {
                 'Failed create annotation attempt - no highlight or comment supplied',
             )
         }
-        if (await isPkmSyncEnabled()) {
-            try {
+        try {
+            if (await isPkmSyncEnabled()) {
                 const pageVisitStorage = await this.options.storageManager
                     .collection('visits')
                     .findOneObject<{ time: string }>({
@@ -536,7 +555,8 @@ export default class AnnotationStorage extends StorageModule {
                     pageTitle: pageTitle,
                     body: body ?? '',
                     comment: comment ?? '',
-                    createdWhen: createdWhen,
+                    createdWhen: Math.floor(createdWhen.getTime() / 1000),
+                    color: color ?? null,
                     pageCreatedWhen: pageDate,
                     pageUrl: pageDataStorage?.fullUrl ?? pageUrl,
                 }
@@ -546,14 +566,25 @@ export default class AnnotationStorage extends StorageModule {
                     this.options.pkmSyncBG,
                     this.options.imageSupport,
                 )
-            } catch (e) {}
-        }
+            }
+
+            const annotationData = {
+                pageTitle: pageTitle,
+                fullUrl: 'https://' + url,
+                createdWhen: Math.floor(createdWhen.getTime() / 1000),
+                creatorId: userId,
+                contentType: 'annotation',
+                fullHTML: (body ?? '') + (comment ? ' ' + comment : ''),
+            }
+            await createRabbitHoleEntry(annotationData, this.options.pkmSyncBG)
+        } catch (e) {}
         return this.operation('createAnnotation', {
             pageTitle,
             pageUrl,
             comment,
             body,
             selector,
+            color,
             createdWhen,
             lastEdited: createdWhen,
             url,
@@ -590,10 +621,12 @@ export default class AnnotationStorage extends StorageModule {
     async editAnnotation(
         url: string,
         comment: string,
+        color: string,
         lastEdited = new Date(),
+        userId?: string,
     ) {
-        if (await isPkmSyncEnabled()) {
-            try {
+        try {
+            if (!(await isPkmSyncEnabled())) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
 
@@ -636,12 +669,29 @@ export default class AnnotationStorage extends StorageModule {
                             listNames: listNames,
                         }),
                 )
-            } catch (e) {}
-        }
+                const annotationDataForRabbitHole = {
+                    pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
+                    fullUrl: 'https://' + annotationDataForPKMSyncUpdate.url,
+                    createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
+                    creatorId: userId,
+                    contentType: 'annotation',
+                    fullHTML:
+                        (annotationDataForPKMSyncUpdate.body ?? '') +
+                        (comment ? ' ' + comment : ''),
+                }
+                await createRabbitHoleEntry(
+                    annotationDataForRabbitHole,
+                    this.options.pkmSyncBG,
+                )
+            }
+        } catch (e) {}
+
+        console.log('edit', url, comment, color, lastEdited)
 
         return this.operation('editAnnotation', {
             url,
             comment,
+            color,
             lastEdited,
         })
     }

@@ -24,6 +24,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
+import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 
 const limitSuggestionsStorageLength = 25
 
@@ -64,18 +65,22 @@ export default class CustomListBackground {
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
             insertPageToList: async (params) => {
-                const currentTab = await this.options.queryTabs?.({
-                    active: true,
-                    currentWindow: true,
-                })
-                params.tabId = currentTab?.[0]?.id
+                if (!params.indexUrl) {
+                    const currentTab = await this.options.queryTabs?.({
+                        active: true,
+                        currentWindow: true,
+                    })
+                    params.tabId = currentTab?.[0]?.id
+                }
                 return this.insertPageToList(params)
             },
             updateListName: this.updateList,
+            findPageByUrl: this.findPageByUrl,
             removePageFromList: this.removePageFromList,
             removeAllListPages: this.removeAllListPages,
             fetchAllLists: this.fetchAllLists,
             fetchListById: this.fetchListById,
+            findSimilarBackground: this.findSimilarBackground,
             fetchAnnotationRefsForRemoteListsOnPage: this
                 .fetchAnnotationRefsForRemoteListsOnPage,
             fetchSharedListDataWithPageAnnotations: this
@@ -214,6 +219,23 @@ export default class CustomListBackground {
 
     fetchListById = async ({ id }: { id: number }) => {
         return this.storage.fetchListWithPagesById(id)
+    }
+
+    findSimilarBackground = async (
+        currentPageContent?: string,
+        fullUrl?: string,
+    ) => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+        const results = await backend.findSimilar(currentPageContent, fullUrl)
+
+        return results
+    }
+    findPageByUrl = async (normalizedUrl: string) => {
+        const pageData = await this.storage.findPageByUrl(normalizedUrl)
+
+        return pageData
     }
 
     fetchListByName = async ({ name }: { name: string }) => {

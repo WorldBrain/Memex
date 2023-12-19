@@ -46,6 +46,7 @@ import {
     SELECT_SPACE_AFFIRM_LABEL,
 } from 'src/overview/sharing/constants'
 import type {
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
@@ -64,6 +65,8 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -74,6 +77,11 @@ export interface Props extends SidebarContainerOptions {
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
+    saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
+    saveHighlightColorSettings?: (newState) => void
+    getHighlightColorSettings?: () => void
+    highlightColorSettings?: string
+    pkmSyncBG?: PkmSyncInterface
 }
 
 export class AnnotationsSidebarContainer<
@@ -109,6 +117,8 @@ export class AnnotationsSidebarContainer<
                 },
                 imageSupport: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
+                storage: props.storageAPI,
+                pkmSyncBG: props.pkmSyncBG,
             }),
         )
 
@@ -342,11 +352,11 @@ export class AnnotationsSidebarContainer<
             renderSpacePicker: () => (
                 <CollectionPicker
                     showPageLinks
-                    selectEntry={(listId) =>
+                    selectEntry={async (listId) => {
                         this.processEvent('setNewPageNoteLists', {
                             lists: [...this.state.commentBox.lists, listId],
                         })
-                    }
+                    }}
                     unselectEntry={(listId) =>
                         this.processEvent('setNewPageNoteLists', {
                             lists: this.state.commentBox.lists.filter(
@@ -430,7 +440,7 @@ export class AnnotationsSidebarContainer<
                     params.annotation.unifiedListIds,
                 ),
             selectEntry: async (listId, options) => {
-                this.processEvent(getUpdateListsEvent(listId), {
+                this.processEvent('updateListsForAnnotation', {
                     added: listId,
                     deleted: null,
                     unifiedAnnotationId: params.annotation.unifiedId,
@@ -476,11 +486,11 @@ export class AnnotationsSidebarContainer<
         const annotation = this.props.annotationsCache.annotations.byId[
             unifiedId
         ]
+
         return (
             <CollectionPicker
                 {...this.getSpacePickerProps({
                     annotation,
-                    showExternalConfirmations: true,
                 })}
                 bgScriptBG={this.props.bgScriptBG}
                 closePicker={closePicker}
@@ -534,7 +544,7 @@ export class AnnotationsSidebarContainer<
                     this.processEvent('updateAnnotationShareInfo', {
                         privacyLevel: state.privacyLevel,
                         unifiedAnnotationId: annotation.unifiedId,
-                        keepListsIfUnsharing: opts?.keepListsIfUnsharing,
+                        keepListsIfUnsharing: true,
                     })
                 }
                 syncSettingsBG={this.props.syncSettingsBG}
@@ -796,9 +806,9 @@ export class AnnotationsSidebarContainer<
                         default={{
                             x: 0,
                             y: 0,
-                            width: this.state.sidebarWidth
-                                ? this.state.sidebarWidth
-                                : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                            width: this.state.sidebarWidth,
+                            // ? this.state.sidebarWidth
+                            // : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
                             height: 'auto',
                         }}
                         resizeHandleWrapperClass={'sidebarResizeHandle'}
@@ -839,14 +849,48 @@ export class AnnotationsSidebarContainer<
                             }}
                             loadState={this.state.loadState}
                             setAIModel={(AImodel) => {
-                                console.log('adadfadfasdf', AImodel)
                                 this.processEvent('setAIModel', AImodel)
+                            }}
+                            saveFeedSources={(feedSources) => {
+                                this.processEvent('saveFeedSources', {
+                                    sources: feedSources,
+                                })
+                            }}
+                            loadFeedSources={() => {
+                                this.processEvent('loadFeedSources', null)
                             }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}
                             videoDetails={this.state.videoDetails}
                             bgScriptBG={this.props.bgScriptBG}
+                            saveHighlightColor={(noteId, colorId, color) => {
+                                this.processEvent('saveHighlightColor', {
+                                    noteId: noteId,
+                                    colorId: colorId,
+                                    color: color,
+                                })
+                            }}
+                            onGoToAnnotation={async (unifiedAnnotationId) =>
+                                this.processEvent('goToAnnotationInNewTab', {
+                                    unifiedAnnotationId,
+                                })
+                            }
+                            saveHighlightColorSettings={(newState) => {
+                                this.processEvent(
+                                    'saveHighlightColorSettings',
+                                    {
+                                        newState: newState,
+                                    },
+                                )
+                            }}
+                            getHighlightColorSettings={() =>
+                                this.processEvent(
+                                    'getHighlightColorSettings',
+                                    null,
+                                )
+                            }
+                            highlightColorSettings={this.state.highlightColors}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,
                                 annotationReference,
@@ -1286,6 +1330,21 @@ export class AnnotationsSidebarContainer<
                                     tab,
                                 })
                             }}
+                            setSummaryMode={(tab) => (event) => {
+                                this.processEvent('setSummaryMode', {
+                                    tab,
+                                })
+                            }}
+                            setActiveSuggestionsTab={(tab) => (event) => {
+                                this.processEvent('setActiveSuggestionsTab', {
+                                    tab,
+                                })
+                            }}
+                            setActiveAITab={(tab) => (event) => {
+                                this.processEvent('setActiveAITab', {
+                                    tab,
+                                })
+                            }}
                             expandFollowedListNotes={(unifiedListId) =>
                                 this.processEvent('expandListAnnotations', {
                                     unifiedListId,
@@ -1349,6 +1408,23 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             fetchLocalHTML={this.state.fetchLocalHTML}
+                            setRabbitHoleBetaFeatureAccess={(permission) =>
+                                this.processEvent(
+                                    'setRabbitHoleBetaFeatureAccess',
+                                    { permission },
+                                )
+                            }
+                            requestRabbitHoleBetaFeatureAccess={(reasonText) =>
+                                this.processEvent(
+                                    'requestRabbitHoleBetaFeatureAccess',
+                                    { reasonText },
+                                )
+                            }
+                            processFileImportFeeds={(fileString) => {
+                                this.processEvent('processFileImportFeeds', {
+                                    fileString: fileString,
+                                })
+                            }}
                         />
                     </Rnd>
                 </ContainerStyled>

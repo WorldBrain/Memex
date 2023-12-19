@@ -23,6 +23,7 @@ export const initAnnotationCardInstance = (
     isCommentTruncated: true,
     isCommentEditing: false,
     cardMode: 'none',
+    color: null,
 })
 
 export const initListInstance = (

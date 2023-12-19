@@ -149,6 +149,7 @@ export interface BackgroundModules {
     userMessages: UserMessageService
     personalCloud: PersonalCloudBackground
     imageSupport: ImageSupportBackground
+    pkmSyncBG: PKMSyncBackgroundModule
 }
 
 export function createBackgroundModules(options: {
@@ -349,6 +350,7 @@ export function createBackgroundModules(options: {
         analytics,
         analyticsBG,
         pkmSyncBG,
+        authBG: auth,
         serverStorage: options.serverStorage.modules,
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
@@ -493,6 +495,7 @@ export function createBackgroundModules(options: {
         getCurrentUserId,
         contentSharingBackend,
         jobScheduler: jobScheduler.scheduler,
+        pkmSyncBG,
     })
     const summarizeBG = new SummarizeBackground({
         remoteEventEmitter: createRemoteEventEmitter('pageSummary'),
@@ -615,6 +618,8 @@ export function createBackgroundModules(options: {
             pageActivityIndicator,
             summarizeBG,
             auth,
+            contentSharing,
+            pkmSyncBG,
         },
     })
 
@@ -629,6 +634,7 @@ export function createBackgroundModules(options: {
         // connectivityChecker,
         readable: reader,
         pdfBg,
+        pkmSyncBG,
         directLinking,
         search,
         eventLog: new EventLogBackground({ storageManager }),

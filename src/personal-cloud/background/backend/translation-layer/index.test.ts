@@ -1512,6 +1512,7 @@ describe('Personal cloud translation layer', () => {
                         selector: JSON.stringify(LOCAL_TEST_DATA_V24.annotations.first.selector),
                         body: LOCAL_TEST_DATA_V24.annotations.first.body,
                         comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                        color: LOCAL_TEST_DATA_V24.annotations.first.color,
                     }),
                     expect.objectContaining({
                         comment: LOCAL_TEST_DATA_V24.annotations.second.comment,
@@ -1708,6 +1709,7 @@ describe('Personal cloud translation layer', () => {
                         selector: JSON.stringify(LOCAL_TEST_DATA_V24.annotations.first.selector),
                         body: LOCAL_TEST_DATA_V24.annotations.first.body,
                         comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                        color: LOCAL_TEST_DATA_V24.annotations.first.color,
                     })
                 ],
             })
@@ -5630,6 +5632,7 @@ describe('Personal cloud translation layer', () => {
                     ],
                     sharedAnnotation: [
                         expect.objectContaining({
+                            color: LOCAL_TEST_DATA_V24.annotations.first.color,
                             comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
                             normalizedPageUrl: LOCAL_TEST_DATA_V24.annotations.first.pageUrl,
                         }),

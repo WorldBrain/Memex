@@ -116,6 +116,7 @@ const LOCAL_ANNOTATIONS_V24 = {
         comment: 'This is a test comment',
         createdWhen: new Date('2020-10-10'),
         lastEdited: new Date('2020-10-10'),
+        color: '#ffffff',
         selector: {
             quote: 'This is a test highlight',
             descriptor: { strategy: 'hyp-anchoring', content: [] },
@@ -791,6 +792,7 @@ const REMOTE_ANNOTATIONS_V24 = {
         comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
         createdWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
         updatedWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.getTime(),
+        color: LOCAL_TEST_DATA_V24.annotations.first.color,
         user: TEST_USER.id,
         createdByDevice: REMOTE_DEVICES_V24.first.id,
     },

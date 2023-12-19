@@ -25,7 +25,7 @@ export interface InPageUIContentScriptRemoteInterface {
 
     // Highlights
     goToHighlight(
-        annotationCacheId: UnifiedAnnotation['unifiedId'],
+        annotationCacheId: UnifiedAnnotation['localId'],
     ): Promise<void>
     removeHighlights(): Promise<void>
     createHighlight(shouldShare: boolean): Promise<void>

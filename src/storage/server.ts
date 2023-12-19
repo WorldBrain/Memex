@@ -25,6 +25,7 @@ import DiscordStorage from '@worldbrain/memex-common/lib/discord/storage'
 import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import SlackStorage from '@worldbrain/memex-common/lib/slack/storage'
 import { SlackRetroSyncStorage } from '@worldbrain/memex-common/lib/slack/storage/retro-sync'
+import { PublicApiStorage } from '@worldbrain/memex-common/lib/public-api/storage'
 
 let shouldLogOperations = false
 
@@ -110,6 +111,10 @@ export async function createServerStorage(
         storageManager,
         operationExecuter: operationExecuter('slackRetroSync'),
     })
+    const publicApi = new PublicApiStorage({
+        storageManager,
+        operationExecuter: operationExecuter('publicApi'),
+    })
     const serverStorage: ServerStorage = {
         manager: storageManager,
         modules: {
@@ -124,6 +129,7 @@ export async function createServerStorage(
             discord,
             slackRetroSync,
             slack,
+            publicApi,
         },
     }
     registerModuleMapCollections(storageManager.registry, serverStorage.modules)

@@ -60,7 +60,6 @@ export interface RibbonContainerState {
     // sidebar: ValuesOf<componentTypes.RibbonSidebarProps>
     commentBox: ValuesOf<componentTypes.RibbonCommentBoxProps>
     bookmark: ValuesOf<componentTypes.RibbonBookmarkProps>
-    tagging: ValuesOf<componentTypes.RibbonTaggingProps>
     lists: ValuesOf<componentTypes.RibbonListsProps>
     annotations: number
     search: ValuesOf<componentTypes.RibbonSearchProps>
@@ -84,6 +83,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleFeed: null
         toggleReadingView: null
         toggleAskAI: null
+        toggleRabbitHole: null
         toggleTheme: { themeVariant: MemexThemeVariant }
         openPDFinViewer: null
         hydrateStateFromDB: { url: string }
@@ -96,7 +96,6 @@ export type RibbonContainerEvents = UIEvent<
                 isProtected?: boolean
             }
         } & SubcomponentHandlers<'bookmark'> &
-        SubcomponentHandlers<'tagging'> &
         SubcomponentHandlers<'lists'> &
         SubcomponentHandlers<'search'> &
         SubcomponentHandlers<'pausing'>
@@ -165,12 +164,6 @@ export class RibbonContainerLogic extends UILogic<
             bookmark: {
                 isBookmarked: false,
                 lastBookmarkTimestamp: undefined,
-            },
-            tagging: {
-                tags: [],
-                showTagsPicker: false,
-                pageHasTags: false,
-                shouldShowTagsUIs: false,
             },
             lists: {
                 showListsPicker: false,
@@ -368,6 +361,13 @@ export class RibbonContainerLogic extends UILogic<
             action: 'show_page_summary',
         })
     }
+    toggleRabbitHole: EventHandler<'toggleRabbitHole'> = async ({
+        previousState,
+    }) => {
+        await this.dependencies.inPageUI.showSidebar({
+            action: 'rabbit_hole_open',
+        })
+    }
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
         await browser.storage.local.set({
             themeVariant:
@@ -499,7 +499,6 @@ export class RibbonContainerLogic extends UILogic<
 
         if (!previousState.showFeed) {
             mutation.commentBox = { showCommentBox: { $set: false } }
-            mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
             this.emitMutation(mutation)
             await this.dependencies.activityIndicatorBG.markActivitiesAsSeen()
@@ -522,7 +521,6 @@ export class RibbonContainerLogic extends UILogic<
 
         if (!previousState.areExtraButtonsShown) {
             mutation.commentBox = { showCommentBox: { $set: false } }
-            mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
         }
 
@@ -543,7 +541,6 @@ export class RibbonContainerLogic extends UILogic<
 
         if (!previousState.showRemoveMenu) {
             mutation.commentBox = { showCommentBox: { $set: false } }
-            mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
         }
 
@@ -565,7 +562,6 @@ export class RibbonContainerLogic extends UILogic<
 
         if (!previousState.areTutorialShown) {
             mutation.commentBox = { showCommentBox: { $set: false } }
-            mutation.tagging = { showTagsPicker: { $set: false } }
             mutation.lists = { showListsPicker: { $set: false } }
         }
 
@@ -654,7 +650,6 @@ export class RibbonContainerLogic extends UILogic<
         const extra: UIMutation<RibbonContainerState> =
             event.value === true
                 ? {
-                      tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
@@ -764,90 +759,6 @@ export class RibbonContainerLogic extends UILogic<
     }
 
     //
-    // Tagging
-    //
-    setShowTagsPicker: EventHandler<'setShowTagsPicker'> = async ({
-        event,
-    }) => {
-        await this.initLogicResolvable
-        this.dependencies.setRibbonShouldAutoHide(!event.value)
-        const extra: UIMutation<RibbonContainerState> =
-            event.value === true
-                ? {
-                      commentBox: { showCommentBox: { $set: false } },
-                      lists: { showListsPicker: { $set: false } },
-                      search: { showSearchBox: { $set: false } },
-                      areExtraButtonsShown: { $set: false },
-                      showRemoveMenu: { $set: false },
-                      areTutorialShown: { $set: false },
-                  }
-                : {}
-
-        return {
-            tagging: { showTagsPicker: { $set: event.value } },
-            ...extra,
-        }
-    }
-
-    private _updateTags: (
-        context: 'commentBox' | 'tagging',
-    ) => EventHandler<'updateTags'> = (context) => async ({
-        previousState,
-        event,
-    }) => {
-        if (context === 'tagging' && event.value.added != null) {
-            this.dependencies.analytics.trackEvent({
-                category: 'Tags',
-                action: 'createForPageViaRibbon',
-            })
-        }
-
-        const backendResult =
-            context === 'commentBox'
-                ? Promise.resolve()
-                : this.dependencies.tags.updateTagForPage({
-                      added: event.value.added,
-                      deleted: event.value.deleted,
-                      url: previousState.fullPageUrl,
-                      tabId: this.dependencies.currentTab.id,
-                  })
-
-        let tagsStateUpdater: (tags: string[]) => string[]
-
-        if (event.value.added) {
-            tagsStateUpdater = (tags) => {
-                const tag = event.value.added
-                return tags.includes(tag) ? tags : [...tags, tag]
-            }
-        }
-
-        if (event.value.deleted) {
-            tagsStateUpdater = (tags) => {
-                const index = tags.indexOf(event.value.deleted)
-                if (index === -1) {
-                    return tags
-                }
-
-                return [...tags.slice(0, index), ...tags.slice(index + 1)]
-            }
-        }
-        this.emitMutation({
-            [context]: { tags: { $apply: tagsStateUpdater } },
-        })
-
-        return backendResult
-    }
-
-    updateCommentTags = this._updateTags('commentBox')
-    updateTags = this._updateTags('tagging')
-
-    tagAllTabs: EventHandler<'tagAllTabs'> = ({ event }) => {
-        return this.dependencies.tags.addTagsToOpenTabs({
-            name: event.value,
-        })
-    }
-
-    //
     // Lists
     //
     updateLists: EventHandler<'updateLists'> = async ({
@@ -920,7 +831,6 @@ export class RibbonContainerLogic extends UILogic<
             event.value === true
                 ? {
                       commentBox: { showCommentBox: { $set: false } },
-                      tagging: { showTagsPicker: { $set: false } },
                       search: { showSearchBox: { $set: false } },
                       areExtraButtonsShown: { $set: false },
                       showRemoveMenu: { $set: false },
@@ -940,7 +850,6 @@ export class RibbonContainerLogic extends UILogic<
             event.value === true
                 ? {
                       commentBox: { showCommentBox: { $set: false } },
-                      tagging: { showTagsPicker: { $set: false } },
                       lists: { showListsPicker: { $set: false } },
                       areExtraButtonsShown: { $set: false },
                       showRemoveMenu: { $set: false },

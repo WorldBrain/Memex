@@ -25,6 +25,7 @@ import type {
     SidebarContainerEvents,
     EditForm,
     AnnotationCardInstanceEvent,
+    SuggestionCard,
 } from './types'
 import type { AnnotationsSidebarInPageEventEmitter } from '../types'
 import { DEF_RESULT_LIMIT } from '../constants'
@@ -51,6 +52,7 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type {
     PageAnnotationsCacheEvents,
+    RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
     UnifiedListForCache,
@@ -78,6 +80,8 @@ import {
 } from 'src/util/webextensionRPC'
 import {
     AIActionAllowed,
+    downloadMemexDesktop,
+    rabbitHoleBetaFeatureAllowed,
     updateAICounter,
 } from 'src/util/subscriptions/storage'
 import {
@@ -102,6 +106,13 @@ import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annot
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
+import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
+import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
+import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
+import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -117,6 +128,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
     spacesBG?: SpacePickerDependencies['spacesBG']
+    pkmSyncBG?: PkmSyncInterface
 }
 
 type EventHandler<
@@ -149,20 +161,22 @@ export class SidebarContainerLogic extends UILogic<
     SidebarContainerState,
     SidebarContainerEvents
 > {
-    syncSettings: SyncSettingsStore<'contentSharing' | 'extension' | 'openAI'>
+    syncSettings: SyncSettingsStore<
+        'contentSharing' | 'extension' | 'openAI' | 'highlightColors'
+    >
     resizeObserver
     sidebar
     readingViewState
     openAIkey
     showState
     focusIndex
+    previousState
     summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
     AIpromptSuggestions: { prompt: string; focused: boolean | null }[]
     // NOTE: this mirrors the state key of the same name. Only really exists as the cache's `updatedPageData` event listener can't access state :/
     private fullPageUrl: string
     private youtubeTranscriptSummary: string = ''
     private chapterSummaries
-    private editor = null
 
     constructor(private options: SidebarLogicOptions) {
         super()
@@ -230,6 +244,13 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     getInitialState(): SidebarContainerState {
+        let sidebarWidth = SIDEBAR_WIDTH_STORAGE_KEY
+        if (window.location.href.includes('youtube.com/watch')) {
+            const sidebarContainerWidth = document.getElementById('secondary')
+                .clientWidth
+            sidebarWidth = sidebarContainerWidth - 50 + 'px'
+        }
+
         return {
             ...annotationConversationInitialState(),
 
@@ -245,11 +266,15 @@ export class SidebarContainerLogic extends UILogic<
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
             selectedTextAIPreview: undefined,
+            sidebarWidth: sidebarWidth,
+            activeSuggestionsTab: 'MySuggestions',
+            activeAITab: 'ThisPage',
 
             users: {},
             currentUserReference: null,
             pillVisibility: 'unhover',
             videoDetails: null,
+            summaryModeActiveTab: 'Answer',
 
             isWidthLocked: false,
             isLocked: false,
@@ -264,6 +289,7 @@ export class SidebarContainerLogic extends UILogic<
             activeListContextMenuId: null,
             activeListEditMenuId: null,
             fetchLocalHTML: false,
+            rabbitHoleBetaFeatureAccess: null,
 
             commentBox: { ...INIT_FORM_STATE },
 
@@ -329,6 +355,10 @@ export class SidebarContainerLogic extends UILogic<
             chapterList: [],
             AImodel: 'gpt-3.5-turbo-1106',
             hasKey: false,
+            highlightColors: null,
+            suggestionsResults: [],
+            suggestionsResultsLoadState: 'pristine',
+            desktopAppDownloadLink: null,
         }
     }
 
@@ -398,7 +428,7 @@ export class SidebarContainerLogic extends UILogic<
         )
         this.options.events?.emit('renderHighlights', {
             highlights,
-            removeExisting: state.activeTab === 'annotations' ? false : true,
+            removeExisting: true,
         })
     }
 
@@ -501,6 +531,172 @@ export class SidebarContainerLogic extends UILogic<
                 })
             },
         )
+    }
+
+    getHighlightColorSettings: EventHandler<
+        'getHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        let highlightColorJSON
+        if (previousState.highlightColors) {
+            highlightColorJSON = JSON.parse(previousState.highlightColors)
+        } else {
+            const highlightColors = await this.syncSettings.highlightColors.get(
+                'highlightColors',
+            )
+
+            if (highlightColors) {
+                highlightColorJSON = highlightColors
+            } else {
+                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+                await this.syncSettings.highlightColors.set(
+                    'highlightColors',
+                    highlightColorJSON,
+                )
+            }
+        }
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
+        })
+
+        return highlightColorJSON
+    }
+    saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
+        event,
+        previousState,
+    }) => {
+        const {
+            annotations: {
+                byId: { [event.noteId]: annotationData },
+            },
+        } = previousState
+
+        if (annotationData?.creator?.id !== this.options.getCurrentUser()?.id) {
+            return
+        }
+
+        await updateAnnotation({
+            annotationsBG: this.options.annotationsBG,
+            contentSharingBG: this.options.contentSharingBG,
+            keepListsIfUnsharing: true,
+            annotationData: {
+                comment: annotationData?.comment ?? '',
+                localId: annotationData?.localId,
+                color: event.colorId,
+            },
+            shareOpts: {
+                shouldShare:
+                    annotationData?.privacyLevel === 200 ? true : false,
+                skipPrivacyLevelUpdate: true,
+            },
+        })
+
+        this.options.annotationsCache.updateAnnotation({
+            ...annotationData,
+            comment: annotationData?.comment ?? '',
+            color: event.color,
+            unifiedListIds: annotationData?.unifiedListIds,
+        })
+
+        let highlights: HTMLCollection = document.getElementsByTagName(
+            'hypothesis-highlight',
+        )
+
+        let memexHighlights: Element[] = Array.from(
+            highlights,
+        ).filter((highlight) =>
+            highlight.classList.contains(`memex-highlight-${event.noteId}`),
+        )
+
+        for (let item of memexHighlights) {
+            item.setAttribute(
+                'style',
+                `background-color:${RGBAobjectToString(event.color)};`,
+            )
+            item.setAttribute(
+                'highlightcolor',
+                `${RGBAobjectToString(event.color)}`,
+            )
+        }
+    }
+    saveHighlightColorSettings: EventHandler<
+        'saveHighlightColorSettings'
+    > = async ({ event, previousState }) => {
+        const newState = JSON.parse(event.newState)
+        const oldState = JSON.parse(previousState.highlightColors)
+        await this.syncSettings.highlightColors.set('highlightColors', newState)
+
+        const changedColors = newState
+            .map((newItem, index) => {
+                const oldItem = oldState[index]
+                if (
+                    oldItem &&
+                    newItem.id === oldItem.id &&
+                    JSON.stringify(newItem.color) !==
+                        JSON.stringify(oldItem.color)
+                ) {
+                    return {
+                        id: oldItem.id,
+                        oldColor: oldItem.color,
+                        newColor: newItem.color,
+                    }
+                }
+            })
+            .filter((item) => item != null)
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(newState) },
+        })
+
+        let highlights: HTMLCollection = document.getElementsByTagName(
+            'hypothesis-highlight',
+        )
+
+        for (let color of changedColors) {
+            Array.from(highlights).filter((highlight) => {
+                if (
+                    highlight.getAttribute('highlightcolor') ===
+                    RGBAobjectToString(color.oldColor)
+                ) {
+                    highlight.setAttribute(
+                        'style',
+                        `background-color:${RGBAobjectToString(
+                            color.newColor,
+                        )};`,
+                    )
+                    highlight.setAttribute(
+                        'highlightcolor',
+                        RGBAobjectToString(color.newColor),
+                    )
+                }
+            })
+            const annotationLocalIds: Annotation[] = await this.options.annotationsBG.listAnnotationIdsByColor(
+                { color: color.id },
+            )
+
+            const annotations = []
+
+            for (let annotation of annotationLocalIds) {
+                const annotationCachedData = this.options.annotationsCache.getAnnotationByLocalId(
+                    annotation.url,
+                )
+                if (annotationCachedData) {
+                    annotations.push(annotationCachedData)
+                }
+            }
+
+            for (let annotation of annotations) {
+                const colorToUpdate = color.newColor
+
+                this.options.annotationsCache.updateAnnotation({
+                    comment: annotation.comment,
+                    privacyLevel: annotation.privacyLevel,
+                    unifiedListIds: annotation.unifiedListIds,
+                    unifiedId: annotation.unifiedId,
+                    color: colorToUpdate,
+                })
+            }
+        }
     }
 
     /** Should only be used for state initialization. */
@@ -632,6 +828,37 @@ export class SidebarContainerLogic extends UILogic<
             signupDate: { $set: signupDate },
             isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
         })
+
+        await this.checkRabbitHoleOnboardingStage()
+    }
+
+    private checkRabbitHoleOnboardingStage = async () => {
+        const rabbitHoleBetaAccess = await rabbitHoleBetaFeatureAllowed(
+            this.options.authBG,
+        )
+
+        this.emitMutation({
+            rabbitHoleBetaFeatureAccess: { $set: rabbitHoleBetaAccess },
+        })
+
+        if (rabbitHoleBetaAccess === 'onboarded') {
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: { $set: 'onboarded' },
+            })
+            return 'onboarded'
+        }
+
+        if (
+            rabbitHoleBetaAccess === 'granted' ||
+            rabbitHoleBetaAccess === 'grantedBcOfSubscription'
+        ) {
+            console.log('granted', rabbitHoleBetaAccess)
+            const url = await downloadMemexDesktop()
+
+            this.emitMutation({
+                desktopAppDownloadLink: { $set: url },
+            })
+        }
     }
 
     cleanup = () => {
@@ -846,9 +1073,6 @@ export class SidebarContainerLogic extends UILogic<
                         )
                     ) {
                         document.body.style.position = 'relative'
-                    } else {
-                        document.body.style.position = 'sticky'
-                        this.adjustYoutubePlayerSize()
                     }
                     if (window.location.href.includes('mail.google.com')) {
                         this.adjustGmailWidth('initial')
@@ -860,13 +1084,6 @@ export class SidebarContainerLogic extends UILogic<
                     document.body.style.position = 'initial'
                     if (document.body.offsetWidth === 0) {
                         document.body.style.width = '100%'
-                    }
-                    if (
-                        window.location.href.startsWith(
-                            'https://www.youtube.com',
-                        )
-                    ) {
-                        this.adjustYoutubePlayerSize()
                     }
                     if (window.location.href.includes('mail.google.com')) {
                         this.adjustGmailWidth('initial')
@@ -889,17 +1106,11 @@ export class SidebarContainerLogic extends UILogic<
             const sidebar = this.sidebar
             let currentsidebarWidth = sidebar.offsetWidth
             let currentWindowWidth = window.innerWidth
-            let readingWidth =
-                currentWindowWidth - currentsidebarWidth - 40 + 'px'
+            let readingWidth = currentWindowWidth - currentsidebarWidth - 40
 
-            document.body.style.width = readingWidth
-
-            if (window.location.href.startsWith('https://www.youtube.com')) {
-                document.body.style.position = 'sticky'
-                this.adjustYoutubePlayerSize()
-            }
+            document.body.style.width = readingWidth + 'px'
             if (window.location.href.includes('mail.google.com')) {
-                this.adjustGmailWidth(readingWidth)
+                this.adjustGmailWidth(readingWidth + 'px')
             }
         }
     }
@@ -914,26 +1125,6 @@ export class SidebarContainerLogic extends UILogic<
         Array.from(document.body.children).forEach((child) => {
             setMaxWidth(child as HTMLElement)
         })
-    }
-
-    private adjustYoutubePlayerSize() {
-        const moviePlayer = document.getElementById('movie_player')
-
-        const bottomBar = document.getElementsByClassName(
-            'ytp-chrome-bottom',
-        )[0] as HTMLElement
-        const moviePlayerWidth = moviePlayer.clientWidth
-        const moviePlayerHeight = moviePlayer.clientHeight
-
-        const videoStream = moviePlayer.getElementsByClassName(
-            'video-stream html5-main-video',
-        )
-        if (videoStream[0]) {
-            const videoStreamElement = videoStream[0] as HTMLElement
-            videoStreamElement.style.width = moviePlayerWidth + 'px'
-            bottomBar.style.width = moviePlayerWidth - 12 + 'px'
-            videoStreamElement.style.height = moviePlayerHeight + 'px'
-        }
     }
 
     private async getYoutubeDetails(url) {
@@ -1094,13 +1285,15 @@ export class SidebarContainerLogic extends UILogic<
         this.readingViewState =
             (await browser.storage.local.get('@Sidebar-reading_view')) ?? false
         this.readingViewStorageListener(true)
-        if (!window.location.href.startsWith('https://www.youtube.com')) {
-            document.body.style.position = 'relative'
-        }
-        const width =
+
+        let width =
             event.existingWidthState != null
                 ? event.existingWidthState
                 : SIDEBAR_WIDTH_STORAGE_KEY
+
+        if (!window.location.href.startsWith('https://www.youtube.com')) {
+            document.body.style.position = 'relative'
+        }
 
         this.emitMutation({
             showState: { $set: 'visible' },
@@ -1124,11 +1317,6 @@ export class SidebarContainerLogic extends UILogic<
 
         if (document.body.offsetWidth === 0) {
             document.body.style.width = '100%'
-        }
-
-        if (window.location.href.startsWith('https://www.youtube.com')) {
-            document.body.style.position = 'initial'
-            this.adjustYoutubePlayerSize()
         }
 
         if (window.location.href.includes('mail.google.com')) {
@@ -1262,6 +1450,165 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ selectedShareMenuPageLinkList: { $set: null } })
     }
 
+    processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({
+        event,
+        previousState,
+    }) => {
+        const fileContent = event.fileString
+        const parser = new DOMParser()
+        const xmlDoc = parser.parseFromString(fileContent, 'text/xml')
+
+        const feedsNode = Array.from(
+            xmlDoc.getElementsByTagName('outline'),
+        ).filter((node) => node.getAttribute('type') === 'rss')
+        const feedSources = Array.from(feedsNode).map((node) => ({
+            feedTitle: node.getAttribute('title'),
+            feedUrl: (
+                node.getAttribute('') || node.getAttribute('xmlUrl')
+            ).replace('http://', 'https://'),
+            feedFavicon: null,
+            type: null,
+            confirmState: 'success',
+        }))
+
+        const allFeedSources = [
+            ...feedSources,
+            ...previousState.existingFeedSources,
+        ]
+
+        console.log('allFeedSources', allFeedSources)
+        this.emitMutation({
+            existingFeedSources: {
+                $set: allFeedSources,
+            },
+        })
+
+        await this.options.pkmSyncBG.addFeedSources(feedSources)
+    }
+
+    saveFeedSources: EventHandler<'saveFeedSources'> = async ({
+        event,
+        previousState,
+    }) => {
+        const sources =
+            event.sources?.includes(',') || event.sources?.includes('\n')
+                ? event.sources?.split(/[\n,]+/).map((source) => source.trim())
+                : [event.sources]
+
+        let feedSourcesToCheck = sources
+        if (feedSourcesToCheck?.length === 0) {
+            return
+        }
+        let updatedSources = [...previousState.existingFeedSources]
+        const feedSourcePromises = feedSourcesToCheck.map(
+            async (inputFeedUrl) => {
+                if (
+                    !inputFeedUrl ||
+                    (inputFeedUrl &&
+                        previousState.existingFeedSources.some(
+                            (source) => source.feedUrl === inputFeedUrl,
+                        ))
+                ) {
+                    console.log('feedurlempty')
+                    return
+                }
+                let response
+                console.log('response1')
+                response = await this.options.pkmSyncBG.checkFeedSource(
+                    inputFeedUrl,
+                )
+
+                console.log('response', response)
+
+                let title = response?.feedTitle ?? null
+                let feedUrl = response?.feedUrl
+
+                if (title?.includes('[CDATA')) {
+                    title = title.replace(/<!\[CDATA\[(.*?)\]\]>/g, '$1')
+                }
+
+                let confirmState
+                if (title) {
+                    confirmState = 'success'
+                } else {
+                    confirmState = 'error'
+                }
+
+                const updatedSource = {
+                    feedTitle: title ?? feedUrl,
+                    feedUrl: feedUrl,
+                    type: null,
+                    confirmState: confirmState,
+                    feedFavIcon: null,
+                }
+
+                // Find the index of the existing source with the same feedUrl
+                const existingSourceIndex = updatedSources.findIndex(
+                    (src) => src.feedUrl === feedUrl,
+                )
+
+                // If the source does not exist in the updatedSources array, add it to the beginning
+                if (
+                    existingSourceIndex === -1 &&
+                    updatedSource.feedUrl &&
+                    updatedSource.feedTitle
+                ) {
+                    console.log(existingSourceIndex)
+                    updatedSources.unshift(updatedSource)
+                } else {
+                    // If the source already exists, do not add it again
+                    return
+                }
+
+                console.log('updatedSource', updatedSource)
+                console.log('updatedSourceS', updatedSources)
+
+                this.emitMutation({
+                    existingFeedSources: { $set: updatedSources },
+                })
+
+                return updatedSource
+            },
+        )
+        let results
+
+        try {
+            results = await Promise.all(feedSourcePromises)
+
+            results = results?.filter(
+                (result) => result != null && result.confirmState !== 'error',
+            )
+        } catch (e) {
+            console.log('e', e)
+        }
+
+        // // Remove duplicates from updatedSources based on feedUrl
+        // updatedSources = updatedSources.reduce((unique, item) => {
+        //     // If the feedUrl already exists in the unique array, return the unique array as is
+        //     return unique.some((feed) => feed.feedUrl === item.feedUrl)
+        //         ? unique
+        //         : // If the feedUrl does not exist in the unique array, add the item to the unique array
+        //           [...unique, item]
+        // }, [])
+
+        // this.emitMutation({
+        //     existingFeedSources: { $set: updatedSources },
+        // })
+        await this.options.pkmSyncBG.addFeedSources(results)
+    }
+    loadFeedSources: EventHandler<'loadFeedSources'> = async ({
+        event,
+        previousState,
+    }) => {
+        const feedSources = await this.options.pkmSyncBG.loadFeedSources()
+
+        console.log('feedSources', feedSources)
+
+        this.emitMutation({
+            existingFeedSources: { $set: feedSources },
+        })
+    }
+
     validateSpaceName(name: string, listIdToSkip?: number) {
         const validationResult = validateSpaceName(
             name,
@@ -1306,6 +1653,109 @@ export class SidebarContainerLogic extends UILogic<
             )
         }
         return listData
+    }
+
+    setRabbitHoleBetaFeatureAccess: EventHandler<
+        'setRabbitHoleBetaFeatureAccess'
+    > = async ({ event }) => {
+        if (event.permission === 'onboarding') {
+            const url = await downloadMemexDesktop()
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: { $set: event.permission },
+            })
+
+            this.emitMutation({
+                desktopAppDownloadLink: { $set: url },
+            })
+        }
+
+        if (event.permission === 'downloadStarted') {
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: {
+                    $set: 'downloadStarted',
+                },
+            })
+            console.log('downloadStarted')
+            const desktopAppRunning = await this.checkIfDesktopAppIsRunning()
+            if (desktopAppRunning) {
+                this.emitMutation({
+                    rabbitHoleBetaFeatureAccess: {
+                        $set: 'helperConnectionSuccess',
+                    },
+                })
+            }
+        }
+
+        if (event.permission === 'onboarded') {
+            this.emitMutation({
+                rabbitHoleBetaFeatureAccess: {
+                    $set: 'onboarded',
+                },
+            })
+            await browser.storage.local.set({
+                rabbitHoleBetaFeatureAccessOnboardingDone: true,
+            })
+        }
+    }
+
+    async checkIfDesktopAppIsRunning(onetimeCheck?: boolean) {
+        let isConnected = false
+        let counter = 0
+        while (!isConnected && counter < 3000) {
+            counter++
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            let backend
+            try {
+                backend = await this.options.pkmSyncBG.checkConnectionStatus()
+            } catch (e) {
+                console.error(
+                    'Trying to connect to Desktop App but not yet available',
+                )
+            }
+            if (backend) {
+                isConnected = true
+                return true
+            } else if (onetimeCheck && isConnected === false) {
+                return false
+            }
+        }
+    }
+
+    requestRabbitHoleBetaFeatureAccess: EventHandler<
+        'requestRabbitHoleBetaFeatureAccess'
+    > = async ({ event }) => {
+        this.emitMutation({
+            rabbitHoleBetaFeatureAccess: { $set: null },
+        })
+
+        const isStaging =
+            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
+            process.env.NODE_ENV === 'development'
+
+        const email = (await this.options.authBG.getCurrentUser())?.email
+        const userId = (await this.options.authBG.getCurrentUser())?.id
+
+        const baseUrl = isStaging
+            ? 'https://cloudflare-memex-staging.memex.workers.dev'
+            : 'https://cloudfare-memex.memex.workers.dev'
+
+        await fetch(baseUrl + '/subscribe_rabbithole_waitlist', {
+            method: 'POST',
+            body: JSON.stringify({
+                email: email,
+                userId: userId,
+                reasonText: event.reasonText,
+            }),
+            headers: { 'Content-Type': 'application/json' },
+        })
+
+        const onboardingStage = await rabbitHoleBetaFeatureAllowed(
+            this.options.authBG,
+        )
+
+        this.emitMutation({
+            rabbitHoleBetaFeatureAccess: { $set: onboardingStage },
+        })
     }
 
     setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
@@ -1740,6 +2190,16 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
+        let syncSettings: SyncSettingsStore<'extension'>
+
+        syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.options.syncSettingsBG,
+        })
+
+        const shouldShareSettings = await syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+
         const now = event.now ?? Date.now()
         const annotationId =
             event.annotationId ??
@@ -1810,14 +2270,15 @@ export class SidebarContainerLogic extends UILogic<
             maybeAddLocalListIdForCacheList(event.listInstanceId)
 
             let privacyLevel: AnnotationPrivacyLevels
-            if (remoteListIds.length) {
+            if (previousState.selectedListId) {
                 privacyLevel = event.shouldShare
                     ? AnnotationPrivacyLevels.SHARED
                     : AnnotationPrivacyLevels.PROTECTED
             } else {
-                privacyLevel = event.shouldShare
-                    ? AnnotationPrivacyLevels.SHARED
-                    : AnnotationPrivacyLevels.PRIVATE
+                privacyLevel =
+                    shouldShareSettings || event.shouldShare
+                        ? AnnotationPrivacyLevels.SHARED
+                        : AnnotationPrivacyLevels.PRIVATE
             }
 
             const { remoteAnnotationId, savePromise } = await createAnnotation({
@@ -1836,7 +2297,10 @@ export class SidebarContainerLogic extends UILogic<
                     previousState.hasListDataBeenManuallyPulled,
                 privacyLevelOverride: privacyLevel,
                 shareOpts: {
-                    shouldShare: remoteListIds.length > 0 || event.shouldShare,
+                    shouldShare:
+                        shouldShareSettings ||
+                        remoteListIds.length > 0 ||
+                        event.shouldShare,
                     shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected: event.isProtected,
                 },
@@ -1880,7 +2344,8 @@ export class SidebarContainerLogic extends UILogic<
         'updateListsForAnnotation'
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
-        this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
+
+        // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
             annotationsCache.annotations.byId[event.unifiedAnnotationId]
@@ -1924,7 +2389,7 @@ export class SidebarContainerLogic extends UILogic<
             bgPromise = contentSharingBG.shareAnnotationToSomeLists({
                 annotationUrl: existing.localId,
                 localListIds: [event.added],
-                protectAnnotation: event.options?.protectAnnotation,
+                protectAnnotation: true,
             })
         } else if (event.deleted != null) {
             const cacheList = annotationsCache.getListByLocalId(event.deleted)
@@ -1947,9 +2412,7 @@ export class SidebarContainerLogic extends UILogic<
                 remoteId: existing.remoteId,
                 unifiedListIds: [...unifiedListIds],
                 unifiedId: event.unifiedAnnotationId,
-                privacyLevel: event.options?.protectAnnotation
-                    ? AnnotationPrivacyLevels.PROTECTED
-                    : existing.privacyLevel,
+                privacyLevel: existing.privacyLevel,
             },
             { keepListsIfUnsharing: event.options?.protectAnnotation },
         )
@@ -1976,7 +2439,7 @@ export class SidebarContainerLogic extends UILogic<
                     )
                     .filter((id) => !!id),
             },
-            { keepListsIfUnsharing: true },
+            { forceListUpdate: true },
         )
     }
 
@@ -1999,14 +2462,14 @@ export class SidebarContainerLogic extends UILogic<
         const annotation = this.options.annotationsCache.annotations.byId[
             event.unifiedAnnotationId
         ]
+
         if (!annotation) {
             throw new Error(
                 `Could not find cached annotation data for ID: ${event.unifiedAnnotationId}`,
             )
         }
 
-        let fullPageURL =
-            this.fullPageUrl ?? 'https://' + annotation.normalizedPageUrl
+        let fullPageURL = 'https://' + annotation.normalizedPageUrl
 
         if (fullPageURL.includes('web.telegram.org')) {
             fullPageURL = convertMemexURLintoTelegramURL(fullPageURL)
@@ -2014,7 +2477,7 @@ export class SidebarContainerLogic extends UILogic<
         return this.options.contentScriptsBG.goToAnnotationFromDashboardSidebar(
             {
                 fullPageUrl: fullPageURL,
-                annotationCacheId: event.unifiedAnnotationId,
+                annotationCacheId: annotation.localId,
             },
         )
     }
@@ -2036,12 +2499,28 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        let unifiedAnnotation
+        for (const id in this.options.annotationsCache.annotations.byId) {
+            if (
+                this.options.annotationsCache.annotations.byId[id].unifiedId ===
+                    event.unifiedAnnotationId ||
+                this.options.annotationsCache.annotations.byId[id].localId ===
+                    event.unifiedAnnotationId
+            ) {
+                unifiedAnnotation = this.options.annotationsCache.annotations
+                    .byId[id]
+                break
+            }
+        }
+
+        const unifiedAnnotationId = unifiedAnnotation?.unifiedId
+
         this.emitMutation({
-            activeAnnotationId: { $set: event.unifiedAnnotationId },
+            activeAnnotationId: { $set: unifiedAnnotationId },
         })
 
         const cachedAnnotation = this.options.annotationsCache.annotations.byId[
-            event.unifiedAnnotationId
+            unifiedAnnotationId
         ]
         if (event.source === 'highlightCard') {
             if (cachedAnnotation?.selector != null) {
@@ -2057,7 +2536,7 @@ export class SidebarContainerLogic extends UILogic<
         const location = previousState.selectedListId ?? undefined
         const cardId = generateAnnotationCardInstanceId(
             {
-                unifiedId: event.unifiedAnnotationId,
+                unifiedId: unifiedAnnotationId,
             },
             location,
         )
@@ -2175,6 +2654,10 @@ export class SidebarContainerLogic extends UILogic<
             | null,
         chapterSummaryIndex?: number,
     ) {
+        this.emitMutation({
+            loadState: { $set: 'running' },
+        })
+
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
@@ -2228,7 +2711,9 @@ export class SidebarContainerLogic extends UILogic<
             hasKey: { $set: hasAPIKey },
         })
 
-        let textToAnalyse = textAsAlternative
+        let textToAnalyse
+        let isContentSearch = false
+        textToAnalyse = textAsAlternative
             ? textAsAlternative
             : highlightedText
             ? highlightedText
@@ -2236,6 +2721,67 @@ export class SidebarContainerLogic extends UILogic<
 
         if (previousState.fetchLocalHTML) {
             textToAnalyse = document.title + document.body.innerText
+        }
+
+        if (
+            previousState.activeAITab === 'ExistingKnowledge' ||
+            previousState.activeAITab === 'InFollowedFeeds'
+        ) {
+            if (previousState.prompt?.length === 0 && prompt.length === 0) {
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                })
+                return
+            }
+            const results = await this.options.customListsBG.findSimilarBackground(
+                previousState.prompt || prompt,
+                normalizeUrl(
+                    this.previousState?.fullPageUrl || this.fullPageUrl,
+                    {
+                        skipProtocolTrim: true,
+                    },
+                ),
+            )
+
+            let extractedData
+
+            if (previousState.activeAITab === 'ExistingKnowledge') {
+                this.emitMutation({
+                    activeSuggestionsTab: { $set: 'MySuggestions' },
+                })
+                extractedData = results.filter((result) => {
+                    return (
+                        result.creatorId ===
+                        previousState.currentUserReference.id
+                    )
+                })
+            }
+            if (previousState.activeAITab === 'InFollowedFeeds') {
+                this.emitMutation({
+                    activeSuggestionsTab: { $set: 'OtherSuggestions' },
+                })
+
+                extractedData = results.filter((result) => {
+                    return (
+                        result.creatorId !==
+                        previousState.currentUserReference.id
+                    )
+                })
+
+                extractedData = extractedData.map((result) => {
+                    return {
+                        pageTitle: result.pageTitle,
+                        contentText: result.contentText,
+                    }
+                })
+            }
+
+            textToAnalyse = JSON.stringify(extractedData)
+            isContentSearch = true
+
+            console.log('extractedData', results)
+
+            await this.updateSuggestionResults(results)
         }
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
@@ -2251,6 +2797,7 @@ export class SidebarContainerLogic extends UILogic<
             outputLocation: outputLocation ?? null,
             chapterSummaryIndex: chapterSummaryIndex ?? null,
             AImodel: previousState.AImodel,
+            isContentSearch: isContentSearch ? true : false,
         })
 
         return response
@@ -2476,6 +3023,12 @@ export class SidebarContainerLogic extends UILogic<
             let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
             let fullTextToProcess
             if (isPagePDF) {
+                const searchParams = new URLSearchParams(window.location.search)
+                const filePath = searchParams.get('file')
+                const pdf: PDFDocumentProxy = await (globalThis as any)[
+                    'pdfjsLib'
+                ].getDocument(filePath).promise
+                const text = await extractDataFromPDFDocument(pdf, true)
                 fullTextToProcess = document.body.innerText
             }
 
@@ -2573,10 +3126,47 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private handleMouseUpToTriggerRabbitHole = (event) => {
+        this.listenToTextHighlightSuggestions()
+    }
+
+    setActiveSuggestionsTab: EventHandler<'setActiveSuggestionsTab'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            activeSuggestionsTab: { $set: event.tab },
+        })
+    }
+    setSummaryMode: EventHandler<'setSummaryMode'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            summaryModeActiveTab: { $set: event.tab },
+        })
+    }
+    setActiveAITab: EventHandler<'setActiveAITab'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (event.tab !== 'ThisPage') {
+            await this.checkRabbitHoleOnboardingStage()
+        }
+        this.emitMutation({
+            activeAITab: { $set: event.tab },
+        })
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
     }) => {
+        document.removeEventListener(
+            'mouseup',
+            this.handleMouseUpToTriggerRabbitHole,
+        )
+
         this.emitMutation({ activeTab: { $set: event.tab } })
 
         // Ensure in-page selectedList state only applies when the spaces tab is active
@@ -2601,6 +3191,8 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
+            console.log('waaaa')
+            this.renderOwnHighlights(previousState)
         } else if (
             event.tab === 'summary' &&
             ((event.prompt && event.prompt?.length > 0) ||
@@ -2639,7 +3231,271 @@ export class SidebarContainerLogic extends UILogic<
                     )
                 }
             }
+        } else if (event.tab === 'rabbitHole') {
+            this.emitMutation({
+                suggestionsResultsLoadState: { $set: 'running' },
+            })
+            this.previousState = previousState
+            if (
+                !(
+                    previousState.rabbitHoleBetaFeatureAccess === 'onboarded' ||
+                    (await this.checkRabbitHoleOnboardingStage()) ===
+                        'onboarded'
+                )
+            ) {
+                this.emitMutation({
+                    suggestionsResultsLoadState: { $set: 'success' },
+                })
+                return
+            }
+
+            const currentPageContent =
+                document.title && document.title + document.body.innerText
+
+            const prompt = `You are given the text of a web page. Your task is to summarise it in such a way that is ideally suited for similarity comparison with other texts. This means you should retain all key entities and concepts as much as you can. Here is the text of the page:  `
+
+            // const summary = await this.options.summarizeBG.getTextSummary({
+            //     text: currentPageContent,
+            //     prompt: prompt,
+            // })
+
+            // const summarisedText = summary.choices[0].text
+
+            // add step to summmarise page and extract key information suitable for similiarity search
+
+            let results
+            results = await this.options.customListsBG.findSimilarBackground(
+                currentPageContent,
+                normalizeUrl(previousState.fullPageUrl, {
+                    skipProtocolTrim: true,
+                }),
+            )
+            if (results.length === 0) {
+                this.emitMutation({
+                    suggestionsResultsLoadState: { $set: 'success' },
+                })
+            }
+            if (results === 'not-connected' || results === 'not-allowed') {
+                this.emitMutation({
+                    suggestionsResultsLoadState: { $set: 'error' },
+                })
+                return
+            }
+
+            await this.updateSuggestionResults(results)
+
+            // Add the event listener
+            document.addEventListener(
+                'mouseup',
+                this.handleMouseUpToTriggerRabbitHole,
+            )
         }
+    }
+
+    async listenToTextHighlightSuggestions() {
+        const selectedText = window.getSelection().toString().trim()
+        if (selectedText.length > 0) {
+            this.emitMutation({
+                suggestionsResultsLoadState: { $set: 'running' },
+            })
+            const results = await this.options.customListsBG.findSimilarBackground(
+                selectedText,
+                normalizeUrl(this.previousState.fullPageUrl, {
+                    skipProtocolTrim: true,
+                }),
+            )
+            await this.updateSuggestionResults(results)
+        }
+    }
+
+    async updateSuggestionResults(resultsInput: SuggestionCard[]) {
+        const resultsArray: SuggestionCard[] = []
+        const user = await this.options.authBG.getCurrentUser()
+        const userId = user?.id
+
+        type spaceItem = {
+            name: string
+            id?: number
+            unifiedId?: string
+            isShared?: boolean
+            remoteId?: string | AutoPk
+            localId?: number | null
+        }
+
+        // Filter the resultsArray to only have one item from the same URL, and take the one with the lowest "distance" value
+        const results = resultsInput.reduce(
+            (acc: SuggestionCard[], curr: SuggestionCard) => {
+                const existing = acc.find(
+                    (item) => item.fullUrl === curr.fullUrl,
+                )
+                if (!existing) {
+                    return acc.concat([curr])
+                } else if (existing.distance > curr.distance) {
+                    return acc
+                        .filter((item) => item.fullUrl !== curr.fullUrl)
+                        .concat([curr])
+                } else {
+                    return acc
+                }
+            },
+            [],
+        )
+
+        console.log('results    ', results)
+
+        if (results) {
+            for (let result of Object.values(results)) {
+                let space: spaceItem
+                let pageData
+                let pageToDisplay: SuggestionCard
+
+                if (
+                    userId != result.creatorId &&
+                    result.contentType === 'page'
+                ) {
+                    const followedPageListData = []
+                    const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
+                        result.fullUrl,
+                    )
+
+                    for (let spaceItemKey in spacesData) {
+                        let spaceItem = spacesData[spaceItemKey]
+                        space = {
+                            name: spaceItem.name,
+                            remoteId: spaceItem.sharedList,
+                            unifiedId: null,
+                            isShared: false,
+                            localId: null,
+                            id: null,
+                        }
+                        followedPageListData.push(space)
+                    }
+
+                    pageToDisplay = {
+                        fullUrl: result.fullUrl,
+                        pageTitle: result.pageTitle,
+                        contentText: result.contentText,
+                        contentType: result.contentType,
+                        creatorId: result.creatorId,
+                        spaces: followedPageListData,
+                        sourceApplication: result.sourceApplication,
+                    }
+                } else {
+                    if (
+                        result.contentType === 'page' ||
+                        result.contentType === 'rss-feed-item'
+                    ) {
+                        const pageListData = []
+                        pageData = await this.options.customListsBG.findPageByUrl(
+                            normalizeUrl(result.fullUrl),
+                        )
+
+                        if (pageData) {
+                            const pageLists = await this.options.customListsBG.fetchPageLists(
+                                { url: pageData?.fullUrl },
+                            )
+
+                            if (pageLists.length > 0) {
+                                for (let pageList of pageLists) {
+                                    const list = await this.options.annotationsCache.getListByLocalId(
+                                        pageList,
+                                    )
+                                    space = {
+                                        name: list.name,
+                                        remoteId: list.remoteId,
+                                        unifiedId: list.unifiedId,
+                                        isShared: !list.isPrivate,
+                                        localId: list.localId,
+                                        id: list.localId,
+                                    }
+                                    pageListData.push(space)
+                                }
+                            }
+                        }
+
+                        pageToDisplay = {
+                            fullUrl: pageData?.fullUrl || result?.fullUrl,
+                            pageTitle: pageData?.fullTitle || result?.pageTitle,
+                            contentText: result.contentText,
+                            contentType: result.contentType,
+                            creatorId: userId,
+                            spaces: pageListData ?? null,
+                        }
+                    } else if (result.contentType === 'annotation') {
+                        try {
+                            const annotationUrl = normalizeUrl(
+                                result.fullUrl,
+                            ).split('/#')[0]
+
+                            const normalizedUrl = normalizeUrl(result.fullUrl, {
+                                stripHash: false,
+                            })
+
+                            let annotationRawData = await this.options.annotationsBG.getAnnotationByPk(
+                                {
+                                    url: result.fullUrl.replace('https://', ''),
+                                },
+                            )
+
+                            // Convert the string to a Date object
+                            let createdWhenDate = new Date(
+                                annotationRawData.createdWhen,
+                            )
+
+                            // Now you can use getTime method
+                            annotationRawData.createdWhen = Math.floor(
+                                createdWhenDate.getTime(),
+                            )
+                            let lastEditedDate = new Date(
+                                annotationRawData.lastEdited,
+                            )
+
+                            // Now you can use getTime method
+                            annotationRawData.lastEdited = Math.floor(
+                                lastEditedDate.getTime(),
+                            )
+                            annotationRawData.lists = []
+
+                            const annotationForCache = cacheUtils.reshapeAnnotationForCache(
+                                annotationRawData,
+                                annotationRawData.createdWhen,
+                            )
+                            const annotationsCacheVersion = await this.options.annotationsCache.addAnnotation(
+                                annotationForCache,
+                            )
+
+                            if (annotationsCacheVersion) {
+                                pageToDisplay = {
+                                    fullUrl: annotationUrl,
+                                    pageTitle:
+                                        result.pageTitle ?? annotationUrl,
+                                    body: annotationRawData?.body ?? null,
+                                    comment: annotationRawData?.comment ?? null,
+                                    contentType: result.contentType,
+                                    creatorId: result.creatorId,
+                                    unifiedId:
+                                        annotationsCacheVersion.unifiedId,
+                                }
+                            }
+                        } catch (e) {
+                            console.log('Error', e)
+                        }
+                    }
+                }
+                if (pageToDisplay) {
+                    resultsArray.push(pageToDisplay)
+                }
+            }
+        }
+
+        // next step is to fetch the respective user data from the creators, potentially load them async after reuslts already display
+
+        this.emitMutation({
+            suggestionsResults: { $set: resultsArray ?? [] },
+            suggestionsResultsLoadState: { $set: 'success' },
+        })
+
+        return resultsArray
     }
 
     private async maybeLoadListRemoteAnnotations(
@@ -2730,6 +3586,14 @@ export class SidebarContainerLogic extends UILogic<
                             }),
                         )
                     }
+
+                    this.options.events?.emit('renderHighlights', {
+                        highlights: cacheUtils.getListHighlightsArray(
+                            this.options.annotationsCache,
+                            unifiedListId,
+                        ),
+                        removeExisting: false,
+                    })
 
                     // Ensure cache added annotations are set in latest state
                     nextState = {
@@ -3192,6 +4056,10 @@ export class SidebarContainerLogic extends UILogic<
         //     return
         // }
 
+        this.emitMutation({
+            activeTab: { $set: 'spaces' },
+        })
+
         if (event.unifiedListId == null) {
             this.options.events?.emit('setSelectedList', null)
             this.emitMutation({ selectedListId: { $set: null } })
@@ -3203,6 +4071,8 @@ export class SidebarContainerLogic extends UILogic<
             previousState,
             event.unifiedListId,
         )
+
+        this.renderOwnHighlights(previousState)
 
         this.emitMutation({})
     }

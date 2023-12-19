@@ -7,6 +7,7 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { ListShareResult } from 'src/content-sharing/background/types'
+import { SuggestionCard } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export interface PageList {
     id: number
@@ -92,12 +93,14 @@ export interface RemoteCollectionsInterface {
         skipPageIndexing?: boolean
         suppressVisitCreation?: boolean
         pageTitle?: string
+        indexUrl?: boolean
     }): Promise<{ object: PageListEntry }>
     updateListName(args: {
         id: number
         oldName: string
         newName: string
     }): Promise<void>
+    findPageByUrl(normalizedUrl: string): Promise<void>
     fetchListDescriptions(args: {
         listIds: number[]
     }): Promise<{ [listId: number]: string | null }>
@@ -137,6 +140,10 @@ export interface RemoteCollectionsInterface {
         includeDescriptions?: boolean
     }): Promise<PageList[]>
     fetchListById(args: { id: number }): Promise<PageList>
+    findSimilarBackground(
+        currentPageContent?: string,
+        fullUrl?: string,
+    ): Promise<SuggestionCard[]>
     fetchListPagesByUrl(args: { url: string }): Promise<PageList[]>
     fetchPageListEntriesByUrl(args: { url: string }): Promise<PageListEntry[]>
     fetchPageLists(args: { url: string }): Promise<number[]>
