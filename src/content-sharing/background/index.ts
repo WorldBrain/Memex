@@ -43,6 +43,7 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { ListTree } from 'src/custom-lists/background/types'
 import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
 import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import type { OperationBatch } from '@worldbrain/storex'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -386,7 +387,7 @@ export default class ContentSharingBackground {
             pageActivityIndicator,
         } = this.options.getBgModules()
 
-        let listTrees: ListTree[]
+        let listTrees: Pick<ListTree, 'listId' | 'linkTarget'>[] = []
         try {
             listTrees = await customLists.storage.getAllNodesInTreeByList({
                 rootLocalListId: localListId,
@@ -397,35 +398,87 @@ export default class ContentSharingBackground {
             console.error(err)
         }
         // Reverse so that we delete nodes starting from the leaves
-        listTrees.reverse().push({ listId: localListId } as ListTree)
+        listTrees.reverse().push({ listId: localListId, linkTarget: null })
+        const batch: OperationBatch = []
 
         for (const listTree of listTrees) {
-            if (listTree.linkTarget) {
-                await customLists.storage.deleteListTreeLink({
-                    localListId: listTree.linkTarget,
-                })
-                continue
-            }
+            // TODO: add proper tree link target support
+            // if (listTree.linkTarget) {
+            //     await customLists.storage.deleteListTreeLink({
+            //         localListId: listTree.linkTarget,
+            //     })
+            //     continue
+            // }
             const listId = listTree.listId
-            await directLinking.annotationStorage.removeAnnotsFromList({
-                listId,
+
+            batch.push({
+                collection: 'annotListEntries',
+                operation: 'deleteObjects',
+                where: { listId },
             })
+
+            // await directLinking.annotationStorage.removeAnnotsFromList({
+            //     listId,
+            // })
+            batch.push(
+                {
+                    collection: 'pageListEntries',
+                    operation: 'deleteObjects',
+                    where: { listId },
+                },
+                {
+                    collection: 'customListTrees',
+                    operation: 'deleteObjects',
+                    where: { listId },
+                },
+                {
+                    collection: 'customListDescriptions',
+                    operation: 'deleteObjects',
+                    where: { listId },
+                },
+                {
+                    collection: 'customLists',
+                    operation: 'deleteObjects',
+                    where: { id: listId },
+                },
+                {
+                    collection: 'sharedListMetadata',
+                    operation: 'deleteObjects',
+                    where: { localId: listId },
+                },
+            )
+
             const remoteListId = await this.storage.getRemoteListId({
                 localId: listId,
             })
-            await customLists.storage.removeListAssociatedData({ listId })
-            await customLists.storage.removeList({ id: listId })
+
+            // await customLists.storage.removeListAssociatedData({ listId })
+            // await customLists.storage.removeList({ id: listId })
             if (remoteListId != null) {
-                await this.storage.deleteMetadataByLocalListId({
-                    localListId: listId,
-                })
-                await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
+                // await this.storage.deleteMetadataByLocalListId({
+                //     localListId: listId,
+                // })
+                batch.push(
                     {
-                        sharedList: remoteListId,
+                        collection: 'followedListEntry',
+                        operation: 'deleteObjects',
+                        where: { followedList: remoteListId },
+                    },
+                    {
+                        collection: 'followedList',
+                        operation: 'deleteObjects',
+                        where: { sharedList: remoteListId },
                     },
                 )
+                // await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
+                //     {
+                //         sharedList: remoteListId,
+                //     },
+                // )
             }
         }
+
+        await this.options.storageManager.backend.executeBatch(batch)
     }
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({

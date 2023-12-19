@@ -39,7 +39,6 @@ export class PKMSyncBackgroundModule {
 
     async pushRabbitHoleUpdate(entryData) {
         if (await this.backendNew.isConnected()) {
-            console.log('entryData', entryData)
             const document = {
                 createdWhen: entryData.createdWhen,
                 creatorId: entryData.creatorId,

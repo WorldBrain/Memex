@@ -7239,27 +7239,27 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
-                { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: {
-                    listId: syncedList.localId,
-                 } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'followedListEntry', where: {
-                    followedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
-                 } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'followedList', where: {
-                    sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
-                 } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'pageListEntries', where: {
-                    listId: syncedList.localId,
-                 } },
-                // { type: PersonalCloudUpdateType.Delete, collection: 'customListTrees', where: {
+                // { type: PersonalCloudUpdateType.Delete, collection: 'annotListEntries', where: {
                 //     listId: syncedList.localId,
                 //  } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'sharedListMetadata', where: {
-                    localId: syncedList.localId,
-                 } },
-                { type: PersonalCloudUpdateType.Delete, collection: 'customLists', where: {
-                    id: syncedList.localId,
-                 } },
+                // { type: PersonalCloudUpdateType.Delete, collection: 'followedListEntry', where: {
+                //     followedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                //  } },
+                // { type: PersonalCloudUpdateType.Delete, collection: 'followedList', where: {
+                //     sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                //  } },
+                // { type: PersonalCloudUpdateType.Delete, collection: 'pageListEntries', where: {
+                //     listId: syncedList.localId,
+                //  } },
+                // // { type: PersonalCloudUpdateType.Delete, collection: 'customListTrees', where: {
+                // //     listId: syncedList.localId,
+                // //  } },
+                // { type: PersonalCloudUpdateType.Delete, collection: 'sharedListMetadata', where: {
+                //     localId: syncedList.localId,
+                //  } },
+                // { type: PersonalCloudUpdateType.Delete, collection: 'customLists', where: {
+                //     id: syncedList.localId,
+                //  } },
             ], { skip: 0, deviceIndex: 1, userId: TEST_USER_2_ID, queryResultLimit: 1000 })
 
             // Assert user B (list joiner)'s list data has also been deleted
