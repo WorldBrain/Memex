@@ -275,7 +275,7 @@ export const LOCAL_TEST_DATA_V24 = {
             version: 0,
             deviceId: REMOTE_DEVICES_V24.first.id,
         },
-        // NOTE: fourth_a and fourth_b point to the same page
+        // NOTE: all the fourth_* locators point to the same page
         fourth_a: {
             id: 2,
             fingerprint: 'test-fingerprint-2',
@@ -312,11 +312,11 @@ export const LOCAL_TEST_DATA_V24 = {
             id: 4,
             fingerprint: 'test-fingerprint-1',
             fingerprintScheme: FingerprintSchemeType.PdfV1,
-            location: 'getmemex.com/test2.pdf',
+            location: 'test-upload-id-1',
             locationType: ContentLocatorType.Remote,
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: LOCAL_PAGES_V24.fourth.url,
-            originalLocation: 'https://getmemex.com/test2.pdf',
+            // originalLocation: null,
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
             status: 'uploading',
@@ -329,11 +329,11 @@ export const LOCAL_TEST_DATA_V24 = {
             id: 4,
             fingerprint: 'test-fingerprint-1',
             fingerprintScheme: FingerprintSchemeType.PdfV1,
-            location: 'getmemex.com/test2.pdf',
+            location: 'test-upload-id-1',
             locationType: ContentLocatorType.Remote,
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: LOCAL_PAGES_V24.fourth.url,
-            originalLocation: 'https://getmemex.com/test2.pdf',
+            // originalLocation: null,
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
             status: 'uploaded',
@@ -705,9 +705,7 @@ const REMOTE_LOCATORS_V24 = {
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationScheme,
         locationType:
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
-        originalLocation:
-            LOCAL_TEST_DATA_V24.locators.fourth_uploading.originalLocation,
-        primary: true,
+        // originalLocation: null,
         valid: true,
         version: 0,
         lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_uploading.lastVisited,
@@ -731,8 +729,7 @@ const REMOTE_LOCATORS_V24 = {
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationScheme,
         locationType:
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
-        originalLocation:
-            LOCAL_TEST_DATA_V24.locators.fourth_uploading.originalLocation,
+        // originalLocation: null,
         primary: true,
         valid: true,
         version: 0,

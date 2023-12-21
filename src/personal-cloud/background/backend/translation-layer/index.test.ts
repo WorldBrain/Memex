@@ -803,6 +803,7 @@ describe('Personal cloud translation layer', () => {
                     'personalBlockStats',
                     'personalContentMetadata',
                     'personalContentLocator',
+                    'sharedContentLocator',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...personalDataChanges(remoteData, [
@@ -825,7 +826,19 @@ describe('Personal cloud translation layer', () => {
                 personalContentLocator: [
                     testLocators.first, testLocators.second,
                     testLocators.third_dummy, testLocators.third,
-                    testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b, testLocators.fourth_c_uploaded],
+                    testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b, testLocators.fourth_c_uploaded,
+                ],
+                sharedContentLocator: [
+                    {
+                        id: expect.anything(),
+                        creator: TEST_USER.id,
+                        locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                        normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                        location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                        // originalUrl: null,
+                        // sharedList: null,
+                    },
+                ],
             })
 
             // prettier-ignore
