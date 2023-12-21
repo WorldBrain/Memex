@@ -5281,6 +5281,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.fourth_uploading)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -5306,6 +5309,15 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('pageListEntries')
                     .createObject(LOCAL_TEST_DATA_V24.pageListEntries.fourth)
+                await setups[0].backgroundModules.pages.storage.updateLocatorStatus(
+                    {
+                        normalizedUrl:
+                            LOCAL_TEST_DATA_V24.locators.fourth_uploading
+                                .normalizedUrl,
+                        locationScheme: LocationSchemeType.UploadStorage,
+                        status: 'uploaded',
+                    },
+                )
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
                 const remoteData = serverIdCapturer.mergeIds(
@@ -5348,7 +5360,7 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_c_uploaded],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -5372,17 +5384,41 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentFingerprint: [
-                        expect.objectContaining({
-                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            fingerprint: testLocators.fourth_c_uploaded.fingerprint,
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
                             fingerprint: testLocators.fourth_a.fingerprint,
-                        }),
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            fingerprint: testLocators.fourth_b.fingerprint,
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                     sharedContentLocator: [
-                        // NOTE: This shouldn't get shared as it's a local filesystem locator
-                        // expect.objectContaining({
-                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
-                        //     originalUrl: testLocators.fourth_a.originalLocation,
-                        // }),
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                            // originalUrl: null,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                 })
 
@@ -5421,6 +5457,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.fourth_uploading)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -5447,6 +5486,15 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('sharedListMetadata')
                     .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+                await setups[0].backgroundModules.pages.storage.updateLocatorStatus(
+                    {
+                        normalizedUrl:
+                            LOCAL_TEST_DATA_V24.locators.fourth_uploading
+                                .normalizedUrl,
+                        locationScheme: LocationSchemeType.UploadStorage,
+                        status: 'uploaded',
+                    },
+                )
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
                 const remoteData = serverIdCapturer.mergeIds(
@@ -5489,7 +5537,7 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_c_uploaded],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -5498,6 +5546,7 @@ describe('Personal cloud translation layer', () => {
                     personalAnnotationPrivacyLevel: [testPrivacyLevels.fifth],
                     sharedList: [
                         expect.objectContaining({
+                            id: testListShares.first.remoteId,
                             title: LOCAL_TEST_DATA_V24.customLists.first.name,
                         }),
                     ],
@@ -5513,17 +5562,41 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentFingerprint: [
-                        expect.objectContaining({
-                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            fingerprint: testLocators.fourth_c_uploaded.fingerprint,
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
                             fingerprint: testLocators.fourth_a.fingerprint,
-                        }),
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            fingerprint: testLocators.fourth_b.fingerprint,
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                     sharedContentLocator: [
-                        // NOTE: This shouldn't get shared as it's a local filesystem locator
-                        // expect.objectContaining({
-                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
-                        //     originalUrl: testLocators.fourth_a.originalLocation,
-                        // }),
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                            // originalUrl: null,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                 })
 
@@ -5898,9 +5971,12 @@ describe('Personal cloud translation layer', () => {
             const annotBId = '11111112'
             const annotBUrl =
                 LOCAL_TEST_DATA_V24.pages.first.url + '/#' + annotBId
-            const syncedList = await setups[1].serverStorage.manager
+            const syncedList: {
+                id: AutoPk
+                localId: AutoPk
+            } = await setups[1].serverStorage.manager
                 .collection('personalList')
-                .findObject<{ id: AutoPk; localId: AutoPk }>({
+                .findObject({
                     user: TEST_USER_2_ID,
                 })
 
