@@ -316,7 +316,7 @@ export const LOCAL_TEST_DATA_V24 = {
             locationType: ContentLocatorType.Remote,
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: LOCAL_PAGES_V24.fourth.url,
-            // originalLocation: null,
+            originalLocation: null,
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
             status: 'uploading',
@@ -333,7 +333,7 @@ export const LOCAL_TEST_DATA_V24 = {
             locationType: ContentLocatorType.Remote,
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: LOCAL_PAGES_V24.fourth.url,
-            // originalLocation: null,
+            originalLocation: null,
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
             status: 'uploaded',
@@ -580,9 +580,9 @@ const REMOTE_LOCATORS_V24 = {
         // contentSize: null,
         // fingerprint: null,
     },
-    // As the third page is a PDF, an extra dummy locator exists to point to the dummy
+    // As the third page is a PDF, an extra base locator exists to point to the contentMetadata
     //  memex.cloud/ct/ page that gets created locally for the PDF
-    third_dummy: {
+    third_base: {
         id: 3,
         createdWhen: 560,
         updatedWhen: 560,
@@ -624,7 +624,7 @@ const REMOTE_LOCATORS_V24 = {
         fingerprint: LOCAL_TEST_DATA_V24.locators.third.fingerprint,
         fingerprintScheme: LOCAL_TEST_DATA_V24.locators.third.fingerprintScheme,
     },
-    fourth_dummy: {
+    fourth_base: {
         id: 5,
         createdWhen: 564,
         updatedWhen: 564,
@@ -706,6 +706,7 @@ const REMOTE_LOCATORS_V24 = {
         locationType:
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
         // originalLocation: null,
+        primary: true,
         valid: true,
         version: 0,
         lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_uploading.lastVisited,
