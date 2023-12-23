@@ -42,5 +42,5 @@ export interface InPageUIContentScriptRemoteInterface {
 
 export interface InPDFPageUIContentScriptRemoteInterface {
     extractPDFContents(): Promise<ExtractedPDFData | null>
-    uploadPdf(params: { token: string }): Promise<void>
+    getPDFRawData(): Promise<Uint8Array | null>
 }

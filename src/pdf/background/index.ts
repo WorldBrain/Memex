@@ -166,6 +166,15 @@ export class PDFBackground {
         tabId: number
         identifier: ContentIdentifier
     }) => {
+        const data = await runInTab<InPDFPageUIContentScriptRemoteInterface>(
+            params.tabId,
+        ).getPDFRawData()
+        if (!data) {
+            throw new Error(
+                `Could not get raw data for current PDF - tab ID: ${params.tabId}, url: ${params.identifier.fullUrl}`,
+            )
+        }
+
         const existingLocators = await this.deps.pageStorage.findLocatorsByNormalizedUrl(
             params.identifier.normalizedUrl,
         )
@@ -205,9 +214,11 @@ export class PDFBackground {
             )
         }
         const { token } = tokenResult as RequestPdfSuccessResult
-        await runInTab<InPDFPageUIContentScriptRemoteInterface>(
-            params.tabId,
-        ).uploadPdf({ token })
+        await this.deps.pdfUploads.uploadPdfContent({
+            token,
+            content: data,
+        })
+
         await this.deps.pageStorage.updateLocatorStatus({
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: params.identifier.normalizedUrl,

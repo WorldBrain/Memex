@@ -10,8 +10,6 @@ import type { GetContentFingerprints } from './types'
 import { makeRemotelyCallableType } from 'src/util/webextensionRPC'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import { getPDFTitle } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/get-title'
-import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
-import { getOnlineBackendEnv } from 'src/util/env'
 
 const waitForDocument = async () => {
     while (true) {
@@ -99,18 +97,9 @@ Global.main({
             ].getDocument(filePath).promise
             return extractDataFromPDFDocument(pdf)
         },
-        uploadPdf: async (params) => {
+        getPDFRawData: async () => {
             const { pdfDocument } = await waitForDocument()
-            const content = await pdfDocument.getData()
-            const pdfService = new PdfUploadService({
-                callFirebaseFunction: async () => null as any,
-                dataUrlToBlob: () => null as any,
-                env: getOnlineBackendEnv(),
-            })
-            await pdfService.uploadPdfContent({
-                token: params.token,
-                content,
-            })
+            return pdfDocument.getData()
         },
     })
     await inPageUI.showSidebar()
