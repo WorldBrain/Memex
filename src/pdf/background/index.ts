@@ -1,11 +1,10 @@
 import type { WebRequest, Tabs, Runtime, Storage } from 'webextension-polyfill'
 import type {
     PdfUploadServiceInterface,
-    PdfUploadParams,
-    RequestPdfUploadSuccessResult,
+    RequestPdfSuccessResult,
 } from '@worldbrain/memex-common/lib/pdf/uploads/types'
 import type { SyncSettingsStore } from '../../sync-settings/util'
-import PageStorage from '../../page-indexing/background/storage'
+import type PageStorage from '../../page-indexing/background/storage'
 import type { PDFRemoteInterface } from './types'
 import { PDF_VIEWER_HTML } from '../constants'
 import {
@@ -13,10 +12,10 @@ import {
     ContentLocatorType,
     LocationSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { PagePutHandler } from 'src/page-indexing/background/types'
+import type { PagePutHandler } from 'src/page-indexing/background/types'
 import { runInTab } from 'src/util/webextensionRPC'
-import { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { ContentIdentifier } from 'src/search'
+import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import type { ContentIdentifier } from 'src/search'
 
 export class PDFBackground {
     static OPEN_PDF_VIEWER_ONE_TIME_KEY =
@@ -54,7 +53,6 @@ export class PDFBackground {
                     [PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY]: false,
                 })
             },
-            uploadPdf: this.uploadPdf,
         }
     }
 
@@ -151,6 +149,12 @@ export class PDFBackground {
 
     handlePagePut: PagePutHandler = async (event) => {
         if (event.isNew && event.isPdf && event.tabId) {
+            const isAutoUploadEnabled = await this.deps.syncSettings.pdfIntegration.get(
+                'shouldAutoUpload',
+            )
+            if (!isAutoUploadEnabled) {
+                return
+            }
             await this.uploadPdf({
                 tabId: event.tabId,
                 identifier: event.identifier,
@@ -158,7 +162,7 @@ export class PDFBackground {
         }
     }
 
-    uploadPdf = async (params: {
+    private uploadPdf = async (params: {
         tabId: number
         identifier: ContentIdentifier
     }) => {
@@ -200,7 +204,7 @@ export class PDFBackground {
                 `Got error while trying to get PDF upload token: ${tokenResult.error}`,
             )
         }
-        const { token } = tokenResult as RequestPdfUploadSuccessResult
+        const { token } = tokenResult as RequestPdfSuccessResult
         await runInTab<InPDFPageUIContentScriptRemoteInterface>(
             params.tabId,
         ).uploadPdf({ token })

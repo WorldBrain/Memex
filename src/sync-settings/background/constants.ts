@@ -44,6 +44,7 @@ export const SETTING_NAMES: SyncSettingNames = {
     },
     pdfIntegration: {
         shouldAutoOpen: FEATURE_PREFIX.PDF_INTEGRATION + 'should_auto_open',
+        shouldAutoUpload: FEATURE_PREFIX.PDF_INTEGRATION + 'should_auto_upload',
     },
     inPageUI: {
         ribbonEnabled: FEATURE_PREFIX.IN_PAGE_UI + 'ribbon_enabled',
