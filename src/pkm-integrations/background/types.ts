@@ -18,4 +18,7 @@ export interface PkmSyncInterface {
     loadFeedSources(): Promise<
         { feedUrl: string; feedTitle: string; type: 'substack' }[]
     >
+    openLocalFile(path: string): Promise<void>
+    addLocalFolder(): Promise<{ path: string }>
+    getLocalFolders(): Promise<string[]>
 }

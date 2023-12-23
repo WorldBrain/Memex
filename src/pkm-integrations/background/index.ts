@@ -21,6 +21,9 @@ export class PKMSyncBackgroundModule {
             checkConnectionStatus: this.checkConnectionStatus,
             loadFeedSources: this.loadFeedSources,
             checkFeedSource: this.checkFeedSource,
+            openLocalFile: this.openLocalFile,
+            addLocalFolder: this.addLocalFolder,
+            getLocalFolders: this.getLocalFolders,
         }
     }
 
@@ -68,6 +71,27 @@ export class PKMSyncBackgroundModule {
         })
 
         await backend.addFeedSources(feedSources)
+    }
+    openLocalFile = async (path: string) => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+
+        await backend.openLocalFile(path)
+    }
+    addLocalFolder = async () => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+
+        await backend.addLocalFolder()
+    }
+    getLocalFolders = async () => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+
+        await backend.getLocalFolders()
     }
     checkFeedSource = async (
         feedUrl: string,

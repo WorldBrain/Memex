@@ -835,6 +835,7 @@ export class SidebarContainerLogic extends UILogic<
     private checkRabbitHoleOnboardingStage = async () => {
         const rabbitHoleBetaAccess = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
+            this.options.contentScriptsBG.openBetaFeatureSettings,
         )
 
         this.emitMutation({
@@ -1751,6 +1752,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const onboardingStage = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
+            this.options.contentScriptsBG.openBetaFeatureSettings,
         )
 
         this.emitMutation({
@@ -3270,6 +3272,8 @@ export class SidebarContainerLogic extends UILogic<
                     skipProtocolTrim: true,
                 }),
             )
+
+            console.log('results    ', results)
             if (results.length === 0) {
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'success' },
@@ -3281,6 +3285,24 @@ export class SidebarContainerLogic extends UILogic<
                 })
                 return
             }
+
+            results = results.reduce(
+                (acc: SuggestionCard[], curr: SuggestionCard) => {
+                    const existing = acc.find(
+                        (item) => item.fullUrl === curr.fullUrl,
+                    )
+                    if (!existing) {
+                        return acc.concat([curr])
+                    } else if (existing.distance > curr.distance) {
+                        return acc
+                            .filter((item) => item.fullUrl !== curr.fullUrl)
+                            .concat([curr])
+                    } else {
+                        return acc
+                    }
+                },
+                [],
+            )
 
             await this.updateSuggestionResults(results)
 
@@ -3298,17 +3320,59 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 suggestionsResultsLoadState: { $set: 'running' },
             })
-            const results = await this.options.customListsBG.findSimilarBackground(
+            let results = await this.options.customListsBG.findSimilarBackground(
                 selectedText,
                 normalizeUrl(this.previousState.fullPageUrl, {
                     skipProtocolTrim: true,
                 }),
             )
+
+            results = results.reduce(
+                (acc: SuggestionCard[], curr: SuggestionCard) => {
+                    const existing = acc.find(
+                        (item) => item.fullUrl === curr.fullUrl,
+                    )
+                    if (!existing) {
+                        return acc.concat([curr])
+                    } else if (existing.distance > curr.distance) {
+                        return acc
+                            .filter((item) => item.fullUrl !== curr.fullUrl)
+                            .concat([curr])
+                    } else {
+                        return acc
+                    }
+                },
+                [],
+            )
             await this.updateSuggestionResults(results)
         }
     }
 
-    async updateSuggestionResults(resultsInput: SuggestionCard[]) {
+    openLocalFile: EventHandler<'openLocalFile'> = async ({ event }) => {
+        console.log('reaches here')
+        await this.options.pkmSyncBG.openLocalFile(event.path)
+    }
+    addLocalFolder: EventHandler<'addLocalFolder'> = async ({
+        previousState,
+    }) => {
+        const path = await this.options.pkmSyncBG.addLocalFolder()
+
+        let localFolders = previousState.localFoldersList
+        localFolders.push(path.path)
+
+        this.emitMutation({
+            localFoldersList: { $push: localFolders },
+        })
+    }
+    getLocalFolders: EventHandler<'getLocalFolders'> = async ({}) => {
+        const localFolders = await this.options.pkmSyncBG.getLocalFolders()
+
+        this.emitMutation({
+            localFoldersList: { $push: localFolders },
+        })
+    }
+
+    async updateSuggestionResults(results: SuggestionCard[]) {
         const resultsArray: SuggestionCard[] = []
         const user = await this.options.authBG.getCurrentUser()
         const userId = user?.id
@@ -3323,25 +3387,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         // Filter the resultsArray to only have one item from the same URL, and take the one with the lowest "distance" value
-        const results = resultsInput.reduce(
-            (acc: SuggestionCard[], curr: SuggestionCard) => {
-                const existing = acc.find(
-                    (item) => item.fullUrl === curr.fullUrl,
-                )
-                if (!existing) {
-                    return acc.concat([curr])
-                } else if (existing.distance > curr.distance) {
-                    return acc
-                        .filter((item) => item.fullUrl !== curr.fullUrl)
-                        .concat([curr])
-                } else {
-                    return acc
-                }
-            },
-            [],
-        )
-
-        console.log('results    ', results)
 
         if (results) {
             for (let result of Object.values(results)) {
@@ -3420,6 +3465,32 @@ export class SidebarContainerLogic extends UILogic<
                             contentType: result.contentType,
                             creatorId: userId,
                             spaces: pageListData ?? null,
+                        }
+                    } else if (result.contentType === 'pdf') {
+                        const pageListData = []
+
+                        pageData = await this.options.customListsBG.findPageByUrl(
+                            normalizeUrl(result.fullUrl),
+                        )
+
+                        if (pageData) {
+                            pageToDisplay = {
+                                fullUrl: result.path,
+                                pageTitle: pageData?.fullTitle,
+                                contentText: result.contentText,
+                                contentType: result.contentType,
+                                creatorId: userId,
+                                spaces: pageListData ?? null,
+                            }
+                        } else {
+                            pageToDisplay = {
+                                fullUrl: result.path,
+                                pageTitle: result?.pageTitle,
+                                contentText: result.contentText,
+                                contentType: result.contentType,
+                                creatorId: userId,
+                                spaces: pageListData ?? null,
+                            }
                         }
                     } else if (result.contentType === 'annotation') {
                         try {

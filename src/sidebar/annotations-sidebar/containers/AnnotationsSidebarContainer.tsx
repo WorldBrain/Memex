@@ -1425,6 +1425,17 @@ export class AnnotationsSidebarContainer<
                                     fileString: fileString,
                                 })
                             }}
+                            openLocalFile={(path: string) => {
+                                this.processEvent('openLocalFile', {
+                                    path: path,
+                                })
+                            }}
+                            addLocalFolder={() => {
+                                this.processEvent('addLocalFolder', null)
+                            }}
+                            getLocalFolders={() => {
+                                this.processEvent('getLocalFolders', null)
+                            }}
                         />
                     </Rnd>
                 </ContainerStyled>

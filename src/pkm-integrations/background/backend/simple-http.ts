@@ -341,4 +341,86 @@ export class MemexLocalBackend {
             await fetch(`${this.url}/Memex Sync/Memex Sync History.md`)
         ).json()
     }
+
+    async addLocalFolder(): Promise<{ path: string }> {
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+        })
+
+        const response = await fetch(`${this.url}/watch_new_folder`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
+
+        if (response.ok) {
+            const responseObj = await response.json()
+            return responseObj
+        }
+
+        if (!response.ok || response.status !== 200) {
+            throw new Error(
+                `Error adding new local folder to watchlist: ${response.status}`,
+            )
+        }
+    }
+    async getLocalFolders(): Promise<void> {
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+        })
+
+        const response = await fetch(`${this.url}/watch_new_folder`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
+
+        if (response.ok) {
+            const responseObj = await response.json()
+            return responseObj
+        }
+
+        if (!response.ok || response.status !== 200) {
+            throw new Error(
+                `Error adding new local folder to watchlist: ${response.status}`,
+            )
+        }
+    }
+
+    async openLocalFile(path: string): Promise<void> {
+        const syncKey = await getPkmSyncKey()
+
+        console.log('gets here')
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+            path: path,
+        })
+
+        const response = await fetch(`${this.url}/open_file`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
+
+        if (response.ok) {
+            const responseObj = await response.json()
+            console.log('responseObj', responseObj)
+            return responseObj
+        }
+
+        if (!response.ok || response.status !== 200) {
+            throw new Error(`Error opening local file: ${response.status}`)
+        }
+    }
 }

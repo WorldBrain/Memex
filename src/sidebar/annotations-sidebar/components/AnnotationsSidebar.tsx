@@ -255,6 +255,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     saveFeedSources: (sources) => void
     loadFeedSources: () => void
     processFileImportFeeds: (fileContent) => void
+    openLocalFile: (path: string) => void
+    addLocalFolder: () => void
+    getLocalFolders: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -2667,13 +2670,17 @@ export class AnnotationsSidebar extends React.Component<
             <ItemBox>
                 <StyledPageResult
                     isAnnotation={item.contentType === 'annotation'}
-                    onClick={() => {
+                    onClick={(event) => {
+                        event.preventDefault()
                         if (item.contentType === 'annotation') {
                             this.props.onGoToAnnotation(item.unifiedId)
+                        } else if (item.contentType === 'pdf') {
+                            this.props.openLocalFile(item.fullUrl)
                         } else {
                             window.open(item.fullUrl)
                         }
                     }}
+                    href={item.fullUrl}
                 >
                     <PageContentBox
                         // onMouseOver={this.props.onMainContentHover}
@@ -2685,14 +2692,14 @@ export class AnnotationsSidebar extends React.Component<
                         tabIndex={-1}
                     >
                         <BlockContent
-                            type={'page'}
+                            type={item.contentType === 'pdf' ? 'pdf' : 'page'}
                             normalizedUrl={normalizeUrl(item.fullUrl)}
                             originalUrl={
                                 null
                                 // 'https://' + item.normalizedUrl
                             } // TODO: put proper url here
                             fullTitle={item.pageTitle}
-                            pdfUrl={null}
+                            pdfUrl={item.contentType === 'pdf' && item.fullUrl}
                             favIcon={null}
                             youtubeService={null}
                         />

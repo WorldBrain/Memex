@@ -281,6 +281,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         }
     }
     AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+    localFoldersList: string[]
 }
 
 export type AnnotationEvent<T> = {
@@ -514,6 +515,9 @@ interface SidebarEvents {
             | null
     }
     requestRabbitHoleBetaFeatureAccess: { reasonText: string }
+    openLocalFile: { path: string }
+    addLocalFolder: null
+    getLocalFolders: null
 }
 
 export type SidebarContainerEvents = UIEvent<
@@ -541,7 +545,7 @@ export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']
     pageTitle: string
     contentText?: string
-    contentType: 'page' | 'annotation' | 'rss-feed-item'
+    contentType: 'page' | 'annotation' | 'rss-feed-item' | 'pdf'
     creatorId?: UserReference['id']
     spaces?: any
     body?: string
@@ -549,6 +553,7 @@ export interface SuggestionCard {
     unifiedId?: UnifiedAnnotation['unifiedId']
     sourceApplication?: string
     distance?: number
+    path?: string
 }
 
 export interface ListInstance {
