@@ -310,13 +310,13 @@ export const LOCAL_TEST_DATA_V24 = {
         },
         fourth_uploading: {
             id: 4,
-            fingerprint: 'test-fingerprint-1',
-            fingerprintScheme: FingerprintSchemeType.PdfV1,
+            fingerprint: null,
+            fingerprintScheme: null,
             location: 'test-upload-id-1',
             locationType: ContentLocatorType.Remote,
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: LOCAL_PAGES_V24.fourth.url,
-            originalLocation: null,
+            originalLocation: LOCAL_PAGES_V24.fourth.fullUrl,
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
             status: 'uploading',
@@ -327,13 +327,13 @@ export const LOCAL_TEST_DATA_V24 = {
         },
         fourth_uploaded: {
             id: 4,
-            fingerprint: 'test-fingerprint-1',
-            fingerprintScheme: FingerprintSchemeType.PdfV1,
+            fingerprint: null,
+            fingerprintScheme: null,
             location: 'test-upload-id-1',
             locationType: ContentLocatorType.Remote,
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: LOCAL_PAGES_V24.fourth.url,
-            originalLocation: null,
+            originalLocation: LOCAL_PAGES_V24.fourth.fullUrl,
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
             status: 'uploaded',
@@ -705,15 +705,13 @@ const REMOTE_LOCATORS_V24 = {
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationScheme,
         locationType:
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
-        // originalLocation: null,
+        originalLocation:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.originalLocation,
         primary: true,
         valid: true,
         version: 0,
         lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_uploading.lastVisited,
         // contentSize: null,
-        fingerprint: LOCAL_TEST_DATA_V24.locators.fourth_uploading.fingerprint,
-        fingerprintScheme:
-            LOCAL_TEST_DATA_V24.locators.fourth_uploading.fingerprintScheme,
         status: 'uploading',
     },
     fourth_c_uploaded: {
@@ -730,15 +728,13 @@ const REMOTE_LOCATORS_V24 = {
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationScheme,
         locationType:
             LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
-        // originalLocation: null,
+        originalLocation:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.originalLocation,
         primary: true,
         valid: true,
         version: 0,
         lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_uploading.lastVisited,
         // contentSize: null,
-        fingerprint: LOCAL_TEST_DATA_V24.locators.fourth_uploading.fingerprint,
-        fingerprintScheme:
-            LOCAL_TEST_DATA_V24.locators.fourth_uploading.fingerprintScheme,
         status: 'uploaded',
     },
     twitter_a: {
