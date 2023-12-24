@@ -264,6 +264,17 @@ export default class OnboardingScreen extends StatefulUIElement<
                     </OptionDescription> */}
                 </OptionsContainer>
             </OptionsBox>
+            <PrimaryAction
+                label={'Continue to Dashboard'}
+                icon={'longArrowRight'}
+                onClick={() =>
+                    this.processEvent('goToNextOnboardingStep', {
+                        step: 'finish',
+                    })
+                }
+                type="tertiary"
+                size={'large'}
+            />
         </WelcomeBox>
     )
 
@@ -501,17 +512,13 @@ export default class OnboardingScreen extends StatefulUIElement<
         return (
             <OnboardingBox>
                 <OnboardingContent>
-                    {this.state.welcomeStep === 'start' &&
-                        this.renderWelcomeStep()}
-                    {this.state.welcomeStep === 'finish' &&
-                        this.renderOnboardingOptions()}
                     {this.state.welcomeStep === 'basicIntro' &&
                         this.renderBasicIntro()}
-                    {/* {this.state.showSyncNotification &&
+                    {this.state.welcomeStep === 'ChooseOnboardingOption' &&
+                        this.renderOnboardingOptions()}
+                    {this.state.showSyncNotification &&
                         this.state.welcomeStep === 'finish' &&
-                        this.renderSyncNotif()} */}
-                    {this.state.showOnboardingSelection &&
-                        this.renderBasicIntro()}
+                        this.renderSyncNotif()}
                     {!this.state.showOnboardingSelection &&
                         !this.state.showSyncNotification &&
                         this.state.welcomeStep === 'login' &&
@@ -532,6 +539,7 @@ const OptionsBox = styled.div`
     position: relative;
     width: 300px;
     margin-top: 20px;
+    margin-bottom: 50px;
 `
 
 const OptionsContainer = styled.div`

@@ -1788,17 +1788,20 @@ export class AnnotationsSidebar extends React.Component<
 
     renderQaASection() {
         const addPromptButton = (prompt) => (
-            <TooltipBox
-                tooltipText="Save prompt as template"
-                placement="bottom-end"
+            <PromptTemplateButton
+                onMouseDown={() => this.props.saveAIPrompt(prompt)}
             >
-                <Icon
-                    onClick={() => this.props.saveAIPrompt(prompt)}
-                    filePath={icons.plus}
-                    heightAndWidth="22px"
-                    color="prime1"
-                />
-            </TooltipBox>
+                <TooltipBox
+                    tooltipText="Save prompt as template"
+                    placement="bottom-end"
+                >
+                    <Icon
+                        filePath={icons.plus}
+                        heightAndWidth="22px"
+                        color="prime1"
+                    />
+                </TooltipBox>
+            </PromptTemplateButton>
         )
 
         const SuggestionsList = ({
@@ -4061,6 +4064,12 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 }
+
+const PromptTemplateButton = styled.div`
+    position: absolute;
+    right: 5px;
+    top: 5px;
+`
 
 const InfoTextTitle = styled.div`
     font-size: 16px;

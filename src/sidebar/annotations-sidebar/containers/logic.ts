@@ -3114,7 +3114,7 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        let prompt = 'Summarise this for me: '
+        let prompt = 'Tell me the key takeaways: '
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: {
