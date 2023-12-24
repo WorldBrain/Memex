@@ -271,7 +271,7 @@ export async function AIActionAllowed(analyticsBG) {
         return false
     }
 }
-export async function rabbitHoleBetaFeatureAllowed(authBG) {
+export async function rabbitHoleBetaFeatureAllowed(authBG, betaStatus) {
     const onboardingComplete = await browser.storage.local.get(
         'rabbitHoleBetaFeatureAccessOnboardingDone',
     )
@@ -284,27 +284,10 @@ export async function rabbitHoleBetaFeatureAllowed(authBG) {
 
     const grantedBcOfSubscription = status.AIlimit > 10000
 
-    const isStaging =
-        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-        process.env.NODE_ENV === 'development'
-
     const email = (await authBG.getCurrentUser()).email
     const userId = (await authBG.getCurrentUser()).id
 
-    const baseUrl = isStaging
-        ? 'https://cloudflare-memex-staging.memex.workers.dev'
-        : 'https://cloudfare-memex.memex.workers.dev'
-
-    const response = await fetch(baseUrl + '/check_rabbithole_beta_status', {
-        method: 'POST',
-        body: JSON.stringify({
-            email: email,
-            userId: userId,
-        }),
-        headers: { 'Content-Type': 'application/json' },
-    })
-
-    let responseContent = await response.json()
+    let responseContent = await betaStatus(email, userId)
 
     if (responseContent.status === 'granted') {
         if (grantedBcOfSubscription) {
