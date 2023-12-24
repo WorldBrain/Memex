@@ -77,7 +77,7 @@ const InfoBox = styled.div`
     padding: 15px 30px;
     display: flex;
     justify-content: center;
-    align-item: center;
+    align-items: center;
     margin-top: 30px;
     background: #f29d9d;
     border-radius: 5px;
@@ -186,11 +186,6 @@ export default class BetaFeatureNotif extends PureComponent<Props, State> {
     // }
 
     onRequestAccess = () => {
-        if (this.props.betaRequestStrategy === 'go-to-options-page') {
-            this.props.contentScriptBackground.openBetaFeatureSettings()
-            return
-        }
-
         if (this.state.isAuthenticated) {
             this.activateBeta()
         } else {

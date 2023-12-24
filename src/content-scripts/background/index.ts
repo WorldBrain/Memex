@@ -30,7 +30,7 @@ export class ContentScriptsBackground {
                 url: (await options.browserAPIs.tabs.get(tab.id)).url,
             }),
             openBetaFeatureSettings: async (
-                _,
+                _: any,
                 email: string,
                 userId: string,
             ) => {
