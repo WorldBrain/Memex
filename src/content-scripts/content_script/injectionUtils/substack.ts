@@ -40,6 +40,7 @@ export function injectSubstackButtons(
     memexButtons.style.gap = '10px'
     memexButtons.style.cursor = 'pointer'
     memexButtons.innerText = 'Follow with Memex'
+    memexButtons.style.overflow = 'hidden'
     memexButtons.onclick = async () => {
         const rabbitHoleEnabled = await storageAPI.local.get(
             'rabbitHoleBetaFeatureAccessOnboardingDone',

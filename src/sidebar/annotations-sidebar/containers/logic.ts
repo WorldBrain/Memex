@@ -2745,6 +2745,14 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             )
 
+            if (results.length === 0) {
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                    pageSummary: { $set: 'No references to analyse' },
+                })
+                return
+            }
+
             let extractedData
 
             if (previousState.activeAITab === 'ExistingKnowledge') {
@@ -2780,8 +2788,6 @@ export class SidebarContainerLogic extends UILogic<
 
             textToAnalyse = JSON.stringify(extractedData)
             isContentSearch = true
-
-            console.log('extractedData', results)
 
             await this.updateSuggestionResults(results)
         }
@@ -3108,7 +3114,7 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        let prompt = 'Summarise this for me: '
+        let prompt = 'Tell me the key takeaways: '
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: {
