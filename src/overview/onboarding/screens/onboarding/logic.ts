@@ -46,8 +46,9 @@ export default class Logic extends UILogic<State, Event> {
         autoLoginState: 'pristine',
         showSyncNotification: false,
         showOnboardingVideo: false,
-        welcomeStep: 'start',
+        welcomeStep: 'login',
         enableNudges: true,
+        hoveredOverOnboardingIcon: false,
     })
 
     async init() {
@@ -247,7 +248,7 @@ export default class Logic extends UILogic<State, Event> {
                     }
                 } else {
                     this.emitMutation({
-                        showOnboardingSelection: { $set: true },
+                        welcomeStep: { $set: 'basicIntro' },
                     })
                 }
             }
@@ -264,6 +265,14 @@ export default class Logic extends UILogic<State, Event> {
     }) => {
         this.emitMutation({
             showOnboardingVideo: { $set: !previousState.showOnboardingVideo },
+        })
+    }
+    hoverOverOnboardingIcon: EventHandler<'hoverOverOnboardingIcon'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            hoveredOverOnboardingIcon: { $set: true },
         })
     }
 

@@ -1788,17 +1788,20 @@ export class AnnotationsSidebar extends React.Component<
 
     renderQaASection() {
         const addPromptButton = (prompt) => (
-            <TooltipBox
-                tooltipText="Save prompt as template"
-                placement="bottom-end"
+            <PromptTemplateButton
+                onMouseDown={() => this.props.saveAIPrompt(prompt)}
             >
-                <Icon
-                    onClick={() => this.props.saveAIPrompt(prompt)}
-                    filePath={icons.plus}
-                    heightAndWidth="22px"
-                    color="prime1"
-                />
-            </TooltipBox>
+                <TooltipBox
+                    tooltipText="Save prompt as template"
+                    placement="bottom-end"
+                >
+                    <Icon
+                        filePath={icons.plus}
+                        heightAndWidth="22px"
+                        color="prime1"
+                    />
+                </TooltipBox>
+            </PromptTemplateButton>
         )
 
         const SuggestionsList = ({
@@ -1865,7 +1868,7 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.activeAITab === 'ExistingKnowledge'
                             }
                         >
-                            Existing knowledge
+                            Saved by me
                         </SuggestionsSwitcherButton>
                         <SuggestionsSwitcherButton
                             onClick={this.props.setActiveAITab(
@@ -2150,6 +2153,7 @@ export class AnnotationsSidebar extends React.Component<
                                     {!this.props.fullPageUrl.includes(
                                         'youtube.com/watch',
                                     ) &&
+                                        this.props.activeAITab === 'ThisPage' &&
                                         (this.props.sidebarContext ===
                                             'in-page' ||
                                             this.props.queryMode !==
@@ -2384,28 +2388,32 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                             </SourcesButtonRow>
                         </TextAreaContainer>
-                        <ExistingSourcesList>
-                            {this.props.existingFeedSources?.map((source) => (
-                                <ExistingSourcesListItem>
-                                    <ExistingSourcesListItemTitle>
-                                        {source.confirmState === 'error'
-                                            ? '⚠️ Error adding source'
-                                            : source.feedTitle}
-                                    </ExistingSourcesListItemTitle>
-                                    <ExistingSourcesListItemUrl>
-                                        {source.feedUrl?.length === 0
-                                            ? 'No URL Added'
-                                            : source.feedUrl?.replace(
-                                                  'https://',
-                                                  '',
-                                              )}
-                                    </ExistingSourcesListItemUrl>
-                                    {/* <ExistingSourcesListItemImage
+                        {this.props.existingFeedSources?.length > 0 && (
+                            <ExistingSourcesList>
+                                {this.props.existingFeedSources?.map(
+                                    (source) => (
+                                        <ExistingSourcesListItem>
+                                            <ExistingSourcesListItemTitle>
+                                                {source.confirmState === 'error'
+                                                    ? '⚠️ Error adding source'
+                                                    : source.feedTitle}
+                                            </ExistingSourcesListItemTitle>
+                                            <ExistingSourcesListItemUrl>
+                                                {source.feedUrl?.length === 0
+                                                    ? 'No URL Added'
+                                                    : source.feedUrl?.replace(
+                                                          'https://',
+                                                          '',
+                                                      )}
+                                            </ExistingSourcesListItemUrl>
+                                            {/* <ExistingSourcesListItemImage
                                     src={source.favicon}
                                 /> */}
-                                </ExistingSourcesListItem>
-                            ))}
-                        </ExistingSourcesList>
+                                        </ExistingSourcesListItem>
+                                    ),
+                                )}
+                            </ExistingSourcesList>
+                        )}
                     </PopoutBox>
                 )
             }
@@ -4057,6 +4065,12 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const PromptTemplateButton = styled.div`
+    position: absolute;
+    right: 5px;
+    top: 5px;
+`
+
 const InfoTextTitle = styled.div`
     font-size: 16px;
     font-weight: 500;
@@ -4099,6 +4113,12 @@ const TextAreaContainer = styled.div`
     height: fit-content;
     position: relative;
     padding: 5px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const SourcesButtonRow = styled.div`
@@ -4125,6 +4145,12 @@ const ExistingSourcesList = styled.div`
     color: ${(props) => props.theme.colors.greyScale7};
     font-weight: 400;
     font-size: 14px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const ExistingSourcesListItem = styled.div`
@@ -4181,6 +4207,12 @@ const ResultsBodyBox = styled.div`
     overflow: scroll;
     position: relative;
     justify-content: flex-start;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const OnboardingContainer = styled.div`
@@ -4363,12 +4395,20 @@ const SuggestionsList = styled.div`
     display: flex;
     grid-gap: 5px;
     flex-direction: column;
-    margin: 10px;
+    padding: 10px;
     width: fill-available;
     width: -moz-available;
     overflow: scroll;
     padding-bottom: 150px;
     position: relative;
+    height: fill-available;
+    height: -moz-available;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const SuggestionsCardContainer = styled(ItemBox)`
@@ -4833,6 +4873,12 @@ const SummaryContainer = styled.div`
     height: 100%;
     overflow: scroll;
     padding: 10px 0px 10px 0px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 const ChapterContainer = styled.div`
     display: flex;
@@ -5330,6 +5376,7 @@ const FollowedListNotesContainer = styled(Margin)<{
     width: -moz-available;
     z-index: ${(props) => 1000 - props.key};
     height: -webkit-fill-available;
+    overflow: hidden;
 
     ${(props) =>
         props.isHovered &&
@@ -5657,6 +5704,7 @@ const SuggestionsSectionStyled = styled.div`
     flex: 1;
     z-index: 19;
     overflow: hidden;
+    width: 100%;
 
     scrollbar-width: none;
 

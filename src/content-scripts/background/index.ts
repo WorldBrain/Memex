@@ -29,11 +29,32 @@ export class ContentScriptsBackground {
                 id: tab.id,
                 url: (await options.browserAPIs.tabs.get(tab.id)).url,
             }),
-            openBetaFeatureSettings: async () => {
-                const optionsPageUrl = this.options.browserAPIs.runtime.getURL(
-                    'options.html',
+            openBetaFeatureSettings: async (
+                _: any,
+                email: string,
+                userId: string,
+            ) => {
+                const isStaging =
+                    process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
+                        'staging',
+                    ) || process.env.NODE_ENV === 'development'
+                const baseUrl = isStaging
+                    ? 'https://cloudflare-memex-staging.memex.workers.dev'
+                    : 'https://cloudfare-memex.memex.workers.dev'
+
+                const response = await fetch(
+                    baseUrl + '/check_rabbithole_beta_status',
+                    {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            email: email,
+                            userId: userId,
+                        }),
+                        headers: { 'Content-Type': 'application/json' },
+                    },
                 )
-                window.open(optionsPageUrl + '#/features')
+
+                return await response.json()
             },
             openAuthSettings: async () => {
                 const optionsPageUrl = this.options.browserAPIs.runtime.getURL(
