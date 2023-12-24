@@ -482,7 +482,8 @@ export async function main(
 
     const captureScreenshot = () =>
         browser.tabs.captureVisibleTab(undefined, {
-            format: 'png',
+            format: 'jpeg',
+            quality: 100,
         })
 
     const annotationsFunctions = {
