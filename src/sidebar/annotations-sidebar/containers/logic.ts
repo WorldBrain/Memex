@@ -835,7 +835,7 @@ export class SidebarContainerLogic extends UILogic<
     private checkRabbitHoleOnboardingStage = async () => {
         const rabbitHoleBetaAccess = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
-            this.options.contentScriptsBG.openBetaFeatureSettings,
+            this.options.contentScriptsBG,
         )
 
         this.emitMutation({
@@ -1752,7 +1752,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const onboardingStage = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
-            this.options.contentScriptsBG.openBetaFeatureSettings,
+            this.options.contentScriptsBG,
         )
 
         this.emitMutation({
