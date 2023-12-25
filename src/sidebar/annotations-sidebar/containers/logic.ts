@@ -1609,6 +1609,29 @@ export class SidebarContainerLogic extends UILogic<
             existingFeedSources: { $set: feedSources },
         })
     }
+    removeFeedSource: EventHandler<'loadFeedSources'> = async ({
+        event,
+        previousState,
+    }) => {
+        const feedUrl = event
+
+        let currentSources = previousState.existingFeedSources
+
+        // Find the index of the folder with the id = event.id
+        const feedIndex = currentSources.findIndex(
+            (folder) => folder.feedUrl === feedUrl,
+        )
+
+        // If the folder is found, remove it from the array
+        if (feedIndex !== -1) {
+            currentSources.splice(feedIndex, 1)
+        }
+
+        this.emitMutation({
+            existingFeedSources: { $set: currentSources },
+        })
+        await this.options.pkmSyncBG.removeFeedSource(feedUrl)
+    }
 
     validateSpaceName(name: string, listIdToSkip?: number) {
         const validationResult = validateSpaceName(
@@ -2745,6 +2768,8 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             )
 
+            console.log('results', results)
+
             if (results.length === 0) {
                 this.emitMutation({
                     loadState: { $set: 'success' },
@@ -3355,26 +3380,53 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     openLocalFile: EventHandler<'openLocalFile'> = async ({ event }) => {
-        console.log('reaches here')
         await this.options.pkmSyncBG.openLocalFile(event.path)
     }
     addLocalFolder: EventHandler<'addLocalFolder'> = async ({
         previousState,
     }) => {
-        const path = await this.options.pkmSyncBG.addLocalFolder()
+        const folder = await this.options.pkmSyncBG.addLocalFolder()
+
+        console.log('folder', folder)
 
         let localFolders = previousState.localFoldersList
-        localFolders.push(path.path)
+        localFolders.unshift(folder)
 
         this.emitMutation({
-            localFoldersList: { $push: localFolders },
+            localFoldersList: { $set: localFolders },
         })
+    }
+    removeLocalFolder: EventHandler<'removeLocalFolder'> = async ({
+        previousState,
+        event,
+    }) => {
+        let folderId = event.id
+        let localFolders = previousState.localFoldersList
+
+        // Find the index of the folder with the id = event.id
+        const folderIndex = localFolders.findIndex(
+            (folder) => folder.id === folderId,
+        )
+
+        // If the folder is found, remove it from the array
+        if (folderIndex !== -1) {
+            localFolders.splice(folderIndex, 1)
+        }
+
+        this.emitMutation({
+            localFoldersList: { $set: localFolders },
+        })
+
+        console.log('folderId', folderId)
+        await this.options.pkmSyncBG.removeLocalFolder(folderId)
     }
     getLocalFolders: EventHandler<'getLocalFolders'> = async ({}) => {
         const localFolders = await this.options.pkmSyncBG.getLocalFolders()
 
+        console.log('localFolders', localFolders)
+
         this.emitMutation({
-            localFoldersList: { $push: localFolders },
+            localFoldersList: { $set: localFolders },
         })
     }
 
@@ -3382,6 +3434,8 @@ export class SidebarContainerLogic extends UILogic<
         const resultsArray: SuggestionCard[] = []
         const user = await this.options.authBG.getCurrentUser()
         const userId = user?.id
+
+        console.log('results2', results)
 
         type spaceItem = {
             name: string
@@ -3478,6 +3532,8 @@ export class SidebarContainerLogic extends UILogic<
                         pageData = await this.options.customListsBG.findPageByUrl(
                             normalizeUrl(result.fullUrl),
                         )
+
+                        console.log('pageData', pageData)
 
                         if (pageData) {
                             pageToDisplay = {

@@ -254,10 +254,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setSummaryMode: (tab) => void
     saveFeedSources: (sources) => void
     loadFeedSources: () => void
+    removeFeedSource: (feedUrl) => void
     processFileImportFeeds: (fileContent) => void
     openLocalFile: (path: string) => void
     addLocalFolder: () => void
     getLocalFolders: () => void
+    removeLocalFolder: (id) => void
 }
 
 interface AnnotationsSidebarState {
@@ -285,7 +287,13 @@ interface AnnotationsSidebarState {
     showFeedSourcesMenu?: boolean
     feedSourcesTextAreaContent?: string
     fileDragOverFeedField?: boolean
-    addExistingSourcesOptions?: 'pristine' | 'existingKnowledge' | 'twitter'
+    addExistingSourcesOptions?:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -2028,6 +2036,7 @@ export class AnnotationsSidebar extends React.Component<
                                                 size="small"
                                                 onClick={async () => {
                                                     this.props.loadFeedSources()
+                                                    this.props.getLocalFolders()
                                                     this.setState({
                                                         showFeedSourcesMenu: !this
                                                             .state
@@ -2284,6 +2293,22 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     renderSourcesMenu = (mode: 'existingKnowledge' | 'isFollowed') => {
+        const EmptyMessage = (message, onClick) => {
+            return (
+                <EmptyMessageContainer>
+                    <IconBox onClick={onClick} heightAndWidth="40px">
+                        <Icon
+                            filePath={'plus'}
+                            heightAndWidth="20px"
+                            color="prime1"
+                            hoverOff
+                        />
+                    </IconBox>
+                    <InfoText>{message}</InfoText>
+                </EmptyMessageContainer>
+            )
+        }
+
         if (this.state.showFeedSourcesMenu) {
             if (mode === 'isFollowed') {
                 return (
@@ -2294,7 +2319,10 @@ export class AnnotationsSidebar extends React.Component<
                         offsetX={5}
                         offsetY={-5}
                         closeComponent={() => {
-                            this.setState({ showFeedSourcesMenu: false })
+                            this.setState({
+                                showFeedSourcesMenu: false,
+                                addExistingSourcesOptions: 'pristine',
+                            })
                         }}
                         width="380px"
                     >
@@ -2409,9 +2437,21 @@ export class AnnotationsSidebar extends React.Component<
                                                           '',
                                                       )}
                                             </ExistingSourcesListItemUrl>
+                                            <RemoveListEntryBox>
+                                                <Icon
+                                                    icon="removeX"
+                                                    heightAndWidth="20px"
+                                                    onClick={(event) => {
+                                                        event.preventDefault()
+                                                        this.props.removeFeedSource(
+                                                            source.feedUrl,
+                                                        )
+                                                    }}
+                                                />
+                                            </RemoveListEntryBox>
                                             {/* <ExistingSourcesListItemImage
-                                    src={source.favicon}
-                                /> */}
+                                                src={source.favicon}
+                                            /> */}
                                         </ExistingSourcesListItem>
                                     ),
                                 )}
@@ -2429,30 +2469,62 @@ export class AnnotationsSidebar extends React.Component<
                         offsetX={5}
                         offsetY={-5}
                         closeComponent={() => {
-                            this.setState({ showFeedSourcesMenu: false })
+                            this.setState({
+                                showFeedSourcesMenu: false,
+                                addExistingSourcesOptions: 'pristine',
+                            })
                         }}
-                        width={
-                            this.props.activeAITab === 'ExistingKnowledge'
-                                ? '300px'
-                                : '380px'
-                        }
+                        width={'380px'}
                     >
                         {this.state.addExistingSourcesOptions ===
                             'pristine' && (
-                            <ExistingKnowledgeContainer>
-                                We don't have more sources for personal data
-                                yet, please suggest some here.
-                                {/* <PrimaryAction
+                            <ExistingKnowledgeContainer
+                                gap="10px"
+                                padding="10px"
+                            >
+                                <PrimaryAction
                                     onClick={() => {
-                                        null
+                                        this.setState({
+                                            addExistingSourcesOptions:
+                                                'localFolder',
+                                        })
                                     }}
-                                    label="Import Saves & Annotations"
+                                    label="Import local folder of PDFs"
                                     type="tertiary"
                                     fullWidth
                                     size="medium"
-                                    icon={'arrowDown'}
+                                    icon={'filePDF'}
                                     contentAlign="left"
-                                /> */}
+                                />
+                                <PrimaryAction
+                                    onClick={() => {
+                                        this.setState({
+                                            addExistingSourcesOptions:
+                                                'obsidian',
+                                        })
+                                    }}
+                                    label="Sync Obsidian Vault"
+                                    type="tertiary"
+                                    fullWidth
+                                    size="medium"
+                                    icon={'obsidianLogo'}
+                                    contentAlign="left"
+                                    originalImage
+                                />
+                                <PrimaryAction
+                                    onClick={() => {
+                                        this.setState({
+                                            addExistingSourcesOptions: 'logseq',
+                                        })
+                                    }}
+                                    label="Sync Logseq Graph"
+                                    type="tertiary"
+                                    fullWidth
+                                    size="medium"
+                                    icon={'logseqLogo'}
+                                    contentAlign="left"
+                                    originalImage
+                                />
                                 <PrimaryAction
                                     onClick={() =>
                                         window.open(
@@ -2466,6 +2538,229 @@ export class AnnotationsSidebar extends React.Component<
                                     size="small"
                                     icon={'helpIcon'}
                                 />
+                            </ExistingKnowledgeContainer>
+                        )}
+                        {this.state.addExistingSourcesOptions ===
+                            'localFolder' && (
+                            <ExistingKnowledgeContainer>
+                                <SourcesButtonRow>
+                                    <PrimaryAction
+                                        type="forth"
+                                        icon={'plus'}
+                                        iconColor="prime1"
+                                        size="small"
+                                        onClick={() => {
+                                            this.props.addLocalFolder()
+                                        }}
+                                        label="Add Local Folder"
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            window.open(
+                                                'https://airtable.com/appfDNclcUe1q8CIN/shrKuLb0y1kn8Afvl',
+                                                '_blank',
+                                            )
+                                        }
+                                        label="Request More Source Types"
+                                        icon={'helpIcon'}
+                                        type="tertiary"
+                                        size="small"
+                                    />
+                                </SourcesButtonRow>
+                                {this.props.localFoldersList?.filter(
+                                    (folder) => folder.type === 'local',
+                                ).length > 0 ? (
+                                    <ExistingSourcesList>
+                                        {this.props.localFoldersList
+                                            ?.filter(
+                                                (folder) =>
+                                                    folder.type === 'local',
+                                            )
+                                            .map((folder) => (
+                                                <ExistingSourcesListItem
+                                                    onClick={() => {
+                                                        this.props.openLocalFile(
+                                                            folder.path,
+                                                        )
+                                                    }}
+                                                >
+                                                    <ExistingSourcesListItemUrl>
+                                                        {folder.path}
+                                                    </ExistingSourcesListItemUrl>
+                                                    <RemoveListEntryBox>
+                                                        <Icon
+                                                            icon="removeX"
+                                                            heightAndWidth="20px"
+                                                            onClick={(
+                                                                event,
+                                                            ) => {
+                                                                event.preventDefault()
+                                                                this.props.removeLocalFolder(
+                                                                    folder.id,
+                                                                )
+                                                            }}
+                                                        />
+                                                    </RemoveListEntryBox>
+                                                </ExistingSourcesListItem>
+                                            ))}
+                                    </ExistingSourcesList>
+                                ) : (
+                                    <EmptyMessageContainer>
+                                        {EmptyMessage(
+                                            'No folders synced yet',
+                                            () => this.props.addLocalFolder(),
+                                        )}
+                                    </EmptyMessageContainer>
+                                )}
+                            </ExistingKnowledgeContainer>
+                        )}
+                        {this.state.addExistingSourcesOptions === 'logseq' && (
+                            <ExistingKnowledgeContainer>
+                                <SourcesButtonRow>
+                                    <PrimaryAction
+                                        type="forth"
+                                        icon={'plus'}
+                                        iconColor="prime1"
+                                        size="small"
+                                        onClick={() => {
+                                            this.props.addLocalFolder()
+                                        }}
+                                        label="Add Logseq Graph"
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            window.open(
+                                                'https://airtable.com/appfDNclcUe1q8CIN/shrKuLb0y1kn8Afvl',
+                                                '_blank',
+                                            )
+                                        }
+                                        label="Request More Source Types"
+                                        icon={'helpIcon'}
+                                        type="tertiary"
+                                        size="small"
+                                    />
+                                </SourcesButtonRow>
+                                {this.props.localFoldersList?.filter(
+                                    (folder) => folder.type === 'logseq',
+                                ).length > 0 ? (
+                                    <ExistingSourcesList>
+                                        {this.props.localFoldersList
+                                            ?.filter(
+                                                (folder) =>
+                                                    folder.type === 'logseq',
+                                            )
+                                            .map((folder) => (
+                                                <ExistingSourcesListItem>
+                                                    <ExistingSourcesListItemTitle>
+                                                        {folder.path
+                                                            .split('/')
+                                                            .pop()}{' '}
+                                                    </ExistingSourcesListItemTitle>
+                                                    <ExistingSourcesListItemUrl>
+                                                        {folder.path}
+                                                    </ExistingSourcesListItemUrl>
+                                                    <RemoveListEntryBox>
+                                                        <Icon
+                                                            icon="removeX"
+                                                            heightAndWidth="20px"
+                                                            onClick={(
+                                                                event,
+                                                            ) => {
+                                                                event.preventDefault()
+                                                                this.props.removeLocalFolder(
+                                                                    folder.id,
+                                                                )
+                                                            }}
+                                                        />
+                                                    </RemoveListEntryBox>
+                                                </ExistingSourcesListItem>
+                                            ))}
+                                    </ExistingSourcesList>
+                                ) : (
+                                    <EmptyMessageContainer>
+                                        {EmptyMessage(
+                                            'Add your Logseq Top Level Folder',
+                                            () => this.props.addLocalFolder(),
+                                        )}
+                                    </EmptyMessageContainer>
+                                )}
+                            </ExistingKnowledgeContainer>
+                        )}
+                        {this.state.addExistingSourcesOptions ===
+                            'obsidian' && (
+                            <ExistingKnowledgeContainer>
+                                <SourcesButtonRow>
+                                    <PrimaryAction
+                                        type="forth"
+                                        icon={'plus'}
+                                        iconColor="prime1"
+                                        size="small"
+                                        onClick={() => {
+                                            this.props.addLocalFolder()
+                                        }}
+                                        label="Add Obsidian Vault"
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            window.open(
+                                                'https://airtable.com/appfDNclcUe1q8CIN/shrKuLb0y1kn8Afvl',
+                                                '_blank',
+                                            )
+                                        }
+                                        label="Request More Source Types"
+                                        icon={'helpIcon'}
+                                        type="tertiary"
+                                        size="small"
+                                    />
+                                </SourcesButtonRow>
+                                {this.props.localFoldersList?.filter(
+                                    (folder) => folder.type === 'obsidian',
+                                ).length > 0 ? (
+                                    <ExistingSourcesList>
+                                        {this.props.localFoldersList
+                                            ?.filter(
+                                                (folder) =>
+                                                    folder.type === 'obsidian',
+                                            )
+                                            .map((folder) => (
+                                                <ExistingSourcesListItem>
+                                                    <ExistingSourcesListItemTitle>
+                                                        {folder.path
+                                                            .split('/')
+                                                            .pop()}{' '}
+                                                    </ExistingSourcesListItemTitle>
+                                                    <ExistingSourcesListItemUrl>
+                                                        {folder.path}
+                                                    </ExistingSourcesListItemUrl>
+                                                    <RemoveListEntryBox>
+                                                        <Icon
+                                                            icon="removeX"
+                                                            heightAndWidth="20px"
+                                                            onClick={(
+                                                                event,
+                                                            ) => {
+                                                                console.log(
+                                                                    'folder.id',
+                                                                    folder,
+                                                                )
+                                                                event.preventDefault()
+                                                                this.props.removeLocalFolder(
+                                                                    folder.id,
+                                                                )
+                                                            }}
+                                                        />
+                                                    </RemoveListEntryBox>
+                                                </ExistingSourcesListItem>
+                                            ))}
+                                    </ExistingSourcesList>
+                                ) : (
+                                    <EmptyMessageContainer>
+                                        {EmptyMessage(
+                                            'Add your Obsidian Vault folder',
+                                            () => this.props.addLocalFolder(),
+                                        )}
+                                    </EmptyMessageContainer>
+                                )}
                             </ExistingKnowledgeContainer>
                         )}
                         {/* {this.state.addExistingSourcesOptions ===
@@ -2555,6 +2850,29 @@ export class AnnotationsSidebar extends React.Component<
                             >
                                 {MySuggestionsResults.length}
                             </SuggestionsCounter>
+                            <AddSourceIconContainer>
+                                <TooltipBox
+                                    tooltipText="Add new recommendation sources"
+                                    placement="bottom-end"
+                                >
+                                    <Icon
+                                        filePath={icons.plus}
+                                        heightAndWidth="20px"
+                                        color="prime1"
+                                        containerRef={this.addSourcesButtonRef}
+                                        hoverOff
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            this.setState({
+                                                showFeedSourcesMenu: !this.state
+                                                    .showFeedSourcesMenu,
+                                            })
+                                            this.props.loadFeedSources()
+                                        }}
+                                    />
+                                </TooltipBox>
+                                {this.renderSourcesMenu('existingKnowledge')}
+                            </AddSourceIconContainer>
                         </SuggestionsSwitcherButton>
                         <SuggestionsSwitcherButton
                             onClick={this.props.setActiveSuggestionsTab(
@@ -4072,6 +4390,12 @@ export class AnnotationsSidebar extends React.Component<
     }
 }
 
+const RemoveListEntryBox = styled.div`
+    position: absolute;
+    right: 10px;
+    display: none;
+`
+
 const PromptTemplateButton = styled.div`
     position: absolute;
     right: 5px;
@@ -4130,7 +4454,7 @@ const TextAreaContainer = styled.div`
 
 const SourcesButtonRow = styled.div`
     padding: 10px 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+    //border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     display: flex;
     justify-content: space-between;
     &:last-child {
@@ -4146,7 +4470,7 @@ const ExistingSourcesList = styled.div`
     height: fit-content;
     max-height: 300px;
     overflow: scroll;
-    padding: 10px;
+    padding: 5px 10px 5px 10px;
     width: fill-available;
     width: -moz-available;
     color: ${(props) => props.theme.colors.greyScale7};
@@ -4170,22 +4494,38 @@ const ExistingSourcesListItem = styled.div`
     flex-direction: column;
     min-width: 10%;
     flex: 1;
+    position: relative;
+
+    &:last-child {
+        border-bottom: none;
+    }
+
+    &:hover ${RemoveListEntryBox} {
+        display: flex;
+    }
 `
 
-const ExistingKnowledgeContainer = styled.div`
+const ExistingKnowledgeContainer = styled.div<{ padding: string; gap: string }>`
     display: flex;
     flex-direction: column;
     width: 100%;
     height: fit-content;
     max-height: 300px;
     overflow: scroll;
-    padding: 10px 20px;
     width: fill-available;
     width: -moz-available;
     color: ${(props) => props.theme.colors.greyScale7};
     font-weight: 400;
     font-size: 14px;
-    grid-gap: 10px;
+    /* grid-gap: 10px; */
+    padding: ${(props) => props.padding};
+    grid-gap: ${(props) => props.gap};
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const ExistingSourcesListItemImage = styled.div`
@@ -4766,6 +5106,7 @@ const AISidebarContainer = styled.div`
     flex-direction: column;
     height: 100%;
     overflow: hidden;
+    flex: 1;
 
     &::-webkit-scrollbar {
         display: none;
@@ -5276,7 +5617,7 @@ const TopBar = styled.div`
     justify-content: space-between;
     align-items: center;
     height: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '40px' : '32px'};
+        props.sidebarContext === 'dashboard' ? '40px' : '20px'};
     z-index: 11300;
     padding: 10px 10px 10px 10px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};

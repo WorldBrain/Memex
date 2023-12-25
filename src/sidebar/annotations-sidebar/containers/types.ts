@@ -281,7 +281,13 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         }
     }
     AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
-    localFoldersList: string[]
+    localFoldersList: LocalFolder[]
+}
+
+export interface LocalFolder {
+    path: string
+    type: 'local' | 'obsidian' | 'logseq'
+    id: number
 }
 
 export type AnnotationEvent<T> = {
@@ -323,6 +329,9 @@ interface SidebarEvents {
     }
     saveFeedSources: {
         sources: string
+    }
+    removeFeedSource: {
+        feedUrl: string
     }
     loadFeedSources: null
     saveHighlightColorSettings: { newState: string }
@@ -517,6 +526,7 @@ interface SidebarEvents {
     requestRabbitHoleBetaFeatureAccess: { reasonText: string }
     openLocalFile: { path: string }
     addLocalFolder: null
+    removeLocalFolder: { id: number }
     getLocalFolders: null
 }
 

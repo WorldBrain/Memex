@@ -859,6 +859,11 @@ export class AnnotationsSidebarContainer<
                             loadFeedSources={() => {
                                 this.processEvent('loadFeedSources', null)
                             }}
+                            removeFeedSource={(feedUrl) => {
+                                this.processEvent('removeFeedSource', {
+                                    feedUrl,
+                                })
+                            }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}
@@ -1435,6 +1440,11 @@ export class AnnotationsSidebarContainer<
                             }}
                             getLocalFolders={() => {
                                 this.processEvent('getLocalFolders', null)
+                            }}
+                            removeLocalFolder={(id) => {
+                                this.processEvent('removeLocalFolder', {
+                                    id: id,
+                                })
                             }}
                         />
                     </Rnd>

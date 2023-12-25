@@ -1,8 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
-import { BackupObject } from './types'
 import { getPkmSyncKey } from './utils'
-import TurndownService from 'turndown'
-import { left } from '@popperjs/core'
+import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export class MemexLocalBackend {
     private url
@@ -342,7 +340,7 @@ export class MemexLocalBackend {
         ).json()
     }
 
-    async addLocalFolder(): Promise<{ path: string }> {
+    async addLocalFolder(): Promise<LocalFolder> {
         const syncKey = await getPkmSyncKey()
 
         const body = JSON.stringify({
@@ -368,14 +366,14 @@ export class MemexLocalBackend {
             )
         }
     }
-    async getLocalFolders(): Promise<void> {
+    async getLocalFolders(): Promise<LocalFolder[]> {
         const syncKey = await getPkmSyncKey()
 
         const body = JSON.stringify({
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/watch_new_folder`, {
+        const response = await fetch(`${this.url}/fetch_all_folders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -406,6 +404,64 @@ export class MemexLocalBackend {
         })
 
         const response = await fetch(`${this.url}/open_file`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
+
+        if (response.ok) {
+            const responseObj = await response.json()
+            console.log('responseObj', responseObj)
+            return responseObj
+        }
+
+        if (!response.ok || response.status !== 200) {
+            throw new Error(`Error opening local file: ${response.status}`)
+        }
+    }
+
+    async removeFeedSource(feedUrl: string): Promise<void> {
+        const syncKey = await getPkmSyncKey()
+
+        console.log('gets here')
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+            path: feedUrl,
+        })
+
+        const response = await fetch(`${this.url}/remove_feed_source`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: body,
+        })
+
+        if (response.ok) {
+            const responseObj = await response.json()
+            console.log('responseObj', responseObj)
+            return responseObj
+        }
+
+        if (!response.ok || response.status !== 200) {
+            throw new Error(`Error opening local file: ${response.status}`)
+        }
+    }
+
+    async removeLocalFolder(id: number): Promise<void> {
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+            id: id,
+        })
+
+        console.log('body', body)
+
+        const response = await fetch(`${this.url}/remove_folder_to_watch`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

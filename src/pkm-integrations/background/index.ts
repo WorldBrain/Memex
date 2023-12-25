@@ -4,6 +4,7 @@ import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'
+import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -21,9 +22,11 @@ export class PKMSyncBackgroundModule {
             checkConnectionStatus: this.checkConnectionStatus,
             loadFeedSources: this.loadFeedSources,
             checkFeedSource: this.checkFeedSource,
+            removeFeedSource: this.removeFeedSource,
             openLocalFile: this.openLocalFile,
             addLocalFolder: this.addLocalFolder,
             getLocalFolders: this.getLocalFolders,
+            removeLocalFolder: this.removeLocalFolder,
         }
     }
 
@@ -79,19 +82,35 @@ export class PKMSyncBackgroundModule {
 
         await backend.openLocalFile(path)
     }
-    addLocalFolder = async () => {
+    removeFeedSource = async (feedUrl: string) => {
         const backend = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
 
-        await backend.addLocalFolder()
+        await backend.removeFeedSource(feedUrl)
     }
-    getLocalFolders = async () => {
+    removeLocalFolder = async (id: number) => {
         const backend = new MemexLocalBackend({
             url: 'http://localhost:11922',
         })
 
-        await backend.getLocalFolders()
+        await backend.removeLocalFolder(id)
+    }
+    addLocalFolder = async (): Promise<LocalFolder> => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+
+        const folderAdded = await backend.addLocalFolder()
+        return folderAdded
+    }
+    getLocalFolders = async (): Promise<LocalFolder[]> => {
+        const backend = new MemexLocalBackend({
+            url: 'http://localhost:11922',
+        })
+
+        const folders = await backend.getLocalFolders()
+        return folders
     }
     checkFeedSource = async (
         feedUrl: string,

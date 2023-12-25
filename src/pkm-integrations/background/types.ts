@@ -1,3 +1,5 @@
+import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
+
 export interface PkmSyncInterface {
     addFeedSources(
         feedSources: {
@@ -14,11 +16,13 @@ export interface PkmSyncInterface {
         feedTitle: string
         feedFavIcon?: string
     }>
+    removeFeedSource(feedUrl: string): Promise<void>
     checkConnectionStatus(): Promise<boolean | 'not-available'>
     loadFeedSources(): Promise<
         { feedUrl: string; feedTitle: string; type: 'substack' }[]
     >
     openLocalFile(path: string): Promise<void>
-    addLocalFolder(): Promise<{ path: string }>
-    getLocalFolders(): Promise<string[]>
+    addLocalFolder(): Promise<LocalFolder>
+    getLocalFolders(): Promise<LocalFolder[]>
+    removeLocalFolder(id: number): Promise<void>
 }
