@@ -15,6 +15,9 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
         {
             email: string
             userId: string
+        },
+        {
+            status: 'granted' | 'requested'
         }
     >
     openAuthSettings: RemoteFunction<Role, void>

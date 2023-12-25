@@ -101,15 +101,20 @@ export default class BookmarksBackground {
             )
         }
 
-        const [activeTab] = await this.options.browserAPIs.tabs.query({
-            active: true,
-        })
+        let tabId = params.tabId
+        if (tabId == null) {
+            const [activeTab] = await this.options.browserAPIs.tabs.query({
+                currentWindow: true,
+                active: true,
+            })
+            tabId = activeTab.id
+        }
 
         if (!params.skipIndexing) {
             await this.options.pages.indexPage(
                 {
+                    tabId,
                     fullUrl,
-                    tabId: activeTab.id ?? params.tabId,
                     visitTime: params.timestamp || '$now',
                     metaData: params.metaData,
                 },
@@ -198,6 +203,7 @@ export default class BookmarksBackground {
 
         let tabId: number
         const [activeTab] = await this.options.browserAPIs.tabs.query({
+            currentWindow: true,
             active: true,
         })
 
@@ -238,6 +244,7 @@ export default class BookmarksBackground {
         pageUrl,
     ) => {
         const [activeTab] = await this.options.browserAPIs.tabs.query({
+            currentWindow: true,
             active: true,
         })
 
