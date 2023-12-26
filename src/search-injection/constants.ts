@@ -28,7 +28,7 @@ export const SEARCH_ENGINES: {
         regex: /(http[s]?:\/\/)?(www.)?duckduckgo[.\w]+\/.*?[?&]q=.*/,
         container: {
             above: 'results--main',
-            side: 'results--sidebar',
+            side: 'js-react-sidebar',
         },
         containerType: 'class',
     },

@@ -7,6 +7,8 @@ import {
     AI_SUMMARY_URLS,
 } from './constants'
 import { trackHitPaywall } from '@worldbrain/memex-common/lib/analytics/events'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -271,7 +273,10 @@ export async function AIActionAllowed(analyticsBG) {
         return false
     }
 }
-export async function rabbitHoleBetaFeatureAllowed(authBG, betaStatus) {
+export async function rabbitHoleBetaFeatureAllowed(
+    authBG: AuthRemoteFunctionsInterface,
+    contentScriptsBG: ContentScriptsInterface<'caller'>,
+) {
     const onboardingComplete = await browser.storage.local.get(
         'rabbitHoleBetaFeatureAccessOnboardingDone',
     )
@@ -287,7 +292,10 @@ export async function rabbitHoleBetaFeatureAllowed(authBG, betaStatus) {
     const email = (await authBG.getCurrentUser()).email
     const userId = (await authBG.getCurrentUser()).id
 
-    let responseContent = await betaStatus(email, userId)
+    let responseContent = await contentScriptsBG.openBetaFeatureSettings({
+        email,
+        userId,
+    })
 
     if (responseContent.status === 'granted') {
         if (grantedBcOfSubscription) {
