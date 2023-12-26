@@ -12,10 +12,15 @@ export class PKMSyncBackgroundModule {
 
     backendNew: MemexLocalBackend
     PKMSYNCremovewarning = true
+    serverToTalkTo =
+        process.env.NODE_ENV === 'production'
+            ? 'http://localhost:11922'
+            : 'http://localhost:11923'
 
     constructor() {
+        console.log('env', process.env.NODE_ENV, this.serverToTalkTo)
         this.backendNew = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
         this.remoteFunctions = {
             addFeedSources: this.addFeedSources,
@@ -57,7 +62,7 @@ export class PKMSyncBackgroundModule {
     }
     loadFeedSources = async () => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
         return await backend.loadFeedSources()
     }
@@ -70,7 +75,7 @@ export class PKMSyncBackgroundModule {
         }[],
     ) => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
 
         await backend.addFeedSources(feedSources)
@@ -391,6 +396,7 @@ export class PKMSyncBackgroundModule {
                     PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian,
                 )
             } catch (e) {
+                this.bufferPKMSyncItems(item)
                 console.error('error', e)
             }
         }
