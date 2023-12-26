@@ -82,28 +82,28 @@ export class PKMSyncBackgroundModule {
     }
     openLocalFile = async (path: string) => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
 
         await backend.openLocalFile(path)
     }
     removeFeedSource = async (feedUrl: string) => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
 
         await backend.removeFeedSource(feedUrl)
     }
     removeLocalFolder = async (id: number) => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
 
         await backend.removeLocalFolder(id)
     }
     addLocalFolder = async (): Promise<LocalFolder> => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
 
         const folderAdded = await backend.addLocalFolder()
@@ -111,7 +111,7 @@ export class PKMSyncBackgroundModule {
     }
     getLocalFolders = async (): Promise<LocalFolder[]> => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
 
         const folders = await backend.getLocalFolders()
