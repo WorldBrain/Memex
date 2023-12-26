@@ -29,11 +29,7 @@ export class ContentScriptsBackground {
                 id: tab.id,
                 url: (await options.browserAPIs.tabs.get(tab.id)).url,
             }),
-            openBetaFeatureSettings: async (
-                _: any,
-                email: string,
-                userId: string,
-            ) => {
+            openBetaFeatureSettings: async (_, { email, userId }) => {
                 const isStaging =
                     process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
                         'staging',
