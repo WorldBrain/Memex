@@ -65,6 +65,8 @@ export default class SetupLocation extends React.Component {
 
     _handleChangeBackupPath = async () => {
         const newBackupPath = await changeBackupPath()
+
+        console.log('newBackupPath', newBackupPath)
         if (newBackupPath) {
             const { initialBackup, backendLocation, backupPath } = this.state
             /* If the user is trying to change the local backup location to a different
@@ -80,9 +82,14 @@ export default class SetupLocation extends React.Component {
                 this.setState({
                     backupPath: newBackupPath.backupFolder,
                 })
+            } else {
+                this.setState({
+                    backupPath: newBackupPath.backupFolder,
+                })
             }
         } else if (!newBackupPath && !this.state.backupPath) {
             this.setState({
+                backupPath: newBackupPath.backupFolder,
                 overlay: 'download',
             })
         }
