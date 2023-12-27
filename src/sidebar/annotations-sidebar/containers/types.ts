@@ -555,7 +555,7 @@ export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']
     pageTitle: string
     contentText?: string
-    contentType: 'page' | 'annotation' | 'rss-feed-item' | 'pdf'
+    contentType: 'page' | 'annotation' | 'rss-feed-item' | 'pdf' | 'markdown'
     creatorId?: UserReference['id']
     spaces?: any
     body?: string
@@ -564,6 +564,7 @@ export interface SuggestionCard {
     sourceApplication?: string
     distance?: number
     path?: string
+    topLevelFolder?: string
 }
 
 export interface ListInstance {

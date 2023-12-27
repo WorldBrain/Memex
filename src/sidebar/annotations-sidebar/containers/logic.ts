@@ -2703,10 +2703,6 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
 
-        let contentType = fullPageUrl?.includes('youtube.com/watch')
-            ? 'video transcript'
-            : 'text'
-
         let queryPrompt = prompt
 
         if (!previousState.isTrial) {
@@ -2784,12 +2780,25 @@ export class SidebarContainerLogic extends UILogic<
                 this.emitMutation({
                     activeSuggestionsTab: { $set: 'MySuggestions' },
                 })
+
                 extractedData = results.filter((result) => {
                     return (
                         result.creatorId ===
-                        previousState.currentUserReference.id
+                            previousState.currentUserReference.id ||
+                        result.creatorId === '1'
                     )
                 })
+
+                console.log('extractedData1', extractedData)
+
+                extractedData = extractedData.map((result) => {
+                    return {
+                        pageTitle: result.pageTitle,
+                        contentText: result.contentText,
+                    }
+                })
+
+                console.log('extractedData', extractedData)
             }
             if (previousState.activeAITab === 'InFollowedFeeds') {
                 this.emitMutation({
@@ -3224,7 +3233,6 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
-            console.log('waaaa')
             this.renderOwnHighlights(previousState)
         } else if (
             event.tab === 'summary' &&
@@ -3304,7 +3312,6 @@ export class SidebarContainerLogic extends UILogic<
                 }),
             )
 
-            console.log('results    ', results)
             if (results.length === 0) {
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'success' },
@@ -3553,6 +3560,28 @@ export class SidebarContainerLogic extends UILogic<
                                 creatorId: userId,
                                 spaces: pageListData ?? null,
                             }
+                        }
+                    } else if (result.contentType === 'markdown') {
+                        const sourceApplication = result.sourceApplication
+
+                        let url = ''
+                        let file = result.path.split(
+                            `${result.topLevelFolder}/`,
+                        )[1]
+                        if (sourceApplication === 'obsidian') {
+                            url =
+                                `obsidian://open?vault=${result.topLevelFolder}&file=` +
+                                encodeURIComponent(file)
+                        }
+
+                        pageToDisplay = {
+                            fullUrl: url,
+                            pageTitle: result?.pageTitle,
+                            contentText: result.contentText,
+                            contentType: result.contentType,
+                            sourceApplication: sourceApplication,
+                            creatorId: userId,
+                            spaces: null,
                         }
                     } else if (result.contentType === 'annotation') {
                         try {

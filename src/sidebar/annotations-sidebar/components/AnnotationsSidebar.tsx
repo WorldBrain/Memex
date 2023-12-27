@@ -2992,6 +2992,14 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     renderSuggestionsListItem(item: SuggestionCard) {
+        let sourceApplicationLogo
+
+        if (item.sourceApplication === 'obsidian') {
+            sourceApplicationLogo = icons.obsidianLogo
+        } else if (item.sourceApplication === 'logseq') {
+            sourceApplicationLogo = icons.logseqLogo
+        }
+
         return (
             <ItemBox>
                 <StyledPageResult
@@ -3018,16 +3026,23 @@ export class AnnotationsSidebar extends React.Component<
                         tabIndex={-1}
                     >
                         <BlockContent
-                            type={item.contentType === 'pdf' ? 'pdf' : 'page'}
-                            normalizedUrl={normalizeUrl(item.fullUrl)}
+                            type={item.contentType || 'page'}
+                            normalizedUrl={
+                                item.fullUrl.startsWith('http')
+                                    ? normalizeUrl(item.fullUrl)
+                                    : null
+                            }
                             originalUrl={
-                                null
+                                item.fullUrl
                                 // 'https://' + item.normalizedUrl
                             } // TODO: put proper url here
                             fullTitle={item.pageTitle}
                             pdfUrl={item.contentType === 'pdf' && item.fullUrl}
-                            favIcon={null}
+                            favIcon={
+                                item.sourceApplication && sourceApplicationLogo
+                            }
                             youtubeService={null}
+                            entryData={item}
                         />
                     </PageContentBox>
                     {item.spaces?.length > 0 && (
