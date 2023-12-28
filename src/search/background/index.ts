@@ -20,7 +20,10 @@ import {
     isMemexPageAPdf,
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
-import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import {
+    ContentLocatorType,
+    LocationSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { trackSearchExecution } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
@@ -173,8 +176,20 @@ export default class SearchBackground {
             const mainLocator = pickBestLocator(locators, {
                 priority: ContentLocatorType.Remote,
             })
-            doc.pdfUrl = mainLocator?.location ?? undefined
-            doc.fullPdfUrl = mainLocator?.originalLocation ?? undefined
+
+            // If this is an uploaded PDF, we need to flag it for grabbing a temporary access URL when clicked via the `upload_id` param
+            if (
+                mainLocator &&
+                mainLocator.locationScheme === LocationSchemeType.UploadStorage
+            ) {
+                doc.fullPdfUrl =
+                    mainLocator.originalLocation +
+                    '?upload_id=' +
+                    mainLocator.location
+            } else {
+                doc.fullPdfUrl = mainLocator?.originalLocation ?? undefined
+            }
+
             toReturn.push(doc)
         }
         return toReturn

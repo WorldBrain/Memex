@@ -162,7 +162,6 @@ export type PageData = Pick<
     hasNotes: boolean
     type: 'pdf' | 'page'
     isShared?: boolean
-    pdfUrl?: string
     fullPdfUrl?: string
 }
 
@@ -246,9 +245,10 @@ export interface RootState {
     pageDeleteState: TaskState
     paginationState: TaskState
     noteUpdateState: TaskState
+    uploadedPdfLinkLoadState: TaskState
     newNoteCreateState: TaskState
-    searchPaginationState: TaskState
     clearInboxLoadState: TaskState
+    searchPaginationState: TaskState
 
     // Misc local storage flags
     showMobileAppAd: boolean

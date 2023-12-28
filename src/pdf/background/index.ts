@@ -16,6 +16,8 @@ import type { PagePutHandler } from 'src/page-indexing/background/types'
 import { runInTab } from 'src/util/webextensionRPC'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import type { ContentIdentifier } from 'src/search'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { RETRIEVE_PDF_ROUTE } from '@worldbrain/memex-common/lib/pdf/uploads/constants'
 
 export class PDFBackground {
     static OPEN_PDF_VIEWER_ONE_TIME_KEY =
@@ -43,6 +45,7 @@ export class PDFBackground {
         this.routeViewer = deps.runtimeAPI.getURL(PDF_VIEWER_HTML)
         this.remoteFunctions = {
             refreshSetting: this.refreshSetting,
+            getTempPdfAccessUrl: this.getTempPdfAccessUrl,
             openPdfViewerForNextPdf: async () => {
                 await deps.storageAPI.local.set({
                     [PDFBackground.OPEN_PDF_VIEWER_ONE_TIME_KEY]: true,
@@ -54,6 +57,25 @@ export class PDFBackground {
                 })
             },
         }
+    }
+
+    private getTempPdfAccessUrl: PDFRemoteInterface['getTempPdfAccessUrl'] = async (
+        uploadId,
+    ) => {
+        const result = await this.deps.pdfUploads.getDownloadToken({
+            uploadId,
+        })
+
+        const workerUrl =
+            process.env.NODE_ENV === 'production'
+                ? CLOUDFLARE_WORKER_URLS.production
+                : CLOUDFLARE_WORKER_URLS.staging
+
+        if ('token' in result) {
+            return `${workerUrl}${RETRIEVE_PDF_ROUTE}?token=${result.token}`
+        }
+
+        throw new Error(result.error)
     }
 
     private async shouldOpenPDFViewer(): Promise<boolean | null> {
