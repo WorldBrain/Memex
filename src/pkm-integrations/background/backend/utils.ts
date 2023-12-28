@@ -97,6 +97,8 @@ export async function getFolder(pkmToSync: string) {
             throw new Error(`HTTP error! status: ${response.status}`)
         }
         const directoryPath = await response.text()
+
+        console.log('directoryPath', directoryPath)
         return directoryPath
     }
 
