@@ -202,7 +202,11 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     contentSharing: ContentSharingInterface
     annotationsShareAll: any
     copyPageLink: any
-    queryAIwithPrompt: any
+    queryAIwithPrompt: (
+        prompt: string,
+        highlightedText?: string,
+        queryMode?: string,
+    ) => void
     getVideoChapters: any
     chapterList: any
     videoDetails: any
@@ -260,6 +264,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     addLocalFolder: () => void
     getLocalFolders: () => void
     removeLocalFolder: (id) => void
+    showFeedSourcesMenu: boolean
+    setFeedSourcesMenu: () => void
+    setExistingSourcesOptions: (option) => void
+    existingSourcesOption: string
 }
 
 interface AnnotationsSidebarState {
@@ -284,16 +292,8 @@ interface AnnotationsSidebarState {
     hoveredListId: string | null
     copiedVideoLink: boolean
     onboardingReasonContainer?: string
-    showFeedSourcesMenu?: boolean
     feedSourcesTextAreaContent?: string
     fileDragOverFeedField?: boolean
-    addExistingSourcesOptions?:
-        | 'pristine'
-        | 'existingKnowledge'
-        | 'twitter'
-        | 'localFolder'
-        | 'obsidian'
-        | 'logseq'
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -343,10 +343,8 @@ export class AnnotationsSidebar extends React.Component<
         hoveredListId: null,
         copiedVideoLink: false,
         onboardingReasonContainer: null,
-        showFeedSourcesMenu: false,
         feedSourcesTextAreaContent: '',
         fileDragOverFeedField: false,
-        addExistingSourcesOptions: 'pristine',
     }
 
     async addYoutubeTimestampToEditor(commentText) {
@@ -1893,8 +1891,14 @@ export class AnnotationsSidebar extends React.Component<
                         </SuggestionsSwitcherButton>
                     </SuggestionsListSwitcher>
                 )}
-                {this.props.rabbitHoleBetaFeatureAccess === 'onboarded' ||
-                this.props.activeAITab === 'ThisPage' ? (
+                {this.props.showFeedSourcesMenu ? (
+                    this.renderSourcesMenu(
+                        this.props.activeAITab === 'ExistingKnowledge'
+                            ? 'existingKnowledge'
+                            : 'isFollowed',
+                    )
+                ) : this.props.rabbitHoleBetaFeatureAccess === 'onboarded' ||
+                  this.props.activeAITab === 'ThisPage' ? (
                     <>
                         {this.props.selectedTextAIPreview && (
                             <SelectedAITextBox>
@@ -1975,8 +1979,14 @@ export class AnnotationsSidebar extends React.Component<
                                         event.key === 'Enter' &&
                                         !event.shiftKey
                                     ) {
-                                        await this.props.queryAIwithPrompt(
+                                        console.log(
+                                            'enter pressed',
+                                            this.props.queryMode,
+                                        )
+                                        this.props.queryAIwithPrompt(
                                             this.props.prompt,
+                                            this.props.selectedTextAIPreview,
+                                            this.props.queryMode,
                                         )
                                     }
                                     if (event.key === 'Escape') {
@@ -2037,11 +2047,7 @@ export class AnnotationsSidebar extends React.Component<
                                                 onClick={async () => {
                                                     this.props.loadFeedSources()
                                                     this.props.getLocalFolders()
-                                                    this.setState({
-                                                        showFeedSourcesMenu: !this
-                                                            .state
-                                                            .showFeedSourcesMenu,
-                                                    })
+                                                    this.props.setFeedSourcesMenu()
                                                 }}
                                                 icon={'plus'}
                                                 iconColor="prime1"
@@ -2062,63 +2068,56 @@ export class AnnotationsSidebar extends React.Component<
                                                     info:
                                                         'Best for summarisations',
                                                 },
+                                                ...(this.props.fullPageUrl.includes(
+                                                    'youtube.com',
+                                                )
+                                                    ? [
+                                                          {
+                                                              id: 'chapters',
+                                                              name: 'Chapters',
+                                                              info:
+                                                                  'Get chapter overview and summaries',
+                                                          },
+                                                      ]
+                                                    : []),
                                                 {
-                                                    id: 'chapters',
-                                                    name: 'Chapters',
-                                                    info:
-                                                        'Get chapter overview and summaries',
-                                                },
-                                                {
-                                                    id: 'Question',
+                                                    id: 'question',
                                                     name: 'General Question',
                                                     info:
                                                         'Unrelated to the content',
                                                 },
                                             ]}
-                                            onMenuItemClick={async (
-                                                props,
-                                                index,
-                                            ) => {
-                                                let queryMode
-                                                if (index === 0) {
-                                                    queryMode = 'summarize'
-                                                }
-                                                if (index === 1) {
-                                                    queryMode = 'chapterSummary'
-                                                }
-                                                if (index === 2) {
-                                                    queryMode = 'question'
-                                                }
-                                                this.props.setQueryMode(
-                                                    queryMode,
-                                                )
+                                            onMenuItemClick={async (item) => {
+                                                this.props.setQueryMode(item.id)
+                                                console.log('item', item)
 
-                                                if (index === 0) {
+                                                if (item.id === 'summarize') {
                                                     await this.props.queryAIwithPrompt(
                                                         this.props.prompt,
                                                     )
                                                 }
-                                                if (index === 1) {
+                                                if (item.id === 'chapters') {
                                                     await this.props.getVideoChapters()
                                                 }
-
-                                                if (index === 2) {
+                                                if (item.id === 'question') {
                                                     await this.props.queryAIwithPrompt(
                                                         this.props.prompt,
                                                         undefined,
-                                                        queryMode,
+                                                        item.id,
                                                     )
                                                 }
                                             }}
-                                            initSelectedIndex={
+                                            initSelectedItem={
                                                 this.props.queryMode ===
                                                 'chapterSummary'
-                                                    ? 1
-                                                    : 0
+                                                    ? 'chapterSummary'
+                                                    : null
                                             }
                                             selectedState={
                                                 this.props.queryMode ===
-                                                    'chapterSummary' && 1
+                                                'chapterSummary'
+                                                    ? 'chapterSummary'
+                                                    : 'summarize'
                                             }
                                             keepSelectedState
                                         />
@@ -2128,37 +2127,31 @@ export class AnnotationsSidebar extends React.Component<
                                         hideDescriptionInPreview
                                         menuItems={[
                                             {
-                                                id: 'GPT 3.5',
+                                                id: 'gpt-3.5-turbo-1106',
                                                 name: 'GPT 3.5',
-                                                info: 'Fast & decent',
+                                                info:
+                                                    'Fast & good for summarization',
                                             },
                                             {
-                                                id: 'GPT 4',
+                                                id: 'gpt-4-1106-preview',
                                                 name: 'GPT 4',
                                                 isDisabled: this.props.hasKey
                                                     ? false
                                                     : true,
                                                 info: (
                                                     <span>
-                                                        Better at understanding
-                                                        logic
+                                                        Better at generation of
+                                                        text
                                                         <br />
                                                         ONLY WITH OWN KEY
                                                     </span>
                                                 ),
                                             },
                                         ]}
-                                        onMenuItemClick={(props, index) => {
-                                            let AImodel
-                                            if (index === 0) {
-                                                AImodel = 'gpt-3.5-turbo-1106'
-                                            }
-                                            if (index === 1) {
-                                                AImodel = 'gpt-4-0613'
-                                            }
-                                            this.props.setAIModel(AImodel)
+                                        onMenuItemClick={async (item) => {
+                                            this.props.setAIModel(item.id)
                                         }}
-                                        initSelectedIndex={0}
+                                        initSelectedItem={'gpt-3.5-turbo-1106'}
                                         keepSelectedState
                                     />
 
@@ -2215,12 +2208,7 @@ export class AnnotationsSidebar extends React.Component<
                                             </TooltipBox>
                                         )}
                                 </OptionsContainerLeft>
-                                {this.renderSourcesMenu(
-                                    this.props.activeAITab ===
-                                        'ExistingKnowledge'
-                                        ? 'existingKnowledge'
-                                        : 'isFollowed',
-                                )}
+
                                 <OptionsContainerRight>
                                     {this.props.pageSummary?.length > 0 && (
                                         <TooltipBox
@@ -2309,23 +2297,10 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        if (this.state.showFeedSourcesMenu) {
+        if (this.props.showFeedSourcesMenu) {
             if (mode === 'isFollowed') {
                 return (
-                    <PopoutBox
-                        targetElementRef={this.addSourcesButtonRef.current}
-                        strategy="absolute"
-                        placement="bottom"
-                        offsetX={5}
-                        offsetY={-5}
-                        closeComponent={() => {
-                            this.setState({
-                                showFeedSourcesMenu: false,
-                                addExistingSourcesOptions: 'pristine',
-                            })
-                        }}
-                        width="380px"
-                    >
+                    <>
                         <TextAreaContainer
                             onDragOver={(event) => {
                                 this.setState({ fileDragOverFeedField: true })
@@ -2394,6 +2369,10 @@ export class AnnotationsSidebar extends React.Component<
                                     icon={'plus'}
                                     iconColor="prime1"
                                     size="small"
+                                    disabled={
+                                        this.state.feedSourcesTextAreaContent
+                                            ?.length === 0
+                                    }
                                     onClick={() => {
                                         this.props.saveFeedSources(
                                             this.state
@@ -2419,75 +2398,63 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                             </SourcesButtonRow>
                         </TextAreaContainer>
-                        {this.props.existingFeedSources?.length > 0 && (
-                            <ExistingSourcesList>
-                                {this.props.existingFeedSources?.map(
-                                    (source) => (
-                                        <ExistingSourcesListItem>
-                                            <ExistingSourcesListItemTitle>
-                                                {source.confirmState === 'error'
-                                                    ? '⚠️ Error adding source'
-                                                    : source.feedTitle}
-                                            </ExistingSourcesListItemTitle>
-                                            <ExistingSourcesListItemUrl>
-                                                {source.feedUrl?.length === 0
-                                                    ? 'No URL Added'
-                                                    : source.feedUrl?.replace(
-                                                          'https://',
-                                                          '',
-                                                      )}
-                                            </ExistingSourcesListItemUrl>
-                                            <RemoveListEntryBox>
-                                                <Icon
-                                                    icon="removeX"
-                                                    heightAndWidth="20px"
-                                                    onClick={(event) => {
-                                                        event.preventDefault()
-                                                        this.props.removeFeedSource(
-                                                            source.feedUrl,
-                                                        )
-                                                    }}
-                                                />
-                                            </RemoveListEntryBox>
-                                            {/* <ExistingSourcesListItemImage
+                        {this.props.existingFeedSources &&
+                            this.props.existingFeedSources?.length > 0 && (
+                                <ExistingSourcesList>
+                                    {this.props.existingFeedSources?.map(
+                                        (source) => (
+                                            <ExistingSourcesListItem>
+                                                <ExistingSourcesListItemTitle>
+                                                    {source.confirmState ===
+                                                    'error'
+                                                        ? '⚠️ Error adding source'
+                                                        : source.feedTitle}
+                                                </ExistingSourcesListItemTitle>
+                                                <ExistingSourcesListItemUrl>
+                                                    {source.feedUrl?.length ===
+                                                    0
+                                                        ? 'No URL Added'
+                                                        : source.feedUrl?.replace(
+                                                              'https://',
+                                                              '',
+                                                          )}
+                                                </ExistingSourcesListItemUrl>
+                                                <RemoveListEntryBox>
+                                                    <Icon
+                                                        icon="removeX"
+                                                        heightAndWidth="20px"
+                                                        onClick={(event) => {
+                                                            event.preventDefault()
+                                                            this.props.removeFeedSource(
+                                                                source.feedUrl,
+                                                            )
+                                                        }}
+                                                    />
+                                                </RemoveListEntryBox>
+                                                {/* <ExistingSourcesListItemImage
                                                 src={source.favicon}
                                             /> */}
-                                        </ExistingSourcesListItem>
-                                    ),
-                                )}
-                            </ExistingSourcesList>
-                        )}
-                    </PopoutBox>
+                                            </ExistingSourcesListItem>
+                                        ),
+                                    )}
+                                </ExistingSourcesList>
+                            )}
+                    </>
                 )
             }
             if (mode === 'existingKnowledge') {
                 return (
-                    <PopoutBox
-                        targetElementRef={this.addSourcesButtonRef.current}
-                        strategy="absolute"
-                        placement="bottom"
-                        offsetX={5}
-                        offsetY={-5}
-                        closeComponent={() => {
-                            this.setState({
-                                showFeedSourcesMenu: false,
-                                addExistingSourcesOptions: 'pristine',
-                            })
-                        }}
-                        width={'380px'}
-                    >
-                        {this.state.addExistingSourcesOptions ===
-                            'pristine' && (
+                    <>
+                        {this.props.existingSourcesOption === 'pristine' && (
                             <ExistingKnowledgeContainer
                                 gap="10px"
                                 padding="10px"
                             >
                                 <PrimaryAction
                                     onClick={() => {
-                                        this.setState({
-                                            addExistingSourcesOptions:
-                                                'localFolder',
-                                        })
+                                        this.props.setExistingSourcesOptions(
+                                            'localFolder',
+                                        )
                                     }}
                                     label="Import local folder of PDFs"
                                     type="tertiary"
@@ -2498,10 +2465,9 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                                 <PrimaryAction
                                     onClick={() => {
-                                        this.setState({
-                                            addExistingSourcesOptions:
-                                                'obsidian',
-                                        })
+                                        this.props.setExistingSourcesOptions(
+                                            'obsidian',
+                                        )
                                     }}
                                     label="Sync Obsidian Vault"
                                     type="tertiary"
@@ -2513,9 +2479,9 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                                 <PrimaryAction
                                     onClick={() => {
-                                        this.setState({
-                                            addExistingSourcesOptions: 'logseq',
-                                        })
+                                        this.props.setExistingSourcesOptions(
+                                            'logseq',
+                                        )
                                     }}
                                     label="Sync Logseq Graph"
                                     type="tertiary"
@@ -2540,8 +2506,7 @@ export class AnnotationsSidebar extends React.Component<
                                 />
                             </ExistingKnowledgeContainer>
                         )}
-                        {this.state.addExistingSourcesOptions ===
-                            'localFolder' && (
+                        {this.props.existingSourcesOption === 'localFolder' && (
                             <ExistingKnowledgeContainer>
                                 <SourcesButtonRow>
                                     <PrimaryAction
@@ -2614,7 +2579,7 @@ export class AnnotationsSidebar extends React.Component<
                                 )}
                             </ExistingKnowledgeContainer>
                         )}
-                        {this.state.addExistingSourcesOptions === 'logseq' && (
+                        {this.props.existingSourcesOption === 'logseq' && (
                             <ExistingKnowledgeContainer>
                                 <SourcesButtonRow>
                                     <PrimaryAction
@@ -2686,8 +2651,7 @@ export class AnnotationsSidebar extends React.Component<
                                 )}
                             </ExistingKnowledgeContainer>
                         )}
-                        {this.state.addExistingSourcesOptions ===
-                            'obsidian' && (
+                        {this.props.existingSourcesOption === 'obsidian' && (
                             <ExistingKnowledgeContainer>
                                 <SourcesButtonRow>
                                     <PrimaryAction
@@ -2779,7 +2743,7 @@ export class AnnotationsSidebar extends React.Component<
                                 take a while.
                             </ExistingSourcesList>
                         )} */}
-                    </PopoutBox>
+                    </>
                 )
             }
         }
@@ -2861,17 +2825,15 @@ export class AnnotationsSidebar extends React.Component<
                                         color="prime1"
                                         containerRef={this.addSourcesButtonRef}
                                         hoverOff
-                                        onClick={(event) => {
-                                            event.stopPropagation()
-                                            this.setState({
-                                                showFeedSourcesMenu: !this.state
-                                                    .showFeedSourcesMenu,
-                                            })
-                                            this.props.loadFeedSources()
+                                        onClick={async () => {
+                                            this.props.setActiveSuggestionsTab(
+                                                'MySuggestions',
+                                            )
+                                            this.props.getLocalFolders()
+                                            this.props.setFeedSourcesMenu()
                                         }}
                                     />
                                 </TooltipBox>
-                                {this.renderSourcesMenu('existingKnowledge')}
                             </AddSourceIconContainer>
                         </SuggestionsSwitcherButton>
                         <SuggestionsSwitcherButton
@@ -2901,21 +2863,26 @@ export class AnnotationsSidebar extends React.Component<
                                         containerRef={this.addSourcesButtonRef}
                                         hoverOff
                                         onClick={(event) => {
-                                            event.stopPropagation()
-                                            this.setState({
-                                                showFeedSourcesMenu: !this.state
-                                                    .showFeedSourcesMenu,
-                                            })
+                                            this.props.setActiveSuggestionsTab(
+                                                'OtherSuggestions',
+                                            )
+                                            this.props.setFeedSourcesMenu()
                                             this.props.loadFeedSources()
                                         }}
                                     />
                                 </TooltipBox>
-                                {this.renderSourcesMenu('isFollowed')}
                             </AddSourceIconContainer>
                         </SuggestionsSwitcherButton>
                     </SuggestionsListSwitcher>
                 )}
-                {this.props.suggestionsResultsLoadState === 'running' ? (
+
+                {this.props.showFeedSourcesMenu ? (
+                    this.renderSourcesMenu(
+                        this.props.activeSuggestionsTab === 'MySuggestions'
+                            ? 'existingKnowledge'
+                            : 'isFollowed',
+                    )
+                ) : this.props.suggestionsResultsLoadState === 'running' ? (
                     <>{loaderBox()}</>
                 ) : this.props.suggestionsResultsLoadState === 'error' ? (
                     <EmptyMessageContainer>
@@ -2963,11 +2930,7 @@ export class AnnotationsSidebar extends React.Component<
                                             size="medium"
                                             onClick={async () => {
                                                 this.props.loadFeedSources()
-                                                this.setState({
-                                                    showFeedSourcesMenu: !this
-                                                        .state
-                                                        .showFeedSourcesMenu,
-                                                })
+                                                this.props.setFeedSourcesMenu()
                                             }}
                                             icon={'plus'}
                                             iconColor="prime1"
@@ -3396,10 +3359,6 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         if (this.props.activeTab === 'rabbitHole') {
-            console.log(
-                'this.props.rabbitHoleBetaFeatureAccess222',
-                this.props.rabbitHoleBetaFeatureAccess,
-            )
             if (this.props.rabbitHoleBetaFeatureAccess == null) {
                 return (
                     <LoaderBox>
@@ -4458,7 +4417,7 @@ const TextAreaContainer = styled.div`
     width: -moz-available;
     height: fit-content;
     position: relative;
-    padding: 5px;
+    padding: 15px;
 
     &::-webkit-scrollbar {
         display: none;
@@ -4468,7 +4427,7 @@ const TextAreaContainer = styled.div`
 `
 
 const SourcesButtonRow = styled.div`
-    padding: 10px 10px;
+    padding: 10px 0px;
     //border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     display: flex;
     justify-content: space-between;
@@ -4533,9 +4492,9 @@ const ExistingKnowledgeContainer = styled.div<{ padding: string; gap: string }>`
     font-weight: 400;
     font-size: 14px;
     /* grid-gap: 10px; */
+    padding: 0 10px 10px 10px;
     padding: ${(props) => props.padding};
     grid-gap: ${(props) => props.gap};
-
     &::-webkit-scrollbar {
         display: none;
     }
@@ -4936,6 +4895,7 @@ const AIContainerNotifSubTitle = styled.div`
     font-weight: 300;
     margin-bottom: 5px;
     color: ${(props) => props.theme.colors.greyScale5};
+    text-align: center;
 `
 
 const LoaderBoxInSummary = styled.div`

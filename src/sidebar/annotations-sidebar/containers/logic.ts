@@ -359,6 +359,9 @@ export class SidebarContainerLogic extends UILogic<
             suggestionsResults: [],
             suggestionsResultsLoadState: 'pristine',
             desktopAppDownloadLink: null,
+            showFeedSourcesMenu: false,
+            existingSourcesOption: 'pristine',
+            localFoldersList: [],
         }
     }
 
@@ -1609,11 +1612,11 @@ export class SidebarContainerLogic extends UILogic<
             existingFeedSources: { $set: feedSources },
         })
     }
-    removeFeedSource: EventHandler<'loadFeedSources'> = async ({
+    removeFeedSource: EventHandler<'removeFeedSource'> = async ({
         event,
         previousState,
     }) => {
-        const feedUrl = event
+        const feedUrl = event.feedUrl
 
         let currentSources = previousState.existingFeedSources
 
@@ -2683,6 +2686,11 @@ export class SidebarContainerLogic extends UILogic<
             loadState: { $set: 'running' },
         })
 
+        const selectedText =
+            highlightedText || previousState?.selectedTextAIPreview
+
+        console.log('selectedText', selectedText)
+
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
@@ -2711,9 +2719,9 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             selectedTextAIPreview: {
                 $set:
-                    highlightedText && outputLocation !== 'chapterSummary'
-                        ? highlightedText
-                        : '',
+                    selectedText?.length && outputLocation !== 'chapterSummary'
+                        ? selectedText
+                        : null,
             },
             loadState: {
                 $set:
@@ -2736,9 +2744,9 @@ export class SidebarContainerLogic extends UILogic<
         let isContentSearch = false
         textToAnalyse = textAsAlternative
             ? textAsAlternative
-            : highlightedText
-            ? highlightedText
-            : undefined
+            : selectedText
+            ? selectedText
+            : null
 
         if (previousState.fetchLocalHTML) {
             textToAnalyse = document.title + document.body.innerText
@@ -2763,8 +2771,6 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 ),
             )
-
-            console.log('results', results)
 
             if (results.length === 0) {
                 this.emitMutation({
@@ -2825,6 +2831,8 @@ export class SidebarContainerLogic extends UILogic<
 
             await this.updateSuggestionResults(results)
         }
+
+        console.log('exec', textToAnalyse, queryPrompt)
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
@@ -3023,6 +3031,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        console.log('works', event)
         if (event.prompt == null) {
             this.emitMutation({
                 showAISuggestionsDropDown: {
@@ -3082,6 +3091,7 @@ export class SidebarContainerLogic extends UILogic<
                 event.queryMode === 'question' ||
                 previousState.queryMode === 'question'
             ) {
+                console.log('question')
                 this.queryAI(
                     undefined,
                     null,
@@ -3106,6 +3116,7 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     setQueryMode: EventHandler<'setQueryMode'> = async ({ event }) => {
+        console.log('works', event)
         this.emitMutation({
             queryMode: { $set: event.mode },
         })
@@ -3188,12 +3199,36 @@ export class SidebarContainerLogic extends UILogic<
             summaryModeActiveTab: { $set: event.tab },
         })
     }
+    setExistingSourcesOptions: EventHandler<
+        'setExistingSourcesOptions'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            existingSourcesOption: { $set: event },
+        })
+    }
+    setFeedSourcesMenu: EventHandler<'setFeedSourcesMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.showFeedSourcesMenu) {
+            this.emitMutation({
+                existingSourcesOption: { $set: 'pristine' },
+            })
+        }
+
+        this.emitMutation({
+            showFeedSourcesMenu: { $set: !previousState.showFeedSourcesMenu },
+        })
+    }
     setActiveAITab: EventHandler<'setActiveAITab'> = async ({
         event,
         previousState,
     }) => {
         if (event.tab !== 'ThisPage') {
             await this.checkRabbitHoleOnboardingStage()
+            this.emitMutation({
+                selectedTextAIPreview: { $set: null },
+            })
         }
         this.emitMutation({
             activeAITab: { $set: event.tab },
@@ -3209,7 +3244,11 @@ export class SidebarContainerLogic extends UILogic<
             this.handleMouseUpToTriggerRabbitHole,
         )
 
-        this.emitMutation({ activeTab: { $set: event.tab } })
+        this.emitMutation({
+            activeTab: { $set: event.tab },
+            showFeedSourcesMenu: { $set: false },
+            existingSourcesOption: { $set: 'pristine' },
+        })
 
         // Ensure in-page selectedList state only applies when the spaces tab is active
         const returningToSelectedListMode =
@@ -3239,7 +3278,7 @@ export class SidebarContainerLogic extends UILogic<
             ((event.prompt && event.prompt?.length > 0) ||
                 event.textToProcess?.length > 0)
         ) {
-            if (previousState.pageSummary.length === 0) {
+            if (previousState.pageSummary?.length === 0) {
                 let isPagePDF = window.location.href.includes(
                     '/pdfjs/viewer.html?',
                 )
@@ -3354,7 +3393,7 @@ export class SidebarContainerLogic extends UILogic<
 
     async listenToTextHighlightSuggestions() {
         const selectedText = window.getSelection().toString().trim()
-        if (selectedText.length > 0) {
+        if (selectedText?.length > 0) {
             this.emitMutation({
                 suggestionsResultsLoadState: { $set: 'running' },
             })

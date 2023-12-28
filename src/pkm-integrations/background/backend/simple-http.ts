@@ -396,8 +396,6 @@ export class MemexLocalBackend {
     async openLocalFile(path: string): Promise<void> {
         const syncKey = await getPkmSyncKey()
 
-        console.log('gets here')
-
         const body = JSON.stringify({
             syncKey: syncKey,
             path: path,
@@ -425,11 +423,11 @@ export class MemexLocalBackend {
     async removeFeedSource(feedUrl: string): Promise<void> {
         const syncKey = await getPkmSyncKey()
 
-        console.log('gets here')
+        console.log('gets here', feedUrl)
 
         const body = JSON.stringify({
             syncKey: syncKey,
-            path: feedUrl,
+            feedUrl: feedUrl,
         })
 
         const response = await fetch(`${this.url}/remove_feed_source`, {
@@ -447,7 +445,7 @@ export class MemexLocalBackend {
         }
 
         if (!response.ok || response.status !== 200) {
-            throw new Error(`Error opening local file: ${response.status}`)
+            throw new Error(`Error removing feed source: ${response.status}`)
         }
     }
 
@@ -476,7 +474,7 @@ export class MemexLocalBackend {
         }
 
         if (!response.ok || response.status !== 200) {
-            throw new Error(`Error opening local file: ${response.status}`)
+            throw new Error(`Error removing local folder: ${response.status}`)
         }
     }
 }

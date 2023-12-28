@@ -164,6 +164,14 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     // except if explicity told otherwise.
     selectedListId: UnifiedList['unifiedId'] | null
 
+    existingSourcesOption:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
+
     annotationSharingAccess: AnnotationSharingAccess
     readingView?: boolean
     showAllNotesCopyPaster: boolean
@@ -282,6 +290,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     }
     AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
     localFoldersList: LocalFolder[]
+    showFeedSourcesMenu: boolean
 }
 
 export interface LocalFolder {
@@ -320,6 +329,13 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    setExistingSourcesOptions:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
     processFileImportFeeds: { fileString: string }
     getHighlightColorSettings: null
     saveHighlightColor: {
@@ -359,6 +375,7 @@ interface SidebarEvents {
     setSummaryMode: {
         tab: 'Answer' | 'References'
     }
+    setFeedSourcesMenu: null
     setActiveAITab: {
         tab: SidebarAITab
     }

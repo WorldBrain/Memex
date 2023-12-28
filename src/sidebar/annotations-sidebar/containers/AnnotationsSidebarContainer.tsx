@@ -1095,9 +1095,15 @@ export class AnnotationsSidebarContainer<
                             copyPageLink={(link) => {
                                 this.processEvent('copyNoteLink', { link })
                             }}
-                            queryAIwithPrompt={(prompt) => {
+                            queryAIwithPrompt={(
+                                prompt: string,
+                                highlightedText?: string,
+                                queryMode?: string,
+                            ) => {
                                 this.processEvent('queryAIwithPrompt', {
                                     prompt,
+                                    highlightedText,
+                                    queryMode,
                                 })
                             }}
                             saveAIPrompt={(prompt) => {
@@ -1445,6 +1451,15 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('removeLocalFolder', {
                                     id: id,
                                 })
+                            }}
+                            setFeedSourcesMenu={() => {
+                                this.processEvent('setFeedSourcesMenu', null)
+                            }}
+                            setExistingSourcesOptions={(option) => {
+                                this.processEvent(
+                                    'setExistingSourcesOptions',
+                                    option,
+                                )
                             }}
                         />
                     </Rnd>
