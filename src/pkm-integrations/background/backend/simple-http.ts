@@ -383,6 +383,7 @@ export class MemexLocalBackend {
 
         if (response.ok) {
             const responseObj = await response.json()
+
             return responseObj
         }
 
@@ -411,7 +412,6 @@ export class MemexLocalBackend {
 
         if (response.ok) {
             const responseObj = await response.json()
-            console.log('responseObj', responseObj)
             return responseObj
         }
 
@@ -422,8 +422,6 @@ export class MemexLocalBackend {
 
     async removeFeedSource(feedUrl: string): Promise<void> {
         const syncKey = await getPkmSyncKey()
-
-        console.log('gets here', feedUrl)
 
         const body = JSON.stringify({
             syncKey: syncKey,
@@ -440,7 +438,6 @@ export class MemexLocalBackend {
 
         if (response.ok) {
             const responseObj = await response.json()
-            console.log('responseObj', responseObj)
             return responseObj
         }
 
@@ -457,8 +454,6 @@ export class MemexLocalBackend {
             id: id,
         })
 
-        console.log('body', body)
-
         const response = await fetch(`${this.url}/remove_folder_to_watch`, {
             method: 'POST',
             headers: {
@@ -469,7 +464,6 @@ export class MemexLocalBackend {
 
         if (response.ok) {
             const responseObj = await response.json()
-            console.log('responseObj', responseObj)
             return responseObj
         }
 

@@ -18,7 +18,6 @@ export class PKMSyncBackgroundModule {
             : 'http://localhost:11923'
 
     constructor() {
-        console.log('env', process.env.NODE_ENV, this.serverToTalkTo)
         this.backendNew = new MemexLocalBackend({
             url: this.serverToTalkTo,
         })
@@ -47,7 +46,6 @@ export class PKMSyncBackgroundModule {
 
     async pushRabbitHoleUpdate(entryData) {
         if (await this.backendNew.isConnected()) {
-            console.log('entryData', entryData)
             const document = {
                 createdWhen: entryData.createdWhen,
                 creatorId: entryData.creatorId,
@@ -156,7 +154,6 @@ export class PKMSyncBackgroundModule {
                 const response = await fetch(feedUrl)
 
                 const contentType = response.headers.get('content-type')
-                console.log('contentType2', contentType.includes('xml'))
 
                 // Check if the new content type is XML
                 if (
@@ -167,7 +164,6 @@ export class PKMSyncBackgroundModule {
                     const text = await response.text()
                     const title = text.match(/<title>(.*?)<\/title>/)[1]
                     source.feedTitle = title
-                    console.log('source', source)
                     // Return the source object
                     return source
                 } else {

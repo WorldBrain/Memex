@@ -856,7 +856,6 @@ export class SidebarContainerLogic extends UILogic<
             rabbitHoleBetaAccess === 'granted' ||
             rabbitHoleBetaAccess === 'grantedBcOfSubscription'
         ) {
-            console.log('granted', rabbitHoleBetaAccess)
             const url = await downloadMemexDesktop()
 
             this.emitMutation({
@@ -1480,7 +1479,6 @@ export class SidebarContainerLogic extends UILogic<
             ...previousState.existingFeedSources,
         ]
 
-        console.log('allFeedSources', allFeedSources)
         this.emitMutation({
             existingFeedSources: {
                 $set: allFeedSources,
@@ -1513,16 +1511,12 @@ export class SidebarContainerLogic extends UILogic<
                             (source) => source.feedUrl === inputFeedUrl,
                         ))
                 ) {
-                    console.log('feedurlempty')
                     return
                 }
                 let response
-                console.log('response1')
                 response = await this.options.pkmSyncBG.checkFeedSource(
                     inputFeedUrl,
                 )
-
-                console.log('response', response)
 
                 let title = response?.feedTitle ?? null
                 let feedUrl = response?.feedUrl
@@ -1557,15 +1551,11 @@ export class SidebarContainerLogic extends UILogic<
                     updatedSource.feedUrl &&
                     updatedSource.feedTitle
                 ) {
-                    console.log(existingSourceIndex)
                     updatedSources.unshift(updatedSource)
                 } else {
                     // If the source already exists, do not add it again
                     return
                 }
-
-                console.log('updatedSource', updatedSource)
-                console.log('updatedSourceS', updatedSources)
 
                 this.emitMutation({
                     existingFeedSources: { $set: updatedSources },
@@ -1605,8 +1595,6 @@ export class SidebarContainerLogic extends UILogic<
         previousState,
     }) => {
         const feedSources = await this.options.pkmSyncBG.loadFeedSources()
-
-        console.log('feedSources', feedSources)
 
         this.emitMutation({
             existingFeedSources: { $set: feedSources },
@@ -1702,7 +1690,6 @@ export class SidebarContainerLogic extends UILogic<
                     $set: 'downloadStarted',
                 },
             })
-            console.log('downloadStarted')
             const desktopAppRunning = await this.checkIfDesktopAppIsRunning()
             if (desktopAppRunning) {
                 this.emitMutation({
@@ -2689,8 +2676,6 @@ export class SidebarContainerLogic extends UILogic<
         const selectedText =
             highlightedText || previousState?.selectedTextAIPreview
 
-        console.log('selectedText', selectedText)
-
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
@@ -2795,16 +2780,12 @@ export class SidebarContainerLogic extends UILogic<
                     )
                 })
 
-                console.log('extractedData1', extractedData)
-
                 extractedData = extractedData.map((result) => {
                     return {
                         pageTitle: result.pageTitle,
                         contentText: result.contentText,
                     }
                 })
-
-                console.log('extractedData', extractedData)
             }
             if (previousState.activeAITab === 'InFollowedFeeds') {
                 this.emitMutation({
@@ -2831,8 +2812,6 @@ export class SidebarContainerLogic extends UILogic<
 
             await this.updateSuggestionResults(results)
         }
-
-        console.log('exec', textToAnalyse, queryPrompt)
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
@@ -3031,7 +3010,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        console.log('works', event)
         if (event.prompt == null) {
             this.emitMutation({
                 showAISuggestionsDropDown: {
@@ -3091,7 +3069,6 @@ export class SidebarContainerLogic extends UILogic<
                 event.queryMode === 'question' ||
                 previousState.queryMode === 'question'
             ) {
-                console.log('question')
                 this.queryAI(
                     undefined,
                     null,
@@ -3116,7 +3093,6 @@ export class SidebarContainerLogic extends UILogic<
     }
 
     setQueryMode: EventHandler<'setQueryMode'> = async ({ event }) => {
-        console.log('works', event)
         this.emitMutation({
             queryMode: { $set: event.mode },
         })
@@ -3433,8 +3409,6 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const folder = await this.options.pkmSyncBG.addLocalFolder()
 
-        console.log('folder', folder)
-
         let localFolders = previousState.localFoldersList
         localFolders.unshift(folder)
 
@@ -3463,13 +3437,10 @@ export class SidebarContainerLogic extends UILogic<
             localFoldersList: { $set: localFolders },
         })
 
-        console.log('folderId', folderId)
         await this.options.pkmSyncBG.removeLocalFolder(folderId)
     }
     getLocalFolders: EventHandler<'getLocalFolders'> = async ({}) => {
         const localFolders = await this.options.pkmSyncBG.getLocalFolders()
-
-        console.log('localFolders', localFolders)
 
         this.emitMutation({
             localFoldersList: { $set: localFolders },
@@ -3480,8 +3451,6 @@ export class SidebarContainerLogic extends UILogic<
         const resultsArray: SuggestionCard[] = []
         const user = await this.options.authBG.getCurrentUser()
         const userId = user?.id
-
-        console.log('results2', results)
 
         type spaceItem = {
             name: string
@@ -3578,8 +3547,6 @@ export class SidebarContainerLogic extends UILogic<
                         pageData = await this.options.customListsBG.findPageByUrl(
                             normalizeUrl(result.fullUrl),
                         )
-
-                        console.log('pageData', pageData)
 
                         if (pageData) {
                             pageToDisplay = {

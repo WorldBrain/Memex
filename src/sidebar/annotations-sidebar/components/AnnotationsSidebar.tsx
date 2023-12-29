@@ -1985,10 +1985,6 @@ export class AnnotationsSidebar extends React.Component<
                                         event.key === 'Enter' &&
                                         !event.shiftKey
                                     ) {
-                                        console.log(
-                                            'enter pressed',
-                                            this.props.queryMode,
-                                        )
                                         this.props.queryAIwithPrompt(
                                             this.props.prompt,
                                             this.props.selectedTextAIPreview,
@@ -2095,7 +2091,6 @@ export class AnnotationsSidebar extends React.Component<
                                             ]}
                                             onMenuItemClick={async (item) => {
                                                 this.props.setQueryMode(item.id)
-                                                console.log('item', item)
 
                                                 if (item.id === 'summarize') {
                                                     await this.props.queryAIwithPrompt(
@@ -2319,19 +2314,12 @@ export class AnnotationsSidebar extends React.Component<
                                     }}
                                     onDrop={(event) => {
                                         event.preventDefault()
-                                        console.log('drop')
-                                        console.log('event', event)
                                         const file = event.dataTransfer.files[0]
                                         const reader = new FileReader()
 
-                                        console.log('file', file)
                                         reader.onload = (event) => {
                                             const fileContent = event.target
                                                 .result as string
-                                            console.log(
-                                                'fileContent',
-                                                fileContent,
-                                            )
                                             this.props.processFileImportFeeds(
                                                 fileContent,
                                             )
@@ -2540,13 +2528,15 @@ export class AnnotationsSidebar extends React.Component<
                                     />
                                 </SourcesButtonRow>
                                 {this.props.localFoldersList?.filter(
-                                    (folder) => folder.type === 'local',
+                                    (folder) =>
+                                        folder.sourceApplication === 'local',
                                 ).length > 0 ? (
                                     <ExistingSourcesList>
                                         {this.props.localFoldersList
                                             ?.filter(
                                                 (folder) =>
-                                                    folder.type === 'local',
+                                                    folder.sourceApplication ===
+                                                    'local',
                                             )
                                             .map((folder) => (
                                                 <ExistingSourcesListItem
@@ -2614,13 +2604,15 @@ export class AnnotationsSidebar extends React.Component<
                                     />
                                 </SourcesButtonRow>
                                 {this.props.localFoldersList?.filter(
-                                    (folder) => folder.type === 'logseq',
+                                    (folder) =>
+                                        folder.sourceApplication === 'logseq',
                                 ).length > 0 ? (
                                     <ExistingSourcesList>
                                         {this.props.localFoldersList
                                             ?.filter(
                                                 (folder) =>
-                                                    folder.type === 'logseq',
+                                                    folder.sourceApplication ===
+                                                    'logseq',
                                             )
                                             .map((folder) => (
                                                 <ExistingSourcesListItem>
@@ -2687,13 +2679,15 @@ export class AnnotationsSidebar extends React.Component<
                                     />
                                 </SourcesButtonRow>
                                 {this.props.localFoldersList?.filter(
-                                    (folder) => folder.type === 'obsidian',
+                                    (folder) =>
+                                        folder.sourceApplication === 'obsidian',
                                 ).length > 0 ? (
                                     <ExistingSourcesList>
                                         {this.props.localFoldersList
                                             ?.filter(
                                                 (folder) =>
-                                                    folder.type === 'obsidian',
+                                                    folder.sourceApplication ===
+                                                    'obsidian',
                                             )
                                             .map((folder) => (
                                                 <ExistingSourcesListItem>
@@ -2712,10 +2706,6 @@ export class AnnotationsSidebar extends React.Component<
                                                             onClick={(
                                                                 event,
                                                             ) => {
-                                                                console.log(
-                                                                    'folder.id',
-                                                                    folder,
-                                                                )
                                                                 event.preventDefault()
                                                                 this.props.removeLocalFolder(
                                                                     folder.id,
@@ -3263,7 +3253,6 @@ export class AnnotationsSidebar extends React.Component<
                                 'downloadStarted',
                             )
                             window.open(url, '_blank')
-                            console.log('adasdadsds')
                         }}
                         label={`Download for ${OS}`}
                         icon="stars"

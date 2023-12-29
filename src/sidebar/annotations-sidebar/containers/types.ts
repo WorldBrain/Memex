@@ -295,7 +295,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
 export interface LocalFolder {
     path: string
-    type: 'local' | 'obsidian' | 'logseq'
+    sourceApplication: 'local' | 'obsidian' | 'logseq'
     id: number
 }
 
