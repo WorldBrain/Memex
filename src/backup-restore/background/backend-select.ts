@@ -7,6 +7,11 @@ import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from './types'
 
 export class BackendSelect {
+    serverToTalkTo =
+        process.env.NODE_ENV === 'production'
+            ? 'http://localhost:11922'
+            : 'http://localhost:11923'
+
     constructor(
         private deps: {
             localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
@@ -39,7 +44,7 @@ export class BackendSelect {
 
     async initLocalBackend(): Promise<BackupBackend> {
         return new localBackup.MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
     }
 

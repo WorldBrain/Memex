@@ -164,6 +164,14 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     // except if explicity told otherwise.
     selectedListId: UnifiedList['unifiedId'] | null
 
+    existingSourcesOption:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
+
     annotationSharingAccess: AnnotationSharingAccess
     readingView?: boolean
     showAllNotesCopyPaster: boolean
@@ -281,6 +289,14 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         }
     }
     AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+    localFoldersList: LocalFolder[]
+    showFeedSourcesMenu: boolean
+}
+
+export interface LocalFolder {
+    path: string
+    type: 'local' | 'obsidian' | 'logseq'
+    id: number
 }
 
 export type AnnotationEvent<T> = {
@@ -313,6 +329,13 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    setExistingSourcesOptions:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
     processFileImportFeeds: { fileString: string }
     getHighlightColorSettings: null
     saveHighlightColor: {
@@ -322,6 +345,9 @@ interface SidebarEvents {
     }
     saveFeedSources: {
         sources: string
+    }
+    removeFeedSource: {
+        feedUrl: string
     }
     loadFeedSources: null
     saveHighlightColorSettings: { newState: string }
@@ -349,6 +375,7 @@ interface SidebarEvents {
     setSummaryMode: {
         tab: 'Answer' | 'References'
     }
+    setFeedSourcesMenu: null
     setActiveAITab: {
         tab: SidebarAITab
     }
@@ -514,6 +541,10 @@ interface SidebarEvents {
             | null
     }
     requestRabbitHoleBetaFeatureAccess: { reasonText: string }
+    openLocalFile: { path: string }
+    addLocalFolder: null
+    removeLocalFolder: { id: number }
+    getLocalFolders: null
 }
 
 export type SidebarContainerEvents = UIEvent<
@@ -541,7 +572,7 @@ export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']
     pageTitle: string
     contentText?: string
-    contentType: 'page' | 'annotation' | 'rss-feed-item' | 'pdf'
+    contentType: 'page' | 'annotation' | 'rss-feed-item' | 'pdf' | 'markdown'
     creatorId?: UserReference['id']
     spaces?: any
     body?: string
@@ -550,6 +581,7 @@ export interface SuggestionCard {
     sourceApplication?: string
     distance?: number
     path?: string
+    topLevelFolder?: string
 }
 
 export interface ListInstance {

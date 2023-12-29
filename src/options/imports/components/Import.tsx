@@ -59,6 +59,11 @@ class Import extends React.PureComponent<Props> {
     //     return <AdvSettings />
     // }
 
+    serverToTalkTo =
+        process.env.NODE_ENV === 'production'
+            ? 'http://localhost:11922'
+            : 'http://localhost:11923'
+
     serverOnline: any
 
     state = {
@@ -98,7 +103,7 @@ class Import extends React.PureComponent<Props> {
         }
 
         this.serverOnline = await new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         }).isReachable()
 
         this.setState({
@@ -108,7 +113,7 @@ class Import extends React.PureComponent<Props> {
         // Check every 3 seconds if the server is running and update the state accordingly
         setInterval(async () => {
             const serverOnline = await new MemexLocalBackend({
-                url: 'http://localhost:11922',
+                url: this.serverToTalkTo,
             }).isReachable()
 
             this.setState({

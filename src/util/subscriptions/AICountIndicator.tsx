@@ -71,9 +71,8 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 openAIKey: openAIKey,
             })
         } else {
-            await this.syncSettings.openAI.set('apiKey', '')
             this.setState({
-                openAIKey: openAIKey,
+                openAIKey: '',
             })
         }
 

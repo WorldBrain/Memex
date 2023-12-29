@@ -164,17 +164,6 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
     includeLastFewSecs,
 ) {
-    const videoId = new URL(window.location.href).searchParams.get('v')
-    const isStaging =
-        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-        process.env.NODE_ENV === 'development'
-
-    const baseUrl = isStaging
-        ? 'https://cloudflare-memex-staging.memex.workers.dev'
-        : 'https://cloudfare-memex.memex.workers.dev'
-
-    const normalisedYoutubeURL = 'https://www.youtube.com/watch?v=' + videoId
-
     const [startTimeURL] = getHTML5VideoTimestamp(includeLastFewSecs)
     const [endTimeURL] = getHTML5VideoTimestamp(0)
 
