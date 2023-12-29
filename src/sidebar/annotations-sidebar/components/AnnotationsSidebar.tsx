@@ -267,7 +267,13 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     showFeedSourcesMenu: boolean
     setFeedSourcesMenu: () => void
     setExistingSourcesOptions: (option) => void
-    existingSourcesOption: string
+    existingSourcesOption:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
 }
 
 interface AnnotationsSidebarState {
