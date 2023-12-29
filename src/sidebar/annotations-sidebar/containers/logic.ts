@@ -3612,6 +3612,9 @@ export class SidebarContainerLogic extends UILogic<
                                 `obsidian://open?vault=${result.topLevelFolder}&file=` +
                                 encodeURIComponent(file)
                         }
+                        if (sourceApplication === 'local') {
+                            url = result.path
+                        }
 
                         pageToDisplay = {
                             fullUrl: url,

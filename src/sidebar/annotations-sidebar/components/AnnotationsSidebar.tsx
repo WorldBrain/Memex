@@ -2434,6 +2434,7 @@ export class AnnotationsSidebar extends React.Component<
                                                             this.props.removeFeedSource(
                                                                 source.feedUrl,
                                                             )
+                                                            event.stopPropagation()
                                                         }}
                                                     />
                                                 </RemoveListEntryBox>
@@ -2569,6 +2570,7 @@ export class AnnotationsSidebar extends React.Component<
                                                                 this.props.removeLocalFolder(
                                                                     folder.id,
                                                                 )
+                                                                event.stopPropagation()
                                                             }}
                                                         />
                                                     </RemoveListEntryBox>
@@ -2641,6 +2643,7 @@ export class AnnotationsSidebar extends React.Component<
                                                                 this.props.removeLocalFolder(
                                                                     folder.id,
                                                                 )
+                                                                event.stopPropagation()
                                                             }}
                                                         />
                                                     </RemoveListEntryBox>
@@ -2717,6 +2720,7 @@ export class AnnotationsSidebar extends React.Component<
                                                                 this.props.removeLocalFolder(
                                                                     folder.id,
                                                                 )
+                                                                event.stopPropagation()
                                                             }}
                                                         />
                                                     </RemoveListEntryBox>
@@ -3001,6 +3005,16 @@ export class AnnotationsSidebar extends React.Component<
                                     ? normalizeUrl(item.fullUrl)
                                     : null
                             }
+                            onClick={(event) => {
+                                if (
+                                    item.contentType === 'markdown' &&
+                                    item.sourceApplication === 'local'
+                                ) {
+                                    event.preventDefault()
+                                    event.stopPropagation()
+                                    this.props.openLocalFile(item.fullUrl)
+                                }
+                            }}
                             originalUrl={
                                 item.fullUrl
                                 // 'https://' + item.normalizedUrl
