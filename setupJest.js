@@ -23,6 +23,8 @@ global.DataTransfer = function () {
     this.setDragImage = (img) => (this.img = img)
 }
 
+global.Blob = class Blob {}
+
 global.document = global.document ?? {}
 global.document.execCommand = () => true
 

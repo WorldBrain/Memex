@@ -5364,10 +5364,6 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     ])
                                 }
 
-                                // Sync so everything uploads and creates cloud-side data
-                                await personalCloud.integrateAllUpdates()
-                                await personalCloud.waitForSync()
-
                                 // Shared cloud DB data
                                 // prettier-ignore
                                 {
@@ -5378,6 +5374,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         creator: userId,
                                         title: listTitle,
                                         description: null,
+                                        private: false,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -5409,6 +5406,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: userId,
+                                        location: null,
                                         originalUrl: fullPageUrl,
                                         sharedList: maybeInt(remoteListId),
                                         normalizedUrl: normalizedBaseLocatorUrl,
@@ -5417,6 +5415,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         id: expect.anything(),
                                         creator: userId,
+                                        location: null,
                                         originalUrl: fullPageUrl,
                                         sharedList: maybeInt(remoteListId),
                                         normalizedUrl: normalizedBaseLocatorUrl,
@@ -5552,6 +5551,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         locationType: ContentLocatorType.Remote,
                                         primary: true,
                                         valid: true,
+                                        status: null,
                                         version: 0,
                                         user: userId,
                                         localId: localLocators[0].id,
@@ -5573,6 +5573,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         locationType: ContentLocatorType.Remote,
                                         primary: true,
                                         valid: true,
+                                        status: null,
                                         version: 0,
                                         user: userId,
                                         localId: localLocators[1].id,
