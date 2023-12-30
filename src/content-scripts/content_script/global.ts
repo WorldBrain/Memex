@@ -692,10 +692,11 @@ export async function main(
                 }
             }
         },
-        askAI: () => (highlightedText: string) => {
+        askAI: () => (highlightedText: string, prompt: string) => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText,
+                prompt,
             })
             inPageUI.hideTooltip()
         },
