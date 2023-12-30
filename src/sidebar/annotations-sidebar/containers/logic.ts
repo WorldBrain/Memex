@@ -1463,7 +1463,11 @@ export class SidebarContainerLogic extends UILogic<
 
         const feedsNode = Array.from(
             xmlDoc.getElementsByTagName('outline'),
-        ).filter((node) => node.getAttribute('type') === 'rss')
+        ).filter(
+            (node) =>
+                node.getAttribute('type') === 'rss' ||
+                node.getAttribute('type') === 'atom',
+        )
         const feedSources = Array.from(feedsNode).map((node) => ({
             feedTitle: node.getAttribute('title'),
             feedUrl: (
