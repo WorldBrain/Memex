@@ -1463,7 +1463,11 @@ export class SidebarContainerLogic extends UILogic<
 
         const feedsNode = Array.from(
             xmlDoc.getElementsByTagName('outline'),
-        ).filter((node) => node.getAttribute('type') === 'rss')
+        ).filter(
+            (node) =>
+                node.getAttribute('type') === 'rss' ||
+                node.getAttribute('type') === 'atom',
+        )
         const feedSources = Array.from(feedsNode).map((node) => ({
             feedTitle: node.getAttribute('title'),
             feedUrl: (
@@ -3135,7 +3139,9 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        let prompt = 'Tell me the key takeaways: '
+        console.log('askAIviaInPageInteractions', event)
+
+        let prompt = event.prompt ?? 'Tell me the key takeaways: '
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: {

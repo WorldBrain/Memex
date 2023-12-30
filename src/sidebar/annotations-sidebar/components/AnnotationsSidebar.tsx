@@ -2250,33 +2250,6 @@ export class AnnotationsSidebar extends React.Component<
                 ) : (
                     this.renderBetaAccessOnboarding()
                 )}
-                {/* <SummaryFooter>
-                    <RightSideButtons>
-                        <BetaButton>
-                            <BetaButtonInner>BETA</BetaButtonInner>
-                        </BetaButton>
-                        <PrimaryAction
-                            type="tertiary"
-                            size="small"
-                            onClick={() => {
-                                window.open(
-                                    'https://memex.garden/chatsupport',
-                                    '_blank',
-                                )
-                            }}
-                            label="Report Bug"
-                        />
-                    </RightSideButtons>
-                    <PoweredBy>
-                        Powered by
-                        <Icon
-                            icon="openAI"
-                            height="18px"
-                            hoverOff
-                            width="70px"
-                        />
-                    </PoweredBy>
-                </SummaryFooter> */}
             </AISidebarContainer>
         )
     }

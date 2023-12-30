@@ -131,17 +131,25 @@ export class PKMSyncBackgroundModule {
             }
             // Fetch the feed URL
             const response = await fetch(feedUrl)
+            const text = await response.text()
             // Get the content type of the response
             const contentType = response.headers.get('content-type')
 
+            const isAtom = text.includes('<feed xml')
+            const isRSS =
+                contentType?.includes('rss') || contentType?.includes('xml')
             // Check if the content type is XML
-            if (
-                contentType &&
-                (contentType.includes('rss') || contentType.includes('xml'))
-            ) {
+            if (isAtom) {
+                // Check if the feed is an atom feed
+                // If it is, extract the feed title and URL
+                const title = text.match(/<title>(.*?)<\/title>/)[1]
+                source.feedTitle = title
+                source.feedUrl = feedUrl
+                // Return the source object
+                return source
+            } else if (isRSS) {
                 // If it is, set the feed URL and title in the source object
                 source.feedUrl = feedUrl
-                const text = await response.text()
                 const title = text.match(/<title>(.*?)<\/title>/)[1]
                 source.feedTitle = title
                 // Return the source object
