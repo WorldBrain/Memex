@@ -2740,6 +2740,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'page-link',
                                         creator: userId,
                                         title: listTitle,
+                                        private: false,
                                         description: null,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
@@ -3081,6 +3082,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         creator: userId,
                                         sharedList: sharedListDataA[0].id,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        originalUrl: fullPageUrl,
+                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        sharedList: null,
                                         normalizedUrl: normalizedBaseLocatorUrl,
                                         originalUrl: fullPageUrl,
                                         locationScheme: LocationSchemeType.NormalizedUrlV1,
@@ -3562,7 +3571,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     {
                                         now,
                                         fullPageUrl: tmpPdfAccessUrl,
-                                        uploadId,
+                                        uploadedPdfParams: {
+                                            fingerprints: [
+                                                fingerprintA,
+                                                fingerprintB,
+                                            ],
+                                            title: pdfTitle,
+                                            uploadId,
+                                        },
                                     },
                                 )
 
@@ -3627,6 +3643,15 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         id: expect.anything(),
                                         creator: userId,
                                         sharedList: sharedListDataA[0].id,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        locationScheme: LocationSchemeType.UploadStorage,
+                                        location: uploadId,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        sharedList: null,
                                         normalizedUrl: normalizedBaseLocatorUrl,
                                         originalUrl: fullBaseLocatorUrl,
                                         locationScheme: LocationSchemeType.UploadStorage,
@@ -3990,7 +4015,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 } = await contentSharing.options.backend.createPageLink(
                                     {
                                         fullPageUrl: tmpPdfAccessUrl,
-                                        uploadId,
+                                        uploadedPdfParams: {
+                                            fingerprints: [
+                                                fingerprintA,
+                                                fingerprintB,
+                                            ],
+                                            title: pdfTitle,
+                                            uploadId,
+                                        },
                                         now: now + 10,
                                     },
                                 )
