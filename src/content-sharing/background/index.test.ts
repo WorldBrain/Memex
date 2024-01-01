@@ -5628,6 +5628,586 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
             },
         ),
         backgroundIntegrationTest(
+            'should created shared list, entry, page info, key, role + all corresponding personal cloud data when a user creates a shareable page link for an uploaded PDF - via extension',
+            {
+                skipConflictTests: true,
+                skipSyncTests: true,
+                customTestOpts: {
+                    fetchPdfData: async () => ({
+                        title: data.PDF_DATA_B.title,
+                        fullText: data.PDF_DATA_B.fullText,
+                        pdfPageTexts: [data.PDF_DATA_B.fullText],
+                        pdfMetadata: {
+                            fingerprints: data.PDF_DATA_B.fingerprints,
+                            memexIncludedPages: 1,
+                            memexTotalPages: 1,
+                        },
+                    }),
+                },
+            },
+            () => {
+                const testData: TestData = {}
+
+                return {
+                    setup: setupPreTest,
+                    steps: [
+                        {
+                            execute: async ({ setup }) => {
+                                const {
+                                    contentSharing,
+                                    personalCloud,
+                                } = await setupTest({
+                                    setup,
+                                    testData,
+                                })
+
+                                // Set up PDF BG to fake PDF upload
+                                setup.backgroundModules.pdfBg[
+                                    'deps'
+                                ].generateUploadId = () => uploadId
+                                await setup.backgroundModules.pdfBg[
+                                    'deps'
+                                ].syncSettings.pdfIntegration.set(
+                                    'shouldAutoUpload',
+                                    true,
+                                )
+
+                                const { manager } = setup.serverStorage
+                                const now = Date.now()
+                                const listTitle = createPageLinkListTitle()
+                                const pdfTitle = data.PDF_DATA_B.title
+                                const fullPageUrl = data.PDF_DATA_B.fullUrl
+                                const normalizedPageUrl =
+                                    data.PDF_DATA_B.normalizedUrl
+                                const fingerprintA =
+                                    data.PDF_DATA_B.fingerprints[0]
+                                const fingerprintB =
+                                    data.PDF_DATA_B.fingerprints[1]
+                                const domain = data.PDF_DATA_B.domain
+                                const fullText = data.PDF_DATA_B.fullText
+                                const uploadId = 'test-upload-id'
+                                const fullBaseLocatorUrl = buildBaseLocatorUrl(
+                                    fingerprintA,
+                                    ContentLocatorFormat.PDF,
+                                )
+                                const normalizedBaseLocatorUrl = normalizeUrl(
+                                    fullBaseLocatorUrl,
+                                )
+                                const userId = TEST_USER.id
+
+                                // Shared cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('sharedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([])
+                                }
+
+                                // Personal cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('personalList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentMetadata').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentRead').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalContentLocator').findAllObjects({})).toEqual([])
+                                }
+
+                                // Local DB data
+                                // prettier-ignore
+                                {
+                                expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
+                                }
+
+                                const tabInfo = { tab: { id: 123 } }
+                                const {
+                                    collabKey,
+                                    localListId,
+                                    remoteListId,
+                                    remoteListEntryId,
+                                    listTitle: createdListTitle,
+                                } = await contentSharing.schedulePageLinkCreation(
+                                    tabInfo,
+                                    {
+                                        fullPageUrl: fullBaseLocatorUrl,
+                                        now,
+                                        customPageTitle: null,
+                                    },
+                                )
+                                await contentSharing.waitForPageLinkCreation(
+                                    tabInfo,
+                                    {
+                                        // fullPageUrl,
+                                        fullPageUrl: fullBaseLocatorUrl,
+                                    },
+                                )
+
+                                const localLocators: any[] = await setup.storageManager
+                                    .collection('locators')
+                                    .findAllObjects({})
+                                // Local DB data should be created first
+                                // prettier-ignore
+                                {
+                                    expect(localListId).toEqual(now)
+                                    expect(createdListTitle).toEqual(listTitle)
+                                    expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([
+                                        {
+                                            id: localListId,
+                                            name: listTitle,
+                                            type: 'page-link',
+                                            isDeletable: true,
+                                            isNestable: true,
+                                            searchableName: listTitle,
+                                            nameTerms: expect.any(Array),
+                                            createdAt: new Date(now)
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
+                                        {
+                                            listId: localListId,
+                                            pageUrl: normalizedBaseLocatorUrl,
+                                            fullUrl: fullBaseLocatorUrl,
+                                            createdAt: new Date(now)
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([
+                                        {
+                                            localId: localListId,
+                                            remoteId: remoteListId,
+                                            private: false
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([
+                                        {
+                                            sharedList: remoteListId,
+                                            creator: userId,
+                                            name: listTitle,
+                                            type: 'page-link',
+                                            lastSync: undefined
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('followedListEntry').findAllObjects({})).toEqual([
+                                        {
+                                            id: expect.anything(),
+                                            followedList: remoteListId,
+                                            entryTitle: pdfTitle,
+                                            creator: userId,
+                                            normalizedPageUrl: normalizedBaseLocatorUrl,
+                                            hasAnnotationsFromOthers: false,
+                                            sharedListEntry: remoteListEntryId,
+                                            createdWhen: now,
+                                            updatedWhen: now,
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('pages').findAllObjects({})).toEqual([
+                                        {
+                                            url: normalizedBaseLocatorUrl,
+                                            fullUrl: fullBaseLocatorUrl,
+                                            fullTitle: pdfTitle,
+                                            domain,
+                                            hostname: domain,
+                                            text: fullText,
+                                            terms: expect.any(Array),
+                                            urlTerms: expect.any(Array),
+                                            titleTerms: expect.any(Array),
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('visits').findAllObjects({})).toEqual([
+                                        {
+                                            url: normalizedBaseLocatorUrl,
+                                            time: now
+                                        }
+                                    ])
+                                    expect(localLocators).toEqual([
+                                        {
+                                            id: expect.any(Number),
+                                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                            // originalLocation: fullPageUrl,
+                                            // location: normalizedPageUrl,
+                                            // locationScheme: LocationSchemeType.FilesystemPathV1,
+                                            // locationType: ContentLocatorType.Local,
+                                            originalLocation: expect.any(String),
+                                            location: expect.any(String),
+                                            locationScheme: expect.any(String),
+                                            locationType: expect.any(String),
+                                            format: ContentLocatorFormat.PDF,
+                                            normalizedUrl: normalizedBaseLocatorUrl,
+                                            primary: true,
+                                            valid: true,
+                                            version: 0,
+                                            fingerprint: fingerprintA,
+                                            lastVisited: expect.any(Number),
+                                        },
+                                        {
+                                            id: expect.any(Number),
+                                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                            // originalLocation: fullPageUrl,
+                                            // location: normalizedPageUrl,
+                                            // locationScheme: LocationSchemeType.FilesystemPathV1,
+                                            // locationType: ContentLocatorType.Local,
+                                            originalLocation: expect.any(String),
+                                            location: expect.any(String),
+                                            locationScheme: expect.any(String),
+                                            locationType: expect.any(String),
+                                            format: ContentLocatorFormat.PDF,
+                                            normalizedUrl: normalizedBaseLocatorUrl,
+                                            primary: true,
+                                            valid: true,
+                                            version: 0,
+                                            fingerprint: fingerprintB,
+                                            lastVisited: expect.any(Number),
+                                        },
+                                        {
+                                            id: expect.any(Number),
+                                            locationScheme: LocationSchemeType.UploadStorage,
+                                            locationType: ContentLocatorType.Remote,
+                                            format: ContentLocatorFormat.PDF,
+                                            originalLocation: fullBaseLocatorUrl,
+                                            location: uploadId,
+                                            normalizedUrl: normalizedBaseLocatorUrl,
+                                            primary: true,
+                                            valid: true,
+                                            version: 0,
+                                            status: 'uploaded',
+                                            lastVisited: expect.any(Number),
+                                        },
+                                    ])
+                                }
+
+                                // Shared cloud DB data
+                                // prettier-ignore
+                                {
+                                expect(await manager.collection('sharedList').findAllObjects({})).toEqual([
+                                    {
+                                        id: maybeInt(remoteListId),
+                                        type: 'page-link',
+                                        creator: userId,
+                                        title: listTitle,
+                                        description: null,
+                                        private: false,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([
+                                    {
+                                        id: maybeInt(remoteListEntryId),
+                                        creator: userId,
+                                        entryTitle: pdfTitle,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        fullTitle: pdfTitle
+                                    }
+                                ])
+                                expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        sharedList: null,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        locationScheme: LocationSchemeType.UploadStorage,
+                                        location: uploadId,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        sharedList: maybeInt(remoteListId),
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        originalUrl: fullBaseLocatorUrl,
+                                        locationScheme: LocationSchemeType.UploadStorage,
+                                        location: uploadId,
+                                    },
+                                ])
+                                expect(await manager.collection('sharedContentFingerprint').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: null,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        fingerprint: fingerprintA,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: null,
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        fingerprint: fingerprintB,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: maybeInt(remoteListId),
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        fingerprint: fingerprintA,
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        creator: TEST_USER.id,
+                                        sharedList: maybeInt(remoteListId),
+                                        normalizedUrl: normalizedBaseLocatorUrl,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        fingerprint: fingerprintB,
+                                    },
+                                ])
+                                expect(await manager.collection('sharedListKey').findAllObjects({})).toEqual([
+                                    {
+                                        id: maybeInt(collabKey),
+                                        disabled: false,
+                                        roleID: SharedListRoleID.ReadWrite,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListRole').findAllObjects({})).toEqual([
+                                    {
+                                        user: userId,
+                                        roleID: SharedListRoleID.Owner,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('sharedListRoleByUser').findAllObjects({})).toEqual([
+                                    {
+                                        user: userId,
+                                        roleID: SharedListRoleID.Owner,
+                                        sharedList: maybeInt(remoteListId),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                }
+
+                                // Personal cloud DB data
+                                const personalMetadataA: Array<
+                                    PersonalContentMetadata & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalContentMetadata')
+                                    .findAllObjects({})
+                                const personalListsA: Array<
+                                    PersonalList & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalList')
+                                    .findAllObjects({})
+                                const personalLocatorsA: Array<
+                                    PersonalContentLocator & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalContentLocator')
+                                    .findAllObjects({})
+
+                                // prettier-ignore
+                                {
+                                expect(personalListsA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        localId: expect.anything(), // TODO: Can we expect an actual value?
+                                        name: listTitle,
+                                        type: 'page-link',
+                                        isDeletable: true,
+                                        isNestable: true,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalMetadataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        canonicalUrl: fullBaseLocatorUrl,
+                                        title: pdfTitle,
+                                        lang: null,
+                                        description: null,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalContentRead').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        personalContentLocator: personalLocatorsA[0].id,
+                                        readWhen: expect.any(Number),
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        pageEnd: null,
+                                        pageMax: null,
+                                        pageTotal: null,
+                                        readDuration: null,
+                                        scrollEndPixel: null,
+                                        scrollMaxPixel: null,
+                                        scrollEndPercentage: null,
+                                        scrollMaxPercentage: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalLocatorsA).toEqual([
+                                    // Dummy/base locator
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        format: ContentLocatorFormat.PDF,
+                                        originalLocation: fullBaseLocatorUrl,
+                                        location: normalizedBaseLocatorUrl,
+                                        locationScheme: LocationSchemeType.NormalizedUrlV1,
+                                        locationType: ContentLocatorType.MemexCloud,
+                                        primary: true,
+                                        valid: true,
+                                        version: 0,
+                                        user: userId,
+                                        localId: null,
+                                        fingerprint: null,
+                                        fingerprintScheme: null,
+                                        contentSize: null,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        lastVisited: expect.anything(),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    },
+                                    // Locators for PDF's fingerprints
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        format: ContentLocatorFormat.PDF,
+                                        originalLocation: fullPageUrl,
+                                        location: normalizedPageUrl,
+                                        locationScheme: LocationSchemeType.FilesystemPathV1,
+                                        locationType: ContentLocatorType.Local,
+                                        status: null,
+                                        primary: true,
+                                        valid: true,
+                                        version: 0,
+                                        user: userId,
+                                        localId: localLocators[0].id,
+                                        fingerprint: fingerprintA,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        contentSize: null,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        lastVisited: expect.anything(),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    },
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        format: ContentLocatorFormat.PDF,
+                                        originalLocation: fullPageUrl,
+                                        location: normalizedPageUrl,
+                                        locationScheme: LocationSchemeType.FilesystemPathV1,
+                                        locationType: ContentLocatorType.Local,
+                                        status: null,
+                                        primary: true,
+                                        valid: true,
+                                        version: 0,
+                                        user: userId,
+                                        localId: localLocators[1].id,
+                                        fingerprint: fingerprintB,
+                                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                                        contentSize: null,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        lastVisited: expect.anything(),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    },
+                                    // Uploaded PDFs have the upload locator
+                                    {
+                                        id: expect.anything(),
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        format: ContentLocatorFormat.PDF,
+                                        originalLocation: fullBaseLocatorUrl,
+                                        location: uploadId,
+                                        locationScheme: LocationSchemeType.UploadStorage,
+                                        locationType: ContentLocatorType.Remote,
+                                        primary: true,
+                                        valid: true,
+                                        version: 0,
+                                        user: userId,
+                                        status: 'uploaded',
+                                        localId: localLocators[2].id,
+                                        fingerprint: null,
+                                        fingerprintScheme: null,
+                                        contentSize: null,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        lastVisited: expect.anything(),
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    },
+                                ])
+                                expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalList: personalListsA[0].id,
+                                        personalContentMetadata: personalMetadataA[0].id,
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        personalList: personalListsA[0].id,
+                                        remoteId: remoteListId,
+                                        user: userId,
+                                        private: false,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        sharedList: remoteListId,
+                                        type: 'page-link',
+                                        user: userId,
+                                        createdByDevice: data.DEVICE_ID_A,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                }
+                            },
+                        },
+                    ],
+                }
+            },
+        ),
+        backgroundIntegrationTest(
             'should add an annotation and store its metadata when the user creates a new annotation to their own page via the web UI',
             { skipConflictTests: true, skipSyncTests: true },
             () => makeAnnotationFromWebUiTest({ ownPage: true }),

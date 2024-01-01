@@ -1398,12 +1398,10 @@ class PageInfo {
 
         if (window.location.href.includes('twitter.com/messages')) {
             fullUrl = await this.normalizeTwitterCurrentFullURL()
-            return fullUrl
-        } else if (window.location.href.includes('mail.google.com/mail'))
-            return (fullUrl = await this.normalizeGmailFullURL(fullUrl))
-        else {
-            return fullUrl
+        } else if (window.location.href.includes('mail.google.com/mail')) {
+            fullUrl = await this.normalizeGmailFullURL(fullUrl)
         }
+        return fullUrl
     }
 
     getPageTitle = () => {

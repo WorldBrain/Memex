@@ -106,9 +106,9 @@ export class PageIndexingBackground {
             fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
             fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
-            getNow: () => number
             pkmSyncBG: PKMSyncBackgroundModule
             onPagePut?: PagePutHandler
+            getNow: () => number
         },
     ) {
         this.storage = new PageStorage({

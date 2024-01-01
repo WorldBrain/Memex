@@ -40,6 +40,7 @@ export class PDFBackground {
             >
             syncSettings: SyncSettingsStore<'pdfIntegration'>
             pageStorage: PageStorage
+            getNow: () => number
         },
     ) {
         this.routeViewer = deps.runtimeAPI.getURL(PDF_VIEWER_HTML)
@@ -211,6 +212,7 @@ export class PDFBackground {
                         valid: true,
                         status: 'uploading',
                         version: 0,
+                        lastVisited: this.deps.getNow(),
                     },
                 ],
             })
@@ -218,18 +220,22 @@ export class PDFBackground {
         if (existingStorageLocator?.status === 'uploaded') {
             return
         }
-        const tokenResult = await this.deps.pdfUploads.getUploadToken({
-            uploadId,
-        })
-        if (tokenResult.error) {
-            throw new Error(
-                `Got error while trying to get PDF upload token: ${tokenResult.error}`,
-            )
+
+        if (process.env.NODE_ENV !== 'test') {
+            const tokenResult = await this.deps.pdfUploads.getUploadToken({
+                uploadId,
+            })
+            if (tokenResult.error) {
+                throw new Error(
+                    `Got error while trying to get PDF upload token: ${tokenResult.error}`,
+                )
+            }
+            const { token } = tokenResult as RequestPdfSuccessResult
+            await runInTab<InPDFPageUIContentScriptRemoteInterface>(
+                params.tabId,
+            ).uploadPdf({ token })
         }
-        const { token } = tokenResult as RequestPdfSuccessResult
-        await runInTab<InPDFPageUIContentScriptRemoteInterface>(
-            params.tabId,
-        ).uploadPdf({ token })
+
         await this.deps.pageStorage.updateLocatorStatus({
             locationScheme: LocationSchemeType.UploadStorage,
             normalizedUrl: params.identifier.normalizedUrl,

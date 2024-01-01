@@ -327,9 +327,10 @@ export function createBackgroundModules(options: {
         storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
         syncSettings: syncSettingsStore,
-        pdfUploads,
         generateUploadId: () => generateServerId('uploadAuditLogEntry'),
         pageStorage: pages.storage,
+        pdfUploads,
+        getNow,
     })
     pages.options.onPagePut = pdfBg.handlePagePut
 
