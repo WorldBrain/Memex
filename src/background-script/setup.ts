@@ -331,6 +331,7 @@ export function createBackgroundModules(options: {
         pageStorage: pages.storage,
         pdfUploads,
         getNow,
+        fetch,
     })
     pages.options.onPagePut = pdfBg.handlePagePut
 

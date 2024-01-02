@@ -40,6 +40,7 @@ export class PDFBackground {
             >
             syncSettings: SyncSettingsStore<'pdfIntegration'>
             pageStorage: PageStorage
+            fetch: typeof fetch
             getNow: () => number
         },
     ) {
@@ -233,9 +234,13 @@ export class PDFBackground {
                 )
             }
             const { token } = tokenResult as RequestPdfSuccessResult
-            await runInTab<InPDFPageUIContentScriptRemoteInterface>(
-                params.tabId,
-            ).uploadPdf({ token })
+            const { objectUrl } = await runInTab<
+                InPDFPageUIContentScriptRemoteInterface
+            >(params.tabId).getObjectUrlForPdf()
+            const response = await this.deps.fetch(objectUrl)
+            const content = await response.blob()
+            await this.deps.pdfUploads.uploadPdfContent({ token, content })
+            URL.revokeObjectURL(objectUrl) // TODO: Need to remove this when we move to MV3
         }
 
         await this.deps.pageStorage.updateLocatorStatus({
