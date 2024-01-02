@@ -3860,6 +3860,13 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         // Uploaded PDFs need to have temporary access URLs fetched
         if (uploadId != null) {
+            // Ignore multi-clicks while it's loading
+            if (
+                previousState.searchResults.uploadedPdfLinkLoadState ===
+                'running'
+            ) {
+                return
+            }
             await executeUITask(
                 this,
                 (taskState) => ({
