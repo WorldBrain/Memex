@@ -223,6 +223,10 @@ export class PDFBackground {
         if (existingStorageLocator?.status === 'uploaded') {
             return
         }
+        const contentScriptRPC = runInTab<
+            InPDFPageUIContentScriptRemoteInterface
+        >(params.tabId)
+        await contentScriptRPC.setPdfUploadState(true)
 
         if (process.env.NODE_ENV !== 'test') {
             const tokenResult = await this.deps.pdfUploads.getUploadToken({
@@ -234,9 +238,7 @@ export class PDFBackground {
                 )
             }
             const { token } = tokenResult as RequestPdfSuccessResult
-            const { objectUrl } = await runInTab<
-                InPDFPageUIContentScriptRemoteInterface
-            >(params.tabId).getObjectUrlForPdf()
+            const { objectUrl } = await contentScriptRPC.getObjectUrlForPdf()
             const response = await this.deps.fetch(objectUrl)
             const content = await response.blob()
             await this.deps.pdfUploads.uploadPdfContent({ token, content })
@@ -248,6 +250,7 @@ export class PDFBackground {
             normalizedUrl: params.identifier.normalizedUrl,
             status: 'uploaded',
         })
+        await contentScriptRPC.setPdfUploadState(false)
     }
 
     setupRequestInterceptors = async () => {

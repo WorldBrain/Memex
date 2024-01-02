@@ -103,6 +103,9 @@ Global.main({
             const blob = new Blob([content])
             return { objectUrl: URL.createObjectURL(blob) }
         },
+        setPdfUploadState: async (isUploading) => {
+            // TODO: Do something with uploading state
+        },
     })
     await inPageUI.showSidebar()
 })
