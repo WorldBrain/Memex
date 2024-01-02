@@ -891,6 +891,11 @@ export async function main(
                 getHighlightColorsSettings: () => getHighlightColorSettings(),
                 saveHighlightColorsSettings: (newState) =>
                     saveHighlightColorSettings(newState),
+                openPDFinViewer: async (originalPageURL) => {
+                    await contentScriptsBG.openPdfInViewer({
+                        fullPageUrl: originalPageURL,
+                    })
+                },
             })
             components.tooltip?.resolve()
         },

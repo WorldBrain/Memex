@@ -191,7 +191,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 <PopoutBox
                     targetElementRef={this.autoAddButtonRef?.current}
                     placement="bottom-end"
-                    width="150px"
+                    width="320px"
                     closeComponent={() =>
                         this.setState({ showAutoAddMenu: false })
                     }

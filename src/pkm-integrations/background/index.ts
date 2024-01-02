@@ -540,6 +540,7 @@ export class PKMSyncBackgroundModule {
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
+                console.log('createpage update', item.data)
                 annotationsSection = this.annotationObjectDefault(
                     item.data.annotationId,
                     item.data.body
@@ -646,6 +647,13 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
+            console.log(
+                'annotationcreate',
+                item.data,
+                moment(item.data.createdWhen).format(
+                    `${syncDateFormat} hh:mma`,
+                ),
+            )
             const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
@@ -1022,6 +1030,7 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
     ) {
+        console.log('annotation', creationDate)
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = body ? `> ${body}\n\n` : ''
