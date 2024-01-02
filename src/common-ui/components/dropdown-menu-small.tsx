@@ -20,13 +20,13 @@ interface ThemeProps {
 export interface Props<T extends MenuItemProps = MenuItemProps> {
     isOpen?: boolean
     toggleOpen?: () => void
-    menuItems: T[]
+    menuItems: MenuItemProps[]
     btnChildren?: React.ReactNode
-    onMenuItemClick?: (itemProps: T, index?) => void
+    onMenuItemClick?: (item: T) => void
     theme?: ThemeProps
     keepSelectedState?: boolean
-    initSelectedIndex?: number
-    selectedState?: number
+    initSelectedItem?: string
+    selectedState?: string
     btnId?: string
     menuTitle?: string
     width?: string
@@ -37,20 +37,21 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
 
 interface State {
     isOpen: boolean
-    selected: number
+    selected: MenuItemProps
     isOpened: boolean
 }
 
 export class DropdownMenuBtn extends React.PureComponent<Props, State> {
-    static defaultProps: Partial<Props> = { initSelectedIndex: 0 }
+    static defaultProps: Partial<Props> = { initSelectedItem: null }
 
     private menuRef = React.createRef<HTMLDivElement>()
 
     state: State = {
         isOpen: false,
-        selected: this.props.keepSelectedState
-            ? this.props.initSelectedIndex
-            : -1,
+        selected:
+            this.props.menuItems.find(
+                (item) => item.id === this.props.initSelectedItem,
+            ) || this.props.menuItems[0],
         isOpened: false,
     }
 
@@ -85,54 +86,56 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 
     private handleItemClick: (
-        props: MenuItemProps,
-        index: number,
-    ) => React.MouseEventHandler = (props, index) => (e) => {
-        if (props.isDisabled) {
+        item: MenuItemProps,
+    ) => React.MouseEventHandler = (item) => (e) => {
+        if (item.isDisabled) {
             e.preventDefault()
             return
         }
         this.setState({
             isOpen: this.props.keepSelectedState,
-            selected: index,
+            selected: item,
             isOpened: false,
         })
-        this.props.onMenuItemClick(props, index)
+        this.props.onMenuItemClick(item)
     }
 
     private renderMenuItems() {
-        if (this.props.selectedState === 1) {
-            this.setState({
-                selected: 1,
-            })
-        }
+        // if (this.props.selectedState === 1) {
+        //     this.setState({
+        //         selected: 1,
+        //     })
+        // }
 
         return (
             <MenuItemContainerUnfolded isOpen={this.state.isOpened}>
-                {this.props.menuItems.map((props, i) => (
+                {this.props.menuItems.map((item) => (
                     <MenuItem
-                        key={i}
-                        onClick={this.handleItemClick(props, i)}
-                        isSelected={this.state.selected === i}
+                        onClick={this.handleItemClick(item)}
+                        isSelected={this.state.selected.id === item.id}
                         backgroundColor={this.props.backgroundColor}
                         elementHeight={this.props.elementHeight}
                         isOpened={this.state.isOpened}
-                        isDisabled={props.isDisabled}
+                        isDisabled={item.isDisabled}
                     >
-                        <MenuItemName isSelected={this.state.selected === i}>
+                        <MenuItemName
+                            isSelected={this.state.selected.id === item.id}
+                        >
                             <MenuItemBox>
                                 <MenuItemName
-                                    isSelected={this.state.selected === i}
+                                    isSelected={
+                                        this.state.selected.id === item.id
+                                    }
                                 >
-                                    {props.name}
+                                    {item.name}
                                 </MenuItemName>
-                                {props.info && (
-                                    <MenuItemInfo isDisabled={props.isDisabled}>
-                                        {props.info}
+                                {item.info && (
+                                    <MenuItemInfo isDisabled={item.isDisabled}>
+                                        {item.info}
                                     </MenuItemInfo>
                                 )}
                             </MenuItemBox>
-                            {this.state.selected === i && (
+                            {this.state.selected.id === item.id && (
                                 <Icon
                                     filePath="check"
                                     color="prime1"
@@ -162,9 +165,11 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
     }
 
     render() {
-        const selectedMenuItem = this.props.menuItems[
-            this.props.selectedState || this.state.selected
-        ]
+        const selectedMenuItem = this.props.menuItems.find(
+            (item) =>
+                item.id ===
+                (this.state.selected.id || this.props.selectedState),
+        )
 
         return (
             <ThemeProvider theme={this.theme}>
@@ -184,7 +189,6 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                 >
                     {' '}
                     <MenuItem
-                        key={this.state.selected}
                         onClick={() => {
                             this.setState({
                                 isOpened: true,

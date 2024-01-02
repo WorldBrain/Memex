@@ -692,10 +692,11 @@ export async function main(
                 }
             }
         },
-        askAI: () => (highlightedText: string) => {
+        askAI: () => (highlightedText: string, prompt: string) => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText,
+                prompt,
             })
             inPageUI.hideTooltip()
         },
@@ -890,6 +891,11 @@ export async function main(
                 getHighlightColorsSettings: () => getHighlightColorSettings(),
                 saveHighlightColorsSettings: (newState) =>
                     saveHighlightColorSettings(newState),
+                openPDFinViewer: async (originalPageURL) => {
+                    await contentScriptsBG.openPdfInViewer({
+                        fullPageUrl: originalPageURL,
+                    })
+                },
             })
             components.tooltip?.resolve()
         },

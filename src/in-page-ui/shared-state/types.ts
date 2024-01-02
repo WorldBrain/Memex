@@ -56,6 +56,7 @@ export interface SidebarActionOptions {
     listId?: number
     videoRangeTimestamps?: number[]
     imageData?: string
+    prompt?: string
 }
 
 export type InPageErrorType = 'annotation' // Add more specific error types here
