@@ -172,7 +172,7 @@ export class PDFBackground {
     }
 
     handlePagePut: PagePutHandler = async (event) => {
-        if (event.isNew && event.isPdf && event.tabId) {
+        if (event.isNew && event.isPdf && event.isLocalPdf && event.tabId) {
             // TODO: Set up PDF auto-upload as a sync setting
             // const isAutoUploadEnabled = await this.deps.syncSettings.pdfIntegration.get(
             //     'shouldAutoUpload',

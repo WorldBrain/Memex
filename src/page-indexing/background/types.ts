@@ -50,6 +50,7 @@ export enum StoredContentType {
 export type PagePutHandler = (event: {
     identifier: ContentIdentifier
     isNew: boolean
-    isPdf: boolean
+    isPdf?: boolean
+    isLocalPdf?: boolean
     tabId?: number
 }) => Promise<void>

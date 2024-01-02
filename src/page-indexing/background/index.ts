@@ -602,6 +602,7 @@ export class PageIndexingBackground {
             },
             isNew: !pageData.isExisting,
             tabId: props.tabId,
+            isLocalPdf: isPdf && pageData.domain === 'memex.cloud', // TODO: Set up more robust way to derive this
             isPdf,
         })
 
