@@ -31,6 +31,10 @@ const limitSuggestionsStorageLength = 25
 export default class CustomListBackground {
     storage: CustomListStorage
     remoteFunctions: RemoteCollectionsInterface
+    serverToTalkTo =
+        process.env.NODE_ENV === 'production'
+            ? 'http://localhost:11922'
+            : 'http://localhost:11923'
 
     private localStorage: BrowserSettingsStore<CollectionsSettings>
 
@@ -226,7 +230,7 @@ export default class CustomListBackground {
         fullUrl?: string,
     ) => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
         const results = await backend.findSimilar(currentPageContent, fullUrl)
 

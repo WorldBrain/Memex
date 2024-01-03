@@ -77,8 +77,13 @@ export async function isPkmSyncEnabled() {
 export async function getFolder(pkmToSync: string) {
     const pkmSyncKey = await getPkmSyncKey()
 
+    const serverToTalkTo =
+        process.env.NODE_ENV === 'production'
+            ? 'http://localhost:11922'
+            : 'http://localhost:11923'
+
     const getFolderPath = async (pkmToSync: string) => {
-        const response = await fetch('http://localhost:11922/set-directory', {
+        const response = await fetch(`${serverToTalkTo}/set-directory`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,6 +97,8 @@ export async function getFolder(pkmToSync: string) {
             throw new Error(`HTTP error! status: ${response.status}`)
         }
         const directoryPath = await response.text()
+
+        console.log('directoryPath', directoryPath)
         return directoryPath
     }
 

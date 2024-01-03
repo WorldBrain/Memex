@@ -346,8 +346,8 @@ export default class AnnotationStorage extends StorageModule {
         })
 
         // Send to PKM Sync
-        if (await isPkmSyncEnabled()) {
-            try {
+        try {
+            if (await isPkmSyncEnabled()) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
                 const listData = await this.options.storageManager
@@ -395,8 +395,8 @@ export default class AnnotationStorage extends StorageModule {
                             listNames: listNames,
                         }),
                 )
-            } catch (e) {}
-        }
+            }
+        } catch (e) {}
     }
 
     async ensureAnnotInList(
@@ -420,8 +420,8 @@ export default class AnnotationStorage extends StorageModule {
 
         await this.operation('deleteAnnotationFromList', { listId, url })
 
-        if (await isPkmSyncEnabled()) {
-            try {
+        try {
+            if (await isPkmSyncEnabled()) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
                 const listData = await this.options.storageManager
@@ -454,8 +454,8 @@ export default class AnnotationStorage extends StorageModule {
                     this.options.pkmSyncBG,
                     this.options.imageSupport,
                 )
-            } catch (e) {}
-        }
+            }
+        } catch (e) {}
     }
 
     /**
@@ -555,7 +555,7 @@ export default class AnnotationStorage extends StorageModule {
                     pageTitle: pageTitle,
                     body: body ?? '',
                     comment: comment ?? '',
-                    createdWhen: Math.floor(createdWhen.getTime() / 1000),
+                    createdWhen: createdWhen.getTime(),
                     color: color ?? null,
                     pageCreatedWhen: pageDate,
                     pageUrl: pageDataStorage?.fullUrl ?? pageUrl,
@@ -626,7 +626,7 @@ export default class AnnotationStorage extends StorageModule {
         userId?: string,
     ) {
         try {
-            if (!(await isPkmSyncEnabled())) {
+            if (await isPkmSyncEnabled()) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
 
@@ -679,14 +679,13 @@ export default class AnnotationStorage extends StorageModule {
                         (annotationDataForPKMSyncUpdate.body ?? '') +
                         (comment ? ' ' + comment : ''),
                 }
+
                 await createRabbitHoleEntry(
                     annotationDataForRabbitHole,
                     this.options.pkmSyncBG,
                 )
             }
         } catch (e) {}
-
-        console.log('edit', url, comment, color, lastEdited)
 
         return this.operation('editAnnotation', {
             url,

@@ -246,6 +246,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         if (event.action === 'show_page_summary') {
             await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
+                prompt: event.prompt,
             })
         } else if (
             event.action === 'create_youtube_timestamp_with_AI_summary'

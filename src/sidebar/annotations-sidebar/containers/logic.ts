@@ -359,6 +359,9 @@ export class SidebarContainerLogic extends UILogic<
             suggestionsResults: [],
             suggestionsResultsLoadState: 'pristine',
             desktopAppDownloadLink: null,
+            showFeedSourcesMenu: false,
+            existingSourcesOption: 'pristine',
+            localFoldersList: [],
         }
     }
 
@@ -835,6 +838,7 @@ export class SidebarContainerLogic extends UILogic<
     private checkRabbitHoleOnboardingStage = async () => {
         const rabbitHoleBetaAccess = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
+            this.options.contentScriptsBG,
         )
 
         this.emitMutation({
@@ -852,7 +856,6 @@ export class SidebarContainerLogic extends UILogic<
             rabbitHoleBetaAccess === 'granted' ||
             rabbitHoleBetaAccess === 'grantedBcOfSubscription'
         ) {
-            console.log('granted', rabbitHoleBetaAccess)
             const url = await downloadMemexDesktop()
 
             this.emitMutation({
@@ -1460,7 +1463,11 @@ export class SidebarContainerLogic extends UILogic<
 
         const feedsNode = Array.from(
             xmlDoc.getElementsByTagName('outline'),
-        ).filter((node) => node.getAttribute('type') === 'rss')
+        ).filter(
+            (node) =>
+                node.getAttribute('type') === 'rss' ||
+                node.getAttribute('type') === 'atom',
+        )
         const feedSources = Array.from(feedsNode).map((node) => ({
             feedTitle: node.getAttribute('title'),
             feedUrl: (
@@ -1476,7 +1483,6 @@ export class SidebarContainerLogic extends UILogic<
             ...previousState.existingFeedSources,
         ]
 
-        console.log('allFeedSources', allFeedSources)
         this.emitMutation({
             existingFeedSources: {
                 $set: allFeedSources,
@@ -1509,16 +1515,12 @@ export class SidebarContainerLogic extends UILogic<
                             (source) => source.feedUrl === inputFeedUrl,
                         ))
                 ) {
-                    console.log('feedurlempty')
                     return
                 }
                 let response
-                console.log('response1')
                 response = await this.options.pkmSyncBG.checkFeedSource(
                     inputFeedUrl,
                 )
-
-                console.log('response', response)
 
                 let title = response?.feedTitle ?? null
                 let feedUrl = response?.feedUrl
@@ -1553,15 +1555,11 @@ export class SidebarContainerLogic extends UILogic<
                     updatedSource.feedUrl &&
                     updatedSource.feedTitle
                 ) {
-                    console.log(existingSourceIndex)
                     updatedSources.unshift(updatedSource)
                 } else {
                     // If the source already exists, do not add it again
                     return
                 }
-
-                console.log('updatedSource', updatedSource)
-                console.log('updatedSourceS', updatedSources)
 
                 this.emitMutation({
                     existingFeedSources: { $set: updatedSources },
@@ -1602,11 +1600,32 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const feedSources = await this.options.pkmSyncBG.loadFeedSources()
 
-        console.log('feedSources', feedSources)
-
         this.emitMutation({
             existingFeedSources: { $set: feedSources },
         })
+    }
+    removeFeedSource: EventHandler<'removeFeedSource'> = async ({
+        event,
+        previousState,
+    }) => {
+        const feedUrl = event.feedUrl
+
+        let currentSources = previousState.existingFeedSources
+
+        // Find the index of the folder with the id = event.id
+        const feedIndex = currentSources.findIndex(
+            (folder) => folder.feedUrl === feedUrl,
+        )
+
+        // If the folder is found, remove it from the array
+        if (feedIndex !== -1) {
+            currentSources.splice(feedIndex, 1)
+        }
+
+        this.emitMutation({
+            existingFeedSources: { $set: currentSources },
+        })
+        await this.options.pkmSyncBG.removeFeedSource(feedUrl)
     }
 
     validateSpaceName(name: string, listIdToSkip?: number) {
@@ -1675,7 +1694,6 @@ export class SidebarContainerLogic extends UILogic<
                     $set: 'downloadStarted',
                 },
             })
-            console.log('downloadStarted')
             const desktopAppRunning = await this.checkIfDesktopAppIsRunning()
             if (desktopAppRunning) {
                 this.emitMutation({
@@ -1751,6 +1769,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const onboardingStage = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
+            this.options.contentScriptsBG,
         )
 
         this.emitMutation({
@@ -2658,6 +2677,9 @@ export class SidebarContainerLogic extends UILogic<
             loadState: { $set: 'running' },
         })
 
+        const selectedText =
+            highlightedText || previousState?.selectedTextAIPreview
+
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
@@ -2678,10 +2700,6 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
 
-        let contentType = fullPageUrl?.includes('youtube.com/watch')
-            ? 'video transcript'
-            : 'text'
-
         let queryPrompt = prompt
 
         if (!previousState.isTrial) {
@@ -2690,9 +2708,9 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             selectedTextAIPreview: {
                 $set:
-                    highlightedText && outputLocation !== 'chapterSummary'
-                        ? highlightedText
-                        : '',
+                    selectedText?.length && outputLocation !== 'chapterSummary'
+                        ? selectedText
+                        : null,
             },
             loadState: {
                 $set:
@@ -2715,9 +2733,9 @@ export class SidebarContainerLogic extends UILogic<
         let isContentSearch = false
         textToAnalyse = textAsAlternative
             ? textAsAlternative
-            : highlightedText
-            ? highlightedText
-            : undefined
+            : selectedText
+            ? selectedText
+            : null
 
         if (previousState.fetchLocalHTML) {
             textToAnalyse = document.title + document.body.innerText
@@ -2743,17 +2761,34 @@ export class SidebarContainerLogic extends UILogic<
                 ),
             )
 
+            if (results.length === 0) {
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                    pageSummary: { $set: 'No references to analyse' },
+                })
+                return
+            }
+
             let extractedData
 
             if (previousState.activeAITab === 'ExistingKnowledge') {
                 this.emitMutation({
                     activeSuggestionsTab: { $set: 'MySuggestions' },
                 })
+
                 extractedData = results.filter((result) => {
                     return (
                         result.creatorId ===
-                        previousState.currentUserReference.id
+                            previousState.currentUserReference.id ||
+                        result.creatorId === '1'
                     )
+                })
+
+                extractedData = extractedData.map((result) => {
+                    return {
+                        pageTitle: result.pageTitle,
+                        contentText: result.contentText,
+                    }
                 })
             }
             if (previousState.activeAITab === 'InFollowedFeeds') {
@@ -2778,8 +2813,6 @@ export class SidebarContainerLogic extends UILogic<
 
             textToAnalyse = JSON.stringify(extractedData)
             isContentSearch = true
-
-            console.log('extractedData', results)
 
             await this.updateSuggestionResults(results)
         }
@@ -3106,7 +3139,9 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        let prompt = 'Summarise this for me: '
+        console.log('askAIviaInPageInteractions', event)
+
+        let prompt = event.prompt ?? 'Tell me the key takeaways: '
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: {
@@ -3146,12 +3181,36 @@ export class SidebarContainerLogic extends UILogic<
             summaryModeActiveTab: { $set: event.tab },
         })
     }
+    setExistingSourcesOptions: EventHandler<
+        'setExistingSourcesOptions'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            existingSourcesOption: { $set: event },
+        })
+    }
+    setFeedSourcesMenu: EventHandler<'setFeedSourcesMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.showFeedSourcesMenu) {
+            this.emitMutation({
+                existingSourcesOption: { $set: 'pristine' },
+            })
+        }
+
+        this.emitMutation({
+            showFeedSourcesMenu: { $set: !previousState.showFeedSourcesMenu },
+        })
+    }
     setActiveAITab: EventHandler<'setActiveAITab'> = async ({
         event,
         previousState,
     }) => {
         if (event.tab !== 'ThisPage') {
             await this.checkRabbitHoleOnboardingStage()
+            this.emitMutation({
+                selectedTextAIPreview: { $set: null },
+            })
         }
         this.emitMutation({
             activeAITab: { $set: event.tab },
@@ -3167,7 +3226,11 @@ export class SidebarContainerLogic extends UILogic<
             this.handleMouseUpToTriggerRabbitHole,
         )
 
-        this.emitMutation({ activeTab: { $set: event.tab } })
+        this.emitMutation({
+            activeTab: { $set: event.tab },
+            showFeedSourcesMenu: { $set: false },
+            existingSourcesOption: { $set: 'pristine' },
+        })
 
         // Ensure in-page selectedList state only applies when the spaces tab is active
         const returningToSelectedListMode =
@@ -3191,14 +3254,13 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
-            console.log('waaaa')
             this.renderOwnHighlights(previousState)
         } else if (
             event.tab === 'summary' &&
             ((event.prompt && event.prompt?.length > 0) ||
                 event.textToProcess?.length > 0)
         ) {
-            if (previousState.pageSummary.length === 0) {
+            if (previousState.pageSummary?.length === 0) {
                 let isPagePDF = window.location.href.includes(
                     '/pdfjs/viewer.html?',
                 )
@@ -3270,6 +3332,7 @@ export class SidebarContainerLogic extends UILogic<
                     skipProtocolTrim: true,
                 }),
             )
+
             if (results.length === 0) {
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'success' },
@@ -3281,6 +3344,24 @@ export class SidebarContainerLogic extends UILogic<
                 })
                 return
             }
+
+            results = results.reduce(
+                (acc: SuggestionCard[], curr: SuggestionCard) => {
+                    const existing = acc.find(
+                        (item) => item.fullUrl === curr.fullUrl,
+                    )
+                    if (!existing) {
+                        return acc.concat([curr])
+                    } else if (existing.distance > curr.distance) {
+                        return acc
+                            .filter((item) => item.fullUrl !== curr.fullUrl)
+                            .concat([curr])
+                    } else {
+                        return acc
+                    }
+                },
+                [],
+            )
 
             await this.updateSuggestionResults(results)
 
@@ -3294,21 +3375,85 @@ export class SidebarContainerLogic extends UILogic<
 
     async listenToTextHighlightSuggestions() {
         const selectedText = window.getSelection().toString().trim()
-        if (selectedText.length > 0) {
+        if (selectedText?.length > 0) {
             this.emitMutation({
                 suggestionsResultsLoadState: { $set: 'running' },
             })
-            const results = await this.options.customListsBG.findSimilarBackground(
+            let results = await this.options.customListsBG.findSimilarBackground(
                 selectedText,
                 normalizeUrl(this.previousState.fullPageUrl, {
                     skipProtocolTrim: true,
                 }),
             )
+
+            results = results.reduce(
+                (acc: SuggestionCard[], curr: SuggestionCard) => {
+                    const existing = acc.find(
+                        (item) => item.fullUrl === curr.fullUrl,
+                    )
+                    if (!existing) {
+                        return acc.concat([curr])
+                    } else if (existing.distance > curr.distance) {
+                        return acc
+                            .filter((item) => item.fullUrl !== curr.fullUrl)
+                            .concat([curr])
+                    } else {
+                        return acc
+                    }
+                },
+                [],
+            )
             await this.updateSuggestionResults(results)
         }
     }
 
-    async updateSuggestionResults(resultsInput: SuggestionCard[]) {
+    openLocalFile: EventHandler<'openLocalFile'> = async ({ event }) => {
+        await this.options.pkmSyncBG.openLocalFile(event.path)
+    }
+    addLocalFolder: EventHandler<'addLocalFolder'> = async ({
+        previousState,
+    }) => {
+        const folder = await this.options.pkmSyncBG.addLocalFolder()
+
+        let localFolders = previousState.localFoldersList
+        localFolders.unshift(folder)
+
+        this.emitMutation({
+            localFoldersList: { $set: localFolders },
+        })
+    }
+    removeLocalFolder: EventHandler<'removeLocalFolder'> = async ({
+        previousState,
+        event,
+    }) => {
+        let folderId = event.id
+        let localFolders = previousState.localFoldersList
+
+        // Find the index of the folder with the id = event.id
+        const folderIndex = localFolders.findIndex(
+            (folder) => folder.id === folderId,
+        )
+
+        // If the folder is found, remove it from the array
+        if (folderIndex !== -1) {
+            localFolders.splice(folderIndex, 1)
+        }
+
+        this.emitMutation({
+            localFoldersList: { $set: localFolders },
+        })
+
+        await this.options.pkmSyncBG.removeLocalFolder(folderId)
+    }
+    getLocalFolders: EventHandler<'getLocalFolders'> = async ({}) => {
+        const localFolders = await this.options.pkmSyncBG.getLocalFolders()
+
+        this.emitMutation({
+            localFoldersList: { $set: localFolders },
+        })
+    }
+
+    async updateSuggestionResults(results: SuggestionCard[]) {
         const resultsArray: SuggestionCard[] = []
         const user = await this.options.authBG.getCurrentUser()
         const userId = user?.id
@@ -3323,25 +3468,6 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         // Filter the resultsArray to only have one item from the same URL, and take the one with the lowest "distance" value
-        const results = resultsInput.reduce(
-            (acc: SuggestionCard[], curr: SuggestionCard) => {
-                const existing = acc.find(
-                    (item) => item.fullUrl === curr.fullUrl,
-                )
-                if (!existing) {
-                    return acc.concat([curr])
-                } else if (existing.distance > curr.distance) {
-                    return acc
-                        .filter((item) => item.fullUrl !== curr.fullUrl)
-                        .concat([curr])
-                } else {
-                    return acc
-                }
-            },
-            [],
-        )
-
-        console.log('results    ', results)
 
         if (results) {
             for (let result of Object.values(results)) {
@@ -3420,6 +3546,57 @@ export class SidebarContainerLogic extends UILogic<
                             contentType: result.contentType,
                             creatorId: userId,
                             spaces: pageListData ?? null,
+                        }
+                    } else if (result.contentType === 'pdf') {
+                        const pageListData = []
+
+                        pageData = await this.options.customListsBG.findPageByUrl(
+                            normalizeUrl(result.fullUrl),
+                        )
+
+                        if (pageData) {
+                            pageToDisplay = {
+                                fullUrl: result.path,
+                                pageTitle: pageData?.fullTitle,
+                                contentText: result.contentText,
+                                contentType: result.contentType,
+                                creatorId: userId,
+                                spaces: pageListData ?? null,
+                            }
+                        } else {
+                            pageToDisplay = {
+                                fullUrl: result.path,
+                                pageTitle: result?.pageTitle,
+                                contentText: result.contentText,
+                                contentType: result.contentType,
+                                creatorId: userId,
+                                spaces: pageListData ?? null,
+                            }
+                        }
+                    } else if (result.contentType === 'markdown') {
+                        const sourceApplication = result.sourceApplication
+
+                        let url = ''
+                        let file = result.path.split(
+                            `${result.topLevelFolder}/`,
+                        )[1]
+                        if (sourceApplication === 'obsidian') {
+                            url =
+                                `obsidian://open?vault=${result.topLevelFolder}&file=` +
+                                encodeURIComponent(file)
+                        }
+                        if (sourceApplication === 'local') {
+                            url = result.path
+                        }
+
+                        pageToDisplay = {
+                            fullUrl: url,
+                            pageTitle: result?.pageTitle,
+                            contentText: result.contentText,
+                            contentType: result.contentType,
+                            sourceApplication: sourceApplication,
+                            creatorId: userId,
+                            spaces: null,
                         }
                     } else if (result.contentType === 'annotation') {
                         try {

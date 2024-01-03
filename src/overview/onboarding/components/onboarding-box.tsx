@@ -28,6 +28,8 @@ const FlexLayout = styled.div`
     align-items: center;
     overflow: hidden;
     background-color: ${(props) => props.theme.colors.black};
+    width: 100vw;
+    position: absolute;
 `
 
 export default OnboardingBox

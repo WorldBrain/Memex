@@ -4,13 +4,14 @@ import * as Raven from 'src/util/raven'
 import { EventEmitter } from 'events'
 
 import type BackupStorage from '../storage'
-import { BackupBackend } from '../backend'
+import { BackupBackend, MemexLocalBackend } from '../backend'
 import { ObjectChangeBatch } from '../backend/types'
 import { isExcludedFromBackup } from '../utils'
 import { DexieUtilsPlugin, BackupPlugin } from 'src/search/plugins'
 import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/utils'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from '../types'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
 const pickBy = require('lodash/pickBy')
 
@@ -28,6 +29,7 @@ export default class BackupProcedure {
     storageManager: Storex
     storage: BackupStorage
     backend: BackupBackend
+    pkmBackend: MemexLocalBackend
     currentSchemaVersion: number
     localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
 
@@ -55,6 +57,10 @@ export default class BackupProcedure {
         this.storageManager = storageManager
         this.storage = storage
         this.backend = backend
+        console.log(LOCAL_SERVER_ROOT)
+        this.pkmBackend = new MemexLocalBackend({
+            url: LOCAL_SERVER_ROOT,
+        })
         this.currentSchemaVersion = getCurrentSchemaVersion(
             storageManager,
         ).getTime()
@@ -246,7 +252,7 @@ export default class BackupProcedure {
         info: BackupProgressInfo,
         events,
     ) => {
-        // console.log('preparing batch')
+        console.log('preparing batch')
         for (const change of batch.changes) {
             const object = pickBy(
                 await this.storageManager.operation(
@@ -272,7 +278,8 @@ export default class BackupProcedure {
             const shouldStoreBlobs = !!(await this.localBackupSettings.get(
                 'saveBlobs',
             ))
-            await this.backend.backupChanges({
+
+            await this.pkmBackend.backupChanges({
                 changes: batch.changes,
                 events,
                 currentSchemaVersion: this.currentSchemaVersion,
