@@ -600,9 +600,9 @@ export class PageIndexingBackground {
                 normalizedUrl: pageData.url,
                 fullUrl: pageData.fullUrl,
             },
+            isLocalPdf: isPdf && pageData.isLocalPdf,
             isNew: !pageData.isExisting,
             tabId: props.tabId,
-            isLocalPdf: isPdf && pageData.domain === 'memex.cloud', // TODO: Set up more robust way to derive this
             isPdf,
         })
 
@@ -639,13 +639,14 @@ export class PageIndexingBackground {
 
     private async processPageDataFromTab(
         props: PageCreationProps,
-    ): Promise<PipelineRes & { isExisting?: boolean }> {
+    ): Promise<PipelineRes & { isExisting?: boolean; isLocalPdf?: boolean }> {
         if (props.tabId == null) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
             )
         }
         const isPdf = doesUrlPointToPdf(props.fullUrl)
+        let isLocalPdf = false
 
         const existingPage = await this.storage.getPage(props.fullUrl)
         if (existingPage) {
@@ -666,9 +667,14 @@ export class PageIndexingBackground {
             )[0]
 
             // Only take the original location for remote PDFs
-            //  - local PDFs use an in-memory location, which we'd rather use the memex.cloud/ct/ for URL data
-            if (!latestLocator.originalLocation.startsWith('blob:')) {
+            //  - local PDFs use an in-memory blob OR file URL location, which we'd rather use the memex.cloud/ct/ for URL data
+            if (
+                !latestLocator.originalLocation.startsWith('blob:') &&
+                !latestLocator.originalLocation.startsWith('file:')
+            ) {
                 originalUrl = latestLocator.originalLocation
+            } else {
+                isLocalPdf = true
             }
         }
 
@@ -693,12 +699,12 @@ export class PageIndexingBackground {
             )
         }
 
-        return pageData
+        return { ...pageData, isLocalPdf }
     }
 
     private async processPageDataFromUrl(
         props: PageCreationProps,
-    ): Promise<PipelineRes & { isExisting?: boolean }> {
+    ): Promise<PipelineRes & { isExisting?: boolean; isLocalPdf?: boolean }> {
         const pageDoc: PageDoc = {
             url: props.fullUrl,
             originalUrl: props.fullUrl,
