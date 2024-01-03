@@ -5502,6 +5502,12 @@ const TopAreaContainer = styled.div`
     width: fill-available;
     z-index: 1;
     padding: 5px 10px;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
 
