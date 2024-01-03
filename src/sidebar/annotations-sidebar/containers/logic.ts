@@ -3141,7 +3141,12 @@ export class SidebarContainerLogic extends UILogic<
 
         console.log('askAIviaInPageInteractions', event)
 
-        let prompt = event.prompt ?? 'Tell me the key takeaways: '
+        let prompt =
+            event.prompt?.length > 0
+                ? event.prompt
+                : 'Tell me the key takeaways: '
+        let highlightedText =
+            event.textToProcess?.length > 0 ? event.textToProcess : null
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: {
