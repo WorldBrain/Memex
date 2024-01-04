@@ -2644,12 +2644,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         customPageTitle: null,
                                     },
                                 )
-                                await contentSharing.waitForPageLinkCreation(
-                                    tabInfo,
-                                    {
-                                        fullPageUrl,
-                                    },
-                                )
+                                await contentSharing.waitForPageLinkCreation()
 
                                 // Local DB data should be created first
                                 // prettier-ignore
@@ -5281,12 +5276,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         customPageTitle: null,
                                     },
                                 )
-                                await contentSharing.waitForPageLinkCreation(
-                                    tabInfo,
-                                    {
-                                        fullPageUrl,
-                                    },
-                                )
+                                await contentSharing.waitForPageLinkCreation()
 
                                 const localLocators: any[] = await setup.storageManager
                                     .collection('locators')
@@ -5780,13 +5770,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         customPageTitle: null,
                                     },
                                 )
-                                await contentSharing.waitForPageLinkCreation(
-                                    tabInfo,
-                                    {
-                                        // fullPageUrl,
-                                        fullPageUrl: fullBaseLocatorUrl,
-                                    },
-                                )
+                                await contentSharing.waitForPageLinkCreation()
 
                                 const localLocators: any[] = await setup.storageManager
                                     .collection('locators')

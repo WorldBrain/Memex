@@ -4681,9 +4681,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             await Promise.all([
-                this.options.contentSharingByTabsBG.waitForPageLinkCreation({
-                    fullPageUrl,
-                }),
+                this.options.contentSharingBG.waitForPageLinkCreation(),
                 this.setLocallyAvailableSelectedList(
                     {
                         ...previousState,
