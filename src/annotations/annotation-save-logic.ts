@@ -125,6 +125,14 @@ export async function createAnnotation({
                 privacyLevel = AnnotationPrivacyLevels.SHARED
             }
 
+            if (annotationData.localListIds?.length) {
+                await contentSharingBG.shareAnnotationToSomeLists({
+                    annotationUrl,
+                    skipListExistenceCheck,
+                    localListIds: annotationData.localListIds,
+                })
+            }
+
             if (shouldShareSettings) {
                 await contentSharingBG.shareAnnotation({
                     annotationUrl,
@@ -148,14 +156,6 @@ export async function createAnnotation({
                     privacyLevelOverride ??
                     shareOptsToPrivacyLvl(shareOpts),
             })
-
-            if (annotationData.localListIds?.length) {
-                await contentSharingBG.shareAnnotationToSomeLists({
-                    annotationUrl,
-                    skipListExistenceCheck,
-                    localListIds: annotationData.localListIds,
-                })
-            }
 
             createAndCopyShareLink(
                 remoteAnnotationId,
