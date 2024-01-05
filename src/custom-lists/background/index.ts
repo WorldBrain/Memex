@@ -25,16 +25,14 @@ import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
 const limitSuggestionsStorageLength = 25
 
 export default class CustomListBackground {
     storage: CustomListStorage
     remoteFunctions: RemoteCollectionsInterface
-    serverToTalkTo =
-        process.env.NODE_ENV === 'production'
-            ? 'http://localhost:11922'
-            : 'http://localhost:11923'
+    serverToTalkTo = LOCAL_SERVER_ROOT
 
     private localStorage: BrowserSettingsStore<CollectionsSettings>
 

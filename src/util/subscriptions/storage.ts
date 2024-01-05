@@ -313,19 +313,10 @@ export async function rabbitHoleBetaFeatureAllowed(
         return 'denied'
     }
 }
-export async function downloadMemexDesktop() {
+export async function downloadMemexDesktop(getSystemArchAndOS) {
     const OS = window.navigator.platform.includes('Win')
-        ? 'win'
-        : window.navigator.platform.includes('Mac')
-        ? 'mac'
-        : 'linux'
-
-    // @ts-ignore
-    const OSData = await navigator.userAgentData.getHighEntropyValues([
-        'architecture',
-    ])
-
-    let arch = OSData.architecture
+    const OS = getSystemArchAndOS.os
+    const arch = getSystemArchAndOS.arch
 
     const isStaging =
         process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||

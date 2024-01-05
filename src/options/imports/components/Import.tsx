@@ -23,6 +23,7 @@ import {
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { Checkbox } from 'src/common-ui/components'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -59,10 +60,7 @@ class Import extends React.PureComponent<Props> {
     //     return <AdvSettings />
     // }
 
-    serverToTalkTo =
-        process.env.NODE_ENV === 'production'
-            ? 'http://localhost:11922'
-            : 'http://localhost:11923'
+    serverToTalkTo = LOCAL_SERVER_ROOT
 
     serverOnline: any
 

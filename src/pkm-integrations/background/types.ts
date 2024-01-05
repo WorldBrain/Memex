@@ -25,4 +25,5 @@ export interface PkmSyncInterface {
     addLocalFolder(): Promise<LocalFolder>
     getLocalFolders(): Promise<LocalFolder[]>
     removeLocalFolder(id: number): Promise<void>
+    getSystemArchAndOS(): Promise<{ arch: string; os: string }>
 }

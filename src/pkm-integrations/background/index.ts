@@ -5,6 +5,7 @@ import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'
 import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -12,11 +13,7 @@ export class PKMSyncBackgroundModule {
 
     backendNew: MemexLocalBackend
     PKMSYNCremovewarning = true
-    serverToTalkTo =
-        process.env.NODE_ENV === 'production'
-            ? 'http://localhost:11922'
-            : 'http://localhost:11923'
-
+    serverToTalkTo = LOCAL_SERVER_ROOT
     constructor() {
         this.backendNew = new MemexLocalBackend({
             url: this.serverToTalkTo,
@@ -31,6 +28,31 @@ export class PKMSyncBackgroundModule {
             addLocalFolder: this.addLocalFolder,
             getLocalFolders: this.getLocalFolders,
             removeLocalFolder: this.removeLocalFolder,
+            getSystemArchAndOS: this.getSystemArchAndOS,
+        }
+    }
+
+    getSystemArchAndOS = async () => {
+        let os
+        let arch
+        await browser.runtime.getPlatformInfo().then(function (info) {
+            os = info.os
+            arch = info.arch
+        })
+
+        console.log('os', os)
+        console.log('arch', arch)
+
+        if (arch === 'aarch64' || arch === 'arm' || arch === 'arm64') {
+            arch = 'arm'
+        }
+        if (arch === 'x86-64') {
+            arch = 'x64'
+        }
+
+        return {
+            arch,
+            os,
         }
     }
 

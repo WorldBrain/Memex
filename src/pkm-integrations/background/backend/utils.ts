@@ -2,6 +2,7 @@ import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annota
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 // TODO: Refactor this so it's not importing and using the browser global
 import { browser } from 'webextension-polyfill-ts'
 
@@ -77,10 +78,7 @@ export async function isPkmSyncEnabled() {
 export async function getFolder(pkmToSync: string) {
     const pkmSyncKey = await getPkmSyncKey()
 
-    const serverToTalkTo =
-        process.env.NODE_ENV === 'production'
-            ? 'http://localhost:11922'
-            : 'http://localhost:11923'
+    const serverToTalkTo = LOCAL_SERVER_ROOT
 
     const getFolderPath = async (pkmToSync: string) => {
         const response = await fetch(`${serverToTalkTo}/set-directory`, {
