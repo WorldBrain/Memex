@@ -98,6 +98,7 @@ export async function createAnnotation({
     return {
         remoteAnnotationId,
         savePromise: (async () => {
+            await contentSharingBG.waitForPageLinkCreation()
             const annotationUrl = await annotationsBG.createAnnotation(
                 {
                     url: annotationData.localId,
