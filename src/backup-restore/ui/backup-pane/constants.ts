@@ -1,7 +1,7 @@
 const localServer =
     process.env.NODE_ENV === 'production'
         ? 'http://localhost:11922'
-        : 'http://localhost:11922'
+        : 'http://localhost:11923'
 
 export const LOCAL_SERVER_ROOT = localServer
 
