@@ -432,18 +432,18 @@ export class PKMSyncBackgroundModule {
         let fileName = fileNameInput
 
         // Remove any () and its encapsulated content from the string
-        fileName = fileName.replace(/\(.*?\)/g, '')
+        fileName = fileName?.replace(/\(.*?\)/g, '')
 
         if (onlyRemoveColon) {
-            fileName = fileName.replace(/:/g, ' ')
+            fileName = fileName?.replace(/:/g, ' ')
         } else {
             if (!onlyParenthesisRemoval) {
                 // Remove any characters that are not allowed in filenames and replace them with hyphens
                 const illegalCharacters = /[#%&{}\\<>?:/$!'"@+`|=]/g
-                fileName = fileName.replace(illegalCharacters, '-')
+                fileName = fileName?.replace(illegalCharacters, '-')
             }
         }
-        fileName = fileName.trim()
+        fileName = fileName?.trim()
 
         return fileName
     }
