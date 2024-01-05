@@ -314,7 +314,6 @@ export async function rabbitHoleBetaFeatureAllowed(
     }
 }
 export async function downloadMemexDesktop(getSystemArchAndOS) {
-    const OS = window.navigator.platform.includes('Win')
     const OS = getSystemArchAndOS.os
     const arch = getSystemArchAndOS.arch
 
