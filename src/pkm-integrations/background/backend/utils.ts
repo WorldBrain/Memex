@@ -37,7 +37,41 @@ export async function sharePageWithPKM(
         data: pageData,
     }
 
-    await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    if (
+        item.data.pageUrl.includes('twitter.com') ||
+        item.data.pageUrl.includes('x.com')
+    ) {
+        if (item.data.pageTitle.length === 0) {
+            return
+        }
+        let title = item.data.pageTitle?.replace(/[^a-zA-Z0-9]/g, ' ')
+        title = item.data.pageTitle?.substring(0, 100).trim()
+        title = item.data.pageTitle
+            ?.substring(0, 100)
+            .trim()
+            .replace(/\n/g, ' ')
+
+        const annotatinon =
+            '<div>' + item.data.pageTitle.replace(/\n/g, '<br/>') + '</div>'
+
+        const itemToSync = {
+            annotationId: item.data.pageUrl,
+            pageTitle: title,
+            pageUrl: item.data.pageUrl,
+            pageCreatedWhen: item.data.createdWhen,
+            comment: annotatinon,
+            createdWhen: item.data.createdWhen,
+        }
+
+        item = {
+            type: 'annotation',
+            data: itemToSync,
+        }
+
+        await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    } else {
+        await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    }
 }
 
 export async function getPkmSyncKey() {
@@ -96,7 +130,6 @@ export async function getFolder(pkmToSync: string) {
         }
         const directoryPath = await response.text()
 
-        console.log('directoryPath', directoryPath)
         return directoryPath
     }
 
