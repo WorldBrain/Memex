@@ -581,6 +581,16 @@ export class PageIndexingBackground {
             : this.processPageDataFromUrl(props))
 
         if (pageData.isExisting) {
+            // Ensure page has a visit and create it if not
+            const existingVisit = await this.storage.getLatestVisit(
+                pageData.fullUrl,
+            )
+            if (!existingVisit) {
+                await this.storage.addPageVisit(
+                    pageData.fullUrl,
+                    this._getTime(props.visitTime),
+                )
+            }
             return { fullUrl: pageData.fullUrl }
         }
 
