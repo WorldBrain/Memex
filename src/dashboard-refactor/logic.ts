@@ -4120,9 +4120,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             async () => {
                 this.options.annotationsCache.removeList({ unifiedId: listId })
                 this.emitMutation({
-                    modals: { deletingListId: { $set: undefined } },
+                    modals: { deletingListId: { $set: null } },
                     listsSidebar: {
-                        selectedListId: { $set: null },
+                        selectedListId: { $set: undefined },
                         filteredListIds: {
                             $apply: (ids: string[]) =>
                                 ids.filter((id) => id !== listId),

@@ -52,6 +52,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     followedListsGroup: ListGroup
     onConfirmListEdit: (listId: string, value: string) => void
     currentUser: any
+    onConfirmListDelete: (listId: string) => void
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -204,6 +205,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             this.props.onConfirmListEdit(
                                                 list.unifiedId,
                                                 newName,
+                                            )
+                                        }}
+                                        confirmSpaceDelete={() => {
+                                            console.log('delete list')
+                                            this.props.onConfirmListDelete(
+                                                list.unifiedId,
                                             )
                                         }}
                                     />
