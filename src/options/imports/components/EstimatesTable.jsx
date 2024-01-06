@@ -81,7 +81,7 @@ const EstimatesTable = ({
                                         heightAndWidth="16px"
                                         onClick={() => {
                                             window.open(
-                                                'https://worldbrain.io/tutorials/importing',
+                                                'https://tutorials.memex.garden/tutorials/importing-to-memex-from-other-services',
                                             )
                                         }}
                                     />
