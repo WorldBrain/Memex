@@ -22,6 +22,7 @@ import { DropdownMenuBtn } from 'src/common-ui/components/dropdown-menu'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
+    confirmSpaceDelete?: () => void
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
@@ -90,11 +91,7 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
                     </DetailsText>
                     <ButtonRow>
                         <PrimaryAction
-                            onClick={wrapClick((reactEvent) =>
-                                this.processEvent('confirmSpaceDelete', {
-                                    reactEvent,
-                                }),
-                            )}
+                            onClick={this.props.confirmSpaceDelete}
                             label={'Delete'}
                             icon={'trash'}
                             type={'secondary'}

@@ -75,6 +75,7 @@ class SpacePicker extends StatefulUIElement<
     private editMenuBtnRef = React.createRef<HTMLDivElement>()
     private extraMenuBtnRef = React.createRef<HTMLDivElement>()
     private goToButtonRef = React.createRef<HTMLDivElement>()
+    private openInTabGroupButtonRef = React.createRef<HTMLDivElement>()
 
     constructor(props: Props) {
         super(props, new ListPickerLogic(props))
@@ -278,6 +279,7 @@ class SpacePicker extends StatefulUIElement<
                 goToButtonRef={this.goToButtonRef}
                 editMenuBtnRef={this.editMenuBtnRef}
                 extraMenuBtnRef={this.extraMenuBtnRef}
+                openInTabGroupButtonRef={this.openInTabGroupButtonRef}
                 onContextMenuBtnPress={
                     entry.creator?.id === this.state.currentUser?.id
                         ? () =>
@@ -293,6 +295,11 @@ class SpacePicker extends StatefulUIElement<
                                   listId: entry.localId,
                               })
                         : undefined
+                }
+                onOpenInTabGroupPress={() =>
+                    this.processEvent('onOpenInTabGroupPress', {
+                        listId: entry.localId,
+                    })
                 }
                 actOnAllTooltipText="Add all tabs in window to Space"
                 shareState={

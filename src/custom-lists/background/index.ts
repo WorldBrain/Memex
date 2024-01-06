@@ -25,16 +25,15 @@ import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
+import { browser } from 'webextension-polyfill-ts'
 
 const limitSuggestionsStorageLength = 25
 
 export default class CustomListBackground {
     storage: CustomListStorage
     remoteFunctions: RemoteCollectionsInterface
-    serverToTalkTo =
-        process.env.NODE_ENV === 'production'
-            ? 'http://localhost:11922'
-            : 'http://localhost:11923'
+    serverToTalkTo = LOCAL_SERVER_ROOT
 
     private localStorage: BrowserSettingsStore<CollectionsSettings>
 
@@ -100,6 +99,7 @@ export default class CustomListBackground {
             fetchListDescriptions: this.fetchListDescriptions,
             updateListDescription: this.updateListDescription,
             getInboxUnreadCount: this.getInboxUnreadCount,
+            createTabGroup: this.createTabGroup,
             fetchLocalDataForRemoteListEntryFromServer: this
                 .fetchLocalDataForRemoteListEntryFromServer,
         }
@@ -337,6 +337,20 @@ export default class CustomListBackground {
 
     getInboxUnreadCount = () => {
         return this.storage.countInboxUnread()
+    }
+    createTabGroup = async (id: number) => {
+        const listId = id
+
+        if (listId == null) {
+            return false
+        }
+        const spaceData = await this.fetchListById({ id: listId })
+        const spaceEntries = spaceData.pages
+
+        const newWindow = await browser.windows.create()
+        for (const url of spaceEntries) {
+            await browser.tabs.create({ windowId: newWindow.id, url })
+        }
     }
 
     createCustomList: RemoteCollectionsInterface['createCustomList'] = async ({

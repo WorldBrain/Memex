@@ -30,6 +30,7 @@ import {
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sleepPromise } from 'src/util/promises'
+import { browser } from 'webextension-polyfill-ts'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -458,6 +459,12 @@ export default class SpacePickerLogic extends UILogic<
         const nextListId =
             previousState.editMenuListId === event.listId ? null : event.listId
         this.emitMutation({ editMenuListId: { $set: nextListId } })
+    }
+    onOpenInTabGroupPress: EventHandler<'onOpenInTabGroupPress'> = async ({
+        event,
+        previousState,
+    }) => {
+        await this.dependencies.spacesBG.createTabGroup(event.listId)
     }
 
     updateContextMenuPosition: EventHandler<

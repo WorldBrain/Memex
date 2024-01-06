@@ -856,7 +856,9 @@ export class SidebarContainerLogic extends UILogic<
             rabbitHoleBetaAccess === 'granted' ||
             rabbitHoleBetaAccess === 'grantedBcOfSubscription'
         ) {
-            const url = await downloadMemexDesktop()
+            const url = await downloadMemexDesktop(
+                await this.options.pkmSyncBG.getSystemArchAndOS(),
+            )
 
             this.emitMutation({
                 desktopAppDownloadLink: { $set: url },
@@ -1678,7 +1680,9 @@ export class SidebarContainerLogic extends UILogic<
         'setRabbitHoleBetaFeatureAccess'
     > = async ({ event }) => {
         if (event.permission === 'onboarding') {
-            const url = await downloadMemexDesktop()
+            const url = await downloadMemexDesktop(
+                await this.options.pkmSyncBG.getSystemArchAndOS(),
+            )
             this.emitMutation({
                 rabbitHoleBetaFeatureAccess: { $set: event.permission },
             })
@@ -4686,9 +4690,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             await Promise.all([
-                this.options.contentSharingByTabsBG.waitForPageLinkCreation({
-                    fullPageUrl,
-                }),
+                this.options.contentSharingBG.waitForPageLinkCreation(),
                 this.setLocallyAvailableSelectedList(
                     {
                         ...previousState,

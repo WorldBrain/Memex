@@ -1804,7 +1804,11 @@ export class AnnotationsSidebar extends React.Component<
     renderQaASection() {
         const addPromptButton = (prompt) => (
             <PromptTemplateButton
-                onMouseDown={() => this.props.saveAIPrompt(prompt)}
+                onClick={(event) => {
+                    event.stopPropagation()
+                    event.preventDefault()
+                    this.props.saveAIPrompt(prompt)
+                }}
             >
                 <TooltipBox
                     tooltipText="Save prompt as template"
@@ -1812,7 +1816,7 @@ export class AnnotationsSidebar extends React.Component<
                 >
                     <Icon
                         filePath={icons.plus}
-                        heightAndWidth="22px"
+                        heightAndWidth="20px"
                         color="prime1"
                     />
                 </TooltipBox>
@@ -1973,7 +1977,12 @@ export class AnnotationsSidebar extends React.Component<
                                         : 'Type a prompt like "Summarize in 2 paragraphs"'
                                 }
                                 value={this.props.prompt}
-                                icon="stars"
+                                icon={
+                                    this.props.prompt &&
+                                    this.props.prompt?.length > 0
+                                        ? addPromptButton(this.props.prompt)
+                                        : 'stars'
+                                }
                                 onChange={async (event) => {
                                     await this.props.updatePromptState(
                                         (event.target as HTMLInputElement)
@@ -2022,11 +2031,6 @@ export class AnnotationsSidebar extends React.Component<
                                 }}
                                 onClick={() =>
                                     this.props.toggleAISuggestionsDropDown()
-                                }
-                                actionButton={
-                                    this.props.prompt &&
-                                    this.props.prompt?.length > 0 &&
-                                    addPromptButton(this.props.prompt)
                                 }
                                 autoFocus={this.props.activeTab === 'summary'}
                             />
@@ -4352,11 +4356,7 @@ const RemoveListEntryBox = styled.div`
     display: none;
 `
 
-const PromptTemplateButton = styled.div`
-    position: absolute;
-    right: 5px;
-    top: 5px;
-`
+const PromptTemplateButton = styled.div``
 
 const InfoTextTitle = styled.div`
     font-size: 16px;
