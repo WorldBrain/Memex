@@ -373,6 +373,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
         return (
             <>
+                {this.state.showTooltip && this.renderTooltip()}
                 <TooltipBox
                     placement="bottom-end"
                     tooltipText={
@@ -390,8 +391,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         containerRef={this.tooltipButtonRef}
                     />
                 </TooltipBox>
-
-                {this.state.showTooltip && this.renderTooltip()}
             </>
         )
     }
