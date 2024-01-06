@@ -659,7 +659,10 @@ export class PageIndexingBackground {
         let isLocalPdf = false
 
         const existingPage = await this.storage.getPage(props.fullUrl)
-        if (existingPage) {
+        // Consider a page existing/already indexed if it's in the DB and has text
+        //  One case where it's in the DB but does not yet have text is when a list is joined and
+        //  stubs of all the uploaded PDFs are downloaded to the joining user's extension (without full text)
+        if (existingPage?.text?.length > 0) {
             return { ...existingPage, isExisting: true }
         }
 

@@ -12,6 +12,7 @@ import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import {
     mergeTermFields,
     fingerprintsEqual,
+    isTempPdfAccessUrl,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import {
     ContentIdentifier,
@@ -442,10 +443,13 @@ export default class PageStorage extends StorageModule {
             params.identifier,
         )
         const toStore = params.locators.filter((locator) => {
-            return !existingLocators.find(
-                (existing) =>
-                    fingerprintsEqual(existing, locator) &&
-                    existing.originalLocation === locator.originalLocation,
+            return (
+                !isTempPdfAccessUrl(locator.originalLocation) &&
+                !existingLocators.find(
+                    (existing) =>
+                        fingerprintsEqual(existing, locator) &&
+                        existing.originalLocation === locator.originalLocation,
+                )
             )
         })
         await Promise.all(
