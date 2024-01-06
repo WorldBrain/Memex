@@ -158,7 +158,7 @@ export interface RemoteCollectionsInterface {
         pageTitle?: string
     }): Promise<void>
     getInboxUnreadCount(): Promise<number>
-    createTabGroup(listId: number): Promise<void>
+    createTabGroup(listId: number): void
 }
 
 export interface CollectionsSettings {
