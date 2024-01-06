@@ -55,6 +55,7 @@ export type SpacePickerEvent = UIEvent<{
     resultEntryFocus: { entry: UnifiedList; index: number }
     toggleEntryContextMenu: { listId: number }
     toggleEntryEditMenu: { listId: number }
+    onOpenInTabGroupPress: { listId: number }
     openListInWebUI: { unifiedListId: UnifiedList['unifiedId'] }
     updateContextMenuPosition: { x?: number; y?: number }
     setListPrivacy: { listId: number; isPrivate: boolean }
