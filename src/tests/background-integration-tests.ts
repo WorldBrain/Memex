@@ -275,6 +275,7 @@ export async function setupBackgroundIntegrationTest(
             fetch: fetch as any,
             normalizeUrl,
             fetchPDFData,
+            secretPlainText: 'test-secret',
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
             sendPrivateListEmailInvite: async (emailAddress, details) => ({
