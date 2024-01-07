@@ -187,8 +187,8 @@ async function handleSyncedDataForPKMSync(
         }
     }
 
-    if (await isPkmSyncEnabled()) {
-        try {
+    try {
+        if (await isPkmSyncEnabled()) {
             if (collection === 'annotations') {
                 const pageDataStorage = await storageManager
                     .collection('pages')
@@ -282,6 +282,20 @@ async function handleSyncedDataForPKMSync(
                 )
             }
             if (collection === 'pages') {
+                if (!updates.fullTitle) {
+                    const xhr = new XMLHttpRequest()
+                    xhr.open('GET', updates.fullUrl, false)
+                    xhr.send()
+                    const doc = new DOMParser().parseFromString(
+                        xhr.responseText,
+                        'text/html',
+                    )
+                    updates.fullTitle =
+                        doc
+                            .querySelector('meta[property="og:title"]')
+                            ?.getAttribute('content') || doc.title
+                }
+
                 const pageData = {
                     pageTitle: updates.fullTitle,
                     pageUrl: updates.fullUrl,
@@ -319,8 +333,8 @@ async function handleSyncedDataForPKMSync(
                         }),
                 )
             }
-        } catch (e) {
-            console.error(e)
         }
+    } catch (e) {
+        console.error(e)
     }
 }

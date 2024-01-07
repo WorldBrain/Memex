@@ -436,6 +436,8 @@ export class DashboardContainer extends StatefulUIElement<
     private renderListsSidebar() {
         const { listsSidebar, currentUser } = this.state
 
+        console.log('renderListsSidebar', listsSidebar.filteredListIds)
+
         let allLists = normalizedStateToArray(listsSidebar.lists)
         if (listsSidebar.searchQuery.trim().length > 0) {
             allLists = allLists.filter((list) =>
@@ -475,6 +477,11 @@ export class DashboardContainer extends StatefulUIElement<
                 }
                 onConfirmListEdit={(listId: string, value: string) => {
                     this.processEvent('confirmListEdit', { value, listId })
+                }}
+                onConfirmListDelete={(listId: string) => {
+                    console.log('onConfirmListDelete', listId)
+                    this.processEvent('setDeletingListId', { listId: listId })
+                    this.processEvent('confirmListDelete', null)
                 }}
                 switchToFeed={() => this.processEvent('switchToFeed', null)}
                 onListSelection={(listId) => {
@@ -997,7 +1004,7 @@ export class DashboardContainer extends StatefulUIElement<
                         return this.processEvent('setPageNewNoteLists', {
                             day,
                             pageId,
-                            lists: this.state.searchResults.results[
+                            lists: this.state.searchResults?.results[
                                 day
                             ].pages.byId[pageId].newNoteForm.lists.filter(
                                 (id) => id !== listData.unifiedId,

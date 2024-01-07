@@ -5,13 +5,10 @@ import browser from 'webextension-polyfill'
 import { BackupBackend } from './backend/types'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from './types'
+import { LOCAL_SERVER_ROOT } from '../ui/backup-pane/constants'
 
 export class BackendSelect {
-    serverToTalkTo =
-        process.env.NODE_ENV === 'production'
-            ? 'http://localhost:11922'
-            : 'http://localhost:11923'
-
+    serverToTalkTo = LOCAL_SERVER_ROOT
     constructor(
         private deps: {
             localBackupSettings: BrowserSettingsStore<LocalBackupSettings>

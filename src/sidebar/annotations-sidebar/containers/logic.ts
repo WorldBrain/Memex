@@ -856,7 +856,9 @@ export class SidebarContainerLogic extends UILogic<
             rabbitHoleBetaAccess === 'granted' ||
             rabbitHoleBetaAccess === 'grantedBcOfSubscription'
         ) {
-            const url = await downloadMemexDesktop()
+            const url = await downloadMemexDesktop(
+                await this.options.pkmSyncBG.getSystemArchAndOS(),
+            )
 
             this.emitMutation({
                 desktopAppDownloadLink: { $set: url },
@@ -1678,7 +1680,9 @@ export class SidebarContainerLogic extends UILogic<
         'setRabbitHoleBetaFeatureAccess'
     > = async ({ event }) => {
         if (event.permission === 'onboarding') {
-            const url = await downloadMemexDesktop()
+            const url = await downloadMemexDesktop(
+                await this.options.pkmSyncBG.getSystemArchAndOS(),
+            )
             this.emitMutation({
                 rabbitHoleBetaFeatureAccess: { $set: event.permission },
             })
@@ -3141,7 +3145,12 @@ export class SidebarContainerLogic extends UILogic<
 
         console.log('askAIviaInPageInteractions', event)
 
-        let prompt = event.prompt ?? 'Tell me the key takeaways: '
+        let prompt =
+            event.prompt?.length > 0
+                ? event.prompt
+                : 'Tell me the key takeaways: '
+        let highlightedText =
+            event.textToProcess?.length > 0 ? event.textToProcess : null
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: {

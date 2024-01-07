@@ -72,7 +72,7 @@ export default [
     },
     {
         name: 'Tutorial',
-        pathname: 'https://tutorials.memex.garden',
+        pathname: 'https://tutorials.memex.garden/tutorials',
         isExternal: true,
         icon: 'info',
     },
