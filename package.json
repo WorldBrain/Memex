@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.10.5",
+    "version": "3.11.0",
     "homepage": "https://memex.garden",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -99,6 +99,7 @@
         "html-to-image": "^1.11.11",
         "html2canvas": "^1.4.1",
         "immutability-helper": "^3.0.1",
+        "jose": "^5.1.2",
         "jsdom": "^20.0.0",
         "json-date-parser": "^1.0.1",
         "lodash": "^4.17.4",

@@ -436,8 +436,6 @@ export class DashboardContainer extends StatefulUIElement<
     private renderListsSidebar() {
         const { listsSidebar, currentUser } = this.state
 
-        console.log('renderListsSidebar', listsSidebar.filteredListIds)
-
         let allLists = normalizedStateToArray(listsSidebar.lists)
         if (listsSidebar.searchQuery.trim().length > 0) {
             allLists = allLists.filter((list) =>

@@ -12,6 +12,7 @@ import { getTermsField } from '@worldbrain/memex-common/lib/storage/utils'
 import {
     mergeTermFields,
     fingerprintsEqual,
+    isTempPdfAccessUrl,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import {
     ContentIdentifier,
@@ -19,7 +20,10 @@ import {
 } from '@worldbrain/memex-common/lib/page-indexing/types'
 import decodeBlob from 'src/util/decode-blob'
 import { pageIsStub } from 'src/page-indexing/utils'
-import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import {
+    ContentFingerprint,
+    LocationSchemeType,
+} from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import {
     createRabbitHoleEntry,
     isPkmSyncEnabled,
@@ -131,6 +135,17 @@ export default class PageStorage extends StorageModule {
             createLocator: {
                 operation: 'createObject',
                 collection: 'locators',
+            },
+            updateLocatorStatus: {
+                operation: 'updateObjects',
+                collection: 'locators',
+                args: [
+                    {
+                        normalizedUrl: '$normalizedUrl:string',
+                        locationScheme: '$locationScheme:string',
+                    },
+                    { status: '$status:string' },
+                ],
             },
         },
     })
@@ -428,15 +443,26 @@ export default class PageStorage extends StorageModule {
             params.identifier,
         )
         const toStore = params.locators.filter((locator) => {
-            return !existingLocators.find(
-                (existing) =>
-                    fingerprintsEqual(existing, locator) &&
-                    existing.originalLocation === locator.originalLocation,
+            return (
+                !isTempPdfAccessUrl(locator.originalLocation) &&
+                !existingLocators.find(
+                    (existing) =>
+                        fingerprintsEqual(existing, locator) &&
+                        existing.originalLocation === locator.originalLocation,
+                )
             )
         })
         await Promise.all(
             toStore.map((locator) => this.operation('createLocator', locator)),
         )
+    }
+
+    async updateLocatorStatus(params: {
+        normalizedUrl: string
+        locationScheme: LocationSchemeType
+        status: string
+    }) {
+        await this.operation('updateLocatorStatus', params)
     }
 
     async _maybeDecodeBlob(

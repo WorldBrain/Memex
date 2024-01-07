@@ -15,8 +15,11 @@ const waitForDocument = async () => {
     while (true) {
         const pdfApplication = (globalThis as any)['PDFViewerApplication']
         const pdfViewer = pdfApplication?.pdfViewer
-        const pdfDocument: { fingerprint?: string; fingerprints?: string[] } =
-            pdfViewer?.pdfDocument
+        const pdfDocument: {
+            fingerprint?: string
+            fingerprints?: string[]
+            getData(): Promise<Uint8Array>
+        } = pdfViewer?.pdfDocument
         if (pdfDocument) {
             const searchParams = new URLSearchParams(location.search)
             const filePath = searchParams.get('file')
@@ -38,14 +41,14 @@ const waitForDocument = async () => {
                     isDark ? 1 : 0
                 }) contrast(75%)`)
 
-            return pdfDocument
+            return { pdfDocument, pdfApplication }
         }
         await new Promise((resolve) => setTimeout(resolve, 200))
     }
 }
 
 const getContentFingerprints: GetContentFingerprints = async () => {
-    const pdfDocument = await waitForDocument()
+    const { pdfDocument } = await waitForDocument()
     const fingerprintsStrings =
         pdfDocument.fingerprints ??
         (pdfDocument.fingerprint ? [pdfDocument.fingerprint] : [])
@@ -64,7 +67,7 @@ Global.main({
     loadRemotely: false,
     getContentFingerprints,
     htmlElToCanvasEl: (el) => html2canvas(el),
-}).then(async (inPageUI) => {
+}).then(async ({ inPageUI, pdfBG }) => {
     // DEBUG: Use this in console to debug screenshot UX
     // ;(window as any)['promptPdfScreenshot'] = promptPdfScreenshot
     // // DEBUG: Uncomment to trigger screenshot as soon as PDF is loaded
@@ -93,6 +96,15 @@ Global.main({
                 'pdfjsLib'
             ].getDocument(filePath).promise
             return extractDataFromPDFDocument(pdf)
+        },
+        getObjectUrlForPdf: async () => {
+            const { pdfDocument } = await waitForDocument()
+            const content = await pdfDocument.getData()
+            const blob = new Blob([content])
+            return { objectUrl: URL.createObjectURL(blob) }
+        },
+        setPdfUploadState: async (isUploading) => {
+            // TODO: Do something with uploading state
         },
     })
     await inPageUI.showSidebar()

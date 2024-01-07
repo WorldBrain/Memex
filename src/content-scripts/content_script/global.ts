@@ -90,6 +90,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import { PDFRemoteInterface } from 'src/pdf/background/types'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { injectTelegramCustomUI } from './injectionUtils/telegram'
@@ -114,7 +115,7 @@ export async function main(
         getContentFingerprints?: GetContentFingerprints
         htmlElToCanvasEl?: (el: HTMLElement) => Promise<HTMLCanvasElement>
     } = {},
-): Promise<SharedInPageUIState> {
+) {
     const isRunningInFirefox = checkBrowser() === 'firefox'
     if (!isRunningInFirefox) {
         initSentry({})
@@ -225,6 +226,7 @@ export async function main(
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
     >()
+    const pdfBG = runInBackground<PDFRemoteInterface>()
     const annotationsManager = new AnnotationsManager()
 
     // loadInitialSettings
@@ -1242,7 +1244,7 @@ export async function main(
         }
     }
 
-    return inPageUI
+    return { inPageUI, pdfBG }
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
@@ -1403,12 +1405,10 @@ class PageInfo {
 
         if (window.location.href.includes('twitter.com/messages')) {
             fullUrl = await this.normalizeTwitterCurrentFullURL()
-            return fullUrl
-        } else if (window.location.href.includes('mail.google.com/mail'))
-            return (fullUrl = await this.normalizeGmailFullURL(fullUrl))
-        else {
-            return fullUrl
+        } else if (window.location.href.includes('mail.google.com/mail')) {
+            fullUrl = await this.normalizeGmailFullURL(fullUrl)
         }
+        return fullUrl
     }
 
     getPageTitle = () => {

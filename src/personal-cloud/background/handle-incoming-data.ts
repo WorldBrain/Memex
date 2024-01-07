@@ -302,7 +302,6 @@ async function handleSyncedDataForPKMSync(
                     createdWhen: Date.now(),
                 }
 
-
                 await sharePageWithPKM(pageData, pkmSyncBG)
             }
             if (collection === 'pageListEntries') {
@@ -323,7 +322,6 @@ async function handleSyncedDataForPKMSync(
                     pageUrl: updates.fullUrl,
                     pageSpaces: listData.name,
                 }
-
 
                 await sharePageWithPKM(
                     pageData,

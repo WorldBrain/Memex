@@ -106,3 +106,14 @@ export const PDF_DATA_A = {
     fullText: 'this is some test PDF text',
     fingerprints: ['test-pdf-a-fingerprint-a', 'test-pdf-a-fingerprint-b'],
 }
+
+export const PDF_DATA_B = {
+    domain: 'memex.cloud',
+    title: 'My Local PDF',
+    fullUrl:
+        'blob:chrome-extension://booamaoembahmnhhmmnnkomgfoibmpee/86c2a472-9390-433d-91f1-645823967a05',
+    normalizedUrl:
+        'blob:chrome-extension://booamaoembahmnhhmmnnkomgfoibmpee/86c2a472-9390-433d-91f1-645823967a05',
+    fullText: 'this is some test local PDF text',
+    fingerprints: ['test-pdf-b-fingerprint-a', 'test-pdf-b-fingerprint-b'],
+}

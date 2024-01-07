@@ -100,12 +100,6 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                     </LoadingStatusContainer>
                 )}
                 <BottomSection>
-                    {this.state.isLocalPDF && (
-                        <LocalPDFWarning>
-                            The PDF file is not uploaded. Send it separately &
-                            recipients must drop it into the web reader.
-                        </LocalPDFWarning>
-                    )}
                     {this.props.listData.remoteId != null && (
                         <SectionTopbar>
                             <SectionTitle>

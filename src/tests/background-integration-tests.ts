@@ -275,6 +275,7 @@ export async function setupBackgroundIntegrationTest(
             fetch: fetch as any,
             normalizeUrl,
             fetchPDFData,
+            secretPlainText: 'test-secret',
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
             sendPrivateListEmailInvite: async (emailAddress, details) => ({
@@ -306,6 +307,8 @@ export async function setupBackgroundIntegrationTest(
                     ? 'production'
                     : 'staging',
         }),
+        backendEnv:
+            process.env.NODE_ENV === 'production' ? 'production' : 'staging',
     })
 
     registerBackgroundModuleCollections({

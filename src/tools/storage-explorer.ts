@@ -70,6 +70,7 @@ async function main() {
     })
     const backgroundModules = createBackgroundModules({
         manifestVersion: '3',
+        backendEnv: 'staging',
         serverStorage,
         authServices,
         services,

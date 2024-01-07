@@ -147,7 +147,6 @@ const pageResultToPageData = (
         hasNotes: pageResult.annotsCount > 0,
         type: isPdf ? 'pdf' : 'page',
         fullPdfUrl: isPdf ? pageResult.fullPdfUrl! : undefined,
-        pdfUrl: isPdf ? pageResult.pdfUrl! : undefined,
     }
 }
 

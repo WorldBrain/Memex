@@ -5,10 +5,9 @@ import { sizeConstants } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import { RootState as State, DashboardDependencies, Events } from './types'
-import { getLocalStorage, setLocalStorage } from 'src/util/storage'
+import { setLocalStorage } from 'src/util/storage'
 import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
-import chrono from 'chrono-node'
 
 import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
@@ -336,6 +335,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteUpdateState: 'pristine',
                 newNoteCreateState: 'pristine',
                 searchPaginationState: 'pristine',
+                uploadedPdfLinkLoadState: 'pristine',
                 activeDay: undefined,
                 activePageID: undefined,
                 clearInboxLoadState: 'pristine',
@@ -3852,9 +3852,52 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
+        // This event will be assigned to an anchor <a> el, so we need to override that for PDFs
         event.synthEvent.preventDefault()
 
-        if (pageData.fullPdfUrl!.startsWith('blob:')) {
+        const memexCloudUrl = new URL(pageData.fullPdfUrl!)
+        const uploadId = memexCloudUrl.searchParams.get('upload_id')
+
+        // Uploaded PDFs need to have temporary access URLs fetched
+        if (uploadId != null) {
+            // Ignore multi-clicks while it's loading
+            // if (
+            //     previousState.searchResults.uploadedPdfLinkLoadState ===
+            //     'running'
+            // ) {
+            //     return
+            // }
+
+            console.log(pageData.fullPdfUrl, event.pageId)
+            await executeUITask(
+                this,
+                (taskState) => ({
+                    searchResults: {
+                        pageData: {
+                            byId: {
+                                [event.pageId]: {
+                                    uploadedPdfLinkLoadState: {
+                                        $set: taskState,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                }),
+                async () => {
+                    const tempPdfAccessUrl = await this.options.pdfViewerBG.getTempPdfAccessUrl(
+                        uploadId,
+                    )
+                    await openPDFInViewer(tempPdfAccessUrl, {
+                        tabsAPI: this.options.tabsAPI,
+                        runtimeAPI: this.options.runtimeAPI,
+                    })
+                },
+            )
+            return
+        }
+
+        if (memexCloudUrl.protocol === 'blob:') {
             // Show dropzone for local-only PDFs
             const input = document.createElement('input')
             input.type = 'file'
@@ -3878,12 +3921,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             }
             input.click()
             this.emitMutation({ showDropArea: { $set: true } })
-        } else {
-            await openPDFInViewer(pageData.fullPdfUrl!, {
-                tabsAPI: this.options.tabsAPI,
-                runtimeAPI: this.options.runtimeAPI,
-            })
         }
+
+        await openPDFInViewer(pageData.fullPdfUrl!, {
+            tabsAPI: this.options.tabsAPI,
+            runtimeAPI: this.options.runtimeAPI,
+        })
     }
 
     dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {

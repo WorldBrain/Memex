@@ -4,6 +4,7 @@ import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/conten
 import type { Tabs, Browser } from 'webextension-polyfill'
 import delay from 'src/util/delay'
 import { openPDFInViewer } from 'src/pdf/util'
+import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
@@ -102,7 +103,7 @@ export class ContentScriptsBackground {
         delayBeforeExecution = 1000,
     ) {
         let activeTab: Tabs.Tab
-        if (fullPageUrl.endsWith('.pdf')) {
+        if (doesUrlPointToPdf(fullPageUrl)) {
             await openPDFInViewer(fullPageUrl, {
                 tabsAPI: this.options.browserAPIs.tabs,
                 runtimeAPI: this.options.browserAPIs.runtime,
