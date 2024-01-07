@@ -163,6 +163,7 @@ export type PageData = Pick<
     type: 'pdf' | 'page'
     isShared?: boolean
     fullPdfUrl?: string
+    uploadedPdfLinkLoadState?: TaskState
 }
 
 export type NoResultsType =
