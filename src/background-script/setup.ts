@@ -718,6 +718,7 @@ export function createBackgroundModules(options: {
         bgScript,
         contentScripts: new ContentScriptsBackground({
             browserAPIs: options.browserAPIs,
+            waitForSync: () => personalCloud.waitForSync(),
             injectScriptInTab: async (tabId, file) => {
                 if (options.manifestVersion === '3') {
                     await options.browserAPIs.scripting.executeScript({

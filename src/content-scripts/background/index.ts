@@ -5,12 +5,14 @@ import type { Tabs, Browser } from 'webextension-polyfill'
 import delay from 'src/util/delay'
 import { openPDFInViewer } from 'src/pdf/util'
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { sleepPromise } from 'src/util/promises'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
 
     constructor(
         private options: {
+            waitForSync: () => Promise<void>
             injectScriptInTab: (tabId: number, file: string) => Promise<void>
             browserAPIs: Pick<
                 Browser,
@@ -185,6 +187,14 @@ export class ContentScriptsBackground {
         { tab },
         { fullPageUrl, sharedListId, manuallyPullLocalListData },
     ) => {
+        if (manuallyPullLocalListData) {
+            // Doing this to give a bit of time for the Firestore listener/FCM messages to receive sync data.
+            // Not a perfect solution but that would be a lot more work.
+            //  Main case: web UI reader auto-opens page in extension on page-link list join
+            await sleepPromise(1000)
+            await this.options.waitForSync()
+        }
+
         const allTabs = await this.options.browserAPIs.tabs.query({
             currentWindow: true,
             active: true,
