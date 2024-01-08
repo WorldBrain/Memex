@@ -35,6 +35,7 @@ export interface State {
     showOnboardingVideo?: boolean
     welcomeStep: string
     enableNudges: boolean
+    hoveredOverOnboardingIcon: boolean
 }
 
 export type Event = UIEvent<{
@@ -46,4 +47,5 @@ export type Event = UIEvent<{
     showOnboardingVideo: null
     goToNextOnboardingStep: { step: string }
     enableNudges: null
+    hoverOverOnboardingIcon: null
 }>

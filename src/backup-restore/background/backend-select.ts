@@ -5,8 +5,10 @@ import browser from 'webextension-polyfill'
 import { BackupBackend } from './backend/types'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from './types'
+import { LOCAL_SERVER_ROOT } from '../ui/backup-pane/constants'
 
 export class BackendSelect {
+    serverToTalkTo = LOCAL_SERVER_ROOT
     constructor(
         private deps: {
             localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
@@ -39,7 +41,7 @@ export class BackendSelect {
 
     async initLocalBackend(): Promise<BackupBackend> {
         return new localBackup.MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
     }
 

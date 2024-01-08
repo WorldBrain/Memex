@@ -71,12 +71,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         // Call your async function here
         const syncSettingsBG = this.deps.syncSettingsBG
         if (syncSettingsBG != null) {
-            const syncSettings = await createSyncSettingsStore({
+            const syncSettings = createSyncSettingsStore({
                 syncSettingsBG,
             })
-            const highlightColorSettings =
-                syncSettings &&
-                (await syncSettings?.highlightColors.get('highlightColors'))
+            const highlightColorSettings = await syncSettings.highlightColors?.get(
+                'highlightColors',
+            )
 
             this.highlightColorSettings = highlightColorSettings
         }

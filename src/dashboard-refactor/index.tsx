@@ -491,6 +491,11 @@ export class DashboardContainer extends StatefulUIElement<
                 onConfirmListEdit={(listId: string, value: string) => {
                     this.processEvent('confirmListEdit', { value, listId })
                 }}
+                onConfirmListDelete={(listId: string) => {
+                    console.log('onConfirmListDelete', listId)
+                    this.processEvent('setDeletingListId', { listId: listId })
+                    this.processEvent('confirmListDelete', null)
+                }}
                 switchToFeed={() => this.processEvent('switchToFeed', null)}
                 onListSelection={(listId) => {
                     this.processEvent('setSelectedListId', { listId })
@@ -1021,7 +1026,7 @@ export class DashboardContainer extends StatefulUIElement<
                         return this.processEvent('setPageNewNoteLists', {
                             day,
                             pageId,
-                            lists: this.state.searchResults.results[
+                            lists: this.state.searchResults?.results[
                                 day
                             ].pages.byId[pageId].newNoteForm.lists.filter(
                                 (id) => id !== listData.unifiedId,

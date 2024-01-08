@@ -38,6 +38,8 @@ export interface SyncSettingsByFeature {
     }
     pdfIntegration: {
         shouldAutoOpen: boolean
+        /** Determines whether or not local PDFs should be auto-uploaded on index. */
+        shouldAutoUpload: boolean
     }
     extension: {
         blocklist: string
@@ -83,7 +85,7 @@ export interface SyncSettingsByFeature {
         ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     }
     highlightColors: {
-        highlightColors: []
+        highlightColors: [] // TODO: Fully type
     }
 }
 

@@ -100,6 +100,7 @@ export interface ContentSharingInterface
         localListId: number
         isPrivate: boolean
     }): Promise<void>
+    waitForPageLinkCreation(): Promise<void>
 }
 
 export interface RemoteContentSharingByTabsInterface<
@@ -121,7 +122,6 @@ export interface RemoteContentSharingByTabsInterface<
             pageTitle?: string | null
         }
     >
-    waitForPageLinkCreation: RemoteFunction<Role, { fullPageUrl: string }, void>
 }
 
 /**

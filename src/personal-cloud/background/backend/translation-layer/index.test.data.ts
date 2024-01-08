@@ -303,7 +303,7 @@ export const LOCAL_TEST_DATA_V24 = {
             version: 0,
             deviceId: REMOTE_DEVICES_V24.first.id,
         },
-        // NOTE: fourth_a and fourth_b point to the same page
+        // NOTE: all the fourth_* locators point to the same page
         fourth_a: {
             id: 2,
             fingerprint: 'test-fingerprint-2',
@@ -331,6 +331,40 @@ export const LOCAL_TEST_DATA_V24 = {
             originalLocation: 'https://getmemex.com/test2.pdf',
             format: ContentLocatorFormat.PDF,
             lastVisited: 1635927743925,
+            primary: true,
+            valid: true,
+            version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
+        },
+        fourth_uploading: {
+            id: 4,
+            fingerprint: undefined,
+            fingerprintScheme: undefined,
+            location: 'test-upload-id-1',
+            locationType: ContentLocatorType.Remote,
+            locationScheme: LocationSchemeType.UploadStorage,
+            normalizedUrl: LOCAL_PAGES_V24.fourth.url,
+            originalLocation: LOCAL_PAGES_V24.fourth.fullUrl,
+            format: ContentLocatorFormat.PDF,
+            lastVisited: 1635927743925,
+            status: 'uploading',
+            primary: true,
+            valid: true,
+            version: 0,
+            deviceId: REMOTE_DEVICES_V24.first.id,
+        },
+        fourth_uploaded: {
+            id: 4,
+            fingerprint: null,
+            fingerprintScheme: null,
+            location: 'test-upload-id-1',
+            locationType: ContentLocatorType.Remote,
+            locationScheme: LocationSchemeType.UploadStorage,
+            normalizedUrl: LOCAL_PAGES_V24.fourth.url,
+            originalLocation: LOCAL_PAGES_V24.fourth.fullUrl,
+            format: ContentLocatorFormat.PDF,
+            lastVisited: 1635927743925,
+            status: 'uploaded',
             primary: true,
             valid: true,
             version: 0,
@@ -632,9 +666,9 @@ const REMOTE_LOCATORS_V24 = {
         // contentSize: null,
         // fingerprint: null,
     },
-    // As the third page is a PDF, an extra dummy locator exists to point to the dummy
+    // As the third page is a PDF, an extra base locator exists to point to the contentMetadata
     //  memex.cloud/ct/ page that gets created locally for the PDF
-    third_dummy: {
+    third_base: {
         id: 3,
         createdWhen: 560,
         updatedWhen: 560,
@@ -676,7 +710,7 @@ const REMOTE_LOCATORS_V24 = {
         fingerprint: LOCAL_TEST_DATA_V24.locators.third.fingerprint,
         fingerprintScheme: LOCAL_TEST_DATA_V24.locators.third.fingerprintScheme,
     },
-    fourth_dummy: {
+    fourth_base: {
         id: 5,
         createdWhen: 564,
         updatedWhen: 564,
@@ -742,6 +776,52 @@ const REMOTE_LOCATORS_V24 = {
         fingerprint: LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprint,
         fingerprintScheme:
             LOCAL_TEST_DATA_V24.locators.fourth_b.fingerprintScheme,
+    },
+    fourth_c_uploading: {
+        id: 8,
+        createdWhen: 566,
+        updatedWhen: 566,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+        localId: LOCAL_TEST_DATA_V24.locators.fourth_uploading.id,
+        format: LOCAL_TEST_DATA_V24.locators.fourth_uploading.format,
+        location: LOCAL_TEST_DATA_V24.locators.fourth_uploading.location,
+        locationScheme:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationScheme,
+        locationType:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
+        originalLocation:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.originalLocation,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_uploading.lastVisited,
+        // contentSize: null,
+        status: 'uploading',
+    },
+    fourth_c_uploaded: {
+        id: 8,
+        createdWhen: 566,
+        updatedWhen: 566,
+        user: TEST_USER.id,
+        createdByDevice: REMOTE_DEVICES_V24.first.id,
+        personalContentMetadata: REMOTE_METADATA_V24.fourth.id,
+        localId: LOCAL_TEST_DATA_V24.locators.fourth_uploading.id,
+        format: LOCAL_TEST_DATA_V24.locators.fourth_uploading.format,
+        location: LOCAL_TEST_DATA_V24.locators.fourth_uploading.location,
+        locationScheme:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationScheme,
+        locationType:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.locationType,
+        originalLocation:
+            LOCAL_TEST_DATA_V24.locators.fourth_uploading.originalLocation,
+        primary: true,
+        valid: true,
+        version: 0,
+        lastVisited: LOCAL_TEST_DATA_V24.locators.fourth_uploading.lastVisited,
+        // contentSize: null,
+        status: 'uploaded',
     },
     twitter_a: {
         id: 1,

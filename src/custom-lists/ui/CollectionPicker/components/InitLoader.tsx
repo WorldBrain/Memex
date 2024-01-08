@@ -1,7 +1,6 @@
 import styled from 'styled-components'
-import { Loader } from '@styled-icons/feather'
 
-export const InitLoader = styled(Loader)`
+export const InitLoader = styled.div`
     display: block;
     margin: 30px 45%;
 `

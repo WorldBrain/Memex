@@ -83,6 +83,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleFeed: null
         toggleReadingView: null
         toggleAskAI: null
+        toggleRabbitHole: null
         toggleTheme: { themeVariant: MemexThemeVariant }
         openPDFinViewer: null
         hydrateStateFromDB: { url: string }
@@ -358,6 +359,13 @@ export class RibbonContainerLogic extends UILogic<
     toggleAskAI: EventHandler<'toggleAskAI'> = async ({ previousState }) => {
         await this.dependencies.inPageUI.showSidebar({
             action: 'show_page_summary',
+        })
+    }
+    toggleRabbitHole: EventHandler<'toggleRabbitHole'> = async ({
+        previousState,
+    }) => {
+        await this.dependencies.inPageUI.showSidebar({
+            action: 'rabbit_hole_open',
         })
     }
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {

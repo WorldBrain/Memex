@@ -2,6 +2,7 @@ import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annota
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 // TODO: Refactor this so it's not importing and using the browser global
 import { browser } from 'webextension-polyfill-ts'
 
@@ -36,7 +37,41 @@ export async function sharePageWithPKM(
         data: pageData,
     }
 
-    await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    if (
+        item.data.pageUrl.includes('twitter.com') ||
+        item.data.pageUrl.includes('x.com')
+    ) {
+        if (item.data.pageTitle.length === 0) {
+            return
+        }
+        let title = item.data.pageTitle?.replace(/[^a-zA-Z0-9]/g, ' ')
+        title = item.data.pageTitle?.substring(0, 100).trim()
+        title = item.data.pageTitle
+            ?.substring(0, 100)
+            .trim()
+            .replace(/\n/g, ' ')
+
+        const annotatinon =
+            '<div>' + item.data.pageTitle.replace(/\n/g, '<br/>') + '</div>'
+
+        const itemToSync = {
+            annotationId: item.data.pageUrl,
+            pageTitle: title,
+            pageUrl: item.data.pageUrl,
+            pageCreatedWhen: item.data.createdWhen,
+            comment: annotatinon,
+            createdWhen: item.data.createdWhen,
+        }
+
+        item = {
+            type: 'annotation',
+            data: itemToSync,
+        }
+
+        await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    } else {
+        await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    }
 }
 
 export async function getPkmSyncKey() {
@@ -77,8 +112,10 @@ export async function isPkmSyncEnabled() {
 export async function getFolder(pkmToSync: string) {
     const pkmSyncKey = await getPkmSyncKey()
 
+    const serverToTalkTo = LOCAL_SERVER_ROOT
+
     const getFolderPath = async (pkmToSync: string) => {
-        const response = await fetch('http://localhost:11922/set-directory', {
+        const response = await fetch(`${serverToTalkTo}/set-directory`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -92,6 +129,7 @@ export async function getFolder(pkmToSync: string) {
             throw new Error(`HTTP error! status: ${response.status}`)
         }
         const directoryPath = await response.text()
+
         return directoryPath
     }
 

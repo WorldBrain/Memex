@@ -4,12 +4,17 @@ import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/conten
 import type { Tabs, Browser } from 'webextension-polyfill'
 import delay from 'src/util/delay'
 import { openPDFInViewer } from 'src/pdf/util'
+import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import { sleepPromise } from 'src/util/promises'
+import type { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
 
     constructor(
         private options: {
+            waitForSync: () => Promise<void>
+            contentSharingStorage: ContentSharingClientStorage
             injectScriptInTab: (tabId: number, file: string) => Promise<void>
             browserAPIs: Pick<
                 Browser,
@@ -29,11 +34,28 @@ export class ContentScriptsBackground {
                 id: tab.id,
                 url: (await options.browserAPIs.tabs.get(tab.id)).url,
             }),
-            openBetaFeatureSettings: async () => {
-                const optionsPageUrl = this.options.browserAPIs.runtime.getURL(
-                    'options.html',
+            openBetaFeatureSettings: async (_, { email, userId }) => {
+                const isStaging =
+                    process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
+                        'staging',
+                    ) || process.env.NODE_ENV === 'development'
+                const baseUrl = isStaging
+                    ? 'https://cloudflare-memex-staging.memex.workers.dev'
+                    : 'https://cloudfare-memex.memex.workers.dev'
+
+                const response = await fetch(
+                    baseUrl + '/check_rabbithole_beta_status',
+                    {
+                        method: 'POST',
+                        body: JSON.stringify({
+                            email: email,
+                            userId: userId,
+                        }),
+                        headers: { 'Content-Type': 'application/json' },
+                    },
                 )
-                window.open(optionsPageUrl + '#/features')
+
+                return await response.json()
             },
             openAuthSettings: async () => {
                 const optionsPageUrl = this.options.browserAPIs.runtime.getURL(
@@ -85,7 +107,7 @@ export class ContentScriptsBackground {
         delayBeforeExecution = 1000,
     ) {
         let activeTab: Tabs.Tab
-        if (fullPageUrl.endsWith('.pdf')) {
+        if (doesUrlPointToPdf(fullPageUrl)) {
             await openPDFInViewer(fullPageUrl, {
                 tabsAPI: this.options.browserAPIs.tabs,
                 runtimeAPI: this.options.browserAPIs.runtime,
@@ -167,6 +189,24 @@ export class ContentScriptsBackground {
         { tab },
         { fullPageUrl, sharedListId, manuallyPullLocalListData },
     ) => {
+        if (manuallyPullLocalListData && sharedListId != null) {
+            // Doing this to give a bit of time for the Firestore listener/FCM messages to trigger extension sync so it can receive any assumed data.
+            //  Main case: web UI reader auto-opens page in extension on page-link list join - joined list data needs to be DL'd locally for UI state to set up
+            let retries = 5
+            while (retries-- > 0) {
+                await sleepPromise(1000)
+                await this.options.waitForSync()
+                const existing = await this.options.contentSharingStorage.getRemoteListShareMetadata(
+                    {
+                        remoteListId: sharedListId,
+                    },
+                )
+                if (existing != null) {
+                    break
+                }
+            }
+        }
+
         const allTabs = await this.options.browserAPIs.tabs.query({
             currentWindow: true,
             active: true,

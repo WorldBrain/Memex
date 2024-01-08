@@ -2,6 +2,7 @@ import type { PipelineRes } from 'src/search'
 import * as Raven from 'src/util/raven'
 import type { PageIndexingBackground } from './background'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
+import { isTempPdfAccessUrl } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 export function pageIsStub(page: Pick<PipelineRes, 'text' | 'terms'>): boolean {
     return (
@@ -37,6 +38,11 @@ export const isUrlSupported = (params: {
         if (params.fullUrl.includes('pdfjs/viewer.html?file')) {
             return true
         }
+    }
+
+    // Ignore our upload PDF access URLs
+    if (isTempPdfAccessUrl(params.fullUrl)) {
+        return false
     }
 
     for (const prefix of unsupportedUrlPrefixes) {

@@ -36,6 +36,7 @@ import { setupOmnibar } from 'src/omnibar'
 import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
+import { getOnlineBackendEnv } from './util/env'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -127,6 +128,7 @@ async function main() {
                     ? 'production'
                     : 'staging',
         }),
+        backendEnv: getOnlineBackendEnv(),
     })
     registerBackgroundModuleCollections({
         storageManager,

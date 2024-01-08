@@ -1,15 +1,13 @@
 import React, { createRef, useRef } from 'react'
 import styled, { css } from 'styled-components'
-import { Layers } from '@styled-icons/feather'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { runtime } from 'webextension-polyfill'
-import { browser } from 'webextension-polyfill-ts'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onPress: () => void
@@ -18,6 +16,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     onPressActOnAll?: () => void
     onContextMenuBtnPress?: () => void
     onEditMenuBtnPress?: () => void
+    onOpenInTabGroupPress?: () => void
     index: number
     shareState: 'private' | 'shared'
     id?: string
@@ -26,6 +25,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     resultItem: React.ReactNode
     contextMenuBtnRef?: React.RefObject<HTMLDivElement>
     editMenuBtnRef?: React.RefObject<HTMLDivElement>
+    openInTabGroupButtonRef?: React.RefObject<HTMLDivElement>
     extraMenuBtnRef?: React.RefObject<HTMLDivElement>
     selected?: boolean
     allTabsButtonPressed?: string
@@ -58,6 +58,28 @@ class EntryRow extends React.Component<Props> {
         e.stopPropagation()
         return false
     }
+    private handleOpenInTabGroup: React.MouseEventHandler = (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+        if (this.state.confirmOpenAll) {
+            this.props.onOpenInTabGroupPress()
+            e.preventDefault()
+            e.stopPropagation()
+            setTimeout(() => {
+                this.setState({
+                    confirmOpenAll: false,
+                })
+            }, 2000)
+        } else {
+            this.setState({
+                confirmOpenAll: true,
+            })
+            e.preventDefault()
+            e.stopPropagation()
+        }
+
+        return false
+    }
 
     private resultEntryRef = createRef<HTMLDivElement>()
     private pressAllButtonRef = createRef<HTMLDivElement>()
@@ -66,6 +88,7 @@ class EntryRow extends React.Component<Props> {
         checkBoxHover: false,
         mouseOverItem: false,
         showExtraMenu: false,
+        confirmOpenAll: false,
     }
 
     private handleResultPress: React.MouseEventHandler = (e) => {
@@ -78,7 +101,13 @@ class EntryRow extends React.Component<Props> {
                 this.props.editMenuBtnRef?.current?.contains(
                     e.target as Node,
                 ) ||
-                this.props.extraMenuBtnRef?.current?.contains(e.target as Node)
+                this.props.extraMenuBtnRef?.current?.contains(
+                    e.target as Node,
+                ) ||
+                this.props.openInTabGroupButtonRef?.current?.contains(
+                    e.target as Node,
+                ) ||
+                this.state.showExtraMenu
             ) {
                 return
             }
@@ -137,6 +166,20 @@ class EntryRow extends React.Component<Props> {
                             innerRef={this.props.editMenuBtnRef}
                             contentAlign={'flex-start'}
                         />
+                        <PrimaryAction
+                            onClick={this.handleOpenInTabGroup}
+                            icon="goTo"
+                            size="medium"
+                            type="tertiary"
+                            fullWidth
+                            label={
+                                this.state.confirmOpenAll
+                                    ? 'Confirm opening all urls'
+                                    : 'Open all pages in new window'
+                            }
+                            innerRef={this.props.openInTabGroupButtonRef}
+                            contentAlign={'flex-start'}
+                        />
                         {this.props.addedToAllIds.includes(cleanID) ? (
                             <TooltipBox
                                 tooltipText={
@@ -152,7 +195,7 @@ class EntryRow extends React.Component<Props> {
                                     size="medium"
                                     type="tertiary"
                                     fullWidth
-                                    label="Add all tabs in window"
+                                    label="Added all tabs in window"
                                     innerRef={this.pressAllButtonRef}
                                     onClick={null}
                                     contentAlign={'flex-start'}
@@ -377,7 +420,7 @@ class EntryRow extends React.Component<Props> {
     }
 }
 
-export const ActOnAllTabsButton = styled(Layers)`
+export const ActOnAllTabsButton = styled.div`
     pointer-events: auto !important;
 `
 

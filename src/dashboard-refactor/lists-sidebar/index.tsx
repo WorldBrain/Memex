@@ -70,6 +70,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     followedListsGroup: ListGroup
     onConfirmListEdit: (listId: string, value: string) => void
     currentUser: any
+    onConfirmListDelete: (listId: string) => void
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {

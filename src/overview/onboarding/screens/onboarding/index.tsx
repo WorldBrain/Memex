@@ -151,19 +151,128 @@ export default class OnboardingScreen extends StatefulUIElement<
                 to get started
             </Title>
             <DescriptionText>
-                When on a website, hover to the bottom right corner. <br />
-                It's the jumping point for saving, organising & summarising.
+                Every website has a small Memex icon in the bottom right corner.{' '}
+                <br /> It's the jumping point for everything Memex.
             </DescriptionText>
-            <MemexActionButtonIntro src={'img/memexActionButtonIntro.png'} />
+
+            {this.state.hoveredOverOnboardingIcon ? (
+                <ContinueButton>
+                    <PrimaryAction
+                        label={'Continue'}
+                        icon={'longArrowRight'}
+                        onClick={() =>
+                            this.processEvent('goToNextOnboardingStep', {
+                                step: 'ChooseOnboardingOption',
+                            })
+                        }
+                        type="primary"
+                        size={'large'}
+                    />
+                </ContinueButton>
+            ) : (
+                <>
+                    <MemexActionButtonIntro
+                        onMouseEnter={() => {
+                            console.log('hovered')
+                            this.processEvent('hoverOverOnboardingIcon', null)
+                        }}
+                        src={'img/memexActionButtonIntro.svg'}
+                    />
+                    <ContinueButtonNotif>
+                        Hover over the icon here to continue{' '}
+                        <ContinueIcon>
+                            <Icon
+                                icon={'longArrowRight'}
+                                hoverOff
+                                heightAndWidth="24px"
+                                color="prime1"
+                            />
+                        </ContinueIcon>
+                    </ContinueButtonNotif>
+                </>
+            )}
+        </WelcomeBox>
+    )
+    private renderOnboardingOptions = () => (
+        <WelcomeBox>
+            <Title>Try it on real examples</Title>
+            <DescriptionText>
+                Annotate, Summarise, Share & Collaborate
+            </DescriptionText>
+            <OptionsBox>
+                <OptionsContainer
+                    onClick={() => {
+                        window.open(
+                            'https://links.memex.garden/onboarding_web',
+                            '_blank',
+                        )
+                    }}
+                >
+                    <OptionTitle>
+                        <Icon
+                            icon={'cursor'}
+                            heightAndWidth="30px"
+                            color="prime1"
+                            hoverOff
+                        />
+                        <OptionTitleText>Web Article</OptionTitleText>
+                    </OptionTitle>
+                    {/* <OptionDescription>
+                        Highlight text on a page and add tags
+                    </OptionDescription> */}
+                </OptionsContainer>
+                <OptionsContainer
+                    onClick={() => {
+                        window.open(
+                            'https://links.memex.garden/onboarding_youtube',
+                            '_blank',
+                        )
+                    }}
+                >
+                    <OptionTitle>
+                        <Icon
+                            icon={'play'}
+                            heightAndWidth="30px"
+                            color="prime1"
+                            hoverOff
+                        />
+                        <OptionTitleText>YouTube Video</OptionTitleText>
+                    </OptionTitle>
+                    {/* <OptionDescription>
+                        Highlight text on a page and add tags
+                    </OptionDescription> */}
+                </OptionsContainer>
+                <OptionsContainer
+                    onClick={() => {
+                        window.open(
+                            'https://links.memex.garden/onboarding_pdf',
+                            '_blank',
+                        )
+                    }}
+                >
+                    <OptionTitle>
+                        <Icon
+                            icon={'filePDF'}
+                            heightAndWidth="30px"
+                            color="prime1"
+                            hoverOff
+                        />
+                        <OptionTitleText>PDF</OptionTitleText>
+                    </OptionTitle>
+                    {/* <OptionDescription>
+                        Highlight text on a page and add tags
+                    </OptionDescription> */}
+                </OptionsContainer>
+            </OptionsBox>
             <PrimaryAction
-                label={'Finish'}
+                label={'Continue to Dashboard'}
                 icon={'longArrowRight'}
                 onClick={() =>
                     this.processEvent('goToNextOnboardingStep', {
                         step: 'finish',
                     })
                 }
-                type="primary"
+                type="tertiary"
                 size={'large'}
             />
         </WelcomeBox>
@@ -403,16 +512,13 @@ export default class OnboardingScreen extends StatefulUIElement<
         return (
             <OnboardingBox>
                 <OnboardingContent>
-                    {this.state.welcomeStep === 'start' &&
-                        this.renderWelcomeStep()}
-                    {this.state.welcomeStep === 'nudges' && this.renderNudges()}
                     {this.state.welcomeStep === 'basicIntro' &&
                         this.renderBasicIntro()}
+                    {this.state.welcomeStep === 'ChooseOnboardingOption' &&
+                        this.renderOnboardingOptions()}
                     {this.state.showSyncNotification &&
                         this.state.welcomeStep === 'finish' &&
                         this.renderSyncNotif()}
-                    {this.state.showOnboardingSelection &&
-                        this.renderBasicIntro()}
                     {!this.state.showOnboardingSelection &&
                         !this.state.showSyncNotification &&
                         this.state.welcomeStep === 'login' &&
@@ -424,18 +530,104 @@ export default class OnboardingScreen extends StatefulUIElement<
     }
 }
 
+const OptionsBox = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    grid-gap: 15px;
+    flex-direction: column;
+    position: relative;
+    width: 300px;
+    margin-top: 20px;
+    margin-bottom: 50px;
+`
+
+const OptionsContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    border-radius: 8px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    grid-gap: 15px;
+    flex-direction: row;
+    position: relative;
+    width: 300px;
+
+    background: transparent;
+    background-size: 0 0;
+    background-size: cover;
+    transition: background-image 1s ease-in-out;
+    cursor: pointer;
+    &:hover {
+        background-image: url('img/welcomeScreenIllustration.svg');
+    }
+`
+
+const OptionTitle = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    position: absolute;
+    z-index: 2;
+`
+
+const OptionTitleText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 18px;
+`
+
+const OptionDescription = styled.div``
+
+const ContinueButtonNotif = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    position: absolute;
+    bottom: 20px;
+    z-index: 2;
+    font-size: 18px;
+    color: ${(props) => props.theme.colors.prime1};
+    right: 15%;
+`
+const ContinueButton = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    position: absolute;
+    bottom: 50px;
+    z-index: 2;
+    font-size: 18px;
+    color: ${(props) => props.theme.colors.prime1};
+    right: 50px;
+`
+
+const moveRight = keyframes`
+  0% { transform: translateX(0); }
+  50% { transform: translateX(10px); }
+  100% { transform: translateX(0); }
+`
+
+const ContinueIcon = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: ${moveRight} 1s ease-in-out infinite;
+`
+
 const OnboardingContent = styled.div`
     z-index: 1;
     position: relative;
+    height: 100vh;
+    width: 100vw;
 `
 
 const MemexActionButtonIntro = styled.img`
-    height: 450px;
+    height: 50px;
     width: auto;
-    border-radius: 8px;
-    margin-top: -250px;
-    z-index: -1;
-    margin-bottom: 30px;
+    position: absolute;
+    right: 0;
+    bottom: 0;
 `
 
 const CheckBoxContainer = styled.div`
@@ -456,6 +648,8 @@ const WelcomeBox = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
+    height: 100%;
+    width: 100%;
 `
 
 const BetaButton = styled.div`
@@ -598,8 +792,8 @@ const WelcomeContainer = styled.div`
     display: flex;
     justify-content: space-between;
     overflow: hidden;
-    background-color: ${(props) => props.theme.colors.black};
     height: 100vh;
+    width: 100vw;
 `
 
 const openAnimation = keyframes`
@@ -655,11 +849,11 @@ const ContentBox = styled.div`
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 30px 50px;
-    background: ${(props) => props.theme.colors.black}30;
-    backdrop-filter: blur(5px);
+    padding: 30px 30px;
     border-radius: 20px;
     z-index: 2;
+    width: 100vw;
+    height: 100vh;
 `
 
 const Title = styled.div`

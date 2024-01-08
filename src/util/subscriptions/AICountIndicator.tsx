@@ -71,9 +71,8 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 openAIKey: openAIKey,
             })
         } else {
-            await this.syncSettings.openAI.set('apiKey', '')
             this.setState({
-                openAIKey: openAIKey,
+                openAIKey: '',
             })
         }
 
@@ -372,96 +371,28 @@ export class AICounterIndicator extends React.Component<Props, State> {
             (100 - (this.state.currentCount / this.state.totalCount) * 100) *
             3.6
 
-        if (this.props.isTrial) {
-            return (
-                <ButtonBox>
-                    <TooltipBox
-                        placement="bottom-end"
-                        tooltipText={
-                            <TooltipTextContainer>
-                                <TooltipTextTop>
-                                    Upgrade or add API key.
-                                </TooltipTextTop>
-                            </TooltipTextContainer>
-                        }
-                    >
-                        <Icon
-                            icon="key"
-                            heightAndWidth="22px"
-                            onClick={() => this.setState({ showTooltip: true })}
-                            containerRef={this.tooltipButtonRef}
-                        />
-                    </TooltipBox>
-
-                    {this.state.showTooltip && this.renderTooltip()}
-                </ButtonBox>
-            )
-        } else if (
-            this.state.totalCount < 10000 &&
-            this.state.openAIKey?.length === 0 &&
-            !this.props.isTrial
-        ) {
-            return (
-                <>
-                    <TooltipBox
-                        placement={
-                            this.props.position === 'top' ? 'bottom-end' : 'top'
-                        }
-                        tooltipText={
-                            <TooltipTextContainer>
-                                <TooltipTextTop>
-                                    <strong>{this.leftOverBlocks}</strong>{' '}
-                                    queries left this month
-                                </TooltipTextTop>
-                                <TooltipTextBottom>
-                                    Click for more info
-                                </TooltipTextBottom>
-                            </TooltipTextContainer>
-                        }
-                    >
-                        <CounterContainer
-                            progress={progressPercentNumber}
-                            ref={this.tooltipButtonRef}
-                            onClick={() => {
-                                this.setState({ showTooltip: true })
-                            }}
-                        >
-                            <InnerContainer>
-                                {' '}
-                                {this.props.isTrial
-                                    ? this.daysRemainingToComplete30()
-                                    : this.leftOverBlocks}
-                            </InnerContainer>
-                        </CounterContainer>
-                        {this.state.showTooltip && this.renderTooltip()}
-                    </TooltipBox>
-                </>
-            )
-        } else {
-            return (
-                <>
-                    <TooltipBox
-                        placement="bottom-end"
-                        tooltipText={
-                            <TooltipTextContainer>
-                                <TooltipTextTop>
-                                    Upgrade or add API key.
-                                </TooltipTextTop>
-                            </TooltipTextContainer>
-                        }
-                    >
-                        <Icon
-                            icon="settings"
-                            heightAndWidth="22px"
-                            onClick={() => this.setState({ showTooltip: true })}
-                            containerRef={this.tooltipButtonRef}
-                        />
-                    </TooltipBox>
-
-                    {this.state.showTooltip && this.renderTooltip()}
-                </>
-            )
-        }
+        return (
+            <>
+                {this.state.showTooltip && this.renderTooltip()}
+                <TooltipBox
+                    placement="bottom-end"
+                    tooltipText={
+                        <TooltipTextContainer>
+                            <TooltipTextTop>
+                                Upgrade or add API key.
+                            </TooltipTextTop>
+                        </TooltipTextContainer>
+                    }
+                >
+                    <Icon
+                        icon="key"
+                        heightAndWidth="22px"
+                        onClick={() => this.setState({ showTooltip: true })}
+                        containerRef={this.tooltipButtonRef}
+                    />
+                </TooltipBox>
+            </>
+        )
     }
 }
 

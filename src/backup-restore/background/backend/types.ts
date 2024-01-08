@@ -89,6 +89,7 @@ export abstract class BackupBackend {
         currentSchemaVersion: number
         options: { storeBlobs: boolean }
     }) {
+        console.log('backupChanges', changes)
         for (const change of changes) {
             if (change.operation !== 'delete') {
                 await this.storeObject({

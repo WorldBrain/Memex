@@ -154,8 +154,8 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         feedTitle: string
         feedUrl: string
         feedFavIcon?: string
-        type?: 'substack'
-        confirmState?: TaskState
+        type?: 'substack' | string
+        confirmState?: TaskState | string
     }[]
 
     // Indicates what is the currently selected space in the leaf screen
@@ -163,6 +163,14 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     // is selected, all operations default to use that selected space
     // except if explicity told otherwise.
     selectedListId: UnifiedList['unifiedId'] | null
+
+    existingSourcesOption:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
 
     annotationSharingAccess: AnnotationSharingAccess
     readingView?: boolean
@@ -281,6 +289,14 @@ export interface SidebarContainerState extends AnnotationConversationsState {
         }
     }
     AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+    localFoldersList: LocalFolder[]
+    showFeedSourcesMenu: boolean
+}
+
+export interface LocalFolder {
+    path: string
+    sourceApplication: 'local' | 'obsidian' | 'logseq'
+    id: number
 }
 
 export type AnnotationEvent<T> = {
@@ -313,6 +329,14 @@ interface SidebarEvents {
             endTimeSecs: number
         }
     }
+    setExistingSourcesOptions:
+        | 'pristine'
+        | 'existingKnowledge'
+        | 'twitter'
+        | 'localFolder'
+        | 'obsidian'
+        | 'logseq'
+    processFileImportFeeds: { fileString: string }
     getHighlightColorSettings: null
     saveHighlightColor: {
         noteId: string
@@ -322,13 +346,10 @@ interface SidebarEvents {
     saveFeedSources: {
         sources: string
     }
-    loadFeedSources: {
-        sources: {
-            feedTitle: string
-            feedUrl: string
-            type: 'substack'
-        }[]
+    removeFeedSource: {
+        feedUrl: string
     }
+    loadFeedSources: null
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
     createYoutubeTimestampWithScreenshot: {
@@ -354,6 +375,7 @@ interface SidebarEvents {
     setSummaryMode: {
         tab: 'Answer' | 'References'
     }
+    setFeedSourcesMenu: null
     setActiveAITab: {
         tab: SidebarAITab
     }
@@ -519,6 +541,10 @@ interface SidebarEvents {
             | null
     }
     requestRabbitHoleBetaFeatureAccess: { reasonText: string }
+    openLocalFile: { path: string }
+    addLocalFolder: null
+    removeLocalFolder: { id: number }
+    getLocalFolders: null
 }
 
 export type SidebarContainerEvents = UIEvent<
@@ -546,13 +572,16 @@ export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']
     pageTitle: string
     contentText?: string
-    contentType: 'page' | 'annotation' | 'rss-feed-item'
+    contentType: 'page' | 'annotation' | 'rss-feed-item' | 'pdf' | 'markdown'
     creatorId?: UserReference['id']
     spaces?: any
     body?: string
     comment?: string
     unifiedId?: UnifiedAnnotation['unifiedId']
     sourceApplication?: string
+    distance?: number
+    path?: string
+    topLevelFolder?: string
 }
 
 export interface ListInstance {

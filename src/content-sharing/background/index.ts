@@ -44,6 +44,7 @@ import type { ListTree } from 'src/custom-lists/background/types'
 import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
 import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { OperationBatch } from '@worldbrain/storex'
+import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 
 export interface LocalContentSharingSettings {
     remotePageIdLookup: {
@@ -54,9 +55,7 @@ export interface LocalContentSharingSettings {
 export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
-    private pageLinkCreationPromises: {
-        [fullPageUrl: string]: Promise<void>
-    } = {}
+    private pageLinkCreationResolvable: Resolvable<void> | null = null
     private listSharePromises: {
         [localListId: number]: Promise<void>
     } = {}
@@ -239,10 +238,10 @@ export default class ContentSharingBackground {
 
         this.remoteFunctionsByTab = {
             schedulePageLinkCreation: this.schedulePageLinkCreation,
-            waitForPageLinkCreation: this.waitForPageLinkCreation,
         }
 
         this.remoteFunctions = {
+            waitForPageLinkCreation: this.waitForPageLinkCreation,
             getExistingKeyLinksForList: async (...args) => {
                 const { contentSharing } = await options.services
                 return contentSharing.getExistingKeyLinksForList(...args)
@@ -1000,12 +999,8 @@ export default class ContentSharingBackground {
         },
     ) {}
 
-    waitForPageLinkCreation: RemoteContentSharingByTabsInterface<
-        'provider'
-    >['waitForPageLinkCreation'] = async (_, { fullPageUrl }) => {
-        const promise = this.pageLinkCreationPromises[fullPageUrl]
-        delete this.pageLinkCreationPromises[fullPageUrl]
-        return promise
+    waitForPageLinkCreation: ContentSharingInterface['waitForPageLinkCreation'] = async () => {
+        await this.pageLinkCreationResolvable
     }
 
     schedulePageLinkCreation: RemoteContentSharingByTabsInterface<
@@ -1014,11 +1009,13 @@ export default class ContentSharingBackground {
         { tab },
         { fullPageUrl, now = Date.now(), customPageTitle },
     ) => {
-        if (this.pageLinkCreationPromises[fullPageUrl]) {
+        if (this.pageLinkCreationResolvable) {
             throw new Error(
-                `Page link already in process of being created for this URL: ${fullPageUrl} - try calling "waitForPageLink" RPC method`,
+                `Page link already in process of being created - try calling "waitForPageLink" RPC method`,
             )
         }
+        this.pageLinkCreationResolvable = resolvablePromise()
+
         const bgModules = this.options.getBgModules()
         const currentUser = await bgModules.auth.authService.getCurrentUser()
         if (!currentUser) {
@@ -1039,9 +1036,7 @@ export default class ContentSharingBackground {
         const pageTitle = customPageTitle
 
         // Start but don't wait for the storage logic
-        this.pageLinkCreationPromises[
-            fullPageUrl
-        ] = this.performPageLinkCreation({
+        this.performPageLinkCreation({
             creator: currentUser.id,
             collabKey,
             listTitle,
@@ -1052,6 +1047,9 @@ export default class ContentSharingBackground {
             fullPageUrl,
             now,
             pageTitle,
+        }).catch((err) => {
+            this.pageLinkCreationResolvable.reject(err)
+            this.pageLinkCreationResolvable = null
         })
 
         return {
@@ -1162,6 +1160,9 @@ export default class ContentSharingBackground {
             listId: remoteListId,
             keyString: collabKey.toString(),
         })
+
+        this.pageLinkCreationResolvable.resolve()
+        this.pageLinkCreationResolvable = null
 
         if (this.options.analyticsBG) {
             try {

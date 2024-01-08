@@ -207,7 +207,7 @@ type DataChange = [
     /* type: */ DataChangeType,
     /* collection: */ string,
     /* id: */ string | number,
-    /* info: */ any?,
+    /* info? */ any?,
 ]
 
 interface DataChangeAssertOpts {
@@ -710,6 +710,9 @@ describe('Personal cloud translation layer', () => {
             await setups[0].storageManager
                 .collection('locators')
                 .createObject(LOCAL_TEST_DATA_V24.locators.fourth_b)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_uploading)
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
@@ -732,16 +735,20 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
-                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_base.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.fourth.id],
-                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_base.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_c_uploading.id],
                 ], { skipAssertTimestamp: true }),
                 personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                 personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
-                personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third, testLocators.fourth_dummy, testLocators.fourth_a, testLocators.fourth_b],
+                personalContentLocator: [
+                    testLocators.first, testLocators.second,
+                    testLocators.third_base, testLocators.third,
+                    testLocators.fourth_base, testLocators.fourth_a, testLocators.fourth_b, testLocators.fourth_c_uploading],
             })
 
             // NOTE: Only the locators for the third+fourth pages are downloaded, as they are the only PDFs
@@ -754,6 +761,144 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_b },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploading },
+            ])
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should update locators', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
+            // Note we still want to insert the non-PDF pages here to test the different locators behavior
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.third)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.third)
+            await setups[0].storageManager
+                .collection('pages')
+                .createObject(LOCAL_TEST_DATA_V24.pages.fourth)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_b)
+            await setups[0].storageManager
+                .collection('locators')
+                .createObject(LOCAL_TEST_DATA_V24.locators.fourth_uploading)
+            await setups[0].backgroundModules.pages.storage.updateLocatorStatus(
+                {
+                    normalizedUrl:
+                        LOCAL_TEST_DATA_V24.locators.fourth_uploading
+                            .normalizedUrl,
+                    locationScheme: LocationSchemeType.UploadStorage,
+                    status: 'uploaded',
+                },
+            )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'sharedContentLocator',
+                    'sharedContentFingerprint',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_base.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.fourth.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_base.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_a.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_b.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.fourth_c_uploading.id],
+                    [DataChangeType.Modify, 'personalContentLocator', testLocators.fourth_c_uploading.id],
+                ], { skipAssertTimestamp: true }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
+                personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third, testMetadata.fourth],
+                personalContentLocator: [
+                    testLocators.first, testLocators.second,
+                    testLocators.third_base, testLocators.third,
+                    testLocators.fourth_base, testLocators.fourth_a, testLocators.fourth_b, testLocators.fourth_c_uploaded,
+                ],
+                sharedContentLocator: [
+                    {
+                        id: expect.anything(),
+                        creator: TEST_USER.id,
+                        locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                        normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                        originalUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.originalLocation,
+                        location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                        // sharedList: null,
+                    },
+                ],
+                sharedContentFingerprint: [
+                    {
+                        id: expect.anything(),
+                        creator: TEST_USER.id,
+                        normalizedUrl: testLocators.third_base.location,
+                        fingerprint: testLocators.third.fingerprint,
+                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                        // sharedList: null
+                    },
+                    {
+                        id: expect.anything(),
+                        creator: TEST_USER.id,
+                        normalizedUrl: testLocators.fourth_base.location,
+                        fingerprint: testLocators.fourth_a.fingerprint,
+                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                        // sharedList: null
+                    },
+                    {
+                        id: expect.anything(),
+                        creator: TEST_USER.id,
+                        normalizedUrl: testLocators.fourth_base.location,
+                        fingerprint: testLocators.fourth_b.fingerprint,
+                        fingerprintScheme: FingerprintSchemeType.PdfV1,
+                        // sharedList: null
+                    },
+                ],
+            })
+
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.third },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_b },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
             ])
             testSyncPushTrigger({ wasTriggered: true })
         })
@@ -810,12 +955,12 @@ describe('Personal cloud translation layer', () => {
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
                     [DataChangeType.Create, 'personalContentMetadata', testMetadata.third.id],
-                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_dummy.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.third_base.id],
                     [DataChangeType.Create, 'personalContentLocator', testLocators.third.id],
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.third.id, {
-                        normalizedUrl: testLocators.third_dummy.location,
+                        normalizedUrl: testLocators.third_base.location,
                     }],
-                    [DataChangeType.Delete, 'personalContentLocator', testLocators.third_dummy.id],
+                    [DataChangeType.Delete, 'personalContentLocator', testLocators.third_base.id],
                     [DataChangeType.Delete, 'personalContentLocator', testLocators.third.id, {
                         id: testLocators.third.localId,
                     }],
@@ -6083,7 +6228,7 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_base, testLocators.third],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -6107,10 +6252,22 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentFingerprint: [
-                        expect.objectContaining({
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
                             normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
                             fingerprint: testLocators.third.fingerprint,
-                        }),
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            // sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.third.pageUrl,
+                            fingerprint: testLocators.third.fingerprint,
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                     sharedContentLocator: [
                         expect.objectContaining({
@@ -6236,7 +6393,7 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.third],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_dummy, testLocators.third],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.third_base, testLocators.third],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -6310,6 +6467,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.fourth_uploading)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -6335,6 +6495,17 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('pageListEntries')
                     .createObject(LOCAL_TEST_DATA_V24.pageListEntries.fourth)
+
+                // Local PDFs should get uploaded
+                await setups[0].backgroundModules.pages.storage.updateLocatorStatus(
+                    {
+                        normalizedUrl:
+                            LOCAL_TEST_DATA_V24.locators.fourth_uploading
+                                .normalizedUrl,
+                        locationScheme: LocationSchemeType.UploadStorage,
+                        status: 'uploaded',
+                    },
+                )
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
                 const remoteData = serverIdCapturer.mergeIds(
@@ -6351,7 +6522,7 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
-                testLocators.fourth_dummy.personalContentMetadata =
+                testLocators.fourth_base.personalContentMetadata =
                     testMetadata.fourth.id
                 testLocators.fourth_a.personalContentMetadata =
                     testMetadata.fourth.id
@@ -6377,7 +6548,7 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_base, testLocators.fourth_a, testLocators.fourth_c_uploaded],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -6401,17 +6572,42 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentFingerprint: [
-                        expect.objectContaining({
-                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
                             fingerprint: testLocators.fourth_a.fingerprint,
-                        }),
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            // sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            fingerprint: testLocators.fourth_a.fingerprint,
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                     sharedContentLocator: [
-                        // NOTE: This shouldn't get shared as it's a local filesystem locator
-                        // expect.objectContaining({
-                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
-                        //     originalUrl: testLocators.fourth_a.originalLocation,
-                        // }),
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            originalUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.originalLocation,
+                            location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                            // sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            originalUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.originalLocation,
+                            location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                 })
 
@@ -6419,12 +6615,14 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
                 ], { skip: 2 })
                 testSyncPushTrigger({ wasTriggered: true })
             })
@@ -6450,6 +6648,9 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('locators')
                     .createObject(LOCAL_TEST_DATA_V24.locators.fourth_a)
+                await setups[0].storageManager
+                    .collection('locators')
+                    .createObject(LOCAL_TEST_DATA_V24.locators.fourth_uploading)
                 // Create shared annotation
                 await setups[0].storageManager
                     .collection('annotations')
@@ -6476,6 +6677,17 @@ describe('Personal cloud translation layer', () => {
                 await setups[0].storageManager
                     .collection('sharedListMetadata')
                     .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+
+                // Local PDFs should get uploaded
+                await setups[0].backgroundModules.pages.storage.updateLocatorStatus(
+                    {
+                        normalizedUrl:
+                            LOCAL_TEST_DATA_V24.locators.fourth_uploading
+                                .normalizedUrl,
+                        locationScheme: LocationSchemeType.UploadStorage,
+                        status: 'uploaded',
+                    },
+                )
                 await setups[0].backgroundModules.personalCloud.waitForSync()
 
                 const remoteData = serverIdCapturer.mergeIds(
@@ -6492,7 +6704,7 @@ describe('Personal cloud translation layer', () => {
                 const testPrivacyLevels =
                     remoteData.personalAnnotationPrivacyLevel
 
-                testLocators.fourth_dummy.personalContentMetadata =
+                testLocators.fourth_base.personalContentMetadata =
                     testMetadata.fourth.id
                 testLocators.fourth_a.personalContentMetadata =
                     testMetadata.fourth.id
@@ -6518,7 +6730,7 @@ describe('Personal cloud translation layer', () => {
                 ).toEqual({
                     personalBlockStats: [personalBlockStats({ usedBlocks: 4 })],
                     personalContentMetadata: [testMetadata.first, testMetadata.second, testMetadata.fourth],
-                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_dummy, testLocators.fourth_a],
+                    personalContentLocator: [testLocators.first, testLocators.second, testLocators.fourth_base, testLocators.fourth_a, testLocators.fourth_c_uploaded],
                     personalList: [testLists.first],
                     personalListEntry: [testListEntries.third],
                     personalListShare: [testListShares.first],
@@ -6527,6 +6739,7 @@ describe('Personal cloud translation layer', () => {
                     personalAnnotationPrivacyLevel: [testPrivacyLevels.fifth],
                     sharedList: [
                         expect.objectContaining({
+                            id: testListShares.first.remoteId,
                             title: LOCAL_TEST_DATA_V24.customLists.first.name,
                         }),
                     ],
@@ -6542,17 +6755,42 @@ describe('Personal cloud translation layer', () => {
                         }),
                     ],
                     sharedContentFingerprint: [
-                        expect.objectContaining({
-                            normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
                             fingerprint: testLocators.fourth_a.fingerprint,
-                        }),
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            // sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            fingerprint: testLocators.fourth_a.fingerprint,
+                            fingerprintScheme: FingerprintSchemeType.PdfV1,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                     sharedContentLocator: [
-                        // NOTE: This shouldn't get shared as it's a local filesystem locator
-                        // expect.objectContaining({
-                        //     normalizedUrl: LOCAL_TEST_DATA_V24.annotations.fifth.pageUrl,
-                        //     originalUrl: testLocators.fourth_a.originalLocation,
-                        // }),
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            originalUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.originalLocation,
+                            location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                            // sharedList: testListShares.first.remoteId,
+                        },
+                        {
+                            id: expect.anything(),
+                            creator: TEST_USER.id,
+                            locationScheme: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.locationScheme,
+                            normalizedUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.normalizedUrl,
+                            originalUrl: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.originalLocation,
+                            location: LOCAL_TEST_DATA_V24.locators.fourth_uploaded.location,
+                            sharedList: testListShares.first.remoteId,
+                        },
                     ],
                 })
 
@@ -6560,12 +6798,14 @@ describe('Personal cloud translation layer', () => {
                 await testDownload([
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_a },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotations', object: LOCAL_TEST_DATA_V24.annotations.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedAnnotationMetadata', object: LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'annotationPrivacyLevels', object: LOCAL_TEST_DATA_V24.annotationPrivacyLevels.fifth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'customLists', object: LOCAL_TEST_DATA_V24.customLists.first },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'pageListEntries', object: LOCAL_TEST_DATA_V24.pageListEntries.fourth },
                     { type: PersonalCloudUpdateType.Overwrite, collection: 'sharedListMetadata', object: LOCAL_TEST_DATA_V24.sharedListMetadata.first },
+                    { type: PersonalCloudUpdateType.Overwrite, collection: 'locators', object: LOCAL_TEST_DATA_V24.locators.fourth_uploaded },
                 ], { skip: 2 })
                 testSyncPushTrigger({ wasTriggered: true })
             })
@@ -6930,9 +7170,12 @@ describe('Personal cloud translation layer', () => {
             const annotBId = '11111112'
             const annotBUrl =
                 LOCAL_TEST_DATA_V24.pages.first.url + '/#' + annotBId
-            const syncedList = await setups[1].serverStorage.manager
+            const syncedList: {
+                id: AutoPk
+                localId: AutoPk
+            } = await setups[1].serverStorage.manager
                 .collection('personalList')
-                .findObject<{ id: AutoPk; localId: AutoPk }>({
+                .findObject({
                     user: TEST_USER_2_ID,
                 })
 

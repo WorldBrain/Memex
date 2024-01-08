@@ -859,6 +859,11 @@ export class AnnotationsSidebarContainer<
                             loadFeedSources={() => {
                                 this.processEvent('loadFeedSources', null)
                             }}
+                            removeFeedSource={(feedUrl) => {
+                                this.processEvent('removeFeedSource', {
+                                    feedUrl,
+                                })
+                            }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}
@@ -1090,9 +1095,15 @@ export class AnnotationsSidebarContainer<
                             copyPageLink={(link) => {
                                 this.processEvent('copyNoteLink', { link })
                             }}
-                            queryAIwithPrompt={(prompt) => {
+                            queryAIwithPrompt={(
+                                prompt: string,
+                                highlightedText?: string,
+                                queryMode?: string,
+                            ) => {
                                 this.processEvent('queryAIwithPrompt', {
                                     prompt,
+                                    highlightedText,
+                                    queryMode,
                                 })
                             }}
                             saveAIPrompt={(prompt) => {
@@ -1420,6 +1431,36 @@ export class AnnotationsSidebarContainer<
                                     { reasonText },
                                 )
                             }
+                            processFileImportFeeds={(fileString) => {
+                                this.processEvent('processFileImportFeeds', {
+                                    fileString: fileString,
+                                })
+                            }}
+                            openLocalFile={(path: string) => {
+                                this.processEvent('openLocalFile', {
+                                    path: path,
+                                })
+                            }}
+                            addLocalFolder={() => {
+                                this.processEvent('addLocalFolder', null)
+                            }}
+                            getLocalFolders={() => {
+                                this.processEvent('getLocalFolders', null)
+                            }}
+                            removeLocalFolder={(id) => {
+                                this.processEvent('removeLocalFolder', {
+                                    id: id,
+                                })
+                            }}
+                            setFeedSourcesMenu={() => {
+                                this.processEvent('setFeedSourcesMenu', null)
+                            }}
+                            setExistingSourcesOptions={(option) => {
+                                this.processEvent(
+                                    'setExistingSourcesOptions',
+                                    option,
+                                )
+                            }}
                         />
                     </Rnd>
                 </ContainerStyled>

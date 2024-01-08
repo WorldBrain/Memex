@@ -7,6 +7,8 @@ import {
     AI_SUMMARY_URLS,
 } from './constants'
 import { trackHitPaywall } from '@worldbrain/memex-common/lib/analytics/events'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -271,7 +273,10 @@ export async function AIActionAllowed(analyticsBG) {
         return false
     }
 }
-export async function rabbitHoleBetaFeatureAllowed(authBG) {
+export async function rabbitHoleBetaFeatureAllowed(
+    authBG: AuthRemoteFunctionsInterface,
+    contentScriptsBG: ContentScriptsInterface<'caller'>,
+) {
     const onboardingComplete = await browser.storage.local.get(
         'rabbitHoleBetaFeatureAccessOnboardingDone',
     )
@@ -284,27 +289,13 @@ export async function rabbitHoleBetaFeatureAllowed(authBG) {
 
     const grantedBcOfSubscription = status.AIlimit > 10000
 
-    const isStaging =
-        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-        process.env.NODE_ENV === 'development'
-
     const email = (await authBG.getCurrentUser()).email
     const userId = (await authBG.getCurrentUser()).id
 
-    const baseUrl = isStaging
-        ? 'https://cloudflare-memex-staging.memex.workers.dev'
-        : 'https://cloudfare-memex.memex.workers.dev'
-
-    const response = await fetch(baseUrl + '/check_rabbithole_beta_status', {
-        method: 'POST',
-        body: JSON.stringify({
-            email: email,
-            userId: userId,
-        }),
-        headers: { 'Content-Type': 'application/json' },
+    let responseContent = await contentScriptsBG.openBetaFeatureSettings({
+        email,
+        userId,
     })
-
-    let responseContent = await response.json()
 
     if (responseContent.status === 'granted') {
         if (grantedBcOfSubscription) {
@@ -322,19 +313,9 @@ export async function rabbitHoleBetaFeatureAllowed(authBG) {
         return 'denied'
     }
 }
-export async function downloadMemexDesktop() {
-    const OS = window.navigator.platform.includes('Win')
-        ? 'win'
-        : window.navigator.platform.includes('Mac')
-        ? 'mac'
-        : 'linux'
-
-    // @ts-ignore
-    const OSData = await navigator.userAgentData.getHighEntropyValues([
-        'architecture',
-    ])
-
-    let arch = OSData.architecture
+export async function downloadMemexDesktop(getSystemArchAndOS) {
+    const OS = getSystemArchAndOS.os
+    const arch = getSystemArchAndOS.arch
 
     const isStaging =
         process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||

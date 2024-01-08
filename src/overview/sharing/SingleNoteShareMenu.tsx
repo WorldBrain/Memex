@@ -48,7 +48,7 @@ interface State extends ShareMenuCommonState {
     autoShareState: TaskState
     autoCreateLinkState: TaskState
     autoCreateLinkSetting: boolean
-    isAutoAddSet: boolean
+    isAutoAddEnabled: boolean
     showAutoAddMenu: boolean
 }
 
@@ -112,7 +112,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         confirmationMode: null,
         autoCreateLinkState: 'pristine',
         autoCreateLinkSetting: null,
-        isAutoAddSet: null,
+        isAutoAddEnabled: null,
         showAutoAddMenu: false,
     }
 
@@ -126,17 +126,13 @@ export default class SingleNoteShareMenu extends React.PureComponent<
 
         this.autoAddButtonRef = React.createRef<HTMLDivElement>()
 
-        const isAutoAddStorage = await this.getAutoAddSetting()
+        const isAutoAddEnabled = await this.getAutoAddSetting()
 
-        if (isAutoAddStorage != null) {
-            this.setState({
-                isAutoAddSet: isAutoAddStorage,
-            })
-        } else if (isAutoAddStorage == null) {
-            this.setState({
-                isAutoAddSet: true,
-            })
+        if (isAutoAddEnabled == null) {
+            this.setState({ isAutoAddEnabled: true })
             await this.setAutoAddSetting(true)
+        } else {
+            this.setState({ isAutoAddEnabled })
         }
 
         let existingSetting = await this.syncSettings.extension.get(
@@ -168,21 +164,21 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         }
     }
 
-    async setAutoAddSetting(isAutoAdd) {
-        return await this.syncSettings.extension.set(
+    async setAutoAddSetting(isAutoAddEnabled: boolean) {
+        return this.syncSettings.extension.set(
             'shouldAutoAddSpaces',
-            isAutoAdd,
+            isAutoAddEnabled,
         )
     }
+
     async getAutoAddSetting() {
-        return await this.syncSettings.extension.get('shouldAutoAddSpaces')
+        return this.syncSettings.extension.get('shouldAutoAddSpaces')
     }
 
-    async handleAutoAddToggle(isAutoAdd) {
-        this.setState({
-            isAutoAddSet: isAutoAdd,
-        })
-        await this.setAutoAddSetting(isAutoAdd)
+    async toggleAutoAdd() {
+        const next = !this.state.isAutoAddEnabled
+        this.setState({ isAutoAddEnabled: next })
+        await this.setAutoAddSetting(next)
     }
 
     renderAutoAddDefaultSettings() {
@@ -191,7 +187,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                 <PopoutBox
                     targetElementRef={this.autoAddButtonRef?.current}
                     placement="bottom-end"
-                    width="150px"
+                    width="320px"
                     closeComponent={() =>
                         this.setState({ showAutoAddMenu: false })
                     }
@@ -243,15 +239,11 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 key={3}
                                 id={'3'}
                                 width="fit-content"
-                                isChecked={this.state.isAutoAddSet === true}
-                                handleChange={() =>
-                                    this.handleAutoAddToggle(
-                                        !this.state.isAutoAddSet,
-                                    )
-                                }
+                                isChecked={this.state.isAutoAddEnabled === true}
+                                handleChange={() => this.toggleAutoAdd()}
                                 // isDisabled={!this.state.shortcutsEnabled}
                                 name={
-                                    this.state.isAutoAddSet
+                                    this.state.isAutoAddEnabled
                                         ? 'Is Default'
                                         : 'Make Default'
                                 }
@@ -260,7 +252,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 }
                                 fontSize={14}
                                 size={14}
-                                isLoading={this.state.isAutoAddSet == null}
+                                isLoading={this.state.isAutoAddEnabled == null}
                             />
                         </DefaultCheckBoxContainer>
                     </AutoAddDefaultContainer>

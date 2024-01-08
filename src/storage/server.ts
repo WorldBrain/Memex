@@ -26,6 +26,7 @@ import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import SlackStorage from '@worldbrain/memex-common/lib/slack/storage'
 import { SlackRetroSyncStorage } from '@worldbrain/memex-common/lib/slack/storage/retro-sync'
 import { PublicApiStorage } from '@worldbrain/memex-common/lib/public-api/storage'
+import { UploadsStorage } from '@worldbrain/memex-common/lib/uploads/storage'
 
 let shouldLogOperations = false
 
@@ -115,9 +116,14 @@ export async function createServerStorage(
         storageManager,
         operationExecuter: operationExecuter('publicApi'),
     })
+    const uploads = new UploadsStorage({
+        storageManager,
+        operationExecuter: operationExecuter('uploads'),
+    })
     const serverStorage: ServerStorage = {
         manager: storageManager,
         modules: {
+            uploads,
             sharedSyncLog,
             users,
             contentSharing,

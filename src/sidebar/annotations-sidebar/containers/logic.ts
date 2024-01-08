@@ -359,6 +359,9 @@ export class SidebarContainerLogic extends UILogic<
             suggestionsResults: [],
             suggestionsResultsLoadState: 'pristine',
             desktopAppDownloadLink: null,
+            showFeedSourcesMenu: false,
+            existingSourcesOption: 'pristine',
+            localFoldersList: [],
         }
     }
 
@@ -835,6 +838,7 @@ export class SidebarContainerLogic extends UILogic<
     private checkRabbitHoleOnboardingStage = async () => {
         const rabbitHoleBetaAccess = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
+            this.options.contentScriptsBG,
         )
 
         this.emitMutation({
@@ -852,8 +856,9 @@ export class SidebarContainerLogic extends UILogic<
             rabbitHoleBetaAccess === 'granted' ||
             rabbitHoleBetaAccess === 'grantedBcOfSubscription'
         ) {
-            console.log('granted', rabbitHoleBetaAccess)
-            const url = await downloadMemexDesktop()
+            const url = await downloadMemexDesktop(
+                await this.options.pkmSyncBG.getSystemArchAndOS(),
+            )
 
             this.emitMutation({
                 desktopAppDownloadLink: { $set: url },
@@ -1449,6 +1454,46 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({ selectedShareMenuPageLinkList: { $set: null } })
     }
+
+    processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({
+        event,
+        previousState,
+    }) => {
+        const fileContent = event.fileString
+        const parser = new DOMParser()
+        const xmlDoc = parser.parseFromString(fileContent, 'text/xml')
+
+        const feedsNode = Array.from(
+            xmlDoc.getElementsByTagName('outline'),
+        ).filter(
+            (node) =>
+                node.getAttribute('type') === 'rss' ||
+                node.getAttribute('type') === 'atom',
+        )
+        const feedSources = Array.from(feedsNode).map((node) => ({
+            feedTitle: node.getAttribute('title'),
+            feedUrl: (
+                node.getAttribute('') || node.getAttribute('xmlUrl')
+            ).replace('http://', 'https://'),
+            feedFavicon: null,
+            type: null,
+            confirmState: 'success',
+        }))
+
+        const allFeedSources = [
+            ...feedSources,
+            ...previousState.existingFeedSources,
+        ]
+
+        this.emitMutation({
+            existingFeedSources: {
+                $set: allFeedSources,
+            },
+        })
+
+        await this.options.pkmSyncBG.addFeedSources(feedSources)
+    }
+
     saveFeedSources: EventHandler<'saveFeedSources'> = async ({
         event,
         previousState,
@@ -1459,7 +1504,6 @@ export class SidebarContainerLogic extends UILogic<
                 : [event.sources]
 
         let feedSourcesToCheck = sources
-        console.log('feedSourcesToCheck', feedSourcesToCheck)
         if (feedSourcesToCheck?.length === 0) {
             return
         }
@@ -1467,10 +1511,11 @@ export class SidebarContainerLogic extends UILogic<
         const feedSourcePromises = feedSourcesToCheck.map(
             async (inputFeedUrl) => {
                 if (
-                    inputFeedUrl &&
-                    previousState.existingFeedSources.some(
-                        (source) => source.feedUrl === inputFeedUrl,
-                    )
+                    !inputFeedUrl ||
+                    (inputFeedUrl &&
+                        previousState.existingFeedSources.some(
+                            (source) => source.feedUrl === inputFeedUrl,
+                        ))
                 ) {
                     return
                 }
@@ -1507,16 +1552,16 @@ export class SidebarContainerLogic extends UILogic<
                 )
 
                 // If the source does not exist in the updatedSources array, add it to the beginning
-                if (existingSourceIndex === -1) {
-                    console.log(existingSourceIndex)
+                if (
+                    existingSourceIndex === -1 &&
+                    updatedSource.feedUrl &&
+                    updatedSource.feedTitle
+                ) {
                     updatedSources.unshift(updatedSource)
                 } else {
                     // If the source already exists, do not add it again
                     return
                 }
-
-                console.log('updatedSource', updatedSource)
-                console.log('updatedSourceS', updatedSources)
 
                 this.emitMutation({
                     existingFeedSources: { $set: updatedSources },
@@ -1530,12 +1575,9 @@ export class SidebarContainerLogic extends UILogic<
         try {
             results = await Promise.all(feedSourcePromises)
 
-            console.log('results', results)
             results = results?.filter(
-                (result) => result && result.confirmState !== 'error',
+                (result) => result != null && result.confirmState !== 'error',
             )
-
-            console.log('results', results)
         } catch (e) {
             console.log('e', e)
         }
@@ -1552,10 +1594,9 @@ export class SidebarContainerLogic extends UILogic<
         // this.emitMutation({
         //     existingFeedSources: { $set: updatedSources },
         // })
-        console.log('feedSources', results)
         await this.options.pkmSyncBG.addFeedSources(results)
     }
-    loadFeedSources: EventHandler<'saveFeedSources'> = async ({
+    loadFeedSources: EventHandler<'loadFeedSources'> = async ({
         event,
         previousState,
     }) => {
@@ -1564,6 +1605,29 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             existingFeedSources: { $set: feedSources },
         })
+    }
+    removeFeedSource: EventHandler<'removeFeedSource'> = async ({
+        event,
+        previousState,
+    }) => {
+        const feedUrl = event.feedUrl
+
+        let currentSources = previousState.existingFeedSources
+
+        // Find the index of the folder with the id = event.id
+        const feedIndex = currentSources.findIndex(
+            (folder) => folder.feedUrl === feedUrl,
+        )
+
+        // If the folder is found, remove it from the array
+        if (feedIndex !== -1) {
+            currentSources.splice(feedIndex, 1)
+        }
+
+        this.emitMutation({
+            existingFeedSources: { $set: currentSources },
+        })
+        await this.options.pkmSyncBG.removeFeedSource(feedUrl)
     }
 
     validateSpaceName(name: string, listIdToSkip?: number) {
@@ -1616,7 +1680,9 @@ export class SidebarContainerLogic extends UILogic<
         'setRabbitHoleBetaFeatureAccess'
     > = async ({ event }) => {
         if (event.permission === 'onboarding') {
-            const url = await downloadMemexDesktop()
+            const url = await downloadMemexDesktop(
+                await this.options.pkmSyncBG.getSystemArchAndOS(),
+            )
             this.emitMutation({
                 rabbitHoleBetaFeatureAccess: { $set: event.permission },
             })
@@ -1632,7 +1698,6 @@ export class SidebarContainerLogic extends UILogic<
                     $set: 'downloadStarted',
                 },
             })
-            console.log('downloadStarted')
             const desktopAppRunning = await this.checkIfDesktopAppIsRunning()
             if (desktopAppRunning) {
                 this.emitMutation({
@@ -1689,8 +1754,8 @@ export class SidebarContainerLogic extends UILogic<
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
 
-        const email = (await this.options.authBG.getCurrentUser()).email
-        const userId = (await this.options.authBG.getCurrentUser()).id
+        const email = (await this.options.authBG.getCurrentUser())?.email
+        const userId = (await this.options.authBG.getCurrentUser())?.id
 
         const baseUrl = isStaging
             ? 'https://cloudflare-memex-staging.memex.workers.dev'
@@ -1708,6 +1773,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const onboardingStage = await rabbitHoleBetaFeatureAllowed(
             this.options.authBG,
+            this.options.contentScriptsBG,
         )
 
         this.emitMutation({
@@ -2615,6 +2681,9 @@ export class SidebarContainerLogic extends UILogic<
             loadState: { $set: 'running' },
         })
 
+        const selectedText =
+            highlightedText || previousState?.selectedTextAIPreview
+
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
@@ -2635,10 +2704,6 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
 
-        let contentType = fullPageUrl?.includes('youtube.com/watch')
-            ? 'video transcript'
-            : 'text'
-
         let queryPrompt = prompt
 
         if (!previousState.isTrial) {
@@ -2647,9 +2712,9 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             selectedTextAIPreview: {
                 $set:
-                    highlightedText && outputLocation !== 'chapterSummary'
-                        ? highlightedText
-                        : '',
+                    selectedText?.length && outputLocation !== 'chapterSummary'
+                        ? selectedText
+                        : null,
             },
             loadState: {
                 $set:
@@ -2672,9 +2737,9 @@ export class SidebarContainerLogic extends UILogic<
         let isContentSearch = false
         textToAnalyse = textAsAlternative
             ? textAsAlternative
-            : highlightedText
-            ? highlightedText
-            : undefined
+            : selectedText
+            ? selectedText
+            : null
 
         if (previousState.fetchLocalHTML) {
             textToAnalyse = document.title + document.body.innerText
@@ -2692,10 +2757,21 @@ export class SidebarContainerLogic extends UILogic<
             }
             const results = await this.options.customListsBG.findSimilarBackground(
                 previousState.prompt || prompt,
-                normalizeUrl(this.previousState.fullPageUrl, {
-                    skipProtocolTrim: true,
-                }),
+                normalizeUrl(
+                    this.previousState?.fullPageUrl || this.fullPageUrl,
+                    {
+                        skipProtocolTrim: true,
+                    },
+                ),
             )
+
+            if (results.length === 0) {
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                    pageSummary: { $set: 'No references to analyse' },
+                })
+                return
+            }
 
             let extractedData
 
@@ -2703,11 +2779,20 @@ export class SidebarContainerLogic extends UILogic<
                 this.emitMutation({
                     activeSuggestionsTab: { $set: 'MySuggestions' },
                 })
+
                 extractedData = results.filter((result) => {
                     return (
                         result.creatorId ===
-                        previousState.currentUserReference.id
+                            previousState.currentUserReference.id ||
+                        result.creatorId === '1'
                     )
+                })
+
+                extractedData = extractedData.map((result) => {
+                    return {
+                        pageTitle: result.pageTitle,
+                        contentText: result.contentText,
+                    }
                 })
             }
             if (previousState.activeAITab === 'InFollowedFeeds') {
@@ -2732,8 +2817,6 @@ export class SidebarContainerLogic extends UILogic<
 
             textToAnalyse = JSON.stringify(extractedData)
             isContentSearch = true
-
-            console.log('extractedData', results)
 
             await this.updateSuggestionResults(results)
         }
@@ -3060,7 +3143,14 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        let prompt = 'Summarise this for me: '
+        console.log('askAIviaInPageInteractions', event)
+
+        let prompt =
+            event.prompt?.length > 0
+                ? event.prompt
+                : 'Tell me the key takeaways: '
+        let highlightedText =
+            event.textToProcess?.length > 0 ? event.textToProcess : null
 
         await this.processUIEvent('queryAIwithPrompt', {
             event: {
@@ -3100,12 +3190,36 @@ export class SidebarContainerLogic extends UILogic<
             summaryModeActiveTab: { $set: event.tab },
         })
     }
+    setExistingSourcesOptions: EventHandler<
+        'setExistingSourcesOptions'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            existingSourcesOption: { $set: event },
+        })
+    }
+    setFeedSourcesMenu: EventHandler<'setFeedSourcesMenu'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.showFeedSourcesMenu) {
+            this.emitMutation({
+                existingSourcesOption: { $set: 'pristine' },
+            })
+        }
+
+        this.emitMutation({
+            showFeedSourcesMenu: { $set: !previousState.showFeedSourcesMenu },
+        })
+    }
     setActiveAITab: EventHandler<'setActiveAITab'> = async ({
         event,
         previousState,
     }) => {
         if (event.tab !== 'ThisPage') {
             await this.checkRabbitHoleOnboardingStage()
+            this.emitMutation({
+                selectedTextAIPreview: { $set: null },
+            })
         }
         this.emitMutation({
             activeAITab: { $set: event.tab },
@@ -3121,7 +3235,11 @@ export class SidebarContainerLogic extends UILogic<
             this.handleMouseUpToTriggerRabbitHole,
         )
 
-        this.emitMutation({ activeTab: { $set: event.tab } })
+        this.emitMutation({
+            activeTab: { $set: event.tab },
+            showFeedSourcesMenu: { $set: false },
+            existingSourcesOption: { $set: 'pristine' },
+        })
 
         // Ensure in-page selectedList state only applies when the spaces tab is active
         const returningToSelectedListMode =
@@ -3145,14 +3263,13 @@ export class SidebarContainerLogic extends UILogic<
             await this.loadRemoteAnnototationReferencesForCachedLists(
                 previousState,
             )
-            console.log('waaaa')
             this.renderOwnHighlights(previousState)
         } else if (
             event.tab === 'summary' &&
             ((event.prompt && event.prompt?.length > 0) ||
                 event.textToProcess?.length > 0)
         ) {
-            if (previousState.pageSummary.length === 0) {
+            if (previousState.pageSummary?.length === 0) {
                 let isPagePDF = window.location.href.includes(
                     '/pdfjs/viewer.html?',
                 )
@@ -3218,27 +3335,42 @@ export class SidebarContainerLogic extends UILogic<
             // add step to summmarise page and extract key information suitable for similiarity search
 
             let results
-            console.log('beforereuslts')
             results = await this.options.customListsBG.findSimilarBackground(
                 currentPageContent,
                 normalizeUrl(previousState.fullPageUrl, {
                     skipProtocolTrim: true,
                 }),
             )
+
             if (results.length === 0) {
-                console.log('results3')
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'success' },
                 })
             }
-            if (results === 'not-connected') {
+            if (results === 'not-connected' || results === 'not-allowed') {
                 this.emitMutation({
                     suggestionsResultsLoadState: { $set: 'error' },
                 })
                 return
             }
 
-            console.log('comes through hree')
+            results = results.reduce(
+                (acc: SuggestionCard[], curr: SuggestionCard) => {
+                    const existing = acc.find(
+                        (item) => item.fullUrl === curr.fullUrl,
+                    )
+                    if (!existing) {
+                        return acc.concat([curr])
+                    } else if (existing.distance > curr.distance) {
+                        return acc
+                            .filter((item) => item.fullUrl !== curr.fullUrl)
+                            .concat([curr])
+                    } else {
+                        return acc
+                    }
+                },
+                [],
+            )
 
             await this.updateSuggestionResults(results)
 
@@ -3252,18 +3384,82 @@ export class SidebarContainerLogic extends UILogic<
 
     async listenToTextHighlightSuggestions() {
         const selectedText = window.getSelection().toString().trim()
-        if (selectedText.length > 0) {
+        if (selectedText?.length > 0) {
             this.emitMutation({
                 suggestionsResultsLoadState: { $set: 'running' },
             })
-            const results = await this.options.customListsBG.findSimilarBackground(
+            let results = await this.options.customListsBG.findSimilarBackground(
                 selectedText,
                 normalizeUrl(this.previousState.fullPageUrl, {
                     skipProtocolTrim: true,
                 }),
             )
+
+            results = results.reduce(
+                (acc: SuggestionCard[], curr: SuggestionCard) => {
+                    const existing = acc.find(
+                        (item) => item.fullUrl === curr.fullUrl,
+                    )
+                    if (!existing) {
+                        return acc.concat([curr])
+                    } else if (existing.distance > curr.distance) {
+                        return acc
+                            .filter((item) => item.fullUrl !== curr.fullUrl)
+                            .concat([curr])
+                    } else {
+                        return acc
+                    }
+                },
+                [],
+            )
             await this.updateSuggestionResults(results)
         }
+    }
+
+    openLocalFile: EventHandler<'openLocalFile'> = async ({ event }) => {
+        await this.options.pkmSyncBG.openLocalFile(event.path)
+    }
+    addLocalFolder: EventHandler<'addLocalFolder'> = async ({
+        previousState,
+    }) => {
+        const folder = await this.options.pkmSyncBG.addLocalFolder()
+
+        let localFolders = previousState.localFoldersList
+        localFolders.unshift(folder)
+
+        this.emitMutation({
+            localFoldersList: { $set: localFolders },
+        })
+    }
+    removeLocalFolder: EventHandler<'removeLocalFolder'> = async ({
+        previousState,
+        event,
+    }) => {
+        let folderId = event.id
+        let localFolders = previousState.localFoldersList
+
+        // Find the index of the folder with the id = event.id
+        const folderIndex = localFolders.findIndex(
+            (folder) => folder.id === folderId,
+        )
+
+        // If the folder is found, remove it from the array
+        if (folderIndex !== -1) {
+            localFolders.splice(folderIndex, 1)
+        }
+
+        this.emitMutation({
+            localFoldersList: { $set: localFolders },
+        })
+
+        await this.options.pkmSyncBG.removeLocalFolder(folderId)
+    }
+    getLocalFolders: EventHandler<'getLocalFolders'> = async ({}) => {
+        const localFolders = await this.options.pkmSyncBG.getLocalFolders()
+
+        this.emitMutation({
+            localFoldersList: { $set: localFolders },
+        })
     }
 
     async updateSuggestionResults(results: SuggestionCard[]) {
@@ -3280,13 +3476,18 @@ export class SidebarContainerLogic extends UILogic<
             localId?: number | null
         }
 
+        // Filter the resultsArray to only have one item from the same URL, and take the one with the lowest "distance" value
+
         if (results) {
             for (let result of Object.values(results)) {
                 let space: spaceItem
                 let pageData
                 let pageToDisplay: SuggestionCard
 
-                if (userId != result.creatorId) {
+                if (
+                    userId != result.creatorId &&
+                    result.contentType === 'page'
+                ) {
                     const followedPageListData = []
                     const spacesData = await this.options.pageActivityIndicatorBG.getPageFollowedLists(
                         result.fullUrl,
@@ -3354,6 +3555,57 @@ export class SidebarContainerLogic extends UILogic<
                             contentType: result.contentType,
                             creatorId: userId,
                             spaces: pageListData ?? null,
+                        }
+                    } else if (result.contentType === 'pdf') {
+                        const pageListData = []
+
+                        pageData = await this.options.customListsBG.findPageByUrl(
+                            normalizeUrl(result.fullUrl),
+                        )
+
+                        if (pageData) {
+                            pageToDisplay = {
+                                fullUrl: result.path,
+                                pageTitle: pageData?.fullTitle,
+                                contentText: result.contentText,
+                                contentType: result.contentType,
+                                creatorId: userId,
+                                spaces: pageListData ?? null,
+                            }
+                        } else {
+                            pageToDisplay = {
+                                fullUrl: result.path,
+                                pageTitle: result?.pageTitle,
+                                contentText: result.contentText,
+                                contentType: result.contentType,
+                                creatorId: userId,
+                                spaces: pageListData ?? null,
+                            }
+                        }
+                    } else if (result.contentType === 'markdown') {
+                        const sourceApplication = result.sourceApplication
+
+                        let url = ''
+                        let file = result.path.split(
+                            `${result.topLevelFolder}/`,
+                        )[1]
+                        if (sourceApplication === 'obsidian') {
+                            url =
+                                `obsidian://open?vault=${result.topLevelFolder}&file=` +
+                                encodeURIComponent(file)
+                        }
+                        if (sourceApplication === 'local') {
+                            url = result.path
+                        }
+
+                        pageToDisplay = {
+                            fullUrl: url,
+                            pageTitle: result?.pageTitle,
+                            contentText: result.contentText,
+                            contentType: result.contentType,
+                            sourceApplication: sourceApplication,
+                            creatorId: userId,
+                            spaces: null,
                         }
                     } else if (result.contentType === 'annotation') {
                         try {
@@ -4441,9 +4693,7 @@ export class SidebarContainerLogic extends UILogic<
             })
 
             await Promise.all([
-                this.options.contentSharingByTabsBG.waitForPageLinkCreation({
-                    fullPageUrl,
-                }),
+                this.options.contentSharingBG.waitForPageLinkCreation(),
                 this.setLocallyAvailableSelectedList(
                     {
                         ...previousState,

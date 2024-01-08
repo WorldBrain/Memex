@@ -107,6 +107,8 @@ import { AuthRemoteFunctionsInterface } from 'src/authentication/background/type
 import { remoteFunctions } from 'src/util/remote-functions-background'
 import { ImageSupportBackground } from 'src/image-support/background'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
+import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
+import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -159,6 +161,7 @@ export function createBackgroundModules(options: {
     browserAPIs: Browser
     serverStorage: ServerStorage
     imageSupportBackend: ImageSupportBackend
+    backendEnv: 'staging' | 'production'
     localStorageChangesManager: StorageChangesManager
     callFirebaseFunction: <Returns>(
         name: string,
@@ -313,13 +316,24 @@ export function createBackgroundModules(options: {
 
     const reader = new ReaderBackground({ storageManager })
 
+    const pdfUploads = new PdfUploadService({
+        callFirebaseFunction,
+        dataUrlToBlob,
+        env: options.backendEnv,
+    })
     const pdfBg = new PDFBackground({
         webRequestAPI: options.browserAPIs.webRequest,
         runtimeAPI: options.browserAPIs.runtime,
         storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
         syncSettings: syncSettingsStore,
+        generateUploadId: () => generateServerId('uploadAuditLogEntry'),
+        pageStorage: pages.storage,
+        pdfUploads,
+        getNow,
+        fetch,
     })
+    pages.options.onPagePut = pdfBg.handlePagePut
 
     const social = new SocialBackground({ storageManager })
 
@@ -388,31 +402,33 @@ export function createBackgroundModules(options: {
             callFirebaseFunction,
         )
 
-    const contentSharing = new ContentSharingBackground({
-        backend: contentSharingBackend,
-        remoteEmitter: createRemoteEventEmitter('contentSharing', {
-            broadcastToTabs: true,
-        }),
-        analyticsBG,
-        waitForSync: () => personalCloud.waitForSync(),
-        storageManager,
-        contentSharingSettingsStore: new BrowserSettingsStore(
-            options.browserAPIs.storage.local,
-            { prefix: 'contentSharing.' },
-        ),
-        analytics: options.analyticsManager,
-        services: options.services,
-        captureException: options.captureException,
-        serverStorage: options.serverStorage.modules,
-        generateServerId,
-        getBgModules: () => ({
-            auth,
-            pages,
-            customLists,
-            directLinking,
-            pageActivityIndicator,
-        }),
-    })
+    const contentSharing: ContentSharingBackground = new ContentSharingBackground(
+        {
+            backend: contentSharingBackend,
+            remoteEmitter: createRemoteEventEmitter('contentSharing', {
+                broadcastToTabs: true,
+            }),
+            analyticsBG,
+            waitForSync: () => personalCloud.waitForSync(),
+            storageManager,
+            contentSharingSettingsStore: new BrowserSettingsStore(
+                options.browserAPIs.storage.local,
+                { prefix: 'contentSharing.' },
+            ),
+            analytics: options.analyticsManager,
+            services: options.services,
+            captureException: options.captureException,
+            serverStorage: options.serverStorage.modules,
+            generateServerId,
+            getBgModules: () => ({
+                auth,
+                pages,
+                customLists,
+                directLinking,
+                pageActivityIndicator,
+            }),
+        },
+    )
 
     const customLists = new CustomListBackground({
         analytics,
@@ -703,7 +719,9 @@ export function createBackgroundModules(options: {
         pages,
         bgScript,
         contentScripts: new ContentScriptsBackground({
+            contentSharingStorage: contentSharing.storage,
             browserAPIs: options.browserAPIs,
+            waitForSync: () => personalCloud.waitForSync(),
             injectScriptInTab: async (tabId, file) => {
                 if (options.manifestVersion === '3') {
                     await options.browserAPIs.scripting.executeScript({

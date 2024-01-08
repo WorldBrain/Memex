@@ -1,7 +1,6 @@
 import React, { ChangeEventHandler } from 'react'
 import styled, { css } from 'styled-components'
 import { fontSizeSmall } from 'src/common-ui/components/design-library/typography'
-import { Loader, Search as SearchIcon } from '@styled-icons/feather'
 import TextInputControlled from 'src/common-ui/components/TextInputControlled'
 import { KeyEvent } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -65,7 +64,7 @@ export class PickerSearchInput extends React.Component<Props, State> {
     }
 }
 
-const StyledSearchIcon = styled(SearchIcon)`
+const StyledSearchIcon = styled.div`
     color: ${(props) => props.theme.tag.searchIcon};
     stroke-width: 2px;
     margin-right: 8px;

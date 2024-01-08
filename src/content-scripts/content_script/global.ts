@@ -15,7 +15,6 @@ import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
     remoteFunction,
     runInBackground,
-    RemoteFunctionRegistry,
     makeRemotelyCallableType,
     setupRpcConnection,
 } from 'src/util/webextensionRPC'
@@ -91,6 +90,7 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
+import { PDFRemoteInterface } from 'src/pdf/background/types'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { injectTelegramCustomUI } from './injectionUtils/telegram'
@@ -113,8 +113,9 @@ export async function main(
     params: {
         loadRemotely?: boolean
         getContentFingerprints?: GetContentFingerprints
+        htmlElToCanvasEl?: (el: HTMLElement) => Promise<HTMLCanvasElement>
     } = {},
-): Promise<SharedInPageUIState> {
+) {
     const isRunningInFirefox = checkBrowser() === 'firefox'
     if (!isRunningInFirefox) {
         initSentry({})
@@ -170,7 +171,7 @@ export async function main(
                     ])
                     return
                 } else {
-                    await highlightRenderer.removeAnnotationHighlight({
+                    highlightRenderer.removeAnnotationHighlight({
                         id: lastAction.id,
                     })
                     lastActions.shift()
@@ -225,6 +226,7 @@ export async function main(
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
     >()
+    const pdfBG = runInBackground<PDFRemoteInterface>()
     const annotationsManager = new AnnotationsManager()
 
     // loadInitialSettings
@@ -480,6 +482,12 @@ export async function main(
         }
     }
 
+    const captureScreenshot = () =>
+        browser.tabs.captureVisibleTab(undefined, {
+            format: 'jpeg',
+            quality: 100,
+        })
+
     const annotationsFunctions = {
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
@@ -510,7 +518,10 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
-                    browser,
+                    {
+                        captureScreenshot,
+                        htmlElToCanvasEl: params.htmlElToCanvasEl,
+                    },
                 )
 
                 if (
@@ -578,7 +589,10 @@ export async function main(
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
                     pdfViewer,
-                    browser,
+                    {
+                        captureScreenshot,
+                        htmlElToCanvasEl: params.htmlElToCanvasEl,
+                    },
                 )
 
                 if (
@@ -680,10 +694,11 @@ export async function main(
                 }
             }
         },
-        askAI: () => (highlightedText: string) => {
+        askAI: () => (highlightedText: string, prompt: string) => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText,
+                prompt,
             })
             inPageUI.hideTooltip()
         },
@@ -724,7 +739,9 @@ export async function main(
             )[0] as HTMLElement
 
             if (screenshotTarget) {
-                const dataURL = await captureScreenshot(screenshotTarget)
+                const dataURL = await captureScreenshotFromHTMLVideo(
+                    screenshotTarget,
+                )
                 inPageUI.showSidebar({
                     action: 'create_youtube_timestamp_with_screenshot',
                     imageData: dataURL,
@@ -737,7 +754,7 @@ export async function main(
         },
     }
 
-    async function captureScreenshot(screenshotTarget) {
+    async function captureScreenshotFromHTMLVideo(screenshotTarget) {
         let canvas = document.createElement('canvas')
         let height = screenshotTarget.offsetHeight
         let width = screenshotTarget.offsetWidth
@@ -857,7 +874,7 @@ export async function main(
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
-                pkmSyncBG,
+                pkmSyncBG: runInBackground(),
             })
             components.sidebar?.resolve()
         },
@@ -876,6 +893,11 @@ export async function main(
                 getHighlightColorsSettings: () => getHighlightColorSettings(),
                 saveHighlightColorsSettings: (newState) =>
                     saveHighlightColorSettings(newState),
+                openPDFinViewer: async (originalPageURL) => {
+                    await contentScriptsBG.openPdfInViewer({
+                        fullPageUrl: originalPageURL,
+                    })
+                },
             })
             components.tooltip?.resolve()
         },
@@ -946,7 +968,7 @@ export async function main(
             }
             await inPageUI.hideRibbon()
 
-            await this.injectCustomUIperPage(
+            await injectCustomUIperPage(
                 annotationsFunctions,
                 pkmSyncBG,
                 collectionsBG,
@@ -1078,7 +1100,7 @@ export async function main(
     ////////////////////////////////////////////
     // CHECK CURRENT PAGE IF NEED BE TO INJECT CUSTOM UI
     ////////////////////////////////////////////
-    await this.injectCustomUIperPage(
+    await injectCustomUIperPage(
         annotationsFunctions,
         pkmSyncBG,
         collectionsBG,
@@ -1154,7 +1176,7 @@ export async function main(
         const isStaging =
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
-        const email = _currentUser.email
+        const email = _currentUser?.email
 
         const baseUrl = isStaging
             ? 'https://cloudflare-memex-staging.memex.workers.dev'
@@ -1222,7 +1244,7 @@ export async function main(
         }
     }
 
-    return inPageUI
+    return { inPageUI, pdfBG }
 }
 
 type ContentScriptLoader = (component: ContentScriptComponent) => Promise<void>
@@ -1383,12 +1405,10 @@ class PageInfo {
 
         if (window.location.href.includes('twitter.com/messages')) {
             fullUrl = await this.normalizeTwitterCurrentFullURL()
-            return fullUrl
-        } else if (window.location.href.includes('mail.google.com/mail'))
-            return (fullUrl = await this.normalizeGmailFullURL(fullUrl))
-        else {
-            return fullUrl
+        } else if (window.location.href.includes('mail.google.com/mail')) {
+            fullUrl = await this.normalizeGmailFullURL(fullUrl)
         }
+        return fullUrl
     }
 
     getPageTitle = () => {
@@ -1521,7 +1541,12 @@ export async function injectCustomUIperPage(
             })
         }
 
-        injectSubstackButtons(pkmSyncBG, browser, openSidebarInRabbitHole)
+        injectSubstackButtons(
+            pkmSyncBG,
+            browser.storage,
+            openSidebarInRabbitHole,
+            browser.runtime,
+        )
     }
 
     if (window.location.href.includes('web.telegram.org/')) {

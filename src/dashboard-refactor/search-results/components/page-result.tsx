@@ -30,6 +30,8 @@ import { browser } from 'webextension-polyfill-ts'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { Checkbox } from 'src/common-ui/components'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
+import { TaskState } from 'ui-logic-core/lib/types'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -55,6 +57,7 @@ export interface Props
     selectItem: (itemData: any, remove: boolean) => void
     isBulkSelected: boolean
     shiftSelectItem: () => void
+    uploadedPdfLinkLoadState: TaskState
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -115,7 +118,12 @@ export default class PageResultView extends PureComponent<Props> {
                 id,
                 ...this.props.getListDetailsById(id),
             }))
-            .filter((list) => list.type !== 'page-link')
+            .filter(
+                (list) =>
+                    list.type !== 'page-link' &&
+                    !Object.values(SPECIAL_LIST_IDS).includes(list.id) &&
+                    list.id !== this.props.filteredbyListID,
+            )
     }
 
     private get listPickerBtnClickHandler() {
@@ -423,65 +431,76 @@ export default class PageResultView extends PureComponent<Props> {
                     onDragEnd: this.props.onPageDrop,
                 }}
             >
-                <StyledPageResult>
-                    <PageContentBox
-                        // onMouseOver={this.props.onMainContentHover}
-                        // onMouseLeave={
-                        //     this.props.listPickerShowStatus !== 'hide'
-                        //         ? this.listPickerBtnClickHandler
-                        //         : undefined
-                        // }
-                        tabIndex={-1}
-                        hasSpaces={this.hasLists}
-                    >
-                        <BlockContent
-                            type={this.props.type}
-                            normalizedUrl={this.props.normalizedUrl}
-                            originalUrl={this.fullUrl}
-                            onClick={this.props.onClick}
-                            fullTitle={this.props.fullTitle}
-                            pdfUrl={this.props.fullPdfUrl}
-                            favIcon={this.props.favIconURI}
-                            youtubeService={this.props.youtubeService}
-                            removeFromList={this.renderRemoveFromListBtn()}
-                            bulkSelect={this.renderBulkSelectBtn()}
-                            mainContentHover={
-                                this.props.hoverState != null
-                                    ? this.props.hoverState
-                                    : undefined
-                            }
-                            memexIcon={MemexIcon}
-                        />
-                    </PageContentBox>
-                    {this.hasLists && (
-                        <ListsSegment
-                            lists={this.displayLists}
-                            onListClick={(listId) => {
-                                this.props.filterbyList(listId)
+                {this.props.uploadedPdfLinkLoadState === 'running' ? (
+                    <LoadingBox>
+                        <LoadingIndicator size={30} />
+                    </LoadingBox>
+                ) : (
+                    <StyledPageResult>
+                        <PageContentBox
+                            // onMouseOver={this.props.onMainContentHover}
+                            // onMouseLeave={
+                            //     this.props.listPickerShowStatus !== 'hide'
+                            //         ? this.listPickerBtnClickHandler
+                            //         : undefined
+                            // }
+                            tabIndex={-1}
+                            hasSpaces={this.displayLists}
+                        >
+                            <BlockContent
+                                type={this.props.type}
+                                normalizedUrl={this.props.normalizedUrl}
+                                originalUrl={this.fullUrl}
+                                onClick={this.props.onClick}
+                                fullTitle={this.props.fullTitle}
+                                pdfUrl={this.props.fullPdfUrl}
+                                favIcon={this.props.favIconURI}
+                                youtubeService={this.props.youtubeService}
+                                removeFromList={this.renderRemoveFromListBtn()}
+                                bulkSelect={this.renderBulkSelectBtn()}
+                                mainContentHover={
+                                    this.props.hoverState != null
+                                        ? this.props.hoverState
+                                        : undefined
+                                }
+                                memexIcon={MemexIcon}
+                            />
+                        </PageContentBox>
+                        {this.displayLists.length > 0 && (
+                            <ListsSegment
+                                lists={this.displayLists}
+                                onListClick={(listId) => {
+                                    this.props.filterbyList(listId)
+                                }}
+                                onEditBtnClick={
+                                    this.props.onListPickerBarBtnClick
+                                }
+                                renderSpacePicker={
+                                    this.props.listPickerShowStatus ===
+                                    'lists-bar'
+                                        ? this.renderSpacePicker
+                                        : null
+                                }
+                                filteredbyListID={this.props.filteredbyListID}
+                                padding={'0px 20px 10px 20px'}
+                                spacePickerButtonRef={this.spacePickerBarRef}
+                            />
+                        )}
+                        <ItemBoxBottom
+                            // firstDivProps={{
+                            //     onMouseEnter: this.props.onFooterHover,
+                            //     onMouseOver: this.props.onFooterHover,
+                            // }}
+                            creationInfo={{
+                                createdWhen: this.props.displayTime,
                             }}
-                            onEditBtnClick={this.props.onListPickerBarBtnClick}
-                            renderSpacePicker={
-                                this.props.listPickerShowStatus === 'lists-bar'
-                                    ? this.renderSpacePicker
-                                    : null
-                            }
-                            filteredbyListID={this.props.filteredbyListID}
-                            padding={'0px 20px 10px 20px'}
-                            spacePickerButtonRef={this.spacePickerBarRef}
+                            actions={this.calcFooterActions()}
+                            spacesButton={this.renderSpacesButton()}
                         />
-                    )}
-                    <ItemBoxBottom
-                        // firstDivProps={{
-                        //     onMouseEnter: this.props.onFooterHover,
-                        //     onMouseOver: this.props.onFooterHover,
-                        // }}
-                        creationInfo={{ createdWhen: this.props.displayTime }}
-                        actions={this.calcFooterActions()}
-                        spacesButton={this.renderSpacesButton()}
-                    />
-                    {this.renderSpacePicker()}
-                    {this.renderCopyPaster()}
-                </StyledPageResult>
+                        {this.renderSpacePicker()}
+                        {this.renderCopyPaster()}
+                    </StyledPageResult>
+                )}
             </ItemBox>
         )
     }
@@ -516,4 +535,12 @@ const PageContentBox = styled.div<{ hasSpaces: boolean }>`
     cursor: pointer;
     text-decoration: none;
     border-radius: 10px;
+`
+
+const LoadingBox = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 80px;
+    width: 100%;
 `

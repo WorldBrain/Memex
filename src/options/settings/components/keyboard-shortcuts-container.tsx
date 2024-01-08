@@ -161,8 +161,20 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                                         type="text"
                                         value={this.state[name].shortcut}
                                         onKeyDown={this.recordBinding}
-                                        onChange={(e) => e.preventDefault()}
+                                        onChange={(e) => {
+                                            e.preventDefault()
+                                        }}
                                         disabled={!this.state.shortcutsEnabled}
+                                        onClick={(e) => {
+                                            e.preventDefault()
+                                            this.setState((state) => ({
+                                                ...state,
+                                                [name]: {
+                                                    ...state[name],
+                                                    shortcut: '',
+                                                },
+                                            }))
+                                        }}
                                         name={name}
                                     />{' '}
                                 </RightBox>
@@ -180,7 +192,7 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                 icon={'command'}
                 title={'Keyboard Shortcuts'}
                 description={
-                    'You can also use shift, ctrl, alt, or meta to define keyboard shortcuts.'
+                    'Edit by clicking on the shortcut field. You can also use shift, ctrl, alt, or meta keys.'
                 }
             >
                 <Checkbox
@@ -209,7 +221,7 @@ const RightBox = styled.div`
     justify-content: flex-end;
     position: relative;
     height: 40px;
-    padding-right: 130px;
+    padding-right: 140px;
     color: ${(props) => props.theme.colors.white};
 `
 
@@ -219,7 +231,7 @@ const KeyBoardShortCutBehind = styled.div`
     justify-content: center;
     position: absolute;
     height: 40px;
-    width: 120px;
+    width: 140px;
     top: 0px;
     right: 0px;
     border-radius: 8px;
@@ -264,7 +276,7 @@ const CheckBoxRow = styled.div<{
 
 const KeyboardInput = styled.input`
     height: 40px;
-    width: 120px;
+    width: 140px;
     padding: 0 15px;
     align-items: center;
     justify-content: center;
@@ -280,6 +292,10 @@ const KeyboardInput = styled.input`
     caret-color: transparent;
 
     &:focus {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+    }
+
+    &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
     }
 `

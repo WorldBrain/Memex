@@ -47,6 +47,7 @@ import {
     InitContentIdentifierParams,
     InitContentIdentifierReturns,
     WaitForContentIdentifierReturns,
+    PagePutHandler,
 } from './types'
 import {
     remoteFunctionWithExtraArgs,
@@ -105,8 +106,9 @@ export class PageIndexingBackground {
             fetchPageData: (fullPageUrl: string) => Promise<PageDataResult>
             fetchPdfData: (fullPageUrl: string) => Promise<ExtractedPDFData>
             createInboxEntry: (normalizedPageUrl: string) => Promise<void>
-            getNow: () => number
             pkmSyncBG: PKMSyncBackgroundModule
+            onPagePut?: PagePutHandler
+            getNow: () => number
         },
     ) {
         this.storage = new PageStorage({
@@ -385,7 +387,7 @@ export class PageIndexingBackground {
         await this.createOrUpdatePage(pageData)
     }
 
-    async _deletePages(query: object) {
+    async _deletePages(query: object): Promise<{ info: any }[]> {
         const pages = await this.options.storageManager
             .collection('pages')
             .findObjects<PipelineRes>(query)
@@ -481,12 +483,12 @@ export class PageIndexingBackground {
         const originalHTML = pageData.htmlBody // adding this to keep the fullHTML in the processing pipeline
         pageData = this.removeAnyUnregisteredFields(pageData) // this was already here
         pageData.htmlBody = originalHTML // this is added too
-        const pageContentInfo = await this.getContentInfoForPages()
+        const allContentInfo = await this.getContentInfoForPages()
         const userData = await this.options.authBG.authService.getCurrentUser()
         const userId = userData?.id
 
-        const contentIdentifier =
-            pageContentInfo[pageData.url]?.primaryIdentifier
+        const pageContentInfo = allContentInfo[pageData.url]
+        const contentIdentifier = pageContentInfo?.primaryIdentifier
         if (contentIdentifier) {
             pageData.fullUrl = contentIdentifier.fullUrl
             pageData.url = contentIdentifier.normalizedUrl
@@ -564,7 +566,8 @@ export class PageIndexingBackground {
         //   TODO: have PDF pages pass down their original URLs here, instead of the memex.cloud/ct/ ones,
         //     so we don't have to do this dance
 
-        if (!isMemexPageAPdf({ url: props.fullUrl }) && !props.tabId) {
+        const isPdf = isMemexPageAPdf({ url: props.fullUrl })
+        if (!isPdf && !props.tabId) {
             const foundTabId = await this._findTabId(props.fullUrl)
             if (foundTabId) {
                 props.tabId = foundTabId
@@ -578,6 +581,16 @@ export class PageIndexingBackground {
             : this.processPageDataFromUrl(props))
 
         if (pageData.isExisting) {
+            // Ensure page has a visit and create it if not
+            const existingVisit = await this.storage.getLatestVisit(
+                pageData.fullUrl,
+            )
+            if (!existingVisit) {
+                await this.storage.addPageVisit(
+                    pageData.fullUrl,
+                    this._getTime(props.visitTime),
+                )
+            }
             return { fullUrl: pageData.fullUrl }
         }
 
@@ -592,6 +605,16 @@ export class PageIndexingBackground {
         }
 
         await this.createOrUpdatePage(pageData, opts)
+        await this.options.onPagePut?.({
+            identifier: {
+                normalizedUrl: pageData.url,
+                fullUrl: pageData.fullUrl,
+            },
+            isLocalPdf: isPdf && pageData.isLocalPdf,
+            isNew: !pageData.isExisting,
+            tabId: props.tabId,
+            isPdf,
+        })
 
         if (props.visitTime) {
             await this.storage.addPageVisit(
@@ -626,16 +649,20 @@ export class PageIndexingBackground {
 
     private async processPageDataFromTab(
         props: PageCreationProps,
-    ): Promise<PipelineRes & { isExisting?: boolean }> {
+    ): Promise<PipelineRes & { isExisting?: boolean; isLocalPdf?: boolean }> {
         if (props.tabId == null) {
             throw new Error(
                 `No tabID provided to extract content: ${props.fullUrl}`,
             )
         }
         const isPdf = doesUrlPointToPdf(props.fullUrl)
+        let isLocalPdf = false
 
         const existingPage = await this.storage.getPage(props.fullUrl)
-        if (existingPage) {
+        // Consider a page existing/already indexed if it's in the DB and has text
+        //  One case where it's in the DB but does not yet have text is when a list is joined and
+        //  stubs of all the uploaded PDFs are downloaded to the joining user's extension (without full text)
+        if (existingPage?.text?.length > 0) {
             return { ...existingPage, isExisting: true }
         }
 
@@ -653,9 +680,14 @@ export class PageIndexingBackground {
             )[0]
 
             // Only take the original location for remote PDFs
-            //  - local PDFs use an in-memory location, which we'd rather use the memex.cloud/ct/ for URL data
-            if (!latestLocator.originalLocation.startsWith('blob:')) {
+            //  - local PDFs use an in-memory blob OR file URL location, which we'd rather use the memex.cloud/ct/ for URL data
+            if (
+                !latestLocator.originalLocation.startsWith('blob:') &&
+                !latestLocator.originalLocation.startsWith('file:')
+            ) {
                 originalUrl = latestLocator.originalLocation
+            } else {
+                isLocalPdf = true
             }
         }
 
@@ -680,12 +712,12 @@ export class PageIndexingBackground {
             )
         }
 
-        return pageData
+        return { ...pageData, isLocalPdf }
     }
 
     private async processPageDataFromUrl(
         props: PageCreationProps,
-    ): Promise<PipelineRes & { isExisting?: boolean }> {
+    ): Promise<PipelineRes & { isExisting?: boolean; isLocalPdf?: boolean }> {
         const pageDoc: PageDoc = {
             url: props.fullUrl,
             originalUrl: props.fullUrl,

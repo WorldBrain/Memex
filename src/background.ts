@@ -139,6 +139,8 @@ export async function main(): Promise<void> {
                     ? 'production'
                     : 'staging',
         }),
+        backendEnv:
+            process.env.NODE_ENV === 'production' ? 'production' : 'staging',
     })
 
     __debugCounter++

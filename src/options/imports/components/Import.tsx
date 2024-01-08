@@ -23,6 +23,7 @@ import {
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { Checkbox } from 'src/common-ui/components'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
@@ -58,6 +59,8 @@ class Import extends React.PureComponent<Props> {
 
     //     return <AdvSettings />
     // }
+
+    serverToTalkTo = LOCAL_SERVER_ROOT
 
     serverOnline: any
 
@@ -98,7 +101,7 @@ class Import extends React.PureComponent<Props> {
         }
 
         this.serverOnline = await new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         }).isReachable()
 
         this.setState({
@@ -108,7 +111,7 @@ class Import extends React.PureComponent<Props> {
         // Check every 3 seconds if the server is running and update the state accordingly
         setInterval(async () => {
             const serverOnline = await new MemexLocalBackend({
-                url: 'http://localhost:11922',
+                url: this.serverToTalkTo,
             }).isReachable()
 
             this.setState({

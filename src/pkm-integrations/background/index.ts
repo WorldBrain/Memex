@@ -1,12 +1,11 @@
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
-import { checkServerStatus } from '../../backup-restore/ui/utils'
 import { MemexLocalBackend } from '../background/backend'
-import { marked } from 'marked'
 import TurndownService from 'turndown'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'
-import { sleepPromise } from 'src/util/promises'
+import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
+import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -14,16 +13,46 @@ export class PKMSyncBackgroundModule {
 
     backendNew: MemexLocalBackend
     PKMSYNCremovewarning = true
-
+    serverToTalkTo = LOCAL_SERVER_ROOT
     constructor() {
         this.backendNew = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
         this.remoteFunctions = {
             addFeedSources: this.addFeedSources,
             checkConnectionStatus: this.checkConnectionStatus,
             loadFeedSources: this.loadFeedSources,
             checkFeedSource: this.checkFeedSource,
+            removeFeedSource: this.removeFeedSource,
+            openLocalFile: this.openLocalFile,
+            addLocalFolder: this.addLocalFolder,
+            getLocalFolders: this.getLocalFolders,
+            removeLocalFolder: this.removeLocalFolder,
+            getSystemArchAndOS: this.getSystemArchAndOS,
+        }
+    }
+
+    getSystemArchAndOS = async () => {
+        let os
+        let arch
+        await browser.runtime.getPlatformInfo().then(function (info) {
+            os = info.os
+            arch = info.arch
+        })
+
+        console.log('os', os)
+        console.log('arch', arch)
+
+        if (arch === 'aarch64' || arch === 'arm' || arch === 'arm64') {
+            arch = 'arm'
+        }
+        if (arch === 'x86-64') {
+            arch = 'x64'
+        }
+
+        return {
+            arch,
+            os,
         }
     }
 
@@ -53,7 +82,7 @@ export class PKMSyncBackgroundModule {
     }
     loadFeedSources = async () => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
         return await backend.loadFeedSources()
     }
@@ -66,21 +95,54 @@ export class PKMSyncBackgroundModule {
         }[],
     ) => {
         const backend = new MemexLocalBackend({
-            url: 'http://localhost:11922',
+            url: this.serverToTalkTo,
         })
 
-        console.log('feedSources', feedSources)
+        await backend.addFeedSources(feedSources)
+    }
+    openLocalFile = async (path: string) => {
+        const backend = new MemexLocalBackend({
+            url: this.serverToTalkTo,
+        })
 
-        if (await backend.isConnected()) {
-            await backend.addFeedSources(feedSources)
-        }
+        await backend.openLocalFile(path)
+    }
+    removeFeedSource = async (feedUrl: string) => {
+        const backend = new MemexLocalBackend({
+            url: this.serverToTalkTo,
+        })
+
+        await backend.removeFeedSource(feedUrl)
+    }
+    removeLocalFolder = async (id: number) => {
+        const backend = new MemexLocalBackend({
+            url: this.serverToTalkTo,
+        })
+
+        await backend.removeLocalFolder(id)
+    }
+    addLocalFolder = async (): Promise<LocalFolder> => {
+        const backend = new MemexLocalBackend({
+            url: this.serverToTalkTo,
+        })
+
+        const folderAdded = await backend.addLocalFolder()
+        return folderAdded
+    }
+    getLocalFolders = async (): Promise<LocalFolder[]> => {
+        const backend = new MemexLocalBackend({
+            url: this.serverToTalkTo,
+        })
+
+        const folders = await backend.getLocalFolders()
+        return folders
     }
     checkFeedSource = async (
         feedUrl: string,
     ): Promise<{
         feedUrl: string
         feedTitle: string
-        feedFavIcon: string
+        feedFavIcon?: string
     }> => {
         try {
             // Initialize source object with null values
@@ -91,17 +153,25 @@ export class PKMSyncBackgroundModule {
             }
             // Fetch the feed URL
             const response = await fetch(feedUrl)
+            const text = await response.text()
             // Get the content type of the response
             const contentType = response.headers.get('content-type')
 
+            const isAtom = text.includes('<feed xml')
+            const isRSS =
+                contentType?.includes('rss') || contentType?.includes('xml')
             // Check if the content type is XML
-            if (
-                contentType &&
-                (contentType.includes('rss') || contentType.includes('xml'))
-            ) {
+            if (isAtom) {
+                // Check if the feed is an atom feed
+                // If it is, extract the feed title and URL
+                const title = text.match(/<title>(.*?)<\/title>/)[1]
+                source.feedTitle = title
+                source.feedUrl = feedUrl
+                // Return the source object
+                return source
+            } else if (isRSS) {
                 // If it is, set the feed URL and title in the source object
                 source.feedUrl = feedUrl
-                const text = await response.text()
                 const title = text.match(/<title>(.*?)<\/title>/)[1]
                 source.feedTitle = title
                 // Return the source object
@@ -114,7 +184,6 @@ export class PKMSyncBackgroundModule {
                 const response = await fetch(feedUrl)
 
                 const contentType = response.headers.get('content-type')
-                console.log('contentType2', contentType.includes('xml'))
 
                 // Check if the new content type is XML
                 if (
@@ -125,7 +194,6 @@ export class PKMSyncBackgroundModule {
                     const text = await response.text()
                     const title = text.match(/<title>(.*?)<\/title>/)[1]
                     source.feedTitle = title
-                    console.log('source', source)
                     // Return the source object
                     return source
                 } else {
@@ -354,6 +422,7 @@ export class PKMSyncBackgroundModule {
                     PKMSYNCtitleformatObsidian.PKMSYNCtitleformatObsidian,
                 )
             } catch (e) {
+                this.bufferPKMSyncItems(item)
                 console.error('error', e)
             }
         }
@@ -363,18 +432,18 @@ export class PKMSyncBackgroundModule {
         let fileName = fileNameInput
 
         // Remove any () and its encapsulated content from the string
-        fileName = fileName.replace(/\(.*?\)/g, '')
+        fileName = fileName?.replace(/\(.*?\)/g, '')
 
         if (onlyRemoveColon) {
-            fileName = fileName.replace(/:/g, ' ')
+            fileName = fileName?.replace(/:/g, ' ')
         } else {
             if (!onlyParenthesisRemoval) {
                 // Remove any characters that are not allowed in filenames and replace them with hyphens
                 const illegalCharacters = /[#%&{}\\<>?:/$!'"@+`|=]/g
-                fileName = fileName.replace(illegalCharacters, '-')
+                fileName = fileName?.replace(illegalCharacters, '-')
             }
         }
-        fileName = fileName.trim()
+        fileName = fileName?.trim()
 
         return fileName
     }
@@ -493,6 +562,7 @@ export class PKMSyncBackgroundModule {
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
+                console.log('createpage update', item.data)
                 annotationsSection = this.annotationObjectDefault(
                     item.data.annotationId,
                     item.data.body
@@ -599,6 +669,13 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
+            console.log(
+                'annotationcreate',
+                item.data,
+                moment(item.data.createdWhen).format(
+                    `${syncDateFormat} hh:mma`,
+                ),
+            )
             const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
@@ -975,6 +1052,7 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
     ) {
+        console.log('annotation', creationDate)
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = body ? `> ${body}\n\n` : ''

@@ -10,7 +10,16 @@ export interface ContentScriptsInterface<Role extends 'provider' | 'caller'> {
     >
     reloadTab: RemoteFunction<Role, Tabs.ReloadReloadPropertiesType>
     getCurrentTab: RemoteFunction<Role, void, { id: number; url: string }>
-    openBetaFeatureSettings: RemoteFunction<Role, void>
+    openBetaFeatureSettings: RemoteFunction<
+        Role,
+        {
+            email: string
+            userId: string
+        },
+        {
+            status: 'granted' | 'requested'
+        }
+    >
     openAuthSettings: RemoteFunction<Role, void>
     openPdfInViewer: RemoteFunction<
         Role,

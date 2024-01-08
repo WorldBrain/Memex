@@ -137,11 +137,24 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 
     const observer = new MutationObserver((mutation) => {
         const targetObject = mutation[0]
-        if (
-            (targetObject.target as HTMLElement).className ===
-            'ytp-popup ytp-contextmenu'
-        ) {
-            const panel = document.getElementsByClassName('ytp-panel-menu')[1]
+        const targetElement = targetObject.target as HTMLElement
+        if (targetElement.className === 'ytp-popup ytp-contextmenu') {
+            const targetChildren = targetElement.children
+            let panel = null
+
+            console.log('targetChildren', targetChildren)
+            for (let i = 0; i < targetChildren.length; i++) {
+                console.log('targetChildren[i]', targetChildren[i].classList)
+                if (targetChildren[i].classList.contains('ytp-panel')) {
+                    console.log('panel found')
+                    panel = targetChildren[i]
+                    break
+                }
+            }
+            console.log('panel', panel)
+            if (panel == null) {
+                return
+            }
             const newEntry = document.createElement('div')
             newEntry.setAttribute('class', 'ytp-menuitem')
             newEntry.onclick = () =>
@@ -151,7 +164,7 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
                     false,
                     getTimestampNoteContentForYoutubeNotes(),
                 )
-            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap">Add Note to current time</div>`
+            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap, color: white">Add Note to current time</div>`
             panel.prepend(newEntry)
             // panel.style.height = "320px"
             observer.disconnect()
@@ -164,17 +177,6 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
 export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
     includeLastFewSecs,
 ) {
-    const videoId = new URL(window.location.href).searchParams.get('v')
-    const isStaging =
-        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-        process.env.NODE_ENV === 'development'
-
-    const baseUrl = isStaging
-        ? 'https://cloudflare-memex-staging.memex.workers.dev'
-        : 'https://cloudfare-memex.memex.workers.dev'
-
-    const normalisedYoutubeURL = 'https://www.youtube.com/watch?v=' + videoId
-
     const [startTimeURL] = getHTML5VideoTimestamp(includeLastFewSecs)
     const [endTimeURL] = getHTML5VideoTimestamp(0)
 

@@ -21,9 +21,28 @@ export class MemexLocalBackend extends BackupBackend {
     }
 
     async isConnected() {
+        const syncKey = await getPkmSyncKey()
+
+        const body = JSON.stringify({
+            syncKey: syncKey,
+        })
+
         try {
-            const response = await fetch(`${this.url}/status`)
-            return response.status === 200
+            const response = await fetch(`${this.url}/status`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body,
+            })
+
+            if (response.status === 200) {
+                return true
+            } else if (response.status === 500) {
+                return false
+            } else {
+                return false
+            }
         } catch (e) {
             return false
         }
@@ -64,13 +83,26 @@ export class MemexLocalBackend extends BackupBackend {
         bodyJSON.backupPath = backupFolderPath
         bodyJSON = JSON.stringify(bodyJSON)
 
-        await fetch(`${this.url}/${url}`, {
-            method: 'PUT',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: bodyJSON,
-        })
+        console.log('wirtetopath', this.url, url, bodyJSON)
+
+        try {
+            const response = await fetch(`${this.url}/${url}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: bodyJSON,
+            })
+
+            if (!response.ok) {
+                throw new Error(
+                    `Failed to write to path: ${response.statusText}`,
+                )
+            }
+        } catch (error) {
+            console.error(error)
+            throw error
+        }
     }
 
     async deleteObject({
@@ -94,6 +126,7 @@ export class MemexLocalBackend extends BackupBackend {
         currentSchemaVersion: number
         options: { storeBlobs: boolean }
     }) {
+        console.log('backupChanges', unprocessedChanges)
         const stringify = (obj) => JSON.stringify(obj, null, 4)
         const { images, changes } = await separateDataFromImageChanges(
             unprocessedChanges,

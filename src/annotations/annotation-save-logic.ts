@@ -4,7 +4,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { Anchor } from 'src/highlighting/types'
 import { copyToClipboard } from './content_script/utils'
 import { shareOptsToPrivacyLvl } from './utils'
-import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
@@ -98,6 +98,7 @@ export async function createAnnotation({
     return {
         remoteAnnotationId,
         savePromise: (async () => {
+            await contentSharingBG.waitForPageLinkCreation()
             const annotationUrl = await annotationsBG.createAnnotation(
                 {
                     url: annotationData.localId,
@@ -120,9 +121,17 @@ export async function createAnnotation({
                 'shouldAutoAddSpaces',
             )
 
-            let privacyLevel
+            let privacyLevel: AnnotationPrivacyLevels
             if (shouldShareSettings) {
-                privacyLevel = 200
+                privacyLevel = AnnotationPrivacyLevels.SHARED
+            }
+
+            if (annotationData.localListIds?.length) {
+                await contentSharingBG.shareAnnotationToSomeLists({
+                    annotationUrl,
+                    skipListExistenceCheck,
+                    localListIds: annotationData.localListIds,
+                })
             }
 
             if (shouldShareSettings) {
@@ -144,17 +153,10 @@ export async function createAnnotation({
             await contentSharingBG.setAnnotationPrivacyLevel({
                 annotationUrl,
                 privacyLevel:
-                    (privacyLevel || privacyLevelOverride) ??
+                    privacyLevel ??
+                    privacyLevelOverride ??
                     shareOptsToPrivacyLvl(shareOpts),
             })
-
-            if (annotationData.localListIds?.length) {
-                await contentSharingBG.shareAnnotationToSomeLists({
-                    annotationUrl,
-                    skipListExistenceCheck,
-                    localListIds: annotationData.localListIds,
-                })
-            }
 
             createAndCopyShareLink(
                 remoteAnnotationId,
