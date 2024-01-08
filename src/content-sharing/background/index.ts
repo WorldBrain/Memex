@@ -958,6 +958,9 @@ export default class ContentSharingBackground {
             fullPageUrl,
             now,
             pageTitle,
+        }).catch((err) => {
+            this.pageLinkCreationResolvable.reject(err)
+            this.pageLinkCreationResolvable = null
         })
 
         return {

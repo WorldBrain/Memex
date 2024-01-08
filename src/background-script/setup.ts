@@ -402,31 +402,33 @@ export function createBackgroundModules(options: {
             callFirebaseFunction,
         )
 
-    const contentSharing = new ContentSharingBackground({
-        backend: contentSharingBackend,
-        remoteEmitter: createRemoteEventEmitter('contentSharing', {
-            broadcastToTabs: true,
-        }),
-        analyticsBG,
-        waitForSync: () => personalCloud.waitForSync(),
-        storageManager,
-        contentSharingSettingsStore: new BrowserSettingsStore(
-            options.browserAPIs.storage.local,
-            { prefix: 'contentSharing.' },
-        ),
-        analytics: options.analyticsManager,
-        services: options.services,
-        captureException: options.captureException,
-        serverStorage: options.serverStorage.modules,
-        generateServerId,
-        getBgModules: () => ({
-            auth,
-            pages,
-            customLists,
-            directLinking,
-            pageActivityIndicator,
-        }),
-    })
+    const contentSharing: ContentSharingBackground = new ContentSharingBackground(
+        {
+            backend: contentSharingBackend,
+            remoteEmitter: createRemoteEventEmitter('contentSharing', {
+                broadcastToTabs: true,
+            }),
+            analyticsBG,
+            waitForSync: () => personalCloud.waitForSync(),
+            storageManager,
+            contentSharingSettingsStore: new BrowserSettingsStore(
+                options.browserAPIs.storage.local,
+                { prefix: 'contentSharing.' },
+            ),
+            analytics: options.analyticsManager,
+            services: options.services,
+            captureException: options.captureException,
+            serverStorage: options.serverStorage.modules,
+            generateServerId,
+            getBgModules: () => ({
+                auth,
+                pages,
+                customLists,
+                directLinking,
+                pageActivityIndicator,
+            }),
+        },
+    )
 
     const customLists = new CustomListBackground({
         analytics,
@@ -717,7 +719,9 @@ export function createBackgroundModules(options: {
         pages,
         bgScript,
         contentScripts: new ContentScriptsBackground({
+            contentSharingStorage: contentSharing.storage,
             browserAPIs: options.browserAPIs,
+            waitForSync: () => personalCloud.waitForSync(),
             injectScriptInTab: async (tabId, file) => {
                 if (options.manifestVersion === '3') {
                     await options.browserAPIs.scripting.executeScript({
