@@ -383,7 +383,7 @@ export class PersonalCloudBackground {
     }
 
     waitForSync = async () => {
-        this._debugLog('waitforsync Start')
+        this._debugLog('waitForSync start')
         await this.pushMutex.wait()
         this._debugLog('pushMutex done')
         await this.pullMutex.wait()
@@ -393,7 +393,7 @@ export class PersonalCloudBackground {
         if (this.strictErrorReporting && this._integrationError) {
             throw this._integrationError
         }
-        this._debugLog('waitforsyncdone')
+        this._debugLog('waitForSync done')
     }
 
     async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
