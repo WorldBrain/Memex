@@ -6,6 +6,7 @@ import delay from 'src/util/delay'
 import { openPDFInViewer } from 'src/pdf/util'
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { sleepPromise } from 'src/util/promises'
+import type { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
@@ -13,6 +14,7 @@ export class ContentScriptsBackground {
     constructor(
         private options: {
             waitForSync: () => Promise<void>
+            contentSharingStorage: ContentSharingClientStorage
             injectScriptInTab: (tabId: number, file: string) => Promise<void>
             browserAPIs: Pick<
                 Browser,
@@ -187,12 +189,22 @@ export class ContentScriptsBackground {
         { tab },
         { fullPageUrl, sharedListId, manuallyPullLocalListData },
     ) => {
-        if (manuallyPullLocalListData) {
-            // Doing this to give a bit of time for the Firestore listener/FCM messages to receive sync data.
-            // Not a perfect solution but that would be a lot more work.
-            //  Main case: web UI reader auto-opens page in extension on page-link list join
-            await sleepPromise(1000)
-            await this.options.waitForSync()
+        if (manuallyPullLocalListData && sharedListId != null) {
+            // Doing this to give a bit of time for the Firestore listener/FCM messages to trigger extension sync so it can receive any assumed data.
+            //  Main case: web UI reader auto-opens page in extension on page-link list join - joined list data needs to be DL'd locally for UI state to set up
+            let retries = 5
+            while (retries-- > 0) {
+                await sleepPromise(1000)
+                await this.options.waitForSync()
+                const existing = await this.options.contentSharingStorage.getRemoteListShareMetadata(
+                    {
+                        remoteListId: sharedListId,
+                    },
+                )
+                if (existing != null) {
+                    break
+                }
+            }
         }
 
         const allTabs = await this.options.browserAPIs.tabs.query({
