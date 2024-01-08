@@ -3861,17 +3861,27 @@ export class DashboardLogic extends UILogic<State, Events> {
         // Uploaded PDFs need to have temporary access URLs fetched
         if (uploadId != null) {
             // Ignore multi-clicks while it's loading
-            if (
-                previousState.searchResults.uploadedPdfLinkLoadState ===
-                'running'
-            ) {
-                return
-            }
+            // if (
+            //     previousState.searchResults.uploadedPdfLinkLoadState ===
+            //     'running'
+            // ) {
+            //     return
+            // }
+
+            console.log(pageData.fullPdfUrl, event.pageId)
             await executeUITask(
                 this,
                 (taskState) => ({
                     searchResults: {
-                        uploadedPdfLinkLoadState: { $set: taskState },
+                        pageData: {
+                            byId: {
+                                [event.pageId]: {
+                                    uploadedPdfLinkLoadState: {
+                                        $set: taskState,
+                                    },
+                                },
+                            },
+                        },
                     },
                 }),
                 async () => {

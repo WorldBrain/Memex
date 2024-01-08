@@ -616,6 +616,7 @@ export default class SearchResultsContainer extends React.Component<
                     }
                     filterbyList={this.props.filterByList}
                     analyticsBG={this.props.analyticsBG}
+                    uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
