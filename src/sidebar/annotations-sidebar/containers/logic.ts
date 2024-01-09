@@ -3143,8 +3143,6 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        console.log('askAIviaInPageInteractions', event)
-
         let prompt =
             event.prompt?.length > 0
                 ? event.prompt
@@ -4286,12 +4284,29 @@ export class SidebarContainerLogic extends UILogic<
             '@Sidebar-reading_view': true,
         })
 
-        const { annotationsCache, customListsBG } = this.options
+        const {
+            annotationsCache,
+            customListsBG,
+            contentSharingBG,
+        } = this.options
 
         const normalizedPageUrl = normalizeUrl(this.fullPageUrl)
         const cachedList = annotationsCache.getListByRemoteId(
             event.sharedListId,
         )
+
+        if (!cachedList.localId) {
+            const existingLocalListId = await this.options.contentSharingBG.fetchLocalListDataByRemoteId(
+                { remoteListId: event.sharedListId },
+            )
+
+            let listInCache = this.options.annotationsCache.getListByRemoteId(
+                event.sharedListId,
+            )
+
+            listInCache.localId = existingLocalListId
+            this.options.annotationsCache.updateList(listInCache)
+        }
 
         // If locally available, proceed as usual
         if (cachedList) {

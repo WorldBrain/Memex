@@ -12,6 +12,7 @@ import type {
 } from 'src/util/webextensionRPC'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedListMetadata } from './types'
+import { PageList } from 'src/custom-lists/background/types'
 
 export type ListShareResult = Omit<
     SharedListData,
@@ -101,6 +102,9 @@ export interface ContentSharingInterface
         isPrivate: boolean
     }): Promise<void>
     waitForPageLinkCreation(): Promise<void>
+    fetchLocalListDataByRemoteId(args: {
+        remoteListId: string
+    }): Promise<number>
 }
 
 export interface RemoteContentSharingByTabsInterface<
