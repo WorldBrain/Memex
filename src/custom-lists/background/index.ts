@@ -102,7 +102,6 @@ export default class CustomListBackground {
             createTabGroup: this.createTabGroup,
             fetchLocalDataForRemoteListEntryFromServer: this
                 .fetchLocalDataForRemoteListEntryFromServer,
-            fetchLocalListDataByRemoteId: this.fetchLocalListDataByRemoteId,
         }
 
         this.localStorage = new BrowserSettingsStore(
@@ -132,26 +131,6 @@ export default class CustomListBackground {
         normalizedPageUrl,
         remoteListId,
         opts,
-    }) => {
-        const response = await this.options.contentSharingBackend.loadLocalDataForListEntry(
-            {
-                listId: remoteListId,
-                normalizedPageUrl,
-                opts,
-            },
-        )
-        if (response.status === 'permission-denied') {
-            throw new Error(
-                'Cannot get user data from server when unauthorized',
-            )
-        }
-        if (response.status === 'not-found') {
-            return null
-        }
-        return response.data
-    }
-    fetchLocalListDataByRemoteId: RemoteCollectionsInterface['fetchLocalListDataByRemoteId'] = async ({
-        remoteListId,
     }) => {
         const response = await this.options.contentSharingBackend.loadLocalDataForListEntry(
             {
