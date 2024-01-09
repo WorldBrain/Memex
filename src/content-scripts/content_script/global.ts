@@ -1535,7 +1535,6 @@ export async function injectCustomUIperPage(
         checkIfSubstackHeader()
     ) {
         const openSidebarInRabbitHole = async () => {
-            console.log('exec', inPageUI)
             inPageUI.showSidebar({
                 action: 'rabbit_hole_open',
             })

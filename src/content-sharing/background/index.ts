@@ -286,6 +286,7 @@ export default class ContentSharingBackground {
                 })
             },
             getAnnotationSharingState: this.getAnnotationSharingState,
+            fetchLocalListDataByRemoteId: this.fetchLocalListDataByRemoteId,
             getAnnotationSharingStates: this.getAnnotationSharingStates,
             createListEmailInvite: (params) =>
                 this.options.backend.createListEmailInvite(params),
@@ -360,6 +361,18 @@ export default class ContentSharingBackground {
         }
 
         return remoteListData
+    }
+
+    fetchLocalListDataByRemoteId: ContentSharingInterface['fetchLocalListDataByRemoteId'] = async ({
+        remoteListId,
+    }) => {
+        const sharedListMetaData = (
+            await this.storage.getRemoteListShareMetadata({
+                remoteListId: remoteListId,
+            })
+        ).localId
+
+        return sharedListMetaData
     }
 
     deleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
