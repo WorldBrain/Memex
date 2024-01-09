@@ -38,7 +38,10 @@ import {
     InitSqlUsageParams,
 } from '@worldbrain/memex-common/lib/personal-cloud/backend/translation-layer/utils'
 import type { MockPushMessagingService } from 'src/tests/push-messaging'
-import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import {
+    SharedListRoleID,
+    SharedListTree,
+} from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { ChangeWatchMiddlewareSettings } from '@worldbrain/storex-middleware-change-watcher/lib/index'
 import {
@@ -7170,11 +7173,19 @@ describe('Personal cloud translation layer', () => {
             const annotBId = '11111112'
             const annotBUrl =
                 LOCAL_TEST_DATA_V24.pages.first.url + '/#' + annotBId
-            const syncedList: {
+            const syncedPersonalList: {
                 id: AutoPk
                 localId: AutoPk
             } = await setups[1].serverStorage.manager
                 .collection('personalList')
+                .findObject({
+                    user: TEST_USER_2_ID,
+                })
+            const syncedListTree: {
+                id: AutoPk
+                localId: AutoPk
+            } = await setups[1].serverStorage.manager
+                .collection('personalListTree')
                 .findObject({
                     user: TEST_USER_2_ID,
                 })
@@ -7186,7 +7197,7 @@ describe('Personal cloud translation layer', () => {
                 .collection('pageListEntries')
                 .createObject({
                     ...LOCAL_TEST_DATA_V24.pageListEntries.first,
-                    listId: syncedList.localId,
+                    listId: syncedPersonalList.localId,
                 })
             await setups[1].storageManager
                 .collection('annotations')
@@ -7211,15 +7222,15 @@ describe('Personal cloud translation layer', () => {
                 .createObject({
                     ...LOCAL_TEST_DATA_V24.annotationListEntries.first,
                     url: annotBUrl,
-                    listId: syncedList.localId,
+                    listId: syncedPersonalList.localId,
                 })
 
             await setups[1].backgroundModules.personalCloud.waitForSync()
 
             // Assert shared* cloud data, pre-delete
             // prettier-ignore
-            expect(
-                await getDatabaseContents([
+            const sharedData = await getDatabaseContents(
+                [
                     'sharedListRole',
                     'sharedListRoleByUser',
                     'sharedListEntry',
@@ -7237,8 +7248,14 @@ describe('Personal cloud translation layer', () => {
                         return { user: TEST_USER_2_ID }
                     }
                     return {}
-                } }),
-            ).toEqual({
+                } }
+            )
+            const [sharedListTree] = sharedData.sharedListTree as [
+                SharedListTree,
+            ]
+
+            // prettier-ignore
+            expect(sharedData).toEqual({
                 sharedListRole: [
                     expect.objectContaining({
                         roleID: SharedListRoleID.ReadWrite,
@@ -7349,7 +7366,7 @@ describe('Personal cloud translation layer', () => {
             expect(
                 await getDatabaseContents([
                     'personalList',
-                    // 'personalListTree',
+                    'personalListTree',
                     'personalListShare',
                     'personalFollowedList',
                     'personalListEntry',
@@ -7365,28 +7382,40 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 personalList: [{
                     ...remoteDataB.personalList.first,
-                    localId: syncedList.localId,
+                    localId: syncedPersonalList.localId,
                     createdByDevice: undefined, // This is created via a storage hook, thus no device
                 }],
-                // personalListTree: [{
-                //     ...remoteDataA.personalListTree.first,
-                //     localId: syncedList.localId,
-                //     createdByDevice: undefined, // This is created via a storage hook, thus no device
-                // }],
+                personalListTree: [{
+                    id: expect.anything(),
+                    parentListId: ROOT_NODE_PARENT_ID,
+                    localParentId: ROOT_NODE_PARENT_ID,
+                    order: sharedListTree.order,
+                    // localLinkTarget: null,
+                    // linkTarget: null,
+                    // localPath: null,
+                    // path: null,
+                    localId: syncedListTree.localId,
+                    personalList: syncedPersonalList.id,
+                    localListId: syncedPersonalList.localId,
+                    updatedWhen: expect.anything(),
+                    createdWhen: expect.anything(),
+                    user: TEST_USER_2_ID,
+                    createdByDevice: undefined, // This is created via a storage hook, thus no device
+                }],
                 personalListShare: [{
                     ...remoteDataB.personalListShare.first,
-                    personalList: syncedList.id,
+                    personalList: syncedPersonalList.id,
                     createdByDevice: undefined, // This is created via a storage hook, thus no device
                 }],
                 personalListEntry: [{
                     ...remoteDataB.personalListEntry.first,
                     personalContentMetadata: expect.anything(),
-                    personalList: syncedList.id
+                    personalList: syncedPersonalList.id
                 }],
                 personalAnnotationListEntry: [{
                     ...remoteDataB.personalAnnotationListEntry.first,
                     personalAnnotation: expect.anything(),
-                    personalList: syncedList.id
+                    personalList: syncedPersonalList.id
                 }],
                 personalAnnotation: [{
                     ...remoteDataB.personalAnnotation.first,
