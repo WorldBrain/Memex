@@ -3143,8 +3143,6 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
-        console.log('askAIviaInPageInteractions', event)
-
         let prompt =
             event.prompt?.length > 0
                 ? event.prompt

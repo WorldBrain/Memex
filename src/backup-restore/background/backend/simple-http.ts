@@ -83,8 +83,6 @@ export class MemexLocalBackend extends BackupBackend {
         bodyJSON.backupPath = backupFolderPath
         bodyJSON = JSON.stringify(bodyJSON)
 
-        console.log('wirtetopath', this.url, url, bodyJSON)
-
         try {
             const response = await fetch(`${this.url}/${url}`, {
                 method: 'PUT',
@@ -126,7 +124,6 @@ export class MemexLocalBackend extends BackupBackend {
         currentSchemaVersion: number
         options: { storeBlobs: boolean }
     }) {
-        console.log('backupChanges', unprocessedChanges)
         const stringify = (obj) => JSON.stringify(obj, null, 4)
         const { images, changes } = await separateDataFromImageChanges(
             unprocessedChanges,

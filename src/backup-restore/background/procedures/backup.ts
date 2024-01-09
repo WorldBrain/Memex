@@ -220,8 +220,6 @@ export default class BackupProcedure {
     }
 
     async _doIncrementalBackup(untilWhen: Date, events: EventEmitter) {
-        console.log('starting incremental backup')
-
         const collectionsWithVersions = this._getCollectionsToBackup()
         const info = (this.info = await this._createBackupInfo(
             collectionsWithVersions,
@@ -244,7 +242,6 @@ export default class BackupProcedure {
         }
 
         await this.localBackupSettings.remove('runningBackup')
-        console.log('finished incremental backup')
     }
 
     _backupChanges = async (
@@ -252,7 +249,6 @@ export default class BackupProcedure {
         info: BackupProgressInfo,
         events,
     ) => {
-        console.log('preparing batch')
         for (const change of batch.changes) {
             const object = pickBy(
                 await this.storageManager.operation(
@@ -267,11 +263,7 @@ export default class BackupProcedure {
                 },
             )
             change.object = object
-            // console.log('prepared change %o', change.object)
         }
-        // console.log('prepared batch')
-
-        // console.log('uploading batch')
         if (process.env.MOCK_BACKUP_BACKEND === 'true') {
             await new Promise((resolve) => setTimeout(resolve, 500))
         } else {

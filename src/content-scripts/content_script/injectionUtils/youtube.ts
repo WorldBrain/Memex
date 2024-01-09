@@ -142,16 +142,12 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
             const targetChildren = targetElement.children
             let panel = null
 
-            console.log('targetChildren', targetChildren)
             for (let i = 0; i < targetChildren.length; i++) {
-                console.log('targetChildren[i]', targetChildren[i].classList)
                 if (targetChildren[i].classList.contains('ytp-panel')) {
-                    console.log('panel found')
                     panel = targetChildren[i]
                     break
                 }
             }
-            console.log('panel', panel)
             if (panel == null) {
                 return
             }
