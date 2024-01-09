@@ -9558,8 +9558,10 @@ function makeAnnotationFromWebUiTest(options: {
         },
         setup: async (context) => {
             const fakeFetch = new FakeFetch()
+            const getNow = () => Date.now()
 
             storageHooksChangeWatcher.setUp({
+                getNow,
                 fetch: fakeFetch.fetch as any,
                 captureException: async (err) => undefined, // TODO: implement
                 getFunctionsConfig: () => ({}), // TODO: implement

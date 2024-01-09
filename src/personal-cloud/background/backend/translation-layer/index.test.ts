@@ -364,6 +364,7 @@ async function setup(options?: {
     serverIdCapturer.setup(serverStorageManager)
     for (const user of deviceUsersSet) {
         storageHooksChangeWatchers.get(user).setUp({
+            getNow,
             getFunctionsConfig: () => ({
                 content_sharing: {
                     cloudflare_worker_credentials: 'fake-creds',
