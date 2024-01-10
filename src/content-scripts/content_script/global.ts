@@ -9,8 +9,6 @@ import {
     MEMEX_REQUEST_HANDLED_EVENT_NAME,
 } from '@worldbrain/memex-common/lib/services/memex-extension'
 
-// import { setupScrollReporter } from 'src/activity-logger/content_script'
-import { setupPageContentRPC } from 'src/page-analysis/content_script'
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
     remoteFunction,
@@ -104,6 +102,8 @@ import {
     trackTwitterMessageList,
 } from './injectionUtils/twitter'
 import { injectSubstackButtons } from './injectionUtils/substack'
+import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -123,7 +123,6 @@ export async function main(
     params.loadRemotely = params.loadRemotely ?? true
 
     setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
-    setupPageContentRPC()
     // TODO: potential are for improvement, setup RPC earlier or later
 
     const isPdfViewerRunning = params.getContentFingerprints != null
@@ -913,6 +912,12 @@ export async function main(
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
     makeRemotelyCallableType<InPageUIContentScriptRemoteInterface>({
+        extractRawPageContent: async (doc = document, url = location.href) => {
+            if (isUrlPDFViewerUrl(url, { runtimeAPI: browser.runtime })) {
+                return extractRawPDFContent(doc, url)
+            }
+            return extractRawPageContent(doc, url)
+        },
         ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),

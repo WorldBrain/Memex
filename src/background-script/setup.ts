@@ -55,12 +55,10 @@ import ContentConversationsBackground from 'src/content-conversations/background
 import { getFirebase } from 'src/util/firebase-app-initialized'
 import TabManagementBackground from 'src/tab-management/background'
 import {
-    runInTab,
     RemoteEventEmitter,
     RemoteEvents,
     remoteEventEmitter,
 } from 'src/util/webextensionRPC'
-import { PageAnalyzerInterface } from 'src/page-analysis/types'
 import { ReadwiseBackground } from 'src/readwise-integration/background'
 import pick from 'lodash/pick'
 import ActivityIndicatorBackground from 'src/activity-indicator/background'
@@ -214,8 +212,6 @@ export function createBackgroundModules(options: {
     const tabManagement = new TabManagementBackground({
         browserAPIs: options.browserAPIs,
         manifestVersion: options.manifestVersion,
-        extractRawPageContent: (tabId) =>
-            runInTab<PageAnalyzerInterface>(tabId).extractRawPageContent(),
     })
     const callFirebaseFunction = <Returns>(name: string, ...args: any[]) => {
         const call = options.callFirebaseFunction
