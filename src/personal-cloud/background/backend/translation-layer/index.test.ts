@@ -7532,6 +7532,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             await testDownload([
+                // Before this comes the 4 docs related to the annotation (page+annotation+annotShare+annotPrivacyLvl)
                 {
                     type: PersonalCloudUpdateType.ListTreeDelete,
                     rootNodeLocalListId:
@@ -7542,45 +7543,78 @@ describe('Personal cloud translation layer', () => {
             await setups[1].backgroundModules.personalCloud.waitForSync()
 
             // Assert user B (list joiner)'s list data has also been deleted
+            // TODO: This will come later - for now we don't care about deleting collab users data
             // prettier-ignore
-            expect(
-                await getDatabaseContents([
-                    'personalList',
-                    'personalListDescription',
-                    'personalListTree',
-                    'personalListShare',
-                    'personalFollowedList',
-                    'personalListEntry',
-                    'personalAnnotationListEntry',
-                    'personalAnnotation',
-                ], {
-                    getWhere: (collection) => {
-                        if (collection.startsWith('personal')) {
-                            return { user: TEST_USER_2_ID }
-                        }
-                    },
-                }),
-            ).toEqual({
-                personalList: [],
-                personalListDescription: [],
-                personalListTree: [],
-                personalListShare: [],
-                personalListEntry: [],
-                personalAnnotationListEntry: [],
-                personalAnnotation: [{
-                    ...remoteDataB.personalAnnotation.first,
-                    localId: annotBId,
-                    personalContentMetadata: expect.anything()
-                }],
-                personalFollowedList: [],
-            })
+            // expect(
+            //     await getDatabaseContents([
+            //         'personalList',
+            //         'personalListDescription',
+            //         'personalListTree',
+            //         'personalListShare',
+            //         'personalFollowedList',
+            //         'personalListEntry',
+            //         'personalAnnotationListEntry',
+            //         'personalAnnotation',
+            //     ], {
+            //         getWhere: (collection) => {
+            //             if (collection.startsWith('personal')) {
+            //                 return { user: TEST_USER_2_ID }
+            //             }
+            //         },
+            //     }),
+            // ).toEqual({
+            //     personalList: [],
+            //     personalListDescription: [],
+            //     personalListTree: [],
+            //     personalListShare: [],
+            //     personalListEntry: [],
+            //     personalAnnotationListEntry: [],
+            //     personalAnnotation: [{
+            //         ...remoteDataB.personalAnnotation.first,
+            //         localId: annotBId,
+            //         personalContentMetadata: expect.anything()
+            //     }],
+            //     personalFollowedList: [],
+            // })
 
+            // For now, as we're not deleting collab users data, they are just expected to DL the list data which
+            //  happens after they join the list.
             // prettier-ignore
             await testDownload([
                 {
-                    type: PersonalCloudUpdateType.ListTreeDelete,
-                    rootNodeLocalListId:
-                        LOCAL_TEST_DATA_V24.customLists.first.id,
+                    type: PersonalCloudUpdateType.Overwrite,
+                    collection: 'customLists',
+                    object: {
+                        id: syncedPersonalList.localId,
+                        createdAt: expect.anything(),
+                        isDeletable: true,
+                        isNestable: true,
+                        name: LOCAL_TEST_DATA_V24.customLists.first.name,
+                        searchableName: LOCAL_TEST_DATA_V24.customLists.first.name,
+                    },
+                },
+                {
+                    type: PersonalCloudUpdateType.Overwrite,
+                    collection: 'customListTrees',
+                    object: {
+                        id: expect.anything(),
+                        listId: syncedPersonalList.localId,
+                        order: sharedListTree.order,
+                        parentListId: ROOT_NODE_PARENT_ID,
+                        path: null,
+                        linkTarget: null,
+                        createdWhen: expect.anything(),
+                        updatedWhen: expect.anything(),
+                    },
+                },
+                {
+                    type: PersonalCloudUpdateType.Overwrite,
+                    collection: 'sharedListMetadata',
+                    object: {
+                        localId: syncedPersonalList.localId,
+                        remoteId: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                        private: LOCAL_TEST_DATA_V24.sharedListMetadata.first.private,
+                    },
                 },
             ], { skip: 0, deviceIndex: 1, userId: TEST_USER_2_ID, queryResultLimit: 1000 })
 

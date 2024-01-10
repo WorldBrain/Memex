@@ -338,8 +338,8 @@ export const LOCAL_TEST_DATA_V24 = {
         },
         fourth_uploading: {
             id: 4,
-            fingerprint: undefined,
-            fingerprintScheme: undefined,
+            fingerprint: null,
+            fingerprintScheme: null,
             location: 'test-upload-id-1',
             locationType: ContentLocatorType.Remote,
             locationScheme: LocationSchemeType.UploadStorage,
