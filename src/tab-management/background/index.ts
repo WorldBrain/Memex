@@ -43,7 +43,6 @@ export default class TabManagementBackground {
                 | 'windows'
                 | 'scripting'
             >
-            extractRawPageContent(tabId: number): Promise<RawPageContent>
         },
     ) {
         this.remoteFunctions = {
@@ -73,7 +72,24 @@ export default class TabManagementBackground {
     // }
 
     async extractRawPageContent(tabId: number): Promise<RawPageContent> {
-        return this.options.extractRawPageContent(tabId)
+        // This is a hack around a problem that we were experiencing where the CS doesn't fully get
+        //  to the point where its RPCs are ready to be called from the BG script here - or at least this one.
+        //  Thus when it got called it would error out. We realized that reinjecting the CS would partially solve it,
+        //  so that's what we're doing.
+        //  TODO: Solve the core issue - likely something in the RPC wrapper logic
+        let content: RawPageContent
+        try {
+            content = await runInTab<InPageUIContentScriptRemoteInterface>(
+                tabId,
+            ).extractRawPageContent()
+        } catch (err) {
+            const tab = await this.options.browserAPIs.tabs.get(tabId)
+            await this.injectContentScripts(tab)
+            content = await runInTab<InPageUIContentScriptRemoteInterface>(
+                tabId,
+            ).extractRawPageContent()
+        }
+        return content
     }
 
     async getOpenTabsInCurrentWindow(): Promise<
