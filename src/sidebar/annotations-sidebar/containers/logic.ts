@@ -3584,13 +3584,16 @@ export class SidebarContainerLogic extends UILogic<
                         const sourceApplication = result.sourceApplication
 
                         let url = ''
-                        let file = result.path.split(
+                        let file = result.path?.split(
                             `${result.topLevelFolder}/`,
                         )[1]
                         if (sourceApplication === 'obsidian') {
                             url =
                                 `obsidian://open?vault=${result.topLevelFolder}&file=` +
                                 encodeURIComponent(file)
+                        }
+                        if (sourceApplication === 'logseq') {
+                            url = `logseq://graph/${result.topLevelFolder}?page=${result.pageTitle}`
                         }
                         if (sourceApplication === 'local') {
                             url = result.path
@@ -3609,7 +3612,7 @@ export class SidebarContainerLogic extends UILogic<
                         try {
                             const annotationUrl = normalizeUrl(
                                 result.fullUrl,
-                            ).split('/#')[0]
+                            )?.split('/#')[0]
 
                             const normalizedUrl = normalizeUrl(result.fullUrl, {
                                 stripHash: false,
