@@ -380,11 +380,7 @@ export default class ContentSharingBackground {
     performDeleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
         localListId,
     }) => {
-        const {
-            customLists,
-            directLinking,
-            pageActivityIndicator,
-        } = this.options.getBgModules()
+        const { customLists } = this.options.getBgModules()
 
         let listTrees: Pick<ListTree, 'listId' | 'linkTarget'>[] = []
         try {
@@ -402,24 +398,13 @@ export default class ContentSharingBackground {
 
         for (const listTree of listTrees) {
             // TODO: add proper tree link target support
-            // if (listTree.linkTarget) {
-            //     await customLists.storage.deleteListTreeLink({
-            //         localListId: listTree.linkTarget,
-            //     })
-            //     continue
-            // }
             const listId = listTree.listId
-
-            batch.push({
-                collection: 'annotListEntries',
-                operation: 'deleteObjects',
-                where: { listId },
-            })
-
-            // await directLinking.annotationStorage.removeAnnotsFromList({
-            //     listId,
-            // })
             batch.push(
+                {
+                    collection: 'annotListEntries',
+                    operation: 'deleteObjects',
+                    where: { listId },
+                },
                 {
                     collection: 'pageListEntries',
                     operation: 'deleteObjects',
@@ -451,12 +436,7 @@ export default class ContentSharingBackground {
                 localId: listId,
             })
 
-            // await customLists.storage.removeListAssociatedData({ listId })
-            // await customLists.storage.removeList({ id: listId })
             if (remoteListId != null) {
-                // await this.storage.deleteMetadataByLocalListId({
-                //     localListId: listId,
-                // })
                 batch.push(
                     {
                         collection: 'followedListEntry',
@@ -469,11 +449,6 @@ export default class ContentSharingBackground {
                         where: { sharedList: remoteListId },
                     },
                 )
-                // await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
-                //     {
-                //         sharedList: remoteListId,
-                //     },
-                // )
             }
         }
 

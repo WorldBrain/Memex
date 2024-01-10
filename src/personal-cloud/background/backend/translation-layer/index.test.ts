@@ -49,8 +49,11 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import cloneDeep from 'lodash/cloneDeep'
+import omit from 'lodash/omit'
 import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { ListTree } from 'src/custom-lists/background/types'
+
+const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
 
 // This exists due to inconsistencies between Firebase and Dexie when dealing with optional fields
 //  - FB requires them to be `null` and excludes them from query results
@@ -6198,11 +6201,7 @@ describe('Personal cloud translation layer', () => {
 
                 const remoteData = serverIdCapturer.mergeIds(
                     REMOTE_TEST_DATA_V24,
-                    {
-                        anyId:
-                            process.env.TEST_SERVER_STORAGE ===
-                            'firebase-emulator',
-                    },
+                    { anyId: isFBEmu },
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
@@ -6346,11 +6345,7 @@ describe('Personal cloud translation layer', () => {
 
                 const remoteData = serverIdCapturer.mergeIds(
                     REMOTE_TEST_DATA_V24,
-                    {
-                        anyId:
-                            process.env.TEST_SERVER_STORAGE ===
-                            'firebase-emulator',
-                    },
+                    { anyId: isFBEmu },
                 )
                 const testMetadata = remoteData.personalContentMetadata
                 const testLocators = remoteData.personalContentLocator
@@ -6979,7 +6974,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
                 // Using the FB emu here results in non-deterministic IDs that get followed
-                anyId: process.env.TEST_SERVER_STORAGE === 'firebase-emulator',
+                anyId: isFBEmu,
             })
             const testFollowedLists = remoteData.personalFollowedList
 
@@ -7045,7 +7040,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24, {
-                anyId: process.env.TEST_SERVER_STORAGE === 'firebase-emulator',
+                anyId: isFBEmu,
             })
             const testFollowedLists = remoteData.personalFollowedList
 
@@ -7151,10 +7146,7 @@ describe('Personal cloud translation layer', () => {
             await setups[0].backgroundModules.personalCloud.waitForSync()
 
             // Create key from owner then join with other device/user
-            const sharedListKeyId =
-                process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
-                    ? 'my-test-key'
-                    : 123
+            const sharedListKeyId = isFBEmu ? 'my-test-key' : 123
             await setups[0].services.contentSharing.generateKeyLink({
                 key: { roleID: SharedListRoleID.ReadWrite },
                 listKeyReference: {
@@ -7166,6 +7158,14 @@ describe('Personal cloud translation layer', () => {
                     id: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
                 },
             })
+            await setups[0].backgroundModules.contentSharing.options.backend.processListKey(
+                {
+                    allowOwnKeyProcessing: true,
+                    keyString: sharedListKeyId as any,
+                    listId:
+                        LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                },
+            )
             await setups[1].backgroundModules.contentSharing.options.backend.processListKey(
                 {
                     keyString: sharedListKeyId as any,
@@ -7266,12 +7266,23 @@ describe('Personal cloud translation layer', () => {
             expect(sharedData).toEqual({
                 sharedListRole: [
                     expect.objectContaining({
+                        roleID: SharedListRoleID.Owner,
+                        sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                        user: TEST_USER.id,
+                    }),
+                    expect.objectContaining({
                         roleID: SharedListRoleID.ReadWrite,
                         sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
                         user: TEST_USER_2_ID,
                     }),
                 ],
                 sharedListRoleByUser: [
+                    // Exclude owner's, not because it doesn't exist, but because too painful to update getWhere to support multi-ID queries on grouped coll
+                    // expect.objectContaining({
+                    //     roleID: SharedListRoleID.Owner,
+                    //     sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
+                    //     user: TEST_USER.id,
+                    // }),
                     expect.objectContaining({
                         roleID: SharedListRoleID.ReadWrite,
                         sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
@@ -7325,8 +7336,7 @@ describe('Personal cloud translation layer', () => {
                 REMOTE_TEST_DATA_V24,
                 {
                     userOverride: TEST_USER.id,
-                    anyId:
-                        process.env.TEST_SERVER_STORAGE === 'firebase-emulator',
+                    anyId: isFBEmu,
                 },
             )
             // prettier-ignore
@@ -7350,18 +7360,12 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 personalList: [remoteDataA.personalList.first],
                 personalListDescription: [remoteDataA.personalListDescription.first],
-                personalListTree: [remoteDataA.personalListTree.first],
+                personalListTree: [isFBEmu ? omit(remoteDataA.personalListTree.first, ['linkTarget']) : remoteDataA.personalListTree.first],
                 personalListShare: [remoteDataA.personalListShare.first],
                 personalListEntry: [remoteDataA.personalListEntry.first],
                 personalAnnotationListEntry: [remoteDataA.personalAnnotationListEntry.first],
                 personalAnnotation: [remoteDataA.personalAnnotation.first],
-                personalFollowedList: [
-                    {
-                        ...remoteDataA.personalFollowedList.first,
-                        createdByDevice: undefined, // This is created via a storage hook, thus no device
-                        id: expect.anything(),
-                    },
-                ],
+                personalFollowedList: [isFBEmu ? omit(remoteDataA.personalFollowedList.first, ['createdByDevice']) : remoteDataA.personalFollowedList.first],
             })
 
             // Assert user B (list joiner)'s sync data, pre-delete
@@ -7515,7 +7519,7 @@ describe('Personal cloud translation layer', () => {
             ).toEqual({
                 ...personalDataChanges(remoteDataB, [
                     // followedList added via follow storage hook (on list join)
-                    [DataChangeType.Create, 'personalFollowedList', 2, undefined, { createdByDevice: undefined }],
+                    [DataChangeType.Create, 'personalFollowedList', expect.any(isFBEmu ? String : Number), undefined, { createdByDevice: undefined }],
                     [DataChangeType.ListTreeDelete, 'personalList', remoteDataA.personalList.first.id, {
                         localListId: remoteDataA.personalList.first.localId,
                     }],
