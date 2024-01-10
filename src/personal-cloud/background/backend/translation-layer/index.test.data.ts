@@ -504,6 +504,12 @@ export const LOCAL_TEST_DATA_V24 = {
             pageUrl: LOCAL_PAGES_V24.fourth.url,
             listId: LOCAL_LISTS_V24.first.id,
         },
+        fifth: {
+            createdAt: new Date(1625190554991),
+            fullUrl: LOCAL_PAGES_V24.second.fullUrl,
+            pageUrl: LOCAL_PAGES_V24.second.url,
+            listId: LOCAL_LISTS_V24.second.id,
+        },
     },
     annotationListEntries: {
         first: {
@@ -1393,6 +1399,15 @@ export const REMOTE_TEST_DATA_V24 = {
             user: TEST_USER.id,
             createdWhen: 565,
             updatedWhen: 565,
+        },
+        fifth: {
+            id: 1,
+            personalContentMetadata: REMOTE_METADATA_V24.second.id,
+            personalList: REMOTE_LISTS_V24.second.id,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+            user: TEST_USER.id,
+            createdWhen: 566,
+            updatedWhen: 566,
         },
     },
     personalAnnotationListEntry: {
