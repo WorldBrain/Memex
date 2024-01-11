@@ -1214,7 +1214,7 @@ export const REMOTE_TEST_DATA_V24 = {
             localId: LOCAL_TEST_DATA_V24.customListTrees.first.id,
             localPath: LOCAL_TEST_DATA_V24.customListTrees.first.path,
             localListId: LOCAL_TEST_DATA_V24.customListTrees.first.listId,
-            localParentId:
+            localParentListId:
                 LOCAL_TEST_DATA_V24.customListTrees.first.parentListId,
             localLinkTarget: null,
             order: LOCAL_TEST_DATA_V24.customListTrees.first.order,
@@ -1231,7 +1231,7 @@ export const REMOTE_TEST_DATA_V24 = {
             localId: LOCAL_TEST_DATA_V24.customListTrees.second.id,
             localPath: LOCAL_TEST_DATA_V24.customListTrees.second.path,
             localListId: LOCAL_TEST_DATA_V24.customListTrees.second.listId,
-            localParentId:
+            localParentListId:
                 LOCAL_TEST_DATA_V24.customListTrees.second.parentListId,
             localLinkTarget: null,
             order: LOCAL_TEST_DATA_V24.customListTrees.second.order,
@@ -1248,7 +1248,7 @@ export const REMOTE_TEST_DATA_V24 = {
             localId: LOCAL_TEST_DATA_V24.customListTrees.third.id,
             localPath: LOCAL_TEST_DATA_V24.customListTrees.third.path,
             localListId: LOCAL_TEST_DATA_V24.customListTrees.third.listId,
-            localParentId:
+            localParentListId:
                 LOCAL_TEST_DATA_V24.customListTrees.third.parentListId,
             localLinkTarget: null,
             order: LOCAL_TEST_DATA_V24.customListTrees.third.order,
@@ -1268,7 +1268,7 @@ export const REMOTE_TEST_DATA_V24 = {
             localId: LOCAL_TEST_DATA_V24.customListTrees.fourth.id,
             localPath: LOCAL_TEST_DATA_V24.customListTrees.fourth.path,
             localListId: LOCAL_TEST_DATA_V24.customListTrees.fourth.listId,
-            localParentId:
+            localParentListId:
                 LOCAL_TEST_DATA_V24.customListTrees.fourth.parentListId,
             localLinkTarget: null,
             order: LOCAL_TEST_DATA_V24.customListTrees.fourth.order,
@@ -1288,7 +1288,7 @@ export const REMOTE_TEST_DATA_V24 = {
             localId: LOCAL_TEST_DATA_V24.customListTrees.fifth.id,
             localPath: LOCAL_TEST_DATA_V24.customListTrees.fifth.path,
             localListId: null,
-            localParentId:
+            localParentListId:
                 LOCAL_TEST_DATA_V24.customListTrees.fifth.parentListId,
             localLinkTarget:
                 LOCAL_TEST_DATA_V24.customListTrees.fifth.linkTarget,

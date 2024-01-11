@@ -2440,7 +2440,7 @@ describe('Personal cloud translation layer', () => {
                         ),
                         parentListId: testListTreesA.second.personalList,
                         localPath: listTreesData.third.path,
-                        localParentId: listTreesData.third.parentListId,
+                        localParentListId: listTreesData.third.parentListId,
                     },
                     {
                         ...testListTreesA.fourth,
@@ -2566,18 +2566,18 @@ describe('Personal cloud translation layer', () => {
                         // path: null,
                         // parentListId: null,
                         // localPath: listTreesData.second.path,
-                        // localParentId: listTreesData.second.parentListId,
+                        // localParentListId: listTreesData.second.parentListId,
                         path: undefined,
                         parentListId: ROOT_NODE_PARENT_ID,
                         localPath: undefined,
-                        localParentId: undefined,
+                        localParentListId: undefined,
                     },
                     {
                         ...testListTreesB.third,
                         path: buildMaterializedPath(testListTreesB.second.personalList),
                         parentListId: testListTreesB.second.personalList,
                         localPath: listTreesData.third.path,
-                        localParentId: listTreesData.third.parentListId,
+                        localParentListId: listTreesData.third.parentListId,
                     },
                     {
                         ...testListTreesB.fourth,
@@ -7397,7 +7397,7 @@ describe('Personal cloud translation layer', () => {
                 personalListTree: [{
                     id: expect.anything(),
                     parentListId: ROOT_NODE_PARENT_ID,
-                    localParentId: ROOT_NODE_PARENT_ID,
+                    localParentListId: ROOT_NODE_PARENT_ID,
                     order: sharedListTree.order,
                     // localLinkTarget: null,
                     // linkTarget: null,
@@ -7992,7 +7992,7 @@ describe('Personal cloud translation layer', () => {
                     {
                         id: syncedListTrees[0].id,
                         parentListId: ROOT_NODE_PARENT_ID,
-                        localParentId: ROOT_NODE_PARENT_ID,
+                        localParentListId: ROOT_NODE_PARENT_ID,
                         order: sharedListTrees[0].order,
                         // localLinkTarget: null,
                         // linkTarget: null,
@@ -8010,7 +8010,7 @@ describe('Personal cloud translation layer', () => {
                     // {
                     //     id: syncedListTrees[1].id,
                     //     parentListId: syncedPersonalLists[0].id,
-                    //     localParentId: syncedListTrees[0].id,
+                    //     localParentListId: syncedListTrees[0].id,
                     //     order: sharedListTrees[1].order,
                     //     // localLinkTarget: null,
                     //     // linkTarget: null,
@@ -8027,7 +8027,7 @@ describe('Personal cloud translation layer', () => {
                     // {
                     //     id: syncedListTrees[2].id,
                     //     parentListId: syncedPersonalLists[0].id,
-                    //     localParentId: syncedListTrees[0].id,
+                    //     localParentListId: syncedListTrees[0].id,
                     //     order: sharedListTrees[2].order,
                     //     // localLinkTarget: null,
                     //     // linkTarget: null,
@@ -8044,7 +8044,7 @@ describe('Personal cloud translation layer', () => {
                     // {
                     //     id: syncedListTrees[3].id,
                     //     parentListId: syncedPersonalLists[2].id,
-                    //     localParentId: syncedListTrees[2].id,
+                    //     localParentListId: syncedListTrees[2].id,
                     //     order: sharedListTrees[3].order,
                     //     // localLinkTarget: null,
                     //     // linkTarget: null,
