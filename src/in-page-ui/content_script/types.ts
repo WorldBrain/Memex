@@ -1,3 +1,4 @@
+import type { RawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 import type {
     InPageUIRibbonAction,
     SidebarActionOptions,
@@ -32,6 +33,7 @@ export interface InPageUIContentScriptRemoteInterface {
 
     teardownContentScripts(): Promise<void>
     handleHistoryStateUpdate(tabId: number): Promise<void>
+    extractRawPageContent: () => Promise<RawPageContent>
 
     /**
      * Acts as a way for the BG script to check if the content script is

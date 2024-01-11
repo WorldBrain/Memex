@@ -310,11 +310,26 @@ async function handleSyncedDataForPKMSync(
                     .findOneObject<{ id: number; name: string }>({
                         id: updates.listId,
                     })
-                const pageDataStorage = await storageManager
+
+                let pageDataStorage = await storageManager
                     .collection('pages')
                     .findOneObject<{ fullTitle: string }>({
                         url: normalizeUrl(updates.fullUrl),
                     })
+
+                if (!pageDataStorage.fullTitle) {
+                    const xhr = new XMLHttpRequest()
+                    xhr.open('GET', updates.fullUrl, false)
+                    xhr.send()
+                    const doc = new DOMParser().parseFromString(
+                        xhr.responseText,
+                        'text/html',
+                    )
+                    pageDataStorage.fullTitle =
+                        doc
+                            .querySelector('meta[property="og:title"]')
+                            ?.getAttribute('content') || doc.title
+                }
 
                 const pageData = {
                     pageTitle: pageDataStorage.fullTitle,
