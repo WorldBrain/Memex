@@ -3916,16 +3916,35 @@ export class DashboardLogic extends UILogic<State, Events> {
         newParentListId: UnifiedList['unifiedId'],
         previousState: State,
     ) {
+        const becomesTopLevelRoot = newParentListId == null
         const { annotationsCache } = this.options
         const listData = getListData(listId, previousState, {
             mustBeLocal: true,
             source: 'dropOnListItem',
         })
-        const dropTargetListData = getListData(newParentListId, previousState, {
-            mustBeLocal: true,
-            source: 'dropOnListItem',
-        })
-        if (listData.localId == null || dropTargetListData.localId == null) {
+        const dropTargetListData = becomesTopLevelRoot
+            ? null
+            : getListData(newParentListId, previousState, {
+                  mustBeLocal: true,
+                  source: 'dropOnListItem',
+              })
+
+        if (
+            listData.localId == null ||
+            (!becomesTopLevelRoot && dropTargetListData.localId == null)
+        ) {
+            return
+        }
+
+        if (becomesTopLevelRoot) {
+            annotationsCache.updateList({
+                unifiedId: listId,
+                parentUnifiedId: null,
+            })
+            await this.options.listsBG.updateListTreeParent({
+                localListId: listData.localId!,
+                parentListId: dropTargetListData?.localId! ?? null,
+            })
             return
         }
 

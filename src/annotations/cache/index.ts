@@ -689,7 +689,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             isPrivate: updates.isPrivate ?? previousList.isPrivate,
             description: updates.description ?? previousList.description,
             parentUnifiedId:
-                updates.parentUnifiedId ?? previousList.parentUnifiedId,
+                // If it's `null`, then we're updating a list tree node to be a top-level node
+                updates.parentUnifiedId === null
+                    ? updates.parentUnifiedId
+                    : updates.parentUnifiedId ?? previousList.parentUnifiedId,
         }
 
         if (
@@ -729,6 +732,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 cb: (node) => {
                     const nodeParent = this.lists.byId[node.parentUnifiedId]
                     if (!nodeParent) {
+                        node.parentUnifiedId = null
+                        node.parentLocalId = null
+                        node.pathUnifiedIds = []
+                        node.pathLocalIds = []
                         return
                     }
 
