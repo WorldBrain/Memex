@@ -40,10 +40,7 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import {
-    ROOT_NODE_PARENT_ID,
-    forEachTreeClimbAsync,
-} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { OperationBatch } from '@worldbrain/storex'
 import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
@@ -749,23 +746,8 @@ export default class CustomListStorage extends StorageModule {
         if (!startingNode) {
             return false
         }
-
-        let isAncestor = false
-        await forEachTreeClimbAsync({
-            startingNode,
-            getParent: (node) =>
-                node.parentListId !== ROOT_NODE_PARENT_ID &&
-                node.parentListId != null
-                    ? this.getTreeDataForList({
-                          localListId: node.parentListId,
-                      })
-                    : null,
-            cb: async (node) => {
-                isAncestor = node.listId === listAId
-            },
-            shouldEndEarly: () => isAncestor,
-        })
-        return isAncestor
+        const pathIds = extractMaterializedPathIds(startingNode.path, 'number')
+        return pathIds.includes(listAId)
     }
 
     async deleteListTree(params: { treeId: number }): Promise<void> {
