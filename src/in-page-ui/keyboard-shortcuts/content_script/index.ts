@@ -119,5 +119,13 @@ function getShortcutHandlers({
             annotationFunctions.createHighlight(window.getSelection(), false),
         createAnnotation: () =>
             annotationFunctions.createAnnotation(window.getSelection(), false),
+        copyHighlightLink: () =>
+            annotationFunctions.createHighlight(
+                window.getSelection(),
+                true,
+                true,
+                undefined,
+                true,
+            ),
     }
 }

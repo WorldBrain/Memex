@@ -208,7 +208,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             )
                                         }}
                                         confirmSpaceDelete={() => {
-                                            console.log('delete list')
                                             this.props.onConfirmListDelete(
                                                 list.unifiedId,
                                             )
