@@ -134,12 +134,6 @@ export async function createAnnotation({
                 })
             }
 
-            console.log(
-                'shuuu',
-                shareOpts.shouldCopyShareLink,
-                shouldShareSettings,
-            )
-
             if (shareOpts?.shouldCopyShareLink) {
                 const shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,

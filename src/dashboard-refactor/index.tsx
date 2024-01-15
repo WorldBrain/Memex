@@ -477,7 +477,6 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('confirmListEdit', { value, listId })
                 }}
                 onConfirmListDelete={(listId: string) => {
-                    console.log('onConfirmListDelete', listId)
                     this.processEvent('setDeletingListId', { listId: listId })
                     this.processEvent('confirmListDelete', null)
                 }}
