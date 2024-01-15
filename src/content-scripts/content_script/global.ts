@@ -499,6 +499,8 @@ export async function main(
                 id: string
                 label: string
             },
+            preventHideTooltip?: boolean,
+            copyLink?: boolean,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
@@ -554,6 +556,37 @@ export async function main(
             }
 
             await inPageUI.hideTooltip()
+            if (preventHideTooltip) {
+                const styleSheet = document.createElement('style')
+                styleSheet.type = 'text/css'
+                styleSheet.innerText = `
+                    @keyframes slideAndFade {
+                        0% { transform: translateY(-5px); opacity: 0; }
+                        10% { transform: translateY(10px); opacity: 1; }
+                        90% { transform: translateY(10px); opacity: 1; }
+                        100% { transform: translateY(-5px); opacity: 0; }
+                    }`
+                document.head.appendChild(styleSheet)
+
+                const notification = document.createElement('div')
+                notification.textContent = '🔗 Link copied to clipboard'
+                notification.style.position = 'fixed'
+                notification.style.top = '5px'
+                notification.style.left = '50%'
+                notification.style.transform = 'translateX(-50%)'
+                notification.style.backgroundColor = '#12131B95'
+                ;(notification.style as any).backdropFilter = 'blur(10px)'
+                notification.style.color = 'white'
+                notification.style.padding = '10px'
+                notification.style.borderRadius = '5px'
+                notification.style.zIndex = '1000'
+                notification.style.textAlign = 'center'
+                notification.style.animation = 'slideAndFade 2s ease-in-out'
+                document.body.appendChild(notification)
+                setTimeout(() => {
+                    document.body.removeChild(notification)
+                }, 2000)
+            }
             if (analyticsBG) {
                 try {
                     await trackAnnotationCreate(analyticsBG, {

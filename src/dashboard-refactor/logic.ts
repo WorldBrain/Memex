@@ -3868,7 +3868,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             //     return
             // }
 
-            console.log(pageData.fullPdfUrl, event.pageId)
             await executeUITask(
                 this,
                 (taskState) => ({
