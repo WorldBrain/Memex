@@ -3948,18 +3948,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        // Block any attempts at adding ancestor as child
-        let isListAncestorOfTargetList = false
-        forEachTreeClimb({
-            startingNode: dropTargetListData,
-            getParent: (node) =>
-                annotationsCache.lists.byId[node.parentUnifiedId] ?? null,
-            cb: (node, i) => {
-                isListAncestorOfTargetList =
-                    isListAncestorOfTargetList || node.unifiedId === listId
-            },
-            shouldEndEarly: () => isListAncestorOfTargetList,
-        })
+        const isListAncestorOfTargetList = dropTargetListData.pathUnifiedIds.includes(
+            listId,
+        )
         if (isListAncestorOfTargetList) {
             this.emitMutation({
                 listsSidebar: { dragOverListId: { $set: undefined } },
