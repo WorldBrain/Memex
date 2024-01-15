@@ -4687,7 +4687,6 @@ export class SidebarContainerLogic extends UILogic<
             const cacheListData: UnifiedListForCache<'page-link'> = {
                 type: 'page-link',
                 name: listTitle,
-                order: 1, // TODO nested-lists: Update this
                 creator: currentUser,
                 localId: localListId,
                 collabKey: collabKey.toString(),

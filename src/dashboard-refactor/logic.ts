@@ -3683,7 +3683,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     unifiedAnnotationIds: [],
                     hasRemoteAnnotationsToLoad: false,
                     isPrivate: true,
-                    order: 0, // TODO nested-lists: Figure out how to calc this here
                     creator:
                         previousState.currentUser != null
                             ? {

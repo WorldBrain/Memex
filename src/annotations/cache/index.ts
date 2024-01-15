@@ -25,6 +25,10 @@ import {
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import {
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -556,6 +560,24 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             nextList.pathUnifiedIds = nextList.pathLocalIds
                 .map((id) => this.getListByLocalId(id)?.unifiedId)
                 .filter((id) => id != null)
+
+            if (nextList.order == null) {
+                const siblings = this.getListsByParentId(
+                    nextList.parentUnifiedId ?? null,
+                )
+                const items = siblings.map((list) => ({
+                    id: list.unifiedId,
+                    key: list.order,
+                }))
+                nextList.order =
+                    items.length > 0
+                        ? insertOrderedItemBeforeIndex(
+                              items,
+                              nextList.unifiedId,
+                              0,
+                          ).create.key
+                        : pushOrderedItem(items, nextList.unifiedId).create.key
+            }
         }
 
         this.lists.allIds = [nextList.unifiedId, ...this.lists.allIds]

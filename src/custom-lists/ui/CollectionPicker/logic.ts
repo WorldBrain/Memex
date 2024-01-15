@@ -848,7 +848,6 @@ export default class SpacePickerLogic extends UILogic<
             localId: localListId,
             remoteId: remoteListId,
             hasRemoteAnnotationsToLoad: false,
-            order: 1, // TODO nested-lists: Update this
             type: 'user-list',
             unifiedAnnotationIds: [],
             creator: previousState.currentUser ?? undefined,

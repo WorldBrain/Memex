@@ -186,12 +186,14 @@ export type UnifiedListForCache<
     T extends UnifiedListType = UnifiedListType
 > = Omit<
     UnifiedList<T>,
+    | 'order'
     | 'unifiedId'
     | 'parentUnifiedId'
     | 'parentLocalId'
     | 'pathLocalIds'
     | 'pathUnifiedIds'
 > & {
+    order?: number
     parentLocalId?: number | null
     pathLocalIds?: number[]
 }
