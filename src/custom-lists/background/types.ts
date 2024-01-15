@@ -45,15 +45,16 @@ export interface ListTree {
     updatedWhen: number
 }
 
-export type SharedListWithAnnotations = SharedList & {
-    creator: UserReference
-    sharedAnnotations: Array<
-        SharedAnnotation & {
-            creator: UserReference
-            reference: SharedAnnotationReference
-        }
-    >
-}
+export type SharedListWithAnnotations = SharedList &
+    Orderable & {
+        creator: UserReference
+        sharedAnnotations: Array<
+            SharedAnnotation & {
+                creator: UserReference
+                reference: SharedAnnotationReference
+            }
+        >
+    }
 
 export interface ListDescription {
     listId: number

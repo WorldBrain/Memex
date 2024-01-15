@@ -179,6 +179,7 @@ export default class CustomListBackground {
         return {
             ...response.data.retrievedList.sharedList,
             sharedAnnotations: Object.values(response.data.annotations ?? {}),
+            order: response.data.retrievedList.sharedListTree?.order ?? 1,
         }
     }
 
@@ -208,7 +209,7 @@ export default class CustomListBackground {
         return {
             name: sharedList.title,
             id: sharedList.createdWhen,
-            order: 1, // TODO nested-lists: Update this
+            order: response.data.retrievedList.sharedListTree?.order ?? 1,
             remoteId: sharedList.reference.id.toString(),
             createdAt: new Date(sharedList.createdWhen),
             isOwned: sharedList.creator.id === currentUser.id,

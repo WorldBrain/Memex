@@ -4410,7 +4410,7 @@ export class SidebarContainerLogic extends UILogic<
             const listCommon = {
                 remoteId: event.sharedListId,
                 name: sharedList.title,
-                order: 1, // TODO nested-lists: Set this
+                order: sharedList.order,
                 creator: sharedList.creator,
                 description: sharedList.description,
                 localId: localListData?.localListId ?? undefined,
