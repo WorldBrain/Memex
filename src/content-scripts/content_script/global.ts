@@ -356,6 +356,8 @@ export async function main(
                     false,
                 )
 
+                console.log('shouldshare', data.shouldShare)
+
                 const {
                     savePromise,
                     remoteAnnotationId,
@@ -499,6 +501,8 @@ export async function main(
                 id: string
                 label: string
             },
+            preventHideTooltip?: boolean,
+            copyLink?: boolean,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
@@ -553,7 +557,9 @@ export async function main(
                 await results.createPromise
             }
 
-            await inPageUI.hideTooltip()
+            if (!preventHideTooltip) {
+                await inPageUI.hideTooltip()
+            }
             if (analyticsBG) {
                 try {
                     await trackAnnotationCreate(analyticsBG, {
