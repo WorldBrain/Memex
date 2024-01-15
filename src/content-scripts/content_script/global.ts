@@ -575,7 +575,7 @@ export async function main(
                 notification.style.left = '50%'
                 notification.style.transform = 'translateX(-50%)'
                 notification.style.backgroundColor = '#12131B95'
-                notification.style.backdropFilter = 'blur(10px)'
+                ;(notification.style as any).backdropFilter = 'blur(10px)'
                 notification.style.color = 'white'
                 notification.style.padding = '10px'
                 notification.style.borderRadius = '5px'
