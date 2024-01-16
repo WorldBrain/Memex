@@ -37,6 +37,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     goToButtonRef?: React.RefObject<HTMLDivElement>
     localId?: number
     bgScriptBG?: RemoteBGScriptInterface
+    pathText?: string
 }
 
 class EntryRow extends React.Component<Props> {
@@ -277,21 +278,34 @@ class EntryRow extends React.Component<Props> {
                 zIndex={10000 - this.props.index}
             >
                 <NameWrapper>
-                    {resultItem}
-                    {shareState === 'shared' && (
-                        <TooltipBox
-                            tooltipText={'Shared Space'}
-                            placement="bottom"
-                        >
+                    {this.props.pathText?.length > 0 && (
+                        <PathBox>
+                            {this.props.pathText}{' '}
                             <Icon
+                                filePath="arrowRight"
                                 heightAndWidth="14px"
-                                // padding="6px"
-                                icon={'peopleFine'}
+                                color="greyScale4"
                                 hoverOff
-                                color="greyScale5"
                             />
-                        </TooltipBox>
+                        </PathBox>
                     )}
+                    <NameRow>
+                        {resultItem}
+                        {shareState === 'shared' && (
+                            <TooltipBox
+                                tooltipText={'Shared Space'}
+                                placement="bottom"
+                            >
+                                <Icon
+                                    heightAndWidth="14px"
+                                    // padding="6px"
+                                    icon={'peopleFine'}
+                                    hoverOff
+                                    color="greyScale5"
+                                />
+                            </TooltipBox>
+                        )}
+                    </NameRow>
                 </NameWrapper>
                 <IconStyleWrapper>
                     {((focused &&
@@ -481,11 +495,12 @@ const Row = styled.div<{ isFocused; zIndex }>`
     display: flex;
     justify-content: space-between;
     transition: background 0.3s;
-    height: 40px;
+
+    height: fit-content;
     width: fill-available;
     cursor: pointer;
     border-radius: 5px;
-    padding: 0 9px;
+    padding: 10px 9px;
     margin: 0 -5px;
     overflow: visible;
     color: ${(props) => props.isFocused && props.theme.colors.greyScale6};
@@ -535,13 +550,32 @@ const Row = styled.div<{ isFocused; zIndex }>`
 
 const NameWrapper = styled.div`
     display: flex;
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    align-items: flex-start;
+    grid-gap: 5px;
     max-width: 80%;
     font-size: 14px;
     width: 100%;
     min-width: 50px;
     flex: 1;
+`
+
+const PathBox = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    font-size: 12px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    grid-gap: 0px;
+    align-items: center;
+`
+
+const NameRow = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
 `
 
 export default EntryRow

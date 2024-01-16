@@ -234,6 +234,7 @@ class SpacePicker extends StatefulUIElement<
                         analyticsBG: this.props.analyticsBG,
                     })
                 }}
+                pathText={this.getListNameByUnifiedId(entry.parentUnifiedId)}
                 onListFocus={() => this.props.onListFocus(entry.localId)}
                 addedToAllIds={this.state.addedToAllIds}
                 keepScrollPosition={this.keepScrollPosition}
@@ -318,6 +319,10 @@ class SpacePicker extends StatefulUIElement<
                 el.scroll({ top: 0 })
             }
         }
+    }
+
+    private getListNameByUnifiedId = (unifiedId: string) => {
+        return this.props.annotationsCache.lists.byId[unifiedId]?.name
     }
 
     private renderListEntries() {
