@@ -556,6 +556,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 nextList.parentUnifiedId =
                     this.getListByLocalId(nextList.parentLocalId)?.unifiedId ??
                     null
+            } else {
+                nextList.parentUnifiedId = null
             }
             nextList.pathUnifiedIds = nextList.pathLocalIds
                 .map((id) => this.getListByLocalId(id)?.unifiedId)

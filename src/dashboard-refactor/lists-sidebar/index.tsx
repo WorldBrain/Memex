@@ -251,9 +251,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     }, 100)
 
     private renderListTrees() {
-        const rootLists = this.props.ownListsGroup.listData.filter(
-            (list) => list.parentUnifiedId == null,
-        )
+        const rootLists = this.props.ownListsGroup.listData
+            .filter((list) => list.parentUnifiedId == null)
+            .sort(defaultTreeNodeSorter)
 
         // Derived state used to hide nested lists if any of their ancestors are collapsed
         const listShowFlag = new Map<string, boolean>()
