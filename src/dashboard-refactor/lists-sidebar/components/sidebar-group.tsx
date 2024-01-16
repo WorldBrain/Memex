@@ -105,7 +105,7 @@ const LoadingContainer = styled.div`
 `
 
 const GroupHeaderContainer = styled.div`
-    height: 70px;
+    height: 50px;
     width: 100%;
     display: flex;
     flex-direction: row;
@@ -180,7 +180,6 @@ const GroupContentSection = styled.div<Props>`
         props.isExpanded &&
         props.listsCount > 0 &&
         css`
-            margin-top: -20px;
             margin-bottom: 10px;
         `}
 `
