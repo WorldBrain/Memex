@@ -14,6 +14,7 @@ export interface Props {
     errorMessage: string | null
     onCancelClick: () => void
     onConfirmClick: (value: string) => void
+    onChange?: (value: string) => void
 }
 
 export default class ListsSidebarEditableItem extends React.PureComponent<
@@ -23,8 +24,14 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     static defaultProps: Partial<Props> = { initValue: '' }
     state: State = { value: this.props.initValue }
 
-    private handleChange: React.MouseEventHandler<HTMLInputElement> = (event) =>
+    private handleChange: React.MouseEventHandler<HTMLInputElement> = (
+        event,
+    ) => {
+        if (this.props.onChange) {
+            this.props.onChange((event.target as HTMLInputElement).value)
+        }
         this.setState({ value: (event.target as HTMLInputElement).value })
+    }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state

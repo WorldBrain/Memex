@@ -14,7 +14,7 @@ const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
                 return (
                     <Icon
                         icon="check"
-                        heightAndWidth="20px"
+                        heightAndWidth="18px"
                         color="prime1"
                         hoverOff
                     />
@@ -27,7 +27,7 @@ const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
                 return (
                     <Icon
                         icon="plus"
-                        heightAndWidth="20px"
+                        heightAndWidth="18px"
                         color="prime1"
                         hoverOff
                     />

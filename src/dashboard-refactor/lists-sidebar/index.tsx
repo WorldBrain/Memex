@@ -29,6 +29,7 @@ import {
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { LIST_REORDER_EL_POST } from '../constants'
+import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -107,7 +108,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     indentSteps={list.pathUnifiedIds.length}
                     onDragStart={this.props.onListDragStart(list.unifiedId)}
                     onDragEnd={this.props.onListDragEnd(list.unifiedId)}
-                    // zIndex={10000000 - i}
                     name={`${list.pathUnifiedIds.length}: ${list.name}`}
                     isSelected={this.props.selectedListId === list.unifiedId}
                     onClick={() => this.props.onListSelection(list.unifiedId)}
@@ -121,33 +121,72 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         this.props.editMenuListId === list.unifiedId
                     }
                     renderLeftSideIcon={() => (
-                        <Icon
-                            icon={
-                                this.props.listTrees.byId[list.unifiedId]
-                                    ?.isTreeToggled
-                                    ? 'arrowDown'
-                                    : 'arrowRight'
+                        <TooltipBox
+                            tooltipText={
+                                !this.props.listTrees.byId[list.unifiedId]
+                                    ?.hasChildren
+                                    ? 'Add Sub-Space'
+                                    : this.props.listTrees.byId[list.unifiedId]
+                                          .isTreeToggled
+                                    ? 'Collapse list'
+                                    : 'Expand list'
                             }
-                            heightAndWidth="20px"
-                            onClick={(event) => {
-                                event.stopPropagation()
-                                this.props.onTreeToggle(list.unifiedId)
-                            }}
-                        />
-                    )}
-                    renderRightSideIcon={() => {
-                        return (
-                            <>
-                                <Icon
-                                    icon="plus"
-                                    heightAndWidth="20px"
-                                    onClick={(event) => {
-                                        event.stopPropagation()
+                            placement="bottom-start"
+                        >
+                            <Icon
+                                icon={
+                                    !this.props.listTrees.byId[list.unifiedId]
+                                        ?.hasChildren
+                                        ? 'plus'
+                                        : this.props.listTrees.byId[
+                                              list.unifiedId
+                                          ].isTreeToggled
+                                        ? 'arrowDown'
+                                        : 'arrowRight'
+                                }
+                                heightAndWidth="20px"
+                                color={
+                                    this.props.listTrees.byId[list.unifiedId]
+                                        .hasChildren
+                                        ? 'greyScale7'
+                                        : 'greyScale3'
+                                }
+                                onClick={(event) => {
+                                    event.stopPropagation()
+
+                                    if (
+                                        this.props.listTrees.byId[
+                                            list.unifiedId
+                                        ].hasChildren
+                                    ) {
+                                        this.props.onTreeToggle(list.unifiedId)
+                                    } else {
                                         this.props.onNestedListInputToggle(
                                             list.unifiedId,
                                         )
-                                    }}
-                                />
+                                    }
+                                }}
+                            />
+                        </TooltipBox>
+                    )}
+                    renderRightSideIcon={() => {
+                        return (
+                            <RightSideIconBox>
+                                <TooltipBox
+                                    placement={'bottom'}
+                                    tooltipText={'Add Sub-Space'}
+                                >
+                                    <Icon
+                                        icon="plus"
+                                        heightAndWidth="18px"
+                                        onClick={(event) => {
+                                            event.stopPropagation()
+                                            this.props.onNestedListInputToggle(
+                                                list.unifiedId,
+                                            )
+                                        }}
+                                    />
+                                </TooltipBox>
                                 <SpaceContextMenuBtn
                                     {...this.props.initContextMenuBtnProps(
                                         list.unifiedId,
@@ -166,7 +205,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     }
                                     isShared={!list.isPrivate}
                                 />
-                            </>
+                            </RightSideIconBox>
                         )
                     }}
                     renderEditIcon={() => (
@@ -246,39 +285,33 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         ) {
                             nestedListInput = (
                                 <NestedListInput
-                                    type="text"
                                     indentSteps={list.pathUnifiedIds.length}
-                                    placeholder="+ add new subspace"
-                                    autoFocus
-                                    disabled={
-                                        currentListTreeState.newNestedListCreateState ===
-                                        'running'
-                                    }
-                                    value={
-                                        currentListTreeState.newNestedListValue
-                                    }
-                                    onKeyDown={async (event) => {
-                                        const metaKeyPressed =
-                                            navigator.platform === 'MacIntel'
-                                                ? event.metaKey
-                                                : event.ctrlKey
-                                        // TODO: Make confirm method more intuitive
-                                        if (
-                                            event.key === 'Enter' &&
-                                            metaKeyPressed
-                                        ) {
+                                >
+                                    <SidebarItemInput
+                                        initValue={
+                                            currentListTreeState.newNestedListValue
+                                        }
+                                        onCancelClick={() =>
+                                            this.props.onNestedListInputToggle(
+                                                list.unifiedId,
+                                            )
+                                        }
+                                        onConfirmClick={async () =>
                                             await this.props.onConfirmNestedListCreate(
                                                 list.unifiedId,
                                             )
                                         }
-                                    }}
-                                    onChange={(event) =>
-                                        this.props.setNestedListInputValue(
-                                            list.unifiedId,
-                                            event.target.value,
-                                        )
-                                    }
-                                />
+                                        // onErro={
+                                        //     currentListTreeState.newNestedListErrorMessage
+                                        // }
+                                        onChange={(value) =>
+                                            this.props.setNestedListInputValue(
+                                                list.unifiedId,
+                                                value,
+                                            )
+                                        }
+                                    />
+                                </NestedListInput>
                             )
                         }
                         return (
@@ -425,6 +458,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     }
 }
 
+const RightSideIconBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+`
+
 const Container = styled.div<{ spaceSidebarWidth: number }>`
     position: sticky;
     z-index: 2147483645;
@@ -569,7 +609,7 @@ const NewItemsCountInnerDiv = styled.div`
     padding: 2px 0px;
 `
 
-const NestedListInput = styled.input`
+const NestedListInput = styled.div`
     margin-left: ${(props) => props.indentSteps * 20}px;
 `
 

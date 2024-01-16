@@ -17,6 +17,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
         isNestedListInputShown: boolean
         newNestedListValue: string
         newNestedListCreateState: TaskState
+        hasChildren: boolean
     }>
     filteredListIds: UnifiedList['unifiedId'][]
     areLocalListsExpanded: boolean

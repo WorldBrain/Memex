@@ -20,7 +20,6 @@ export interface Props {
     renderRightSideIcon?: () => JSX.Element
     renderEditIcon?: () => JSX.Element
     areAnyMenusDisplayed?: boolean
-    zIndex?: number
     forceRightSidePermanentDisplay?: boolean
 }
 
@@ -57,7 +56,21 @@ export default class ListsSidebarItem extends React.PureComponent<
         }
 
         return (
-            <Container zIndex={this.props.zIndex}>
+            <Container
+                onMouseEnter={() => this.setState({ isHovering: true })}
+                isHovering={this.state.isHovering}
+                onMouseLeave={() => {
+                    if (!this.props.areAnyMenusDisplayed) {
+                        this.setState({
+                            isHovering: false,
+                            canDisableHover: true,
+                        })
+                    }
+                    this.setState({
+                        canDisableHover: true,
+                    })
+                }}
+            >
                 <SidebarItem
                     indentSteps={this.props.indentSteps ?? 0}
                     onDragEnter={this.handleDragEnter}
@@ -97,7 +110,6 @@ export default class ListsSidebarItem extends React.PureComponent<
                     <IconBox {...this.props} {...this.state}>
                         {this.props.renderEditIcon?.()}
                     </IconBox>
-
                     {(this.props.isShared ||
                         this.state.isHovering ||
                         this.props.forceRightSidePermanentDisplay) &&
@@ -124,9 +136,9 @@ const SidebarItemClickContainer = styled.div`
     z-index: 1;
 `
 
-const Container = styled.div<Props>`
+const Container = styled.div<{ isHovering: boolean }>`
     position: relative;
-    z-index: ${(props) => props.zIndex};
+    z-index: ${(props) => (props.isHovering ? 2147483647 : 0)};
 `
 
 const Name = styled.div`
@@ -141,22 +153,20 @@ const TitleBox = styled.div<Props>`
     flex: 0 1 100%;
     width: 65%;
     height: 100%;
-    padding-left: 14px;
     align-items: center;
     color: ${(props) => props.theme.colors.greyScale5};
 `
 
 const SidebarItem = styled.div<Props>`
     height: 40px;
-    margin: 5px 12px;
-    margin-left: ${({ indentSteps }: Props) => indentSteps * 10}px;
+    margin: 0px 12px;
+    margin-left: ${({ indentSteps }: Props) => (indentSteps + 1) * 10}px;
     border-radius: 5px;
     display: flex;
     flex-direction: row;
     padding-right: 5px;
     justify-content: space-between;
     align-items: center;
-    z-index: ${(props) => props.zIndex};
     background-color: ${(props) =>
         props.dropReceivingState?.isDraggedOver
             ? props.theme.colors.greyScale1
@@ -228,7 +238,7 @@ const IconBox = styled.div<Props & State>`
     height: 100%;
     align-items: center;
     justify-content: flex-end;
-    padding-right: 10px;
+    padding-right: 5px;
     padding-left: 5px;
     z-index: 1;
 

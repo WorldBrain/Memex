@@ -428,6 +428,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         newNestedListCreateState:
                                             prevState?.newNestedListCreateState ??
                                             'pristine',
+                                        hasChildren:
+                                            this.options.annotationsCache.getListsByParentId(
+                                                list.unifiedId,
+                                            ).length > 0,
                                     }
                                 },
                             ),
