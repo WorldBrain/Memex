@@ -133,7 +133,7 @@ const SidebarItemClickContainer = styled.div`
     text-overflow: ellipsis;
     white-space: nowrap;
     cursor: pointer;
-    z-index: 1;
+    z-index: 10;
 `
 
 const Container = styled.div<{ isHovering: boolean }>`

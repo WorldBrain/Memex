@@ -75,6 +75,8 @@ export interface ListsSidebarProps extends ListsSidebarState {
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
+    private spaceToggleButtonRef = React.createRef<HTMLDivElement>()
+
     private renderListTreeNode = (list: UnifiedList) => {
         const reorderLineDropReceivingState = this.props.initDropReceivingState(
             list.unifiedId + LIST_REORDER_EL_POST,
@@ -131,9 +133,11 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     ? 'Collapse list'
                                     : 'Expand list'
                             }
-                            placement="bottom-start"
+                            placement="right"
+                            targetElementRef={this.spaceToggleButtonRef.current}
                         >
                             <Icon
+                                containerRef={this.spaceToggleButtonRef}
                                 icon={
                                     !this.props.listTrees.byId[list.unifiedId]
                                         ?.hasChildren
