@@ -108,7 +108,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     indentSteps={list.pathUnifiedIds.length}
                     onDragStart={this.props.onListDragStart(list.unifiedId)}
                     onDragEnd={this.props.onListDragEnd(list.unifiedId)}
-                    name={`${list.pathUnifiedIds.length}: ${list.name}`}
+                    name={`${list.name}`}
                     isSelected={this.props.selectedListId === list.unifiedId}
                     onClick={() => this.props.onListSelection(list.unifiedId)}
                     dropReceivingState={this.props.initDropReceivingState(
