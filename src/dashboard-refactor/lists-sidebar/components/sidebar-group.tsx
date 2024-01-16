@@ -169,6 +169,13 @@ const ErrorMsg = styled.div`
 `
 
 const GroupContentSection = styled.div<Props>`
+    overflow: scroll;
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+
     ${(props) =>
         props.isExpanded &&
         props.listsCount > 0 &&

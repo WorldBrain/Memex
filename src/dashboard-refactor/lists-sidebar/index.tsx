@@ -1,6 +1,7 @@
 import React, { PureComponent } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import { fonts } from 'src/dashboard-refactor/styles'
+import throttle from 'lodash/throttle'
 import ListsSidebarGroup, {
     Props as SidebarGroupProps,
 } from './components/sidebar-group'
@@ -76,6 +77,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     private spaceToggleButtonRef = React.createRef<HTMLDivElement>()
+    private nestedInputBoxRef = React.createRef<HTMLDivElement>()
 
     private renderListTreeNode = (list: UnifiedList) => {
         const reorderLineDropReceivingState = this.props.initDropReceivingState(
@@ -238,6 +240,16 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         )
     }
 
+    private moveItemIntoHorizontalView = throttle((itemRef: HTMLElement) => {
+        if (itemRef) {
+            itemRef.scrollIntoView({
+                behavior: 'smooth',
+                block: 'nearest', // vertical alignment
+                inline: 'start',
+            })
+        }
+    }, 100)
+
     private renderListTrees() {
         const rootLists = this.props.ownListsGroup.listData.filter(
             (list) => list.parentUnifiedId == null,
@@ -290,6 +302,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             nestedListInput = (
                                 <NestedListInput
                                     indentSteps={list.pathUnifiedIds.length}
+                                    ref={this.nestedInputBoxRef}
                                 >
                                     <SidebarItemInput
                                         initValue={
@@ -308,12 +321,20 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         // onErro={
                                         //     currentListTreeState.newNestedListErrorMessage
                                         // }
-                                        onChange={(value) =>
+                                        onChange={(value) => {
                                             this.props.setNestedListInputValue(
                                                 list.unifiedId,
                                                 value,
                                             )
-                                        }
+                                            this.moveItemIntoHorizontalView(
+                                                this.nestedInputBoxRef.current,
+                                            )
+                                        }}
+                                        scrollIntoView={() => {
+                                            this.moveItemIntoHorizontalView(
+                                                this.nestedInputBoxRef.current,
+                                            )
+                                        }}
                                     />
                                 </NestedListInput>
                             )
@@ -614,7 +635,10 @@ const NewItemsCountInnerDiv = styled.div`
 `
 
 const NestedListInput = styled.div`
-    margin-left: ${(props) => props.indentSteps * 20}px;
+    margin-left: ${(props) =>
+        props.indentSteps > 0
+            ? (props.indentSteps - 1) * 20
+            : props.indentSteps * 20}px;
 `
 
 const ReorderLine = styled.div<{ isVisible: boolean }>`
