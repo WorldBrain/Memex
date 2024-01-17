@@ -26,7 +26,10 @@ import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
 import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
-import { insertOrderedItemBeforeIndex } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import {
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { defaultTreeNodeSorter } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
@@ -456,12 +459,14 @@ export default class CustomListBackground {
                 key: tree.order,
             }))
 
-        // TODO: Implement sibling updates if in changes
-        const changes = insertOrderedItemBeforeIndex(
-            orderedSiblingItems,
-            localListId,
-            intendedIndexAmongSiblings,
-        )
+        const changes =
+            intendedIndexAmongSiblings === siblingListIds.length
+                ? pushOrderedItem(orderedSiblingItems, localListId)
+                : insertOrderedItemBeforeIndex(
+                      orderedSiblingItems,
+                      localListId,
+                      intendedIndexAmongSiblings,
+                  )
 
         await this.storage.updateListTreeOrder({
             order: changes.create.key,

@@ -3906,7 +3906,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 if (targetSiblingLists.length > 0) {
                     await this.performListTreeReorder(
                         action.listId,
-                        targetSiblingLists[0].unifiedId,
+                        { targetListId: targetSiblingLists[0].unifiedId },
                         previousState,
                     )
                 }
@@ -4001,28 +4001,32 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    // TODO: Simplify this. Half the logic is just getting the same data that the callers need to get
     private async performListTreeReorder(
         listId: UnifiedList['unifiedId'],
-        nextListIdInOrder: UnifiedList['unifiedId'] | undefined,
+        targetListParams: {
+            targetListId: UnifiedList['unifiedId']
+            isFinalSibling?: boolean
+        },
         previousState: State,
     ): Promise<void> {
         const { annotationsCache } = this.options
         const targetList =
-            previousState.listsSidebar.lists.byId[nextListIdInOrder]
+            previousState.listsSidebar.lists.byId[targetListParams.targetListId]
         const draggedList = previousState.listsSidebar.lists.byId[listId]
 
         const targetSiblingLists = targetList
             ? annotationsCache.getListsByParentId(targetList.parentUnifiedId)
             : []
         const index = targetSiblingLists.findIndex(
-            (list) => list.unifiedId === nextListIdInOrder,
+            (list) => list.unifiedId === targetListParams.targetListId,
         )
         const items = targetSiblingLists.map((list) => ({
             id: list.unifiedId,
             key: list.order,
         }))
         const order =
-            index === -1
+            index === -1 || targetListParams.isFinalSibling
                 ? pushOrderedItem(items, draggedList.unifiedId).create.key
                 : insertOrderedItemBeforeIndex(
                       items,
@@ -4038,7 +4042,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.options.listsBG.updateListTreeOrder({
                 localListId: draggedList.localId!,
                 siblingListIds: targetSiblingLists.map((list) => list.localId!),
-                intendedIndexAmongSiblings: index,
+                intendedIndexAmongSiblings: targetListParams.isFinalSibling
+                    ? targetSiblingLists.length
+                    : index,
             })
         }
 
@@ -4080,7 +4086,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             if (targetSiblings.length) {
                 await this.performListTreeReorder(
                     listId,
-                    targetSiblings[0].unifiedId,
+                    { targetListId: targetSiblings[0].unifiedId },
                     previousState,
                 )
             }
@@ -4097,12 +4103,22 @@ export class DashboardLogic extends UILogic<State, Events> {
                 )
             }
             if (targetSiblings.length) {
-                const targetIndex = targetSiblings.findIndex(
+                let isFinalSibling = false
+                let targetIndex = targetSiblings.findIndex(
                     (list) => list.unifiedId === targetList.unifiedId,
                 )
+                // If we're on the last sibling we need to flag that and put the index back one to point at the last sibling
+                if (targetIndex === targetSiblings.length - 1) {
+                    targetIndex--
+                    isFinalSibling = true
+                }
                 await this.performListTreeReorder(
                     listId,
-                    targetSiblings[targetIndex + 1]?.unifiedId,
+                    {
+                        targetListId:
+                            targetSiblings[targetIndex + 1]?.unifiedId,
+                        isFinalSibling,
+                    },
                     previousState,
                 )
             }
