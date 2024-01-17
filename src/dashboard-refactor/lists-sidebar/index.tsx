@@ -29,7 +29,10 @@ import {
     mapTreeTraverse,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { LIST_REORDER_POST_EL_POSTFIX } from '../constants'
+import {
+    LIST_REORDER_POST_EL_POSTFIX,
+    LIST_REORDER_PRE_EL_POSTFIX,
+} from '../constants'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
@@ -109,145 +112,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         )
     }
 
-    private renderListTreeNode = (list: UnifiedList) => {
-        return (
-            <>
-                <DropTargetSidebarItem
-                    key={list.unifiedId}
-                    indentSteps={list.pathUnifiedIds.length}
-                    onDragStart={this.props.onListDragStart(list.unifiedId)}
-                    onDragEnd={this.props.onListDragEnd(list.unifiedId)}
-                    name={`${list.name}`}
-                    isSelected={this.props.selectedListId === list.unifiedId}
-                    onClick={() => this.props.onListSelection(list.unifiedId)}
-                    dropReceivingState={this.props.initDropReceivingState(
-                        list.unifiedId,
-                    )}
-                    isPrivate={list.isPrivate}
-                    isShared={!list.isPrivate}
-                    areAnyMenusDisplayed={
-                        this.props.showMoreMenuListId === list.unifiedId ||
-                        this.props.editMenuListId === list.unifiedId
-                    }
-                    renderLeftSideIcon={() => (
-                        <TooltipBox
-                            tooltipText={
-                                !this.props.listTrees.byId[list.unifiedId]
-                                    ?.hasChildren
-                                    ? 'Add Sub-Space'
-                                    : this.props.listTrees.byId[list.unifiedId]
-                                          .isTreeToggled
-                                    ? 'Collapse list'
-                                    : 'Expand list'
-                            }
-                            placement="right"
-                            targetElementRef={this.spaceToggleButtonRef.current}
-                        >
-                            <Icon
-                                containerRef={this.spaceToggleButtonRef}
-                                icon={
-                                    !this.props.listTrees.byId[list.unifiedId]
-                                        ?.hasChildren
-                                        ? 'plus'
-                                        : this.props.listTrees.byId[
-                                              list.unifiedId
-                                          ].isTreeToggled
-                                        ? 'arrowDown'
-                                        : 'arrowRight'
-                                }
-                                heightAndWidth="20px"
-                                color={
-                                    this.props.listTrees.byId[list.unifiedId]
-                                        .hasChildren
-                                        ? 'greyScale7'
-                                        : 'greyScale3'
-                                }
-                                onClick={(event) => {
-                                    event.stopPropagation()
-
-                                    if (
-                                        this.props.listTrees.byId[
-                                            list.unifiedId
-                                        ].hasChildren
-                                    ) {
-                                        this.props.onTreeToggle(list.unifiedId)
-                                    } else {
-                                        this.props.onNestedListInputToggle(
-                                            list.unifiedId,
-                                        )
-                                    }
-                                }}
-                            />
-                        </TooltipBox>
-                    )}
-                    renderRightSideIcon={() => {
-                        return (
-                            <RightSideIconBox>
-                                <TooltipBox
-                                    placement={'bottom'}
-                                    tooltipText={'Add Sub-Space'}
-                                >
-                                    <Icon
-                                        icon="plus"
-                                        heightAndWidth="18px"
-                                        onClick={(event) => {
-                                            event.stopPropagation()
-                                            this.props.onNestedListInputToggle(
-                                                list.unifiedId,
-                                            )
-                                        }}
-                                    />
-                                </TooltipBox>
-                                <SpaceContextMenuBtn
-                                    {...this.props.initContextMenuBtnProps(
-                                        list.unifiedId,
-                                    )}
-                                    listData={list}
-                                    isCreator={
-                                        list.creator?.id ===
-                                        this.props.currentUser?.id
-                                    }
-                                    isMenuDisplayed={
-                                        this.props.showMoreMenuListId ===
-                                        list.unifiedId
-                                    }
-                                    errorMessage={
-                                        this.props.editListErrorMessage
-                                    }
-                                    isShared={!list.isPrivate}
-                                />
-                            </RightSideIconBox>
-                        )
-                    }}
-                    renderEditIcon={() => (
-                        <SpaceEditMenuBtn
-                            {...this.props.initContextMenuBtnProps(
-                                list.unifiedId,
-                            )}
-                            listData={list}
-                            isCreator={
-                                list.creator?.id === this.props.currentUser?.id
-                            }
-                            isMenuDisplayed={
-                                this.props.editMenuListId === list.unifiedId
-                            }
-                            errorMessage={this.props.editListErrorMessage}
-                            onConfirmSpaceNameEdit={(newName) => {
-                                this.props.onConfirmListEdit(
-                                    list.unifiedId,
-                                    newName,
-                                )
-                            }}
-                        />
-                    )}
-                />
-                {this.renderReorderLine(
-                    list.unifiedId + LIST_REORDER_POST_EL_POSTFIX,
-                )}
-            </>
-        )
-    }
-
     private moveItemIntoHorizontalView = throttle((itemRef: HTMLElement) => {
         if (itemRef) {
             itemRef.scrollIntoView({
@@ -267,7 +131,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         const listShowFlag = new Map<string, boolean>()
 
         return rootLists
-            .map((root) =>
+            .map((root, index) =>
                 mapTreeTraverse({
                     root,
                     strategy: 'dfs',
@@ -349,7 +213,181 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         }
                         return (
                             <>
-                                {this.renderListTreeNode(list)}
+                                {index === 0 &&
+                                    this.renderReorderLine(
+                                        list.unifiedId +
+                                            LIST_REORDER_PRE_EL_POSTFIX,
+                                    )}
+                                <DropTargetSidebarItem
+                                    key={list.unifiedId}
+                                    indentSteps={list.pathUnifiedIds.length}
+                                    onDragStart={this.props.onListDragStart(
+                                        list.unifiedId,
+                                    )}
+                                    onDragEnd={this.props.onListDragEnd(
+                                        list.unifiedId,
+                                    )}
+                                    name={`${list.name}`}
+                                    isSelected={
+                                        this.props.selectedListId ===
+                                        list.unifiedId
+                                    }
+                                    onClick={() =>
+                                        this.props.onListSelection(
+                                            list.unifiedId,
+                                        )
+                                    }
+                                    dropReceivingState={this.props.initDropReceivingState(
+                                        list.unifiedId,
+                                    )}
+                                    isPrivate={list.isPrivate}
+                                    isShared={!list.isPrivate}
+                                    areAnyMenusDisplayed={
+                                        this.props.showMoreMenuListId ===
+                                            list.unifiedId ||
+                                        this.props.editMenuListId ===
+                                            list.unifiedId
+                                    }
+                                    renderLeftSideIcon={() => (
+                                        <TooltipBox
+                                            tooltipText={
+                                                !this.props.listTrees.byId[
+                                                    list.unifiedId
+                                                ]?.hasChildren
+                                                    ? 'Add Sub-Space'
+                                                    : this.props.listTrees.byId[
+                                                          list.unifiedId
+                                                      ].isTreeToggled
+                                                    ? 'Collapse list'
+                                                    : 'Expand list'
+                                            }
+                                            placement="right"
+                                            targetElementRef={
+                                                this.spaceToggleButtonRef
+                                                    .current
+                                            }
+                                        >
+                                            <Icon
+                                                containerRef={
+                                                    this.spaceToggleButtonRef
+                                                }
+                                                icon={
+                                                    !this.props.listTrees.byId[
+                                                        list.unifiedId
+                                                    ]?.hasChildren
+                                                        ? 'plus'
+                                                        : this.props.listTrees
+                                                              .byId[
+                                                              list.unifiedId
+                                                          ].isTreeToggled
+                                                        ? 'arrowDown'
+                                                        : 'arrowRight'
+                                                }
+                                                heightAndWidth="20px"
+                                                color={
+                                                    this.props.listTrees.byId[
+                                                        list.unifiedId
+                                                    ].hasChildren
+                                                        ? 'greyScale7'
+                                                        : 'greyScale3'
+                                                }
+                                                onClick={(event) => {
+                                                    event.stopPropagation()
+
+                                                    if (
+                                                        this.props.listTrees
+                                                            .byId[
+                                                            list.unifiedId
+                                                        ].hasChildren
+                                                    ) {
+                                                        this.props.onTreeToggle(
+                                                            list.unifiedId,
+                                                        )
+                                                    } else {
+                                                        this.props.onNestedListInputToggle(
+                                                            list.unifiedId,
+                                                        )
+                                                    }
+                                                }}
+                                            />
+                                        </TooltipBox>
+                                    )}
+                                    renderRightSideIcon={() => {
+                                        return (
+                                            <RightSideIconBox>
+                                                <TooltipBox
+                                                    placement={'bottom'}
+                                                    tooltipText={
+                                                        'Add Sub-Space'
+                                                    }
+                                                >
+                                                    <Icon
+                                                        icon="plus"
+                                                        heightAndWidth="18px"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            this.props.onNestedListInputToggle(
+                                                                list.unifiedId,
+                                                            )
+                                                        }}
+                                                    />
+                                                </TooltipBox>
+                                                <SpaceContextMenuBtn
+                                                    {...this.props.initContextMenuBtnProps(
+                                                        list.unifiedId,
+                                                    )}
+                                                    listData={list}
+                                                    isCreator={
+                                                        list.creator?.id ===
+                                                        this.props.currentUser
+                                                            ?.id
+                                                    }
+                                                    isMenuDisplayed={
+                                                        this.props
+                                                            .showMoreMenuListId ===
+                                                        list.unifiedId
+                                                    }
+                                                    errorMessage={
+                                                        this.props
+                                                            .editListErrorMessage
+                                                    }
+                                                    isShared={!list.isPrivate}
+                                                />
+                                            </RightSideIconBox>
+                                        )
+                                    }}
+                                    renderEditIcon={() => (
+                                        <SpaceEditMenuBtn
+                                            {...this.props.initContextMenuBtnProps(
+                                                list.unifiedId,
+                                            )}
+                                            listData={list}
+                                            isCreator={
+                                                list.creator?.id ===
+                                                this.props.currentUser?.id
+                                            }
+                                            isMenuDisplayed={
+                                                this.props.editMenuListId ===
+                                                list.unifiedId
+                                            }
+                                            errorMessage={
+                                                this.props.editListErrorMessage
+                                            }
+                                            onConfirmSpaceNameEdit={(
+                                                newName,
+                                            ) => {
+                                                this.props.onConfirmListEdit(
+                                                    list.unifiedId,
+                                                    newName,
+                                                )
+                                            }}
+                                        />
+                                    )}
+                                />
+                                {this.renderReorderLine(
+                                    list.unifiedId +
+                                        LIST_REORDER_POST_EL_POSTFIX,
+                                )}
                                 {nestedListInput}
                             </>
                         )

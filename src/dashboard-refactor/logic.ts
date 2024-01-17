@@ -3,6 +3,7 @@ import debounce from 'lodash/debounce'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
+    LIST_REORDER_PRE_EL_POSTFIX,
     sizeConstants,
 } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
@@ -3888,6 +3889,20 @@ export class DashboardLogic extends UILogic<State, Events> {
                     )
                     return
                 }
+                if (event.listId.endsWith(LIST_REORDER_PRE_EL_POSTFIX)) {
+                    const cleanedListId = event.listId.slice(
+                        0,
+                        event.listId.length -
+                            LIST_REORDER_PRE_EL_POSTFIX.length,
+                    )
+                    await this.handleDropOnReorderLine(
+                        action,
+                        cleanedListId,
+                        previousState,
+                        { isBeforeFirstRoot: true },
+                    )
+                    return
+                }
 
                 const listToMove = annotationsCache.lists.byId[action.listId]
                 // We only actualy want to perform the move if being dropped on a different parent list
@@ -4057,6 +4072,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         { listId }: DragToListAction<'list'>,
         dropTargetListId: string,
         previousState: State,
+        params?: { isBeforeFirstRoot?: boolean },
     ): Promise<void> {
         if (listId == null || dropTargetListId === listId) {
             this.emitMutation({
@@ -4068,8 +4084,27 @@ export class DashboardLogic extends UILogic<State, Events> {
         const targetList = cache.lists.byId[dropTargetListId]
         const draggedList = cache.lists.byId[listId]
 
-        // If the target list tree is toggled open, the behavior is that the dragged list becomes a child of it (if not already)
-        if (
+        // Edge case: dropping before the first root always orders the dragged list first among all roots
+        if (params?.isBeforeFirstRoot) {
+            const targetSiblings = cache.getListsByParentId(
+                targetList.parentUnifiedId,
+            )
+            if (draggedList.parentUnifiedId !== targetList.parentUnifiedId) {
+                await this.performListTreeMove(
+                    listId,
+                    targetList.parentUnifiedId,
+                    previousState,
+                )
+            }
+            if (targetSiblings.length) {
+                await this.performListTreeReorder(
+                    listId,
+                    { targetListId: targetSiblings[0].unifiedId },
+                    previousState,
+                )
+            }
+        } // If the target list tree is toggled open, the behavior is that the dragged list becomes a child of it (if not already)
+        else if (
             previousState.listsSidebar.listTrees.byId[dropTargetListId]
                 ?.isTreeToggled
         ) {
@@ -4217,7 +4252,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             //     return
             // }
 
-            console.log(pageData.fullPdfUrl, event.pageId)
             await executeUITask(
                 this,
                 (taskState) => ({
