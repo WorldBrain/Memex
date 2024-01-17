@@ -14,7 +14,6 @@ export interface Props {
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick: React.MouseEventHandler
     spaceSidebarWidth: string
-    indentLevel: number
 }
 
 export default class ListsSidebarGroup extends PureComponent<Props> {
