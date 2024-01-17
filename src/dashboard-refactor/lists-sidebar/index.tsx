@@ -76,11 +76,31 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onConfirmListEdit: (listId: string, value: string) => void
     currentUser: any
     onConfirmListDelete: (listId: string) => void
+    spaceSidebarWidth: string
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     private spaceToggleButtonRef = React.createRef<HTMLDivElement>()
     private nestedInputBoxRef = React.createRef<HTMLDivElement>()
+    private sidebarItemRefs: React.RefObject<HTMLDivElement>[]
+
+    constructor(props: ListsSidebarProps) {
+        super(props)
+        // Initialize an array of refs
+        this.sidebarItemRefs = []
+    }
+
+    private setSidebarItemRefs = (
+        element: HTMLDivElement,
+        unifiedId: number | string,
+    ) => {
+        // Ensure the refs array has a slot for the current index
+        if (!this.sidebarItemRefs[unifiedId]) {
+            this.sidebarItemRefs[unifiedId] = React.createRef()
+        }
+        // Replace the ref object with a new one that has the element
+        this.sidebarItemRefs[unifiedId] = { current: element }
+    }
 
     private renderReorderLine = (listId: string) => {
         const reorderLineDropReceivingState = this.props.initDropReceivingState(
@@ -113,15 +133,29 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     }
 
     private moveItemIntoHorizontalView = throttle((itemRef: HTMLElement) => {
-        if (itemRef) {
-            itemRef.scrollIntoView({
-                behavior: 'smooth',
-                block: 'nearest', // vertical alignment
-                inline: 'start',
-            })
+        if (itemRef && itemRef.parentElement) {
+            // container dimensions and scroll position
+            const scrollContainer =
+                itemRef.parentElement.parentElement.parentElement
+
+            const currentScrollLeft = scrollContainer.scrollLeft
+
+            // item dimensions and position
+            const itemLeft = itemRef.offsetLeft
+
+            let scrollLeft = 0
+            if (itemLeft < 11) {
+                scrollLeft = 0
+            } else {
+                scrollLeft = itemLeft - 10
+            }
+
+            // needed for somehow waiting for the toggle animation to complete
+            setTimeout(() => {
+                scrollContainer.scrollLeft = scrollLeft
+            }, 0)
         }
     }, 100)
-
     private renderListTrees() {
         const rootLists = this.props.ownListsGroup.listData
             .filter((list) => list.parentUnifiedId == null)
@@ -219,6 +253,15 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             LIST_REORDER_PRE_EL_POSTFIX,
                                     )}
                                 <DropTargetSidebarItem
+                                    sidebarItemRef={(el) =>
+                                        this.setSidebarItemRefs(
+                                            el,
+                                            list.unifiedId,
+                                        )
+                                    }
+                                    spaceSidebarWidth={
+                                        this.props.spaceSidebarWidth
+                                    }
                                     key={list.unifiedId}
                                     indentSteps={list.pathUnifiedIds.length}
                                     onDragStart={this.props.onListDragStart(
@@ -232,11 +275,16 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         this.props.selectedListId ===
                                         list.unifiedId
                                     }
-                                    onClick={() =>
+                                    onClick={() => {
                                         this.props.onListSelection(
                                             list.unifiedId,
                                         )
-                                    }
+
+                                        this.moveItemIntoHorizontalView(
+                                            this.sidebarItemRefs[list.unifiedId]
+                                                .current,
+                                        )
+                                    }}
                                     dropReceivingState={this.props.initDropReceivingState(
                                         list.unifiedId,
                                     )}
@@ -292,8 +340,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                         : 'greyScale3'
                                                 }
                                                 onClick={(event) => {
-                                                    event.stopPropagation()
-
                                                     if (
                                                         this.props.listTrees
                                                             .byId[
@@ -308,6 +354,13 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                             list.unifiedId,
                                                         )
                                                     }
+                                                    this.moveItemIntoHorizontalView(
+                                                        this.sidebarItemRefs[
+                                                            list.unifiedId
+                                                        ].current,
+                                                    )
+
+                                                    event.stopPropagation()
                                                 }}
                                             />
                                         </TooltipBox>
@@ -420,12 +473,14 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     : null
                             }
                             forceRightSidePermanentDisplay
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
                         />
                         <StaticSidebarItem
                             icon="heartEmpty"
                             name="All Saved"
                             isSelected={this.props.selectedListId == null}
                             onClick={() => this.props.onListSelection(null)}
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
                         />
                         <StaticSidebarItem
                             icon="inbox"
@@ -451,6 +506,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     : null
                             }
                             forceRightSidePermanentDisplay
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
                         />
                         <StaticSidebarItem
                             icon="phone"
@@ -464,6 +520,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     SPECIAL_LIST_STRING_IDS.MOBILE,
                                 )
                             }
+                            spaceSidebarWidth={this.props.spaceSidebarWidth}
                         />
                     </TopGroup>
                     <Separator />
@@ -473,6 +530,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     <ListsSidebarGroup
                         {...this.props.ownListsGroup}
                         listsCount={this.props.ownListsGroup.listData.length}
+                        spaceSidebarWidth={this.props.spaceSidebarWidth}
                     >
                         {this.props.isAddListInputShown && (
                             <SidebarItemInput
@@ -498,6 +556,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         list.remoteId!,
                                     )
                                 }
+                                spaceSidebarWidth={this.props.spaceSidebarWidth}
                             />
                         ))}
                     </ListsSidebarGroup>
@@ -520,6 +579,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 )}
                                 isPrivate={list.isPrivate}
                                 isShared={!list.isPrivate}
+                                spaceSidebarWidth={this.props.spaceSidebarWidth}
                             />
                         ))}
                     </ListsSidebarGroup>
@@ -539,7 +599,7 @@ const RightSideIconBox = styled.div`
 const Container = styled.div<{ spaceSidebarWidth: number }>`
     position: sticky;
     z-index: 2147483645;
-    width: ${(props) => props.spaceSidebarWidth}px;
+    width: ${(props) => props.spaceSidebarWidth};
     display: flex;
     justify-content: center;
     height: fill-available;
@@ -562,7 +622,7 @@ const Separator = styled.div`
 
 const SidebarInnerContent = styled.div`
     overflow-y: scroll;
-    overflow-x: visible;
+    overflow-x: hidden;
     height: fill-available;
     width: fill-available;
     padding-bottom: 100px;

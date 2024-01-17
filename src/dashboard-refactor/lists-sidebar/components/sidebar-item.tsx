@@ -21,6 +21,8 @@ export interface Props {
     renderEditIcon?: () => JSX.Element
     areAnyMenusDisplayed?: boolean
     forceRightSidePermanentDisplay?: boolean
+    spaceSidebarWidth: string
+    sidebarItemRef: (el: any) => void
 }
 
 export interface State {
@@ -70,8 +72,10 @@ export default class ListsSidebarItem extends React.PureComponent<
                         canDisableHover: true,
                     })
                 }}
+                spaceSidebarWidth={this.props.spaceSidebarWidth}
             >
                 <SidebarItem
+                    ref={this.props.sidebarItemRef}
                     indentSteps={this.props.indentSteps ?? 0}
                     onDragEnter={this.handleDragEnter}
                     isSelected={this.props.isSelected}
@@ -95,7 +99,10 @@ export default class ListsSidebarItem extends React.PureComponent<
                         })
                     }}
                 >
-                    <SidebarItemClickContainer onClick={this.props.onClick}>
+                    <SidebarItemClickContainer
+                        spaceSidebarWidth={this.props.spaceSidebarWidth}
+                        onClick={this.props.onClick}
+                    >
                         {this.props.renderLeftSideIcon?.()}
                         <TitleBox
                             onDragStart={this.props.onDragStart}
@@ -107,20 +114,29 @@ export default class ListsSidebarItem extends React.PureComponent<
                             </ListTitle>
                         </TitleBox>
                     </SidebarItemClickContainer>
-                    <IconBox {...this.props} {...this.state}>
-                        {this.props.renderEditIcon?.()}
-                    </IconBox>
-                    {(this.props.isShared ||
-                        this.state.isHovering ||
-                        this.props.forceRightSidePermanentDisplay) &&
-                        this.props.renderRightSideIcon?.()}
+                    <RightSideActionBar>
+                        <IconBox {...this.props} {...this.state}>
+                            {this.props.renderEditIcon?.()}
+                        </IconBox>
+                        {(this.props.isShared ||
+                            this.state.isHovering ||
+                            this.props.forceRightSidePermanentDisplay) &&
+                            this.props.renderRightSideIcon?.()}
+                    </RightSideActionBar>
                 </SidebarItem>
             </Container>
         )
     }
 }
 
-const SidebarItemClickContainer = styled.div`
+const RightSideActionBar = styled.div`
+    position: absolute;
+    right: 10px;
+    display: flex;
+    z-index: 10;
+`
+
+const SidebarItemClickContainer = styled.div<{ spaceSidebarWidth: string }>`
     display: flex;
     flex: 1;
     height: 100%;
@@ -134,9 +150,13 @@ const SidebarItemClickContainer = styled.div`
     white-space: nowrap;
     cursor: pointer;
     z-index: 10;
+    width: calc(${(props) => props.spaceSidebarWidth} - 44px);
 `
 
-const Container = styled.div<{ isHovering: boolean }>`
+const Container = styled.div<{
+    isHovering: boolean
+    spaceSidebarWidth: string
+}>`
     position: relative;
     z-index: ${(props) => (props.isHovering ? 2147483647 : 0)};
 `
@@ -151,7 +171,7 @@ const Name = styled.div`
 const TitleBox = styled.div<Props>`
     display: flex;
     flex: 0 1 100%;
-    width: 65%;
+    width: 30%;
     height: 100%;
     align-items: center;
     color: ${(props) => props.theme.colors.greyScale5};
@@ -160,9 +180,14 @@ const TitleBox = styled.div<Props>`
 const SidebarItem = styled.div<Props>`
     height: 40px;
     margin: 0px 12px;
+    position: relative;
+    scroll-margin: 20px;
     margin-left: ${({ indentSteps }: Props) => (indentSteps + 1) * 10}px;
     border-radius: 5px;
     display: flex;
+    width: fill-available;
+    width: -moz-available;
+    min-width: fit-content;
     flex-direction: row;
     padding-right: 5px;
     justify-content: space-between;
@@ -174,7 +199,7 @@ const SidebarItem = styled.div<Props>`
 
 
     &:hover ${TitleBox} {
-        width: 65%;
+        width: 30%;
     }
 
     ${({ isSelected }: Props) =>

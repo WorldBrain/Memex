@@ -368,7 +368,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 skip: 0,
             },
             listsSidebar: {
-                spaceSidebarWidth: sizeConstants.listsSidebar.width,
+                spaceSidebarWidth: sizeConstants.listsSidebar.width + 'px',
                 addListErrorMessage: null,
                 editListErrorMessage: null,
                 listShareLoadingState: 'pristine',

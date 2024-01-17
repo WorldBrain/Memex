@@ -24,7 +24,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     areFollowedListsExpanded: boolean
     areJoinedListsExpanded: boolean
     isAddListInputShown: boolean
-    spaceSidebarWidth: number
+    spaceSidebarWidth: string
 
     draggedListId: string | null
     inboxUnreadCount: number

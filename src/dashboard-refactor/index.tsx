@@ -469,6 +469,7 @@ export class DashboardContainer extends StatefulUIElement<
         return (
             <ListsSidebarContainer
                 {...listsSidebar}
+                spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 onTreeToggle={(listId) =>
                     this.processEvent('toggleListTreeShow', { listId })
                 }
@@ -484,7 +485,6 @@ export class DashboardContainer extends StatefulUIElement<
                 onConfirmNestedListCreate={(parentListId) =>
                     this.processEvent('createdNestedList', { parentListId })
                 }
-                spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
                 openRemoteListPage={(remoteListId) =>
                     this.props.openCollectionPage(remoteListId)
                 }
@@ -492,7 +492,6 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('confirmListEdit', { value, listId })
                 }}
                 onConfirmListDelete={(listId: string) => {
-                    console.log('onConfirmListDelete', listId)
                     this.processEvent('setDeletingListId', { listId: listId })
                     this.processEvent('confirmListDelete', null)
                 }}
@@ -526,6 +525,8 @@ export class DashboardContainer extends StatefulUIElement<
                     loadingState: listsSidebar.listLoadState,
                     title: 'My Spaces',
                     listData: ownListsData,
+                    spaceSidebarWidth: this.state.listsSidebar
+                        .spaceSidebarWidth,
                     onAddBtnClick: (event) => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -542,6 +543,8 @@ export class DashboardContainer extends StatefulUIElement<
                     isExpanded: listsSidebar.areFollowedListsExpanded,
                     loadingState: listsSidebar.listLoadState,
                     title: 'Followed Spaces',
+                    spaceSidebarWidth: this.state.listsSidebar
+                        .spaceSidebarWidth,
                     listData: followedListsData,
                     onExpandBtnClick: () =>
                         this.processEvent('setFollowedListsExpanded', {
@@ -552,6 +555,8 @@ export class DashboardContainer extends StatefulUIElement<
                     isExpanded: listsSidebar.areJoinedListsExpanded,
                     loadingState: listsSidebar.listLoadState,
                     title: 'Joined Spaces',
+                    spaceSidebarWidth: this.state.listsSidebar
+                        .spaceSidebarWidth,
                     onExpandBtnClick: () => {
                         this.processEvent('setJoinedListsExpanded', {
                             isExpanded: !listsSidebar.areJoinedListsExpanded,

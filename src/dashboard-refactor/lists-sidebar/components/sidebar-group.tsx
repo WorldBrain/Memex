@@ -13,6 +13,8 @@ export interface Props {
     loadingState: TaskState
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick: React.MouseEventHandler
+    spaceSidebarWidth: string
+    indentLevel: number
 }
 
 export default class ListsSidebarGroup extends PureComponent<Props> {
@@ -45,7 +47,10 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
     render() {
         return (
             <Container>
-                <GroupHeaderContainer onClick={this.props.onExpandBtnClick}>
+                <GroupHeaderContainer
+                    spaceSidebarWidth={this.props.spaceSidebarWidth}
+                    onClick={this.props.onExpandBtnClick}
+                >
                     <GroupHeaderInnerDiv className="inner">
                         {/* {this.props.onExpandBtnClick && (
                                 <ArrowIcon
@@ -76,16 +81,22 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
                         </GroupTitle>
                     </GroupHeaderInnerDiv>
                 </GroupHeaderContainer>
-                <GroupContentSection {...this.props}>
-                    {this.renderGroupContent()}
-                </GroupContentSection>
+                <GroupScrollContainer
+                    spaceSidebarWidth={this.props.spaceSidebarWidth}
+                >
+                    <GroupContentSection {...this.props}>
+                        {this.renderGroupContent()}
+                    </GroupContentSection>
+                </GroupScrollContainer>
             </Container>
         )
     }
 }
 
-const Container = styled.div`
-    width: 100%;
+const Container = styled.div<{
+    spaceSidebarWidth: number
+}>`
+    max-width: ${(props) => props.spaceSidebarWidth};
     position: relative;
     user-select: none;
     cursor: pointer;
@@ -104,12 +115,15 @@ const LoadingContainer = styled.div`
     justify-content: center;
 `
 
-const GroupHeaderContainer = styled.div`
-    height: 50px;
-    width: 100%;
+const GroupHeaderContainer = styled.div<{
+    spaceSidebarWidth: number
+}>`
+    height: 40px;
+    width: ${(props) => props.spaceSidebarWidth};
     display: flex;
     flex-direction: row;
     justify-content: start;
+    align-items: flex-end;
     cursor: pointer;
 
     &:hover ${ArrowIcon} {
@@ -168,13 +182,24 @@ const ErrorMsg = styled.div`
     padding: 0 10px;
 `
 
-const GroupContentSection = styled.div<Props>`
+const GroupScrollContainer = styled.div<{
+    spaceSidebarWidth: number
+}>`
     overflow: scroll;
+    width: calc(${(props) => props.spaceSidebarWidth});
+    height: fit-content;
     &::-webkit-scrollbar {
         display: none;
     }
 
     scrollbar-width: none;
+`
+
+const GroupContentSection = styled.div<Props>`
+    min-width: fit-content;
+    width: fill-available;
+    width: -moz-available;
+    width: 100%;
 
     ${(props) =>
         props.isExpanded &&
