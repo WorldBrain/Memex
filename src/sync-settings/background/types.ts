@@ -55,6 +55,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcutEnabled: boolean
             sharePageShortcutEnabled: boolean
             toggleHighlightsShortcutEnabled: boolean
+            copyHighlightLinkShortcutEnabled: boolean
             createAnnotationShortcutEnabled: boolean
             askAIShortcutEnabled: boolean
             addCommentShortcut: string
@@ -65,6 +66,7 @@ export interface SyncSettingsByFeature {
             addToCollectionShortcut: string
             toggleHighlightsShortcut: string
             createAnnotationShortcut: string
+            copyHighlightLinkShortcut: string
             askAIShortcut: string
             sharePageShortcut: string
         }

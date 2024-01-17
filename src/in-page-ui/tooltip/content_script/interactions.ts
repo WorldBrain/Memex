@@ -94,6 +94,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                 createAnnotation: shortcutToKeyStrs(state.createAnnotation),
                 createHighlight: shortcutToKeyStrs(state.createHighlight),
                 addToCollection: shortcutToKeyStrs(state.addToCollection),
+                copyHighlightLink: shortcutToKeyStrs(state.copyHighlightLink),
                 askAI: shortcutToKeyStrs(state.askAI),
             }
         },

@@ -20,9 +20,11 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
         'openDashboard',
         'shortcutsEnabled',
         'askAI',
+        'copyHighlightLink',
     ]
 
     const shortcuts: Partial<BaseKeyboardShortcuts> = {}
+
     for (const key of keys) {
         if (key === 'shortcutsEnabled') {
             shortcuts[key] = storage[key] || false

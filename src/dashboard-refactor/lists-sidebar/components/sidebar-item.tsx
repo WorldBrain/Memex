@@ -22,7 +22,6 @@ export interface Props {
     areAnyMenusDisplayed?: boolean
     forceRightSidePermanentDisplay?: boolean
     spaceSidebarWidth: string
-    sidebarItemRef?: (el: any) => void
 }
 
 export interface State {
@@ -76,6 +75,7 @@ export default class ListsSidebarItem extends React.PureComponent<
             >
                 <SidebarItem
                     ref={this.props.sidebarItemRef}
+                    spaceSidebarWidth={this.props.spaceSidebarWidth}
                     indentSteps={this.props.indentSteps ?? 0}
                     onDragEnter={this.handleDragEnter}
                     isSelected={this.props.isSelected}
@@ -159,6 +159,9 @@ const Container = styled.div<{
 }>`
     position: relative;
     z-index: ${(props) => (props.isHovering ? 2147483647 : 0)};
+    width: fit-content;
+    margin-right: 10px;
+    /* max-width: calc(${(props) => props.spaceSidebarWidth} - 34px); */
 `
 
 const Name = styled.div`
@@ -190,6 +193,7 @@ const SidebarItem = styled.div<Props>`
     min-width: fit-content;
     flex-direction: row;
     padding-right: 5px;
+    width: calc(${(props) => props.spaceSidebarWidth} - 34px);
     justify-content: space-between;
     align-items: center;
     background-color: ${(props) =>
