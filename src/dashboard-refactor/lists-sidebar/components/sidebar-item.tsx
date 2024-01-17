@@ -100,11 +100,13 @@ export default class ListsSidebarItem extends React.PureComponent<
                         })
                     }}
                 >
+                    <LeftSideIconContainer>
+                        {this.props.renderLeftSideIcon?.()}
+                    </LeftSideIconContainer>
                     <SidebarItemClickContainer
                         spaceSidebarWidth={this.props.spaceSidebarWidth}
                         onClick={this.props.onClick}
                     >
-                        {this.props.renderLeftSideIcon?.()}
                         <TitleBox
                             onDragStart={this.props.onDragStart}
                             onDragEnd={this.props.onDragEnd}
@@ -130,11 +132,20 @@ export default class ListsSidebarItem extends React.PureComponent<
     }
 }
 
+const LeftSideIconContainer = styled.div`
+    display: flex;
+    z-index: 11;
+    margin-left: 5px;
+`
+
 const RightSideActionBar = styled.div`
     position: absolute;
     right: 10px;
     display: flex;
     z-index: 10;
+    backdrop-filter: blur(5px);
+    height: -webkit-fill-available;
+    height: -moz-available;
 `
 
 const SidebarItemClickContainer = styled.div<{ spaceSidebarWidth: string }>`
@@ -151,7 +162,6 @@ const SidebarItemClickContainer = styled.div<{ spaceSidebarWidth: string }>`
     white-space: nowrap;
     cursor: pointer;
     z-index: 10;
-    width: calc(${(props) => props.spaceSidebarWidth} - 44px);
 `
 
 const Container = styled.div<{
@@ -161,7 +171,6 @@ const Container = styled.div<{
     position: relative;
     z-index: ${(props) => (props.isHovering ? 2147483647 : 0)};
     width: fit-content;
-    margin-right: 10px;
     /* max-width: calc(${(props) => props.spaceSidebarWidth} - 34px); */
 `
 
@@ -194,7 +203,7 @@ const SidebarItem = styled.div<Props>`
     min-width: fit-content;
     flex-direction: row;
     padding-right: 5px;
-    width: calc(${(props) => props.spaceSidebarWidth} - 34px);
+    width: calc(${(props) => props.spaceSidebarWidth} - 24px);
     justify-content: space-between;
     align-items: center;
     background-color: ${(props) =>
