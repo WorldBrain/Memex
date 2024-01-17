@@ -82,4 +82,5 @@ export const FILTER_PICKERS_LIMIT = 20
 
 export const MISSING_PDF_QUERY_PARAM = 'missing-pdf'
 
-export const LIST_REORDER_EL_POST = '-reorder'
+export const LIST_REORDER_PRE_EL_POSTFIX = '-reorder-pre'
+export const LIST_REORDER_POST_EL_POSTFIX = '-reorder-post'

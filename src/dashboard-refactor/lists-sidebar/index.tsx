@@ -29,7 +29,7 @@ import {
     mapTreeTraverse,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { LIST_REORDER_EL_POST } from '../constants'
+import { LIST_REORDER_POST_EL_POSTFIX } from '../constants'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
@@ -79,34 +79,39 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     private spaceToggleButtonRef = React.createRef<HTMLDivElement>()
     private nestedInputBoxRef = React.createRef<HTMLDivElement>()
 
-    private renderListTreeNode = (list: UnifiedList) => {
+    private renderReorderLine = (listId: string) => {
         const reorderLineDropReceivingState = this.props.initDropReceivingState(
-            list.unifiedId + LIST_REORDER_EL_POST,
+            listId,
         )
         return (
+            <ReorderLine
+                isVisible={reorderLineDropReceivingState.isDraggedOver}
+                onDragEnter={(e: React.DragEvent) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                    // Needed to push this op back on the event queue, so it fires after the previous
+                    //  list item's `onDropLeave` event
+                    setTimeout(
+                        () => reorderLineDropReceivingState.onDragEnter(),
+                        0,
+                    )
+                }}
+                onDragLeave={reorderLineDropReceivingState.onDragLeave}
+                onDragOver={(e: React.DragEvent) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                }} // Needed to allow the `onDrop` event to fire
+                onDrop={(e: React.DragEvent) => {
+                    e.preventDefault()
+                    reorderLineDropReceivingState.onDrop(e.dataTransfer)
+                }}
+            />
+        )
+    }
+
+    private renderListTreeNode = (list: UnifiedList) => {
+        return (
             <>
-                <ReorderLine
-                    isVisible={reorderLineDropReceivingState.isDraggedOver}
-                    onDragEnter={(e: React.DragEvent) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                        // Needed to push this op back on the event queue, so it fires after the previous
-                        //  list item's `onDropLeave` event
-                        setTimeout(
-                            () => reorderLineDropReceivingState.onDragEnter(),
-                            0,
-                        )
-                    }}
-                    onDragLeave={reorderLineDropReceivingState.onDragLeave}
-                    onDragOver={(e: React.DragEvent) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                    }} // Needed to allow the `onDrop` event to fire
-                    onDrop={(e: React.DragEvent) => {
-                        e.preventDefault()
-                        reorderLineDropReceivingState.onDrop(e.dataTransfer)
-                    }}
-                />
                 <DropTargetSidebarItem
                     key={list.unifiedId}
                     indentSteps={list.pathUnifiedIds.length}
@@ -236,6 +241,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         />
                     )}
                 />
+                {this.renderReorderLine(
+                    list.unifiedId + LIST_REORDER_POST_EL_POSTFIX,
+                )}
             </>
         )
     }

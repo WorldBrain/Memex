@@ -2,7 +2,7 @@ import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
 import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 import {
-    LIST_REORDER_EL_POST,
+    LIST_REORDER_POST_EL_POSTFIX,
     sizeConstants,
 } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
@@ -71,7 +71,6 @@ import {
     setBulkEdit,
 } from 'src/bulk-edit/utils'
 import type { DragToListAction } from './lists-sidebar/types'
-import { forEachTreeClimb } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
@@ -3876,10 +3875,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                     )
                     return
                 }
-                if (event.listId.endsWith(LIST_REORDER_EL_POST)) {
+                if (event.listId.endsWith(LIST_REORDER_POST_EL_POSTFIX)) {
                     const cleanedListId = event.listId.slice(
                         0,
-                        event.listId.length - LIST_REORDER_EL_POST.length,
+                        event.listId.length -
+                            LIST_REORDER_POST_EL_POSTFIX.length,
                     )
                     await this.handleDropOnReorderLine(
                         action,
@@ -4003,7 +4003,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     private async performListTreeReorder(
         listId: UnifiedList['unifiedId'],
-        nextListIdInOrder: UnifiedList['unifiedId'],
+        nextListIdInOrder: UnifiedList['unifiedId'] | undefined,
         previousState: State,
     ): Promise<void> {
         const { annotationsCache } = this.options
@@ -4058,25 +4058,55 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
             return
         }
+        const { annotationsCache: cache } = this.options
+        const targetList = cache.lists.byId[dropTargetListId]
+        const draggedList = cache.lists.byId[listId]
 
-        const targetList =
-            previousState.listsSidebar.lists.byId[dropTargetListId]
-        const draggedList = previousState.listsSidebar.lists.byId[listId]
-
-        // If we're reodering a list to live under a different parent, we need to do a tree-move first
-        if (targetList.parentUnifiedId !== draggedList.parentUnifiedId) {
-            await this.performListTreeMove(
-                listId,
-                targetList.parentUnifiedId,
-                previousState,
+        // If the target list tree is toggled open, the behavior is that the dragged list becomes a child of it (if not already)
+        if (
+            previousState.listsSidebar.listTrees.byId[dropTargetListId]
+                ?.isTreeToggled
+        ) {
+            const targetSiblings = cache.getListsByParentId(
+                targetList.unifiedId,
             )
+            if (draggedList.parentUnifiedId !== targetList.unifiedId) {
+                await this.performListTreeMove(
+                    listId,
+                    targetList.unifiedId,
+                    previousState,
+                )
+            }
+            if (targetSiblings.length) {
+                await this.performListTreeReorder(
+                    listId,
+                    targetSiblings[0].unifiedId,
+                    previousState,
+                )
+            }
+        } // Else the behavior is that the dragged list becomes the next sibling after the target list
+        else {
+            const targetSiblings = cache.getListsByParentId(
+                targetList.parentUnifiedId,
+            )
+            if (draggedList.parentUnifiedId !== targetList.parentUnifiedId) {
+                await this.performListTreeMove(
+                    listId,
+                    targetList.parentUnifiedId,
+                    previousState,
+                )
+            }
+            if (targetSiblings.length) {
+                const targetIndex = targetSiblings.findIndex(
+                    (list) => list.unifiedId === targetList.unifiedId,
+                )
+                await this.performListTreeReorder(
+                    listId,
+                    targetSiblings[targetIndex + 1]?.unifiedId,
+                    previousState,
+                )
+            }
         }
-
-        await this.performListTreeReorder(
-            listId,
-            dropTargetListId,
-            previousState,
-        )
     }
 
     private async handleDropPageOnListItem(
