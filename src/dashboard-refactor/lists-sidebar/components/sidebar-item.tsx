@@ -22,6 +22,7 @@ export interface Props {
     areAnyMenusDisplayed?: boolean
     forceRightSidePermanentDisplay?: boolean
     spaceSidebarWidth: string
+    sidebarItemRef?: (el: any) => void
 }
 
 export interface State {
