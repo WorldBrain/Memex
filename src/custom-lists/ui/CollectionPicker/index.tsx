@@ -455,11 +455,11 @@ class SpacePicker extends StatefulUIElement<
                         contentSharingBG={this.props.contentSharingBG}
                         analyticsBG={this.props.analyticsBG}
                         spacesBG={this.props.spacesBG}
-                        onDeleteSpaceConfirm={() =>
+                        onDeleteSpaceConfirm={() => {
                             this.processEvent('deleteList', {
                                 listId: list.localId,
                             })
-                        }
+                        }}
                         errorMessage={this.state.renameListErrorMessage}
                         onConfirmSpaceNameEdit={(name) => {
                             this.processEvent('renameList', {

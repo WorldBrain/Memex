@@ -47,7 +47,7 @@ export type Event = UIEvent<{
     inviteViaEmail: { now?: number }
     deleteEmailInvite: { key: string }
     copyInviteLink: { linkIndex: number; linkType: 'page-link' | 'space-link' }
-    confirmSpaceDelete: { reactEvent: React.MouseEvent }
+    onDeleteSpaceConfirm: { reactEvent: React.MouseEvent }
     intendToDeleteSpace: { reactEvent: React.MouseEvent }
     cancelDeleteSpace: null
 }>
@@ -151,7 +151,7 @@ export default class SpaceContextMenuLogic extends UILogic<State, Event> {
         return this.withMutation(previousState, mutation)
     }
 
-    confirmSpaceDelete: EventHandler<'confirmSpaceDelete'> = async ({
+    onDeleteSpaceConfirm: EventHandler<'onDeleteSpaceConfirm'> = async ({
         event,
     }) => {
         const { listData } = this.dependencies
