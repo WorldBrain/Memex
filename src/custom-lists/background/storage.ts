@@ -661,7 +661,7 @@ export default class CustomListStorage extends StorageModule {
 
     async updateListTreeParent(params: {
         localListId: number
-        parentListId: number | null
+        newParentListId: number | null
         now?: number
     }): Promise<void> {
         const updatedWhen = params.now ?? Date.now()
@@ -669,7 +669,7 @@ export default class CustomListStorage extends StorageModule {
         const batch: OperationBatch = []
         await moveTree<ListTree>({
             nodeId: params.localListId,
-            newParentNodeId: params.parentListId,
+            newParentNodeId: params.newParentListId,
             selectNodeId: (node) => node.listId ?? node.linkTarget,
             selectNodeParentId: (node) => node.parentListId,
             retrieveNode: (localListId) =>

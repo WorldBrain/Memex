@@ -50,7 +50,7 @@ import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { Runtime } from 'webextension-polyfill'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
-import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend

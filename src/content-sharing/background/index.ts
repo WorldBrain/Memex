@@ -41,8 +41,8 @@ import {
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import type { ListTree } from 'src/custom-lists/background/types'
-import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
 import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import type { OperationBatch } from '@worldbrain/storex'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 

@@ -13,7 +13,7 @@ import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watc
 import {
     ListTreeMiddleware,
     LIST_TREE_OPERATION_ALIASES,
-} from './list-tree-middleware'
+} from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import { PersonalCloudUpdateType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 
 export function setStorageMiddleware(
@@ -49,9 +49,10 @@ export function setStorageMiddleware(
     }
 
     const listTreeMiddleware = new ListTreeMiddleware({
-        storageManager,
-        customListsBG: options.customLists,
-        contentSharingBG: options.contentSharing,
+        moveTree: (args) =>
+            options.customLists.storage.updateListTreeParent(args),
+        deleteTree: (args) =>
+            options.contentSharing.performDeleteListAndAllAssociatedData(args),
     })
 
     // Set up custom operation watchers for list tree ops to set them up differently for cloud sync

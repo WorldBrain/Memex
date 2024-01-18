@@ -25,7 +25,7 @@ import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
-import { LIST_TREE_OPERATION_ALIASES } from 'src/storage/list-tree-middleware'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
