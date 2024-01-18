@@ -154,7 +154,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     ) => {
         return [
             ...normalizedStateToArray(this.lists).filter(
-                (list) => list.parentUnifiedId === unifiedId,
+                (list) =>
+                    list.parentUnifiedId === unifiedId &&
+                    list.type === 'user-list',
             ),
         ].sort(defaultTreeNodeSorter)
     }
