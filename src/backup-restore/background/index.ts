@@ -18,6 +18,7 @@ import type { BackupInterface, LocalBackupSettings } from './types'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { checkServerStatus } from '../../backup-restore/ui/utils'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 
 export * from './backend'
 
@@ -216,6 +217,27 @@ export class BackupBackgroundModule {
             },
             { insertExtraArg: true },
         )
+    }
+
+    async handlePostStorageChange(event: StorageOperationEvent<'post'>) {
+        for (const change of event.info.changes) {
+            if (change.type === 'create') {
+                this.storage.handleStorageChange({
+                    collection: change.collection,
+                    operation: 'create',
+                    pk: change.pk,
+                })
+            } else {
+                for (const pk of change.pks) {
+                    this.storage.handleStorageChange({
+                        collection: change.collection,
+                        operation:
+                            change.type === 'modify' ? 'update' : 'delete',
+                        pk,
+                    })
+                }
+            }
+        }
     }
 
     estimateInitialBackupSize() {

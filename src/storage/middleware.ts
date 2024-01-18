@@ -1,25 +1,28 @@
-import StorageManager from '@worldbrain/storex'
-import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
+import type StorageManager from '@worldbrain/storex'
+import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
-import { StorexHubBackground } from 'src/storex-hub/background'
-import ContentSharingBackground from 'src/content-sharing/background'
-import { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import { PersonalCloudBackground } from 'src/personal-cloud/background'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { WATCHED_COLLECTIONS } from './constants'
+import type { BackgroundModules } from 'src/background-script/setup'
 
 export function setStorageMiddleware(
     storageManager: StorageManager,
-    options: {
-        storexHub?: StorexHubBackground
-        contentSharing?: ContentSharingBackground
-        personalCloud?: PersonalCloudBackground
+    bgModules: Pick<
+        BackgroundModules,
+        | 'personalCloud'
+        | 'backupModule'
+        | 'contentSharing'
+        | 'customLists'
+        | 'storexHub'
+    >,
+    options?: {
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
         ) => StorageMiddleware[]
     },
 ) {
     const modifyMiddleware =
-        options.modifyMiddleware ?? ((middleware) => middleware)
+        options?.modifyMiddleware ?? ((middleware) => middleware)
     const watchedCollections = new Set(WATCHED_COLLECTIONS)
 
     const postProcessChange = async (
@@ -27,13 +30,16 @@ export function setStorageMiddleware(
         source: 'local' | 'sync',
     ) => {
         const promises = [
-            options.storexHub?.handlePostStorageChange(event),
-            options.contentSharing?.handlePostStorageChange(event, {
+            bgModules.storexHub.handlePostStorageChange(event),
+            bgModules.contentSharing.handlePostStorageChange(event, {
                 source,
             }),
         ]
         if (source !== 'sync') {
-            promises.push(options.personalCloud?.handlePostStorageChange(event))
+            promises.push(
+                bgModules.personalCloud.handlePostStorageChange(event),
+                bgModules.backupModule.handlePostStorageChange(event),
+            )
         }
         await Promise.all(promises)
     }

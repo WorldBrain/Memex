@@ -340,10 +340,7 @@ export async function setupBackgroundIntegrationTest(
         },
     }
 
-    setStorageMiddleware(storageManager, {
-        storexHub: backgroundModules.storexHub,
-        contentSharing: backgroundModules.contentSharing,
-        personalCloud: backgroundModules.personalCloud,
+    setStorageMiddleware(storageManager, backgroundModules, {
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations
