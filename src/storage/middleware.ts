@@ -112,8 +112,8 @@ export function setStorageMiddleware(
             createOperationLoggingMiddleware({
                 shouldLog: () => shouldLogStorageOperations,
             }),
-            changeWatchMiddleware,
             listTreeMiddleware,
+            changeWatchMiddleware,
         ]),
     )
 
