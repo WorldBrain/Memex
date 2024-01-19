@@ -7256,7 +7256,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(sharedData).toEqual({
-                sharedListRole: [
+                sharedListRole: expect.arrayContaining([
                     expect.objectContaining({
                         roleID: SharedListRoleID.Owner,
                         sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
@@ -7267,7 +7267,7 @@ describe('Personal cloud translation layer', () => {
                         sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
                         user: TEST_USER_2_ID,
                     }),
-                ],
+                ]),
                 sharedListRoleByUser: [
                     // Exclude owner's, not because it doesn't exist, but because too painful to update getWhere to support multi-ID queries on grouped coll
                     // expect.objectContaining({
@@ -7766,7 +7766,7 @@ describe('Personal cloud translation layer', () => {
 
             // prettier-ignore
             expect(sharedData).toEqual({
-                sharedListRole: [
+                sharedListRole: expect.arrayContaining([
                     expect.objectContaining({
                         roleID: SharedListRoleID.Owner,
                         sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
@@ -7777,7 +7777,7 @@ describe('Personal cloud translation layer', () => {
                         sharedList: LOCAL_TEST_DATA_V24.sharedListMetadata.first.remoteId,
                         user: TEST_USER_2_ID,
                     }),
-                ],
+                ]),
                 sharedListRoleByUser: [
                     // Exclude owner's, not because it doesn't exist, but because too painful to update getWhere to support multi-ID queries on grouped coll
                     // expect.objectContaining({

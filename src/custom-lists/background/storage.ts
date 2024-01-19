@@ -837,6 +837,8 @@ export default class CustomListStorage extends StorageModule {
             .startsWith(materializedPath)
             .toArray()
 
+        listTrees.push(listTree)
+
         // TODO: Maybe sort each level of siblings
         return listTrees
     }

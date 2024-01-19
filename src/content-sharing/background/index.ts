@@ -31,6 +31,7 @@ import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/ser
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { deleteListTreeAndAllAssociatedData } from '@worldbrain/memex-common/lib/content-sharing/storage/delete-tree'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     trackPageLinkCreate,
@@ -395,77 +396,25 @@ export default class ContentSharingBackground {
     }) => {
         const { customLists } = this.options.getBgModules()
 
-        let listTrees: Pick<ListTree, 'listId' | 'linkTarget'>[] = []
-        try {
-            listTrees = await customLists.storage.getAllNodesInTreeByList({
-                rootLocalListId: localListId,
-            })
-        } catch (err) {
-            // Error should only occur here when deleteing existing lists that do not yet have `customListTrees` data.
-            //  Letting it pass to retain backwards compatibility and saves doing the error-case read for the `customLists` data
-            console.error(err)
-        }
-        // Reverse so that we delete nodes starting from the leaves
-        listTrees.reverse().push({ listId: localListId, linkTarget: null })
-        const batch: OperationBatch = []
-
-        for (const listTree of listTrees) {
-            // TODO: add proper tree link target support
-            const listId = listTree.listId
-            batch.push(
-                {
-                    collection: 'annotListEntries',
-                    operation: 'deleteObjects',
-                    where: { listId },
-                },
-                {
-                    collection: 'pageListEntries',
-                    operation: 'deleteObjects',
-                    where: { listId },
-                },
-                {
-                    collection: 'customListTrees',
-                    operation: 'deleteObjects',
-                    where: { listId },
-                },
-                {
-                    collection: 'customListDescriptions',
-                    operation: 'deleteObjects',
-                    where: { listId },
-                },
-                {
-                    collection: 'customLists',
-                    operation: 'deleteObjects',
-                    where: { id: listId },
-                },
-                {
-                    collection: 'sharedListMetadata',
-                    operation: 'deleteObjects',
-                    where: { localId: listId },
-                },
-            )
-
-            const remoteListId = await this.storage.getRemoteListId({
-                localId: listId,
-            })
-
-            if (remoteListId != null) {
-                batch.push(
+        await deleteListTreeAndAllAssociatedData({
+            storageManager: this.options.storageManager,
+            getAllNodesInTree: async () => {
+                const listTrees = await customLists.storage.getAllNodesInTreeByList(
                     {
-                        collection: 'followedListEntry',
-                        operation: 'deleteObjects',
-                        where: { followedList: remoteListId },
-                    },
-                    {
-                        collection: 'followedList',
-                        operation: 'deleteObjects',
-                        where: { sharedList: remoteListId },
+                        rootLocalListId: localListId,
                     },
                 )
-            }
-        }
-
-        await this.options.storageManager.backend.executeBatch(batch)
+                const remoteListIds = await this.storage.getRemoteListIds({
+                    localIds: listTrees
+                        .filter((tree) => tree.listId != null)
+                        .map((tree) => tree.listId!),
+                })
+                return listTrees.map((tree) => ({
+                    ...tree,
+                    remoteListId: remoteListIds[tree.listId!] ?? null,
+                }))
+            },
+        })
     }
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({
