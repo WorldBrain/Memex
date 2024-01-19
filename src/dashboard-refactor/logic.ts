@@ -3905,6 +3905,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
 
                 const listToMove = annotationsCache.lists.byId[action.listId]
+                if (listToMove.unifiedId === event.listId) {
+                    return
+                }
+
                 // We only actualy want to perform the move if being dropped on a different parent list
                 if (listToMove.parentUnifiedId !== event.listId) {
                     await this.performListTreeMove(
