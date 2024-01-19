@@ -146,6 +146,8 @@ const RightSideActionBar = styled.div`
     backdrop-filter: blur(5px);
     height: -webkit-fill-available;
     height: -moz-available;
+    align-items: center;
+    justify-content: flex-end;
 `
 
 const SidebarItemClickContainer = styled.div<{ spaceSidebarWidth: string }>`
