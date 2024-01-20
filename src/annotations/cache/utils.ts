@@ -314,7 +314,7 @@ export async function hydrateCacheForListUsage(
 ): Promise<void> {
     const localListsData = await args.bgModules.customLists.fetchAllLists({
         includeDescriptions: true,
-        skipSpecialLists: true,
+        skipSpecialLists: false,
         includeTreeData: true,
     })
     const followedListsData = await args.bgModules.pageActivityIndicator.getAllFollowedLists()
