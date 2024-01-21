@@ -53,7 +53,7 @@ export function setStorageMiddleware(
 
     const changeWatchMiddleware = new ChangeWatchMiddleware({
         storageManager,
-        rawOperationWatchers: initListTreeOperationWatchers({
+        customOperationWatchers: initListTreeOperationWatchers({
             handleListTreeStorageChange: (update) =>
                 options.personalCloud?.handleListTreeStorageChange(update),
         }),
@@ -74,8 +74,8 @@ export function setStorageMiddleware(
             createOperationLoggingMiddleware({
                 shouldLog: () => shouldLogStorageOperations,
             }),
-            listTreeMiddleware,
             changeWatchMiddleware,
+            listTreeMiddleware,
         ]),
     )
 

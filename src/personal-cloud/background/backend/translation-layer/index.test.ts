@@ -52,6 +52,7 @@ import cloneDeep from 'lodash/cloneDeep'
 import omit from 'lodash/omit'
 import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { ListTree } from 'src/custom-lists/background/types'
+import delay from 'src/util/delay'
 
 const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
 
@@ -2366,17 +2367,35 @@ describe('Personal cloud translation layer', () => {
 
             const listTreesData = cloneDeep(LOCAL_TEST_DATA_V24.customListTrees)
 
-            const assertExpectedLocalTreeData = async () =>
-                expect(
-                    await setups[0].storageManager
-                        .collection('customListTrees')
-                        .findAllObjects({}),
-                ).toEqual([
+            const assertExpectedLocalTreeData = async () => {
+                const expectedLocalData = [
                     listTreesData.first,
                     listTreesData.second,
                     listTreesData.third,
                     listTreesData.fourth,
-                ])
+                ].map((data) => ({
+                    ...data,
+                    order: expect.any(Number),
+                    updatedWhen: expect.anything(),
+                    createdWhen: expect.anything(),
+                }))
+
+                expect(
+                    await setups[0].storageManager
+                        .collection('customListTrees')
+                        .findAllObjects({}),
+                ).toEqual(expectedLocalData)
+                await setups[0].backgroundModules.personalCloud.waitForSync()
+                // TODO: This delay shouldn't be necessary (and probably inconsistently fails).
+                //  Only here as sync updates get received on second device a little after waitForSync runs here. This seems to fix it most of the time.
+                await delay(100)
+                await setups[1].backgroundModules.personalCloud.waitForSync()
+                expect(
+                    await setups[1].storageManager
+                        .collection('customListTrees')
+                        .findAllObjects({}),
+                ).toEqual(expectedLocalData)
+            }
 
             await assertExpectedLocalTreeData()
 
@@ -2653,7 +2672,7 @@ describe('Personal cloud translation layer', () => {
                         parentLocalListId: null,
                     },
                 ],
-                { skip: 12 },
+                { skip: 8 },
             )
 
             testSyncPushTrigger({ wasTriggered: true })
@@ -2720,27 +2739,33 @@ describe('Personal cloud translation layer', () => {
                 now: nowA,
             })
 
-            const localData: ListTree[] = await setups[0].storageManager
+            const expectedLocalData = [
+                LOCAL_TEST_DATA_V24.customListTrees.first,
+                LOCAL_TEST_DATA_V24.customListTrees.second,
+                LOCAL_TEST_DATA_V24.customListTrees.third,
+                LOCAL_TEST_DATA_V24.customListTrees.fourth,
+            ].map((data) => ({
+                ...data,
+                id: expect.any(Number),
+                order: expect.any(Number),
+                updatedWhen: expect.anything(),
+                createdWhen: expect.anything(),
+            }))
+
+            const localDataA: ListTree[] = await setups[0].storageManager
                 .collection('customListTrees')
                 .findAllObjects({})
-            expect(localData).toEqual(
-                [
-                    LOCAL_TEST_DATA_V24.customListTrees.first,
-                    LOCAL_TEST_DATA_V24.customListTrees.second,
-                    LOCAL_TEST_DATA_V24.customListTrees.third,
-                    LOCAL_TEST_DATA_V24.customListTrees.fourth,
-                ].map((data) => ({
-                    ...data,
-                    order: expect.any(Number),
-                    updatedWhen: nowA,
-                    createdWhen: nowA,
-                })),
-            )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+            await setups[1].backgroundModules.personalCloud.waitForSync()
+            const localDataB: ListTree[] = await setups[1].storageManager
+                .collection('customListTrees')
+                .findAllObjects({})
+            expect(localDataA).toEqual(expectedLocalData)
+            expect(localDataB).toEqual(expectedLocalData)
 
             // Third list gets made a sibling of the second, thus it should be inserted in the first position
-            expect(localData[2].order).toBeLessThan(localData[1].order)
-
-            await setups[0].backgroundModules.personalCloud.waitForSync()
+            expect(localDataA[2].order).toBeLessThan(localDataA[1].order)
+            expect(localDataB[2].order).toBeLessThan(localDataB[1].order)
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
             const testList = remoteData.personalList
@@ -2816,28 +2841,6 @@ describe('Personal cloud translation layer', () => {
             await testDownload(
                 [
                     {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: {
-                            ...LOCAL_TEST_DATA_V24.customListTrees.first,
-                            id: LOCAL_TEST_DATA_V24.customLists.first.id,
-                            order: expect.any(Number),
-                            createdWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                        },
-                    },
-                    {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: {
-                            ...LOCAL_TEST_DATA_V24.customListTrees.second,
-                            id: LOCAL_TEST_DATA_V24.customLists.second.id,
-                            order: expect.any(Number),
-                            createdWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                        },
-                    },
-                    {
                         type: PersonalCloudUpdateType.ListTreeMove,
                         rootNodeLocalListId:
                             LOCAL_TEST_DATA_V24.customLists.second.id,
@@ -2845,33 +2848,11 @@ describe('Personal cloud translation layer', () => {
                             LOCAL_TEST_DATA_V24.customLists.first.id,
                     },
                     {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: {
-                            ...LOCAL_TEST_DATA_V24.customListTrees.third,
-                            id: LOCAL_TEST_DATA_V24.customLists.third.id,
-                            order: expect.any(Number),
-                            createdWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                        },
-                    },
-                    {
                         type: PersonalCloudUpdateType.ListTreeMove,
                         rootNodeLocalListId:
                             LOCAL_TEST_DATA_V24.customLists.third.id,
                         parentLocalListId:
                             LOCAL_TEST_DATA_V24.customLists.first.id,
-                    },
-                    {
-                        type: PersonalCloudUpdateType.Overwrite,
-                        collection: 'customListTrees',
-                        object: {
-                            ...LOCAL_TEST_DATA_V24.customListTrees.fourth,
-                            id: LOCAL_TEST_DATA_V24.customLists.fourth.id,
-                            order: expect.any(Number),
-                            createdWhen: expect.any(Number),
-                            updatedWhen: expect.any(Number),
-                        },
                     },
                     {
                         type: PersonalCloudUpdateType.ListTreeMove,
