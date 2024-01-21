@@ -308,6 +308,40 @@ export class PersonalCloudBackground {
         }
     }
 
+    async __integrateContinuouslyForCollectionFromTime(
+        collectionNames: string[],
+        startTime: number,
+    ) {
+        const { backend, settingStore } = this.options
+        try {
+            for await (const {
+                batch,
+                lastSeen,
+            } of backend.streamCollectionData({ collectionNames, startTime })) {
+                try {
+                    await this.integrateUpdates(batch)
+                    await settingStore.set('lastSeen', lastSeen)
+                } catch (err) {
+                    if (this.strictErrorReporting) {
+                        this._integrationError = err
+                        throw err
+                    } else {
+                        console.error(
+                            `Error integrating update from cloud`,
+                            err,
+                        )
+                        Raven.captureException(err)
+                    }
+                }
+            }
+        } catch (err) {
+            this._integrationError = err
+            if (!this.strictErrorReporting) {
+                console.error(err)
+            }
+        }
+    }
+
     async integrateUpdates(updates: PersonalCloudUpdateBatch) {
         this.options.remoteEventEmitter.emit('downloadStarted')
         const { releaseMutex } = await this.pullMutex.lock()
