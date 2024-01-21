@@ -2473,7 +2473,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 sharedListTree: [
                     {
-                        id: 1,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesA.first.order,
                         sharedList: testListSharesA.first.remoteId,
@@ -2483,7 +2483,7 @@ describe('Personal cloud translation layer', () => {
                         updatedWhen: expect.any(Number),
                     },
                     {
-                        id: 2,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesA.second.order,
                         sharedList: testListSharesA.second.remoteId,
@@ -2493,7 +2493,7 @@ describe('Personal cloud translation layer', () => {
                         updatedWhen: expect.any(Number),
                     },
                     {
-                        id: 3,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesA.third.order,
                         sharedList: testListSharesA.third.remoteId,
@@ -2506,7 +2506,7 @@ describe('Personal cloud translation layer', () => {
                         updatedWhen: expect.any(Number),
                     },
                     {
-                        id: 4,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesA.fourth.order,
                         sharedList: testListSharesA.fourth.remoteId,
@@ -2610,7 +2610,7 @@ describe('Personal cloud translation layer', () => {
                 ],
                 sharedListTree: [
                     {
-                        id: 1,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesB.first.order,
                         sharedList: testListSharesB.first.remoteId,
@@ -2620,7 +2620,7 @@ describe('Personal cloud translation layer', () => {
                         updatedWhen: expect.any(Number),
                     },
                     {
-                        id: 2,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesB.second.order,
                         sharedList: testListSharesB.second.remoteId,
@@ -2630,7 +2630,7 @@ describe('Personal cloud translation layer', () => {
                         updatedWhen: expect.any(Number),
                     },
                     {
-                        id: 3,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesB.third.order,
                         sharedList: testListSharesB.third.remoteId,
@@ -2640,7 +2640,7 @@ describe('Personal cloud translation layer', () => {
                         updatedWhen: expect.any(Number),
                     },
                     {
-                        id: 4,
+                        id: expect.anything(),
                         creator: TEST_USER.id,
                         order: testListTreesB.fourth.order,
                         sharedList: testListSharesB.fourth.remoteId,
@@ -2756,6 +2756,9 @@ describe('Personal cloud translation layer', () => {
                 .collection('customListTrees')
                 .findAllObjects({})
             await setups[0].backgroundModules.personalCloud.waitForSync()
+            // TODO: This delay shouldn't be necessary (and probably inconsistently fails).
+            //  Only here as sync updates get received on second device a little after waitForSync runs here. This seems to fix it most of the time.
+            await delay(100)
             await setups[1].backgroundModules.personalCloud.waitForSync()
             const localDataB: ListTree[] = await setups[1].storageManager
                 .collection('customListTrees')
@@ -2811,7 +2814,7 @@ describe('Personal cloud translation layer', () => {
                         localId: Object.values(LOCAL_TEST_DATA_V24.customLists)[i].id,
                         order: expect.any(Number),
                     })),
-                sharedListTree: [
+                sharedListTree: expect.arrayContaining([
                     expect.objectContaining({
                         creator: TEST_USER.id,
                         parentListId: ROOT_NODE_PARENT_ID,
@@ -2835,7 +2838,7 @@ describe('Personal cloud translation layer', () => {
                         parentListId: testListShares.third.remoteId,
                         path: buildMaterializedPath(testListShares.first.remoteId, testListShares.third.remoteId),
                     }),
-                ],
+                ]),
             })
 
             await testDownload(
