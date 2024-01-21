@@ -27,6 +27,7 @@ import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/li
 import { extractMaterializedPathIds } from 'src/content-sharing/utils'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import {
+    DEFAULT_KEY,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
@@ -241,9 +242,9 @@ export default class CustomListBackground {
               })
             : {}
 
-        return lists.map((list) => ({
+        return lists.map((list, i) => ({
             ...list,
-            order: treeDataByList[list.id]?.order ?? 0,
+            order: treeDataByList[list.id]?.order ?? DEFAULT_KEY + i * 10,
             parentListId: treeDataByList[list.id]?.parentListId ?? null,
             pathListIds: extractMaterializedPathIds(
                 treeDataByList[list.id]?.path ?? '',

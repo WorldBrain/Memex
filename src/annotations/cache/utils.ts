@@ -22,6 +22,7 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
+import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -161,7 +162,7 @@ export const reshapeFollowedListForCache = (
     hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
     parentUnifiedId: null,
     parentLocalId: null,
-    order: 0,
+    order: DEFAULT_KEY,
     ...(opts.extraData ?? {}),
 })
 
