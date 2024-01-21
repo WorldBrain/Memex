@@ -309,8 +309,8 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     : this.props.listTrees.byId[
                                                           list.unifiedId
                                                       ].isTreeToggled
-                                                    ? 'Collapse list'
-                                                    : 'Expand list'
+                                                    ? 'Hide Sub Spaces'
+                                                    : 'Show Sub Spaces'
                                             }
                                             placement="right"
                                             targetElementRef={
@@ -334,12 +334,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                         ? 'arrowDown'
                                                         : 'arrowRight'
                                                 }
-                                                heightAndWidth="20px"
+                                                heightAndWidth="16px"
                                                 color={
                                                     this.props.listTrees.byId[
                                                         list.unifiedId
                                                     ].hasChildren
-                                                        ? 'greyScale7'
+                                                        ? 'greyScale5'
                                                         : 'greyScale3'
                                                 }
                                                 onClick={(event) => {
@@ -753,7 +753,5 @@ const NestedListInput = styled.div`
 const ReorderLine = styled.div<{ isVisible: boolean }>`
     border-bottom: 3px solid
         ${(props) =>
-            props.isVisible
-                ? props.theme.colors.prime3
-                : props.theme.colors.greyScale1};
+            props.isVisible ? props.theme.colors.prime3 : 'transparent'};
 `

@@ -117,15 +117,19 @@ export default class ListsSidebarItem extends React.PureComponent<
                             </ListTitle>
                         </TitleBox>
                     </SidebarItemClickContainer>
-                    <RightSideActionBar>
-                        <IconBox {...this.props} {...this.state}>
-                            {this.props.renderEditIcon?.()}
-                        </IconBox>
-                        {(this.props.isShared ||
-                            this.state.isHovering ||
-                            this.props.forceRightSidePermanentDisplay) &&
-                            this.props.renderRightSideIcon?.()}
-                    </RightSideActionBar>
+                    {(this.props.isShared ||
+                        this.state.isHovering ||
+                        this.props.forceRightSidePermanentDisplay) && (
+                        <RightSideActionBar>
+                            <IconBox {...this.props} {...this.state}>
+                                {this.props.renderEditIcon?.()}
+                            </IconBox>
+                            {(this.props.isShared ||
+                                this.state.isHovering ||
+                                this.props.forceRightSidePermanentDisplay) &&
+                                this.props.renderRightSideIcon?.()}
+                        </RightSideActionBar>
+                    )}
                 </SidebarItem>
             </Container>
         )
@@ -140,7 +144,9 @@ const LeftSideIconContainer = styled.div`
 
 const RightSideActionBar = styled.div`
     position: absolute;
-    right: 10px;
+    padding-right: 10px;
+    right: 0px;
+    border-radius: 0 5px 5px 0;
     display: flex;
     z-index: 10;
     backdrop-filter: blur(5px);
