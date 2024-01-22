@@ -195,45 +195,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     instaClose
                 >
                     <AutoAddDefaultContainer>
-                        <TooltipTextBox>
-                            {this.props.isShared ? (
-                                <>
-                                    <strong>
-                                        <Icon
-                                            icon={'spread'}
-                                            color={'prime1'}
-                                            hoverOff
-                                            heightAndWidth="32px"
-                                        />
-                                        Added to all Spaces the document is in.
-                                    </strong>
-                                    For generally relevant annotations.
-                                </>
-                            ) : (
-                                <>
-                                    <strong>
-                                        Only added to Spaces
-                                        <br />
-                                        you manually put annotation in.
-                                    </strong>
-                                    <span>
-                                        For context specific annotations.
-                                        <br />
-                                        Setting auto-disables when you select
-                                        Spaces for indiviudal annotations.
-                                    </span>
-                                    <KeyboardShortCutBox>
-                                        Save & Auto-Add
-                                        <KeyboardShortcuts
-                                            keys={`shift+${SingleNoteShareMenu.MOD_KEY}+enter`.split(
-                                                '+',
-                                            )}
-                                            size={'small'}
-                                        />
-                                    </KeyboardShortCutBox>
-                                </>
-                            )}
-                        </TooltipTextBox>
                         <DefaultCheckBoxContainer>
                             <Checkbox
                                 key={3}
@@ -255,6 +216,55 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 isLoading={this.state.isAutoAddEnabled == null}
                             />
                         </DefaultCheckBoxContainer>
+                        <TooltipTextBox>
+                            {this.props.isShared ? (
+                                <>
+                                    <strong>
+                                        <Icon
+                                            icon={'spread'}
+                                            color={'prime1'}
+                                            hoverOff
+                                            heightAndWidth="32px"
+                                        />
+                                        Added to all Spaces the document is in.
+                                    </strong>
+                                    For generally relevant annotations.
+                                    <KeyboardShortCutBox>
+                                        Do not add to all Spaces by using
+                                        <KeyboardShortcuts
+                                            keys={`shift+${SingleNoteShareMenu.MOD_KEY}+enter`.split(
+                                                '+',
+                                            )}
+                                            size={'small'}
+                                        />
+                                    </KeyboardShortCutBox>
+                                </>
+                            ) : (
+                                <>
+                                    <strong>
+                                        Only added to Spaces
+                                        <br />
+                                        you manually put annotation in.
+                                    </strong>
+                                    <span>
+                                        For context specific annotations.
+                                        <br />
+                                        Setting auto-disables when you select
+                                        Spaces for indiviudal annotations.
+                                    </span>
+                                    <KeyboardShortCutBox>
+                                        Save & Auto-Add to all Spaces the page
+                                        is in
+                                        <KeyboardShortcuts
+                                            keys={`shift+${SingleNoteShareMenu.MOD_KEY}+enter`.split(
+                                                '+',
+                                            )}
+                                            size={'small'}
+                                        />
+                                    </KeyboardShortCutBox>
+                                </>
+                            )}
+                        </TooltipTextBox>
                     </AutoAddDefaultContainer>
                 </PopoutBox>
             )
@@ -661,7 +671,7 @@ const TooltipTextBox = styled.div`
 `
 
 const DefaultCheckBoxContainer = styled.div`
-    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     height: 20px;
     padding: 15px 15px 15px 15px;
 `
@@ -669,8 +679,10 @@ const KeyboardShortCutBox = styled.div`
     display: flex;
     justify-content: center;
     margin-top: 10px;
+    padding: 15px 5px;
     align-items: center;
     height: 30px;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     grid-gap: 15px;

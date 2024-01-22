@@ -304,11 +304,24 @@ export async function main(
                 now: () => data.createdWhen,
             })
 
+            console.log('shouuldshare', data.shouldShare)
+
             const syncSettings = createSyncSettingsStore({ syncSettingsBG })
 
             const shouldShareSettings = await syncSettings.extension.get(
                 'shouldAutoAddSpaces',
             )
+
+            let shouldShareAnnotation
+
+            if (data.shouldShare && shouldShareSettings) {
+                // this setting is here to inverse the "shift" action of the highlight and annotation buttons
+                shouldShareAnnotation = false
+            } else if (data.shouldShare && !shouldShareSettings) {
+                shouldShareAnnotation = true
+            } else if (shouldShareSettings) {
+                shouldShareAnnotation = true
+            }
 
             const localListIds: number[] = []
             const remoteListIds: string[] = []
@@ -332,10 +345,9 @@ export async function main(
                     ? AnnotationPrivacyLevels.SHARED
                     : AnnotationPrivacyLevels.PROTECTED
             } else {
-                privacyLevel =
-                    shouldShareSettings || data.shouldShare
-                        ? AnnotationPrivacyLevels.SHARED
-                        : AnnotationPrivacyLevels.PRIVATE
+                privacyLevel = shouldShareAnnotation
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PROTECTED
             }
 
             const { unifiedId } = annotationsCache.addAnnotation({
@@ -368,9 +380,7 @@ export async function main(
                 } = await createAnnotation({
                     shareOpts: {
                         shouldShare:
-                            shouldShareSettings ||
-                            remoteListIds.length > 0 ||
-                            data.shouldShare,
+                            shouldShareAnnotation || remoteListIds.length > 0,
                         shouldCopyShareLink: data.shouldCopyShareLink,
                     },
                     annotationsBG,

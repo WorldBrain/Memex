@@ -117,15 +117,6 @@ export async function createAnnotation({
                 { skipPageIndexing },
             )
 
-            const shouldShareSettings = await syncSettings.extension.get(
-                'shouldAutoAddSpaces',
-            )
-
-            let privacyLevel: AnnotationPrivacyLevels
-            if (shouldShareSettings) {
-                privacyLevel = AnnotationPrivacyLevels.SHARED
-            }
-
             if (annotationData.localListIds?.length) {
                 await contentSharingBG.shareAnnotationToSomeLists({
                     annotationUrl,
@@ -139,12 +130,8 @@ export async function createAnnotation({
                 shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
-                    shareToParentPageLists:
-                        (shareOpts?.shouldShare || shouldShareSettings) ??
-                        false,
-                    skipPrivacyLevelUpdate:
-                        (!!shareOpts?.shouldShare || shouldShareSettings) ??
-                        true,
+                    shareToParentPageLists: shareOpts?.shouldShare ?? false,
+                    skipPrivacyLevelUpdate: !!shareOpts?.shouldShare ?? true,
                 })
 
                 const baseUrl =
@@ -154,21 +141,20 @@ export async function createAnnotation({
 
                 const link = baseUrl + '/a/' + shareData.remoteId
                 navigator.clipboard.writeText(link)
-            } else if (shouldShareSettings || shareOpts?.shouldShare) {
+            } else if (shareOpts?.shouldShare) {
+                console.log('shouldshare + shouldsharesettings')
                 shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
-                    shareToParentPageLists: true,
-                    skipPrivacyLevelUpdate: false,
+                    shareToParentPageLists: false,
+                    skipPrivacyLevelUpdate: true,
                 })
             }
 
             await contentSharingBG.setAnnotationPrivacyLevel({
                 annotationUrl,
                 privacyLevel:
-                    privacyLevel ??
-                    privacyLevelOverride ??
-                    shareOptsToPrivacyLvl(shareOpts),
+                    privacyLevelOverride ?? shareOptsToPrivacyLvl(shareOpts),
             })
 
             createAndCopyShareLink(
