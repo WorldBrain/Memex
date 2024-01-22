@@ -134,12 +134,17 @@ export async function createAnnotation({
                 })
             }
 
+            let shareData = null
             if (shareOpts?.shouldCopyShareLink) {
-                const shareData = await contentSharingBG.shareAnnotation({
+                shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
-                    shareToParentPageLists: false,
-                    skipPrivacyLevelUpdate: true,
+                    shareToParentPageLists:
+                        (shareOpts?.shouldShare || shouldShareSettings) ??
+                        false,
+                    skipPrivacyLevelUpdate:
+                        (!!shareOpts?.shouldShare || shouldShareSettings) ??
+                        true,
                 })
 
                 const baseUrl =
@@ -149,19 +154,12 @@ export async function createAnnotation({
 
                 const link = baseUrl + '/a/' + shareData.remoteId
                 navigator.clipboard.writeText(link)
-            } else if (shouldShareSettings) {
-                await contentSharingBG.shareAnnotation({
+            } else if (shouldShareSettings || shareOpts?.shouldShare) {
+                shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,
                     shareToParentPageLists: true,
                     skipPrivacyLevelUpdate: false,
-                })
-            } else if (shareOpts?.shouldShare) {
-                await contentSharingBG.shareAnnotation({
-                    annotationUrl,
-                    remoteAnnotationId,
-                    shareToParentPageLists: false,
-                    skipPrivacyLevelUpdate: true,
                 })
             }
 
@@ -174,7 +172,7 @@ export async function createAnnotation({
             })
 
             createAndCopyShareLink(
-                remoteAnnotationId,
+                shareData.remoteId,
                 annotationUrl,
                 contentSharingBG,
                 syncSettingsBG,
@@ -191,19 +189,11 @@ async function createAndCopyShareLink(
     contentSharingBG,
     syncSettingsBG,
 ) {
-    let shouldShareLink = await checkIfAutoCreateLink(syncSettingsBG)
+    let shouldCopyLink = await checkIfAutoCreateLink(syncSettingsBG)
 
-    if (shouldShareLink) {
-        remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
+    if (shouldCopyLink) {
         copyToClipboard(getNoteShareUrl({ remoteAnnotationId }))
     }
-
-    await contentSharingBG.shareAnnotation({
-        annotationUrl: annotationUrl,
-        remoteAnnotationId: remoteAnnotationId,
-        shareToParentPageLists: false,
-        skipPrivacyLevelUpdate: true,
-    })
 }
 
 export async function updateAnnotation({
