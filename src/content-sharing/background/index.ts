@@ -31,6 +31,7 @@ import ListSharingService from '@worldbrain/memex-common/lib/content-sharing/ser
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import { deleteListTreeAndAllAssociatedData } from '@worldbrain/memex-common/lib/content-sharing/storage/delete-tree'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
     trackPageLinkCreate,
@@ -40,6 +41,8 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 
 export interface LocalContentSharingSettings {
@@ -378,30 +381,38 @@ export default class ContentSharingBackground {
     deleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
         localListId,
     }) => {
-        const {
-            customLists,
-            directLinking,
-            pageActivityIndicator,
-        } = this.options.getBgModules()
+        // This will get caught by the ListTreeMiddleware
+        await this.options.storageManager.operation(
+            LIST_TREE_OPERATION_ALIASES.deleteTree,
+            LIST_COLL_NAMES.listTrees,
+            { localListId },
+        )
+    }
 
-        await directLinking.annotationStorage.removeAnnotsFromList({
-            listId: localListId,
+    performDeleteListAndAllAssociatedData: ContentSharingInterface['deleteListAndAllAssociatedData'] = async ({
+        localListId,
+    }) => {
+        const { customLists } = this.options.getBgModules()
+
+        await deleteListTreeAndAllAssociatedData({
+            storageManager: this.options.storageManager,
+            getAllNodesInTree: async () => {
+                const listTrees = await customLists.storage.getAllNodesInTreeByList(
+                    {
+                        rootLocalListId: localListId,
+                    },
+                )
+                const remoteListIds = await this.storage.getRemoteListIds({
+                    localIds: listTrees
+                        .filter((tree) => tree.listId != null)
+                        .map((tree) => tree.listId!),
+                })
+                return listTrees.map((tree) => ({
+                    ...tree,
+                    remoteListId: remoteListIds[tree.listId!] ?? null,
+                }))
+            },
         })
-        const remoteListId = await this.storage.getRemoteListId({
-            localId: localListId,
-        })
-        await customLists.storage.removeListAssociatedData({
-            listId: localListId,
-        })
-        await customLists.storage.removeList({ id: localListId })
-        if (remoteListId != null) {
-            await this.storage.deleteMetadataByLocalListId({ localListId })
-            await pageActivityIndicator.storage.deleteFollowedListAndAllEntries(
-                {
-                    sharedList: remoteListId,
-                },
-            )
-        }
     }
 
     scheduleListShare: ContentSharingInterface['scheduleListShare'] = async ({

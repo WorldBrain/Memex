@@ -156,8 +156,9 @@ export async function main(): Promise<void> {
 
     const { setStorageLoggingEnabled } = setStorageMiddleware(storageManager, {
         storexHub: backgroundModules.storexHub,
-        contentSharing: backgroundModules.contentSharing,
+        customLists: backgroundModules.customLists,
         personalCloud: backgroundModules.personalCloud,
+        contentSharing: backgroundModules.contentSharing,
     })
     __debugCounter++
     await setupBackgroundModules(backgroundModules, storageManager)
