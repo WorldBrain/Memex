@@ -18,8 +18,17 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
-import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import {
+    defaultTreeNodeSorter,
+    forEachTreeTraverse,
+    mapTreeTraverse,
+} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import {
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -140,6 +149,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         return this.lists.byId[unifiedListId] ?? null
     }
 
+    getListsByParentId: PageAnnotationsCacheInterface['getListsByParentId'] = (
+        unifiedId,
+    ) => {
+        return [
+            ...normalizedStateToArray(this.lists).filter(
+                (list) =>
+                    list.parentUnifiedId === unifiedId &&
+                    list.type === 'user-list',
+            ),
+        ].sort(defaultTreeNodeSorter)
+    }
+
     private prepareListForCaching = (
         list: UnifiedListForCache,
     ): UnifiedList => {
@@ -174,7 +195,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             cachedAnnot.unifiedListIds.unshift(unifiedId)
         })
 
-        return { ...list, unifiedId } as UnifiedList
+        return {
+            ...list,
+            pathLocalIds: list.pathLocalIds ?? [],
+            unifiedId,
+        } as UnifiedList
     }
 
     private prepareAnnotationForCaching = (
@@ -424,7 +449,29 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.localListIdsToCacheIds.clear()
         this.remoteListIdsToCacheIds.clear()
 
-        const seedData = [...lists].map(this.prepareListForCaching)
+        const localToCacheId = new Map<number, string>()
+        const seedData = [...lists].map((list) => {
+            const prepared = this.prepareListForCaching(list)
+            if (list.localId) {
+                localToCacheId.set(list.localId, prepared.unifiedId)
+            }
+            return prepared
+        })
+
+        // Go over prepared lists once more to fix parent cache IDs
+        for (const list of seedData) {
+            if (list.type !== 'user-list') {
+                continue
+            }
+            if (list.parentLocalId != null) {
+                list.parentUnifiedId =
+                    localToCacheId.get(list.parentLocalId) ?? null
+            }
+            list.pathUnifiedIds = list.pathLocalIds
+                .map((localId) => localToCacheId.get(localId))
+                .filter((id) => id != null)
+        }
+
         this.lists = initNormalizedState({
             seedData,
             getId: (list) => list.unifiedId,
@@ -505,6 +552,38 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     addList: PageAnnotationsCacheInterface['addList'] = (list) => {
         const nextList = this.prepareListForCaching(list)
+
+        if (nextList.type === 'user-list') {
+            if (nextList.parentLocalId != null) {
+                nextList.parentUnifiedId =
+                    this.getListByLocalId(nextList.parentLocalId)?.unifiedId ??
+                    null
+            } else {
+                nextList.parentUnifiedId = null
+            }
+            nextList.pathUnifiedIds = nextList.pathLocalIds
+                .map((id) => this.getListByLocalId(id)?.unifiedId)
+                .filter((id) => id != null)
+
+            if (nextList.order == null) {
+                const siblings = this.getListsByParentId(
+                    nextList.parentUnifiedId ?? null,
+                )
+                const items = siblings.map((list) => ({
+                    id: list.unifiedId,
+                    key: list.order,
+                }))
+                nextList.order =
+                    items.length > 0
+                        ? insertOrderedItemBeforeIndex(
+                              items,
+                              nextList.unifiedId,
+                              0,
+                          ).create.key
+                        : pushOrderedItem(items, nextList.unifiedId).create.key
+            }
+        }
+
         this.lists.allIds = [nextList.unifiedId, ...this.lists.allIds]
         this.lists.byId = {
             ...this.lists.byId,
@@ -630,10 +709,16 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         const nextList: UnifiedList = {
             ...previousList,
             name: updates.name ?? previousList.name,
+            order: updates.order ?? previousList.order,
             remoteId: updates.remoteId ?? previousList.remoteId,
             collabKey: updates.collabKey ?? previousList.collabKey,
             isPrivate: updates.isPrivate ?? previousList.isPrivate,
             description: updates.description ?? previousList.description,
+            parentUnifiedId:
+                // If it's `null`, then we're updating a list tree node to be a top-level node
+                updates.parentUnifiedId === null
+                    ? updates.parentUnifiedId
+                    : updates.parentUnifiedId ?? previousList.parentUnifiedId,
         }
 
         if (
@@ -663,6 +748,35 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 ...this.lists.byId,
                 [updates.unifiedId]: nextList,
             },
+        }
+
+        // If the parent has changed, this plus all descendent lists must update ancestor references
+        if (previousList.parentUnifiedId !== nextList.parentUnifiedId) {
+            forEachTreeTraverse({
+                root: nextList,
+                getChildren: (node) => this.getListsByParentId(node.unifiedId),
+                cb: (node) => {
+                    const nodeParent = this.lists.byId[node.parentUnifiedId]
+                    if (!nodeParent) {
+                        node.parentUnifiedId = null
+                        node.parentLocalId = null
+                        node.pathUnifiedIds = []
+                        node.pathLocalIds = []
+                        return
+                    }
+
+                    node.parentUnifiedId = nodeParent.unifiedId
+                    node.parentLocalId = nodeParent.localId ?? null
+                    node.pathUnifiedIds = [
+                        ...(nodeParent.pathUnifiedIds ?? []),
+                        nodeParent.unifiedId,
+                    ]
+                    node.pathLocalIds = [
+                        ...(nodeParent.pathLocalIds ?? []),
+                        nodeParent.localId,
+                    ].filter((id) => id != null)
+                },
+            })
         }
 
         this.events.emit('updatedList', nextList)
@@ -712,24 +826,36 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.events.emit('newAnnotationsState', this.annotations)
     }
 
-    removeList: PageAnnotationsCacheInterface['removeList'] = (list) => {
-        const previousList = this.lists.byId[list.unifiedId]
-        if (!previousList) {
+    removeList: PageAnnotationsCacheInterface['removeList'] = ({
+        unifiedId,
+    }) => {
+        const targetList = this.lists.byId[unifiedId]
+        if (!targetList) {
             throw new Error('No existing cached list found to remove')
         }
 
-        if (previousList.remoteId != null) {
-            this.remoteListIdsToCacheIds.delete(previousList.remoteId)
-        }
-        if (previousList.localId != null) {
-            this.localListIdsToCacheIds.delete(previousList.localId)
-        }
-        this.lists.allIds = this.lists.allIds.filter(
-            (unifiedListId) => unifiedListId !== list.unifiedId,
-        )
-        delete this.lists.byId[list.unifiedId]
+        // Ensure we delete all descendent lists as well, in order from leaves to the target
+        const descendentLists = mapTreeTraverse({
+            strategy: 'dfs',
+            root: targetList,
+            cb: (node) => node,
+            getChildren: (node) => this.getListsByParentId(node.unifiedId),
+        }).reverse()
 
-        this.events.emit('removedList', previousList)
+        for (const listToRemove of descendentLists) {
+            if (listToRemove.remoteId != null) {
+                this.remoteListIdsToCacheIds.delete(listToRemove.remoteId)
+            }
+            if (listToRemove.localId != null) {
+                this.localListIdsToCacheIds.delete(listToRemove.localId)
+            }
+            this.lists.allIds = this.lists.allIds.filter(
+                (unifiedListId) => unifiedListId !== listToRemove.unifiedId,
+            )
+            delete this.lists.byId[listToRemove.unifiedId]
+            this.events.emit('removedList', listToRemove)
+        }
+
         this.events.emit('newListsState', this.lists)
     }
 }

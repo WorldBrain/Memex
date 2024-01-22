@@ -686,7 +686,9 @@ describe('Page annotations cache tests', () => {
             remoteId: remoteIdD,
             name: 'new shared list',
             unifiedAnnotationIds: [],
+            order: 0,
             hasRemoteAnnotationsToLoad: false,
+            parentLocalId: null,
         })
         expect([...cache['remoteListIdsToCacheIds']]).toEqual([
             [testLists[2].remoteId, testLists[2].unifiedId],
@@ -853,9 +855,11 @@ describe('Page annotations cache tests', () => {
             hasRemoteAnnotationsToLoad: false,
             unifiedAnnotationIds: [],
             creator: { ...TEST_DATA.USER_1 },
+            order: 10,
             remoteId: 'remote-list-id-2000',
             collabKey: 'test-collab-key-1',
             localId: 2000,
+            parentLocalId: null,
         }
 
         expect(cache.getListByLocalId(testList.localId)).toEqual(null)
@@ -865,6 +869,7 @@ describe('Page annotations cache tests', () => {
         expect(cache.getListByLocalId(testList.localId)).toEqual({
             unifiedId: expect.anything(),
             ...testList,
+            pathLocalIds: [],
             unifiedAnnotationIds: [annotAId], // Only the public one created by the same user as the list creator should show up
         })
     })

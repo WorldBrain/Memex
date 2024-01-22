@@ -22,6 +22,7 @@ import {
     SharedListKey,
     SharedListReference,
     SharedListRoleID,
+    SharedListTree,
     SharedPageInfo,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { maybeInt } from '@worldbrain/memex-common/lib/utils/conversion'
@@ -32,6 +33,7 @@ import type {
     PersonalContentLocator,
     PersonalContentMetadata,
     PersonalList,
+    PersonalListTree,
 } from '@worldbrain/memex-common/lib/web-interface/types/storex-generated/personal-cloud'
 import {
     ContentLocatorFormat,
@@ -46,6 +48,8 @@ import { LIST_EMAIL_INVITE_VALIDITY_MS } from '@worldbrain/memex-common/lib/cont
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher/lib/index'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { RETRIEVE_PDF_ROUTE } from '@worldbrain/memex-common/lib/pdf/uploads/constants'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 async function setupPreTest({ setup }: BackgroundIntegrationTestContext) {
     setup.injectCallFirebaseFunction(async <Returns>() => null as Returns)
@@ -2170,6 +2174,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await manager.collection('sharedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListTree').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
@@ -2182,6 +2187,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await manager.collection('personalList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListTree').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([])
@@ -2194,6 +2200,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
@@ -2202,10 +2209,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
 
+                                const nowA = Date.now()
                                 const {
                                     link: linkA,
                                 } = await contentSharing.options.backend.createPageLink(
-                                    { fullPageUrl },
+                                    { fullPageUrl, now: nowA },
                                 )
 
                                 // Shared cloud DB data
@@ -2213,6 +2221,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     SharedList & { id: AutoPk }
                                 > = await manager
                                     .collection('sharedList')
+                                    .findAllObjects({})
+                                const sharedListTreeDataA: Array<
+                                    SharedListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListTree')
                                     .findAllObjects({})
                                 const sharedPageDataA: Array<
                                     SharedPageInfo & { id: AutoPk }
@@ -2237,6 +2250,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'page-link',
                                         creator: userId,
                                         title: listTitle,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(sharedListTreeDataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        sharedList: sharedListDataA[0].id,
+                                        parentListId: ROOT_NODE_PARENT_ID,
+                                        order: DEFAULT_KEY,
+                                        linkTarget: null,
+                                        path: null,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -2306,6 +2332,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('personalList')
                                     .findAllObjects({})
+                                const personalListTreesA: Array<
+                                    PersonalListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalListTree')
+                                    .findAllObjects({})
                                 const personalReadsA = await manager
                                     .collection('personalContentRead')
                                     .findAllObjects({})
@@ -2325,6 +2356,25 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'page-link',
                                         isDeletable: true,
                                         isNestable: true,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalListTreesA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        localId: nowA,
+                                        personalList: personalListsA[0].id,
+                                        parentListId: ROOT_NODE_PARENT_ID,
+                                        linkTarget: null,
+                                        path: null,
+                                        localListId: personalListsA[0].localId,
+                                        localParentListId: ROOT_NODE_PARENT_ID,
+                                        localLinkTarget: null,
+                                        localPath: null,
+                                        order: DEFAULT_KEY,
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -2418,6 +2468,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
@@ -2433,12 +2484,24 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 {
                                     expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([
                                         {
-                                            id: expect.anything(), // TODO: Can we predict this?
+                                            id: nowA,
                                             name: listTitle,
                                             type: 'page-link',
                                             isDeletable: true,
                                             isNestable: true,
                                             createdAt: expect.anything()
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([
+                                        {
+                                            id: nowA,
+                                            listId: nowA,
+                                            parentListId: ROOT_NODE_PARENT_ID,
+                                            linkTarget: null,
+                                            path: null,
+                                            order: DEFAULT_KEY,
+                                            createdWhen: expect.anything(),
+                                            updatedWhen: expect.anything(),
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
@@ -2512,6 +2575,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('sharedList')
                                     .findAllObjects({})
+                                const sharedListTreeDataB: Array<
+                                    SharedListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListTree')
+                                    .findAllObjects({})
                                 const sharedPageDataB: Array<
                                     SharedPageInfo & { id: AutoPk }
                                 > = await manager
@@ -2524,6 +2592,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     .findAllObjects({})
                                 const personalListsB = await manager
                                     .collection('personalList')
+                                    .findAllObjects({})
+                                const personalListTreesB = await manager
+                                    .collection('personalListTree')
                                     .findAllObjects({})
                                 const personalMetadataB = await manager
                                     .collection('personalContentMetadata')
@@ -2545,6 +2616,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(sharedListDataA.length).toBe(1)
                                 expect(sharedListDataB.length).toBe(2) // There should be a new list, but same page
+                                expect(sharedListTreeDataA.length).toBe(1)
+                                expect(sharedListTreeDataB.length).toBe(2) // Same deal
                                 expect(sharedPageDataA.length).toBe(1)
                                 expect(sharedPageDataB.length).toBe(1)
                                 expect(sharedListEntryDataA.length).toBe(1)
@@ -2552,6 +2625,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(personalListsA.length).toBe(1)
                                 expect(personalListsB.length).toBe(2)
+                                expect(personalListTreesA.length).toBe(1)
+                                expect(personalListTreesB.length).toBe(2)
                                 expect(personalMetadataA.length).toBe(1)
                                 expect(personalMetadataB.length).toBe(1)
                                 expect(personalReadsA.length).toBe(1)
@@ -2978,6 +3053,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await manager.collection('sharedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListTree').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
@@ -2990,6 +3066,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await manager.collection('personalList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListTree').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([])
@@ -3002,6 +3079,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
@@ -3021,6 +3099,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     SharedList & { id: AutoPk }
                                 > = await manager
                                     .collection('sharedList')
+                                    .findAllObjects({})
+                                const sharedListTreeDataA: Array<
+                                    SharedListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListTree')
                                     .findAllObjects({})
                                 const sharedPageDataA: Array<
                                     SharedPageInfo & { id: AutoPk }
@@ -3045,6 +3128,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'page-link',
                                         creator: userId,
                                         title: listTitle,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(sharedListTreeDataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        sharedList: sharedListDataA[0].id,
+                                        parentListId: ROOT_NODE_PARENT_ID,
+                                        order: DEFAULT_KEY,
+                                        linkTarget: null,
+                                        path: null,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -3131,6 +3227,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('personalList')
                                     .findAllObjects({})
+                                const personalListTreesA: Array<
+                                    PersonalListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalListTree')
+                                    .findAllObjects({})
                                 const personalReadsA = await manager
                                     .collection('personalContentRead')
                                     .findAllObjects({})
@@ -3145,11 +3246,30 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(personalListsA).toEqual([
                                     {
                                         id: expect.anything(),
-                                        localId: expect.anything(), // TODO: Can we expect an actual value?
+                                        localId: now,
                                         name: listTitle,
                                         type: 'page-link',
                                         isDeletable: true,
                                         isNestable: true,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalListTreesA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        localId: now,
+                                        personalList: personalListsA[0].id,
+                                        parentListId: ROOT_NODE_PARENT_ID,
+                                        linkTarget: null,
+                                        path: null,
+                                        localListId: personalListsA[0].localId,
+                                        localParentListId: ROOT_NODE_PARENT_ID,
+                                        localLinkTarget: null,
+                                        localPath: null,
+                                        order: DEFAULT_KEY,
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -3287,6 +3407,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
@@ -3302,12 +3423,24 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 {
                                     expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([
                                         {
-                                            id: expect.anything(), // TODO: Can we predict this?
+                                            id: now,
                                             name: listTitle,
                                             type: 'page-link',
                                             isDeletable: true,
                                             isNestable: true,
                                             createdAt: expect.anything()
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([
+                                        {
+                                            id: now,
+                                            listId: now,
+                                            parentListId: ROOT_NODE_PARENT_ID,
+                                            linkTarget: null,
+                                            path: null,
+                                            order: DEFAULT_KEY,
+                                            createdWhen: expect.anything(),
+                                            updatedWhen: expect.anything(),
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
@@ -3417,6 +3550,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('sharedList')
                                     .findAllObjects({})
+                                const sharedListTreeDataB: Array<
+                                    SharedListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListTree')
+                                    .findAllObjects({})
                                 const sharedPageDataB: Array<
                                     SharedPageInfo & { id: AutoPk }
                                 > = await manager
@@ -3429,6 +3567,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     .findAllObjects({})
                                 const personalListsB = await manager
                                     .collection('personalList')
+                                    .findAllObjects({})
+                                const personalListTreesB = await manager
+                                    .collection('personalListTree')
                                     .findAllObjects({})
                                 const personalMetadataB = await manager
                                     .collection('personalContentMetadata')
@@ -3450,6 +3591,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(sharedListDataA.length).toBe(1)
                                 expect(sharedListDataB.length).toBe(2) // There should be a new list, but same page
+                                expect(sharedListTreeDataA.length).toBe(1)
+                                expect(sharedListTreeDataB.length).toBe(2) // Same deal
                                 expect(sharedPageDataA.length).toBe(1)
                                 expect(sharedPageDataB.length).toBe(1)
                                 expect(sharedListEntryDataA.length).toBe(1)
@@ -3457,6 +3600,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(personalListsA.length).toBe(1)
                                 expect(personalListsB.length).toBe(2)
+                                expect(personalListTreesA.length).toBe(1)
+                                expect(personalListTreesB.length).toBe(2)
                                 expect(personalMetadataA.length).toBe(1)
                                 expect(personalMetadataB.length).toBe(1)
                                 expect(personalReadsA.length).toBe(1)
@@ -3528,6 +3673,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await manager.collection('sharedList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('sharedListTree').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedListEntry').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedPageInfo').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('sharedContentLocator').findAllObjects({})).toEqual([])
@@ -3540,6 +3686,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await manager.collection('personalList').findAllObjects({})).toEqual([])
+                                expect(await manager.collection('personalListTree').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalListEntry').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalListShare').findAllObjects({})).toEqual([])
                                 expect(await manager.collection('personalFollowedList').findAllObjects({})).toEqual([])
@@ -3552,6 +3699,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
@@ -3583,6 +3731,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('sharedList')
                                     .findAllObjects({})
+                                const sharedListTreeDataA: Array<
+                                    SharedListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListTree')
+                                    .findAllObjects({})
                                 const sharedPageDataA: Array<
                                     SharedPageInfo & { id: AutoPk }
                                 > = await manager
@@ -3606,6 +3759,19 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'page-link',
                                         creator: userId,
                                         title: listTitle,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(sharedListTreeDataA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        creator: userId,
+                                        sharedList: sharedListDataA[0].id,
+                                        parentListId: ROOT_NODE_PARENT_ID,
+                                        order: DEFAULT_KEY,
+                                        linkTarget: null,
+                                        path: null,
                                         createdWhen: expect.anything(),
                                         updatedWhen: expect.anything(),
                                     }
@@ -3694,6 +3860,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('personalList')
                                     .findAllObjects({})
+                                const personalListTreesA: Array<
+                                    PersonalList & { id: AutoPk }
+                                > = await manager
+                                    .collection('personalListTree')
+                                    .findAllObjects({})
                                 const personalReadsA = await manager
                                     .collection('personalContentRead')
                                     .findAllObjects({})
@@ -3713,6 +3884,25 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         type: 'page-link',
                                         isDeletable: true,
                                         isNestable: true,
+                                        user: userId,
+                                        createdByDevice: null,
+                                        createdWhen: expect.anything(),
+                                        updatedWhen: expect.anything(),
+                                    }
+                                ])
+                                expect(personalListTreesA).toEqual([
+                                    {
+                                        id: expect.anything(),
+                                        localId: now,
+                                        personalList: personalListsA[0].id,
+                                        parentListId: ROOT_NODE_PARENT_ID,
+                                        linkTarget: null,
+                                        path: null,
+                                        localListId: personalListsA[0].localId,
+                                        localParentListId: ROOT_NODE_PARENT_ID,
+                                        localLinkTarget: null,
+                                        localPath: null,
+                                        order: DEFAULT_KEY,
                                         user: userId,
                                         createdByDevice: null,
                                         createdWhen: expect.anything(),
@@ -3873,6 +4063,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 // prettier-ignore
                                 {
                                 expect(await setup.storageManager.collection('customLists').findAllObjects({})).toEqual([])
+                                expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('sharedListMetadata').findAllObjects({})).toEqual([])
                                 expect(await setup.storageManager.collection('followedList').findAllObjects({})).toEqual([])
@@ -3894,6 +4085,18 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             isDeletable: true,
                                             isNestable: true,
                                             createdAt: expect.anything()
+                                        }
+                                    ])
+                                    expect(await setup.storageManager.collection('customListTrees').findAllObjects({})).toEqual([
+                                        {
+                                            id: now,
+                                            listId: now,
+                                            parentListId: ROOT_NODE_PARENT_ID,
+                                            linkTarget: null,
+                                            path: null,
+                                            order: DEFAULT_KEY,
+                                            createdWhen: expect.anything(),
+                                            updatedWhen: expect.anything(),
                                         }
                                     ])
                                     expect(await setup.storageManager.collection('pageListEntries').findAllObjects({})).toEqual([
@@ -4028,6 +4231,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 > = await manager
                                     .collection('sharedList')
                                     .findAllObjects({})
+                                const sharedListTreeDataB: Array<
+                                    SharedListTree & { id: AutoPk }
+                                > = await manager
+                                    .collection('sharedListTree')
+                                    .findAllObjects({})
                                 const sharedPageDataB: Array<
                                     SharedPageInfo & { id: AutoPk }
                                 > = await manager
@@ -4040,6 +4248,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                     .findAllObjects({})
                                 const personalListsB = await manager
                                     .collection('personalList')
+                                    .findAllObjects({})
+                                const personalListTreesB = await manager
+                                    .collection('personalListTree')
                                     .findAllObjects({})
                                 const personalMetadataB = await manager
                                     .collection('personalContentMetadata')
@@ -4061,6 +4272,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(sharedListDataA.length).toBe(1)
                                 expect(sharedListDataB.length).toBe(2) // There should be a new list, but same page
+                                expect(sharedListTreeDataA.length).toBe(1)
+                                expect(sharedListTreeDataB.length).toBe(2) // Same deal
                                 expect(sharedPageDataA.length).toBe(1)
                                 expect(sharedPageDataB.length).toBe(1)
                                 expect(sharedListEntryDataA.length).toBe(1)
@@ -4068,6 +4281,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
 
                                 expect(personalListsA.length).toBe(1)
                                 expect(personalListsB.length).toBe(2)
+                                expect(personalListTreesA.length).toBe(1)
+                                expect(personalListTreesB.length).toBe(2)
                                 expect(personalMetadataA.length).toBe(1)
                                 expect(personalMetadataB.length).toBe(1)
                                 expect(personalReadsA.length).toBe(1)
@@ -9558,8 +9773,10 @@ function makeAnnotationFromWebUiTest(options: {
         },
         setup: async (context) => {
             const fakeFetch = new FakeFetch()
+            const getNow = () => Date.now()
 
             storageHooksChangeWatcher.setUp({
+                getNow,
                 fetch: fakeFetch.fetch as any,
                 captureException: async (err) => undefined, // TODO: implement
                 getFunctionsConfig: () => ({}), // TODO: implement

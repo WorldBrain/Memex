@@ -257,6 +257,7 @@ const handleError = async (originalError: Error) => {
     if (originalError.stack) {
         error.stack = originalError.stack
     }
+    console.error('BG init logic encountered an error:', error)
     captureException(error)
 
     if (noMoreAttempts) {

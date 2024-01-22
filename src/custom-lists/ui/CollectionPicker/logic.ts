@@ -30,7 +30,6 @@ import {
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sleepPromise } from 'src/util/promises'
-import { browser } from 'webextension-polyfill-ts'
 
 type EventHandler<EventName extends keyof SpacePickerEvent> = UIEventHandler<
     SpacePickerState,
@@ -578,7 +577,10 @@ export default class SpacePickerLogic extends UILogic<
         // NOTE: Done in SpaceContextMenuLogic
         // await this.dependencies.spacesBG.removeList({ id: event.listId })
 
-        this.emitMutation({ contextMenuListId: { $set: null } })
+        this.emitMutation({
+            contextMenuListId: { $set: null },
+            editMenuListId: { $set: null },
+        })
     }
 
     searchInputChanged: EventHandler<'searchInputChanged'> = async ({
@@ -851,6 +853,7 @@ export default class SpacePickerLogic extends UILogic<
             type: 'user-list',
             unifiedAnnotationIds: [],
             creator: previousState.currentUser ?? undefined,
+            parentLocalId: null,
             isPrivate: true,
         })
 

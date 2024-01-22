@@ -120,8 +120,8 @@ export interface DashboardDependencies {
 
 export interface DropReceivingState {
     isDraggedOver?: boolean
-    canReceiveDroppedItems?: boolean
     wasPageDropped?: boolean
+    canReceiveDroppedItems?: boolean
     onDrop(dataTransfer: DataTransfer): void
     onDragEnter(): void
     onDragLeave(): void
@@ -165,7 +165,7 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingPageArgs: PageEventArgs
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
-    setSpaceSidebarWidth: { width: number }
+    setSpaceSidebarWidth: { width: string }
     selectAllCurrentItems: null
     clearBulkSelection: null
     setBulkEditSpace: { listId: number }

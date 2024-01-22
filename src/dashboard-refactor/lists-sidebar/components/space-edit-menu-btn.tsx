@@ -11,7 +11,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 export interface Props extends Omit<SpaceEditMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean
     toggleEditMenu: React.MouseEventHandler
-    confirmSpaceDelete?: () => void
+    onDeleteSpaceConfirm?: () => void
 }
 
 export default class SpaceEditMenuBtn extends PureComponent<Props> {
@@ -20,7 +20,7 @@ export default class SpaceEditMenuBtn extends PureComponent<Props> {
 
     private toggleEditMenu = (e) => {
         this.props.toggleEditMenu(e)
-        e.stopPropagation()
+        e?.stopPropagation()
 
         return
     }
