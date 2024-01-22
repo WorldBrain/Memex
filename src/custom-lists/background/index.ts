@@ -24,6 +24,14 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { ContentSharingBackendInterface } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
+import { extractMaterializedPathIds } from 'src/content-sharing/utils'
+import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
+import {
+    DEFAULT_KEY,
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { defaultTreeNodeSorter } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 import { browser } from 'webextension-polyfill-ts'
@@ -67,6 +75,9 @@ export default class CustomListBackground {
 
         this.remoteFunctions = {
             createCustomList: this.createCustomList,
+            deleteListTree: this.deleteListTree,
+            updateListTreeParent: this.updateListTreeParent,
+            updateListTreeOrder: this.updateListTreeOrder,
             insertPageToList: async (params) => {
                 if (!params.indexUrl) {
                     const currentTab = await this.options.queryTabs?.({
@@ -172,6 +183,7 @@ export default class CustomListBackground {
         return {
             ...response.data.retrievedList.sharedList,
             sharedAnnotations: Object.values(response.data.annotations ?? {}),
+            order: response.data.retrievedList.sharedListTree?.order ?? 1,
         }
     }
 
@@ -201,9 +213,12 @@ export default class CustomListBackground {
         return {
             name: sharedList.title,
             id: sharedList.createdWhen,
+            order: response.data.retrievedList.sharedListTree?.order ?? 1,
             remoteId: sharedList.reference.id.toString(),
             createdAt: new Date(sharedList.createdWhen),
             isOwned: sharedList.creator.id === currentUser.id,
+            parentListId: null,
+            pathListIds: [],
         }
     }
 
@@ -211,14 +226,31 @@ export default class CustomListBackground {
         skip = 0,
         limit = 2000,
         skipSpecialLists = false,
+        includeTreeData,
         includeDescriptions,
-    }): Promise<PageList[]> => {
-        return this.storage.fetchAllLists({
+    }) => {
+        const lists = await this.storage.fetchAllLists({
             includeDescriptions,
             skipSpecialLists,
             limit,
             skip,
         })
+
+        const treeDataByList = includeTreeData
+            ? await this.storage.getTreeDataForLists({
+                  localListIds: lists.map((list) => list.id),
+              })
+            : {}
+
+        return lists.map((list, i) => ({
+            ...list,
+            order: treeDataByList[list.id]?.order ?? DEFAULT_KEY + i * 10,
+            parentListId: treeDataByList[list.id]?.parentListId ?? null,
+            pathListIds: extractMaterializedPathIds(
+                treeDataByList[list.id]?.path ?? '',
+                'number',
+            ) as number[],
+        }))
     }
 
     fetchListById = async ({ id }: { id: number }) => {
@@ -357,8 +389,10 @@ export default class CustomListBackground {
         name,
         id: _id,
         type,
+        order,
         createdAt,
         dontTrack,
+        parentListId,
         ...preGeneratedIds
     }) => {
         const id = _id ?? this.generateListId()
@@ -378,8 +412,103 @@ export default class CustomListBackground {
                 ...preGeneratedIds,
             },
         )
+        await this.createListTree({
+            order,
+            localListId,
+            parentListId,
+            now: createdAt?.getTime(),
+        })
 
         return { ...listShareResult, localListId }
+    }
+
+    createListTree = async (args: {
+        localListId: number
+        parentListId?: number
+        order?: number
+        now?: number
+    }): Promise<{ treeId: number }> => {
+        const pathIds =
+            args.parentListId != null
+                ? await this.storage.getMaterializedPathIdsFromTree({
+                      id: args.parentListId,
+                  })
+                : []
+        const { id: treeId } = await this.storage.createListTree({
+            localListId: args.localListId,
+            parentListId: args.parentListId,
+            order: args.order,
+            now: args.now,
+            pathIds,
+        })
+        return { treeId }
+    }
+
+    updateListTreeOrder: RemoteCollectionsInterface['updateListTreeOrder'] = async ({
+        localListId,
+        siblingListIds,
+        intendedIndexAmongSiblings,
+        now,
+    }) => {
+        const siblingListTrees = await this.storage.getTreeDataForLists({
+            localListIds: siblingListIds,
+        })
+        const orderedSiblingItems = Object.values(siblingListTrees)
+            .sort(defaultTreeNodeSorter)
+            .map((tree) => ({
+                id: tree.id,
+                key: tree.order,
+            }))
+
+        const changes =
+            intendedIndexAmongSiblings === siblingListIds.length
+                ? pushOrderedItem(orderedSiblingItems, localListId)
+                : insertOrderedItemBeforeIndex(
+                      orderedSiblingItems,
+                      localListId,
+                      intendedIndexAmongSiblings,
+                  )
+
+        await this.storage.updateListTreeOrder({
+            order: changes.create.key,
+            localListId,
+            now,
+        })
+    }
+
+    updateListTreeParent: RemoteCollectionsInterface['updateListTreeParent'] = async ({
+        localListId,
+        parentListId,
+        now,
+    }) => {
+        if (
+            parentListId != null &&
+            (await this.storage.isListAAncestorOfListB(
+                localListId,
+                parentListId,
+            ))
+        ) {
+            throw new Error(
+                'Cannot make list a child of a descendent - this would result in a cycle',
+            )
+        }
+
+        // This will get caught by the ListTreeMiddleware
+        await this.options.storageManager.operation(
+            LIST_TREE_OPERATION_ALIASES.moveTree,
+            CustomListStorage.LIST_TREES_COLL,
+            {
+                localListId,
+                newParentListId: parentListId,
+                now,
+            },
+        )
+    }
+
+    deleteListTree: RemoteCollectionsInterface['deleteListTree'] = async ({
+        treeId,
+    }) => {
+        await this.storage.deleteListTree({ treeId })
     }
 
     updateList = async ({
