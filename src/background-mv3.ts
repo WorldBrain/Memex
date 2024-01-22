@@ -138,8 +138,9 @@ async function main() {
 
     setStorageMiddleware(storageManager, {
         storexHub: backgroundModules.storexHub,
-        contentSharing: backgroundModules.contentSharing,
+        customLists: backgroundModules.customLists,
         personalCloud: backgroundModules.personalCloud,
+        contentSharing: backgroundModules.contentSharing,
     })
 
     // NOTE: This is a hack to manually init Dexie, which is synchronous, before needing to do the async storex init calls.
