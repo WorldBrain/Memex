@@ -122,8 +122,9 @@ function getShortcutHandlers({
         copyHighlightLink: () =>
             annotationFunctions.createHighlight(
                 window.getSelection(),
+                null,
                 true,
-                true,
+                null,
                 undefined,
                 true,
             ),
