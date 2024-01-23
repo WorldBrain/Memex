@@ -94,5 +94,6 @@ export class InPageUIBackground {
     private createHighlightInTab = (tabId: number) =>
         runInTab<InPageUIContentScriptRemoteInterface>(tabId).createHighlight(
             false,
+            null,
         )
 }
