@@ -29,7 +29,10 @@ export interface InPageUIContentScriptRemoteInterface {
         annotationCacheId: UnifiedAnnotation['localId'],
     ): Promise<void>
     removeHighlights(): Promise<void>
-    createHighlight(shouldShare: boolean): Promise<void>
+    createHighlight(
+        shouldShare: boolean,
+        shouldCopyLink: boolean,
+    ): Promise<void>
 
     teardownContentScripts(): Promise<void>
     handleHistoryStateUpdate(tabId: number): Promise<void>
