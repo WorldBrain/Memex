@@ -25,6 +25,7 @@ import {
     AuthBackendFunctions,
     EmailPasswordCredentials,
 } from './types'
+import * as Raven from 'src/util/raven'
 import { isDev } from 'src/analytics/internal/constants'
 import { setupRequestInterceptors } from 'src/authentication/background/redirect'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
@@ -206,6 +207,9 @@ export class AuthBackground {
     registerRemoteEmitter() {
         this.authService.events.on('changed', async ({ user }) => {
             await this.options.remoteEmitter.emit('onLoadingUser', true)
+            Raven.setUserContext(
+                user ? { email: user.email, id: user.id } : undefined,
+            )
 
             const userWithClaims = user
                 ? {
