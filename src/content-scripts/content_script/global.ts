@@ -269,9 +269,14 @@ export async function main(
         createHighlight: async (
             createHighlightselection,
             shouldShare,
+            shouldCopyShareLink,
             drawRectangle,
         ) => {
-            annotationsFunctions.createHighlight()(null, false)
+            annotationsFunctions.createHighlight()(
+                null,
+                false,
+                shouldCopyShareLink,
+            )
         },
         setUndoHistory: async (undoHistory) =>
             browser.storage.local.set({
@@ -299,11 +304,24 @@ export async function main(
                 now: () => data.createdWhen,
             })
 
+            console.log('shouuldshare', data.shouldShare)
+
             const syncSettings = createSyncSettingsStore({ syncSettingsBG })
 
             const shouldShareSettings = await syncSettings.extension.get(
                 'shouldAutoAddSpaces',
             )
+
+            let shouldShareAnnotation
+
+            if (data.shouldShare && shouldShareSettings) {
+                // this setting is here to inverse the "shift" action of the highlight and annotation buttons
+                shouldShareAnnotation = false
+            } else if (data.shouldShare && !shouldShareSettings) {
+                shouldShareAnnotation = true
+            } else if (shouldShareSettings) {
+                shouldShareAnnotation = true
+            }
 
             const localListIds: number[] = []
             const remoteListIds: string[] = []
@@ -321,15 +339,15 @@ export async function main(
             }
 
             let privacyLevel: AnnotationPrivacyLevels
+
             if (inPageUI.selectedList) {
                 privacyLevel = data.shouldShare
                     ? AnnotationPrivacyLevels.SHARED
                     : AnnotationPrivacyLevels.PROTECTED
             } else {
-                privacyLevel =
-                    shouldShareSettings || data.shouldShare
-                        ? AnnotationPrivacyLevels.SHARED
-                        : AnnotationPrivacyLevels.PRIVATE
+                privacyLevel = shouldShareAnnotation
+                    ? AnnotationPrivacyLevels.SHARED
+                    : AnnotationPrivacyLevels.PROTECTED
             }
 
             const { unifiedId } = annotationsCache.addAnnotation({
@@ -362,10 +380,8 @@ export async function main(
                 } = await createAnnotation({
                     shareOpts: {
                         shouldShare:
-                            shouldShareSettings ||
-                            remoteListIds.length > 0 ||
-                            data.shouldShare,
-                        shouldCopyShareLink: data.shouldShare,
+                            shouldShareAnnotation || remoteListIds.length > 0,
+                        shouldCopyShareLink: data.shouldCopyShareLink,
                     },
                     annotationsBG,
                     contentSharingBG,
@@ -446,6 +462,7 @@ export async function main(
 
     async function saveHighlight(
         shouldShare: boolean,
+        shouldCopyShareLink: boolean,
         screenshotAnchor?,
         screenshotImage?,
         imageSupport?,
@@ -465,6 +482,7 @@ export async function main(
                 getFullPageUrl: async () => pageInfo.getFullPageUrl(),
                 isPdf: pageInfo.isPdf,
                 shouldShare,
+                shouldCopyShareLink,
                 screenshotAnchor,
                 screenshotImage,
                 imageSupport,
@@ -493,6 +511,7 @@ export async function main(
         ) => async (
             selection: Selection,
             shouldShare: boolean,
+            shouldCopyShareLink: boolean,
             drawRectangle?: boolean,
             highlightColorSetting?: {
                 color: RGBAColor
@@ -500,7 +519,6 @@ export async function main(
                 label: string
             },
             preventHideTooltip?: boolean,
-            copyLink?: boolean,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
@@ -534,6 +552,7 @@ export async function main(
 
                 const results = await saveHighlight(
                     shouldShare,
+                    shouldCopyShareLink,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
@@ -547,6 +566,7 @@ export async function main(
             ) {
                 const results = await saveHighlight(
                     shouldShare,
+                    shouldCopyShareLink,
                     null,
                     null,
                     null,
@@ -604,6 +624,7 @@ export async function main(
         ) => async (
             selection: Selection,
             shouldShare: boolean,
+            shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
             commentText?: string,
             includeLastFewSecs?: number,
@@ -636,6 +657,7 @@ export async function main(
 
                 const result = await saveHighlight(
                     shouldShare,
+                    shouldCopyShareLink,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
@@ -661,7 +683,10 @@ export async function main(
                 selection &&
                 window.getSelection().toString().length > 0
             ) {
-                const result = await saveHighlight(shouldShare)
+                const result = await saveHighlight(
+                    shouldShare,
+                    shouldCopyShareLink,
+                )
 
                 const annotationId = result.annotationId
                 const createPromise = result.createPromise
@@ -987,11 +1012,11 @@ export async function main(
                 selector: unifiedAnnotation.selector,
             })
         },
-        createHighlight: (shouldShare) =>
+        createHighlight: (shouldShare, shouldCopyLink) =>
             annotationsFunctions.createHighlight({
                 category: 'Highlights',
                 action: 'createFromContextMenu',
-            })(window.getSelection(), shouldShare),
+            })(window.getSelection(), shouldShare, shouldCopyLink),
         removeHighlights: async () => highlightRenderer.resetHighlightsStyles(),
         teardownContentScripts: async () => {
             await inPageUI.hideHighlights()

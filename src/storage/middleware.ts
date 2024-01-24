@@ -4,6 +4,10 @@ import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watc
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 import { WATCHED_COLLECTIONS } from './constants'
 import type { BackgroundModules } from 'src/background-script/setup'
+import {
+    ListTreeMiddleware,
+    initListTreeOperationWatchers,
+} from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 
 export function setStorageMiddleware(
     storageManager: StorageManager,
@@ -44,8 +48,21 @@ export function setStorageMiddleware(
         await Promise.all(promises)
     }
 
+    const listTreeMiddleware = new ListTreeMiddleware({
+        moveTree: (args) =>
+            bgModules.customLists.storage.updateListTreeParent(args),
+        deleteTree: (args) =>
+            bgModules.contentSharing.performDeleteListAndAllAssociatedData(
+                args,
+            ),
+    })
+
     const changeWatchMiddleware = new ChangeWatchMiddleware({
         storageManager,
+        customOperationWatchers: initListTreeOperationWatchers({
+            handleListTreeStorageChange: (update) =>
+                bgModules.personalCloud.handleListTreeStorageChange(update),
+        }),
         shouldWatchCollection: (collection) =>
             watchedCollections.has(collection),
         postprocessOperation: async (event) => {
@@ -64,6 +81,7 @@ export function setStorageMiddleware(
                 shouldLog: () => shouldLogStorageOperations,
             }),
             changeWatchMiddleware,
+            listTreeMiddleware,
         ]),
     )
 

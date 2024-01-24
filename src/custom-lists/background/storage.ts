@@ -13,24 +13,51 @@ import {
 
 import { SuggestPlugin } from 'src/search/plugins'
 import type { SuggestResult } from 'src/search/types'
-import type { PageList, PageListEntry, ListDescription } from './types'
+import type {
+    PageList,
+    PageListEntry,
+    ListDescription,
+    ListTree,
+} from './types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { DEFAULT_TERM_SEPARATOR } from '@worldbrain/memex-stemmer/lib/constants'
 import {
     trackSpaceCreate,
     trackSpaceEntryCreate,
 } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import {
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 import {
     isPkmSyncEnabled,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import {
+    buildMaterializedPath,
+    extractMaterializedPathIds,
+} from 'src/content-sharing/utils'
+import fromPairs from 'lodash/fromPairs'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import type { OperationBatch } from '@worldbrain/storex'
+import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
+
+const cleanListTree = (listTree: ListTree) => ({
+    ...listTree,
+    parentListId:
+        listTree.parentListId === ROOT_NODE_PARENT_ID
+            ? null
+            : listTree.parentListId,
+})
 
 export default class CustomListStorage extends StorageModule {
     static LIST_DESCRIPTIONS_COLL = COLLECTION_NAMES.listDescription
     static CUSTOM_LISTS_COLL = COLLECTION_NAMES.list
     static LIST_ENTRIES_COLL = COLLECTION_NAMES.listEntry
+    static LIST_TREES_COLL = COLLECTION_NAMES.listTrees
 
     static filterOutSpecialListEntries = (entry: { listId: number }) =>
         !Object.values<number>(SPECIAL_LIST_IDS).includes(entry.listId)
@@ -65,10 +92,29 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
                     operation: 'createObject',
                 },
+                createListTree: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'createObject',
+                },
                 countListEntries: {
                     collection: CustomListStorage.LIST_ENTRIES_COLL,
                     operation: 'countObjects',
                     args: { listId: '$listId:int' },
+                },
+                findListTreeByListId: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'findObject',
+                    args: { listId: '$listId:int' },
+                },
+                findListTreesByParentListId: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'findObjects',
+                    args: { parentListId: '$parentListId:int' },
+                },
+                findListTreesByLocalListIds: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'findObjects',
+                    args: { listId: { $in: '$listIds:int[]' } },
                 },
                 findListsIncluding: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
@@ -178,6 +224,17 @@ export default class CustomListStorage extends StorageModule {
                         { description: '$description:string' },
                     ],
                 },
+                updateListTreeOrder: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'updateObjects',
+                    args: [
+                        { listId: '$listId:int' },
+                        {
+                            order: '$order:int',
+                            updatedWhen: '$updatedWhen:number',
+                        },
+                    ],
+                },
                 deleteList: {
                     collection: CustomListStorage.CUSTOM_LISTS_COLL,
                     operation: 'deleteObject',
@@ -197,6 +254,21 @@ export default class CustomListStorage extends StorageModule {
                     collection: CustomListStorage.LIST_DESCRIPTIONS_COLL,
                     operation: 'deleteObjects',
                     args: { listId: '$listId:pk' },
+                },
+                deleteListTreeByListId: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'deleteObjects',
+                    args: { listId: '$listId:int' },
+                },
+                deleteListTreeByLinkTarget: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'deleteObjects',
+                    args: { linkTarget: '$listId:int' },
+                },
+                deleteListTreeById: {
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'deleteObjects',
+                    args: { id: '$id:int' },
                 },
                 [SuggestPlugin.SUGGEST_OBJS_OP_ID]: {
                     operation: SuggestPlugin.SUGGEST_OBJS_OP_ID,
@@ -467,6 +539,221 @@ export default class CustomListStorage extends StorageModule {
         return object.id
     }
 
+    async createListTree(params: {
+        localListId: number
+        parentListId?: number
+        pathIds?: number[]
+        now?: number
+        order?: number
+        isLink?: boolean
+        skipSyncEntry?: boolean
+        shouldInsertAsFirstSibling?: boolean
+    }): Promise<ListTree> {
+        const existingList = await this.fetchListById(params.localListId)
+        if (!existingList) {
+            throw new Error(
+                `List does not exist to create list tree data for: ${params}`,
+            )
+        }
+        const parentListId = params.parentListId ?? ROOT_NODE_PARENT_ID
+
+        let order: number
+        if (params.order != null) {
+            order = params.order
+        } else {
+            // Look up all sibling nodes to determine order of this one
+            const siblingNodes: ListTree[] = await this.operation(
+                'findListTreesByParentListId',
+                {
+                    parentListId,
+                },
+            )
+            const items = siblingNodes.map((node) => ({
+                id: node.id,
+                key: node.order,
+            }))
+            order =
+                params.shouldInsertAsFirstSibling && items.length > 0
+                    ? insertOrderedItemBeforeIndex(items, '', 0).create.key
+                    : pushOrderedItem(items, '').create.key
+        }
+
+        const now = params.now ?? Date.now()
+        const listTree: Omit<ListTree, 'id'> = {
+            parentListId,
+            listId: params.isLink ? null : params.localListId,
+            linkTarget: params.isLink ? params.localListId : null,
+            path: params.pathIds?.length
+                ? buildMaterializedPath(...params.pathIds)
+                : null,
+            order,
+            createdWhen: now,
+            updatedWhen: now,
+        }
+
+        const opExecuter = params.skipSyncEntry
+            ? this.options.storageManager.backend
+            : this.options.storageManager
+
+        const { object } = await opExecuter.operation(
+            'createObject',
+            'customListTrees',
+            listTree,
+        )
+        return { ...listTree, id: object.id }
+    }
+
+    /**
+     * Climbs up from the given node to the tree root to build an array of customListTree IDs,
+     * in order from root to parent of the given noe.
+     */
+    async getMaterializedPathIdsFromTree(params: {
+        id: number
+    }): Promise<number[]> {
+        const pathIds: number[] = [params.id]
+        let parentListId = params.id
+        while (true) {
+            const currentNode: ListTree = await this.operation(
+                'findListTreeByListId',
+                { listId: parentListId },
+            )
+            parentListId = currentNode?.parentListId
+            if (parentListId === ROOT_NODE_PARENT_ID || parentListId == null) {
+                break
+            }
+            pathIds.unshift(parentListId)
+        }
+        return pathIds
+    }
+
+    async getTreesByParent(params: {
+        parentListId: number
+    }): Promise<ListTree[]> {
+        const listTrees: ListTree[] = await this.operation(
+            'findListTreesByParentListId',
+            { parentListId: params.parentListId },
+        )
+        // TODO: Maybe order them
+        return listTrees.map(cleanListTree)
+    }
+
+    async getTreeDataForList(params: {
+        localListId: number
+    }): Promise<ListTree | null> {
+        const currentNode: ListTree = await this.operation(
+            'findListTreeByListId',
+            { listId: params.localListId },
+        )
+        return currentNode ? cleanListTree(currentNode) : null
+    }
+
+    async getTreeDataForLists(params: {
+        localListIds: number[]
+    }): Promise<{ [localListId: number]: ListTree | null }> {
+        const listTrees: ListTree[] = await this.operation(
+            'findListTreesByLocalListIds',
+            { listIds: params.localListIds },
+        )
+        return fromPairs(
+            listTrees.map((tree) => [tree.listId, cleanListTree(tree)]),
+        )
+    }
+
+    async updateListTreeParent(params: {
+        localListId: number
+        newParentListId: number | null
+        now?: number
+    }): Promise<void> {
+        const updatedWhen = params.now ?? Date.now()
+
+        const batch: OperationBatch = []
+        await moveTree<ListTree>({
+            nodeId: params.localListId,
+            newParentNodeId: params.newParentListId,
+            selectNodeId: (node) => node.listId ?? node.linkTarget,
+            selectNodeParentId: (node) => node.parentListId,
+            retrieveNode: (localListId) =>
+                this.getTreeDataForList({
+                    localListId: localListId as number,
+                }),
+            createNode: (localListId, parentNode) =>
+                this.createListTree({
+                    localListId: localListId as number,
+                    parentListId: parentNode?.listId,
+                    pathIds:
+                        parentNode != null
+                            ? [
+                                  ...(extractMaterializedPathIds(
+                                      parentNode.path,
+                                      'number',
+                                  ) as number[]),
+                                  parentNode.listId,
+                              ]
+                            : undefined,
+                    now: params.now,
+                    skipSyncEntry: true,
+                    shouldInsertAsFirstSibling: true,
+                }),
+            getChildrenOfNode: (node) =>
+                this.getTreesByParent({
+                    parentListId: node.listId,
+                }),
+            isNodeALeaf: (node) => node.linkTarget != null,
+            updateNodesParent: (node, parentNode) => {
+                node.parentListId = parentNode?.listId ?? ROOT_NODE_PARENT_ID
+                node.path =
+                    parentNode != null
+                        ? buildMaterializedPath(
+                              ...extractMaterializedPathIds(
+                                  parentNode.path ?? '',
+                                  'number',
+                              ),
+                              parentNode.listId,
+                          )
+                        : null
+
+                batch.push({
+                    collection: CustomListStorage.LIST_TREES_COLL,
+                    operation: 'updateObjects',
+                    where: { id: node.id },
+                    updates: {
+                        path: node.path,
+                        parentListId: node.parentListId,
+                        updatedWhen,
+                    },
+                })
+            },
+            assertSuitableParent: (node) => {
+                if (node?.linkTarget != null) {
+                    throw new Error(
+                        'Cannot move a list tree node to be a child of a link target node',
+                    )
+                }
+            },
+        })
+
+        // Note we're running this on the storage backend so that it skips storex middleware and doesn't get synced (tree updates handled in a special way for sync)
+        await this.options.storageManager.backend.executeBatch(batch)
+    }
+
+    async isListAAncestorOfListB(
+        listAId: number,
+        listBId: number,
+    ): Promise<boolean> {
+        const startingNode = await this.getTreeDataForList({
+            localListId: listBId,
+        })
+        if (!startingNode) {
+            return false
+        }
+        const pathIds = extractMaterializedPathIds(startingNode.path, 'number')
+        return pathIds.includes(listAId)
+    }
+
+    async deleteListTree(params: { treeId: number }): Promise<void> {
+        await this.operation('deleteListTreeById', { id: params.treeId })
+    }
+
     async updateListName({
         id,
         name,
@@ -502,8 +789,63 @@ export default class CustomListStorage extends StorageModule {
         )
     }
 
+    async updateListTreeOrder(params: {
+        localListId: number
+        order: number
+        now?: number
+    }): Promise<void> {
+        await this.operation('updateListTreeOrder', {
+            listId: params.localListId,
+            order: params.order,
+            updatedWhen: params.now ?? Date.now(),
+        })
+    }
+
+    async deleteListTreeLink(params: { localListId: number }): Promise<void> {
+        await this.operation('deleteListTreeByLinkTarget', {
+            listId: params.localListId,
+        })
+    }
+
+    /**
+     * Returns an array of all list IDs in the list tree starting at the given root in BFS order.
+     */
+    async getAllNodesInTreeByList(params: {
+        rootLocalListId: number
+    }): Promise<ListTree[]> {
+        const listTree = await this.getTreeDataForList({
+            localListId: params.rootLocalListId,
+        })
+        if (!listTree) {
+            throw new Error('Could not find root data of tree to traverse')
+        }
+        // Link nodes are always leaves
+        if (listTree.linkTarget != null) {
+            return [listTree]
+        }
+
+        const materializedPath = buildMaterializedPath(
+            ...extractMaterializedPathIds(listTree.path ?? '', 'number'),
+            listTree.listId,
+        )
+        const storageBackend = this.options.storageManager
+            .backend as DexieStorageBackend
+
+        const listTrees: ListTree[] = await storageBackend.dexieInstance
+            .table('customListTrees')
+            .where('path')
+            .startsWith(materializedPath)
+            .toArray()
+
+        listTrees.push(listTree)
+
+        // TODO: Maybe sort each level of siblings
+        return listTrees
+    }
+
     async removeListAssociatedData({ listId }: { listId: number }) {
         await this.operation('deleteListEntriesByListId', { listId })
+        await this.operation('deleteListTreeByListId', { listId })
         await this.deleteListDescriptions({ listId })
     }
 

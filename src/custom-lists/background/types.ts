@@ -1,5 +1,6 @@
 import type { LoadPageAnnotationRefsForListsResult } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
+import type { Orderable } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type {
     SharedAnnotation,
     SharedAnnotationReference,
@@ -9,13 +10,15 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import type { ListShareResult } from 'src/content-sharing/background/types'
 import { SuggestionCard } from 'src/sidebar/annotations-sidebar/containers/types'
 
-export interface PageList {
+export interface PageList extends Orderable {
     id: number
     name: string
     remoteId?: string
     description?: string
     pages?: string[]
     createdAt: Date
+    pathListIds: number[]
+    parentListId: number | null
     isNestable?: boolean
     isDeletable?: boolean
     isOwned?: boolean
@@ -30,15 +33,28 @@ export interface PageListEntry {
     fullUrl: string
 }
 
-export type SharedListWithAnnotations = SharedList & {
-    creator: UserReference
-    sharedAnnotations: Array<
-        SharedAnnotation & {
-            creator: UserReference
-            reference: SharedAnnotationReference
-        }
-    >
+export interface ListTree {
+    id: number
+    listId: number | null
+    linkTarget: number | null
+    /** A materialized path, containing IDs of all ancestors of this tree delimited by comma in order from oldest to youngest. e.g., "a,b,c" */
+    path: string
+    parentListId: number | null
+    order: number
+    createdWhen: number
+    updatedWhen: number
 }
+
+export type SharedListWithAnnotations = SharedList &
+    Orderable & {
+        creator: UserReference
+        sharedAnnotations: Array<
+            SharedAnnotation & {
+                creator: UserReference
+                reference: SharedAnnotationReference
+            }
+        >
+    }
 
 export interface ListDescription {
     listId: number
@@ -64,10 +80,24 @@ export interface CollectionsCacheInterface {
 }
 
 export interface RemoteCollectionsInterface {
+    updateListTreeParent(args: {
+        localListId: number
+        parentListId: number | null
+        now?: number
+    }): Promise<void>
+    updateListTreeOrder(args: {
+        localListId: number
+        intendedIndexAmongSiblings: number
+        siblingListIds: number[]
+        now?: number
+    }): Promise<void>
+    deleteListTree(args: { treeId: number }): Promise<void>
     createCustomList(
         args: {
             name: string
             id?: number
+            order?: number
+            parentListId?: number
             createdAt?: Date
             dontTrack?: boolean
         } & (
@@ -136,6 +166,7 @@ export interface RemoteCollectionsInterface {
     fetchAllLists(args: {
         skip?: number
         limit?: number
+        includeTreeData?: boolean
         skipSpecialLists?: boolean
         includeDescriptions?: boolean
     }): Promise<PageList[]>
