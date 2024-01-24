@@ -4580,9 +4580,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const { annotationsCache, listsBG, authBG } = this.options
         const parentList = annotationsCache.lists.byId[event.parentListId]
-        const siblingLists = annotationsCache.getListsByParentId(
-            event.parentListId,
-        )
         const newListName = previousState.listsSidebar.listTrees.byId[
             event.parentListId
         ].newNestedListValue.trim()
@@ -4613,13 +4610,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     parentListId: parentList.localId!,
                 })
                 const user = await authBG.getCurrentUser()
-                const order = pushOrderedItem(
-                    siblingLists.map((list) => ({
-                        id: list.unifiedId,
-                        key: list.order,
-                    })),
-                    '',
-                ).create.key
                 annotationsCache.addList({
                     type: 'user-list',
                     name: newListName,
@@ -4635,7 +4625,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         parentList.localId!,
                     ],
                     isPrivate: true,
-                    order,
                 })
 
                 this.emitMutation({
