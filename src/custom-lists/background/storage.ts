@@ -40,7 +40,10 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import {
+    ROOT_NODE_PARENT_ID,
+    defaultTreeNodeSorter,
+} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { OperationBatch } from '@worldbrain/storex'
 import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
@@ -547,7 +550,6 @@ export default class CustomListStorage extends StorageModule {
         order?: number
         isLink?: boolean
         skipSyncEntry?: boolean
-        shouldInsertAsFirstSibling?: boolean
     }): Promise<ListTree> {
         const existingList = await this.fetchListById(params.localListId)
         if (!existingList) {
@@ -568,12 +570,14 @@ export default class CustomListStorage extends StorageModule {
                     parentListId,
                 },
             )
-            const items = siblingNodes.map((node) => ({
-                id: node.id,
-                key: node.order,
-            }))
+            const items = siblingNodes
+                .sort(defaultTreeNodeSorter)
+                .map((node) => ({
+                    id: node.id,
+                    key: node.order,
+                }))
             order =
-                params.shouldInsertAsFirstSibling && items.length > 0
+                items.length > 0
                     ? insertOrderedItemBeforeIndex(items, '', 0).create.key
                     : pushOrderedItem(items, '').create.key
         }
@@ -692,7 +696,6 @@ export default class CustomListStorage extends StorageModule {
                             : undefined,
                     now: params.now,
                     skipSyncEntry: true,
-                    shouldInsertAsFirstSibling: true,
                 }),
             getChildrenOfNode: (node) =>
                 this.getTreesByParent({
