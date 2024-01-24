@@ -101,8 +101,6 @@ import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { handleIncomingData } from 'src/personal-cloud/background/handle-incoming-data'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import { remoteFunctions } from 'src/util/remote-functions-background'
 import { ImageSupportBackground } from 'src/image-support/background'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
@@ -111,7 +109,6 @@ import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-u
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
     auth: AuthBackground
-    authBG: AuthRemoteFunctionsInterface
     analytics: AnalyticsBackground
     notifications: NotificationBackground
     social: SocialBackground
@@ -625,7 +622,6 @@ export function createBackgroundModules(options: {
 
     return {
         auth,
-        authBG: remoteFunctions.auth,
         social,
         analytics,
         jobScheduler,

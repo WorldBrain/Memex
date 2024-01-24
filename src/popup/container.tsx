@@ -75,9 +75,10 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 runtimeAPI: browser.runtime,
                 extensionAPI: browser.extension,
                 customListsBG: collections,
+                authBG: runInBackground(),
+                analyticsBG: runInBackground(),
                 annotationsBG: runInBackground(),
                 pageIndexingBG: runInBackground(),
-                analyticsBG: runInBackground(),
                 pdfIntegrationBG: runInBackground(),
                 syncSettings: createSyncSettingsStore({
                     syncSettingsBG: runInBackground(),

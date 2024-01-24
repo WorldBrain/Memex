@@ -68,7 +68,7 @@ import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { browser } from 'webextension-polyfill-ts'
-import initSentry, { captureException } from 'src/util/raven'
+import initSentry, { captureException, setUserContext } from 'src/util/raven'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
@@ -238,6 +238,9 @@ export async function main(
 
     // 2.5 load cache
     const _currentUser = await authBG.getCurrentUser()
+    if (!isRunningInFirefox) {
+        setUserContext(_currentUser)
+    }
     const currentUser: UserReference = _currentUser
         ? { type: 'user-reference', id: _currentUser.id }
         : null

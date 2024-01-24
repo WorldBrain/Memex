@@ -48,6 +48,7 @@ import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
+import { setUserContext as setSentryUserContext } from 'src/util/raven'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
@@ -449,6 +450,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const { annotationsCache, authBG } = this.options
         this.setupRemoteEventListeners()
         const user = await authBG.getCurrentUser()
+        setSentryUserContext(user)
         this.emitMutation({
             currentUser: { $set: user },
         })
