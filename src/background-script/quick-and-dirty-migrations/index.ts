@@ -1,6 +1,5 @@
 import type Dexie from 'dexie'
 import type Storex from '@worldbrain/storex'
-import type { OperationBatch } from '@worldbrain/storex'
 import type { Storage } from 'webextension-polyfill'
 import type { URLNormalizer } from '@worldbrain/memex-url-utils'
 import {
