@@ -62,6 +62,69 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 
 export const migrations: Migrations = {
     /*
+     * This removes then recreates all the backupChanges docs for collections that have an auto-incrementing PK.
+     * We had a bug in our incremental backup implementation where it was creating backupChanges docs via a Dexie hook,
+     * though Dexie hooks run before create and thus don't have access to the PK at time of running. We since moved
+     * that to work via a storex middleware, which runs post-creation.
+     */
+    [MIGRATION_PREFIX + 'recreate-auto-inc-pk-colls-backup-changes-0']: async ({
+        storex,
+        bgModules,
+    }) => {
+        const autoIncPkCollections = [
+            'annotationPrivacyLevels',
+            'followedListEntry',
+            'locators',
+            'readwiseAction',
+            'pageFetchBacklog',
+            'personalCloudAction',
+            'contentSharingAction',
+        ]
+        const startTime = Date.now()
+
+        await storex
+            .collection('backupChanges')
+            .deleteObjects({ collection: { $in: autoIncPkCollections } })
+
+        const batch: OperationBatch = []
+        let totalDocs = 0
+        async function createBackupEntriesForCollection(
+            collection: string,
+            pageSize = 100,
+        ): Promise<void> {
+            let page = 0
+            let chunkDocs: Array<{ id: number }>
+            while (true) {
+                chunkDocs = await storex
+                    .collection(collection)
+                    .findObjects({}, { limit: pageSize, skip: page * pageSize })
+
+                batch.push(
+                    ...chunkDocs.map((doc, i) => ({
+                        collection: 'backupChanges',
+                        operation: 'createObject' as const,
+                        placeholder: `${collection}-${page}-${i}`,
+                        args: {
+                            collection,
+                            objectPk: doc.id,
+                            operation: 'create',
+                            timestamp: startTime + totalDocs++, // TODO: will this be a problem?
+                        },
+                    })),
+                )
+                page++
+                if (chunkDocs.length !== pageSize) {
+                    break
+                }
+            }
+        }
+
+        for (const collection of autoIncPkCollections) {
+            await createBackupEntriesForCollection(collection)
+        }
+        await storex.operation('executeBatch', batch)
+    },
+    /*
      * This exists as we added a new `customListTrees` collection for the nested lists feature, where
      * a doc is assumed to exist for each `customLists` doc.
      */

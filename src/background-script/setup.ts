@@ -792,7 +792,6 @@ export async function setupBackgroundModules(
     backgroundModules.contentConversations.setupRemoteFunctions()
     backgroundModules.pages.setupRemoteFunctions()
     backgroundModules.syncSettings.setupRemoteFunctions()
-    backgroundModules.backupModule.storage.setupChangeTracking()
     backgroundModules.imageSupport.setupRemoteFunctions()
     setupNotificationClickListener()
 

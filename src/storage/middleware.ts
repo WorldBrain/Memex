@@ -1,12 +1,9 @@
 import type StorageManager from '@worldbrain/storex'
 import type { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
-import type { StorexHubBackground } from 'src/storex-hub/background'
-import type ContentSharingBackground from 'src/content-sharing/background'
-import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
-import type { PersonalCloudBackground } from 'src/personal-cloud/background'
-import type CustomListBackground from 'src/custom-lists/background'
-import { WATCHED_COLLECTIONS } from './constants'
 import { ChangeWatchMiddleware } from '@worldbrain/storex-middleware-change-watcher'
+import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import { WATCHED_COLLECTIONS } from './constants'
+import type { BackgroundModules } from 'src/background-script/setup'
 import {
     ListTreeMiddleware,
     initListTreeOperationWatchers,
@@ -14,18 +11,22 @@ import {
 
 export function setStorageMiddleware(
     storageManager: StorageManager,
-    options: {
-        contentSharing: ContentSharingBackground
-        personalCloud: PersonalCloudBackground
-        customLists: CustomListBackground
-        storexHub: StorexHubBackground
+    bgModules: Pick<
+        BackgroundModules,
+        | 'personalCloud'
+        | 'backupModule'
+        | 'contentSharing'
+        | 'customLists'
+        | 'storexHub'
+    >,
+    options?: {
         modifyMiddleware?: (
             middleware: StorageMiddleware[],
         ) => StorageMiddleware[]
     },
 ) {
     const modifyMiddleware =
-        options.modifyMiddleware ?? ((middleware) => middleware)
+        options?.modifyMiddleware ?? ((middleware) => middleware)
     const watchedCollections = new Set(WATCHED_COLLECTIONS)
 
     const postProcessChange = async (
@@ -33,29 +34,34 @@ export function setStorageMiddleware(
         source: 'local' | 'sync',
     ) => {
         const promises = [
-            options.storexHub?.handlePostStorageChange(event),
-            options.contentSharing?.handlePostStorageChange(event, {
+            bgModules.storexHub.handlePostStorageChange(event),
+            bgModules.contentSharing.handlePostStorageChange(event, {
                 source,
             }),
         ]
         if (source !== 'sync') {
-            promises.push(options.personalCloud?.handlePostStorageChange(event))
+            promises.push(
+                bgModules.personalCloud.handlePostStorageChange(event),
+                bgModules.backupModule.handlePostStorageChange(event),
+            )
         }
         await Promise.all(promises)
     }
 
     const listTreeMiddleware = new ListTreeMiddleware({
         moveTree: (args) =>
-            options.customLists.storage.updateListTreeParent(args),
+            bgModules.customLists.storage.updateListTreeParent(args),
         deleteTree: (args) =>
-            options.contentSharing.performDeleteListAndAllAssociatedData(args),
+            bgModules.contentSharing.performDeleteListAndAllAssociatedData(
+                args,
+            ),
     })
 
     const changeWatchMiddleware = new ChangeWatchMiddleware({
         storageManager,
         customOperationWatchers: initListTreeOperationWatchers({
             handleListTreeStorageChange: (update) =>
-                options.personalCloud?.handleListTreeStorageChange(update),
+                bgModules.personalCloud.handleListTreeStorageChange(update),
         }),
         shouldWatchCollection: (collection) =>
             watchedCollections.has(collection),
