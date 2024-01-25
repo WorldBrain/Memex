@@ -2051,208 +2051,196 @@ export class AnnotationsSidebar extends React.Component<
                                     <SuggestionsList {...this.props} />
                                 )}
                         </QueryContainer>
-                        {this.props.selectedTextAIPreview && (
-                            <OptionsContainer>
-                                <OptionsContainerLeft>
-                                    {this.props.activeAITab ===
-                                        'InFollowedFeeds' ||
-                                    this.props.activeAITab ===
-                                        'ExistingKnowledge' ? (
-                                        <>
-                                            <PrimaryAction
-                                                type="tertiary"
-                                                size="small"
-                                                onClick={async () => {
-                                                    this.props.loadFeedSources()
-                                                    this.props.getLocalFolders()
-                                                    this.props.setFeedSourcesMenu()
-                                                }}
-                                                icon={'plus'}
-                                                iconColor="prime1"
-                                                label="Add Source"
-                                                innerRef={
-                                                    this.addSourcesButtonRef
-                                                }
-                                            />
-                                        </>
-                                    ) : (
-                                        <DropdownMenuBtnSmall
-                                            elementHeight="fit-content"
-                                            hideDescriptionInPreview
-                                            menuItems={[
-                                                {
-                                                    id: 'summarize',
-                                                    name: 'Summarize',
-                                                    info:
-                                                        'Best for summarisations',
-                                                },
-                                                ...(this.props.fullPageUrl.includes(
-                                                    'youtube.com',
-                                                )
-                                                    ? [
-                                                          {
-                                                              id: 'chapters',
-                                                              name: 'Chapters',
-                                                              info:
-                                                                  'Get chapter overview and summaries',
-                                                          },
-                                                      ]
-                                                    : []),
-                                                {
-                                                    id: 'question',
-                                                    name: 'General Question',
-                                                    info:
-                                                        'Unrelated to the content',
-                                                },
-                                            ]}
-                                            onMenuItemClick={async (item) => {
-                                                this.props.setQueryMode(item.id)
-
-                                                if (item.id === 'summarize') {
-                                                    await this.props.queryAIwithPrompt(
-                                                        this.props.prompt,
-                                                    )
-                                                }
-                                                if (item.id === 'chapters') {
-                                                    await this.props.getVideoChapters()
-                                                }
-                                                if (item.id === 'question') {
-                                                    await this.props.queryAIwithPrompt(
-                                                        this.props.prompt,
-                                                        undefined,
-                                                        item.id,
-                                                    )
-                                                }
+                        <OptionsContainer>
+                            <OptionsContainerLeft>
+                                {this.props.activeAITab === 'InFollowedFeeds' ||
+                                this.props.activeAITab ===
+                                    'ExistingKnowledge' ? (
+                                    <>
+                                        <PrimaryAction
+                                            type="tertiary"
+                                            size="small"
+                                            onClick={async () => {
+                                                this.props.loadFeedSources()
+                                                this.props.getLocalFolders()
+                                                this.props.setFeedSourcesMenu()
                                             }}
-                                            initSelectedItem={
-                                                this.props.queryMode ===
-                                                'chapterSummary'
-                                                    ? 'chapterSummary'
-                                                    : null
-                                            }
-                                            selectedState={
-                                                this.props.queryMode ===
-                                                'chapterSummary'
-                                                    ? 'chapterSummary'
-                                                    : 'summarize'
-                                            }
-                                            keepSelectedState
+                                            icon={'plus'}
+                                            iconColor="prime1"
+                                            label="Add Source"
+                                            innerRef={this.addSourcesButtonRef}
                                         />
-                                    )}
+                                    </>
+                                ) : (
                                     <DropdownMenuBtnSmall
                                         elementHeight="fit-content"
                                         hideDescriptionInPreview
                                         menuItems={[
                                             {
-                                                id: 'gpt-3.5-turbo-1106',
-                                                name: 'GPT 3.5',
-                                                info:
-                                                    'Fast & good for summarization',
+                                                id: 'summarize',
+                                                name: 'Summarize',
+                                                info: 'Best for summarisations',
                                             },
+                                            ...(this.props.fullPageUrl.includes(
+                                                'youtube.com',
+                                            )
+                                                ? [
+                                                      {
+                                                          id: 'chapters',
+                                                          name: 'Chapters',
+                                                          info:
+                                                              'Get chapter overview and summaries',
+                                                      },
+                                                  ]
+                                                : []),
                                             {
-                                                id: 'gpt-4-1106-preview',
-                                                name: 'GPT 4',
-                                                isDisabled: this.props.hasKey
-                                                    ? false
-                                                    : true,
-                                                info: (
-                                                    <span>
-                                                        Better at generation of
-                                                        text
-                                                        <br />
-                                                        ONLY WITH OWN KEY
-                                                    </span>
-                                                ),
+                                                id: 'question',
+                                                name: 'General Question',
+                                                info:
+                                                    'Unrelated to the content',
                                             },
                                         ]}
                                         onMenuItemClick={async (item) => {
-                                            this.props.setAIModel(item.id)
+                                            this.props.setQueryMode(item.id)
+
+                                            if (item.id === 'summarize') {
+                                                await this.props.queryAIwithPrompt(
+                                                    this.props.prompt,
+                                                )
+                                            }
+                                            if (item.id === 'chapters') {
+                                                await this.props.getVideoChapters()
+                                            }
+                                            if (item.id === 'question') {
+                                                await this.props.queryAIwithPrompt(
+                                                    this.props.prompt,
+                                                    undefined,
+                                                    item.id,
+                                                )
+                                            }
                                         }}
-                                        initSelectedItem={'gpt-3.5-turbo-1106'}
+                                        initSelectedItem={
+                                            this.props.queryMode ===
+                                            'chapterSummary'
+                                                ? 'chapterSummary'
+                                                : null
+                                        }
+                                        selectedState={
+                                            this.props.queryMode ===
+                                            'chapterSummary'
+                                                ? 'chapterSummary'
+                                                : 'summarize'
+                                        }
                                         keepSelectedState
                                     />
+                                )}
+                                <DropdownMenuBtnSmall
+                                    elementHeight="fit-content"
+                                    hideDescriptionInPreview
+                                    menuItems={[
+                                        {
+                                            id: 'gpt-3.5-turbo-1106',
+                                            name: 'GPT 3.5',
+                                            info:
+                                                'Fast & good for summarization',
+                                        },
+                                        {
+                                            id: 'gpt-4-1106-preview',
+                                            name: 'GPT 4',
+                                            isDisabled: this.props.hasKey
+                                                ? false
+                                                : true,
+                                            info: (
+                                                <span>
+                                                    Better at generation of text
+                                                    <br />
+                                                    ONLY WITH OWN KEY
+                                                </span>
+                                            ),
+                                        },
+                                    ]}
+                                    onMenuItemClick={async (item) => {
+                                        this.props.setAIModel(item.id)
+                                    }}
+                                    initSelectedItem={'gpt-3.5-turbo-1106'}
+                                    keepSelectedState
+                                />
 
-                                    {!this.props.fullPageUrl.includes(
-                                        'youtube.com/watch',
-                                    ) &&
-                                        this.props.activeAITab === 'ThisPage' &&
-                                        (this.props.sidebarContext ===
-                                            'in-page' ||
-                                            this.props.queryMode !==
-                                                'question') && (
-                                            <TooltipBox
-                                                tooltipText={
-                                                    <>
-                                                        For performance we
-                                                        usually fetch the text
-                                                        via our servers but
-                                                        sometimes we can't reach
-                                                        it. E.g. if you are
-                                                        behind a paywall.
-                                                        <br /> Use this to
-                                                        extract the content from
-                                                        the page.
-                                                    </>
-                                                }
-                                                placement="bottom"
-                                                width="150px"
-                                            >
-                                                <Checkbox
-                                                    key={1}
-                                                    id={'1'}
-                                                    isChecked={
-                                                        this.props
-                                                            .fetchLocalHTML
-                                                    }
-                                                    handleChange={() =>
-                                                        this.props
-                                                            .fetchLocalHTML
-                                                            ? this.props.changeFetchLocalHTML(
-                                                                  false,
-                                                              )
-                                                            : this.props.changeFetchLocalHTML(
-                                                                  true,
-                                                              )
-                                                    }
-                                                    // isDisabled={!this.state.shortcutsEnabled}
-                                                    name={'Local Content'}
-                                                    label={'Local Content'}
-                                                    size={14}
-                                                    fontSize={12}
-                                                    checkBoxColor="black"
-                                                    borderColor="greyScale3"
-                                                />
-                                            </TooltipBox>
-                                        )}
-                                </OptionsContainerLeft>
-
-                                <OptionsContainerRight>
-                                    {this.props.pageSummary?.length > 0 && (
+                                {!this.props.fullPageUrl.includes(
+                                    'youtube.com/watch',
+                                ) &&
+                                    this.props.activeAITab === 'ThisPage' &&
+                                    (this.props.sidebarContext === 'in-page' ||
+                                        this.props.queryMode !==
+                                            'question') && (
                                         <TooltipBox
                                             tooltipText={
                                                 <>
-                                                    Create new note <br /> from
-                                                    output
+                                                    For performance we usually
+                                                    fetch the text via our
+                                                    servers but sometimes we
+                                                    can't reach it. E.g. if you
+                                                    are behind a paywall.
+                                                    <br /> Use this to extract
+                                                    the content from the page.
                                                 </>
                                             }
-                                            placement="bottom-end"
+                                            placement="bottom"
+                                            width="150px"
                                         >
-                                            <Icon
-                                                icon={'commentAdd'}
-                                                onClick={() => {
-                                                    this.props.createNewNoteFromAISummary(
-                                                        this.props.pageSummary,
-                                                    )
-                                                }}
-                                                heightAndWidth="22px"
-                                                color="prime1"
+                                            <Checkbox
+                                                key={1}
+                                                id={'1'}
+                                                isChecked={
+                                                    this.props.fetchLocalHTML
+                                                }
+                                                handleChange={() =>
+                                                    this.props.fetchLocalHTML
+                                                        ? this.props.changeFetchLocalHTML(
+                                                              false,
+                                                          )
+                                                        : this.props.changeFetchLocalHTML(
+                                                              true,
+                                                          )
+                                                }
+                                                // isDisabled={!this.state.shortcutsEnabled}
+                                                name={'Local Content'}
+                                                label={'Local Content'}
+                                                size={14}
+                                                fontSize={12}
+                                                checkBoxColor="black"
+                                                borderColor="greyScale3"
                                             />
                                         </TooltipBox>
                                     )}
-                                    {this.props.renderAICounter('top')}
-                                </OptionsContainerRight>
-                            </OptionsContainer>
-                        )}
+                            </OptionsContainerLeft>
+
+                            <OptionsContainerRight>
+                                {this.props.pageSummary?.length > 0 && (
+                                    <TooltipBox
+                                        tooltipText={
+                                            <>
+                                                Create new note <br /> from
+                                                output
+                                            </>
+                                        }
+                                        placement="bottom-end"
+                                    >
+                                        <Icon
+                                            icon={'commentAdd'}
+                                            onClick={() => {
+                                                this.props.createNewNoteFromAISummary(
+                                                    this.props.pageSummary,
+                                                )
+                                            }}
+                                            heightAndWidth="22px"
+                                            color="prime1"
+                                        />
+                                    </TooltipBox>
+                                )}
+                                {this.props.renderAICounter('top')}
+                            </OptionsContainerRight>
+                        </OptionsContainer>
                         {this.props.loadState === 'running' ? (
                             <LoaderBoxInSummary>
                                 {this.renderLoader()}

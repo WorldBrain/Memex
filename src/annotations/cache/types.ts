@@ -6,6 +6,7 @@ import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import type { Anchor } from 'src/highlighting/types'
 import type { Annotation } from '../types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import type { Orderable } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 
 export interface PageAnnotationsCacheEvents {
     updatedPageData: (
@@ -73,7 +74,9 @@ export interface PageAnnotationsCacheInterface {
                     | 'normalizedPageUrl'
                     | 'hasRemoteAnnotationsToLoad'
                     | 'sharedListEntryId'
+                    | 'parentUnifiedId'
                     | 'isPrivate'
+                    | 'order'
                 >
             >,
     ) => void
@@ -89,6 +92,10 @@ export interface PageAnnotationsCacheInterface {
     getAnnotationByRemoteId: (remoteId: string) => UnifiedAnnotation | null
     getListByLocalId: (localId: number) => UnifiedList | null
     getListByRemoteId: (remoteId: string) => UnifiedList | null
+    /** Gets all children of the parent, sorted by their order. */
+    getListsByParentId: (
+        unifiedId: UnifiedList['unifiedId'] | null,
+    ) => UnifiedList[]
 
     readonly isEmpty: boolean
     readonly events: TypedEventEmitter<PageAnnotationsCacheEvents>
@@ -138,7 +145,7 @@ export type UnifiedAnnotationForCache = Omit<
         localListIds: number[]
     }
 
-type CoreUnifiedList<T> = {
+interface CoreUnifiedList<T> extends Orderable {
     // Core list data
     unifiedId: string
     localId?: number
@@ -156,6 +163,11 @@ type CoreUnifiedList<T> = {
 
     // Misc list feature state
     unifiedAnnotationIds: UnifiedAnnotation['unifiedId'][]
+    /** Set to the `unifiedId` of another list if this list is in a tree and not the root. */
+    parentUnifiedId: string | null
+    pathUnifiedIds: string[]
+    parentLocalId: number | null
+    pathLocalIds: number[]
 }
 
 export type UnifiedListType = 'user-list' | 'special-list' | 'page-link'
@@ -172,4 +184,16 @@ export type UnifiedList<
 
 export type UnifiedListForCache<
     T extends UnifiedListType = UnifiedListType
-> = Omit<UnifiedList<T>, 'unifiedId'>
+> = Omit<
+    UnifiedList<T>,
+    | 'order'
+    | 'unifiedId'
+    | 'parentUnifiedId'
+    | 'parentLocalId'
+    | 'pathLocalIds'
+    | 'pathUnifiedIds'
+> & {
+    order?: number
+    parentLocalId?: number | null
+    pathLocalIds?: number[]
+}

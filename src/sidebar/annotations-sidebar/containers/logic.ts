@@ -4410,6 +4410,7 @@ export class SidebarContainerLogic extends UILogic<
             const listCommon = {
                 remoteId: event.sharedListId,
                 name: sharedList.title,
+                order: sharedList.order,
                 creator: sharedList.creator,
                 description: sharedList.description,
                 localId: localListData?.localListId ?? undefined,
@@ -4694,6 +4695,7 @@ export class SidebarContainerLogic extends UILogic<
                 normalizedPageUrl: normalizeUrl(fullPageUrl),
                 unifiedAnnotationIds: [],
                 hasRemoteAnnotationsToLoad: false,
+                parentLocalId: null,
                 isPrivate: false,
             }
             this.emitMutation({

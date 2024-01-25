@@ -6,6 +6,7 @@ import {
 export const LIST_1 = {
     id: 0,
     name: 'SoMe ipsum',
+    remoteListId: 'test-remote-list-nnn',
     isNestable: true,
     isDeletable: true,
     createdAt: new Date(),
@@ -24,6 +25,23 @@ export const LIST_4 = {
     ...LIST_1,
     id: 3,
     name: 'env/transport/velo',
+}
+
+export const LIST_TREE_1 = {
+    localListId: LIST_1.id,
+    parentListId: null,
+}
+export const LIST_TREE_2 = {
+    localListId: LIST_2.id,
+    parentListId: LIST_1.id,
+}
+export const LIST_TREE_3 = {
+    localListId: LIST_3.id,
+    parentListId: LIST_1.id,
+}
+export const LIST_TREE_4 = {
+    localListId: LIST_4.id,
+    parentListId: LIST_2.id,
 }
 
 export const LIST_1_TERMS = ['some', 'ipsum']

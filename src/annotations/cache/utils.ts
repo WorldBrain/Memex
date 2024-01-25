@@ -22,6 +22,7 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
+import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -129,12 +130,16 @@ export const reshapeLocalListForCache = (
     return {
         type,
         name: list.name,
+        order: list.order,
         localId: list.id,
         remoteId: list.remoteId,
         creator: opts.extraData?.creator,
         description: list.description,
         unifiedAnnotationIds: [],
         hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
+        parentUnifiedId: null, // NOTE: this will be derived inside cache add logic
+        parentLocalId: list.parentListId,
+        pathLocalIds: list.pathListIds,
         ...(opts.extraData ?? {}),
     }
 }
@@ -155,6 +160,9 @@ export const reshapeFollowedListForCache = (
     description: undefined,
     unifiedAnnotationIds: [],
     hasRemoteAnnotationsToLoad: !!opts.hasRemoteAnnotations,
+    parentUnifiedId: null,
+    parentLocalId: null,
+    order: DEFAULT_KEY,
     ...(opts.extraData ?? {}),
 })
 
@@ -220,9 +228,9 @@ export async function hydrateCacheForPageAnnotations(
     },
 ): Promise<void> {
     if (!args.skipListHydration) {
-        const localListsData = await args.bgModules.customLists.fetchAllLists(
-            {},
-        )
+        const localListsData = await args.bgModules.customLists.fetchAllLists({
+            includeTreeData: true,
+        })
         const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(
             {
                 localListIds: localListsData.map((list) => list.id),
@@ -307,7 +315,8 @@ export async function hydrateCacheForListUsage(
 ): Promise<void> {
     const localListsData = await args.bgModules.customLists.fetchAllLists({
         includeDescriptions: true,
-        skipSpecialLists: true,
+        skipSpecialLists: false,
+        includeTreeData: true,
     })
     const followedListsData = await args.bgModules.pageActivityIndicator.getAllFollowedLists()
     const listMetadata = await args.bgModules.contentSharing.getListShareMetadata(

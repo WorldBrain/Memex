@@ -470,6 +470,21 @@ export class DashboardContainer extends StatefulUIElement<
             <ListsSidebarContainer
                 {...listsSidebar}
                 spaceSidebarWidth={this.state.listsSidebar.spaceSidebarWidth}
+                onTreeToggle={(listId) =>
+                    this.processEvent('toggleListTreeShow', { listId })
+                }
+                onNestedListInputToggle={(listId) =>
+                    this.processEvent('toggleNestedListInputShow', { listId })
+                }
+                setNestedListInputValue={(listId, value) =>
+                    this.processEvent('setNewNestedListValue', {
+                        listId,
+                        value,
+                    })
+                }
+                onConfirmNestedListCreate={(parentListId) =>
+                    this.processEvent('createdNestedList', { parentListId })
+                }
                 openRemoteListPage={(remoteListId) =>
                     this.props.openCollectionPage(remoteListId)
                 }
@@ -510,6 +525,8 @@ export class DashboardContainer extends StatefulUIElement<
                     loadingState: listsSidebar.listLoadState,
                     title: 'My Spaces',
                     listData: ownListsData,
+                    spaceSidebarWidth: this.state.listsSidebar
+                        .spaceSidebarWidth,
                     onAddBtnClick: (event) => {
                         event.preventDefault()
                         event.stopPropagation()
@@ -526,6 +543,8 @@ export class DashboardContainer extends StatefulUIElement<
                     isExpanded: listsSidebar.areFollowedListsExpanded,
                     loadingState: listsSidebar.listLoadState,
                     title: 'Followed Spaces',
+                    spaceSidebarWidth: this.state.listsSidebar
+                        .spaceSidebarWidth,
                     listData: followedListsData,
                     onExpandBtnClick: () =>
                         this.processEvent('setFollowedListsExpanded', {
@@ -536,6 +555,8 @@ export class DashboardContainer extends StatefulUIElement<
                     isExpanded: listsSidebar.areJoinedListsExpanded,
                     loadingState: listsSidebar.listLoadState,
                     title: 'Joined Spaces',
+                    spaceSidebarWidth: this.state.listsSidebar
+                        .spaceSidebarWidth,
                     onExpandBtnClick: () => {
                         this.processEvent('setJoinedListsExpanded', {
                             isExpanded: !listsSidebar.areJoinedListsExpanded,
@@ -557,21 +578,30 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setShowMoreMenuListId', { listId }),
                     toggleEditMenu: () =>
                         this.processEvent('setEditMenuListId', { listId }),
+                    onDeleteSpaceIntent: () =>
+                        this.processEvent('setDeletingListId', { listId }),
+                    onDeleteSpaceConfirm: () =>
+                        this.processEvent('confirmListDelete', null),
                 })}
+                onListDragStart={(listId) => (e) =>
+                    this.processEvent('dragList', {
+                        listId,
+                        dataTransfer: e.dataTransfer,
+                    })}
+                onListDragEnd={(listId) => (e) =>
+                    this.processEvent('dropList', { listId })}
                 initDropReceivingState={(listId) => ({
-                    onDragEnter: () => {
-                        this.processEvent('setDragOverListId', { listId })
-                    },
+                    onDragEnter: () =>
+                        this.processEvent('setDragOverListId', { listId }),
                     onDragLeave: () =>
                         this.processEvent('setDragOverListId', {
                             listId: undefined,
                         }),
-                    onDrop: (dataTransfer: DataTransfer) => {
-                        this.processEvent('dropPageOnListItem', {
+                    onDrop: (dataTransfer) =>
+                        this.processEvent('dropOnListItem', {
                             listId,
                             dataTransfer,
-                        })
-                    },
+                        }),
                     canReceiveDroppedItems: true,
                     isDraggedOver: listId === listsSidebar.dragOverListId,
                     wasPageDropped:
@@ -1190,20 +1220,20 @@ export class DashboardContainer extends StatefulUIElement<
             )
         }
 
-        if (modalsState.deletingListId) {
-            return (
-                <DeleteConfirmModal
-                    isShown
-                    message="Delete this Space?"
-                    submessage="This does NOT delete the pages in it"
-                    onClose={() => this.processEvent('cancelListDelete', null)}
-                    deleteDocs={() =>
-                        this.processEvent('confirmListDelete', null)
-                    }
-                    icon={icons.collectionsEmpty}
-                />
-            )
-        }
+        // if (modalsState.deletingListId) {
+        //     return (
+        //         <DeleteConfirmModal
+        //             isShown
+        //             message="Delete this Space?"
+        //             submessage="This does NOT delete the pages in it"
+        //             onClose={() => this.processEvent('cancelListDelete', null)}
+        //             deleteDocs={() =>
+        //                 this.processEvent('confirmListDelete', null)
+        //             }
+        //             icon={icons.collectionsEmpty}
+        //         />
+        //     )
+        // }
 
         if (modalsState.deletingNoteArgs) {
             return (
