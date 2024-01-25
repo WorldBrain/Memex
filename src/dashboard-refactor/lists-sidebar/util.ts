@@ -1,9 +1,11 @@
 import type { UnifiedList } from 'src/annotations/cache/types'
 
-export const filterListsByQuery = (
+export const filterListsByQuery = <
+    T extends Pick<UnifiedList, 'name' | 'unifiedId'>
+>(
     query: string,
-    lists: Pick<UnifiedList, 'name' | 'unifiedId'>[],
-) => {
+    lists: T[],
+): T[] => {
     const normalizedQuery = query.toLocaleLowerCase()
     return lists.filter(
         (list) =>

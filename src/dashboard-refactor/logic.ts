@@ -3626,7 +3626,17 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 searchQuery: { $set: event.query },
                 filteredListIds: {
-                    $set: filteredLists.map((list) => list.unifiedId),
+                    $set:
+                        event.query.trim().length > 0
+                            ? [
+                                  ...new Set(
+                                      filteredLists.flatMap((list) => [
+                                          list.unifiedId,
+                                          ...list.pathUnifiedIds, // Include ancestors of matched lists
+                                      ]),
+                                  ),
+                              ]
+                            : [],
                 },
             },
         })
