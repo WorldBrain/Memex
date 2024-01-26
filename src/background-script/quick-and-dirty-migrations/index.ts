@@ -71,15 +71,7 @@ export const migrations: Migrations = {
         storex,
         bgModules,
     }) => {
-        const autoIncPkCollections = [
-            'annotationPrivacyLevels',
-            'followedListEntry',
-            'locators',
-            'readwiseAction',
-            'pageFetchBacklog',
-            'personalCloudAction',
-            'contentSharingAction',
-        ]
+        const autoIncPkCollections = ['annotationPrivacyLevels', 'locators']
         const startTime = Date.now()
 
         await storex
