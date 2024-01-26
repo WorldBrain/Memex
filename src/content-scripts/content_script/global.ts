@@ -979,7 +979,7 @@ export async function main(
             }
             return extractRawPageContent(doc, url)
         },
-        ping: async () => true,
+        confirmTabScriptLoaded: async () => {},
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
         testIfSidebarSetup: inPageUI.testIfSidebarSetup.bind(inPageUI),

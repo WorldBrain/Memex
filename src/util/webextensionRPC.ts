@@ -147,7 +147,7 @@ export function runInTab<T extends object>(
                     tabId,
                     property.toString(),
                     args,
-                    opts?.quietConsole,
+                    opts,
                 )
         },
     })
