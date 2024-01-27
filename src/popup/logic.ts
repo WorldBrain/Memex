@@ -11,9 +11,11 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { AnnotationInterface } from 'src/annotations/background/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { setUserContext as setSentryUserContext } from 'src/util/raven'
 
 export interface Dependencies {
     extensionAPI: Pick<Extension.Static, 'isAllowedFileSchemeAccess'>
@@ -25,6 +27,7 @@ export interface Dependencies {
     pageIndexingBG: PageIndexingInterface<'caller'>
     analyticsBG: AnalyticsCoreInterface
     annotationsBG: AnnotationInterface<'provider'>
+    authBG: AuthRemoteFunctionsInterface
 }
 
 export interface Event {
@@ -78,6 +81,7 @@ export default class PopupLogic extends UILogic<State, Event> {
 
     async init() {
         const {
+            authBG,
             tabsAPI,
             syncSettings,
             runtimeAPI,
@@ -89,6 +93,9 @@ export default class PopupLogic extends UILogic<State, Event> {
         } = this.dependencies
 
         await loadInitial(this, async () => {
+            authBG
+                .getCurrentUser()
+                .then((currentUser) => setSentryUserContext(currentUser))
             const currentTab = await getCurrentTab({ runtimeAPI, tabsAPI })
             if (
                 currentTab.url === 'about:blank' ||

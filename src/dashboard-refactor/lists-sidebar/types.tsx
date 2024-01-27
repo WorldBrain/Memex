@@ -4,17 +4,29 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
-    lists: NormalizedState<UnifiedList & { wasPageDropped?: boolean }>
+    lists: NormalizedState<
+        UnifiedList & {
+            wasPageDropped?: boolean
+            wasListDropped?: boolean
+        }
+    >
+    listTrees: NormalizedState<{
+        isTreeToggled: boolean
+        isNestedListInputShown: boolean
+        newNestedListValue: string
+        newNestedListCreateState: TaskState
+        hasChildren: boolean
+    }>
     filteredListIds: UnifiedList['unifiedId'][]
     areLocalListsExpanded: boolean
     areFollowedListsExpanded: boolean
     areJoinedListsExpanded: boolean
     isAddListInputShown: boolean
-    spaceSidebarWidth: number
+    spaceSidebarWidth: string
 
+    draggedListId: string | null
     inboxUnreadCount: number
     dragOverListId?: string
     editingListId?: string
@@ -32,6 +44,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     listEditState: TaskState
     listDeleteState: TaskState
     listCreateState: TaskState
+    listDropReceiveState: TaskState
     listShareLoadingState: TaskState
     themeVariant: MemexThemeVariant
 }
@@ -58,7 +71,15 @@ export type Events = UIEvent<{
     setSelectedListId: { listId: string }
     setShowMoreMenuListId: { listId: string }
     setEditMenuListId: { listId: string }
-    dropPageOnListItem: { listId: string; dataTransfer: DataTransfer }
+    dropOnListItem: { listId: string; dataTransfer: DataTransfer }
+    dragList: { listId: string; dataTransfer: DataTransfer }
+    dropList: { listId: string }
+
+    // Tree-related events
+    toggleListTreeShow: { listId: string }
+    toggleNestedListInputShow: { listId: string }
+    setNewNestedListValue: { listId: string; value: string }
+    createdNestedList: { parentListId: string }
 
     confirmListDelete: null
     cancelListDelete: null
@@ -67,5 +88,16 @@ export type Events = UIEvent<{
     toggleTheme: { themeVariant: MemexThemeVariant }
     switchToFeed: null
 }>
+
+export type DragToListAction<T extends 'page' | 'list'> = T extends 'page'
+    ? {
+          type: 'page'
+          fullPageUrl: string
+          normalizedPageUrl: string
+      }
+    : {
+          type: 'list'
+          listId: string
+      }
 
 export type ListNameHighlightIndices = [number, number]

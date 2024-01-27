@@ -7,7 +7,6 @@ import {
     SPECIAL_LIST_IDS,
 } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import textStemmer from '@worldbrain/memex-stemmer'
-
 import { STORAGE_KEYS as IDXING_STORAGE_KEYS } from 'src/options/settings/constants'
 import type { BackgroundModules } from '../setup'
 import {
@@ -17,12 +16,18 @@ import {
 import { SETTING_NAMES } from 'src/sync-settings/background/constants'
 import { migrateInstallTime } from 'src/personal-cloud/storage/migrate-install-time'
 import type { LocalExtensionSettings } from '../types'
-import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
+import type { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { __OLD_INSTALL_TIME_KEY } from 'src/constants'
 import { migrateTagsToSpaces } from './tags-migration'
 import { PersonalCloudActionType } from 'src/personal-cloud/background/types'
 import { PersonalCloudUpdateType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
-import { SharedListMetadata } from 'src/content-sharing/background/types'
+import type { SharedListMetadata } from 'src/content-sharing/background/types'
+import type { BatchOperation, OperationBatch } from '@worldbrain/storex'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import {
+    DEFAULT_KEY,
+    DEFAULT_SPACE_BETWEEN,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export interface MigrationProps {
     db: Dexie
@@ -56,6 +61,132 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This removes then recreates all the backupChanges docs for collections that have an auto-incrementing PK.
+     * We had a bug in our incremental backup implementation where it was creating backupChanges docs via a Dexie hook,
+     * though Dexie hooks run before create and thus don't have access to the PK at time of running. We since moved
+     * that to work via a storex middleware, which runs post-creation.
+     */
+    [MIGRATION_PREFIX + 'recreate-auto-inc-pk-colls-backup-changes-0']: async ({
+        storex,
+        bgModules,
+    }) => {
+        const autoIncPkCollections = [
+            'annotationPrivacyLevels',
+            'locators',
+            'customListTrees',
+        ]
+        const startTime = Date.now()
+
+        await storex
+            .collection('backupChanges')
+            .deleteObjects({ collection: { $in: autoIncPkCollections } })
+
+        const batch: OperationBatch = []
+        let totalDocs = 0
+        async function createBackupEntriesForCollection(
+            collection: string,
+            pageSize = 100,
+        ): Promise<void> {
+            let page = 0
+            let chunkDocs: Array<{ id: number }>
+            while (true) {
+                chunkDocs = await storex
+                    .collection(collection)
+                    .findObjects({}, { limit: pageSize, skip: page * pageSize })
+
+                batch.push(
+                    ...chunkDocs.map((doc, i) => ({
+                        collection: 'backupChanges',
+                        operation: 'createObject' as const,
+                        placeholder: `${collection}-${page}-${i}`,
+                        args: {
+                            collection,
+                            objectPk: doc.id,
+                            operation: 'create',
+                            timestamp: startTime + totalDocs++, // TODO: will this be a problem?
+                        },
+                    })),
+                )
+                page++
+                if (chunkDocs.length !== pageSize) {
+                    break
+                }
+            }
+        }
+
+        for (const collection of autoIncPkCollections) {
+            await createBackupEntriesForCollection(collection)
+        }
+        await storex.operation('executeBatch', batch)
+    },
+    /*
+     * This exists as we added a new `customListTrees` collection for the nested lists feature, where
+     * a doc is assumed to exist for each `customLists` doc.
+     */
+    [MIGRATION_PREFIX + 'create-tree-data-for-lists-01']: async ({
+        bgModules,
+        storex,
+    }) => {
+        const now = Date.now()
+        const PAGE_SIZE = 50
+        let page = 0
+        let batchCount = 0
+        const batch: OperationBatch = []
+        while (true) {
+            const listResults = await bgModules.customLists.storage.fetchAllLists(
+                {
+                    limit: PAGE_SIZE,
+                    skip: page * PAGE_SIZE,
+                    skipSpecialLists: false,
+                    includeDescriptions: false,
+                },
+            )
+            const listsToProcess = listResults.filter(
+                (list) =>
+                    !Object.values(SPECIAL_LIST_IDS).includes(list.id) &&
+                    list.name !== SPECIAL_LIST_NAMES.MOBILE,
+            )
+            const treeData = await bgModules.customLists.storage.getTreeDataForLists(
+                {
+                    localListIds: listsToProcess.map((list) => list.id),
+                },
+            )
+
+            batch.push(
+                ...listsToProcess
+                    .filter((list) => treeData[list.id] == null) // Skip any that already have tree data
+                    .map(
+                        (list) =>
+                            ({
+                                operation: 'createObject',
+                                collection: 'customListTrees',
+                                placeholder: `list-tree-${batchCount}`,
+                                args: {
+                                    listId: list.id,
+                                    linkTarget: null,
+                                    path: null,
+                                    parentListId: ROOT_NODE_PARENT_ID,
+                                    order:
+                                        DEFAULT_KEY +
+                                        (batchCount += DEFAULT_SPACE_BETWEEN),
+                                    createdWhen: now,
+                                    updatedWhen: now,
+                                },
+                            } as BatchOperation),
+                    ),
+            )
+
+            if (listResults.length !== PAGE_SIZE) {
+                break
+            }
+            page++
+        }
+
+        if (batch.length) {
+            await storex.operation('executeBatch', batch)
+        }
+    },
     /*
      * This is sharing all private lists taht have not yet a remoteId
      */

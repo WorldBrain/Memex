@@ -1,4 +1,4 @@
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import {
     StorageModule,
     StorageModuleConfig,
@@ -7,10 +7,9 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/backup-changes/constants'
-
-import { ObjectChangeBatch } from './backend/types'
+import type { ObjectChangeBatch } from './backend/types'
 import { isExcludedFromBackup } from './utils'
-import setupChangeTracking from 'src/backup-restore/background/change-hooks'
+import type { StorageChangePk } from '@worldbrain/storex-middleware-change-watcher/lib/types'
 
 export default class BackupStorage extends StorageModule {
     static BACKUP_COLL = COLLECTION_NAMES.backupChange
@@ -60,13 +59,13 @@ export default class BackupStorage extends StorageModule {
         },
     })
 
-    _handleStorageChange({
+    handleStorageChange({
         collection,
         pk,
         operation,
     }: {
         collection: string
-        pk: string
+        pk: StorageChangePk
         operation: string
     }) {
         if (!this.recordingChanges) {
@@ -85,20 +84,13 @@ export default class BackupStorage extends StorageModule {
         }
     }
 
-    setupChangeTracking() {
-        setupChangeTracking(
-            this.storageManager,
-            this._handleStorageChange.bind(this),
-        )
-    }
-
     async registerChange({
         collection,
         pk,
         operation,
     }: {
         collection: string
-        pk: string
+        pk: StorageChangePk
         operation: string
     }) {
         await this.operation('createBackupChange', {

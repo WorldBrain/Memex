@@ -3,7 +3,7 @@ import SidebarItem, { Props as SidebarItemProps } from './sidebar-item'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props
-    extends Omit<SidebarItemProps, 'renderLeftSideIcon' | 'dropReceivingState'>,
+    extends Omit<SidebarItemProps, 'dropReceivingState'>,
         Required<Pick<SidebarItemProps, 'dropReceivingState'>> {}
 
 const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
@@ -14,7 +14,7 @@ const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
                 return (
                     <Icon
                         icon="check"
-                        heightAndWidth="20px"
+                        heightAndWidth="18px"
                         color="prime1"
                         hoverOff
                     />
@@ -27,7 +27,7 @@ const DropTargetSidebarItem: React.FunctionComponent<Props> = (props) => (
                 return (
                     <Icon
                         icon="plus"
-                        heightAndWidth="20px"
+                        heightAndWidth="18px"
                         color="prime1"
                         hoverOff
                     />

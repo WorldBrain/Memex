@@ -173,7 +173,6 @@ export class MemexLocalBackend {
                 syncKey: syncKey,
             }
 
-            console.log('body', body)
             const response = await fetch(`${this.url}/add_page`, {
                 method: 'PUT',
                 headers: {

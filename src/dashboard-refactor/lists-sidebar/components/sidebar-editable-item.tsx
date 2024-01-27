@@ -14,6 +14,8 @@ export interface Props {
     errorMessage: string | null
     onCancelClick: () => void
     onConfirmClick: (value: string) => void
+    onChange?: (value: string) => void
+    scrollIntoView?: () => void
 }
 
 export default class ListsSidebarEditableItem extends React.PureComponent<
@@ -23,8 +25,14 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     static defaultProps: Partial<Props> = { initValue: '' }
     state: State = { value: this.props.initValue }
 
-    private handleChange: React.MouseEventHandler<HTMLInputElement> = (event) =>
+    private handleChange: React.MouseEventHandler<HTMLInputElement> = (
+        event,
+    ) => {
+        if (this.props.onChange) {
+            this.props.onChange((event.target as HTMLInputElement).value)
+        }
         this.setState({ value: (event.target as HTMLInputElement).value })
+    }
 
     private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state
@@ -48,6 +56,14 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
         this.props.onConfirmClick(this.state.value)
     }
 
+    handleFocus = () => {
+        // weird hack to have 0 timeout
+        setTimeout(() => {
+            this.props.scrollIntoView()
+        }, 0)
+        // Do something when the input is focused
+    }
+
     private handleCancel: React.MouseEventHandler = () =>
         this.props.onCancelClick()
 
@@ -59,7 +75,9 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
                         autoFocus
                         onChange={this.handleChange}
                         value={this.state.value}
+                        onFocus={this.handleFocus}
                         onKeyDown={this.handleInputKeyDown}
+                        onClick={this.props.scrollIntoView}
                     />
                     <ActionButtonBox right="5px">
                         <Icon
@@ -111,9 +129,8 @@ const EditableListTitle = styled.input`
 const ActionButtonBox = styled(Margin)`
     display: grid;
     grid-gap: 5px;
-    justify-content: center;
+    justify-content: flex-start;
     grid-auto-flow: column;
-    width: 30px;
 `
 
 const ErrMsg = styled.div`
@@ -123,11 +140,13 @@ const ErrMsg = styled.div`
 `
 
 const Container = styled.div<Props>`
-    width: fill-available;
+    min-width: fit-content;
+    max-width: fill-available;
+    max-width: -moz-available;
     display: flex;
-    grid-gap: 20px;
+    grid-gap: 5px;
     justify-content: space-between;
     align-items: center;
     background-color: transparent;
-    padding: 5px 15px 5px 15px;
+    padding: 5px 5px 5px 15px;
 `

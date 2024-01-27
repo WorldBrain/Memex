@@ -175,12 +175,21 @@ export const FOLLOWED_LIST_ENTRIES: FollowedListEntry[] = [
 
 const testListToSuggestion = (
     list: PageList,
-    extra: Pick<UnifiedList, 'unifiedId' | 'type'> & {
-        sharedListEntryId?: string
-        normalizedPageUrl?: string
-        creator?: UserReference
-        pageTitle?: string
-    },
+    extra: Pick<UnifiedList, 'unifiedId' | 'type'> &
+        Partial<
+            Pick<
+                UnifiedList,
+                | 'parentLocalId'
+                | 'parentUnifiedId'
+                | 'pathLocalIds'
+                | 'pathUnifiedIds'
+            >
+        > & {
+            sharedListEntryId?: string
+            normalizedPageUrl?: string
+            creator?: UserReference
+            pageTitle?: string
+        },
 ): UnifiedList => ({
     type: extra.type,
     unifiedId: extra.unifiedId,
@@ -192,8 +201,13 @@ const testListToSuggestion = (
     hasRemoteAnnotationsToLoad: false,
     unifiedAnnotationIds: [],
     creator: extra.creator,
+    order: list.order,
     normalizedPageUrl: extra.normalizedPageUrl,
     sharedListEntryId: extra.sharedListEntryId,
+    parentUnifiedId: extra.parentUnifiedId ?? null,
+    parentLocalId: extra.parentLocalId ?? null,
+    pathUnifiedIds: extra.pathUnifiedIds ?? [],
+    pathLocalIds: extra.pathLocalIds ?? [],
 })
 
 export const TEST_USER_LIST_SUGGESTIONS = TEST_LISTS.slice(

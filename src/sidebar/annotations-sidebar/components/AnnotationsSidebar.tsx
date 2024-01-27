@@ -3485,7 +3485,7 @@ export class AnnotationsSidebar extends React.Component<
                 {shareMenuAnnotationInstanceId != null && (
                     <PopoutBox
                         targetElementRef={instanceRefs.shareMenuBtn.current}
-                        placement="bottom-start"
+                        placement="left"
                         strategy="fixed"
                         closeComponent={() =>
                             this.props.setShareMenuAnnotationInstance(null)
@@ -5806,6 +5806,7 @@ const FollowedListRow = styled(Margin)<{
     cursor: pointer;
     border-radius: 8px;
     height: 44px;
+    
     padding: 0px 15px 0px 10px;
     z-index: ${(props) => 1000 - props.zIndex};
 
@@ -5828,6 +5829,7 @@ const FollowedListRow = styled(Margin)<{
     &:hover ${ActionButtons} {
         visibility: visible;
     }
+    margin: 5px;
 `
 
 const ButtonContainer = styled.div`

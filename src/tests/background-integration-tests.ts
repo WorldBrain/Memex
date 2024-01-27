@@ -141,8 +141,8 @@ export async function setupBackgroundIntegrationTest(
         tabs: {
             query: () => [],
             get: () => null,
-            onRemoved: { addListener: () => {} },
             onUpdated: { addListener: () => {} },
+            onRemoved: { addListener: () => {} },
         },
         contextMenus: {
             create: () => {},
@@ -261,7 +261,7 @@ export async function setupBackgroundIntegrationTest(
                 },
                 storageManager: serverStorage.manager,
                 storageModules: serverStorage.modules,
-                clientSchemaVersion: STORAGE_VERSIONS[29].version,
+                clientSchemaVersion: STORAGE_VERSIONS[35].version,
                 view: personalCloudHub.getView(),
                 useDownloadTranslationLayer:
                     options?.useDownloadTranslationLayer ?? true,
@@ -340,11 +340,7 @@ export async function setupBackgroundIntegrationTest(
         },
     }
 
-    setStorageMiddleware(storageManager, {
-        storexHub: backgroundModules.storexHub,
-        customLists: backgroundModules.customLists,
-        personalCloud: backgroundModules.personalCloud,
-        contentSharing: backgroundModules.contentSharing,
+    setStorageMiddleware(storageManager, backgroundModules, {
         modifyMiddleware: (originalMiddleware) => [
             ...((options && options.customMiddleware) || []),
             ...(options && options.debugStorageOperations

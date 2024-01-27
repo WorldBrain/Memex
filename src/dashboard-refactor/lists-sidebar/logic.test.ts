@@ -699,7 +699,7 @@ describe('Dashboard lists sidebar logic', () => {
                 normalizedPageUrl: page.normalizedUrl,
             }),
         )
-        const dropEventP = searchResults.processEvent('dropPageOnListItem', {
+        const dropEventP = searchResults.processEvent('dropOnListItem', {
             listId: listData.unifiedId,
             dataTransfer,
         })

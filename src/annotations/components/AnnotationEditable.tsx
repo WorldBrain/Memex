@@ -978,14 +978,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         return (
             <PopoutBox
                 targetElementRef={referenceElement.current}
-                placement={'bottom-start'}
+                placement={'left'}
                 strategy={'fixed'}
                 closeComponent={() => {
                     this.setState({
                         showShareMenu: false,
                     })
                 }}
-                offsetX={10}
+                offsetX={100}
                 width={'310px'}
             >
                 {this.props.renderShareMenuForAnnotation(this.props.unifiedId)}

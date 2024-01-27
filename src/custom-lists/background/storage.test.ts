@@ -7,6 +7,7 @@ import {
 } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { BackgroundIntegrationTestSetup } from 'src/tests/integration-tests'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { buildMaterializedPath } from 'src/content-sharing/utils'
 
 async function insertTestData({
     backgroundModules: { customLists, contentSharing },
@@ -20,6 +21,11 @@ async function insertTestData({
     await customLists.createCustomList(DATA.LIST_2)
     await customLists.createCustomList(DATA.LIST_3)
     await customLists.createCustomList(DATA.LIST_4)
+
+    await customLists.createListTree(DATA.LIST_TREE_1)
+    await customLists.createListTree(DATA.LIST_TREE_2)
+    await customLists.createListTree(DATA.LIST_TREE_3)
+    await customLists.createListTree(DATA.LIST_TREE_4)
     // await customLists.createCustomList(DATA.MOBILE_LIST)
 
     const lists = storageManager.collection('customLists')
@@ -550,7 +556,7 @@ describe('Custom List Integrations', () => {
             )
 
             const annotId = 'test.com/#12345678'
-            const remoteListId = 'test-remote-list-nnn'
+            const remoteListId = DATA.LIST_1.remoteListId
             const listDescription = 'test descr'
             await directLinking.createAnnotation(
                 { tab: null },
@@ -560,11 +566,6 @@ describe('Custom List Integrations', () => {
                     comment: 'test',
                 },
             )
-            await contentSharing['listSharingService'].shareList({
-                localListId: DATA.LIST_1.id,
-                annotationLocalToRemoteIdsDict: {},
-                remoteListId,
-            })
             await customLists.updateListDescription({
                 listId: DATA.LIST_1.id,
                 description: listDescription,
@@ -608,6 +609,7 @@ describe('Custom List Integrations', () => {
                     .findObject({ id: DATA.LIST_1.id }),
             ).toEqual({
                 ...DATA.LIST_1,
+                remoteListId: undefined,
                 nameTerms: expect.anything(),
                 searchableName: DATA.LIST_1.name,
             })
@@ -636,11 +638,54 @@ describe('Custom List Integrations', () => {
             expect(
                 await storageManager
                     .collection('sharedListMetadata')
-                    .findAllObjects({}),
+                    .findObjects({ localId: DATA.LIST_1.id }),
             ).toEqual([
                 {
                     localId: DATA.LIST_1.id,
                     remoteId: remoteListId,
+                    private: true,
+                },
+            ])
+            expect(
+                await storageManager
+                    .collection('customListTrees')
+                    .findAllObjects({}),
+            ).toEqual([
+                {
+                    id: expect.anything(),
+                    listId: DATA.LIST_1.id,
+                    order: expect.any(Number),
+                    parentListId: null,
+                    path: null,
+                    createdWhen: expect.anything(),
+                    updatedWhen: expect.anything(),
+                },
+                {
+                    id: expect.anything(),
+                    listId: DATA.LIST_2.id,
+                    order: expect.any(Number),
+                    parentListId: DATA.LIST_1.id,
+                    path: buildMaterializedPath(DATA.LIST_1.id),
+                    createdWhen: expect.anything(),
+                    updatedWhen: expect.anything(),
+                },
+                {
+                    id: expect.anything(),
+                    listId: DATA.LIST_3.id,
+                    order: expect.any(Number),
+                    parentListId: DATA.LIST_1.id,
+                    path: buildMaterializedPath(DATA.LIST_1.id),
+                    createdWhen: expect.anything(),
+                    updatedWhen: expect.anything(),
+                },
+                {
+                    id: expect.anything(),
+                    listId: DATA.LIST_4.id,
+                    order: expect.any(Number),
+                    parentListId: DATA.LIST_2.id,
+                    path: buildMaterializedPath(DATA.LIST_1.id, DATA.LIST_2.id),
+                    createdWhen: expect.anything(),
+                    updatedWhen: expect.anything(),
                 },
             ])
             expect(
@@ -688,6 +733,11 @@ describe('Custom List Integrations', () => {
                 await storageManager
                     .collection('sharedListMetadata')
                     .findAllObjects({}),
+            ).toEqual([])
+            expect(
+                await storageManager
+                    .collection('customListTrees')
+                    .findObjects({ listId: DATA.LIST_1.id }),
             ).toEqual([])
             expect(
                 await storageManager

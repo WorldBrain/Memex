@@ -42,7 +42,7 @@ export interface InPageUIContentScriptRemoteInterface {
      * Acts as a way for the BG script to check if the content script is
      * available on a given tab. Should throw error if not.
      */
-    ping(): Promise<true>
+    confirmTabScriptLoaded(): Promise<void>
 }
 
 export interface InPDFPageUIContentScriptRemoteInterface {
