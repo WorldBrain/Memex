@@ -281,7 +281,7 @@ class Import extends React.PureComponent<Props> {
                 customTagsObsidian.PKMSYNCcustomTagsObsidian ??
                 customSyncTagDefault,
             PKMSYNCremovewarning:
-                PKMSYNCremovewarning.PKMSYNCremovewarning ?? true,
+                PKMSYNCremovewarning.PKMSYNCremovewarning ?? false,
             customTagsLogseq:
                 customTagsLogseq.PKMSYNCcustomTagsLogseq ??
                 customSyncTagDefault,
@@ -609,7 +609,7 @@ class Import extends React.PureComponent<Props> {
                                             <Checkbox
                                                 label="Remove warning block"
                                                 isChecked={
-                                                    !this.state
+                                                    this.state
                                                         .PKMSYNCremovewarning
                                                 }
                                                 handleChange={async (event) => {

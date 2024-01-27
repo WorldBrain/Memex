@@ -103,6 +103,11 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
     }
 
     private renderReorderLine = (listId: string) => {
+        // Disable reordering when filtering lists by query
+        if (this.props.filteredListIds.length > 0) {
+            return null
+        }
+
         const reorderLineDropReceivingState = this.props.initDropReceivingState(
             listId,
         )
@@ -156,6 +161,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             }, 0)
         }
     }, 100)
+
     private renderListTrees() {
         const rootLists = this.props.ownListsGroup.listData
             .filter(
@@ -193,8 +199,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 list.parentUnifiedId,
                             )
                             if (
-                                !parentShowFlag ||
-                                !parentListTreeState?.isTreeToggled
+                                this.props.filteredListIds.length === 0 && // Always toggle children shown when filtering lists by query
+                                (!parentShowFlag ||
+                                    !parentListTreeState?.isTreeToggled)
                             ) {
                                 return null
                             }

@@ -35,6 +35,7 @@ async function setupTest(
         pageIndexingBG: insertBackgroundFunctionTab(
             backgroundModules.pages.remoteFunctions,
         ) as any,
+        authBG: backgroundModules.auth.remoteFunctions,
         pdfIntegrationBG: backgroundModules.pdfBg.remoteFunctions,
         customListsBG: backgroundModules.customLists.remoteFunctions,
         analyticsBG: backgroundModules.analyticsBG,

@@ -73,24 +73,22 @@ class Root extends React.Component<RootProps, RootState> {
             themeVariant: await loadThemeVariant(),
         })
 
-        await browser.storage.onChanged.addListener(
-            async (changes, areaName) => {
-                if (areaName !== 'local') {
-                    return
-                }
+        browser.storage.onChanged.addListener(async (changes, areaName) => {
+            if (areaName !== 'local') {
+                return
+            }
 
-                if (changes.themeVariant) {
-                    const { themeVariant } = await browser.storage.local.get(
-                        'themeVariant',
-                    )
+            if (changes.themeVariant) {
+                const { themeVariant } = await browser.storage.local.get(
+                    'themeVariant',
+                )
 
-                    this.setState({
-                        themeVariant,
-                        theme: theme({ variant: themeVariant }),
-                    })
-                }
-            },
-        )
+                this.setState({
+                    themeVariant,
+                    theme: theme({ variant: themeVariant }),
+                })
+            }
+        })
     }
 
     render() {

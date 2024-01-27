@@ -1,8 +1,8 @@
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 import { EventEmitter } from 'events'
 
 import BackupStorage from '../../storage'
-import { BackupBackend, ObjectChange } from '../../backend'
+import type { BackupBackend, ObjectChange } from '../../backend'
 import Interruptable from '../interruptable'
 import { DownloadQueue } from './download-queue'
 import {
@@ -11,11 +11,11 @@ import {
     BMS_COLL,
 } from 'src/social-integration/constants'
 import decodeBlob from 'src/util/decode-blob'
-import { SearchIndex } from 'src/search'
+import type { SearchIndex } from 'src/search'
 import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/storage/utils'
 import * as Raven from 'src/util/raven'
-const sorted = require('lodash/sortBy')
-const zipObject = require('lodash/zipObject')
+import sorted from 'lodash/sortBy'
+import zipObject from 'lodash/zipObject'
 
 export interface BackupRestoreInfo {
     status: 'preparing' | 'synching'
@@ -264,7 +264,10 @@ export class BackupRestoreProcedure {
         ]
         const pkIndex = collectionDef.pkIndex
         if (pkIndex instanceof Array) {
-            return zipObject(pkIndex, change.objectPk || change['pk'])
+            return zipObject(
+                pkIndex as string[],
+                change.objectPk || change['pk'],
+            )
         } else if (typeof pkIndex === 'string') {
             return { [pkIndex]: change.objectPk || change['pk'] }
         }

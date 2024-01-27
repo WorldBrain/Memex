@@ -36,6 +36,10 @@ export default function initSentry({
     }
 }
 
+export const setUserContext = (
+    userInfo?: { email: string; id: string } | null,
+) => raven.setUserContext(userInfo ?? undefined)
+
 export const context = (cb: () => Promise<void> | Promise<boolean> | void) =>
     raven.context(cb)
 export const captureException = (error: Error | ErrorEvent | string) =>

@@ -48,6 +48,7 @@ import {
     createAnnotation,
     updateAnnotation,
 } from 'src/annotations/annotation-save-logic'
+import { setUserContext as setSentryUserContext } from 'src/util/raven'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
 import { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
@@ -449,6 +450,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const { annotationsCache, authBG } = this.options
         this.setupRemoteEventListeners()
         const user = await authBG.getCurrentUser()
+        setSentryUserContext(user)
         this.emitMutation({
             currentUser: { $set: user },
         })
@@ -3624,7 +3626,17 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 searchQuery: { $set: event.query },
                 filteredListIds: {
-                    $set: filteredLists.map((list) => list.unifiedId),
+                    $set:
+                        event.query.trim().length > 0
+                            ? [
+                                  ...new Set(
+                                      filteredLists.flatMap((list) => [
+                                          list.unifiedId,
+                                          ...list.pathUnifiedIds, // Include ancestors of matched lists
+                                      ]),
+                                  ),
+                              ]
+                            : [],
                 },
             },
         })
@@ -4578,9 +4590,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const { annotationsCache, listsBG, authBG } = this.options
         const parentList = annotationsCache.lists.byId[event.parentListId]
-        const siblingLists = annotationsCache.getListsByParentId(
-            event.parentListId,
-        )
         const newListName = previousState.listsSidebar.listTrees.byId[
             event.parentListId
         ].newNestedListValue.trim()
@@ -4611,13 +4620,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     parentListId: parentList.localId!,
                 })
                 const user = await authBG.getCurrentUser()
-                const order = pushOrderedItem(
-                    siblingLists.map((list) => ({
-                        id: list.unifiedId,
-                        key: list.order,
-                    })),
-                    '',
-                ).create.key
                 annotationsCache.addList({
                     type: 'user-list',
                     name: newListName,
@@ -4633,7 +4635,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         parentList.localId!,
                     ],
                     isPrivate: true,
-                    order,
                 })
 
                 this.emitMutation({

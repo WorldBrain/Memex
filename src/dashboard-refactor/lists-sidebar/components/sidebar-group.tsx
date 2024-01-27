@@ -187,6 +187,7 @@ const GroupScrollContainer = styled.div<{
     overflow: scroll;
     width: calc(${(props) => props.spaceSidebarWidth});
     height: fit-content;
+    padding: 5px 0px;
     &::-webkit-scrollbar {
         display: none;
     }
