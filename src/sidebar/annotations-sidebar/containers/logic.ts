@@ -586,6 +586,7 @@ export class SidebarContainerLogic extends UILogic<
                 comment: annotationData?.comment ?? '',
                 localId: annotationData?.localId,
                 color: event.colorId,
+                body: annotationData.body,
             },
             shareOpts: {
                 shouldShare:
@@ -597,6 +598,7 @@ export class SidebarContainerLogic extends UILogic<
         this.options.annotationsCache.updateAnnotation({
             ...annotationData,
             comment: annotationData?.comment ?? '',
+            body: annotationData?.body ?? '',
             color: event.color,
             unifiedListIds: annotationData?.unifiedListIds,
         })
@@ -693,6 +695,7 @@ export class SidebarContainerLogic extends UILogic<
 
                 this.options.annotationsCache.updateAnnotation({
                     comment: annotation.comment,
+                    body: annotation.body,
                     privacyLevel: annotation.privacyLevel,
                     unifiedListIds: annotation.unifiedListIds,
                     unifiedId: annotation.unifiedId,
@@ -1971,6 +1974,32 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    /* -- START: Annotation card instance events -- */
+    setHighlightEditMode: EventHandler<'setHighlightEditMode'> = async ({
+        previousState,
+        event,
+    }) => {
+        if (event.instanceLocation === 'annotations-tab') {
+            if (previousState.activeTab !== 'annotations') {
+                this.emitMutation({
+                    activeTab: { $set: 'annotations' },
+                })
+            }
+        } else {
+            this.emitMutation({
+                activeTab: { $set: 'spaces' },
+            })
+        }
+
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    isHighlightEditing: { $set: event.isEditing },
+                },
+            },
+        })
+    }
+
     cancelAnnotationEdit: EventHandler<'cancelAnnotationEdit'> = ({
         previousState,
         event,
@@ -2003,10 +2032,24 @@ export class SidebarContainerLogic extends UILogic<
             )
         ).toString()
 
+        console.log('event#11', event)
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
                     comment: { $set: newComment },
+                },
+            },
+        })
+    }
+
+    setAnnotationEditBodyText: EventHandler<
+        'setAnnotationEditBodyText'
+    > = async ({ event }) => {
+        console.log('event#', event)
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    body: { $set: event.body },
                 },
             },
         })
@@ -2058,6 +2101,7 @@ export class SidebarContainerLogic extends UILogic<
 
         const now = event.now ?? Date.now()
         const comment = sanitizeHTMLhelper(formData.comment.trim())
+        const body = formData.body?.trim()
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
         let commentForSaving = await processCommentForImageUpload(
@@ -2083,11 +2127,14 @@ export class SidebarContainerLogic extends UILogic<
         //           },
         //       })
 
+        console.log('beforesaving', body, commentForSaving)
+
         const { remoteAnnotationId, savePromise } = await updateAnnotation({
             annotationsBG: this.options.annotationsBG,
             contentSharingBG: this.options.contentSharingBG,
             keepListsIfUnsharing: event.keepListsIfUnsharing,
             annotationData: {
+                body: body,
                 comment:
                     commentForSaving !== annotationData.comment
                         ? commentForSaving
@@ -2107,6 +2154,7 @@ export class SidebarContainerLogic extends UILogic<
             {
                 ...annotationData,
                 comment: comment,
+                body: body,
                 remoteId: remoteAnnotationId ?? undefined,
                 privacyLevel: shareOptsToPrivacyLvl({
                     shouldShare: event.shouldShare,
@@ -2432,6 +2480,7 @@ export class SidebarContainerLogic extends UILogic<
         annotationsCache.updateAnnotation(
             {
                 comment: existing.comment,
+                body: existing.body,
                 remoteId: existing.remoteId,
                 unifiedListIds: [...unifiedListIds],
                 unifiedId: event.unifiedAnnotationId,
@@ -2446,6 +2495,7 @@ export class SidebarContainerLogic extends UILogic<
         annotationsCache.updateAnnotation(
             {
                 comment: existing.comment,
+                body: existing.body,
                 remoteId: sharingState.remoteId
                     ? sharingState.remoteId.toString()
                     : existing.remoteId,

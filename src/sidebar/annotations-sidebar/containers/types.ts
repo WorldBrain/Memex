@@ -430,10 +430,18 @@ interface SidebarEvents {
             'unifiedId' | 'privacyLevel' | 'normalizedPageUrl' | 'localId'
         >
     }>
+    setAnnotationEditBodyText: AnnotationCardInstanceEvent<{
+        body: string
+        annotation: Pick<
+            UnifiedAnnotation,
+            'unifiedId' | 'privacyLevel' | 'normalizedPageUrl' | 'localId'
+        >
+    }>
     setAnnotationCardMode: AnnotationCardInstanceEvent<{
         mode: AnnotationCardMode
     }>
     setAnnotationEditMode: AnnotationCardInstanceEvent<{ isEditing: boolean }>
+    setHighlightEditMode: AnnotationCardInstanceEvent<{ isEditing: boolean }>
     cancelAnnotationEdit: AnnotationCardInstanceEvent<{ isEditing: boolean }>
     setAnnotationCommentMode: AnnotationCardInstanceEvent<{
         isTruncated: boolean
@@ -564,8 +572,10 @@ export interface AnnotationCardInstance {
     unifiedAnnotationId: UnifiedAnnotation['unifiedId']
     isCommentTruncated: boolean
     isCommentEditing: boolean
+    isHighlightEditing: boolean
     cardMode: AnnotationCardMode
     comment: string
+    body: string
     color: string
 }
 export interface SuggestionCard {

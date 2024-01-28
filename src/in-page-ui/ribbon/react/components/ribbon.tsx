@@ -2033,6 +2033,12 @@ const SupportContainer = styled.div`
     max-height: 600px;
     height: fit-content;
     overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 const SupportContainerBox = styled.div`
     max-height: 600px;

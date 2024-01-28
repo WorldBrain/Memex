@@ -3622,6 +3622,9 @@ export class AnnotationsSidebar extends React.Component<
                                 AnnotationPrivacyLevels.SHARED_PROTECTED,
                             ].includes(annot.privacyLevel)}
                             isEditing={instanceState.isCommentEditing}
+                            isEditingHighlight={
+                                instanceState.isHighlightEditing
+                            }
                             isDeleting={
                                 instanceState.cardMode === 'delete-confirm'
                             }

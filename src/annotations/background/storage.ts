@@ -146,6 +146,7 @@ export default class AnnotationStorage extends StorageModule {
                     {
                         comment: '$comment:string',
                         color: '$color:string',
+                        body: '$body:string',
                         lastEdited: '$lastEdited:any',
                     },
                 ],
@@ -622,6 +623,7 @@ export default class AnnotationStorage extends StorageModule {
         url: string,
         comment: string,
         color: string,
+        body: string,
         lastEdited = new Date(),
         userId?: string,
     ) {
@@ -650,7 +652,7 @@ export default class AnnotationStorage extends StorageModule {
                 const annotationData = {
                     annotationId: annotationDataForPKMSyncUpdate.url,
                     pageTitle: annotationDataForPKMSyncUpdate.pageTitle,
-                    body: annotationDataForPKMSyncUpdate.body,
+                    body: body ?? annotationDataForPKMSyncUpdate.body,
                     createdWhen: annotationDataForPKMSyncUpdate.createdWhen,
                     comment,
                     pageCreatedWhen: pageDate,
@@ -676,7 +678,7 @@ export default class AnnotationStorage extends StorageModule {
                     creatorId: userId,
                     contentType: 'annotation',
                     fullHTML:
-                        (annotationDataForPKMSyncUpdate.body ?? '') +
+                        (annotationData.body ?? '') +
                         (comment ? ' ' + comment : ''),
                 }
 
@@ -687,10 +689,12 @@ export default class AnnotationStorage extends StorageModule {
             }
         } catch (e) {}
 
+        console.log('editbodyyy', body)
         return this.operation('editAnnotation', {
             url,
             comment,
             color,
+            body,
             lastEdited,
         })
     }

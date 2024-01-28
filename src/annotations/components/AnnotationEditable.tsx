@@ -59,6 +59,7 @@ export interface AnnotationProps {
     listIdToFilterOut?: number
     createdWhen: Date | number
     isEditing?: boolean
+    isEditingHighlight?: boolean
     isDeleting?: boolean
     initShowSpacePicker?: ListPickerShowState
     hoverState: NoteResultHoverState
@@ -373,32 +374,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         } = this.props
 
         const actionsBox =
-            !this.props.isEditing && this.state.hoverCard ? (
+            !this.props.isEditingHighlight && this.state.hoverCard ? (
                 <HighlightActionsBox>
-                    {this.state.needsTruncation && (
-                        <TooltipBox
-                            tooltipText={
-                                this.state.isTruncatedHighlight ||
-                                this.state.isTruncatedNote
-                                    ? 'Expand Note'
-                                    : 'Show Less'
-                            }
-                            placement="bottom"
-                        >
-                            <Icon
-                                onClick={() => this.toggleTextTruncation()}
-                                filePath={
-                                    this.state.isTruncatedHighlight ||
-                                    this.state.isTruncatedNote
-                                        ? 'expand'
-                                        : 'compress'
-                                }
-                                heightAndWidth={'18px'}
-                                borderColor={'greyScale3'}
-                                background={'greyScale1'}
-                            />
-                        </TooltipBox>
-                    )}
                     {onGoToAnnotation && (
                         <TooltipBox
                             tooltipText="Open in Page"
@@ -413,7 +390,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             />
                         </TooltipBox>
                     )}
-                    {footerDeps?.onEditIconClick &&
+                    {footerDeps?.onEditHighlightIconClick &&
                     this.props.currentUserId === this.props.creatorId ? (
                         <TooltipBox
                             tooltipText={
@@ -426,7 +403,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             placement="bottom"
                         >
                             <Icon
-                                onClick={footerDeps.onEditIconClick}
+                                onClick={footerDeps.onEditHighlightIconClick}
                                 icon={'edit'}
                                 heightAndWidth={'18px'}
                                 borderColor={'greyScale3'}
@@ -476,15 +453,45 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         }
                     />
                 )}
-                <Markdown
-                    imageSupport={this.props.imageSupport}
-                    isHighlight
-                    pageUrl={this.props.pageUrl}
-                >
-                    {this.state.isTruncatedHighlight
-                        ? this.state.truncatedTextHighlight
-                        : this.props.body}
-                </Markdown>
+                {this.props.isEditingHighlight ? (
+                    <HighlightEditContainer
+                        hasHighlight={this.theme.hasHighlight}
+                        onDoubleClick={
+                            this.props.isEditingHighlight
+                                ? undefined
+                                : this.props.annotationFooterDependencies
+                                      ?.onEditHighlightIconClick
+                        }
+                    >
+                        <AnnotationEdit
+                            ref={this.annotEditRef}
+                            {...this.props.annotationEditDependencies}
+                            rows={2}
+                            editorHeight={this.state.editorHeight}
+                            isShared={this.props.isShared}
+                            isBulkShareProtected={
+                                this.props.isBulkShareProtected
+                            }
+                            getYoutubePlayer={this.props.getYoutubePlayer}
+                            imageSupport={this.props.imageSupport}
+                            comment={this.props.body}
+                            onCommentChange={
+                                this.props.annotationEditDependencies
+                                    .onBodyChange
+                            }
+                        />
+                    </HighlightEditContainer>
+                ) : (
+                    <Markdown
+                        imageSupport={this.props.imageSupport}
+                        isHighlight
+                        pageUrl={this.props.pageUrl}
+                    >
+                        {this.state.isTruncatedHighlight
+                            ? this.state.truncatedTextHighlight
+                            : this.props.body}
+                    </Markdown>
+                )}
             </HighlightStyled>
         )
     }
@@ -588,6 +595,35 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             annotationFooterDependencies,
         } = this.props
 
+        const actionsBox =
+            !this.props.isEditingHighlight && this.state.hoverCard ? (
+                <HighlightActionsBox>
+                    {annotationFooterDependencies?.onEditIconClick &&
+                    this.props.currentUserId === this.props.creatorId ? (
+                        <TooltipBox
+                            tooltipText={
+                                <span>
+                                    <strong>Add/Edit Note</strong>
+                                    <br />
+                                    or double-click card
+                                </span>
+                            }
+                            placement="bottom"
+                        >
+                            <Icon
+                                onClick={
+                                    annotationFooterDependencies.onEditIconClick
+                                }
+                                icon={'edit'}
+                                heightAndWidth={'18px'}
+                                borderColor={'greyScale3'}
+                                background={'greyScale1'}
+                            />
+                        </TooltipBox>
+                    ) : undefined}
+                </HighlightActionsBox>
+            ) : null
+
         if (isEditing) {
             return (
                 <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
@@ -610,7 +646,16 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
 
         return (
-            <CommentBox>
+            <CommentBox
+                onDoubleClick={
+                    this.props.isEditing
+                        ? undefined
+                        : this.props.annotationFooterDependencies
+                              ?.onEditIconClick
+                }
+            >
+                <ActionBox>{actionsBox}</ActionBox>
+
                 {!this.theme.hasHighlight &&
                     this.state.hoverCard &&
                     this.props.currentUserId === this.props.creatorId && (
@@ -752,6 +797,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         const {
             isShared,
             isEditing,
+            isEditingHighlight,
             isDeleting,
             isBulkShareProtected,
             annotationEditDependencies: editDeps,
@@ -767,7 +813,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             this.hasSharedLists,
         )
 
-        if ((!isEditing && !isDeleting) || footerDeps == null) {
+        if (
+            (!isEditing && !isEditingHighlight && !isDeleting) ||
+            footerDeps == null
+        ) {
             return (
                 <DefaultFooterStyled>
                     {footerDeps != null && (
@@ -1040,12 +1089,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     >
                         <AnnotationStyled>
                             <ContentContainer
-                                onDoubleClick={
-                                    this.props.isEditing
-                                        ? undefined
-                                        : annotationFooterDependencies?.onEditIconClick
+                                isEditMode={
+                                    this.props.isEditing ||
+                                    this.props.isEditingHighlight
                                 }
-                                isEditMode={this.props.isEditing}
                                 onMouseEnter={() =>
                                     this.setState({
                                         hoverEditArea: true,
@@ -1161,6 +1208,17 @@ const ListCounter = styled.div<{ isShared: boolean }>`
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
     margin-top: ${(props) => !props.hasHighlight && '10px'};
+    width: 100%;
+    position: relative;
+`
+const HighlightEditContainer = styled.div<{ hasHighlight: boolean }>`
+    margin-top: ${(props) => !props.hasHighlight && '10px'};
+    width: fill-available;
+    position: relative;
+
+    & > div {
+        padding: 0px;
+    }
 `
 
 const AnnotationBox = styled(Margin)<{ zIndex: number }>`
@@ -1275,6 +1333,7 @@ const CommentBox = styled.div`
     overflow: visible;
     flex-direction: row;
     display: flex;
+    position: relative;
 
     /* &:first-child {
         padding: 15px 20px 20px;

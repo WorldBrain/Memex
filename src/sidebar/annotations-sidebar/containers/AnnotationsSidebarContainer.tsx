@@ -236,6 +236,12 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     isEditing: !annotationCardInstance.isCommentEditing,
                 }),
+            onEditHighlightIconClick: () =>
+                this.processEvent('setHighlightEditMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    isEditing: !annotationCardInstance.isHighlightEditing,
+                }),
             onDeleteIconClick: () =>
                 this.processEvent('setAnnotationCardMode', {
                     instanceLocation,
@@ -303,6 +309,13 @@ export class AnnotationsSidebarContainer<
                     instanceLocation,
                     unifiedAnnotationId,
                     comment,
+                    annotation,
+                }),
+            onBodyChange: (body) =>
+                this.processEvent('setAnnotationEditBodyText', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    body,
                     annotation,
                 }),
             onEditConfirm: (showExternalConfirmations) => (

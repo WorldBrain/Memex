@@ -671,11 +671,14 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         //     updates.color = annotColorObject
         // }
 
+        console.log('updatesbody', updates.body)
+
         const next: UnifiedAnnotation = {
             ...previous,
             privacyLevel,
             unifiedListIds: nextUnifiedListIds,
             comment: updates.comment ?? previous.comment,
+            body: updates.body ?? previous.body,
             remoteId: updates.remoteId ?? previous.remoteId,
             lastEdited: opts?.updateLastEditedTimestamp
                 ? opts?.now ?? Date.now()
