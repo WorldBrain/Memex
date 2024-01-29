@@ -208,7 +208,7 @@ const SidebarItem = styled.div<Props>`
     display: flex;
     width: fill-available;
     width: -moz-available;
-    min-width: fit-content;
+    min-width: 10%;
     flex-direction: row;
     padding-right: 5px;
     width: calc(${(props) => props.spaceSidebarWidth} - 24px);
