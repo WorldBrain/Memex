@@ -965,6 +965,7 @@ export async function main(
             await execute({
                 syncSettingsBG,
                 requestSearcher: remoteFunction('search'),
+                annotationsFunctions,
             })
         },
     }
@@ -1295,7 +1296,8 @@ export async function main(
         shouldIncludeSearchInjection(
             window.location.hostname,
             window.location.href,
-        )
+        ) ||
+        window.location.href.includes('youtube.com')
     ) {
         await contentScriptRegistry.registerSearchInjectionScript(
             searchInjectionMain,
@@ -1577,16 +1579,16 @@ export async function injectCustomUIperPage(
     pageInfo,
     inPageUI,
 ) {
-    if (window.location.hostname === 'www.youtube.com') {
-        const existingButtons = document.getElementsByClassName(
-            'memex-youtube-buttons',
-        )[0]
+    // if (window.location.hostname === 'www.youtube.com') {
+    //     const existingButtons = document.getElementsByClassName(
+    //         'memex-youtube-buttons',
+    //     )[0]
 
-        if (existingButtons) {
-            existingButtons.remove()
-        }
-        loadYoutubeButtons(annotationsFunctions)
-    }
+    //     if (existingButtons) {
+    //         existingButtons.remove()
+    //     }
+    //     loadYoutubeButtons(annotationsFunctions)
+    // }
 
     const checkIfSubstackHeader = () => {
         const headerLinks = document.head.getElementsByTagName('link')

@@ -49,10 +49,7 @@ export interface HighlightDependencies {
 export interface SearchInjectionDependencies {
     requestSearcher: any
     syncSettingsBG: RemoteSyncSettingsInterface
-}
-
-export interface SearchInjectionDependencies {
-    requestSearcher: any
+    annotationsFunctions: any
 }
 
 export type HighlightsScriptMain = (

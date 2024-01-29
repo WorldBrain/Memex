@@ -66,7 +66,7 @@ class Root extends React.Component<RootProps, RootState> {
     }
 }
 
-export const handleRender = async (
+export const handleRenderSearchInjection = async (
     query,
     requestSearcher,
     //{ docs, totalCount },
