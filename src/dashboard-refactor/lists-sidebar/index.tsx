@@ -257,11 +257,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         }
                         return (
                             <>
-                                {index === 0 &&
-                                    this.renderReorderLine(
-                                        list.unifiedId +
-                                            LIST_REORDER_PRE_EL_POSTFIX,
-                                    )}
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
