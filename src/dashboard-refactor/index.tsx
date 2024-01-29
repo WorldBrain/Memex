@@ -1495,13 +1495,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 bottomLeft: false,
                                 topLeft: false,
                             }}
-                            onResizeStop={(
-                                e,
-                                direction,
-                                ref,
-                                delta,
-                                position,
-                            ) => {
+                            onResize={(e, direction, ref, delta, position) => {
                                 this.processEvent('setSpaceSidebarWidth', {
                                     width: ref.style.width,
                                 })
