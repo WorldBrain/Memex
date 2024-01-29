@@ -1,3 +1,4 @@
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 
 export type SyncSettingValue =
@@ -87,7 +88,7 @@ export interface SyncSettingsByFeature {
         ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
     }
     highlightColors: {
-        highlightColors: [] // TODO: Fully type
+        highlightColors: HighlightColor[]
     }
 }
 
