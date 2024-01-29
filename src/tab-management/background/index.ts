@@ -141,7 +141,7 @@ export default class TabManagementBackground {
         try {
             await runInTab<InPageUIContentScriptRemoteInterface>(tabId, {
                 quietConsole: true,
-            }).confirmTabScriptLoaded()
+            }).ping()
         } catch (err) {
             // If the ping fails, the content script is not yet set up
             const _tab = await this.options.browserAPIs.tabs.get(tabId)
