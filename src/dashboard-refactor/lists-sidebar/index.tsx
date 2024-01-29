@@ -257,11 +257,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         }
                         return (
                             <>
-                                {index === 0 &&
-                                    this.renderReorderLine(
-                                        list.unifiedId +
-                                            LIST_REORDER_PRE_EL_POSTFIX,
-                                    )}
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
                                         this.setSidebarItemRefs(
@@ -378,23 +373,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     renderRightSideIcon={() => {
                                         return (
                                             <RightSideIconBox>
-                                                <TooltipBox
-                                                    placement={'bottom'}
-                                                    tooltipText={
-                                                        'Add Sub-Space'
-                                                    }
-                                                >
-                                                    <Icon
-                                                        icon="plus"
-                                                        heightAndWidth="18px"
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            this.props.onNestedListInputToggle(
-                                                                list.unifiedId,
-                                                            )
-                                                        }}
-                                                    />
-                                                </TooltipBox>
                                                 <SpaceContextMenuBtn
                                                     {...this.props.initContextMenuBtnProps(
                                                         list.unifiedId,
@@ -419,33 +397,57 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             </RightSideIconBox>
                                         )
                                     }}
-                                    renderEditIcon={() => (
-                                        <SpaceEditMenuBtn
-                                            {...this.props.initContextMenuBtnProps(
-                                                list.unifiedId,
-                                            )}
-                                            listData={list}
-                                            isCreator={
-                                                list.creator?.id ===
-                                                this.props.currentUser?.id
-                                            }
-                                            isMenuDisplayed={
-                                                this.props.editMenuListId ===
-                                                list.unifiedId
-                                            }
-                                            errorMessage={
-                                                this.props.editListErrorMessage
-                                            }
-                                            onConfirmSpaceNameEdit={(
-                                                newName,
-                                            ) => {
-                                                this.props.onConfirmListEdit(
-                                                    list.unifiedId,
-                                                    newName,
-                                                )
-                                            }}
-                                        />
-                                    )}
+                                    renderEditIcon={() => {
+                                        return (
+                                            <RightSideIconBox>
+                                                <TooltipBox
+                                                    placement={'bottom'}
+                                                    tooltipText={
+                                                        'Add Sub-Space'
+                                                    }
+                                                >
+                                                    <Icon
+                                                        icon="plus"
+                                                        heightAndWidth="18px"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            this.props.onNestedListInputToggle(
+                                                                list.unifiedId,
+                                                            )
+                                                        }}
+                                                    />
+                                                </TooltipBox>
+                                                <SpaceEditMenuBtn
+                                                    {...this.props.initContextMenuBtnProps(
+                                                        list.unifiedId,
+                                                    )}
+                                                    listData={list}
+                                                    isCreator={
+                                                        list.creator?.id ===
+                                                        this.props.currentUser
+                                                            ?.id
+                                                    }
+                                                    isMenuDisplayed={
+                                                        this.props
+                                                            .editMenuListId ===
+                                                        list.unifiedId
+                                                    }
+                                                    errorMessage={
+                                                        this.props
+                                                            .editListErrorMessage
+                                                    }
+                                                    onConfirmSpaceNameEdit={(
+                                                        newName,
+                                                    ) => {
+                                                        this.props.onConfirmListEdit(
+                                                            list.unifiedId,
+                                                            newName,
+                                                        )
+                                                    }}
+                                                />
+                                            </RightSideIconBox>
+                                        )
+                                    }}
                                 />
                                 {this.renderReorderLine(
                                     list.unifiedId +

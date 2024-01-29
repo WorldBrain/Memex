@@ -224,40 +224,6 @@ export class PortBasedRPCManager {
         ensuringConnection.resolve()
     }
 
-    async ensureConnectionToTab(options: {
-        tabId: number
-        timeout: number
-        quietConsole?: boolean
-    }) {
-        if (this._ensuringConnection) {
-            return this._ensuringConnection
-        }
-
-        const ensuringConnection = createResolvable()
-        this._ensuringConnection = ensuringConnection
-        while (true) {
-            const sleeping = sleepPromise(options.timeout)
-            const result = await Promise.race([
-                this.postMessageRequestToTab(
-                    options.tabId,
-                    'confirmTabScriptLoaded',
-                    [],
-                    { skipEnsure: true, quietConsole: options.quietConsole },
-                ).then(() => 'success' as 'success'),
-                sleeping.then(() => 'timeout' as 'timeout'),
-            ]).catch((e) => 'error' as 'error')
-
-            if (result === 'success') {
-                break
-            }
-            if (result === 'error') {
-                await sleeping
-            }
-        }
-        delete this._ensuringConnection
-        ensuringConnection.resolve()
-    }
-
     registerListenerForIncomingConnections() {
         const connected = (port: Runtime.Port) => {
             this.log(
@@ -300,21 +266,13 @@ export class PortBasedRPCManager {
         return this.postMessageToRPC(port, name, payload)
     }
 
-    async postMessageRequestToTab(
+    public postMessageRequestToTab(
         tabId: number,
         name: string,
         payload: any,
-        options?: { quietConsole?: boolean; skipEnsure?: boolean },
+        quietConsole?: boolean,
     ) {
-        if (!options?.skipEnsure) {
-            await this.ensureConnectionToTab({
-                timeout: 500,
-                tabId,
-                quietConsole: options?.quietConsole,
-            })
-        }
-
-        const port = this.getTabPort(tabId, name, options?.quietConsole)
+        const port = this.getTabPort(tabId, name, quietConsole)
         return this.postMessageToRPC(port, name, payload)
     }
 
@@ -449,38 +407,39 @@ export class PortBasedRPCManager {
 
                 const tab = filterTabUrl(port?.sender?.tab)
                 const functionReturn = f({ tab }, ...payload)
-                try {
-                    const promiseReturn = await functionReturn
-                    port.postMessage(
-                        PortBasedRPCManager.createRPCResponseObject({
-                            packet,
-                            payload: promiseReturn,
-                        }),
-                    )
-                    this.log(
-                        `RPC::messageResponder::PortName(${port.name}):: RETURNED Function [${name}]`,
-                    )
-                } catch (err) {
-                    console.error(err)
-                    if (err.message.includes('disconnected port')) {
-                        this.log(
-                            `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}] -- Port Disconnected`,
-                        )
-                    } else {
+                Promise.resolve(functionReturn)
+                    .then((promiseReturn) => {
                         port.postMessage(
                             PortBasedRPCManager.createRPCResponseObject({
                                 packet,
-                                payload: null,
-                                error: err.message,
-                                serializedError: serializeError(err),
+                                payload: promiseReturn,
                             }),
                         )
                         this.log(
-                            `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
+                            `RPC::messageResponder::PortName(${port.name}):: RETURNED Function [${name}]`,
                         )
-                    }
-                    throw new RpcError(err.message)
-                }
+                    })
+                    .catch((err) => {
+                        console.error(err)
+                        if (err.message.includes('disconnected port')) {
+                            this.log(
+                                `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}] -- Port Disconnected`,
+                            )
+                        } else {
+                            port.postMessage(
+                                PortBasedRPCManager.createRPCResponseObject({
+                                    packet,
+                                    payload: null,
+                                    error: err.message,
+                                    serializedError: serializeError(err),
+                                }),
+                            )
+                            this.log(
+                                `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
+                            )
+                        }
+                        throw new RpcError(err.message)
+                    })
             }
         }
     }
