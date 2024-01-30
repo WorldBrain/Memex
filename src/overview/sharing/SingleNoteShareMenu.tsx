@@ -191,8 +191,10 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     closeComponent={() =>
                         this.setState({ showAutoAddMenu: false })
                     }
-                    offsetY={10}
+                    offsetY={-100}
+                    offsetX={-100}
                     instaClose
+                    strategy="fixed"
                 >
                     <AutoAddDefaultContainer>
                         <DefaultCheckBoxContainer>
