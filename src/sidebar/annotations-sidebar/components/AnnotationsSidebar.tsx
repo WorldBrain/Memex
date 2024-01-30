@@ -425,7 +425,7 @@ export class AnnotationsSidebar extends React.Component<
             console.error('Could not load theme, falling back to dark mode')
         }
         this.setState({ themeVariant })
-        await this.props.getHighlightColorSettings()
+        this.props.getHighlightColorSettings()
     }
 
     async componentDidUpdate(

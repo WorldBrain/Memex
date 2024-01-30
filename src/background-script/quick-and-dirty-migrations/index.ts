@@ -28,6 +28,10 @@ import {
     DEFAULT_KEY,
     DEFAULT_SPACE_BETWEEN,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
+import type { SyncSettingsByFeature } from 'src/sync-settings/background/types'
+import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 
 export interface MigrationProps {
     db: Dexie
@@ -61,6 +65,44 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This exists as the main default highlight color was living in local storage while we had since moved custom
+     * highlight colors to live in sync settings (DB coll). This moves the local storage default highlight color to
+     * be an additional entry in the sync settings highlight colors, or creates them if not already present in sync settings.
+     */
+    [MIGRATION_PREFIX +
+    'reconcile-highlight-colors-in-synced-settings-storage-01']: async ({
+        bgModules,
+        localStorage,
+    }) => {
+        const {
+            [HIGHLIGHT_COLOR_KEY]: defaultHighlightColor,
+        } = await localStorage.get({
+            [HIGHLIGHT_COLOR_KEY]: DEFAULT_HIGHLIGHT_COLOR,
+        })
+
+        let syncedHighlightColors = (
+            await bgModules.syncSettings.get(
+                SETTING_NAMES.highlightColors.highlightColors,
+            )
+        )[
+            SETTING_NAMES.highlightColors.highlightColors
+        ] as SyncSettingsByFeature['highlightColors']['highlightColors']
+
+        if (!syncedHighlightColors) {
+            syncedHighlightColors = HIGHLIGHT_COLORS_DEFAULT
+        } else {
+            syncedHighlightColors.unshift({
+                ...HIGHLIGHT_COLORS_DEFAULT[0],
+                color: defaultHighlightColor,
+            })
+        }
+
+        await bgModules.syncSettings.set({
+            [SETTING_NAMES.highlightColors
+                .highlightColors]: syncedHighlightColors,
+        })
+    },
     /*
      * This removes then recreates all the backupChanges docs for collections that have an auto-incrementing PK.
      * We had a bug in our incremental backup implementation where it was creating backupChanges docs via a Dexie hook,
