@@ -101,7 +101,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                         })
                     }}
                     strategy={'fixed'}
-                    width={'200px'}
+                    width={'fit-content'}
                     instaClose
                 >
                     {this.props.spacePicker()}
