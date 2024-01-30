@@ -307,8 +307,6 @@ export async function main(
                 now: () => data.createdWhen,
             })
 
-            console.log('shouuldshare', data.shouldShare)
-
             const syncSettings = createSyncSettingsStore({ syncSettingsBG })
 
             const shouldShareSettings = await syncSettings.extension.get(
