@@ -3899,12 +3899,16 @@ export class DashboardLogic extends UILogic<State, Events> {
                     )
                     return
                 }
+
+                console.log('dropped', action, event.listId)
+
                 if (event.listId.endsWith(LIST_REORDER_POST_EL_POSTFIX)) {
                     const cleanedListId = event.listId.slice(
                         0,
                         event.listId.length -
                             LIST_REORDER_POST_EL_POSTFIX.length,
                     )
+                    console.log('droppedonline', action, cleanedListId)
                     await this.handleDropOnReorderLine(
                         action,
                         cleanedListId,

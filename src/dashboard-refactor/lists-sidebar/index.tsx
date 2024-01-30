@@ -818,7 +818,7 @@ const ReorderLine = styled.div<{
         css`
             display: none;
 
-            &:first-item {
+            &:first-child {
                 display: flex;
             }
         `}
