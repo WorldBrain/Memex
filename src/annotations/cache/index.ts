@@ -68,7 +68,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
         deps.events = deps.events ?? new EventEmitter()
 
-        this.initializeAsync()
+        this.initializeAsync() // TODO: Move this to async init logic in the cache utils
     }
 
     async initializeAsync() {

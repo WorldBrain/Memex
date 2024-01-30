@@ -543,9 +543,7 @@ export class SidebarContainerLogic extends UILogic<
         if (previousState.highlightColors) {
             highlightColorJSON = JSON.parse(previousState.highlightColors)
         } else {
-            const highlightColors = await this.syncSettings.highlightColors.get(
-                'highlightColors',
-            )
+            const highlightColors = await this.fetchHighlightColors()
 
             if (highlightColors) {
                 highlightColorJSON = highlightColors
@@ -564,6 +562,27 @@ export class SidebarContainerLogic extends UILogic<
 
         return highlightColorJSON
     }
+
+    async fetchHighlightColors() {
+        let highlightColorJSON
+
+        const highlightColors = await this.syncSettings.highlightColors.get(
+            'highlightColors',
+        )
+
+        if (highlightColors) {
+            highlightColorJSON = highlightColors
+        } else {
+            highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+            await this.syncSettings.highlightColors.set(
+                'highlightColors',
+                highlightColorJSON,
+            )
+        }
+
+        return highlightColorJSON
+    }
+
     saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
         event,
         previousState,
@@ -833,6 +852,12 @@ export class SidebarContainerLogic extends UILogic<
         })
 
         await this.checkRabbitHoleOnboardingStage()
+
+        const highlightColorJSON = await this.fetchHighlightColors()
+
+        this.emitMutation({
+            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
+        })
     }
 
     private checkRabbitHoleOnboardingStage = async () => {
