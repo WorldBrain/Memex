@@ -216,7 +216,7 @@ const SidebarItem = styled.div<Props>`
     /* margin: 0px 12px; */
     position: relative;
     scroll-margin: 20px;
-    padding-left: ${({ indentSteps }: Props) => indentSteps * 10}px;
+    padding-left: ${({ indentSteps }: Props) => indentSteps * 15}px;
     display: flex;
     width: fill-available;
     width: -moz-available;
