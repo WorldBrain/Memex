@@ -14,7 +14,6 @@ export interface Props {
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick: React.MouseEventHandler
     spaceSidebarWidth: string
-    zIndex: number
 }
 
 export default class ListsSidebarGroup extends PureComponent<Props> {
@@ -46,7 +45,7 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
 
     render() {
         return (
-            <Container zIndex={this.props.zIndex}>
+            <Container>
                 <GroupHeaderContainer
                     spaceSidebarWidth={this.props.spaceSidebarWidth}
                     onClick={this.props.onExpandBtnClick}

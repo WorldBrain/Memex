@@ -393,6 +393,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 selectedListId: null,
                 themeVariant: null,
                 draggedListId: null,
+                someListIsDragging: false,
             },
             syncMenu: {
                 isDisplayed: false,

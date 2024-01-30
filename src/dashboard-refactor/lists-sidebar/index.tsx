@@ -558,7 +558,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         {...this.props.ownListsGroup}
                         listsCount={this.props.ownListsGroup.listData.length}
                         spaceSidebarWidth={this.props.spaceSidebarWidth}
-                        zIndex={3}
                     >
                         {this.props.isAddListInputShown && (
                             <SidebarItemInput
@@ -574,7 +573,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         listsCount={
                             this.props.followedListsGroup.listData.length
                         }
-                        zIndex={2}
                     >
                         {this.props.followedListsGroup.listData.map((list) => (
                             <FollowedListSidebarItem
@@ -592,7 +590,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                     <ListsSidebarGroup
                         {...this.props.joinedListsGroup}
                         listsCount={this.props.joinedListsGroup.listData.length}
-                        zIndex={1}
                     >
                         {this.props.joinedListsGroup.listData.map((list) => (
                             <DropTargetSidebarItem
