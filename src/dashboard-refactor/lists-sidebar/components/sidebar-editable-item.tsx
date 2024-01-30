@@ -120,6 +120,7 @@ const EditableListTitle = styled.input`
     background-color: ${(props) => props.theme.colors.greyScale2};
     flex: 1;
     width: -webkit-fill-available;
+    width: -moz-available;
 
     &:focus-within {
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};

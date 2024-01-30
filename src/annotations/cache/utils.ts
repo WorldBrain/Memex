@@ -495,7 +495,7 @@ export function siftListsIntoCategories(
         const ownership = deriveListOwnershipStatus(list, currentUser)
         if (list.type === 'page-link') {
             categories.pageLinkLists.push(list)
-        } else if (ownership === 'Creator') {
+        } else if (ownership === 'Creator' && list.type === 'user-list') {
             categories.myLists.push(list)
         } else if (ownership === 'Follower' && !list.isForeignList) {
             categories.followedLists.push(list as any)

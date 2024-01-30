@@ -94,11 +94,13 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
 
 const Container = styled.div<{
     spaceSidebarWidth: number
+    zIndex: number
 }>`
     max-width: ${(props) => props.spaceSidebarWidth};
     position: relative;
     user-select: none;
     cursor: pointer;
+    z-index: ${(props) => props.zIndex};
 
     & * {
         cursor: pointer;
