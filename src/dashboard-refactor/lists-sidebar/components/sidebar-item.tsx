@@ -12,6 +12,7 @@ export interface Props {
     isShared?: boolean
     indentSteps?: number
     alwaysShowRightSideIcon?: boolean
+    hasChildren?: boolean
     dropReceivingState?: DropReceivingState
     onDragStart?: React.DragEventHandler
     onDragEnd?: React.DragEventHandler
@@ -73,39 +74,34 @@ export default class ListsSidebarItem extends React.PureComponent<
                     })
                 }}
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
+                onDragEnter={this.handleDragEnter}
+                onDragLeave={this.props.dropReceivingState?.onDragLeave}
+                onDragOver={(e) => {
+                    e.preventDefault()
+                    e.stopPropagation()
+                }}
+                onDrop={this.handleDrop}
+                onClick={this.props.onClick}
             >
                 <SidebarItem
                     ref={this.props.sidebarItemRef}
                     spaceSidebarWidth={this.props.spaceSidebarWidth}
                     indentSteps={this.props.indentSteps ?? 0}
-                    onDragEnter={this.handleDragEnter}
                     isSelected={this.props.isSelected}
                     dropReceivingState={this.props.dropReceivingState}
-                    onDragLeave={this.props.dropReceivingState?.onDragLeave}
-                    onDragOver={(e) => {
-                        e.preventDefault()
-                        e.stopPropagation()
-                    }} // Needed to allow the `onDrop` event to fire
-                    onDrop={this.handleDrop}
-                    onMouseEnter={() => this.setState({ isHovering: true })}
-                    onMouseLeave={() => {
-                        if (!this.props.areAnyMenusDisplayed) {
-                            this.setState({
-                                isHovering: false,
-                                canDisableHover: true,
-                            })
-                        }
-                        this.setState({
-                            canDisableHover: true,
-                        })
-                    }}
                 >
-                    <LeftSideIconContainer>
-                        {this.props.renderLeftSideIcon?.()}
+                    <LeftSideIconContainer
+                        alwaysShowRightSideIcon={
+                            this.props.alwaysShowRightSideIcon
+                        }
+                    >
+                        {(this.state.isHovering ||
+                            this.props.hasChildren ||
+                            this.props.alwaysShowRightSideIcon) &&
+                            this.props.renderLeftSideIcon?.()}
                     </LeftSideIconContainer>
                     <SidebarItemClickContainer
                         spaceSidebarWidth={this.props.spaceSidebarWidth}
-                        onClick={this.props.onClick}
                     >
                         <TitleBox
                             onDragStart={this.props.onDragStart}
@@ -120,7 +116,11 @@ export default class ListsSidebarItem extends React.PureComponent<
                     {(this.props.isShared ||
                         this.state.isHovering ||
                         this.props.forceRightSidePermanentDisplay) && (
-                        <RightSideActionBar>
+                        <RightSideActionBar
+                            alwaysShowRightSideIcon={
+                                this.props.alwaysShowRightSideIcon
+                            }
+                        >
                             <IconBox {...this.props} {...this.state}>
                                 {this.props.renderEditIcon?.()}
                             </IconBox>
@@ -136,17 +136,23 @@ export default class ListsSidebarItem extends React.PureComponent<
     }
 }
 
-const LeftSideIconContainer = styled.div`
+const LeftSideIconContainer = styled.div<{ alwaysShowRightSideIcon: boolean }>`
     display: flex;
     z-index: 11;
     margin-left: 5px;
+    width: 20px;
+
+    ${(props) =>
+        props.alwaysShowRightSideIcon &&
+        css`
+            padding-right: 15px;
+        `}
 `
 
-const RightSideActionBar = styled.div`
+const RightSideActionBar = styled.div<{ alwaysShowRightSideIcon: boolean }>`
     position: absolute;
     padding-right: 10px;
     right: 0px;
-    border-radius: 0 5px 5px 0;
     display: flex;
     z-index: 10;
     backdrop-filter: blur(5px);
@@ -154,6 +160,12 @@ const RightSideActionBar = styled.div`
     height: -moz-available;
     align-items: center;
     justify-content: flex-end;
+
+    ${(props) =>
+        props.alwaysShowRightSideIcon &&
+        css`
+            backdrop-filter: none;
+        `}
 `
 
 const SidebarItemClickContainer = styled.div<{ spaceSidebarWidth: string }>`
@@ -162,7 +174,7 @@ const SidebarItemClickContainer = styled.div<{ spaceSidebarWidth: string }>`
     height: 100%;
     align-items: center;
     justify-content: flex-start;
-    padding-left: 10px;
+    padding-left: 5px;
     padding-right: 10px;
     grid-gap: 10px;
     overflow: hidden;
@@ -180,6 +192,7 @@ const Container = styled.div<{
     z-index: ${(props) => (props.isHovering ? 2147483647 : 0)};
     width: fit-content;
     /* max-width: calc(${(props) => props.spaceSidebarWidth} - 34px); */
+    width: calc(${(props) => props.spaceSidebarWidth} - 0px)
 `
 
 const Name = styled.div`
@@ -200,18 +213,17 @@ const TitleBox = styled.div<Props>`
 
 const SidebarItem = styled.div<Props>`
     height: 40px;
-    margin: 0px 12px;
+    /* margin: 0px 12px; */
     position: relative;
     scroll-margin: 20px;
-    margin-left: ${({ indentSteps }: Props) => (indentSteps + 1) * 10}px;
-    border-radius: 5px;
+    padding-left: ${({ indentSteps }: Props) => indentSteps * 10}px;
     display: flex;
     width: fill-available;
     width: -moz-available;
     min-width: 10%;
     flex-direction: row;
     padding-right: 5px;
-    width: calc(${(props) => props.spaceSidebarWidth} - 24px);
+    /* width: calc(${(props) => props.spaceSidebarWidth} - 0px); */
     justify-content: space-between;
     align-items: center;
     background-color: ${(props) =>
@@ -240,7 +252,7 @@ const SidebarItem = styled.div<Props>`
             : `not-allowed`};
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        background: ${(props) => props.theme.colors.greyScale1_5};
 
         ${({ isSelected }: Props) =>
             isSelected &&

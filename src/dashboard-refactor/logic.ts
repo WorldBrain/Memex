@@ -3814,13 +3814,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
         this.emitMutation({
-            listsSidebar: { draggedListId: { $set: event.listId } },
+            listsSidebar: {
+                draggedListId: { $set: event.listId },
+                someListIsDragging: { $set: true },
+            },
         })
     }
 
     dropList: EventHandler<'dropList'> = async () => {
         this.emitMutation({
-            listsSidebar: { draggedListId: { $set: null } },
+            listsSidebar: {
+                draggedListId: { $set: null },
+                someListIsDragging: { $set: false },
+            },
         })
     }
 
@@ -3838,6 +3844,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
         this.emitMutation({
             searchResults: { draggedPageId: { $set: event.pageId } },
+        })
+        this.emitMutation({
+            listsSidebar: {
+                someListIsDragging: { $set: false },
+            },
         })
     }
 

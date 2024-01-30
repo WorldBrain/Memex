@@ -27,6 +27,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     spaceSidebarWidth: string
 
     draggedListId: string | null
+    someListIsDragging: boolean
     inboxUnreadCount: number
     dragOverListId?: string
     editingListId?: string
