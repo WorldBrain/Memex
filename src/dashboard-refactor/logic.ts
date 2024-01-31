@@ -3994,9 +3994,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        const isListAncestorOfTargetList = dropTargetListData.pathUnifiedIds.includes(
-            listId,
-        )
+        const isListAncestorOfTargetList =
+            dropTargetListData.unifiedId === listId ||
+            dropTargetListData.pathUnifiedIds.includes(listId)
+
         if (isListAncestorOfTargetList) {
             this.emitMutation({
                 listsSidebar: { dragOverListId: { $set: undefined } },
