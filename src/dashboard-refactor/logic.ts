@@ -3712,7 +3712,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({
                     listsSidebar: {
                         isAddListInputShown: { $set: false },
-                        filteredListIds: { $unshift: [unifiedId] },
                         areLocalListsExpanded: { $set: true },
                         addListErrorMessage: { $set: null },
                     },

@@ -260,7 +260,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             )
                         }
                         return (
-                            <>
+                            <React.Fragment key={list.unifiedId}>
                                 {index === 0 &&
                                     this.renderReorderLine(
                                         list.unifiedId +
@@ -469,7 +469,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         LIST_REORDER_POST_EL_POSTFIX,
                                 )}
                                 {nestedListInput}
-                            </>
+                            </React.Fragment>
                         )
                     },
                 }),
