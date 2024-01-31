@@ -403,7 +403,9 @@ export class PersonalCloudBackground {
             // Skip op if lists don't exist (most likely been deleted)
             if (
                 !(await doesListExist(update.rootNodeLocalListId)) ||
-                !(await doesListExist(update.parentLocalListId))
+                !(update.parentLocalListId != null
+                    ? await doesListExist(update.parentLocalListId)
+                    : true)
             ) {
                 return
             }
