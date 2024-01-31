@@ -68,7 +68,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
         deps.events = deps.events ?? new EventEmitter()
 
-        this.initializeAsync()
+        this.initializeAsync() // TODO: Move this to async init logic in the cache utils
     }
 
     async initializeAsync() {
@@ -460,6 +460,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         // Go over prepared lists once more to fix parent cache IDs
         for (const list of seedData) {
+            list.pathUnifiedIds = list.pathLocalIds
+                .map((localId) => localToCacheId.get(localId))
+                .filter((id) => id != null)
+
             if (list.type !== 'user-list') {
                 continue
             }
@@ -467,9 +471,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 list.parentUnifiedId =
                     localToCacheId.get(list.parentLocalId) ?? null
             }
-            list.pathUnifiedIds = list.pathLocalIds
-                .map((localId) => localToCacheId.get(localId))
-                .filter((id) => id != null)
         }
 
         this.lists = initNormalizedState({
@@ -552,6 +553,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     addList: PageAnnotationsCacheInterface['addList'] = (list) => {
         const nextList = this.prepareListForCaching(list)
+        nextList.pathUnifiedIds = nextList.pathLocalIds
+            .map((id) => this.getListByLocalId(id)?.unifiedId)
+            .filter((id) => id != null)
 
         if (nextList.type === 'user-list') {
             if (nextList.parentLocalId != null) {
@@ -561,9 +565,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             } else {
                 nextList.parentUnifiedId = null
             }
-            nextList.pathUnifiedIds = nextList.pathLocalIds
-                .map((id) => this.getListByLocalId(id)?.unifiedId)
-                .filter((id) => id != null)
 
             if (nextList.order == null) {
                 const siblings = this.getListsByParentId(
