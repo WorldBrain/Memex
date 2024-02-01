@@ -42,6 +42,7 @@ export const main: RibbonScriptMain = async (options) => {
                     id: undefined,
                     url: await options.getFullPageUrl(),
                 },
+                getRootElement: () => mount.rootElement,
                 setSidebarEnabled: setSidebarState,
                 getSidebarEnabled: getSidebarState,
             },

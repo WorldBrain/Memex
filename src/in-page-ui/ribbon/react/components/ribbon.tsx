@@ -44,9 +44,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
-import tinycolor from 'tinycolor2'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
-import HighlightColorPicker from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -77,6 +75,7 @@ export interface Props extends RibbonSubcomponentProps {
     isTrial: boolean
     signupDate?: number
     toggleTheme: () => void
+    getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface
 }
 
@@ -295,6 +294,7 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <PopoutBox
+                getPortalRoot={this.props.getRootElement}
                 targetElementRef={this.spacePickerRef.current}
                 placement={
                     topRight
