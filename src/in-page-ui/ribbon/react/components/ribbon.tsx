@@ -328,6 +328,7 @@ export default class Ribbon extends Component<Props, State> {
                     onListFocus={(listId: UnifiedList['localId']) => {
                         this.props.sidebar.handleSidebarOpenInFocusMode(listId)
                     }}
+                    getRootElement={this.props.getRootElement}
                 />
             </PopoutBox>
         )
@@ -368,6 +369,7 @@ export default class Ribbon extends Component<Props, State> {
                     this.props.toggleShowTutorial()
                 }}
                 width={'fit-content'}
+                getPortalRoot={this.props.getRootElement}
             >
                 <SupportContainer>
                     <GlobalStyle />
@@ -643,6 +645,7 @@ export default class Ribbon extends Component<Props, State> {
                 offsetY={-15}
                 width={'630px'}
                 closeComponent={() => this.props.toggleFeed()}
+                getPortalRoot={this.props.getRootElement}
             >
                 <FeedContainer>
                     <TitleContainer>
@@ -700,6 +703,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 10
                 }
                 closeComponent={() => this.props.toggleRemoveMenu()}
+                getPortalRoot={this.props.getRootElement}
             >
                 <RemoveMenuContainer ribbonPosition={this.props.ribbonPosition}>
                     <ExtraButtonRow
@@ -1526,7 +1530,7 @@ export default class Ribbon extends Component<Props, State> {
                 }
                 placement={
                     this.props.sidebar.isSidebarOpen
-                        ? 'left'
+                        ? 'left-end'
                         : topRight
                         ? 'bottom'
                         : bottomRight

@@ -274,6 +274,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         | 'localFolder'
         | 'obsidian'
         | 'logseq'
+    getRootElement: () => HTMLElement
 }
 
 interface AnnotationsSidebarState {
@@ -516,6 +517,7 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
 
+        console.log('renderCopyPasterManager', this.props.getRootElement)
         return (
             <PopoutBox
                 targetElementRef={this.copyButtonRef.current}
@@ -529,6 +531,7 @@ export class AnnotationsSidebar extends React.Component<
                 }}
                 strategy={'fixed'}
                 width={'fit-content'}
+                getPortalRoot={this.props.getRootElement}
             >
                 <PageNotesCopyPaster
                     copyPaster={this.props.copyPaster}
@@ -563,6 +566,7 @@ export class AnnotationsSidebar extends React.Component<
                 }
                 strategy={'fixed'}
                 width={'fit-content'}
+                getPortalRoot={this.props.getRootElement}
             >
                 <AllNotesShareMenu
                     contentSharingBG={this.props.contentSharing}
@@ -1296,6 +1300,7 @@ export class AnnotationsSidebar extends React.Component<
                 closeComponent={() => {
                     this.props.openContextMenuForList(listData.unifiedId)
                 }}
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.props.renderContextMenuForList(listData)}
             </PopoutBox>
@@ -1318,6 +1323,7 @@ export class AnnotationsSidebar extends React.Component<
                     this.props.setSpaceTitleEditValue(listData.name)
                     this.props.openEditMenuForList(listData.unifiedId)
                 }}
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.props.renderEditMenuForList(listData)}
             </PopoutBox>
@@ -1344,6 +1350,7 @@ export class AnnotationsSidebar extends React.Component<
                 offsetY={0}
                 targetElementRef={this.sharePageLinkButtonRef.current}
                 closeComponent={this.props.closePageLinkShareMenu}
+                getPortalRoot={this.props.getRootElement}
             >
                 {!this.props.selectedShareMenuPageLinkList || !selectedList ? (
                     <LoadingIndicatorContainer height="180px" width="330px">
@@ -3474,6 +3481,7 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.setSpacePickerAnnotationInstance(null)
                         }
                         offsetX={10}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         {this.props.renderListsPickerForAnnotation(
                             spacePickerAnnotationInstance.instanceId,
@@ -3491,6 +3499,7 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.setShareMenuAnnotationInstance(null)
                         }
                         offsetX={10}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         {this.props.renderShareMenuForAnnotation(
                             shareMenuAnnotationInstanceId,
@@ -3505,6 +3514,7 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.setCopyPasterAnnotationInstance(null)
                         }
                         offsetX={10}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         {this.props.renderCopyPasterForAnnotation(
                             copyPasterAnnotationInstanceId,
@@ -4228,6 +4238,7 @@ export class AnnotationsSidebar extends React.Component<
                 }
                 width={'fit-content'}
                 strategy={'fixed'}
+                getPortalRoot={this.props.getRootElement}
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={(sortingFn) =>
@@ -4324,6 +4335,7 @@ export class AnnotationsSidebar extends React.Component<
                     })
                 }
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 TOOD: Space picker goes here!
             </PopoutBox>

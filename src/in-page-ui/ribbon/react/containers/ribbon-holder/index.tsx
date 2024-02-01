@@ -307,7 +307,7 @@ const RibbonHolderBox = styled.div<{
     position: fixed;
     right: 0;
     top: 130px;
-    z-index: 2147483647;
+    z-index: 2147483646;
 
     ${(props) =>
         (props.ribbonPosition === 'topRight' ||

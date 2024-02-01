@@ -83,6 +83,7 @@ export interface Props extends ShareMenuCommonProps {
             | 'localStorageAPI'
             | 'normalizedPageUrlToFilterPageLinksBy'
         >
+    getRootElement: () => HTMLElement
 }
 
 export default class SingleNoteShareMenu extends React.PureComponent<
@@ -195,6 +196,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     offsetX={-100}
                     instaClose
                     strategy="fixed"
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <AutoAddDefaultContainer>
                         <DefaultCheckBoxContainer>
@@ -550,6 +552,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     render() {
+        console.log('this.state', this.props.getRootElement)
         return (
             <>
                 <>
@@ -634,6 +637,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             )}
                             width={'300px'}
                             autoFocus={true}
+                            getRootElement={this.props.getRootElement}
                         />
                     </SpacepickerContainer>
                 </>

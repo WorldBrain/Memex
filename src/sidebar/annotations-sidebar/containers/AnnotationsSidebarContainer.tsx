@@ -82,6 +82,7 @@ export interface Props extends SidebarContainerOptions {
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
     pkmSyncBG?: PkmSyncInterface
+    getRootElement?: () => HTMLElement
 }
 
 export class AnnotationsSidebarContainer<
@@ -382,6 +383,7 @@ export class AnnotationsSidebarContainer<
 
                         this.processEvent('setSelectedList', { unifiedListId })
                     }}
+                    getRootElement={this.props.getRootElement}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -502,6 +504,7 @@ export class AnnotationsSidebarContainer<
                     this.processEvent('setSelectedList', { unifiedListId })
                     closePicker()
                 }}
+                getRootElement={this.props.getRootElement}
             />
         )
     }
@@ -523,6 +526,8 @@ export class AnnotationsSidebarContainer<
         if (!annotation.localId) {
             return
         }
+
+        console.log('annotation', this.props.getRootElement)
         return (
             <SingleNoteShareMenu
                 getRemoteListIdForLocalId={(localListId) =>
@@ -559,6 +564,7 @@ export class AnnotationsSidebarContainer<
                     this.getRemoteIdsForCacheIds(annotation.unifiedListIds)
                         .length !== null
                 }
+                getRootElement={this.props.getRootElement}
             />
         )
     }
@@ -1461,6 +1467,7 @@ export class AnnotationsSidebarContainer<
                                     option,
                                 )
                             }}
+                            getRootElement={this.props.getRootElement}
                         />
                     </Rnd>
                 </ContainerStyled>
@@ -1541,7 +1548,7 @@ const ContainerStyled = styled.div<{
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
             ? '3500'
-            : '2147483646'}; /* This is to combat pages setting high values on certain elements under the sidebar */
+            : '2147483645'}; /* This is to combat pages setting high values on certain elements under the sidebar */
                     background: ${(props) =>
                         props.theme.variant === 'dark'
                             ? props.theme.colors.black + 'eb'

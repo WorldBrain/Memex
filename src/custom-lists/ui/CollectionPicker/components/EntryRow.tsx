@@ -38,6 +38,7 @@ export interface Props extends Pick<UnifiedList<'user-list'>, 'remoteId'> {
     localId?: number
     bgScriptBG?: RemoteBGScriptInterface
     pathText?: string
+    getRootElement?: () => HTMLElement
 }
 
 class EntryRow extends React.Component<Props> {
@@ -145,6 +146,8 @@ class EntryRow extends React.Component<Props> {
                     closeComponent={() => {
                         this.setState({ showExtraMenu: false })
                     }}
+                    getPortalRoot={this.props.getRootElement}
+                    blockedBackground={true}
                 >
                     <ExtraMenuContainer>
                         <PrimaryAction
@@ -156,6 +159,7 @@ class EntryRow extends React.Component<Props> {
                             label="Go to Space"
                             innerRef={this.props.goToButtonRef}
                             contentAlign={'flex-start'}
+                            width="100%"
                         />
                         <PrimaryAction
                             onClick={this.handleEditMenuBtnPress}
@@ -166,6 +170,7 @@ class EntryRow extends React.Component<Props> {
                             label="Rename & Delete"
                             innerRef={this.props.editMenuBtnRef}
                             contentAlign={'flex-start'}
+                            width="100%"
                         />
                         <PrimaryAction
                             onClick={this.handleOpenInTabGroup}
@@ -180,6 +185,7 @@ class EntryRow extends React.Component<Props> {
                             }
                             innerRef={this.props.openInTabGroupButtonRef}
                             contentAlign={'flex-start'}
+                            width="100%"
                         />
                         {this.props.addedToAllIds.includes(cleanID) ? (
                             <TooltipBox
@@ -200,6 +206,7 @@ class EntryRow extends React.Component<Props> {
                                     innerRef={this.pressAllButtonRef}
                                     onClick={null}
                                     contentAlign={'flex-start'}
+                                    width="100%"
                                 />
                             </TooltipBox>
                         ) : (
@@ -218,6 +225,7 @@ class EntryRow extends React.Component<Props> {
                                     innerRef={this.pressAllButtonRef}
                                     onClick={this.handleActOnAllPress}
                                     contentAlign={'flex-start'}
+                                    width="100%"
                                 />
                             </TooltipBox>
                         )}
@@ -272,7 +280,7 @@ class EntryRow extends React.Component<Props> {
                     this.setState({ mouseOverItem: false })
                 }}
                 // onMouseLeave={!keyboardNavActive && this.props.onUnfocus}
-                isFocused={focused}
+                isFocused={focused || this.state.showExtraMenu}
                 id={id}
                 title={resultItem['props'].children}
                 zIndex={10000 - this.props.index}
@@ -458,6 +466,10 @@ const ExtraMenuContainer = styled.div`
     align-items: flex-start;
     padding: 10px;
     grid-gap: 6px;
+
+    & > div {
+        width: 100%;
+    }
 `
 
 const SelectionBox = styled.div<{ selected }>`

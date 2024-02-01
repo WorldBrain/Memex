@@ -42,6 +42,7 @@ export interface Props extends ContainerProps {
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
     pkmSyncBG?: PkmSyncInterface
+    getRootElement: () => HTMLElement
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<

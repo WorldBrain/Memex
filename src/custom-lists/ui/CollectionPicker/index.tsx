@@ -40,6 +40,7 @@ export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
     onListFocus?: (listId: UnifiedList['localId']) => void
     bgScriptBG?: RemoteBGScriptInterface
+    getRootElement?: () => HTMLElement
 }
 
 class SpacePicker extends StatefulUIElement<
@@ -306,6 +307,7 @@ class SpacePicker extends StatefulUIElement<
                 shareState={
                     entry?.isPrivate ?? 'private' ? 'private' : 'shared'
                 }
+                getRootElement={this.props.getRootElement}
                 {...entry}
             />
         </EntryRowContainer>

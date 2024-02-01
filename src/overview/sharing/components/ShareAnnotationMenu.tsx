@@ -8,16 +8,11 @@ import SharePrivacyOption, {
     Props as PrivacyOptionProps,
 } from './SharePrivacyOption'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import * as icons from 'src/common-ui/components/design-library/icons'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { Checkbox } from 'src/common-ui/components'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { browser } from 'webextension-polyfill-ts'
-import { SyncSettingsStore } from 'src/sync-settings/util'
 
 const COPY_TIMEOUT = 2000
 
