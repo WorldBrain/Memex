@@ -147,6 +147,7 @@ interface State {
     showHighlightColorPicker?: boolean
     showHighlightColorTooltip?: boolean
     currentHighlightColor?: RGBAColor
+    defaultHighlightColor?: RGBAColor
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -195,6 +196,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         needsTruncation: false,
         showHighlightColorPicker: false,
         showHighlightColorTooltip: false,
+        defaultHighlightColor: null,
     }
 
     focusEditForm() {
@@ -203,9 +205,13 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     componentDidMount() {
         this.setTextAreaHeight()
+        // const defaultHighlightColor = highlightColorSettings.find(
+        //     (setting) => setting.id === 'default',
+        // )
 
         this.setState({
             currentHighlightColor: this.props.color,
+            // defaultHighlightColor: defaultHighlightColor,
         })
 
         // let needsTruncation: boolean
@@ -265,6 +271,23 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         if (prevProps.color != this.props.color) {
             this.setState({
                 currentHighlightColor: this.props.color,
+            })
+        }
+
+        if (
+            prevProps.highlightColorSettings !=
+            this.props.highlightColorSettings
+        ) {
+            const highlightColorSettings = JSON.parse(
+                this.props.highlightColorSettings,
+            )
+
+            const defaultHighlightColor = highlightColorSettings.find(
+                (setting) => setting.id === 'default',
+            )['color']
+
+            this.setState({
+                defaultHighlightColor: defaultHighlightColor,
             })
         }
     }
@@ -415,6 +438,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             ) : null
 
         const isScreenshotAnnotation = this.props.selector?.dimensions != null
+        let barColor = null
+
+        if (this.state.defaultHighlightColor) {
+            barColor = RGBAobjectToString(this.state.defaultHighlightColor)
+        }
+        if (this.state.currentHighlightColor) {
+            barColor = RGBAobjectToString(this.state.currentHighlightColor)
+        }
 
         return (
             <HighlightStyled
@@ -447,10 +478,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     .showHighlightColorPicker,
                             })
                         }
-                        barColor={
-                            this.state.currentHighlightColor &&
-                            RGBAobjectToString(this.state.currentHighlightColor)
-                        }
+                        barColor={barColor}
                     />
                 )}
                 {this.props.isEditingHighlight ? (

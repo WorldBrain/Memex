@@ -1,5 +1,5 @@
 import React, { PureComponent } from 'react'
-import styled, { createGlobalStyle } from 'styled-components'
+import styled, { createGlobalStyle, css } from 'styled-components'
 import { fonts } from 'src/dashboard-refactor/styles'
 import throttle from 'lodash/throttle'
 import ListsSidebarGroup, {
@@ -77,6 +77,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     currentUser: any
     onConfirmListDelete: (listId: string) => void
     spaceSidebarWidth: string
+    someListIsDragging: boolean
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -102,7 +103,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         this.sidebarItemRefs[unifiedId] = { current: element }
     }
 
-    private renderReorderLine = (listId: string) => {
+    private renderReorderLine = (listId: string, topItem?: boolean) => {
         // Disable reordering when filtering lists by query
         if (this.props.filteredListIds.length > 0) {
             return null
@@ -113,6 +114,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
         )
         return (
             <ReorderLine
+                isActive={this.props.someListIsDragging}
                 isVisible={reorderLineDropReceivingState.isDraggedOver}
                 onDragEnter={(e: React.DragEvent) => {
                     e.preventDefault()
@@ -132,7 +134,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                 onDrop={(e: React.DragEvent) => {
                     e.preventDefault()
                     reorderLineDropReceivingState.onDrop(e.dataTransfer)
+                    this.props.onListDragEnd(null)
                 }}
+                topItem={topItem}
             />
         )
     }
@@ -186,7 +190,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             )
                             .sort(defaultTreeNodeSorter)
                             .reverse(),
-                    cb: (list) => {
+                    cb: (list, index2) => {
                         const parentListTreeState = this.props.listTrees.byId[
                             list.parentUnifiedId
                         ]
@@ -256,11 +260,12 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             )
                         }
                         return (
-                            <>
+                            <React.Fragment key={list.unifiedId}>
                                 {index === 0 &&
                                     this.renderReorderLine(
                                         list.unifiedId +
                                             LIST_REORDER_PRE_EL_POSTFIX,
+                                        true,
                                     )}
                                 <DropTargetSidebarItem
                                     sidebarItemRef={(el) =>
@@ -295,6 +300,11 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 .current,
                                         )
                                     }}
+                                    hasChildren={
+                                        this.props.listTrees.byId[
+                                            list.unifiedId
+                                        ]?.hasChildren
+                                    }
                                     dropReceivingState={this.props.initDropReceivingState(
                                         list.unifiedId,
                                     )}
@@ -378,23 +388,6 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                     renderRightSideIcon={() => {
                                         return (
                                             <RightSideIconBox>
-                                                <TooltipBox
-                                                    placement={'bottom'}
-                                                    tooltipText={
-                                                        'Add Sub-Space'
-                                                    }
-                                                >
-                                                    <Icon
-                                                        icon="plus"
-                                                        heightAndWidth="18px"
-                                                        onClick={(event) => {
-                                                            event.stopPropagation()
-                                                            this.props.onNestedListInputToggle(
-                                                                list.unifiedId,
-                                                            )
-                                                        }}
-                                                    />
-                                                </TooltipBox>
                                                 <SpaceContextMenuBtn
                                                     {...this.props.initContextMenuBtnProps(
                                                         list.unifiedId,
@@ -419,40 +412,64 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             </RightSideIconBox>
                                         )
                                     }}
-                                    renderEditIcon={() => (
-                                        <SpaceEditMenuBtn
-                                            {...this.props.initContextMenuBtnProps(
-                                                list.unifiedId,
-                                            )}
-                                            listData={list}
-                                            isCreator={
-                                                list.creator?.id ===
-                                                this.props.currentUser?.id
-                                            }
-                                            isMenuDisplayed={
-                                                this.props.editMenuListId ===
-                                                list.unifiedId
-                                            }
-                                            errorMessage={
-                                                this.props.editListErrorMessage
-                                            }
-                                            onConfirmSpaceNameEdit={(
-                                                newName,
-                                            ) => {
-                                                this.props.onConfirmListEdit(
-                                                    list.unifiedId,
-                                                    newName,
-                                                )
-                                            }}
-                                        />
-                                    )}
+                                    renderEditIcon={() => {
+                                        return (
+                                            <RightSideIconBox>
+                                                <TooltipBox
+                                                    placement={'bottom'}
+                                                    tooltipText={
+                                                        'Add Sub-Space'
+                                                    }
+                                                >
+                                                    <Icon
+                                                        icon="plus"
+                                                        heightAndWidth="18px"
+                                                        onClick={(event) => {
+                                                            event.stopPropagation()
+                                                            this.props.onNestedListInputToggle(
+                                                                list.unifiedId,
+                                                            )
+                                                        }}
+                                                    />
+                                                </TooltipBox>
+                                                <SpaceEditMenuBtn
+                                                    {...this.props.initContextMenuBtnProps(
+                                                        list.unifiedId,
+                                                    )}
+                                                    listData={list}
+                                                    isCreator={
+                                                        list.creator?.id ===
+                                                        this.props.currentUser
+                                                            ?.id
+                                                    }
+                                                    isMenuDisplayed={
+                                                        this.props
+                                                            .editMenuListId ===
+                                                        list.unifiedId
+                                                    }
+                                                    errorMessage={
+                                                        this.props
+                                                            .editListErrorMessage
+                                                    }
+                                                    onConfirmSpaceNameEdit={(
+                                                        newName,
+                                                    ) => {
+                                                        this.props.onConfirmListEdit(
+                                                            list.unifiedId,
+                                                            newName,
+                                                        )
+                                                    }}
+                                                />
+                                            </RightSideIconBox>
+                                        )
+                                    }}
                                 />
                                 {this.renderReorderLine(
                                     list.unifiedId +
                                         LIST_REORDER_POST_EL_POSTFIX,
                                 )}
                                 {nestedListInput}
-                            </>
+                            </React.Fragment>
                         )
                     },
                 }),
@@ -757,8 +774,49 @@ const NestedListInput = styled.div`
             : props.indentSteps * 20}px;
 `
 
-const ReorderLine = styled.div<{ isVisible: boolean }>`
+const ReorderLine = styled.div<{
+    isVisible: boolean
+    isActive: boolean
+    topItem: boolean
+}>`
+    position: relative;
+    z-index: -1;
     border-bottom: 3px solid
         ${(props) =>
-            props.isVisible ? props.theme.colors.prime3 : 'transparent'};
+            props.isVisible && props.isActive
+                ? props.theme.colors.prime3
+                : 'transparent'};
+    &::before {
+        content: '';
+        width: 100%;
+        top: -10px;
+        position: absolute;
+        height: 10px;
+        z-index: 2;
+        background: transparent;
+    }
+    &::after {
+        content: '';
+        width: 100%;
+        bottom: -13px;
+        position: absolute;
+        height: 10px;
+        z-index: 2;
+        background: transparent;
+    }
+
+    ${(props) =>
+        props.isActive &&
+        css`
+            z-index: 2147483647;
+        `}
+    ${(props) =>
+        props.topItem &&
+        css`
+            display: none;
+
+            &:first-child {
+                display: flex;
+            }
+        `}
 `

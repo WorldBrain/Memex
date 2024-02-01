@@ -143,7 +143,6 @@ export async function createAnnotation({
                 const link = baseUrl + '/a/' + shareData.remoteId
                 navigator.clipboard.writeText(link)
             } else if (shareOpts?.shouldShare) {
-                console.log('shouldshare + shouldsharesettings')
                 shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
                     remoteAnnotationId,

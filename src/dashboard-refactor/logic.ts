@@ -393,6 +393,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 selectedListId: null,
                 themeVariant: null,
                 draggedListId: null,
+                someListIsDragging: false,
             },
             syncMenu: {
                 isDisplayed: false,
@@ -3711,7 +3712,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.emitMutation({
                     listsSidebar: {
                         isAddListInputShown: { $set: false },
-                        filteredListIds: { $unshift: [unifiedId] },
                         areLocalListsExpanded: { $set: true },
                         addListErrorMessage: { $set: null },
                     },
@@ -3814,13 +3814,19 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
         this.emitMutation({
-            listsSidebar: { draggedListId: { $set: event.listId } },
+            listsSidebar: {
+                draggedListId: { $set: event.listId },
+                someListIsDragging: { $set: true },
+            },
         })
     }
 
     dropList: EventHandler<'dropList'> = async () => {
         this.emitMutation({
-            listsSidebar: { draggedListId: { $set: null } },
+            listsSidebar: {
+                draggedListId: { $set: null },
+                someListIsDragging: { $set: false },
+            },
         })
     }
 
@@ -3838,6 +3844,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
         this.emitMutation({
             searchResults: { draggedPageId: { $set: event.pageId } },
+        })
+        this.emitMutation({
+            listsSidebar: {
+                someListIsDragging: { $set: false },
+            },
         })
     }
 
@@ -3888,6 +3899,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     )
                     return
                 }
+
                 if (event.listId.endsWith(LIST_REORDER_POST_EL_POSTFIX)) {
                     const cleanedListId = event.listId.slice(
                         0,
@@ -3982,9 +3994,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        const isListAncestorOfTargetList = dropTargetListData.pathUnifiedIds.includes(
-            listId,
-        )
+        const isListAncestorOfTargetList =
+            dropTargetListData.unifiedId === listId ||
+            dropTargetListData.pathUnifiedIds.includes(listId)
+
         if (isListAncestorOfTargetList) {
             this.emitMutation({
                 listsSidebar: { dragOverListId: { $set: undefined } },

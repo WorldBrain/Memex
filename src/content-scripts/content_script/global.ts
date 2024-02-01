@@ -286,8 +286,12 @@ export async function main(
                 [UNDO_HISTORY]: undoHistory,
             }),
         getHighlightColor: async () => {
-            const storage = await browser.storage.local.get(HIGHLIGHT_COLOR_KEY)
-            return storage[HIGHLIGHT_COLOR_KEY] ?? DEFAULT_HIGHLIGHT_COLOR
+            const colorSettings = await getHighlightColorSettings()
+            const defaultColorSetting = colorSettings.find(
+                (setting) => setting.id === 'default',
+            )['color']
+
+            return defaultColorSetting ?? DEFAULT_HIGHLIGHT_COLOR
         },
         onHighlightColorChange: (cb) => {
             browser.storage.onChanged.addListener((changes) => {
@@ -306,8 +310,6 @@ export async function main(
                 pageUrl: data.fullPageUrl,
                 now: () => data.createdWhen,
             })
-
-            console.log('shouuldshare', data.shouldShare)
 
             const syncSettings = createSyncSettingsStore({ syncSettingsBG })
 
@@ -979,7 +981,7 @@ export async function main(
             }
             return extractRawPageContent(doc, url)
         },
-        confirmTabScriptLoaded: async () => {},
+        ping: async () => true,
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
         testIfSidebarSetup: inPageUI.testIfSidebarSetup.bind(inPageUI),

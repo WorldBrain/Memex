@@ -46,6 +46,7 @@ import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import tinycolor from 'tinycolor2'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import HighlightColorPicker from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -82,10 +83,8 @@ export interface Props extends RibbonSubcomponentProps {
 interface State {
     shortcutsReady: boolean
     blockListValue: string
-    showColorPicker: boolean
     renderFeedback: boolean
     pickerColor: RGBAColor
-    showPickerSave: boolean
     renderLiveChat: boolean
     renderChangeLog: boolean
     updatesAvailable: boolean
@@ -109,14 +108,10 @@ export default class Ribbon extends Component<Props, State> {
     private feedButtonRef = createRef<HTMLDivElement>()
     private sidebarButtonRef = createRef<HTMLDivElement>()
     private removeMenuButtonRef = createRef<HTMLDivElement>()
-    private changeColorRef = createRef<HTMLDivElement>()
-    private colorPickerField = createRef<HTMLInputElement>()
 
     state: State = {
         shortcutsReady: false,
         blockListValue: this.getDomain(window.location.href),
-        showColorPicker: false,
-        showPickerSave: false,
         renderFeedback: false,
         pickerColor: DEFAULT_HIGHLIGHT_COLOR,
         renderLiveChat: false,
@@ -171,7 +166,6 @@ export default class Ribbon extends Component<Props, State> {
         const previousColor = { ...this.state.pickerColor }
         this.setState({
             pickerColor: value,
-            showPickerSave: true,
         })
 
         let highlights: HTMLCollection = document.getElementsByTagName(
@@ -200,8 +194,6 @@ export default class Ribbon extends Component<Props, State> {
 
     async saveHighlightColor() {
         this.setState({
-            showPickerSave: false,
-            showColorPicker: false,
             renderFeedback: false,
             renderLiveChat: false,
             renderChangeLog: false,
@@ -368,23 +360,18 @@ export default class Ribbon extends Component<Props, State> {
                         : 10
                 }
                 closeComponent={() => {
-                    if (!this.state.showColorPicker) {
-                        this.setState({
-                            showColorPicker: false,
-                            renderFeedback: false,
-                            renderLiveChat: false,
-                            renderChangeLog: false,
-                        })
-                        this.props.toggleShowTutorial()
-                    }
+                    this.setState({
+                        renderFeedback: false,
+                        renderLiveChat: false,
+                        renderChangeLog: false,
+                    })
+                    this.props.toggleShowTutorial()
                 }}
                 width={'fit-content'}
             >
                 <SupportContainer>
                     <GlobalStyle />
-                    {this.state.showColorPicker ? (
-                        this.renderColorPicker()
-                    ) : this.state.renderFeedback ? (
+                    {this.state.renderFeedback ? (
                         <FeedbackContainer>
                             <LoadingIndicator size={30} />
                             <FeedFrame
@@ -489,23 +476,6 @@ export default class Ribbon extends Component<Props, State> {
                             <TutorialContainerBox>
                                 <SectionTitle>Settings</SectionTitle>
                                 <SupportBox>
-                                    <ExtraButtonRow
-                                        onClick={(event) => {
-                                            this.setState({
-                                                showColorPicker: true,
-                                            })
-                                            event.stopPropagation()
-                                        }}
-                                    >
-                                        <ColorPickerCircle
-                                            backgroundColor={RGBAobjectToString(
-                                                this.state.pickerColor,
-                                            )}
-                                        />
-                                        <InfoText>
-                                            Change Highlight Color
-                                        </InfoText>
-                                    </ExtraButtonRow>
                                     <ExtraButtonRow
                                         onClick={
                                             this.props.tooltip
@@ -633,58 +603,6 @@ export default class Ribbon extends Component<Props, State> {
                     )}
                 </SupportContainer>
             </PopoutBox>
-        )
-    }
-
-    private renderColorPicker() {
-        if (!this.state.showColorPicker) {
-            return
-        }
-
-        return (
-            <ColorPickerContainer>
-                <PickerButtonTopBar>
-                    <PrimaryAction
-                        size={'small'}
-                        icon={'arrowLeft'}
-                        label={'Cancel'}
-                        type={'tertiary'}
-                        onClick={() => {
-                            this.updatePickerColor(
-                                this.state.initialHighlightColor,
-                            )
-                            this.setState({
-                                showColorPicker: false,
-                            })
-                        }}
-                    />
-                    {this.state.showPickerSave ? (
-                        <PrimaryAction
-                            size={'small'}
-                            label={'Save Color'}
-                            type={'primary'}
-                            onClick={() => this.saveHighlightColor()}
-                        />
-                    ) : undefined}
-                </PickerButtonTopBar>
-                <TextField
-                    value={tinycolor(this.state.pickerColor).toHex8String()}
-                    onChange={(event) =>
-                        this.updatePickerColor(
-                            (event.target as HTMLInputElement).value,
-                        )
-                    }
-                    componentRef={this.colorPickerField}
-                />
-                <HexPickerContainer>
-                    <RgbaColorPicker
-                        color={this.state.pickerColor}
-                        onChange={(value) => {
-                            this.updatePickerColor(value)
-                        }}
-                    />
-                </HexPickerContainer>
-            </ColorPickerContainer>
         )
     }
 
