@@ -163,7 +163,6 @@ class Container extends React.Component<Props, State> {
         const target = document.getElementById('memexResults')
 
         if (isSticky) {
-            console.log('isSticky', isSticky)
             target.style.position = 'sticky'
             target.style.top = '100px'
             target.style.zIndex = '30000'

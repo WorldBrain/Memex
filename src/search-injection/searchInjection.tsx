@@ -109,7 +109,6 @@ export const handleRenderSearchInjection = async (
     // Calls renderComponent to render the react component
 
     const renderComponent = async () => {
-        console.log('started injecting')
         // Accesses docs, totalCount from parent through closure
         // Gets position from settings
         // Renders React Component on the respective container
@@ -129,11 +128,6 @@ export const handleRenderSearchInjection = async (
             component.style.top = '100px'
             component.style.zIndex = '30000'
         }
-
-        console.log(
-            'searchEngine.container.side',
-            searchEngineObj.container.side,
-        )
         const sideBox = document.getElementById(searchEngineObj.container.side)
 
         if (sideBox) {
@@ -308,7 +302,6 @@ export const handleRenderSearchInjection = async (
     // else attach it to the DOMContentLoaded event listener
 
     const observer = new MutationObserver((mutationsList, observer) => {
-        console.log('mutationsList', mutationsList)
         for (const mutation of mutationsList) {
             if (mutation.type === 'childList') {
                 const addedNodes = Array.from(mutation.addedNodes)

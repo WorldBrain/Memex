@@ -65,11 +65,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         this.parentContainerRef.current.style.height =
             this.memexButtonContainerRef.current.offsetHeight * scaleFactor +
             'px'
-
-        console.log(
-            'adjustScaleToFitParent',
-            this.parentContainerRef.current.style.height,
-        )
     }
 
     getTimestampNoteContentForYoutubeNotes(includeLastFewSecs?: number) {

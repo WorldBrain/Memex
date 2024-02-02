@@ -48,7 +48,6 @@ class Root extends React.Component<RootProps, RootState> {
         }
         const { props } = this
 
-        console.log('test', props.target)
         return (
             <StyleSheetManager target={props.target}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
@@ -122,7 +121,6 @@ export const handleRenderYoutubeInterface = async (
                                     //     annotationsFunctions,
                                     // )
 
-                                    console.log('shouldinject')
                                     below.insertAdjacentElement(
                                         'afterbegin',
                                         target,
