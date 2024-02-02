@@ -176,17 +176,17 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                     {!props.hideResults && (
                         <ResultsContainer>
                             {props.renderResultItems()}
-                            <MemexLogo>
-                                <Icon
-                                    icon={'memexLogoGrey'}
-                                    originalImage
-                                    height="20px"
-                                    width="130px"
-                                    hoverOff
-                                />
-                            </MemexLogo>
                         </ResultsContainer>
                     )}
+                    <MemexLogo>
+                        <Icon
+                            icon={'memexLogoGrey'}
+                            originalImage
+                            height="20px"
+                            width="130px"
+                            hoverOff
+                        />
+                    </MemexLogo>
                 </MemexContainer>
             </>
         )
@@ -197,13 +197,12 @@ const MemexLogo = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
+    width: 100%;
     backdrop-filter: blur(10px);
     background: ${(props) => props.theme.colors.black}95;
-    border-radius: 8px 0 0 0;
-    position: sticky;
-    bottom: 0px;
-    right: 0px;
-    padding: 3px 6px;
+    position: absolute;
+    bottom: -4px;
+    padding: 5px 0px 10px 0px;
 `
 
 const SearchContainer = styled.div`
@@ -283,14 +282,21 @@ const IconArea = styled.div`
     grid-auto-flow: column;
 `
 
+const ResultsContainerBox = styled.div`
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    overflow: scroll;
+`
+
 const ResultsContainer = styled.div`
     display: flex;
-    flex: 1;
-    height: fill-available;
     flex-direction: column;
+    flex: 1;
+    height: 100%;
     overflow: scroll;
-    height: 500px;
-    position: relative;
+    padding-bottom: 30px;
 
     scrollbar-width: none;
 

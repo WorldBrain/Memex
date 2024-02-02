@@ -130,6 +130,16 @@ export const handleRenderSearchInjection = async (
             component.style.zIndex = '30000'
         }
 
+        console.log(
+            'searchEngine.container.side',
+            searchEngineObj.container.side,
+        )
+        const sideBox = document.getElementById(searchEngineObj.container.side)
+
+        if (sideBox) {
+            sideBox.style.marginLeft = '40px'
+        }
+
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
 
