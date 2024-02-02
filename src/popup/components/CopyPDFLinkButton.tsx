@@ -9,6 +9,7 @@ const LinkButtonStyles = require('src/popup/collections-button/components/Collec
 
 interface Props {
     currentPageUrl?: string
+    getRootElement: () => HTMLElement
 }
 
 interface State {

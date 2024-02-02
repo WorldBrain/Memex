@@ -10,7 +10,11 @@ export interface Props {
 class SemiCircularRibbon extends PureComponent<Props> {
     render() {
         return (
-            <TooltipBox tooltipText="Remove from collection" placement="bottom">
+            <TooltipBox
+                getPortalRoot={null}
+                tooltipText="Remove from collection"
+                placement="bottom"
+            >
                 <div className={pageStyles.button} onClick={this.props.onClick}>
                     <img src={'/img/removing.svg'} className={pageStyles.img} />
                 </div>

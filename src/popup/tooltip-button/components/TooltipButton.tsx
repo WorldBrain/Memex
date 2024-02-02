@@ -15,6 +15,7 @@ const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
     closePopup: () => void
+    getRootElement: () => HTMLElement
 }
 
 interface StateProps {
@@ -51,6 +52,7 @@ class InPageSwitches extends PureComponent<Props> {
                 <ToggleSwitchButton
                     isEnabled={this.props.isEnabled}
                     onToggleClick={null}
+                    getRootElement={this.props.getRootElement}
                 />
             </ButtonItem>
         )

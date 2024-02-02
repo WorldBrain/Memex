@@ -16,12 +16,14 @@ export const generateAnnotationCardInstanceId = (
 ): string => `${instanceLocation}-${unifiedId}`
 
 export const initAnnotationCardInstance = (
-    annot: Pick<UnifiedAnnotation, 'unifiedId' | 'comment'>,
+    annot: Pick<UnifiedAnnotation, 'unifiedId' | 'comment' | 'body'>,
 ): AnnotationCardInstance => ({
     unifiedAnnotationId: annot.unifiedId,
     comment: annot.comment ?? '',
     isCommentTruncated: true,
     isCommentEditing: false,
+    isHighlightEditing: false,
+    body: annot.body ?? '',
     cardMode: 'none',
     color: null,
 })

@@ -18,6 +18,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 
 export interface Props extends Dependencies {
     refreshUser?: boolean
+    getRootElement: () => HTMLElement
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
@@ -122,6 +123,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                     mode: mode,
                                 })
                             }}
+                            getRootElement={this.props.getRootElement}
                         />
                     )}
                 </>

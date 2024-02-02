@@ -937,6 +937,7 @@ export async function main(
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
                 pkmSyncBG: runInBackground(),
+                getRootElement: null,
             })
             components.sidebar?.resolve()
         },

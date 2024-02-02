@@ -44,7 +44,7 @@
     text-align: start;
     align-items: center;
     background: transparent;
-    z-index: 2147483647;
+    z-index: 2147483646;
 }
 
 .ribbonExpanded {

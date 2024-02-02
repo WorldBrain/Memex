@@ -64,6 +64,7 @@ describe('Ribbon logic', () => {
         const ribbonLogic = new RibbonContainerLogic({
             activityIndicatorBG: backgroundModules.activityIndicator,
             getFullPageUrl: () => currentTab.normalizedUrl,
+            getRootElement: () => null,
             analytics,
             analyticsBG: backgroundModules.analyticsBG,
             syncSettings,

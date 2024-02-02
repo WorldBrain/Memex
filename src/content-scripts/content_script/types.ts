@@ -31,7 +31,10 @@ export type SidebarScriptMain = (
 export type RibbonScriptMain = (
     options: Omit<
         RibbonContainerDependencies,
-        'setSidebarEnabled' | 'getSidebarEnabled' | 'currentTab'
+        | 'setSidebarEnabled'
+        | 'getSidebarEnabled'
+        | 'currentTab'
+        | 'getRootElement'
     > & {
         inPageUI: SharedInPageUIInterface
         analyticsBG: AnalyticsCoreInterface

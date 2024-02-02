@@ -13,6 +13,7 @@ const LinkButtonStyles = require('src/popup/collections-button/components/Collec
 
 interface Props {
     goToDashboard: () => void
+    getRootElement: () => HTMLElement
 }
 
 class LinkButton extends PureComponent<Props> {
@@ -53,6 +54,7 @@ class LinkButton extends PureComponent<Props> {
                     <ShortCutContainer>
                         <KeyboardShortcuts
                             keys={this.state.highlightInfo?.split('+')}
+                            getRootElement={this.props.getRootElement}
                         />
                     </ShortCutContainer>
                 </ButtonInnerContent>

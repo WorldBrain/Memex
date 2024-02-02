@@ -58,7 +58,11 @@ class Root extends React.Component<RootProps, RootState> {
         return (
             <StyleSheetManager target={props.mount.shadowRoot as any}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
-                    <RibbonHolder theme={themeVariant} {...props.deps} />
+                    <RibbonHolder
+                        theme={themeVariant}
+                        getRootElement={() => props.mount.rootElement}
+                        {...props.deps}
+                    />
                 </ThemeProvider>
             </StyleSheetManager>
         )

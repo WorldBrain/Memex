@@ -18,6 +18,7 @@ export interface SearchBarProps {
     onInputClear(): void
     renderCopyPasterButton: () => ReactElement
     renderExpandButton: () => ReactElement
+    getRootElement: () => HTMLElement
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -92,6 +93,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             <TooltipBox
                                 placement={'bottom'}
                                 tooltipText={'Clear Filters'}
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     filePath={icons.removeX}
@@ -103,6 +105,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             <TooltipBox
                                 placement={'bottom'}
                                 tooltipText={'Apply Filters'}
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     filePath={icons.filterIcon}

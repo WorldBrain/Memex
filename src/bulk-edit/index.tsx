@@ -10,6 +10,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
+    getRootElement: () => HTMLElement
 }
 
 // NOTE: This exists to stop click events bubbling up into web page handlers AND to stop page result <a> links
@@ -77,6 +78,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                     strategy={'fixed'}
                     width={'200px'}
                     instaClose
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <BulkSelectListContainer>
                         {this.state.bulkSelectedItems.map((item) =>
@@ -103,6 +105,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                     strategy={'fixed'}
                     width={'fit-content'}
                     instaClose
+                    getPortalRoot={this.props.getRootElement}
                 >
                     {this.props.spacePicker()}
                 </PopoutBox>

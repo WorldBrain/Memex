@@ -78,6 +78,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onConfirmListDelete: (listId: string) => void
     spaceSidebarWidth: string
     someListIsDragging: boolean
+    getRootElement: () => HTMLElement
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -260,7 +261,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                             )
                         }
                         return (
-                            <>
+                            <React.Fragment key={list.unifiedId}>
                                 {index === 0 &&
                                     this.renderReorderLine(
                                         list.unifiedId +
@@ -333,6 +334,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                             targetElementRef={
                                                 this.spaceToggleButtonRef
                                                     .current
+                                            }
+                                            getPortalRoot={
+                                                this.props.getRootElement
                                             }
                                         >
                                             <Icon
@@ -420,6 +424,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     tooltipText={
                                                         'Add Sub-Space'
                                                     }
+                                                    getPortalRoot={
+                                                        this.props
+                                                            .getRootElement
+                                                    }
                                                 >
                                                     <Icon
                                                         icon="plus"
@@ -469,7 +477,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                         LIST_REORDER_POST_EL_POSTFIX,
                                 )}
                                 {nestedListInput}
-                            </>
+                            </React.Fragment>
                         )
                     },
                 }),
