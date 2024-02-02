@@ -176,6 +176,15 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                     {!props.hideResults && (
                         <ResultsContainer>
                             {props.renderResultItems()}
+                            <MemexLogo>
+                                <Icon
+                                    icon={'memexLogoGrey'}
+                                    originalImage
+                                    height="20px"
+                                    width="130px"
+                                    hoverOff
+                                />
+                            </MemexLogo>
                         </ResultsContainer>
                     )}
                 </MemexContainer>
@@ -183,6 +192,19 @@ class Results extends React.Component<ResultsProps, ResultsState> {
         )
     }
 }
+
+const MemexLogo = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    backdrop-filter: blur(10px);
+    background: ${(props) => props.theme.colors.black}95;
+    border-radius: 8px 0 0 0;
+    position: sticky;
+    bottom: 0px;
+    right: 0px;
+    padding: 3px 6px;
+`
 
 const SearchContainer = styled.div`
     display: flex;
@@ -268,6 +290,7 @@ const ResultsContainer = styled.div`
     flex-direction: column;
     overflow: scroll;
     height: 500px;
+    position: relative;
 
     scrollbar-width: none;
 
