@@ -22,6 +22,7 @@ class DatePickerInput extends PureComponent {
                 <TooltipBox
                     tooltipText="You can also type e.g. 'last Friday 10am'"
                     placement="bottom"
+                    getPortalRoot={null}
                 >
                     <Input
                         name={this.props.name}
@@ -38,6 +39,7 @@ class DatePickerInput extends PureComponent {
                         <TooltipBox
                             tooltipText="Clear Selection"
                             placement="bottom"
+                            getPortalRoot={null}
                         >
                             <Icon
                                 path={icons.removeX}

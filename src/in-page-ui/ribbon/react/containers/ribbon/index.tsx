@@ -126,6 +126,7 @@ export default class RibbonContainer extends StatefulUIElement<
     render() {
         return (
             <Ribbon
+                getRootElement={this.props.getRootElement}
                 isTrial={this.state.isTrial}
                 signupDate={this.state.signupDate}
                 pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}

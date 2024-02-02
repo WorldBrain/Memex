@@ -9,6 +9,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 export interface Props {
     onClick?: React.MouseEventHandler<HTMLButtonElement>
     isEnabled?: boolean
+    getRootElement: () => HTMLElement
 }
 
 export default class ExpandAllNotes extends PureComponent<Props> {
@@ -18,7 +19,11 @@ export default class ExpandAllNotes extends PureComponent<Props> {
 
     render() {
         return !this.props.isEnabled || this.props.isEnabled == null ? (
-            <TooltipBox tooltipText="Expand all annotations" placement="bottom">
+            <TooltipBox
+                tooltipText="Expand all annotations"
+                placement="bottom"
+                getPortalRoot={this.props.getRootElement}
+            >
                 <Icon
                     filePath={icons.expand}
                     heightAndWidth="24px"
@@ -30,6 +35,7 @@ export default class ExpandAllNotes extends PureComponent<Props> {
             <TooltipBox
                 tooltipText="Collapse all annotations"
                 placement="bottom"
+                getPortalRoot={this.props.getRootElement}
             >
                 <Icon
                     filePath={icons.compress}

@@ -26,6 +26,7 @@ const DisplayNameBox = styled.div`
 
 export interface Props extends Dependencies {
     setAuthMode: (mode) => void
+    getRootElement: () => HTMLElement
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
@@ -63,6 +64,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             null,
                         )
                     }
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <SystemSelectionMenu>
                         <SystemSelectionMenuItem

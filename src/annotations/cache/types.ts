@@ -51,6 +51,7 @@ export interface PageAnnotationsCacheInterface {
             | 'unifiedId'
             | 'remoteId'
             | 'comment'
+            | 'body'
             | 'unifiedListIds'
             | 'privacyLevel'
             | 'color'

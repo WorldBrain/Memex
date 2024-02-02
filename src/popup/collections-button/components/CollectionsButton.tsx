@@ -12,6 +12,7 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 
 export interface OwnProps {
     pageListsIds: number[]
+    getRootElement: () => HTMLElement
 }
 
 interface StateProps {
@@ -78,6 +79,7 @@ class CollectionsButton extends PureComponent<Props> {
                     <ShortCutContainer>
                         <KeyboardShortcuts
                             keys={this.state.highlightInfo?.split('+')}
+                            getRootElement={this.props.getRootElement}
                         />
                     </ShortCutContainer>
                 </ButtonInnerContent>

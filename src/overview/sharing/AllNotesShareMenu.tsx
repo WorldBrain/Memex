@@ -11,6 +11,7 @@ interface State extends ShareMenuCommonState {}
 
 export interface Props extends ShareMenuCommonProps {
     normalizedPageUrl: string
+    getRootElement: () => HTMLElement
 }
 
 export default class AllNotesShareMenu extends React.Component<Props, State> {
@@ -105,6 +106,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                 autoShareState={null}
                 context={'AllNotesShare'}
                 link={this.state.link}
+                getRootElement={this.props.getRootElement}
                 onCopyLinkClick={this.handleLinkCopy}
                 linkTitleCopy="Link to page and its public annotations"
                 privacyOptionsTitleCopy="Set privacy for all notes on this page"
@@ -117,6 +119,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                             'Auto-added to Spaces the page is shared to',
                         icon: 'globe',
                         onClick: this.handleSetShared,
+                        getRootElement: this.props.getRootElement,
                     },
                     {
                         title: 'Private',
@@ -124,6 +127,7 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
                         description: 'Private to you, until shared in Spaces',
                         icon: 'personFine',
                         onClick: this.handleSetPrivate,
+                        getRootElement: this.props.getRootElement,
                     },
                 ]}
                 shortcutHandlerDict={{

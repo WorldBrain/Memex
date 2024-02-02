@@ -64,6 +64,7 @@ class FiltersSidebar extends Component<Props, State> {
                             <TooltipBox
                                 placement="right"
                                 tooltipText={'Clear filters'}
+                                getPortalRoot={null}
                             >
                                 <span
                                     className={styles.clearFilters}
@@ -75,6 +76,7 @@ class FiltersSidebar extends Component<Props, State> {
                     <TooltipBox
                         tooltipText={'Close filters sidebar'}
                         placement="right"
+                        getPortalRoot={null}
                     >
                         <button
                             className={styles.arrow}
@@ -107,7 +109,11 @@ class FiltersSidebar extends Component<Props, State> {
                         />
                     </div>
                     <div className={styles.filterDiv}>
-                        <UsersFilter tooltipPosition="inpage" env="inpage" />
+                        <UsersFilter
+                            getRootElement={null}
+                            tooltipPosition="inpage"
+                            env="inpage"
+                        />
                     </div>
                     <div className={styles.filterDiv}>
                         <HashtagsFilter tooltipPosition="inpage" env="inpage" />

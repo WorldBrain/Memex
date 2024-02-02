@@ -24,13 +24,21 @@ const CreateListForm = (props) => (
                 required
             />
             <span className={styles.buttonBox}>
-                <TooltipBox tooltipText="Save" placement="bottom">
+                <TooltipBox
+                    tooltipText="Save"
+                    placement="bottom"
+                    getPortalRoot={null}
+                >
                     <button
                         type="submit"
                         className={cx(styles.tick, styles.button)}
                     />
                 </TooltipBox>
-                <TooltipBox tooltipText="Cancel" placement="bottom">
+                <TooltipBox
+                    tooltipText="Cancel"
+                    placement="bottom"
+                    getPortalRoot={null}
+                >
                     <button
                         onClick={props.closeCreateListForm}
                         className={cx(styles.deleteButton, styles.button)}

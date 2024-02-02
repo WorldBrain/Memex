@@ -17,6 +17,7 @@ import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles
 
 interface RootProps {
     store: ReturnType<typeof configureStore>
+    getRootElement: () => HTMLElement
 }
 
 interface RootState {
@@ -41,7 +42,10 @@ class Root extends React.Component<RootProps, RootState> {
             <Provider store={this.props.store}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <ErrorBoundary component={RuntimeError}>
-                        <Popup analyticsBG={null} />
+                        <Popup
+                            getRootElement={this.props.getRootElement}
+                            analyticsBG={null}
+                        />
                     </ErrorBoundary>
                 </ThemeProvider>
             </Provider>
@@ -56,7 +60,13 @@ function main() {
 
     document.getElementById('loader').remove()
 
-    ReactDOM.render(<Root store={store} />, document.getElementById('app'))
+    ReactDOM.render(
+        <Root
+            getRootElement={() => document.getElementById('body')}
+            store={store}
+        />,
+        document.getElementById('app'),
+    )
 }
 
 main()

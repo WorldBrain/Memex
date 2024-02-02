@@ -31,6 +31,7 @@ type AnnotationCreateData = {
 
 interface AnnotationUpdateData {
     localId: string
+    body: string
     comment: string | null
     color?: RGBAColor | string | string
 }
@@ -208,15 +209,18 @@ export async function updateAnnotation({
     return {
         remoteAnnotationId,
         savePromise: (async () => {
-            if (annotationData.comment != null) {
+            if (annotationData.comment != null || annotationData.body != null) {
                 await annotationsBG.editAnnotation(
                     annotationData.localId,
                     annotationData.comment
-                        .replace(/\\\[/g, '[')
-                        .replace(/\\\]/g, ']')
-                        .replace(/\\\(/g, '(')
-                        .replace(/\\\)/g, ')'),
+                        ? annotationData.comment
+                              .replace(/\\\[/g, '[')
+                              .replace(/\\\]/g, ']')
+                              .replace(/\\\(/g, '(')
+                              .replace(/\\\)/g, ')')
+                        : null,
                     annotationData.color,
+                    annotationData.body ?? null,
                 )
             }
 

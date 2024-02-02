@@ -35,6 +35,7 @@ export interface Props {
     query
     requestSearcher
     position
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -392,6 +393,7 @@ class Container extends React.Component<Props, State> {
                     changePosition={this.changePosition}
                     renderResultItems={this.renderResultItems}
                     renderNotification={this.renderNotification()}
+                    getRootElement={this.props.getRootElement}
                 />
             </>
         )

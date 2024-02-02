@@ -372,6 +372,7 @@ export function createSelfTests(options: {
                                 publicAnnotationUrl,
                                 'Edited comment',
                                 'one',
+                                'Edited body',
                             )
                         }
                         console.log('Shared and edited annotation')

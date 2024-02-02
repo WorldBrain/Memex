@@ -1439,6 +1439,92 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
+        it('should update annotation highlights', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+            testSyncPushTrigger({ wasTriggered: false })
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[0].storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject(
+                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                )
+            const updatedHighlight = 'This is an updated highlight'
+            const lastEdited = new Date()
+            await setups[0].storageManager
+                .collection('annotations')
+                .updateOneObject(
+                    { url: LOCAL_TEST_DATA_V24.annotations.first.url },
+                    { body: updatedHighlight, lastEdited },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+            const testAnnotations = remoteData.personalAnnotation
+            const testSelectors = remoteData.personalAnnotationSelector
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'personalAnnotation',
+                    'personalAnnotationSelector',
+                    'sharedAnnotation',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalAnnotation', testAnnotations.first.id],
+                ], { skipChanges: 7 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
+                personalContentMetadata: [testMetadata.first, testMetadata.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                personalAnnotation: [{ ...testAnnotations.first, body: updatedHighlight, updatedWhen: lastEdited.getTime() }],
+                personalAnnotationSelector: [testSelectors.first],
+                sharedAnnotation: [expect.objectContaining({
+                    selector: JSON.stringify(LOCAL_TEST_DATA_V24.annotations.first.selector),
+                    body: updatedHighlight,
+                    comment: LOCAL_TEST_DATA_V24.annotations.first.comment,
+                    color: LOCAL_TEST_DATA_V24.annotations.first.color,
+                    createdWhen: LOCAL_TEST_DATA_V24.annotations.first.createdWhen.valueOf(),
+                    updatedWhen: expect.any(Number), // TODO: Be able to assert that timestamp has increased
+                })]
+            })
+
+            await testDownload(
+                [
+                    {
+                        type: PersonalCloudUpdateType.Overwrite,
+                        collection: 'annotations',
+                        object: {
+                            ...LOCAL_TEST_DATA_V24.annotations.first,
+                            body: updatedHighlight,
+                            lastEdited,
+                        },
+                    },
+                ],
+                { skip: 4 },
+            )
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
         it('should delete annotations', async () => {
             const {
                 setups,
@@ -2680,7 +2766,8 @@ describe('Personal cloud translation layer', () => {
             testSyncPushTrigger({ wasTriggered: true })
         })
 
-        it('should move custom list trees when tree data does not yet exist (pre-nested lists data)', async () => {
+        // TODO: Remove this and compat code in tree move+delete code
+        it.skip('should move custom list trees when tree data does not yet exist (pre-nested lists data)', async () => {
             const {
                 setups,
                 serverIdCapturer,

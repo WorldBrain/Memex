@@ -14,6 +14,7 @@ interface Props {
     cancelBtnClassName: any
     actionBtnClickHandler: () => void
     cancelBtnClickHandler: () => void
+    getRootElement: () => HTMLElement
 }
 
 /* tslint:disable-next-line variable-name */
@@ -25,6 +26,7 @@ const Footer = ({
     cancelBtnClassName,
     actionBtnClickHandler,
     cancelBtnClickHandler,
+    getRootElement,
 }: Props) => (
     <div className={styles.footer}>
         <div>
@@ -33,7 +35,11 @@ const Footer = ({
             )}
         </div>
         <div className={styles.savecancel}>
-            <TooltipBox tooltipText={`${MOD_KEY} + Enter`} placement="top">
+            <TooltipBox
+                tooltipText={`${MOD_KEY} + Enter`}
+                placement="top"
+                getPortalRoot={getRootElement}
+            >
                 <button
                     className={actionBtnClassName}
                     onClick={(e) => {

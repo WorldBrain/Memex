@@ -64,7 +64,11 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
     )
 
     renderUsersFilter = () => (
-        <UsersFilter tooltipPosition="bottom" env="overview" />
+        <UsersFilter
+            getRootElement={null}
+            tooltipPosition="bottom"
+            env="overview"
+        />
     )
 
     renderHashtagsFilter = () => (
@@ -82,6 +86,7 @@ class SearchFiltersContainer extends PureComponent<Props, State> {
                 contentFilter={this.renderContentFilter()}
                 userFilter={this.renderUsersFilter()}
                 toggleFilterBar={this.props.toggleFilterBar}
+                getRootElement={null}
             />
         )
     }
@@ -97,7 +102,7 @@ const mapDispatchToProps: MapDispatchToProps<
     DispatchProps,
     OwnProps,
     RootState
-> = dispatch => ({
+> = (dispatch) => ({
     fetchSuggestedTags: () => dispatch(actions.fetchSuggestedTags()),
     fetchSuggestedHashtags: () => dispatch(actions.fetchSuggestedHashtags()),
     fetchSuggestedDomains: () => dispatch(actions.fetchSuggestedDomains()),

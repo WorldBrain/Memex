@@ -57,6 +57,7 @@ export interface AnnotationCreateGeneralProps {
     renderSpacePicker(): JSX.Element
     sidebarEvents?: AnnotationsSidebarInPageEventEmitter
     imageSupport: ImageSupportInterface<'caller'>
+    getRootElement: () => HTMLElement
 }
 
 export interface Props
@@ -305,6 +306,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     this.state.isListPickerShown &&
                     (() => this.toggleSpacePicker())
                 }
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.props.renderSpacePicker()}
             </PopoutBox>
@@ -325,6 +327,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         <TooltipBox
                             tooltipText="Cancel Edit (esc)"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={this.handleCancel}
@@ -337,6 +340,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             onSave={this.handleSave}
                             hasSharedLists={this.hasSharedLists}
                             shortcutText={`${AnnotationCreate.MOD_KEY} + Enter`}
+                            getRootElement={this.props.getRootElement}
                         />
                     </SaveCancelArea>
                 </BtnContainerStyled>
@@ -377,6 +381,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 getYoutubePlayer={this.props.getYoutubePlayer}
                                 sidebarEvents={this.props.sidebarEvents}
                                 imageSupport={this.props.imageSupport}
+                                getRootElement={this.props.getRootElement}
                             />
                         ) : (
                             <EditorDummy

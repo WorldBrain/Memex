@@ -432,10 +432,18 @@ export default class DirectLinkingBackground {
         })
     }
 
-    async editAnnotation(_: any, url: string, comment: string, color: string) {
+    async editAnnotation(
+        _: any,
+        url: string,
+        comment: string,
+        color: string,
+        body: string,
+    ) {
         const existingAnnotation = await this.getAnnotationByPk(url, {
             url: url,
         })
+
+        console.log('edithappens', body)
 
         if (!existingAnnotation?.comment?.length) {
             if (this.options.analyticsBG) {
@@ -451,7 +459,12 @@ export default class DirectLinkingBackground {
             }
         }
 
-        return this.annotationStorage.editAnnotation(url, comment, color)
+        return this.annotationStorage.editAnnotation(
+            url,
+            comment ?? existingAnnotation.comment,
+            color,
+            body,
+        )
     }
 
     async deleteAnnotation(_, pk, isSocialPost?: boolean) {
