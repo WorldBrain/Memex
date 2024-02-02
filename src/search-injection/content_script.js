@@ -30,7 +30,7 @@ export async function initSearchInjection({
             try {
                 const query = utils.fetchQuery(url)
 
-                await handleRender(
+                await handleRenderSearchInjection(
                     query,
                     requestSearcher,
                     matched,
