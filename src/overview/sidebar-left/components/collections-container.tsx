@@ -60,6 +60,7 @@ class CollectionsButton extends PureComponent<Props, State> {
                             : 'Keep Sidebar Open'
                     }
                     placement="bottom"
+                    getPortalRoot={null}
                 >
                     <div
                         className={cx(styles.showListBtn, {

@@ -37,6 +37,7 @@ interface Props {
     shouldRenderEsts: boolean
     shouldRenderProgress: boolean
     allowTypes: any
+    getRootElement: () => HTMLElement
 }
 
 const Warning = ({ children }) => (
@@ -381,6 +382,9 @@ class Import extends React.PureComponent<Props> {
                                                 'Sync was not running in a while, so we stopped buffering updates'
                                             }
                                             placement={'bottom'}
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <SyncStatusContent>
                                                 <Icon
@@ -398,6 +402,9 @@ class Import extends React.PureComponent<Props> {
                                                 'Sync is not running but we have been buffering your last updates (up to 2000)'
                                             }
                                             placement={'bottom'}
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <SyncStatusContent>
                                                 <Icon
@@ -575,6 +582,9 @@ class Import extends React.PureComponent<Props> {
                                                 </span>
                                             }
                                             placement="bottom"
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <SettingsEntry>
                                                 <SettingsLabel>
@@ -718,6 +728,9 @@ class Import extends React.PureComponent<Props> {
                                                 'Sync was not running in a while, so we stopped buffering updates'
                                             }
                                             placement={'bottom'}
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <SyncStatusContent>
                                                 <Icon
@@ -735,6 +748,9 @@ class Import extends React.PureComponent<Props> {
                                                 'Sync is not running but we have been buffering your last updates (up to 2000)'
                                             }
                                             placement={'bottom'}
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <SyncStatusContent>
                                                 <Icon
@@ -910,6 +926,9 @@ class Import extends React.PureComponent<Props> {
                                                 </span>
                                             }
                                             placement="bottom"
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <SettingsEntry>
                                                 <SettingsLabel>

@@ -94,6 +94,7 @@ const PioneerPlanBanner = ({
                 <TooltipBox
                     placement="bottom"
                     tooltipText="Find this message again in your account settings."
+                    getPortalRoot={null}
                 >
                     <Icon
                         icon="removeX"

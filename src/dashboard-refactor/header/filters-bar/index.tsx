@@ -43,6 +43,7 @@ export interface FiltersBarProps {
     spacePickerProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
     spaceSidebarLocked: boolean
+    getRootElement: () => HTMLElement
 }
 
 export default class FiltersBar extends PureComponent<FiltersBarProps> {
@@ -184,6 +185,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 placement={'bottom-start'}
                 offsetX={10}
                 closeComponent={this.props.toggleDatesFilter}
+                getPortalRoot={this.props.getRootElement}
             >
                 <DatePicker
                     {...this.props.datePickerProps}
@@ -204,6 +206,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 placement={'bottom-start'}
                 offsetX={10}
                 closeComponent={this.props.toggleSpaceFilter}
+                getPortalRoot={this.props.getRootElement}
             >
                 <SpacePicker
                     {...this.props.spacePickerProps}
@@ -227,6 +230,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 placement={'bottom-start'}
                 offsetX={10}
                 closeComponent={this.props.toggleDomainsFilter}
+                getPortalRoot={this.props.getRootElement}
             >
                 <DomainPicker
                     {...this.props.domainPickerProps}

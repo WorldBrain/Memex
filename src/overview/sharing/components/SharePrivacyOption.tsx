@@ -18,6 +18,7 @@ export interface Props {
     isSelected?: boolean
     hasProtectedOption?: boolean
     onClick: (isProtected?: boolean) => void
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -48,6 +49,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
             <TooltipBox
                 tooltipText={this.props.description}
                 placement={'bottom-start'}
+                getPortalRoot={this.props.getRootElement}
             >
                 <PrivacyOptionItem
                     onClick={() => this.props.onClick(false)}
@@ -77,6 +79,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
                             <KeyboardShortcuts
                                 keys={this.props.shortcut.split('+')}
                                 size={'small'}
+                                getRootElement={this.props.getRootElement}
                             />
                         </PrivacyOptionTitleBox>
                     </PrivacyOptionBox>

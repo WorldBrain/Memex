@@ -296,6 +296,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             <Title>Quick Save Page</Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'S']}
+                                getRootElement={null}
                             />
                         </TitleArea>
                         <Description>
@@ -328,6 +329,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             <Title>Create a Highlight</Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'A']}
+                                getRootElement={null}
                             />
                         </TitleArea>
                         <Description>
@@ -362,6 +364,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             </Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'X']}
+                                getRootElement={null}
                             />
                         </TitleArea>
                         <Description>
@@ -394,6 +397,7 @@ export const tutorialSteps: TutorialStepContent[] = [
                             <Title>Organise with Spaces</Title>
                             <KeyboardShortcuts
                                 keys={[getKeyName({ key: 'alt' }), 'C']}
+                                getRootElement={null}
                             />
                         </TitleArea>
                         <Description>

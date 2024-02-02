@@ -18,6 +18,7 @@ export interface Props {
     searchParams?: BackgroundSearchParams
     hideCopyPaster?: React.MouseEventHandler
     toggleCopyPaster?: React.MouseEventHandler
+    getRootElement: () => HTMLElement
 }
 
 class SearchCopyPaster extends React.Component<Props> {
@@ -55,6 +56,7 @@ class SearchCopyPaster extends React.Component<Props> {
                         this.props.toggleCopyPaster
                     }
                     targetElementRef={this.copypasterButtonRef.current}
+                    getPortalRoot={this.props.getRootElement}
                 >
                     {this.renderCopyPaster()}
                 </PopoutBox>
@@ -70,6 +72,7 @@ class SearchCopyPaster extends React.Component<Props> {
                 <TooltipBox
                     tooltipText={'Copy Search Results'}
                     placement="bottom"
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
                         filePath={icons.copy}

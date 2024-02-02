@@ -124,6 +124,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                                 <TooltipBox
                                     tooltipText="Saving Tweets is in beta mode. Bugs may appear. Let us know: support@worldbrain.io or github.com/worldbrain"
                                     placement="bottom"
+                                    getPortalRoot={null}
                                 >
                                     <span className={styles.beta}>beta</span>
                                 </TooltipBox>
@@ -136,6 +137,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                         <TooltipBox
                             tooltipText="Share selected list"
                             placement="bottom"
+                            getPortalRoot={null}
                         >
                             <button
                                 className={styles.searchActionBtn}
@@ -153,6 +155,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
                             <TooltipBox
                                 tooltipText="Copy-Paste Results"
                                 placement="bottom"
+                                getPortalRoot={null}
                             >
                                 <button
                                     className={styles.searchActionBtn}

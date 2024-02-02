@@ -89,6 +89,7 @@ export interface SidebarContainerDependencies {
     hasFeedActivity?: boolean
     clickFeedActivityIndicator?: () => void
     copyToClipboard: (text: string) => Promise<boolean>
+    getRootElement: () => HTMLElement
 }
 
 export interface EditForm {

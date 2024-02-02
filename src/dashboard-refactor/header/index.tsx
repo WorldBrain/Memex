@@ -66,6 +66,7 @@ export interface HeaderProps {
     syncStatusIconState: any
     activityStatus?: boolean
     sidebarWidth?: string
+    getRootElement: () => HTMLElement
 }
 
 export type Props = HeaderProps & {}
@@ -112,6 +113,7 @@ function renderSyncStatusMenu(
             offsetY={5}
             closeComponent={() => syncStatusMenuProps.onToggleDisplayState()}
             placement={'bottom-end'}
+            getPortalRoot={syncStatusMenuProps.getRootElement}
         >
             <SyncStatusMenu
                 {...syncStatusMenuProps}

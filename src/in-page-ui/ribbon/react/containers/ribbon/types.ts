@@ -43,5 +43,6 @@ export interface RibbonContainerDependencies {
         'extension' | 'inPageUI' | 'activityIndicator'
     >
     currentUser?: UserReference
+    getRootElement: () => HTMLElement
     openPDFinViewer: (url: string) => Promise<void>
 }

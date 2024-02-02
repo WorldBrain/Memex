@@ -78,6 +78,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     onConfirmListDelete: (listId: string) => void
     spaceSidebarWidth: string
     someListIsDragging: boolean
+    getRootElement: () => HTMLElement
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -334,6 +335,9 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                 this.spaceToggleButtonRef
                                                     .current
                                             }
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <Icon
                                                 containerRef={
@@ -419,6 +423,10 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                                     placement={'bottom'}
                                                     tooltipText={
                                                         'Add Sub-Space'
+                                                    }
+                                                    getPortalRoot={
+                                                        this.props
+                                                            .getRootElement
                                                     }
                                                 >
                                                     <Icon

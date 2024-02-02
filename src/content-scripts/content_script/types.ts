@@ -31,7 +31,10 @@ export type SidebarScriptMain = (
 export type RibbonScriptMain = (
     options: Omit<
         RibbonContainerDependencies,
-        'setSidebarEnabled' | 'getSidebarEnabled' | 'currentTab'
+        | 'setSidebarEnabled'
+        | 'getSidebarEnabled'
+        | 'currentTab'
+        | 'getRootElement'
     > & {
         inPageUI: SharedInPageUIInterface
         analyticsBG: AnalyticsCoreInterface
@@ -49,10 +52,6 @@ export interface HighlightDependencies {
 export interface SearchInjectionDependencies {
     requestSearcher: any
     syncSettingsBG: RemoteSyncSettingsInterface
-}
-
-export interface SearchInjectionDependencies {
-    requestSearcher: any
 }
 
 export type HighlightsScriptMain = (

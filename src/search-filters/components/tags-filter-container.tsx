@@ -60,6 +60,7 @@ class TagsFilter extends PureComponent<Props, State> {
                 showPopup={this.props.setTagFilter}
                 clearFilters={this.props.clearTagFilters}
                 disableOnClickOutside={this.props.env === 'inpage'}
+                getRootElement={null}
             >
                 {this.props.tagFilterDropdown && (
                     <Tooltip

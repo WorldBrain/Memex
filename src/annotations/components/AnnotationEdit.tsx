@@ -40,6 +40,7 @@ export interface AnnotationEditGeneralProps {
     getYoutubePlayer?(): YoutubePlayer
     contextLocation?: string
     selector?: string
+    getRootElement: () => HTMLElement
 }
 
 export interface Props
@@ -147,6 +148,7 @@ class AnnotationEdit extends React.Component<Props> {
                     autoFocus
                     youtubeShortcut={this.state.youtubeShortcut}
                     imageSupport={this.props.imageSupport}
+                    getRootElement={this.props.getRootElement}
                 />
             </EditorContainer>
         )

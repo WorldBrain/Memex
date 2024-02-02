@@ -129,6 +129,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     bgScriptBG?: RemoteBGScriptInterface
     spacesBG?: SpacePickerDependencies['spacesBG']
     pkmSyncBG?: PkmSyncInterface
+    getRootElement: () => HTMLElement
 }
 
 type EventHandler<
