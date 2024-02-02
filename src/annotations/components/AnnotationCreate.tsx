@@ -327,6 +327,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                         <TooltipBox
                             tooltipText="Cancel Edit (esc)"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={this.handleCancel}

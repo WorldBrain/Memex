@@ -196,6 +196,7 @@ class EntryRow extends React.Component<Props> {
                                     </>
                                 }
                                 placement="top"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <PrimaryAction
                                     icon={'checkRound'}
@@ -215,6 +216,7 @@ class EntryRow extends React.Component<Props> {
                                     this.props.actOnAllTooltipText ?? ''
                                 }
                                 placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <PrimaryAction
                                     icon={'multiEdit'}
@@ -303,6 +305,7 @@ class EntryRow extends React.Component<Props> {
                             <TooltipBox
                                 tooltipText={'Shared Space'}
                                 placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     heightAndWidth="14px"
@@ -328,6 +331,7 @@ class EntryRow extends React.Component<Props> {
                                 targetElementRef={
                                     this.props.extraMenuBtnRef?.current
                                 }
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <ButtonContainer
                                     ref={this.props.extraMenuBtnRef}
@@ -352,6 +356,7 @@ class EntryRow extends React.Component<Props> {
                                 tooltipText={'Share Space'}
                                 placement="bottom"
                                 targetElementRef={contextMenuBtnRef?.current}
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <ButtonContainer ref={contextMenuBtnRef}>
                                     <Icon

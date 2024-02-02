@@ -161,7 +161,11 @@ export default class ListDetails extends PureComponent<Props, State> {
         }
 
         return (
-            <TooltipBox placement="bottom" tooltipText={'Edit Space'}>
+            <TooltipBox
+                placement="bottom"
+                tooltipText={'Edit Space'}
+                getPortalRoot={this.props.getRootElement}
+            >
                 <Icon
                     hoverOff={!this.props.isOwnedList}
                     onClick={() =>
@@ -217,6 +221,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                                     <TooltipBox
                                         tooltipText="esc"
                                         placement="bottom"
+                                        getPortalRoot={
+                                            this.props.getRootElement
+                                        }
                                     >
                                         <Icon
                                             heightAndWidth="22px"
@@ -232,6 +239,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                                     <TooltipBox
                                         tooltipText={`${ListDetails.MOD_KEY} + Enter`}
                                         placement="bottom"
+                                        getPortalRoot={
+                                            this.props.getRootElement
+                                        }
                                     >
                                         <Icon
                                             heightAndWidth="22px"
@@ -283,6 +293,9 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                 </TooltipTextContent>
                                             }
                                             placement="bottom-end"
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <PrimaryAction
                                                 label={'Clear Inbox'}
@@ -309,6 +322,10 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                                     'bottom'
                                                                 }
                                                                 tooltipText="Open in web view"
+                                                                getPortalRoot={
+                                                                    this.props
+                                                                        .getRootElement
+                                                                }
                                                             >
                                                                 <Icon
                                                                     height="22px"
@@ -346,6 +363,10 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                         <TooltipBox
                                                             tooltipText="Invite people to this Space"
                                                             placement="bottom"
+                                                            getPortalRoot={
+                                                                this.props
+                                                                    .getRootElement
+                                                            }
                                                         >
                                                             <PrimaryAction
                                                                 onClick={
@@ -424,6 +445,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 getKeyboardShortcutsState={
                                     getKeyboardShortcutsState
                                 }
+                                getRootElement={this.props.getRootElement}
                             />
                         </PopoutBox>
                     )}

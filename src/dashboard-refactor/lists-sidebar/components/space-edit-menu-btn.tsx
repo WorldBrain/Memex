@@ -61,6 +61,7 @@ export default class SpaceEditMenuBtn extends PureComponent<Props> {
                     tooltipText={'Edit Space'}
                     placement={'bottom'}
                     strategy={'fixed'}
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
                         onClick={(e) => this.toggleEditMenu(e)}

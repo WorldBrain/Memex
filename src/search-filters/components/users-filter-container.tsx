@@ -36,6 +36,7 @@ interface DispatchProps {
 interface OwnProps {
     env: 'inpage' | 'overview'
     tooltipPosition: string
+    getRootElement: () => HTMLElement
 }
 
 type Props = StateProps & DispatchProps & OwnProps
@@ -67,6 +68,7 @@ class UsersFilter extends PureComponent<Props, State> {
                 showPopup={this.props.setUserFilter}
                 clearFilters={this.props.clearUserFilters}
                 disableOnClickOutside={this.props.env === 'inpage'}
+                getRootElement={null}
             >
                 {this.props.userFilterDropdown && (
                     <Tooltip

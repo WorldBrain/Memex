@@ -30,6 +30,7 @@ async function writeShortcutState(state: State) {
 export interface Props {
     shortcutsData: ShortcutElData[]
     syncSettingsBG: RemoteSyncSettingsInterface
+    getRootElement: () => HTMLElement
 }
 
 export interface State extends BaseKeyboardShortcuts {
@@ -156,7 +157,12 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                                         )}
                                     </Title>
                                     <KeyBoardShortCutBehind>
-                                        <KeyboardShortcuts keys={keysArray} />
+                                        <KeyboardShortcuts
+                                            keys={keysArray}
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
+                                        />
                                     </KeyBoardShortCutBehind>
                                     <KeyboardInput
                                         type="text"

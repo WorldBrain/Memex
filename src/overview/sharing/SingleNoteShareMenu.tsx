@@ -240,6 +240,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                                 '+',
                                             )}
                                             size={'small'}
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
                                         />
                                     </KeyboardShortCutBox>
                                 </>
@@ -264,6 +267,9 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                                 '+',
                                             )}
                                             size={'small'}
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
                                         />
                                     </KeyboardShortCutBox>
                                 </>
@@ -597,6 +603,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                             in specific Spaces
                                         </>
                                     ),
+                                    getRootElement: this.props.getRootElement,
                                 },
                                 {
                                     icon: 'globe',
@@ -612,6 +619,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                             <br /> the page is added to{' '}
                                         </>
                                     ),
+                                    getRootElement: this.props.getRootElement,
                                 },
                             ]}
                             shortcutHandlerDict={{
@@ -623,6 +631,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                                 'alt+shift+enter': () =>
                                     this.handleSetShared(true),
                             }}
+                            getRootElement={this.props.getRootElement}
                         />
                     </ShareMenuContainer>
                     <SpacepickerContainer>

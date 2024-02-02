@@ -72,6 +72,7 @@ class SearchCopyPaster extends React.Component<Props> {
                 <TooltipBox
                     tooltipText={'Copy Search Results'}
                     placement="bottom"
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
                         filePath={icons.copy}

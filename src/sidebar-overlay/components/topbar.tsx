@@ -19,6 +19,7 @@ interface Props {
     handleSettingsBtnClick: () => void
     handleAddCommentBtnClick: () => void
     handleClearFiltersBtnClick: React.MouseEventHandler<HTMLSpanElement>
+    getRootElement: () => HTMLElement
 }
 
 /* tslint:disable-next-line variable-name */
@@ -27,11 +28,16 @@ const Topbar = ({
     handleCloseBtnClick,
     handleSettingsBtnClick,
     handleAddCommentBtnClick,
+    getRootElement,
     ...props
 }: Props) => (
     <div className={styles.topbar}>
         {props.env === 'overview' && (
-            <TooltipBox tooltipText="Close (ESC)" placement="right">
+            <TooltipBox
+                tooltipText="Close (ESC)"
+                placement="right"
+                getPortalRoot={getRootElement}
+            >
                 <CloseButton
                     title="Close sidebar once. Disable via Memex icon in the extension toolbar."
                     clickHandler={(e) => {
@@ -61,6 +67,7 @@ const Topbar = ({
                         <TooltipBox
                             placement="bottom"
                             tooltipText={'Clear filters'}
+                            getPortalRoot={getRootElement}
                         >
                             <span
                                 className={styles.clearFilters}
@@ -74,7 +81,11 @@ const Topbar = ({
         {props.env === 'overview' && (
             <div className={styles.right}>
                 {/* Button to add a comment. */}
-                <TooltipBox tooltipText="Add notes to page" placement="left">
+                <TooltipBox
+                    tooltipText="Add notes to page"
+                    placement="left"
+                    getPortalRoot={getRootElement}
+                >
                     <button
                         className={cx(styles.button, styles.comments, {
                             [styles.disabled]: disableAddCommentBtn,

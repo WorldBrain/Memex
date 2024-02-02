@@ -22,6 +22,7 @@ interface ResultsProps {
     changePosition: Function
     renderResultItems: Function
     renderNotification: React.ReactNode
+    getRootElement: () => HTMLElement
 }
 interface ResultsState {
     themeVariant?: MemexThemeVariant
@@ -72,6 +73,7 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                         ? 'Show Results'
                                         : 'Hide Results'
                                 }
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     filePath={
@@ -90,6 +92,7 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                             <TooltipBox
                                 placement={'bottom'}
                                 tooltipText={'Go to Dashboard'}
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     filePath={'searchIcon'}
@@ -102,6 +105,7 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                 <TooltipBox
                                     placement={'bottom'}
                                     tooltipText={'Settings'}
+                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <Icon
                                         filePath={'settings'}

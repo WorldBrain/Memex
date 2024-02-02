@@ -135,6 +135,7 @@ class IndexDropdownRow extends PureComponent {
                             <TooltipBox
                                 tooltipText="Exclude from search"
                                 placement="left"
+                                getPortalRoot={null}
                             >
                                 <span
                                     ref={(ref) => (this.excRef = ref)}

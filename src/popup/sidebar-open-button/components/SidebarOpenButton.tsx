@@ -14,6 +14,7 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 
 export interface OwnProps {
     closePopup: () => void
+    getRootElement: () => HTMLElement
 }
 
 interface StateProps {
@@ -66,6 +67,7 @@ class SidebarOpenButton extends PureComponent<Props, State> {
                     <ShortCutContainer>
                         <KeyboardShortcuts
                             keys={this.state.highlightInfo?.split('+')}
+                            getRootElement={this.props.getRootElement}
                         />
                     </ShortCutContainer>
                 </ButtonInnerContent>

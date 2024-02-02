@@ -18,6 +18,7 @@ export interface Props extends Dependencies {
     pageLinkCreateState?: TaskState
     disableWriteOps?: boolean
     showSpacesTab: () => void
+    getRootElement: () => HTMLElement
 }
 
 export default class PageLinkShareMenuContainer extends StatefulUIElement<
@@ -114,6 +115,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                     }
                                     placement="bottom"
                                     width="140px"
+                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <Icon
                                         icon={helpIcon}
@@ -131,6 +133,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                     </span>
                                 }
                                 placement="bottom-end"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <PrimaryAction
                                     label={'New'}
@@ -165,6 +168,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                             this.processEvent('copyInviteLink', { link })
                         }
                         isPageLink={this.props.listData.type === 'page-link'}
+                        getRootElement={this.props.getRootElement}
                     />
                     {this.props.pageLinkCreateState !== 'running' && (
                         <SpaceEmailInvites {...this.props} />

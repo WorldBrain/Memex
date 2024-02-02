@@ -54,10 +54,6 @@ export interface SearchInjectionDependencies {
     syncSettingsBG: RemoteSyncSettingsInterface
 }
 
-export interface SearchInjectionDependencies {
-    requestSearcher: any
-}
-
 export type HighlightsScriptMain = (
     options: HighlightDependencies,
 ) => Promise<void>

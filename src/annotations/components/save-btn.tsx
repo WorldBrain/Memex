@@ -162,6 +162,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                     !this.props.isShared &&
                                     !this.props.hasSharedLists
                                 }
+                                getRootElement={this.props.getRootElement}
                             />
                             <SharePrivacyOption
                                 hasProtectedOption
@@ -179,6 +180,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 }
                                 onClick={this.saveWithShareIntent(true)}
                                 isSelected={this.props.isShared}
+                                getRootElement={this.props.getRootElement}
                             />
                         </PrivacyOptionsBox>
                     </PrivacyOptionsContainer>
@@ -199,18 +201,23 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                 <KeyboardShortcuts
                                     keys={this.props.shortcutText.split('+')}
                                     size={'small'}
+                                    getRootElement={this.props.getRootElement}
                                 />
                                 <BottomText>
                                     +{' '}
                                     <KeyboardShortcuts
                                         optional={'shift'}
                                         size={'small'}
+                                        getRootElement={
+                                            this.props.getRootElement
+                                        }
                                     />
                                     to make auto-add to all Spaces
                                 </BottomText>
                             </SaveButtonTooltipContainer>
                         }
                         placement="bottom-end"
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <PrimaryAction
                             icon={'check'}

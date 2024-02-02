@@ -424,6 +424,7 @@ class SpacePicker extends StatefulUIElement<
                                 isPrivate,
                             })
                         }
+                        getRootElement={this.props.getRootElement}
                     />
                 </>
             )
@@ -541,6 +542,7 @@ class SpacePicker extends StatefulUIElement<
                         onPress={this.handleNewListPress}
                         resultsCount={this.state.filteredListIds?.length}
                         commandKey={SpacePicker.MOD_KEY}
+                        getRootElement={this.props.getRootElement}
                     />
                 )}
             </PickerContainer>

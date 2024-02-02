@@ -408,6 +408,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     : 'Show Less'
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={() => this.toggleTextTruncation()}
@@ -427,6 +428,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         <TooltipBox
                             tooltipText="Open in Page"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={onGoToAnnotation}
@@ -448,6 +450,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 </span>
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={footerDeps.onEditIconClick}
@@ -655,6 +658,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     </span>
                                 }
                                 placement="bottom-end"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     onClick={
@@ -816,6 +820,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 )
                             }
                             placement="bottom-start"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <PrimaryAction
                                 onClick={() => {
@@ -862,6 +867,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         borderTop={false}
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
+                        getRootElement={this.props.getRootElement}
                     />
                     {this.renderSpacePicker(
                         this.shareMenuButtonRef,
@@ -1133,6 +1139,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             getKeyboardShortcutsState={
                                 getKeyboardShortcutsState
                             }
+                            getRootElement={this.props.getRootElement}
                         />
                     </PopoutBox>
                 )}

@@ -385,6 +385,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                             </TooltipTextTop>
                         </TooltipTextContainer>
                     }
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
                         icon="key"

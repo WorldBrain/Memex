@@ -21,6 +21,7 @@ export interface OwnProps {
     closePopup: () => void
     pageUrl: string
     isSavedPage: boolean
+    getRootElement: () => HTMLElement
 }
 
 interface StateProps {
@@ -80,6 +81,7 @@ class BookmarkButton extends PureComponent<Props> {
                     <ShortCutContainer>
                         <KeyboardShortcuts
                             keys={this.state.highlightInfo?.split('+')}
+                            getRootElement={this.props.getRootElement}
                         />
                     </ShortCutContainer>
                 </ButtonInnerContent>

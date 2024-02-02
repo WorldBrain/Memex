@@ -1112,6 +1112,7 @@ export class AnnotationsSidebar extends React.Component<
                                 </span>
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 icon={icons.arrowRight}
@@ -1143,6 +1144,7 @@ export class AnnotationsSidebar extends React.Component<
                                         : 'Go to Space'
                                 }
                                 placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     icon="goTo"
@@ -1162,6 +1164,9 @@ export class AnnotationsSidebar extends React.Component<
                                         <TooltipBox
                                             tooltipText="Edit Space"
                                             placement="bottom"
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <Icon
                                                 icon="edit"
@@ -1192,6 +1197,9 @@ export class AnnotationsSidebar extends React.Component<
                                             <TooltipBox
                                                 tooltipText="Share Space"
                                                 placement="bottom-end"
+                                                getPortalRoot={
+                                                    this.props.getRootElement
+                                                }
                                             >
                                                 <Icon
                                                     icon="invite"
@@ -1228,6 +1236,7 @@ export class AnnotationsSidebar extends React.Component<
                                 <TooltipBox
                                     tooltipText="Space is Shared"
                                     placement="bottom-end"
+                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <Icon
                                         filePath="peopleFine"
@@ -1261,6 +1270,7 @@ export class AnnotationsSidebar extends React.Component<
                                 <TooltipBox
                                     tooltipText={'Has annotations by others'}
                                     placement={'bottom-end'}
+                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <TotalAnnotationsCounter>
                                         {this.props
@@ -1824,6 +1834,7 @@ export class AnnotationsSidebar extends React.Component<
                 <TooltipBox
                     tooltipText="Save prompt as template"
                     placement="bottom-end"
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
                         filePath={icons.plus}
@@ -1859,6 +1870,9 @@ export class AnnotationsSidebar extends React.Component<
                                     <TooltipBox
                                         tooltipText="Remove template"
                                         placement="left"
+                                        getPortalRoot={
+                                            this.props.getRootElement
+                                        }
                                     >
                                         <Icon
                                             filePath={icons.removeX}
@@ -2196,6 +2210,9 @@ export class AnnotationsSidebar extends React.Component<
                                             }
                                             placement="bottom"
                                             width="150px"
+                                            getPortalRoot={
+                                                this.props.getRootElement
+                                            }
                                         >
                                             <Checkbox
                                                 key={1}
@@ -2234,6 +2251,9 @@ export class AnnotationsSidebar extends React.Component<
                                             </>
                                         }
                                         placement="bottom-end"
+                                        getPortalRoot={
+                                            this.props.getRootElement
+                                        }
                                     >
                                         <Icon
                                             icon={'commentAdd'}
@@ -2804,6 +2824,7 @@ export class AnnotationsSidebar extends React.Component<
                                 <TooltipBox
                                     tooltipText="Add new recommendation sources"
                                     placement="bottom-end"
+                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <Icon
                                         filePath={icons.plus}
@@ -2841,6 +2862,7 @@ export class AnnotationsSidebar extends React.Component<
                                 <TooltipBox
                                     tooltipText="Add new recommendation sources"
                                     placement="bottom-end"
+                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <Icon
                                         filePath={icons.plus}
@@ -3002,6 +3024,7 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             youtubeService={null}
                             entryData={item}
+                            getRootElement={this.props.getRootElement}
                         />
                     </PageContentBox>
                     {item.spaces?.length > 0 && (
@@ -3851,6 +3874,7 @@ export class AnnotationsSidebar extends React.Component<
                                 <TooltipBox
                                     tooltipText={'Has new feed updates'}
                                     placement={'bottom'}
+                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <LoadingBox hasToolTip>
                                         <PageActivityIndicator active />
@@ -3965,6 +3989,7 @@ export class AnnotationsSidebar extends React.Component<
                                 isPageLink ? 'Edit Page Link' : 'Edit Space'
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 icon="edit"
@@ -3982,6 +4007,7 @@ export class AnnotationsSidebar extends React.Component<
                                 isPageLink ? 'Share Page' : 'Share Space'
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 icon="invite"
@@ -3999,6 +4025,7 @@ export class AnnotationsSidebar extends React.Component<
                                 isPageLink ? 'Open Page Link' : 'Go to Space'
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 icon="goTo"
@@ -4136,6 +4163,7 @@ export class AnnotationsSidebar extends React.Component<
                         }
                         placement={'bottom-end'}
                         width={'200px'}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         {/* <PrimaryAction
                         type="tertiary"
@@ -4203,6 +4231,7 @@ export class AnnotationsSidebar extends React.Component<
                     }
                     placement={'bottom-end'}
                     width={'200px'}
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <PrimaryAction
                         label="Contributor"
@@ -4258,7 +4287,11 @@ export class AnnotationsSidebar extends React.Component<
                 {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}
                 <TopBarActionBtns>
-                    <TooltipBox tooltipText={'Sort Notes'} placement={'bottom'}>
+                    <TooltipBox
+                        tooltipText={'Sort Notes'}
+                        placement={'bottom'}
+                        getPortalRoot={this.props.getRootElement}
+                    >
                         <PrimaryAction
                             icon={'sort'}
                             iconSize="20px"
@@ -4279,6 +4312,7 @@ export class AnnotationsSidebar extends React.Component<
                     <TooltipBox
                         tooltipText={'Copy & Paste Note'}
                         placement={'bottom'}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <PrimaryAction
                             icon={'copy'}

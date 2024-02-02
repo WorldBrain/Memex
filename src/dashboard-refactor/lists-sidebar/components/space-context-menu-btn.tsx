@@ -63,6 +63,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                         tooltipText={'Shared Space'}
                         placement={'bottom'}
                         strategy={'fixed'}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <Icon
                             onClick={(e) => this.toggleMenu(e)}
@@ -83,6 +84,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                         tooltipText={'Share Space'}
                         placement={'bottom'}
                         strategy={'fixed'}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <Icon
                             onClick={(e) => this.toggleMenu(e)}

@@ -40,6 +40,7 @@ export interface Props {
     renderAutoAddDefaultSettings?: JSX.Element
     autoAddButtonRef?: React.RefObject<HTMLDivElement>
     showAutoAddMenu?: (isShown) => void
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -107,6 +108,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                 }
                 placement="bottom"
                 fullWidthTarget
+                getPortalRoot={this.props.getRootElement}
             >
                 <PrimaryAction
                     onClick={() =>

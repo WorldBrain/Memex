@@ -10,7 +10,9 @@ import SpaceEmailInvites from '../space-email-invites'
 import { __wrapClick } from '../utils'
 import SpaceLinks from '../space-links'
 
-export interface Props extends Dependencies {}
+export interface Props extends Dependencies {
+    getRootElement: () => HTMLElement
+}
 
 const SET_LIST_PRIVATE_ID = 'private-space-selection-state'
 
@@ -101,6 +103,7 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                         this.processEvent('copyInviteLink', { link })
                     }
                     isPageLink={this.props.listData.type === 'page-link'}
+                    getRootElement={this.props.getRootElement}
                 />
                 <SpaceEmailInvites {...this.props} />
             </ContextMenuContainer>

@@ -246,6 +246,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                                 </TooltipTextBottom>
                             </TooltipTextContainer>
                         }
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <CounterContainer
                             progress={progressPercentNumber}

@@ -688,9 +688,14 @@ export class AnnotationsSidebarContainer<
                     tooltipText={
                         <TooltipContent>
                             Close{' '}
-                            <KeyboardShortcuts size="small" keys={['Esc']} />
+                            <KeyboardShortcuts
+                                getRootElement={this.props.getRootElement}
+                                size="small"
+                                keys={['Esc']}
+                            />
                         </TooltipContent>
                     }
+                    getPortalRoot={this.props.getRootElement}
                     placement="left"
                 >
                     <IconBoundary>
@@ -717,6 +722,7 @@ export class AnnotationsSidebarContainer<
                         <TooltipBox
                             tooltipText="Unlock sidebar"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 filePath={icons.arrowRight}
@@ -728,6 +734,7 @@ export class AnnotationsSidebarContainer<
                         <TooltipBox
                             tooltipText="Lock sidebar open"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 filePath={icons.arrowLeft}
@@ -740,6 +747,7 @@ export class AnnotationsSidebarContainer<
                         <TooltipBox
                             tooltipText="Adjust Page Width"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 filePath={icons.compress}
@@ -751,6 +759,7 @@ export class AnnotationsSidebarContainer<
                         <TooltipBox
                             tooltipText="Full page width"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 filePath={icons.expand}
@@ -759,7 +768,11 @@ export class AnnotationsSidebarContainer<
                             />
                         </TooltipBox>
                     )}
-                    <TooltipBox tooltipText="Close (ESC)" placement="bottom">
+                    <TooltipBox
+                        tooltipText="Close (ESC)"
+                        placement="bottom"
+                        getPortalRoot={this.props.getRootElement}
+                    >
                         <Icon
                             filePath={icons.removeX}
                             heightAndWidth="22px"
@@ -1261,6 +1274,9 @@ export class AnnotationsSidebarContainer<
                                             )
                                         }
                                         analyticsBG={this.props.analyticsBG}
+                                        getRootElement={
+                                            this.props.getRootElement
+                                        }
                                     />
                                 )
                             }}
@@ -1337,6 +1353,7 @@ export class AnnotationsSidebarContainer<
                                         })
                                     }}
                                     analyticsBG={this.props.analyticsBG}
+                                    getRootElement={this.props.getRootElement}
                                 />
                             )}
                             activeShareMenuNoteId={

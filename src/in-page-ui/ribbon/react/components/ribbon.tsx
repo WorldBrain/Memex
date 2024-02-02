@@ -251,6 +251,7 @@ export default class Ribbon extends Component<Props, State> {
                     <KeyboardShortcuts
                         size={'small'}
                         keys={short.shortcut.split('+')}
+                        getRootElement={this.props.getRootElement}
                     />
                 }
             </TooltipContent>
@@ -600,6 +601,7 @@ export default class Ribbon extends Component<Props, State> {
                                     )
                                 }
                                 hideEditorTutorials
+                                getRootElement={this.props.getRootElement}
                             />
                         </SupportContainerBox>
                     )}
@@ -805,6 +807,7 @@ export default class Ribbon extends Component<Props, State> {
                             <TooltipBox
                                 tooltipText={'Modify existing block list'}
                                 placement={'bottom'}
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     onClick={() =>
@@ -832,6 +835,7 @@ export default class Ribbon extends Component<Props, State> {
                             <TooltipBox
                                 tooltipText={'Add this entry to the block list'}
                                 placement={'bottom'}
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     heightAndWidth="22px"
@@ -896,6 +900,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 'left'
                 }
                 offsetX={0}
+                getPortalRoot={this.props.getRootElement}
             >
                 <FeedButtonContainer ribbonPosition={this.props.ribbonPosition}>
                     <FeedIndicatorBox
@@ -930,12 +935,14 @@ export default class Ribbon extends Component<Props, State> {
                                 <KeyboardShortcuts
                                     keys={['Esc']}
                                     size="small"
+                                    getRootElement={this.props.getRootElement}
                                 />{' '}
                             </CloseTooltipInnerBox>
                             and {this.getTooltipText('toggleSidebar')}
                         </TooltipContentBox>
                     </TooltipContent>
                 }
+                getPortalRoot={this.props.getRootElement}
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -979,6 +986,7 @@ export default class Ribbon extends Component<Props, State> {
                             ? 'top'
                             : 'left'
                     }
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
                         filePath={icons.sideBySide}
@@ -1001,6 +1009,7 @@ export default class Ribbon extends Component<Props, State> {
                             ? 'top'
                             : 'left'
                     }
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <Icon
                         filePath={icons.fullPageReading}
@@ -1035,6 +1044,7 @@ export default class Ribbon extends Component<Props, State> {
                         this.getTooltipText('createBookmark')
                     )
                 }
+                getPortalRoot={this.props.getRootElement}
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -1110,6 +1120,7 @@ export default class Ribbon extends Component<Props, State> {
                         ? 'top'
                         : 'left'
                 }
+                getPortalRoot={this.props.getRootElement}
                 offsetX={10}
             >
                 {(topRight || bottomRight) &&
@@ -1185,6 +1196,7 @@ export default class Ribbon extends Component<Props, State> {
                 tooltipText={this.getTooltipText('toggleSidebar')}
                 placement={topRight ? 'top' : bottomRight ? 'bottom' : 'left'}
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
@@ -1249,6 +1261,7 @@ export default class Ribbon extends Component<Props, State> {
                 tooltipText={this.getTooltipText('sharePage')}
                 placement={topRight ? 'top' : bottomRight ? 'bottom' : 'left'}
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
@@ -1293,6 +1306,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 'left'
                 }
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
@@ -1332,6 +1346,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 'left'
                 }
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
@@ -1370,6 +1385,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 'left'
                 }
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
@@ -1426,6 +1442,7 @@ export default class Ribbon extends Component<Props, State> {
                                 : 'left'
                         }
                         offsetX={10}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <PrimaryAction
                             size={'medium'}
@@ -1450,6 +1467,7 @@ export default class Ribbon extends Component<Props, State> {
                                 : 'left'
                         }
                         offsetX={10}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <PrimaryAction
                             size={'medium'}
@@ -1481,6 +1499,7 @@ export default class Ribbon extends Component<Props, State> {
                                 : 'left'
                         }
                         offsetX={10}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <Icon
                             onClick={() => this.props.openPDFinViewer()}
@@ -1502,6 +1521,7 @@ export default class Ribbon extends Component<Props, State> {
                                 : 'left'
                         }
                         offsetX={10}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <Icon
                             onClick={() => this.props.openPDFinViewer()}
@@ -1538,6 +1558,7 @@ export default class Ribbon extends Component<Props, State> {
                         : 'left'
                 }
                 offsetX={15}
+                getPortalRoot={this.props.getRootElement}
             >
                 <Icon
                     onClick={() => this.props.toggleShowTutorial()}

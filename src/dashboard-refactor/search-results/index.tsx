@@ -611,6 +611,7 @@ export default class SearchResultsContainer extends React.Component<
                             interactionProps.updatePageNotesShareInfo(
                                 shareInfo,
                             ),
+                        getRootElement: this.props.getRootElement,
                     }}
                     {...interactionProps}
                     {...pickerProps}

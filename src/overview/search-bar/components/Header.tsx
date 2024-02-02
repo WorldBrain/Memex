@@ -102,6 +102,7 @@ class Header extends PureComponent<Props> {
                                 <TooltipBox
                                     tooltipText="Clear all Filters"
                                     placement="bottom"
+                                    getPortalRoot={null}
                                 >
                                     <span
                                         className={styles.clearFilters}

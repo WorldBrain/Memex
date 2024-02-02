@@ -372,6 +372,7 @@ export class DashboardContainer extends StatefulUIElement<
                             onClick={() =>
                                 this.processEvent('setAllNotesShown', null)
                             }
+                            getRootElement={this.props.getRootElement}
                         />
                     ),
                     renderCopyPasterButton: () => (
@@ -409,6 +410,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setSearchQuery', { query }),
                     onInputClear: () =>
                         this.processEvent('setSearchQuery', { query: '' }),
+                    getRootElement: this.props.getRootElement,
                 }}
                 selectedListName={
                     listsSidebar.lists.byId[listsSidebar.selectedListId]?.name
@@ -527,6 +529,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onInputClear: () =>
                         this.processEvent('setListQueryValue', { query: '' }),
                     areLocalListsEmpty: !ownListsData.length,
+                    getRootElement: this.props.getRootElement,
                 }}
                 ownListsGroup={{
                     isExpanded: listsSidebar.areLocalListsExpanded,
@@ -616,6 +619,7 @@ export class DashboardContainer extends StatefulUIElement<
                     wasPageDropped:
                         listsSidebar.lists.byId[listId]?.wasPageDropped,
                 })}
+                getRootElement={this.props.getRootElement}
             />
         )
     }

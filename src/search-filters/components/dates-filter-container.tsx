@@ -74,6 +74,7 @@ class DatesFilter extends PureComponent<Props, State> {
                 startDate={this.props.startDate}
                 endDate={this.props.endDate}
                 disableOnClickOutside={this.props.env === 'inpage'}
+                getRootElement={null}
             >
                 {this.props.datesFilterDropdown && (
                     <Tooltip

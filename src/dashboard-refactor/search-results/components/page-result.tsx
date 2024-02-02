@@ -249,6 +249,7 @@ export default class PageResultView extends PureComponent<Props> {
                         : 'Remove from Space'
                 }
                 placement="bottom"
+                getPortalRoot={this.props.getRootElement}
             >
                 <Icon
                     heightAndWidth="22px"
@@ -468,6 +469,7 @@ export default class PageResultView extends PureComponent<Props> {
                                         : undefined
                                 }
                                 memexIcon={MemexIcon}
+                                getRootElement={this.props.getRootElement}
                             />
                         </PageContentBox>
                         {this.displayLists.length > 0 && (
@@ -500,6 +502,7 @@ export default class PageResultView extends PureComponent<Props> {
                             }}
                             actions={this.calcFooterActions()}
                             spacesButton={this.renderSpacesButton()}
+                            getRootElement={this.props.getRootElement}
                         />
                         {this.renderSpacePicker()}
                         {this.renderCopyPaster()}
