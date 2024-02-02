@@ -7,6 +7,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 interface ResultsProps {
     position: string
@@ -25,7 +26,10 @@ interface ResultsProps {
     getRootElement: () => HTMLElement
     isSticky: boolean
     toggleStickyContainer: (isSticky: boolean) => Promise<void>
+    updateQuery: (query: string) => Promise<void>
+    query: string
 }
+
 interface ResultsState {
     themeVariant?: MemexThemeVariant
 }
@@ -67,29 +71,27 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                         location="search"
                     />
                     <TopBarArea hideResults={props.hideResults}>
-                        <ResultsBox>
-                            <TooltipBox
-                                placement={'bottom'}
-                                tooltipText={
-                                    props.hideResults
-                                        ? 'Show Results'
-                                        : 'Hide Results'
+                        <SearchContainer>
+                            <SearchField
+                                fontSize="16px"
+                                onChange={(e) =>
+                                    props.updateQuery(
+                                        (e.target as HTMLInputElement).value,
+                                    )
                                 }
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <Icon
-                                    filePath={
-                                        props.hideResults
-                                            ? 'expand'
-                                            : 'compress'
-                                    }
-                                    heightAndWidth="22px"
-                                    onClick={props.toggleHideResults}
-                                />
-                            </TooltipBox>
-                            <TotalCount>{props.totalCount}</TotalCount>
-                            <ResultsText>Memex Results</ResultsText>
-                        </ResultsBox>
+                                placeholder={props.query}
+                                icon="searchIcon"
+                                padding={'0px 10px'}
+                                actionButton={
+                                    <ResultsBox>
+                                        <TotalCount>
+                                            {props.totalCount}
+                                        </TotalCount>
+                                    </ResultsBox>
+                                }
+                            />
+                        </SearchContainer>
+
                         <IconArea>
                             <TooltipBox
                                 placement={'bottom'}
@@ -122,6 +124,25 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                             !this.props.isSticky,
                                         )
                                     }
+                                />
+                            </TooltipBox>
+                            <TooltipBox
+                                placement={'bottom'}
+                                tooltipText={
+                                    props.hideResults
+                                        ? 'Show Results'
+                                        : 'Hide Results'
+                                }
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    filePath={
+                                        props.hideResults
+                                            ? 'expand'
+                                            : 'compress'
+                                    }
+                                    heightAndWidth="22px"
+                                    onClick={props.toggleHideResults}
                                 />
                             </TooltipBox>
                             <SettingsButtonContainer>
@@ -158,6 +179,15 @@ class Results extends React.Component<ResultsProps, ResultsState> {
     }
 }
 
+const SearchContainer = styled.div`
+    display: flex;
+    width: fill-available;
+    flex: 1;
+    min-width: 20%;
+`
+
+const SearchField = styled(TextField)``
+
 const SettingsButtonContainer = styled.div``
 
 const MemexContainer = styled.div`
@@ -193,7 +223,8 @@ const TopBarArea = styled.div<{ hideResults }>`
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 10px 20px;
+    grid-gap: 15px;
 `
 
 const ResultsBox = styled.div`
@@ -202,6 +233,8 @@ const ResultsBox = styled.div`
     align-items: center;
     grid-auto-flow: column;
     align-items: center;
+    height: 24px;
+    width: 24px;
 `
 
 const TotalCount = styled.div`

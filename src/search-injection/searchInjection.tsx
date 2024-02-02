@@ -5,6 +5,7 @@ import browser from 'webextension-polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
+import debounce from 'lodash/debounce'
 
 import Container from './components/container'
 import * as constants from './constants'
@@ -32,13 +33,24 @@ interface RootProps {
 interface RootState {
     themeVariant?: MemexThemeVariant
     searchResDocsProcessed?: ResultItemProps[]
+    query?: string
 }
 
 class Root extends React.Component<RootProps, RootState> {
     state: RootState = {}
 
     async componentDidMount() {
-        const { requestSearcher, query } = this.props
+        const { query } = this.props
+
+        this.executeSearchDebounced(query)
+        this.setState({
+            themeVariant: await loadThemeVariant(),
+            query,
+        })
+    }
+
+    executeSearch = async (query) => {
+        const { requestSearcher } = this.props
         const limit = 100
         requestSearcher({ query, limit })
             .then((searchRes) => {
@@ -47,10 +59,13 @@ class Root extends React.Component<RootProps, RootState> {
                 })
             })
             .catch((error) => console.error('Search request failed', error))
+    }
 
-        this.setState({
-            themeVariant: await loadThemeVariant(),
-        })
+    executeSearchDebounced = debounce(this.executeSearch, 100)
+
+    updateQuery = async (query) => {
+        this.executeSearchDebounced(query)
+        this.setState({ query })
     }
 
     render() {
@@ -70,6 +85,8 @@ class Root extends React.Component<RootProps, RootState> {
                         syncSettings={props.syncSettings}
                         getRootElement={this.props.getRootElement}
                         searchResDocs={this.state.searchResDocsProcessed}
+                        updateQuery={this.updateQuery}
+                        query={props.query}
                     />
                 </ThemeProvider>
             </StyleSheetManager>

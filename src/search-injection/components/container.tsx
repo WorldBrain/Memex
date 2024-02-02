@@ -35,6 +35,8 @@ export interface Props {
     syncSettings: SyncSettingsStore<'dashboard' | 'searchInjection'>
     getRootElement: () => HTMLElement
     searchResDocs: ResultItemProps[]
+    updateQuery: (query: string) => Promise<void>
+    query: string
 }
 
 interface State {
@@ -128,7 +130,7 @@ class Container extends React.Component<Props, State> {
             position,
             isNotif: fetchNotif && !fetchNotif.readTime,
             notification,
-            isStickyContainer: this.props.isSticky,
+            isStickyContainer: isSticky,
         })
 
         const target = document.getElementById('memexResults')
@@ -137,6 +139,13 @@ class Container extends React.Component<Props, State> {
             target.style.position = 'sticky'
             target.style.top = '100px'
             target.style.zIndex = '30000'
+
+            const parentElement = target.parentElement
+            if (parentElement && parentElement.id === 'rcnt') {
+                const wrapperDiv = document.createElement('div')
+                parentElement.replaceChild(wrapperDiv, target)
+                wrapperDiv.appendChild(target)
+            }
         } else {
             target.style.position = 'relative'
             target.style.top = 'unset'
@@ -408,6 +417,8 @@ class Container extends React.Component<Props, State> {
                     getRootElement={this.props.getRootElement}
                     isSticky={this.state.isStickyContainer}
                     toggleStickyContainer={this.toggleStickyContainer}
+                    updateQuery={this.props.updateQuery}
+                    query={this.props.query}
                 />
             </>
         )
