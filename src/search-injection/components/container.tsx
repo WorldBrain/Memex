@@ -166,6 +166,13 @@ class Container extends React.Component<Props, State> {
             target.style.position = 'sticky'
             target.style.top = '100px'
             target.style.zIndex = '30000'
+
+            const parentElement = target.parentElement
+            if (parentElement && parentElement.id === 'rcnt') {
+                const wrapperDiv = document.createElement('div')
+                parentElement.replaceChild(wrapperDiv, target)
+                wrapperDiv.appendChild(target)
+            }
         } else {
             target.style.position = 'relative'
             target.style.top = 'unset'
