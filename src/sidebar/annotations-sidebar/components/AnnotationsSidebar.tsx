@@ -517,7 +517,6 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
 
-        console.log('renderCopyPasterManager', this.props.getRootElement)
         return (
             <PopoutBox
                 targetElementRef={this.copyButtonRef.current}

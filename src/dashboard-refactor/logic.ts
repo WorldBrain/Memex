@@ -2660,6 +2660,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isBodyEditing: { $set: event.isEditing },
+                            isEditing: { $set: event.isEditing },
                         },
                     },
                 },
@@ -3088,7 +3089,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     setNoteEditBodyValue: EventHandler<'setNoteEditBodyValue'> = ({
         event,
     }) => {
-        console.log('eeeeee', event)
         this.emitMutation({
             searchResults: {
                 noteData: {
@@ -3211,8 +3211,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         confirmPrivatizeNoteArgs: { $set: null },
                     },
                 })
-
-                console.log('editNoteForm', editNoteForm, existing)
 
                 await updateAnnotation({
                     annotationData: {

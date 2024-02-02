@@ -558,7 +558,6 @@ export default class SingleNoteShareMenu extends React.PureComponent<
     }
 
     render() {
-        console.log('this.state', this.props.getRootElement)
         return (
             <>
                 <>

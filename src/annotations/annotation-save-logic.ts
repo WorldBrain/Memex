@@ -210,7 +210,6 @@ export async function updateAnnotation({
         remoteAnnotationId,
         savePromise: (async () => {
             if (annotationData.comment != null || annotationData.body != null) {
-                console.log('edit', annotationData)
                 await annotationsBG.editAnnotation(
                     annotationData.localId,
                     annotationData.comment

@@ -544,7 +544,6 @@ export class AnnotationsSidebarContainer<
             return
         }
 
-        console.log('annotation', this.props.getRootElement)
         return (
             <SingleNoteShareMenu
                 getRemoteListIdForLocalId={(localListId) =>

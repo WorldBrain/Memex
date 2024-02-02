@@ -1069,7 +1069,6 @@ export class DashboardContainer extends StatefulUIElement<
                             isEditing: true,
                         }),
                     onEditHighlightBtnClick: (noteId) => () => {
-                        console.log('body editing')
                         this.processEvent('setBodyEditing', {
                             noteId,
                             isEditing: true,

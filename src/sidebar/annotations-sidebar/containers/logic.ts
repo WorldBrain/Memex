@@ -2066,7 +2066,6 @@ export class SidebarContainerLogic extends UILogic<
             )
         ).toString()
 
-        console.log('event#11', event)
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
@@ -2079,7 +2078,6 @@ export class SidebarContainerLogic extends UILogic<
     setAnnotationEditBodyText: EventHandler<
         'setAnnotationEditBodyText'
     > = async ({ event }) => {
-        console.log('event#', event)
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
@@ -2160,8 +2158,6 @@ export class SidebarContainerLogic extends UILogic<
         //               protected: !!event.isProtected,
         //           },
         //       })
-
-        console.log('beforesaving', body, commentForSaving)
 
         const { remoteAnnotationId, savePromise } = await updateAnnotation({
             annotationsBG: this.options.annotationsBG,
