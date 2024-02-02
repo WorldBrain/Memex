@@ -16,6 +16,7 @@ import {
 } from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { ResultItemProps } from './types'
 
 interface RootProps {
     target: HTMLDivElement
@@ -30,12 +31,23 @@ interface RootProps {
 
 interface RootState {
     themeVariant?: MemexThemeVariant
+    searchResDocsProcessed?: ResultItemProps[]
 }
 
 class Root extends React.Component<RootProps, RootState> {
     state: RootState = {}
 
     async componentDidMount() {
+        const { requestSearcher, query } = this.props
+        const limit = 100
+        requestSearcher({ query, limit })
+            .then((searchRes) => {
+                this.setState({
+                    searchResDocsProcessed: searchRes.docs.slice(0, limit),
+                })
+            })
+            .catch((error) => console.error('Search request failed', error))
+
         this.setState({
             themeVariant: await loadThemeVariant(),
         })
@@ -52,15 +64,12 @@ class Root extends React.Component<RootProps, RootState> {
             <StyleSheetManager target={props.target}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <Container
-                        query={props.query}
-                        requestSearcher={props.requestSearcher}
-                        // results={searchRes.docs.slice(0, limit)}
                         // len={searchRes.totalCount}
                         rerender={props.renderComponent}
                         searchEngine={props.searchEngine}
                         syncSettings={props.syncSettings}
-                        position={props.position}
                         getRootElement={this.props.getRootElement}
+                        searchResDocs={this.state.searchResDocsProcessed}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -81,9 +90,8 @@ export const handleRenderSearchInjection = async (
     // Injects CSS into the search page.
     // Calls renderComponent to render the react component
 
-    // const searchRes = await requestSearcher({ query, limit: 21 })
-
     const renderComponent = async () => {
+        console.log('started injecting')
         // Accesses docs, totalCount from parent through closure
         // Gets position from settings
         // Renders React Component on the respective container
@@ -241,9 +249,6 @@ export const handleRenderSearchInjection = async (
         // target.setAttribute('id', 'memexResults')
         // container.insertBefore('beforeend', target)
 
-        // Number of results to limit
-        const limit = constants.LIMIT[position]
-
         // Render the React component on the target element
         // Passing this same function so that it can change position
 
@@ -264,11 +269,6 @@ export const handleRenderSearchInjection = async (
         )
     }
 
-    const cssFile = browser.runtime.getURL(
-        '/content_script_search_injection.css',
-    )
-    await injectCSS(cssFile)
-
     // if (!(document.readyState === 'complete'  ||
     //     document.readyState === 'interactive')) {
     //     renderLoading()
@@ -277,15 +277,62 @@ export const handleRenderSearchInjection = async (
     // if it has, execute the rendering function immediately
     // else attach it to the DOMContentLoaded event listener
 
-    renderComponent()
+    const observer = new MutationObserver((mutationsList, observer) => {
+        console.log('mutationsList', mutationsList)
+        for (const mutation of mutationsList) {
+            if (mutation.type === 'childList') {
+                const addedNodes = Array.from(mutation.addedNodes)
+                const isTargetNodeAdded = addedNodes.some((node) => {
+                    // Define the condition to identify the target item
+                    // For example, checking if the added node is the specific element we are looking for
+                    // return node.id === 'targetItemId';
+                    // Placeholder condition below, replace with actual condition
+                    return (
+                        node.nodeType === Node.ELEMENT_NODE &&
+                        (node as Element).matches(
+                            constants.SEARCH_ENGINES[searchEngine].container
+                                .sideAlternative,
+                        )
+                    )
+                })
 
-    if (
-        !(
-            document.readyState === 'complete' ||
-            document.readyState === 'interactive' ||
-            document.readyState === 'loading'
-        )
-    ) {
-        document.addEventListener('DOMContentLoaded', renderComponent, true)
+                if (isTargetNodeAdded) {
+                    renderComponent()
+                    // Optionally, disconnect the observer if it's a one-time observation
+                    // observer.disconnect();
+                }
+            }
+        }
+    })
+
+    const targetNode = document.getElementById(
+        constants.SEARCH_ENGINES[searchEngine].container.sideAlternative,
+    )
+
+    if (targetNode) {
+        renderComponent()
+    } else {
+        // Configuration for the observer (which mutations to observe)
+        const config = { childList: true, subtree: true }
+
+        // Select the node that will be observed for mutations
+        const documentNode = document
+
+        // Start observing the target node for configured mutations
+        if (targetNode) {
+            observer.observe(documentNode, config)
+        } else {
+            console.error('Target node for mutation observer not found')
+        }
     }
+
+    // if (
+    //     !(
+    //         document.readyState === 'complete' ||
+    //         document.readyState === 'interactive' ||
+    //         document.readyState === 'loading'
+    //     )
+    // ) {
+    //     document.addEventListener('DOMContentLoaded', renderComponent, true)
+    // }
 }

@@ -454,17 +454,6 @@ export async function main(
         },
     })
 
-    const pageHasBookark =
-        (await bookmarks.pageHasBookmark(fullPageUrl)) ||
-        (await collectionsBG
-            .fetchPageLists({ url: fullPageUrl })
-            .then((lists) => lists.length > 0)) ||
-        (await annotationsBG
-            .getAllAnnotationsByUrl({ url: fullPageUrl })
-            .then((annotations) => annotations.length > 0))
-
-    const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
-
     async function saveHighlight(
         shouldShare: boolean,
         shouldCopyShareLink: boolean,
@@ -973,6 +962,29 @@ export async function main(
         },
     }
 
+    if (
+        shouldIncludeSearchInjection(
+            window.location.hostname,
+            window.location.href,
+        ) ||
+        window.location.href.includes('youtube.com')
+    ) {
+        await contentScriptRegistry.registerSearchInjectionScript(
+            searchInjectionMain,
+        )
+    }
+
+    const pageHasBookark =
+        (await bookmarks.pageHasBookmark(fullPageUrl)) ||
+        (await collectionsBG
+            .fetchPageLists({ url: fullPageUrl })
+            .then((lists) => lists.length > 0)) ||
+        (await annotationsBG
+            .getAllAnnotationsByUrl({ url: fullPageUrl })
+            .then((annotations) => annotations.length > 0))
+
+    const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
+
     // 5. Registers remote functions that can be used to interact with components
     // in this tab.
     // TODO:(remote-functions) Move these to the inPageUI class too
@@ -1170,6 +1182,7 @@ export async function main(
     ////////////////////////////////////////////
     // CHECK CURRENT PAGE IF NEED BE TO INJECT CUSTOM UI
     ////////////////////////////////////////////
+
     await injectCustomUIperPage(
         annotationsFunctions,
         pkmSyncBG,
@@ -1293,18 +1306,6 @@ export async function main(
                 }
             }
         }, 200)
-    }
-
-    if (
-        shouldIncludeSearchInjection(
-            window.location.hostname,
-            window.location.href,
-        ) ||
-        window.location.href.includes('youtube.com')
-    ) {
-        await contentScriptRegistry.registerSearchInjectionScript(
-            searchInjectionMain,
-        )
     }
 
     if (analyticsBG && hasActivity) {

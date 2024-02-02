@@ -23,6 +23,7 @@ import styled from 'styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 const search = browser.runtime.getURL('/img/search.svg')
 
@@ -32,10 +33,8 @@ export interface Props {
     rerender: () => void
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<'dashboard' | 'searchInjection'>
-    query
-    requestSearcher
-    position
     getRootElement: () => HTMLElement
+    searchResDocs: ResultItemProps[]
 }
 
 interface State {
@@ -47,7 +46,6 @@ interface State {
     isNotif: boolean
     position: null | 'side' | 'above'
     notification: any
-    searchResults: ResultItemProps[] | null
 }
 
 class Container extends React.Component<Props, State> {
@@ -82,7 +80,6 @@ class Container extends React.Component<Props, State> {
         position: null,
         isNotif: true,
         notification: {},
-        searchResults: null,
     }
 
     async componentDidMount() {
@@ -95,7 +92,6 @@ class Container extends React.Component<Props, State> {
                 }
             }
         }
-
         const subBannerShownAfter = await this.props.syncSettings.dashboard.get(
             'subscribeBannerShownAfter',
         )
@@ -106,33 +102,10 @@ class Container extends React.Component<Props, State> {
             fetchNotif = await this.fetchNotifById(notification.id)
         }
 
-        const limit = constants.LIMIT[this.props.position]
-        const query = this.props.query
-
-        try {
-            const searchRes = await this.props.requestSearcher({
-                query,
-                limit: limit,
-            })
-            const searchResDocs = searchRes.docs.slice(0, limit)
-
-            this.setState({
-                searchResults: searchResDocs,
-            })
-        } catch (e) {
-            const searchRes = []
-            const searchResDocs = searchRes.slice(0, limit)
-            this.setState({
-                searchResults: searchResDocs,
-            })
-        }
-
         const hideResults =
-            ((await this.props.syncSettings.searchInjection.get(
+            (await this.props.syncSettings.searchInjection.get(
                 'hideMemexResults',
-            )) ||
-                this.state.searchResults.length === 0) ??
-            false
+            )) ?? false
         const position =
             (await this.props.syncSettings.searchInjection.get(
                 'memexResultsPosition',
@@ -152,16 +125,14 @@ class Container extends React.Component<Props, State> {
     handleResultLinkClick = () => {}
 
     renderResultItems() {
-        if (!this.state.searchResults) {
+        if (this.props.searchResDocs == null) {
             return (
                 <LoadingBox>
                     <LoadingIndicator />
                 </LoadingBox>
             )
-        }
-
-        if (this.state.searchResults?.length > 0) {
-            const resultItems = this.state.searchResults.map((result, i) => (
+        } else if (this.props.searchResDocs?.length > 0) {
+            const resultItems = this.props.searchResDocs.map((result, i) => (
                 <>
                     <ResultItem
                         key={i}
@@ -177,9 +148,7 @@ class Container extends React.Component<Props, State> {
             ))
 
             return resultItems
-        }
-
-        if (this.state.searchResults?.length === 0) {
+        } else if (this.props.searchResDocs?.length === 0) {
             return (
                 <NoResultsSection>
                     <IconBox heightAndWidth="30px" background="light">
@@ -382,7 +351,7 @@ class Container extends React.Component<Props, State> {
                 <Results
                     position={this.state.position}
                     searchEngine={this.props.searchEngine}
-                    totalCount={this.state.searchResults?.length}
+                    totalCount={this.props.searchResDocs?.length}
                     seeMoreResults={this.seeMoreResults}
                     toggleHideResults={this.toggleHideResults}
                     hideResults={this.state.hideResults}
