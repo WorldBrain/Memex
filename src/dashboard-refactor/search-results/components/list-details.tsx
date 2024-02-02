@@ -29,6 +29,7 @@ export interface Props {
     onAddContributorsClick?: React.MouseEventHandler
     clearInbox?: () => void
     imageSupport: ImageSupportInterface<'caller'>
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -105,6 +106,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                             this.setState({ description })
                         }
                         imageSupport={this.props.imageSupport}
+                        getRootElement={this.props.getRootElement}
                     />
                 </DescriptionEditorContainer>
             )
@@ -415,6 +417,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 this.setState({ showQuickTutorial: false })
                             }
                             offsetX={5}
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <QuickTutorial
                                 markdownHelpOnTop={true}

@@ -820,6 +820,7 @@ export class AnnotationsSidebar extends React.Component<
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
                             isShared
+                            getRootElement={this.props.getRootElement}
                             isBulkShareProtected
                             onSpacePickerToggle={() => {
                                 this.props.setSpacePickerAnnotationInstance(
@@ -942,6 +943,7 @@ export class AnnotationsSidebar extends React.Component<
                                         },
                                     )}
                                     imageSupport={this.props.imageSupport}
+                                    getRootElement={this.props.getRootElement}
                                 />
                             )}
                     </AnnotationBox>

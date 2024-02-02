@@ -146,6 +146,7 @@ const setupLogicHelper = async ({
         focusCreateForm,
         copyToClipboard,
         imageSupport: backgroundModules.imageSupport,
+        getRootElement: null,
     })
 
     const sidebar = device.createElement(sidebarLogic)

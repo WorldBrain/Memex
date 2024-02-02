@@ -58,6 +58,7 @@ export interface Props
     isBulkSelected: boolean
     shiftSelectItem: () => void
     uploadedPdfLinkLoadState: TaskState
+    getRootElement: () => HTMLElement
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -142,6 +143,7 @@ export default class PageResultView extends PureComponent<Props> {
                     offsetX={10}
                     closeComponent={this.listPickerBtnClickHandler}
                     strategy={'fixed'}
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <CollectionPicker
                         annotationsCache={this.props.annotationsCache}
@@ -176,6 +178,7 @@ export default class PageResultView extends PureComponent<Props> {
                     offsetX={10}
                     closeComponent={this.listPickerBtnClickHandler}
                     strategy={'fixed'}
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <CollectionPicker
                         annotationsCache={this.props.annotationsCache}
@@ -212,6 +215,7 @@ export default class PageResultView extends PureComponent<Props> {
                     offsetX={10}
                     strategy={'fixed'}
                     closeComponent={this.props.onCopyPasterBtnClick}
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}

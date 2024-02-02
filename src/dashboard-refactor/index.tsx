@@ -75,6 +75,7 @@ const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
 
 export interface Props extends DashboardDependencies {
     theme: MemexTheme
+    getRootElement: () => HTMLElement
 }
 
 export class DashboardContainer extends StatefulUIElement<
@@ -118,6 +119,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openCollectionPage'
         | 'summarizeBG'
         | 'imageSupport'
+        | 'getRootElement'
     > = {
         analytics,
         copyToClipboard,
@@ -149,6 +151,7 @@ export class DashboardContainer extends StatefulUIElement<
         openCollectionPage: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
         imageSupport: runInBackground(),
+        getRootElement: () => document.getElementById('body'),
     }
 
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
@@ -210,6 +213,7 @@ export class DashboardContainer extends StatefulUIElement<
                       })
                 : undefined,
             imageSupport: this.props.imageSupport,
+            getRootElement: this.props.getRootElement,
         }
     }
 
@@ -342,6 +346,7 @@ export class DashboardContainer extends StatefulUIElement<
                     unselectEntry: (spaceId) =>
                         this.processEvent('delIncludedSpace', { spaceId }),
                 }}
+                getRootElement={this.props.getRootElement}
             />
         )
     }
@@ -390,6 +395,7 @@ export class DashboardContainer extends StatefulUIElement<
                                     isShown: !searchResults.isSearchCopyPasterShown,
                                 })
                             }
+                            getRootElement={this.props.getRootElement}
                         />
                     ),
                     searchQuery: searchFilters.searchQuery,
@@ -428,7 +434,9 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: syncMenu.isDisplayed,
                         })
                     },
+                    getRootElement: this.props.getRootElement,
                 }}
+                getRootElement={this.props.getRootElement}
             />
         )
     }
@@ -582,6 +590,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setDeletingListId', { listId }),
                     onDeleteSpaceConfirm: () =>
                         this.processEvent('confirmListDelete', null),
+                    getRootElement: this.props.getRootElement,
                 })}
                 onListDragStart={(listId) => (e) =>
                     this.processEvent('dragList', {
@@ -676,6 +685,7 @@ export class DashboardContainer extends StatefulUIElement<
                         remove: remove,
                     })
                 }
+                getRootElement={this.props.getRootElement}
                 selectedItems={this.state.bulkSelectedUrls}
                 analyticsBG={this.props.analyticsBG}
                 clearInbox={() => this.processEvent('clearInbox', null)}
@@ -1626,6 +1636,7 @@ export class DashboardContainer extends StatefulUIElement<
                                     this.props.theme.variant,
                             })
                         }
+                        getRootElement={this.props.getRootElement}
                     />
                     <DragElement
                         isHoveringOverListItem={
@@ -1655,6 +1666,7 @@ export class DashboardContainer extends StatefulUIElement<
                         bulkEditSpacesLoadingState={
                             this.state.bulkEditSpacesLoadingState
                         }
+                        getRootElement={this.props.getRootElement}
                         spacePicker={() => {
                             return (
                                 <SpacePicker

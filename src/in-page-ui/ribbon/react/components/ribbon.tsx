@@ -1676,6 +1676,9 @@ export default class Ribbon extends Component<Props, State> {
                                             }
                                             isTrial={this.props.isTrial}
                                             signupDate={this.props.signupDate}
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
                                         />
                                         {this.renderTutorialButton()}
                                     </BottomSection>
@@ -1830,6 +1833,7 @@ export default class Ribbon extends Component<Props, State> {
                                     }
                                     isTrial={this.props.isTrial}
                                     signupDate={this.props.signupDate}
+                                    getRootElement={this.props.getRootElement}
                                 />
                                 {this.renderCloseRibbonButton()}
                             </BottomSection>

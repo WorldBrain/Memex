@@ -13,6 +13,7 @@ export interface Props extends Omit<SpaceContextMenuProps, 'copyToClipboard'> {
     toggleMenu: React.MouseEventHandler
     toggleEditMenu: React.MouseEventHandler
     isShared: boolean
+    getRootElement: () => HTMLElement
 }
 
 export default class SpaceContextMenuButton extends PureComponent<Props> {
@@ -43,6 +44,7 @@ export default class SpaceContextMenuButton extends PureComponent<Props> {
                 }}
                 strategy={'fixed'}
                 width={'300px'}
+                getPortalRoot={this.props.getRootElement}
             >
                 <SpaceContextMenu
                     ref={this.contextMenuRef}

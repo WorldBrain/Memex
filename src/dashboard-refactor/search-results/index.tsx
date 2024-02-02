@@ -132,6 +132,7 @@ export type Props = RootState &
         saveHighlightColorSettings?: (newState) => void
         getHighlightColorSettings?: () => void
         highlightColorSettings: string
+        getRootElement: () => HTMLElement
     }
 
 export interface State {
@@ -325,6 +326,7 @@ export default class SearchResultsContainer extends React.Component<
                 createdWhen={new Date(noteData.displayTime)}
                 onGoToAnnotation={interactionProps.onGoToHighlightClick}
                 contextLocation={'dashboard'}
+                getRootElement={this.props.getRootElement}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)
@@ -412,6 +414,7 @@ export default class SearchResultsContainer extends React.Component<
                             createNewEntry: interactionProps.createNewList,
                             analyticsBG: this.props.analyticsBG,
                         }}
+                        getRootElement={this.props.getRootElement}
                     />
                 )}
                 annotationEditDependencies={{
@@ -424,6 +427,7 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onEditCancel(dummyEvent),
                     onEditConfirm: interactionProps.onEditConfirm,
                     imageSupport: this.props.imageSupport,
+                    getRootElement: this.props.getRootElement,
                 }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
@@ -484,6 +488,7 @@ export default class SearchResultsContainer extends React.Component<
                         />
                     )}
                     imageSupport={this.props.imageSupport}
+                    getRootElement={this.props.getRootElement}
                 />
                 <NoteResultContainer>
                     {/* {noteIds[notesType].length > 0 && (
@@ -529,6 +534,7 @@ export default class SearchResultsContainer extends React.Component<
                 closeComponent={() => this.props.toggleSortMenuShown()}
                 placement="right-start"
                 targetElementRef={this.sortButtonRef.current}
+                getPortalRoot={this.props.getRootElement}
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={({ sortingFn }) =>
@@ -597,6 +603,7 @@ export default class SearchResultsContainer extends React.Component<
                     )}
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
+                    getRootElement={this.props.getRootElement}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
                         copyLink: this.props.onPageLinkCopy,

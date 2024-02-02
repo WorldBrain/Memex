@@ -12,6 +12,7 @@ export interface Props extends Omit<SpaceEditMenuProps, 'copyToClipboard'> {
     isMenuDisplayed: boolean
     toggleEditMenu: React.MouseEventHandler
     onDeleteSpaceConfirm?: () => void
+    getRootElement: () => HTMLElement
 }
 
 export default class SpaceEditMenuBtn extends PureComponent<Props> {
@@ -42,6 +43,7 @@ export default class SpaceEditMenuBtn extends PureComponent<Props> {
                 }}
                 strategy={'fixed'}
                 width={'300px'}
+                getPortalRoot={this.props.getRootElement}
             >
                 <SpaceEditMenu
                     ref={this.contextMenuRef}

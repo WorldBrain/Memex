@@ -32,6 +32,7 @@ export interface Props {
     ) => void | Promise<void>
     tabIndex?: number
     shortcutText?: string
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -135,6 +136,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                         isShareMenuShown: false,
                     })
                 }
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.state.confirmationMode == null ? (
                     <PrivacyOptionsContainer>

@@ -19,6 +19,7 @@ export interface Props {
     isTrial: boolean
     signupDate: number
     addedKey: () => void
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -189,6 +190,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 closeComponent={() => this.setState({ showTooltip: false })}
                 offsetX={10}
                 strategy="fixed"
+                getPortalRoot={this.props.getRootElement}
             >
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>

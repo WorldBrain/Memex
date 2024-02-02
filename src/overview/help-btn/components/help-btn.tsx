@@ -11,6 +11,7 @@ import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles
 export interface Props {
     theme: MemexThemeVariant
     toggleTheme: () => void
+    getRootElement: () => HTMLElement
 }
 export interface State {
     isOpen: boolean
@@ -53,6 +54,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                         showChangeLog: false,
                     }))
                 }
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.state.showChat ||
                 this.state.showFeedbackForm ||

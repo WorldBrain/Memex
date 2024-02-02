@@ -13,6 +13,7 @@ interface Props {
     isSidebarOpen: boolean
     isTrial?: boolean
     signupDate?: number
+    getRootElement: () => HTMLElement
 }
 
 export class BlockCounterIndicator extends React.Component<Props> {
@@ -125,6 +126,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
                 targetElementRef={this.tooltipButtonRef.current}
                 closeComponent={() => this.setState({ showTooltip: false })}
                 offsetX={20}
+                getPortalRoot={this.props.getRootElement}
             >
                 <InfoTooltipContainer>
                     <InfoTooltipTitleArea>

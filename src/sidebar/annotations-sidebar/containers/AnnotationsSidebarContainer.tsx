@@ -82,7 +82,7 @@ export interface Props extends SidebarContainerOptions {
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
     pkmSyncBG?: PkmSyncInterface
-    getRootElement?: () => HTMLElement
+    getRootElement: () => HTMLElement
 }
 
 export class AnnotationsSidebarContainer<
@@ -120,6 +120,7 @@ export class AnnotationsSidebarContainer<
                 bgScriptBG: props.bgScriptBG,
                 storage: props.storageAPI,
                 pkmSyncBG: props.pkmSyncBG,
+                getRootElement: props.getRootElement,
             }),
         )
 
@@ -336,6 +337,7 @@ export class AnnotationsSidebarContainer<
                     isEditing: false,
                 }),
             imageSupport: this.props.imageSupport,
+            getRootElement: this.props.getRootElement,
         }
     }
 
@@ -391,6 +393,7 @@ export class AnnotationsSidebarContainer<
             lists: this.state.commentBox.lists,
             hoverState: null,
             imageSupport: this.props.imageSupport,
+            getRootElement: this.props.getRootElement,
         }
     }
 
@@ -663,6 +666,7 @@ export class AnnotationsSidebarContainer<
             isTrial={this.state.isTrial}
             signupDate={this.state.signupDate}
             addedKey={() => this.processEvent('addedKey', null)}
+            getRootElement={this.props.getRootElement}
         />
     )
 

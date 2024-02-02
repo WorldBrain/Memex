@@ -33,6 +33,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     backgroundColor?: string
     elementHeight?: string
     hideDescriptionInPreview: boolean
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -157,6 +158,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                     targetElementRef={this.menuRef.current}
                     closeComponent={() => this.setState({ isOpened: false })}
                     placement="bottom-start"
+                    getPortalRoot={this.props.getRootElement}
                 >
                     {this.props.children ?? this.renderMenuItems()}
                 </PopoutBox>
