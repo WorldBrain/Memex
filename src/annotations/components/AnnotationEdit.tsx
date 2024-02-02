@@ -42,6 +42,7 @@ export interface AnnotationEditGeneralProps {
     contextLocation?: string
     selector?: string
     getRootElement: () => HTMLElement
+    slimEditorActions?: boolean
 }
 
 export interface Props
@@ -150,6 +151,7 @@ class AnnotationEdit extends React.Component<Props> {
                     youtubeShortcut={this.state.youtubeShortcut}
                     imageSupport={this.props.imageSupport}
                     getRootElement={this.props.getRootElement}
+                    slimEditorActions={this.props.slimEditorActions}
                 />
             </EditorContainer>
         )

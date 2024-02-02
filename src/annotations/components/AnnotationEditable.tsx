@@ -511,6 +511,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 this.props.annotationEditDependencies
                                     .onBodyChange
                             }
+                            slimEditorActions={true}
                         />
                     </HighlightEditContainer>
                 ) : (
@@ -1370,7 +1371,7 @@ const CommentBox = styled.div`
     word-wrap: break-word;
     white-space: pre-wrap;
     margin: 0px;
-    padding: 10px 20px 10px;
+    padding: 10px 15px 10px;
     line-height: 1.4;
     text-align: left;
     //border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
