@@ -502,7 +502,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
     AItimeStampButton.appendChild(textFieldContainer)
     annotateButton.appendChild(textFieldContainerNote)
 
-    // MemexIconDisplay
+    // dDisplay
     const memexIcon = runtime.getURL('/img/memex-icon.svg')
     const memexIconEl = document.createElement('img')
     memexIconEl.src = memexIcon

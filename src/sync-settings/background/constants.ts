@@ -58,6 +58,8 @@ export const SETTING_NAMES: SyncSettingNames = {
             FEATURE_PREFIX.SEARCH_INJECTION + 'memexResultsPosition',
         searchEnginesEnabled:
             FEATURE_PREFIX.SEARCH_INJECTION + 'searchEnginesEnabled',
+        stickyContainerEnabled:
+            FEATURE_PREFIX.SEARCH_INJECTION + 'stickyContainerEnabled',
     },
     readwise: {
         apiKey: FEATURE_PREFIX.READWISE + 'apiKey',

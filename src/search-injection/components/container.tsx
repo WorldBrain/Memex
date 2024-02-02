@@ -23,6 +23,7 @@ import styled from 'styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 const search = browser.runtime.getURL('/img/search.svg')
 
@@ -32,10 +33,10 @@ export interface Props {
     rerender: () => void
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<'dashboard' | 'searchInjection'>
-    query
-    requestSearcher
-    position
     getRootElement: () => HTMLElement
+    searchResDocs: ResultItemProps[]
+    updateQuery: (query: string) => Promise<void>
+    query: string
 }
 
 interface State {
@@ -47,7 +48,7 @@ interface State {
     isNotif: boolean
     position: null | 'side' | 'above'
     notification: any
-    searchResults: ResultItemProps[] | null
+    isStickyContainer: boolean
 }
 
 class Container extends React.Component<Props, State> {
@@ -82,7 +83,7 @@ class Container extends React.Component<Props, State> {
         position: null,
         isNotif: true,
         notification: {},
-        searchResults: null,
+        isStickyContainer: true,
     }
 
     async componentDidMount() {
@@ -96,43 +97,29 @@ class Container extends React.Component<Props, State> {
             }
         }
 
-        const subBannerShownAfter = await this.props.syncSettings.dashboard.get(
-            'subscribeBannerShownAfter',
+        let isSticky = null
+
+        isSticky = await this.props.syncSettings.searchInjection.get(
+            'stickyContainerEnabled',
         )
-        const isCloudEnabled = await getLocalStorage(CLOUD_STORAGE_KEYS.isSetUp)
+
+        if (isSticky == null) {
+            await this.props.syncSettings.searchInjection.set(
+                'stickyContainerEnabled',
+                true,
+            )
+            isSticky = true
+        }
 
         let fetchNotif
         if (notification) {
             fetchNotif = await this.fetchNotifById(notification.id)
         }
 
-        const limit = constants.LIMIT[this.props.position]
-        const query = this.props.query
-
-        try {
-            const searchRes = await this.props.requestSearcher({
-                query,
-                limit: limit,
-            })
-            const searchResDocs = searchRes.docs.slice(0, limit)
-
-            this.setState({
-                searchResults: searchResDocs,
-            })
-        } catch (e) {
-            const searchRes = []
-            const searchResDocs = searchRes.slice(0, limit)
-            this.setState({
-                searchResults: searchResDocs,
-            })
-        }
-
         const hideResults =
-            ((await this.props.syncSettings.searchInjection.get(
+            (await this.props.syncSettings.searchInjection.get(
                 'hideMemexResults',
-            )) ||
-                this.state.searchResults.length === 0) ??
-            false
+            )) ?? false
         const position =
             (await this.props.syncSettings.searchInjection.get(
                 'memexResultsPosition',
@@ -143,25 +130,60 @@ class Container extends React.Component<Props, State> {
             position,
             isNotif: fetchNotif && !fetchNotif.readTime,
             notification,
-            isCloudUpgradeBannerShown: !isCloudEnabled,
-            isSubscriptionBannerShown:
-                subBannerShownAfter != null && subBannerShownAfter < Date.now(),
+            isStickyContainer: isSticky,
         })
+
+        const target = document.getElementById('memexResults')
+
+        if (isSticky) {
+            target.style.position = 'sticky'
+            target.style.top = '100px'
+            target.style.zIndex = '30000'
+
+            const parentElement = target.parentElement
+            if (parentElement && parentElement.id === 'rcnt') {
+                const wrapperDiv = document.createElement('div')
+                parentElement.replaceChild(wrapperDiv, target)
+                wrapperDiv.appendChild(target)
+            }
+        } else {
+            target.style.position = 'relative'
+            target.style.top = 'unset'
+            target.style.zIndex = 'unset'
+        }
+    }
+
+    toggleStickyContainer = async (isSticky) => {
+        this.setState({ isStickyContainer: isSticky })
+        await this.props.syncSettings.searchInjection.set(
+            'stickyContainerEnabled',
+            isSticky,
+        )
+
+        const target = document.getElementById('memexResults')
+
+        if (isSticky) {
+            target.style.position = 'sticky'
+            target.style.top = '100px'
+            target.style.zIndex = '30000'
+        } else {
+            target.style.position = 'relative'
+            target.style.top = 'unset'
+            target.style.zIndex = 'initial'
+        }
     }
 
     handleResultLinkClick = () => {}
 
     renderResultItems() {
-        if (!this.state.searchResults) {
+        if (this.props.searchResDocs == null) {
             return (
                 <LoadingBox>
                     <LoadingIndicator />
                 </LoadingBox>
             )
-        }
-
-        if (this.state.searchResults?.length > 0) {
-            const resultItems = this.state.searchResults.map((result, i) => (
+        } else if (this.props.searchResDocs?.length > 0) {
+            const resultItems = this.props.searchResDocs.map((result, i) => (
                 <>
                     <ResultItem
                         key={i}
@@ -177,9 +199,7 @@ class Container extends React.Component<Props, State> {
             ))
 
             return resultItems
-        }
-
-        if (this.state.searchResults?.length === 0) {
+        } else if (this.props.searchResDocs?.length === 0) {
             return (
                 <NoResultsSection>
                     <IconBox heightAndWidth="30px" background="light">
@@ -211,16 +231,16 @@ class Container extends React.Component<Props, State> {
         this.openOverviewRPC('query=' + finalQuery)
     }
 
-    async toggleHideResults() {
+    async toggleHideResults(toggleState) {
         // Toggles hideResults (minimize) state
         // And also, sets dropdown to false
-        const toggled = !this.state.hideResults
+        const toggled = toggleState
         await this.props.syncSettings.searchInjection.set(
             'hideMemexResults',
-            toggled,
+            toggleState,
         )
         this.setState({
-            hideResults: toggled,
+            hideResults: toggleState,
             dropdown: false,
         })
     }
@@ -382,7 +402,7 @@ class Container extends React.Component<Props, State> {
                 <Results
                     position={this.state.position}
                     searchEngine={this.props.searchEngine}
-                    totalCount={this.state.searchResults?.length}
+                    totalCount={this.props.searchResDocs?.length}
                     seeMoreResults={this.seeMoreResults}
                     toggleHideResults={this.toggleHideResults}
                     hideResults={this.state.hideResults}
@@ -394,6 +414,10 @@ class Container extends React.Component<Props, State> {
                     renderResultItems={this.renderResultItems}
                     renderNotification={this.renderNotification()}
                     getRootElement={this.props.getRootElement}
+                    isSticky={this.state.isStickyContainer}
+                    toggleStickyContainer={this.toggleStickyContainer}
+                    updateQuery={this.props.updateQuery}
+                    query={this.props.query}
                 />
             </>
         )
