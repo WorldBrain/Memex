@@ -90,27 +90,24 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
     handleAnnotateButtonClick = async () => {
         // Logic for annotate button click
-        const secondsInPastFieldNote = document.getElementById(
-            'secondsInPastFieldNote',
-        ) as HTMLInputElement
-        const secondsInPastContainerNote = document.getElementById(
-            'secondsInPastContainerNote',
-        ) as HTMLInputElement
 
-        const includeLastFewSecs = secondsInPastFieldNote.value
-            ? parseInt(secondsInPastFieldNote.value)
+        const includeLastFewSecs = this.state.noteSeconds
+            ? parseInt(this.state.noteSeconds)
             : 0
-
         await globalThis['browser'].storage.local.set({
             ['noteSecondsStorage']: includeLastFewSecs,
         })
 
+        console.log(
+            'createAnnotation',
+            this.getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
+        )
         this.props.annotationsFunctions.createAnnotation()(
             false,
             false,
             false,
+            false,
             this.getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
-            includeLastFewSecs,
         )
     }
 
@@ -120,16 +117,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     }
 
     handleAItimeStampButtonClick = async () => {
-        // Logic for AI timestamp button click
-        const secondsInPastField = document.getElementById(
-            'secondsInPastSetting',
-        ) as HTMLInputElement
-        const secondsInPastSettingContainer = document.getElementById(
-            'secondsInPastSettingContainer',
-        ) as HTMLInputElement
-
-        const includeLastFewSecs = secondsInPastField.value
-            ? parseInt(secondsInPastField.value)
+        const includeLastFewSecs = this.state.smartNoteSeconds
+            ? parseInt(this.state.smartNoteSeconds)
             : 60
         await globalThis['browser'].storage.local.set({
             ['smartNoteSecondsStorage']: includeLastFewSecs,
@@ -141,12 +130,25 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             false,
             false,
             false,
+            false,
             this.getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
         )
     }
 
-    handleTextFieldInput = (event) => {
+    handleSmartNoteTimeInput = (event) => {
+        if (isNaN(event.target.value)) {
+            return
+        }
         // Logic for text field input
+        this.setState({ smartNoteSeconds: event.target.value })
+    }
+
+    handleTimestampNoteTimeInput = (event) => {
+        if (isNaN(event.target.value)) {
+            return
+        }
+        // Logic for text field input
+        this.setState({ noteSeconds: event.target.value })
     }
 
     render() {
@@ -161,38 +163,53 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                     {this.state.YTChapterContainerVisible && (
                         <YTChapterContainer />
                     )}
-                    <MemexIcon src={runtime.getURL('/img/memexLogo.svg')} />
+                    <Icon
+                        filePath={runtime.getURL('/img/memexLogo.svg')}
+                        height={'24px'}
+                        color={'prime1'}
+                        padding={'0 10px'}
+                    />
                     <TooltipBox
                         getPortalRoot={this.props.getRootElement}
                         tooltipText={
                             <span>
                                 Add a note with a link <br />
-                                to the current time
+                                to the current time. Optionally: Adjust seconds
+                                into past via the text field
                             </span>
                         }
                         placement="bottom"
                     >
                         <YTPMenuItem onClick={this.handleAnnotateButtonClick}>
-                            <TimestampIcon
-                                src={runtime.getURL(
+                            <Icon
+                                filePath={runtime.getURL(
                                     '/img/clockForYoutubeInjection.svg',
                                 )}
+                                heightAndWidth="20px"
+                                color={'prime1'}
+                                hoverOff
                             />
                             <YTPMenuItemLabel>
                                 Timestamped Note
                             </YTPMenuItemLabel>
                             <TextFieldContainer>
-                                <RewindIcon
-                                    src={runtime.getURL(
+                                <Icon
+                                    filePath={runtime.getURL(
                                         '/img/historyYoutubeInjection.svg',
                                     )}
+                                    heightAndWidth="20px"
+                                    color={'prime1'}
+                                    hoverOff
                                 />
                                 <TextField
                                     type="text"
                                     placeholder="0s"
                                     value={this.state.noteSeconds}
-                                    onChange={this.handleTextFieldInput}
+                                    onChange={this.handleTimestampNoteTimeInput}
                                     id="secondsInPastFieldNote"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                    }}
                                 />
                             </TextFieldContainer>
                         </YTPMenuItem>
@@ -209,10 +226,13 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         placement="bottom"
                     >
                         <YTPMenuItem onClick={this.handleSummarizeButtonClick}>
-                            <SummarizeIcon
-                                src={runtime.getURL(
+                            <Icon
+                                filePath={runtime.getURL(
                                     '/img/summarizeIconForYoutubeInjection.svg',
                                 )}
+                                heightAndWidth="20px"
+                                color={'prime1'}
+                                hoverOff
                             />
                             <YTPMenuItemLabel>Summarize Video</YTPMenuItemLabel>
                         </YTPMenuItem>
@@ -223,7 +243,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             <span>
                                 Summary of the last X seconds with a timestamp.{' '}
                                 <br />
-                                Adjust range via the text field.
+                                Optionally: Adjust seconds into past via the
+                                text field.
                             </span>
                         }
                         placement="bottom"
@@ -231,22 +252,33 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         <YTPMenuItem
                             onClick={this.handleAItimeStampButtonClick}
                         >
-                            <AITimestampIcon
-                                src={runtime.getURL('/img/starsYoutube.svg')}
+                            <Icon
+                                filePath={runtime.getURL(
+                                    '/img/starsYoutube.svg',
+                                )}
+                                heightAndWidth="20px"
+                                color={'prime1'}
+                                hoverOff
                             />
                             <YTPMenuItemLabel>AI Note</YTPMenuItemLabel>
+
                             <TextFieldContainer>
-                                <RewindIcon
-                                    src={runtime.getURL(
+                                <Icon
+                                    filePath={runtime.getURL(
                                         '/img/historyYoutubeInjection.svg',
                                     )}
+                                    heightAndWidth="20px"
+                                    color={'prime1'}
                                 />
                                 <TextField
                                     type="text"
                                     placeholder="60s"
                                     value={this.state.smartNoteSeconds}
-                                    onChange={this.handleTextFieldInput}
+                                    onChange={this.handleSmartNoteTimeInput}
                                     id="secondsInPastSetting"
+                                    onClick={(e) => {
+                                        e.stopPropagation()
+                                    }}
                                 />
                             </TextFieldContainer>
                         </YTPMenuItem>
@@ -263,8 +295,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         placement="bottom"
                     >
                         <YTPMenuItem onClick={this.handleScreenshotButtonClick}>
-                            <CameraIcon
-                                src={runtime.getURL('/img/cameraIcon.svg')}
+                            <Icon
+                                filePath={runtime.getURL('/img/cameraIcon.svg')}
+                                heightAndWidth="20px"
+                                color={'prime1'}
+                                hoverOff
                             />
                             <YTPMenuItemLabel>Screenshot</YTPMenuItemLabel>
                         </YTPMenuItem>
@@ -321,10 +356,16 @@ const YTPMenuItem = styled.div`
     width: fit-content;
     padding: 5px 5px;
     border-radius: 5px;
-    color: ${(props) => props.theme.colors.greyScale7};
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
 
     &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1_5};
+        background-color: ${(props) =>
+            props.theme.variant === 'light'
+                ? props.theme.colors.greyScale3
+                : props.theme.colors.greyScale1_5};
     }
 `
 
@@ -344,9 +385,16 @@ const TextFieldContainer = styled.div`
     align-items: center;
     margin: 0 10px;
     border-radius: 6px;
-    outline: 1px solid #3e3f47;
+    outline: 1px solid
+        ${(props) =>
+            props.theme.variant === 'light'
+                ? props.theme.colors.greyScale3
+                : props.theme.colors.greyScale2};
     overflow: hidden;
-    background: #1e1f26;
+    background: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale1
+            : props.theme.colors.greyScale3};
     width: 84px;
     height: 26px;
     position: relative;
@@ -360,38 +408,12 @@ const TextField = styled.input`
     overflow: hidden;
     background: transparent;
     outline: none;
-    color: #f4f4f4;
+    color: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale5
+            : props.theme.colors.greyScale7};
+
     text-align: center;
     position: absolute;
     border: none;
-`
-
-const RewindIcon = styled.img`
-    height: 18px;
-    margin: 0 10px;
-`
-
-const MemexIcon = styled.img`
-    margin: 0 10px 0 15px;
-    height: 20px;
-`
-
-const TimestampIcon = styled.img`
-    height: 20px;
-    margin: 0 10px;
-`
-
-const CameraIcon = styled.img`
-    height: 20px;
-    margin: 0 10px;
-`
-
-const AITimestampIcon = styled.img`
-    height: 20px;
-    margin: 0 10px;
-`
-
-const SummarizeIcon = styled.img`
-    height: 20px;
-    margin: 0 5px 0 10px;
 `
