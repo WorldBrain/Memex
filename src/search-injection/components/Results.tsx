@@ -74,11 +74,12 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                         <SearchContainer>
                             <SearchField
                                 fontSize="16px"
-                                onChange={(e) =>
+                                onChange={(e) => {
                                     props.updateQuery(
                                         (e.target as HTMLInputElement).value,
                                     )
-                                }
+                                    props.toggleHideResults(false)
+                                }}
                                 placeholder={props.query}
                                 icon="searchIcon"
                                 padding={'0px 10px'}
@@ -142,7 +143,11 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                             : 'compress'
                                     }
                                     heightAndWidth="22px"
-                                    onClick={props.toggleHideResults}
+                                    onClick={() =>
+                                        props.toggleHideResults(
+                                            !props.hideResults,
+                                        )
+                                    }
                                 />
                             </TooltipBox>
                             <SettingsButtonContainer>
@@ -193,7 +198,7 @@ const SettingsButtonContainer = styled.div``
 const MemexContainer = styled.div`
     display: flex;
     flex-direction: column;
-    max-height: ${(props) => (props.hideResults ? 'fit-content' : '650px')};
+    height: ${(props) => (props.hideResults ? 'fit-content' : '650px')};
     width: ${(props) =>
         props.position === 'above' ? 'fill-available' : '450px'};
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);

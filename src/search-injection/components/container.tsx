@@ -232,16 +232,16 @@ class Container extends React.Component<Props, State> {
         this.openOverviewRPC('query=' + finalQuery)
     }
 
-    async toggleHideResults() {
+    async toggleHideResults(toggleState) {
         // Toggles hideResults (minimize) state
         // And also, sets dropdown to false
-        const toggled = !this.state.hideResults
+        const toggled = toggleState
         await this.props.syncSettings.searchInjection.set(
             'hideMemexResults',
-            toggled,
+            toggleState,
         )
         this.setState({
-            hideResults: toggled,
+            hideResults: toggleState,
             dropdown: false,
         })
     }

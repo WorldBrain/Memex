@@ -50,6 +50,7 @@ class Root extends React.Component<RootProps, RootState> {
     }
 
     executeSearch = async (query) => {
+        this.setState({ searchResDocsProcessed: null })
         const { requestSearcher } = this.props
         const limit = 100
         requestSearcher({ query, limit })
