@@ -246,13 +246,14 @@ export class SharingTestHelper {
 
     async editAnnotationComment(
         setup: BackgroundIntegrationTestSetup,
-        options: { id: number; comment: string },
+        options: { id: number; comment: string; body: string },
     ) {
         await setup.backgroundModules.directLinking.editAnnotation(
             null,
             this.annotations[options.id].localId,
             options.comment,
             'two',
+            options.body,
         )
         this.annotations[options.id].comment = options.comment
     }

@@ -517,7 +517,6 @@ export class AnnotationsSidebar extends React.Component<
             return
         }
 
-        console.log('renderCopyPasterManager', this.props.getRootElement)
         return (
             <PopoutBox
                 targetElementRef={this.copyButtonRef.current}
@@ -3657,6 +3656,9 @@ export class AnnotationsSidebar extends React.Component<
                                 AnnotationPrivacyLevels.SHARED_PROTECTED,
                             ].includes(annot.privacyLevel)}
                             isEditing={instanceState.isCommentEditing}
+                            isEditingHighlight={
+                                instanceState.isHighlightEditing
+                            }
                             isDeleting={
                                 instanceState.cardMode === 'delete-confirm'
                             }

@@ -82,7 +82,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                         />
                         <LoadingSuccessBox>
                             <LoadingStatusTitle>
-                                Page available online
+                                Sharing link available online
                             </LoadingStatusTitle>
                             {/* <PrimaryAction
                                 label={'Open'}
