@@ -168,14 +168,16 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         height={'24px'}
                         color={'prime1'}
                         padding={'0 10px'}
+                        hoverOff
                     />
                     <TooltipBox
                         getPortalRoot={this.props.getRootElement}
                         tooltipText={
                             <span>
-                                Add a note with a link <br />
-                                to the current time. Optionally: Adjust seconds
-                                into past via the text field
+                                Add a note with a link to the current time.{' '}
+                                <br />
+                                Optionally: Adjust seconds into past via the
+                                text field
                             </span>
                         }
                         placement="bottom"
