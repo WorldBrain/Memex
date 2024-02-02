@@ -27,18 +27,22 @@ export interface AnnotationEditEventProps {
     ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
+    onBodyChange: (body: string) => void
     onListsBarPickerBtnClick: React.MouseEventHandler
     imageSupport: ImageSupportInterface<'caller'>
 }
 
 export interface AnnotationEditGeneralProps {
     comment: string
+    body: string
     editorHeight?: string
     isShared?: boolean
     isBulkShareProtected?: boolean
     getYoutubePlayer?(): YoutubePlayer
     contextLocation?: string
     selector?: string
+    getRootElement: () => HTMLElement
+    slimEditorActions?: boolean
 }
 
 export interface Props
@@ -146,6 +150,8 @@ class AnnotationEdit extends React.Component<Props> {
                     autoFocus
                     youtubeShortcut={this.state.youtubeShortcut}
                     imageSupport={this.props.imageSupport}
+                    getRootElement={this.props.getRootElement}
+                    slimEditorActions={this.props.slimEditorActions}
                 />
             </EditorContainer>
         )

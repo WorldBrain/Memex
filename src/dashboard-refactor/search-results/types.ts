@@ -87,9 +87,11 @@ export type NoteInteractionProps = Omit<
         },
     ) => void
     onEditBtnClick: React.MouseEventHandler
+    onEditHighlightBtnClick: React.MouseEventHandler
     onReplyBtnClick: React.MouseEventHandler
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: (content: string) => void
+    onBodyChange: (content: string) => void
 }
 
 // NOTE: Derived type - edit the original
@@ -132,6 +134,7 @@ export interface NoteFormState {
     isTagPickerShown: boolean
     isListPickerShown: boolean
     inputValue: string
+    bodyInputValue: string
     tags: string[]
     lists: string[]
 }
@@ -187,6 +190,7 @@ export interface NoteShareInfo {
 export type ListPickerShowState = 'footer' | 'lists-bar' | 'hide'
 export interface NoteResult {
     isEditing: boolean
+    isBodyEditing: boolean
     areRepliesShown: boolean
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
@@ -362,6 +366,7 @@ export type Events = UIEvent<{
     }
     setNoteRepliesShown: NoteEventArgs & { areShown: boolean }
     setNoteEditing: NoteEventArgs & { isEditing: boolean }
+    setBodyEditing: NoteEventArgs & { isEditing: boolean }
     setNoteTags: NoteEventArgs & { added?: string; deleted?: string }
     setNoteLists: NoteEventArgs & {
         added?: string
@@ -378,6 +383,7 @@ export type Events = UIEvent<{
 
     // Note edit form state mutations
     setNoteEditCommentValue: NoteEventArgs & { value: string }
+    setNoteEditBodyValue: NoteEventArgs & { value: string }
     cancelNoteEdit: NoteEventArgs
     saveNoteEdit: NoteEventArgs & {
         shouldShare: boolean

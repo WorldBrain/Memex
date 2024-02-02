@@ -45,6 +45,7 @@ import { UnifiedList } from 'src/annotations/cache/types'
 
 export interface OwnProps {
     analyticsBG: AnalyticsCoreInterface
+    getRootElement: () => HTMLElement
 }
 
 interface StateProps {
@@ -334,8 +335,12 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                     pageUrl={this.state.currentTabFullUrl}
                     closePopup={this.closePopup}
                     isSavedPage={this.state.isSavedPage}
+                    getRootElement={this.props.getRootElement}
                 />
-                <CollectionsButton pageListsIds={this.state.pageListIds} />
+                <CollectionsButton
+                    getRootElement={this.props.getRootElement}
+                    pageListsIds={this.state.pageListIds}
+                />
                 {this.state.pageListNames &&
                     this.state.pageListNames?.length > 0 && (
                         <ListNamesBox>
@@ -361,16 +366,29 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
                 {this.getPDFMode() === 'reader' && (
                     <CopyPDFLinkButton
                         currentPageUrl={this.state.currentTabFullUrl}
+                        getRootElement={this.props.getRootElement}
                     />
                 )}
-                <LinkButton goToDashboard={this.onSearchClick} />
-                <SidebarOpenButton closePopup={this.closePopup} />
+                <LinkButton
+                    goToDashboard={this.onSearchClick}
+                    getRootElement={this.props.getRootElement}
+                />
+                <SidebarOpenButton
+                    closePopup={this.closePopup}
+                    getRootElement={this.props.getRootElement}
+                />
                 <QuickSettingsContainer>
                     Quick Settings <SpacerLine />
                 </QuickSettingsContainer>
 
-                <SidebarButton closePopup={this.closePopup} />
-                <TooltipButton closePopup={this.closePopup} />
+                <SidebarButton
+                    closePopup={this.closePopup}
+                    getRootElement={this.props.getRootElement}
+                />
+                <TooltipButton
+                    closePopup={this.closePopup}
+                    getRootElement={this.props.getRootElement}
+                />
                 <Footer>
                     <MemexLogo />
                     <ButtonContainer>

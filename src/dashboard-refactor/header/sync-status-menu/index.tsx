@@ -64,6 +64,7 @@ export interface SyncStatusMenuProps extends RootState {
     onLoginClick: React.MouseEventHandler
     onClickOutside: React.MouseEventHandler
     syncStatusIconState?: any
+    getRootElement: () => HTMLElement
     onToggleDisplayState?: () => void
 }
 

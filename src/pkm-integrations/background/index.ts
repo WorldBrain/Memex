@@ -207,6 +207,7 @@ export class PKMSyncBackgroundModule {
     }
 
     async pushPKMSyncUpdate(item, checkForFilteredSpaces) {
+        console.log('item', item)
         if (await this.backendNew.isConnected()) {
             const bufferedItems = await this.getBufferedItems()
             bufferedItems.push(item)
@@ -746,7 +747,8 @@ export class PKMSyncBackgroundModule {
             const spacesMatch = annotation.match(/<!-- Spaces -->\n(.+)\n\n/)
 
             const newHighlightText =
-                (highlightTextMatch ? highlightTextMatch[1] : null) || body
+                convertHTMLintoMarkdown(body) ??
+                (highlightTextMatch ? highlightTextMatch[1] : null)
             const newHighlightNote =
                 comment ||
                 (annotationNoteContent ? annotationNoteContent : null)
@@ -796,7 +798,8 @@ export class PKMSyncBackgroundModule {
             const spacesMatch = annotation.match(/  - \*\*Spaces:\*\* (.+)\n/)
 
             const newHighlightText =
-                (highlightTextMatch ? highlightTextMatch[1] : null) || body
+                convertHTMLintoMarkdown(body) ??
+                (highlightTextMatch ? highlightTextMatch[1] : null)
             const newHighlightNote =
                 comment || (HighlightNoteMatch ? HighlightNoteMatch[1] : null)
             const newCreationDate =
@@ -1055,7 +1058,7 @@ export class PKMSyncBackgroundModule {
         console.log('annotation', creationDate)
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
-            let highlightTextLine = body ? `> ${body}\n\n` : ''
+            let highlightTextLine = body ? `> ${body.trim()}\n\n` : ''
             const highlightNoteLine = comment
                 ? `<!-- Note -->\n${convertHTMLintoMarkdown(
                       comment,

@@ -23,6 +23,7 @@ export interface Props {
     renderSecondaryBtn?: () => JSX.Element
     isToggleKBShortcutKeyed?: (e: React.KeyboardEvent) => boolean
     imageSupport: ImageSupportInterface<'caller'>
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -131,6 +132,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
                             <TooltipBox
                                 tooltipText={`Control + Enter`}
                                 placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <PreviewBtn onClick={this.togglePreview}>
                                     Preview Markdown

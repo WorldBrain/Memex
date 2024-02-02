@@ -1615,6 +1615,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 await helper.editAnnotationComment(setup, {
                                     id: 1,
                                     comment: 'Updated comment',
+                                    body: 'Updated body',
                                 })
                                 await helper.assertSharedAnnotations(setup, {
                                     ids: [1],

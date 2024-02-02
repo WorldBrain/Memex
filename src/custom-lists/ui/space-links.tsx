@@ -18,6 +18,7 @@ export interface Props {
     inviteLinks: InviteLink[]
     copyLink: (link: string) => void
     analyticsBG?: AnalyticsCoreInterface
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -77,6 +78,7 @@ export default class SpaceLinks extends React.PureComponent<Props> {
                                 )
                             }
                             fullWidthTarget
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <LinkAndRoleBox
                                 key={roleID}

@@ -42,6 +42,7 @@ export interface Props extends ContainerProps {
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
     pkmSyncBG?: PkmSyncInterface
+    getRootElement: () => HTMLElement
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
@@ -539,6 +540,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         <TooltipBox
                             tooltipText={'Exit focus mode for this Space'}
                             placement={'left-start'}
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 filePath="removeX"

@@ -9,6 +9,7 @@ export interface Props {
     toggleHoverText?: any
     contentType?: 'pages' | 'PDFs'
     onToggleClick: CheckboxToggle
+    getRootElement: () => HTMLElement
 }
 
 export const ToggleSwitchButton = (props: Props) => (
@@ -20,7 +21,11 @@ export const ToggleSwitchButton = (props: Props) => (
                 size={20}
             />
         ) : (
-            <TooltipBox tooltipText={props.toggleHoverText} placement="left">
+            <TooltipBox
+                tooltipText={props.toggleHoverText}
+                placement="left"
+                getPortalRoot={props.getRootElement}
+            >
                 <Checkbox
                     isChecked={props.isEnabled}
                     handleChange={props.onToggleClick}

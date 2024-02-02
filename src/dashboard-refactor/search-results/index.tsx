@@ -132,6 +132,7 @@ export type Props = RootState &
         saveHighlightColorSettings?: (newState) => void
         getHighlightColorSettings?: () => void
         highlightColorSettings: string
+        getRootElement: () => HTMLElement
     }
 
 export interface State {
@@ -325,6 +326,7 @@ export default class SearchResultsContainer extends React.Component<
                 createdWhen={new Date(noteData.displayTime)}
                 onGoToAnnotation={interactionProps.onGoToHighlightClick}
                 contextLocation={'dashboard'}
+                getRootElement={this.props.getRootElement}
                 lastEdited={
                     noteData.isEdited
                         ? new Date(noteData.displayTime)
@@ -336,6 +338,7 @@ export default class SearchResultsContainer extends React.Component<
                 getHighlightColorSettings={this.props.getHighlightColorSettings}
                 highlightColorSettings={this.props.highlightColorSettings}
                 isEditing={noteData.isEditing}
+                isEditingHighlight={noteData.isBodyEditing}
                 isDeleting={false}
                 renderCopyPasterForAnnotation={() => (
                     <PageNotesCopyPaster
@@ -412,10 +415,12 @@ export default class SearchResultsContainer extends React.Component<
                             createNewEntry: interactionProps.createNewList,
                             analyticsBG: this.props.analyticsBG,
                         }}
+                        getRootElement={this.props.getRootElement}
                     />
                 )}
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
+                    body: noteData.editNoteForm.bodyInputValue,
                     onListsBarPickerBtnClick:
                         interactionProps.onListPickerBarBtnClick,
                     onCommentChange: (content) =>
@@ -424,6 +429,9 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onEditCancel(dummyEvent),
                     onEditConfirm: interactionProps.onEditConfirm,
                     imageSupport: this.props.imageSupport,
+                    getRootElement: this.props.getRootElement,
+                    onBodyChange: (content) =>
+                        interactionProps.onBodyChange(content),
                 }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
@@ -432,6 +440,8 @@ export default class SearchResultsContainer extends React.Component<
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,
                     onShareClick: interactionProps.onShareBtnClick,
+                    onEditHighlightIconClick:
+                        interactionProps.onEditHighlightBtnClick,
                 }}
             />
         )
@@ -484,6 +494,7 @@ export default class SearchResultsContainer extends React.Component<
                         />
                     )}
                     imageSupport={this.props.imageSupport}
+                    getRootElement={this.props.getRootElement}
                 />
                 <NoteResultContainer>
                     {/* {noteIds[notesType].length > 0 && (
@@ -529,6 +540,7 @@ export default class SearchResultsContainer extends React.Component<
                 closeComponent={() => this.props.toggleSortMenuShown()}
                 placement="right-start"
                 targetElementRef={this.sortButtonRef.current}
+                getPortalRoot={this.props.getRootElement}
             >
                 <SortingDropdownMenuBtn
                     onMenuItemClick={({ sortingFn }) =>
@@ -597,6 +609,7 @@ export default class SearchResultsContainer extends React.Component<
                     )}
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
+                    getRootElement={this.props.getRootElement}
                     shareMenuProps={{
                         normalizedPageUrl: page.normalizedUrl,
                         copyLink: this.props.onPageLinkCopy,
@@ -604,6 +617,7 @@ export default class SearchResultsContainer extends React.Component<
                             interactionProps.updatePageNotesShareInfo(
                                 shareInfo,
                             ),
+                        getRootElement: this.props.getRootElement,
                     }}
                     {...interactionProps}
                     {...pickerProps}
