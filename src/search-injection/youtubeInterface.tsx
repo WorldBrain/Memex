@@ -19,6 +19,7 @@ import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { runtime } from 'webextension-polyfill'
 import YoutubeButtonMenu from './components/youtubeActionBar'
+import { sleepPromise } from 'src/util/promises'
 
 interface RootProps {
     renderComponent: () => Promise<void>
@@ -256,6 +257,13 @@ export const handleRenderYoutubeInterface = async (
         )
     ) {
         document.addEventListener('DOMContentLoaded', renderComponent, true)
+    }
+
+    await sleepPromise(5000)
+    const hasAnchored = document.getElementById('MemexButtonContainer')
+
+    if (!hasAnchored) {
+        renderComponent()
     }
 }
 
