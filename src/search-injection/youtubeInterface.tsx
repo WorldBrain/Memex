@@ -66,9 +66,15 @@ export const handleRenderYoutubeInterface = async (
     syncSettings: SyncSettingsStoreInterface,
     annotationsFunctions: any,
 ) => {
+    const existingButton = document.getElementById('youtubeInjectionContainer')
+
+    if (existingButton) {
+        existingButton.remove()
+    }
+    const target = document.createElement('div')
+    target.setAttribute('id', 'youtubeInjectionContainer')
     const renderComponent = async () => {
-        const target = document.createElement('div')
-        target.setAttribute('id', 'youtubeInjectionContainer')
+        console.log('rendering youtube interface')
 
         const below = document.querySelector('#below')
         const player = document.querySelector('#player')
@@ -99,6 +105,12 @@ export const handleRenderYoutubeInterface = async (
                             if (node instanceof HTMLElement) {
                                 // Check if the "player" element is in the added node or its descendants
                                 if (node.querySelector('#player')) {
+                                    const below = document.querySelector(
+                                        '#below',
+                                    )
+                                    const player = document.querySelector(
+                                        '#player',
+                                    )
                                     injectYoutubeContextMenu(
                                         annotationsFunctions,
                                     )
@@ -117,10 +129,12 @@ export const handleRenderYoutubeInterface = async (
                             if (node instanceof HTMLElement) {
                                 // Check if the "below" element is in the added node or its descendants
                                 if (node.querySelector('#below')) {
-                                    // injectYoutubeButtonMenu(
-                                    //     annotationsFunctions,
-                                    // )
-
+                                    const below = document.querySelector(
+                                        '#below',
+                                    )
+                                    const player = document.querySelector(
+                                        '#player',
+                                    )
                                     below.insertAdjacentElement(
                                         'afterbegin',
                                         target,

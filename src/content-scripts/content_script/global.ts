@@ -1035,6 +1035,18 @@ export async function main(
             }
             await inPageUI.hideRibbon()
 
+            if (
+                shouldIncludeSearchInjection(
+                    window.location.hostname,
+                    window.location.href,
+                ) ||
+                window.location.href.includes('youtube.com')
+            ) {
+                await contentScriptRegistry.registerSearchInjectionScript(
+                    searchInjectionMain,
+                )
+            }
+
             await injectCustomUIperPage(
                 annotationsFunctions,
                 pkmSyncBG,
