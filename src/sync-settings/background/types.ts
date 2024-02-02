@@ -36,6 +36,7 @@ export interface SyncSettingsByFeature {
             duckduckgo: boolean
             google: boolean
         }
+        stickyContainerEnabled: boolean
     }
     pdfIntegration: {
         shouldAutoOpen: boolean

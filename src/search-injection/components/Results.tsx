@@ -23,6 +23,8 @@ interface ResultsProps {
     renderResultItems: Function
     renderNotification: React.ReactNode
     getRootElement: () => HTMLElement
+    isSticky: boolean
+    toggleStickyContainer: (isSticky: boolean) => Promise<void>
 }
 interface ResultsState {
     themeVariant?: MemexThemeVariant
@@ -101,6 +103,27 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                     onClick={props.seeMoreResults}
                                 />
                             </TooltipBox>
+                            <TooltipBox
+                                placement={'bottom'}
+                                tooltipText={'Pin Search Results'}
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    filePath={'pin'}
+                                    heightAndWidth="18px"
+                                    padding="5px"
+                                    color={
+                                        this.props.isSticky
+                                            ? 'prime1'
+                                            : 'greyScale6'
+                                    }
+                                    onClick={() =>
+                                        props.toggleStickyContainer(
+                                            !this.props.isSticky,
+                                        )
+                                    }
+                                />
+                            </TooltipBox>
                             <SettingsButtonContainer>
                                 <TooltipBox
                                     placement={'bottom'}
@@ -154,7 +177,7 @@ const MemexContainer = styled.div`
     background: ${(props) => props.theme.colors.black};
     font-family: ${(props) => props.theme.fonts.primary};
     border-radius: 12px;
-    overflow: visible;
+    overflow: hidden;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};

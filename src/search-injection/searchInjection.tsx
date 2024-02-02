@@ -107,12 +107,14 @@ export const handleRenderSearchInjection = async (
         const component = document.getElementById('memexResults')
         if (component) {
             component.parentNode.removeChild(component)
+            component.style.position = 'sticky'
+            component.style.top = '100px'
+            component.style.zIndex = '30000'
         }
 
         const target = document.createElement('div')
         target.setAttribute('id', 'memexResults')
 
-        const containerType = searchEngineObj.containerType
         const containerIdentifier = searchEngineObj.container[position]
 
         if (searchEngine === 'google') {
@@ -325,14 +327,4 @@ export const handleRenderSearchInjection = async (
             console.error('Target node for mutation observer not found')
         }
     }
-
-    // if (
-    //     !(
-    //         document.readyState === 'complete' ||
-    //         document.readyState === 'interactive' ||
-    //         document.readyState === 'loading'
-    //     )
-    // ) {
-    //     document.addEventListener('DOMContentLoaded', renderComponent, true)
-    // }
 }

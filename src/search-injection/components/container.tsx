@@ -46,6 +46,7 @@ interface State {
     isNotif: boolean
     position: null | 'side' | 'above'
     notification: any
+    isStickyContainer: boolean
 }
 
 class Container extends React.Component<Props, State> {
@@ -80,6 +81,7 @@ class Container extends React.Component<Props, State> {
         position: null,
         isNotif: true,
         notification: {},
+        isStickyContainer: true,
     }
 
     async componentDidMount() {
@@ -92,10 +94,20 @@ class Container extends React.Component<Props, State> {
                 }
             }
         }
-        const subBannerShownAfter = await this.props.syncSettings.dashboard.get(
-            'subscribeBannerShownAfter',
+
+        let isSticky = null
+
+        isSticky = await this.props.syncSettings.searchInjection.get(
+            'stickyContainerEnabled',
         )
-        const isCloudEnabled = await getLocalStorage(CLOUD_STORAGE_KEYS.isSetUp)
+
+        if (isSticky == null) {
+            await this.props.syncSettings.searchInjection.set(
+                'stickyContainerEnabled',
+                true,
+            )
+            isSticky = true
+        }
 
         let fetchNotif
         if (notification) {
@@ -116,10 +128,41 @@ class Container extends React.Component<Props, State> {
             position,
             isNotif: fetchNotif && !fetchNotif.readTime,
             notification,
-            isCloudUpgradeBannerShown: !isCloudEnabled,
-            isSubscriptionBannerShown:
-                subBannerShownAfter != null && subBannerShownAfter < Date.now(),
+            isStickyContainer: this.props.isSticky,
         })
+
+        const target = document.getElementById('memexResults')
+
+        if (isSticky) {
+            target.style.position = 'sticky'
+            target.style.top = '100px'
+            target.style.zIndex = '30000'
+        } else {
+            target.style.position = 'relative'
+            target.style.top = 'unset'
+            target.style.zIndex = 'unset'
+        }
+    }
+
+    toggleStickyContainer = async (isSticky) => {
+        this.setState({ isStickyContainer: isSticky })
+        await this.props.syncSettings.searchInjection.set(
+            'stickyContainerEnabled',
+            isSticky,
+        )
+
+        const target = document.getElementById('memexResults')
+
+        if (isSticky) {
+            console.log('isSticky', isSticky)
+            target.style.position = 'sticky'
+            target.style.top = '100px'
+            target.style.zIndex = '30000'
+        } else {
+            target.style.position = 'relative'
+            target.style.top = 'unset'
+            target.style.zIndex = 'initial'
+        }
     }
 
     handleResultLinkClick = () => {}
@@ -363,6 +406,8 @@ class Container extends React.Component<Props, State> {
                     renderResultItems={this.renderResultItems}
                     renderNotification={this.renderNotification()}
                     getRootElement={this.props.getRootElement}
+                    isSticky={this.state.isStickyContainer}
+                    toggleStickyContainer={this.toggleStickyContainer}
                 />
             </>
         )
