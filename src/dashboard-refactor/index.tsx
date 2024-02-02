@@ -1068,6 +1068,13 @@ export class DashboardContainer extends StatefulUIElement<
                             noteId,
                             isEditing: true,
                         }),
+                    onEditHighlightBtnClick: (noteId) => () => {
+                        console.log('body editing')
+                        this.processEvent('setBodyEditing', {
+                            noteId,
+                            isEditing: true,
+                        })
+                    },
                     onEditCancel: (noteId) => () =>
                         this.processEvent('cancelNoteEdit', {
                             noteId,
@@ -1162,6 +1169,12 @@ export class DashboardContainer extends StatefulUIElement<
                         }),
                     onCommentChange: (noteId) => (event) => {
                         this.processEvent('setNoteEditCommentValue', {
+                            noteId,
+                            value: event,
+                        })
+                    },
+                    onBodyChange: (noteId) => (event) => {
+                        this.processEvent('setNoteEditBodyValue', {
                             noteId,
                             value: event,
                         })

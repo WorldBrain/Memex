@@ -34,6 +34,7 @@ export interface AnnotationEditEventProps {
 
 export interface AnnotationEditGeneralProps {
     comment: string
+    body: string
     editorHeight?: string
     isShared?: boolean
     isBulkShareProtected?: boolean

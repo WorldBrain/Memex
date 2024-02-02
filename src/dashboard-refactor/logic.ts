@@ -1547,6 +1547,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         localId: event.noteId,
                         comment: existing.comment,
                         color: event.color,
+                        body: existing.highlight,
                     },
                     annotationsBG: this.options.annotationsBG,
                     contentSharingBG: this.options.contentShareBG,
@@ -2652,6 +2653,19 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+    setBodyEditing: EventHandler<'setBodyEditing'> = ({ event }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            isBodyEditing: { $set: event.isEditing },
+                        },
+                    },
+                },
+            },
+        })
+    }
 
     setNoteTagPickerShown: EventHandler<'setNoteTagPickerShown'> = ({
         event,
@@ -3071,6 +3085,24 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+    setNoteEditBodyValue: EventHandler<'setNoteEditBodyValue'> = ({
+        event,
+    }) => {
+        console.log('eeeeee', event)
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            editNoteForm: {
+                                bodyInputValue: { $set: event.value },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
 
     cancelNoteEdit: EventHandler<'cancelNoteEdit'> = ({
         event,
@@ -3088,6 +3120,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     byId: {
                         [event.noteId]: {
                             isEditing: { $set: false },
+                            isBodyEditing: { $set: false },
                             editNoteForm: {
                                 isTagPickerShown: { $set: false },
                                 isListPickerShown: { $set: false },
@@ -3147,16 +3180,29 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.noteId]: {
                                     isEditing: { $set: false },
+                                    isBodyEditing: { $set: false },
                                     tags: { $set: editNoteForm.tags },
                                     isShared: { $set: event.shouldShare },
-                                    comment: { $set: editNoteForm.inputValue },
+                                    comment: {
+                                        $set:
+                                            editNoteForm.inputValue ??
+                                            existing.comment,
+                                    },
+                                    highlight: {
+                                        $set:
+                                            editNoteForm.bodyInputValue ??
+                                            existing.highlight,
+                                    },
                                     isBulkShareProtected: {
                                         $set:
                                             event.isProtected ||
                                             !!event.keepListsIfUnsharing,
                                     },
                                     lists: { $set: lists },
-                                    color: { $set: event.color as RGBAColor },
+                                    color: {
+                                        $set: (event.color ??
+                                            existing.color) as RGBAColor,
+                                    },
                                 },
                             },
                         },
@@ -3166,11 +3212,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 })
 
+                console.log('editNoteForm', editNoteForm, existing)
+
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,
-                        comment: editNoteForm.inputValue,
-                        color: event.color,
+                        comment: editNoteForm.inputValue ?? existing.comment,
+                        color: event.color ?? existing.color,
+                        body: editNoteForm.bodyInputValue ?? existing.highlight,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,

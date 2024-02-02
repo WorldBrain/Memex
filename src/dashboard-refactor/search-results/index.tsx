@@ -338,6 +338,7 @@ export default class SearchResultsContainer extends React.Component<
                 getHighlightColorSettings={this.props.getHighlightColorSettings}
                 highlightColorSettings={this.props.highlightColorSettings}
                 isEditing={noteData.isEditing}
+                isEditingHighlight={noteData.isBodyEditing}
                 isDeleting={false}
                 renderCopyPasterForAnnotation={() => (
                     <PageNotesCopyPaster
@@ -419,6 +420,7 @@ export default class SearchResultsContainer extends React.Component<
                 )}
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
+                    body: noteData.editNoteForm.bodyInputValue,
                     onListsBarPickerBtnClick:
                         interactionProps.onListPickerBarBtnClick,
                     onCommentChange: (content) =>
@@ -428,6 +430,8 @@ export default class SearchResultsContainer extends React.Component<
                     onEditConfirm: interactionProps.onEditConfirm,
                     imageSupport: this.props.imageSupport,
                     getRootElement: this.props.getRootElement,
+                    onBodyChange: (content) =>
+                        interactionProps.onBodyChange(content),
                 }}
                 annotationFooterDependencies={{
                     onDeleteCancel: () => undefined,
@@ -436,6 +440,8 @@ export default class SearchResultsContainer extends React.Component<
                     onCopyPasterBtnClick: interactionProps.onCopyPasterBtnClick,
                     onEditIconClick: interactionProps.onEditBtnClick,
                     onShareClick: interactionProps.onShareBtnClick,
+                    onEditHighlightIconClick:
+                        interactionProps.onEditHighlightBtnClick,
                 }}
             />
         )

@@ -2017,10 +2017,14 @@ export class SidebarContainerLogic extends UILogic<
             })
         }
 
+        const previousAnnotationComment = this.options.annotationsCache
+            .annotations.byId[event.unifiedAnnotationId].comment
+
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
                     isHighlightEditing: { $set: event.isEditing },
+                    isCommentEditing: { $set: event.isEditing },
                 },
             },
         })
@@ -2032,12 +2036,16 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         const previousAnnotationComment = this.options.annotationsCache
             .annotations.byId[event.unifiedAnnotationId].comment
+        const previousAnnotationBody = this.options.annotationsCache.annotations
+            .byId[event.unifiedAnnotationId].body
 
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
                     isCommentEditing: { $set: false },
+                    isHighlightEditing: { $set: false },
                     comment: { $set: previousAnnotationComment },
+                    body: { $set: previousAnnotationBody },
                 },
             },
         })
@@ -2195,6 +2203,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationCardInstances: {
                 [cardId]: {
                     isCommentEditing: { $set: false },
+                    isHighlightEditing: { $set: false },
                 },
             },
             confirmPrivatizeNoteArgs: {

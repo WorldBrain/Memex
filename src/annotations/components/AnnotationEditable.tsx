@@ -484,6 +484,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         barColor={barColor}
                     />
                 )}
+                {/* This is the highlight Editing section, not the annotationEditSection */}
                 {this.props.isEditingHighlight ? (
                     <HighlightEditContainer
                         hasHighlight={this.theme.hasHighlight}
@@ -642,6 +643,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 </span>
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={
@@ -1346,7 +1348,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0;
-    padding: 15px 15px 7px 15px;
+    padding: 15px 10px 7px 15px;
     line-height: 20px;
     text-align: left;
     line-break: normal;
@@ -1356,7 +1358,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     ${(props) =>
         !props.hasComment &&
         css`
-            padding: 15px 15px 15px 15px;
+            padding: 15px 10px 15px 15px;
         `}
 `
 
