@@ -27,6 +27,7 @@ const RIBBON_HIDE_TIMEOUT = 400
 export interface RibbonHolderProps extends RibbonHolderDependencies {
     analyticsBG: AnalyticsCoreInterface
     theme: MemexThemeVariant
+    getRootElement: () => HTMLElement
 }
 
 export default class RibbonHolder extends StatefulUIElement<
@@ -306,7 +307,7 @@ const RibbonHolderBox = styled.div<{
     position: fixed;
     right: 0;
     top: 130px;
-    z-index: 2147483647;
+    z-index: 2147483646;
 
     ${(props) =>
         (props.ribbonPosition === 'topRight' ||
@@ -359,7 +360,7 @@ const RibbonHolderBox = styled.div<{
                 height: fit-content;
                 width: 60px;
             `}
-        
+
     ${(props) =>
         props.isSidebarOpen &&
         css`

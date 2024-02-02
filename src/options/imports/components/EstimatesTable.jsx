@@ -75,6 +75,7 @@ const EstimatesTable = ({
                                 <TooltipBox
                                     tooltipText="How can I get that file?"
                                     placement="right"
+                                    getPortalRoot={null}
                                 >
                                     <Icon
                                         filePath={icons.helpIcon}

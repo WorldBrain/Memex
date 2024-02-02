@@ -25,6 +25,7 @@ interface RootProps {
     searchEngine: any
     syncSettings: SyncSettingsStoreInterface
     position: 'side' | 'above'
+    getRootElement: () => HTMLElement
 }
 
 interface RootState {
@@ -59,6 +60,7 @@ class Root extends React.Component<RootProps, RootState> {
                         searchEngine={props.searchEngine}
                         syncSettings={props.syncSettings}
                         position={props.position}
+                        getRootElement={this.props.getRootElement}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -72,6 +74,7 @@ export const handleRender = async (
     //{ docs, totalCount },
     searchEngine,
     syncSettings: SyncSettingsStoreInterface,
+    getRootElement,
 ) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
@@ -255,6 +258,7 @@ export const handleRender = async (
                     syncSettings,
                     target,
                 }}
+                getRootElement={getRootElement}
             />,
             target,
         )

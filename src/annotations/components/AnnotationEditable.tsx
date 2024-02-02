@@ -119,6 +119,7 @@ export interface AnnotationProps {
     getHighlightColorSettings?: () => void
     highlightColorSettings?: string
     color?: RGBAColor
+    getRootElement: () => HTMLElement
 }
 
 export interface AnnotationEditableEventProps {
@@ -407,6 +408,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     : 'Show Less'
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={() => this.toggleTextTruncation()}
@@ -426,6 +428,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         <TooltipBox
                             tooltipText="Open in Page"
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={onGoToAnnotation}
@@ -447,6 +450,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 </span>
                             }
                             placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
                                 onClick={footerDeps.onEditIconClick}
@@ -544,6 +548,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         }
                         instaClose
                         disableBlur
+                        getPortalRoot={this.props.getRootElement}
                     >
                         {/* {this.props.highlightColorSettings[]} */}
                         <LabelBox>{label}</LabelBox>
@@ -565,6 +570,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     offsetX={5}
                     placement={'right-start'}
                     disableBlur
+                    getPortalRoot={this.props.getRootElement}
                 >
                     <HighlightColorPicker
                         saveHighlightColorSettings={
@@ -652,6 +658,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     </span>
                                 }
                                 placement="bottom-end"
+                                getPortalRoot={this.props.getRootElement}
                             >
                                 <Icon
                                     onClick={
@@ -813,6 +820,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 )
                             }
                             placement="bottom-start"
+                            getPortalRoot={this.props.getRootElement}
                         >
                             <PrimaryAction
                                 onClick={() => {
@@ -859,6 +867,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         borderTop={false}
                         creationInfo={this.creationInfo}
                         actions={this.calcFooterActions()}
+                        getRootElement={this.props.getRootElement}
                     />
                     {this.renderSpacePicker(
                         this.shareMenuButtonRef,
@@ -892,6 +901,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     isShared={isShared}
                     tabIndex={0}
                     shortcutText={`${AnnotationEditable.MOD_KEY} + Enter`}
+                    getRootElement={this.props.getRootElement}
                 />
             )
         }
@@ -982,6 +992,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     })
                 }}
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.props.renderListsPickerForAnnotation(
                     this.props.unifiedId,
@@ -1015,6 +1026,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 }}
                 offsetX={100}
                 width={'310px'}
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.props.renderShareMenuForAnnotation(this.props.unifiedId)}
             </PopoutBox>
@@ -1040,6 +1052,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     })
                 }}
                 offsetX={10}
+                getPortalRoot={this.props.getRootElement}
             >
                 {this.props.renderCopyPasterForAnnotation(this.props.unifiedId)}
             </PopoutBox>
@@ -1119,12 +1132,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         targetElementRef={this.tutorialButtonRef.current}
                         placement={'bottom'}
                         closeComponent={() => this.toggleShowTutorial()}
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <QuickTutorial
                             markdownHelpOnTop={true}
                             getKeyboardShortcutsState={
                                 getKeyboardShortcutsState
                             }
+                            getRootElement={this.props.getRootElement}
                         />
                     </PopoutBox>
                 )}

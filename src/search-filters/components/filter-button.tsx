@@ -19,6 +19,7 @@ interface Props {
     showPopup: (value: boolean) => void
     clearFilters: () => void
     onFilterDel?: (args: any) => void
+    getRootElement: () => HTMLElement
 }
 
 interface State {
@@ -117,6 +118,9 @@ class FilterButton extends PureComponent<Props, State> {
                                     <TooltipBox
                                         tooltipText="Clear this Filter"
                                         placement="bottom"
+                                        getPortalRoot={
+                                            this.props.getRootElement
+                                        }
                                     >
                                         <span
                                             className={this.styles.clearFilters}
@@ -137,6 +141,9 @@ class FilterButton extends PureComponent<Props, State> {
                                     <TooltipBox
                                         tooltipText="Clear this Filter"
                                         placement="bottom"
+                                        getPortalRoot={
+                                            this.props.getRootElement
+                                        }
                                     >
                                         <span
                                             className={this.styles.clearFilters}

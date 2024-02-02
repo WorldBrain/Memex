@@ -15,6 +15,7 @@ const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
     closePopup: () => void
+    getRootElement: () => HTMLElement
 }
 
 interface StateProps {
@@ -71,6 +72,7 @@ class TooltipButton extends PureComponent<Props, State> {
                 <ToggleSwitchButton
                     isEnabled={this.props.isEnabled}
                     onToggleClick={null}
+                    getRootElement={this.props.getRootElement}
                 />
             </ButtonItem>
         )

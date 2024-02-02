@@ -13,6 +13,7 @@ interface Props {
     contentFilter: React.ReactNode
     bookmarkFilter: React.ReactNode
     toggleFilterBar: () => void
+    getRootElement: () => HTMLElement
 }
 
 interface State {}
@@ -34,6 +35,7 @@ class SearchFilters extends PureComponent<Props, State> {
                     <TooltipBox
                         tooltipText="Close Filter Bar"
                         placement="bottom"
+                        getPortalRoot={this.props.getRootElement}
                     >
                         <div
                             className={cx(styles.button, styles.arrow)}

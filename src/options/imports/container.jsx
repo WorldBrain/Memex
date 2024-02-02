@@ -348,6 +348,7 @@ class ImportContainer extends Component {
                     <TooltipBox
                         tooltipText="Recalculate Numbers"
                         placement="bottom"
+                        getPortalRoot={null}
                     >
                         <Icon
                             onClick={this.props.recalcEsts}

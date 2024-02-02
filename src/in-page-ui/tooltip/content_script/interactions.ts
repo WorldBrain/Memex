@@ -128,6 +128,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
         saveHighlightColorsSettings: (newStateInput) =>
             params.saveHighlightColorsSettings(newStateInput),
         openPDFinViewer: (url) => params.openPDFinViewer(url),
+        getRootElement: null,
     })
 
     setupTooltipTrigger(() => {

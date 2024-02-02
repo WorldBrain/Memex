@@ -145,6 +145,7 @@ class TagPicker extends StatefulUIElement<
                 <TooltipBox
                     tooltipText="Tag all tabs in window"
                     placement="left"
+                    getPortalRoot={null}
                 >
                     <ActOnAllTabsButton
                         size={20}

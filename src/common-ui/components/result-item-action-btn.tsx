@@ -14,7 +14,11 @@ export interface Props {
 }
 
 const ResultItemActionBtn: React.SFC<Props> = (props) => (
-    <TooltipBox placement={'bottom'} tooltipText={props.tooltipText}>
+    <TooltipBox
+        placement={'bottom'}
+        tooltipText={props.tooltipText}
+        getPortalRoot={null}
+    >
         <button
             className={props.permanent ? styles.permanentButton : styles.button}
             onClick={props.onClick}

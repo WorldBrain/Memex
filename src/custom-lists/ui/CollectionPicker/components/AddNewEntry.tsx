@@ -10,6 +10,7 @@ interface Props {
     resultItem: ReactNode
     resultsCount: number
     commandKey: string
+    getRootElement: () => HTMLElement
 }
 
 export default (props: Props) => {
@@ -18,12 +19,17 @@ export default (props: Props) => {
             <ContentBox>
                 <Title>Create "{props.resultItem}"</Title>
                 {props.resultsCount === 0 && (
-                    <KeyboardShortcuts size={'small'} keys={['Enter']} />
+                    <KeyboardShortcuts
+                        getRootElement={props.getRootElement}
+                        size={'small'}
+                        keys={['Enter']}
+                    />
                 )}
                 {props.resultsCount > 0 && (
                     <KeyboardShortcuts
                         size={'small'}
                         keys={[props.commandKey, 'Enter']}
+                        getRootElement={props.getRootElement}
                     />
                 )}
             </ContentBox>

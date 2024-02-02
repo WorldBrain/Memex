@@ -31,6 +31,7 @@ export default function TagsSegment({
                             </span>
                         }
                         placement={'right'}
+                        getPortalRoot={null}
                     >
                         <Icon
                             filePath={'warning'}

@@ -117,6 +117,7 @@ export interface ListsSidebarSearchBarProps {
     areLocalListsEmpty: boolean
     isSidebarLocked: boolean
     searchQuery: string
+    getRootElement: () => HTMLElement
 }
 
 export default class ListsSidebarSearchBar extends PureComponent<
@@ -141,7 +142,11 @@ export default class ListsSidebarSearchBar extends PureComponent<
             <CreateButton onClick={this.handleCreateNewClick}>
                 <CreateBox>
                     <TextSpan bold>Create</TextSpan>
-                    <KeyboardShortcuts size={'small'} keys={['Enter']} />
+                    <KeyboardShortcuts
+                        size={'small'}
+                        keys={['Enter']}
+                        getRootElement={this.props.getRootElement}
+                    />
                 </CreateBox>
                 <TextSpan>{this.props.searchQuery}</TextSpan>
             </CreateButton>
