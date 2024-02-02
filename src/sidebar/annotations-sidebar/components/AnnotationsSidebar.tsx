@@ -4633,7 +4633,7 @@ const SuggestionsListSwitcher = styled.div`
     width: 100%;
     position: sticky;
     top: 0px;
-    z-index: 100;
+    z-index: 1000;
     background: ${(props) => props.theme.colors.greyScale1}60;
     backdrop-filter: blur(10px);
 `
@@ -5735,12 +5735,11 @@ const FollowedListNotesContainer = styled(Margin)<{
     width: -moz-available;
     z-index: ${(props) => 1000 - props.key};
     height: -webkit-fill-available;
-    overflow: hidden;
 
     ${(props) =>
         props.isHovered &&
         css`
-            z-index: 100000;
+            z-index: 999;
         `};
 `
 
