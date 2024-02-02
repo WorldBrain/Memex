@@ -5739,7 +5739,7 @@ const FollowedListNotesContainer = styled(Margin)<{
     ${(props) =>
         props.isHovered &&
         css`
-            z-index: 100000;
+            z-index: 999;
         `};
 `
 
