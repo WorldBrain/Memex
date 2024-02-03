@@ -62,7 +62,7 @@ class Root extends React.Component<RootProps, RootState> {
             .catch((error) => console.error('Search request failed', error))
     }
 
-    executeSearchDebounced = debounce(this.executeSearch, 100)
+    executeSearchDebounced = debounce(this.executeSearch, 150)
 
     updateQuery = async (query) => {
         this.executeSearchDebounced(query)

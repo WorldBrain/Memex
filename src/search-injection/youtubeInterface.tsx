@@ -270,40 +270,81 @@ export const handleRenderYoutubeInterface = async (
 export function injectYoutubeContextMenu(annotationsFunctions: any) {
     const config = { attributes: true, childList: true, subtree: true }
     const icon = runtime.getURL('/img/memex-icon.svg')
+    let panel = null
+
+    const contextMenu = document.getElementsByClassName(
+        'ytp-popup ytp-contextmenu',
+    )
+    if (contextMenu.length > 0) {
+        console.log('contextMenu', contextMenu)
+        panel = contextMenu[0]?.querySelector('.ytp-panel-menu')
+
+        console.log('panel', panel)
+    }
+    if (panel) {
+        console.log('panel', panel)
+        renderYoutubeMenuButton(panel, annotationsFunctions, icon)
+        return
+    }
 
     const observer = new MutationObserver((mutation) => {
         const targetObject = mutation[0]
         const targetElement = targetObject.target as HTMLElement
-        if (targetElement.className === 'ytp-popup ytp-contextmenu') {
+        console.log('targetElement', targetElement)
+        if (targetElement.classList.contains('ytp-contextmenu')) {
             const targetChildren = targetElement.children
-            let panel = null
+            console.log('targetChildren', targetChildren)
 
             for (let i = 0; i < targetChildren.length; i++) {
+                console.log('targetChildren[i]', targetChildren[i])
                 if (targetChildren[i].classList.contains('ytp-panel')) {
-                    panel = targetChildren[i]
-                    break
+                    const potentialPanel = targetChildren[i].querySelector(
+                        '.ytp-panel-menu',
+                    )
+                    if (potentialPanel) {
+                        panel = potentialPanel
+                        break
+                    }
                 }
             }
             if (panel == null) {
                 return
             }
-            const newEntry = document.createElement('div')
-            newEntry.setAttribute('class', 'ytp-menuitem')
-            newEntry.onclick = () =>
-                annotationsFunctions.createAnnotation()(
-                    false,
-                    false,
-                    false,
-                    getTimestampNoteContentForYoutubeNotes(),
-                )
-            newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap, color: white">Add Note to current time</div>`
-            panel.prepend(newEntry)
+
+            renderYoutubeMenuButton(panel, annotationsFunctions, icon)
+
             // panel.style.height = "320px"
             observer.disconnect()
         }
     })
 
     observer.observe(document, config)
+}
+
+function renderYoutubeMenuButton(panel, annotationsFunctions: any, icon) {
+    const menuButton = document.getElementById('memex-youtube-menu-button')
+
+    if (menuButton) {
+        menuButton.remove()
+    }
+
+    const newEntry = document.createElement('div')
+    newEntry.setAttribute('class', 'ytp-menuitem')
+    newEntry.id = 'memex-youtube-menu-button'
+    newEntry.onclick = () =>
+        annotationsFunctions.createAnnotation()(
+            false,
+            false,
+            false,
+            getTimestampNoteContentForYoutubeNotes(),
+        )
+    newEntry.innerHTML = `<div class="ytp-menuitem-icon"><img src=${icon} style="height: 23px; padding-left: 2px; display: flex; width: auto"/></div><div class="ytp-menuitem-label" style="white-space: nowrap, color: white">Add Note to current time</div>`
+    const newEntryActionButton = document.createElement('div')
+    newEntryActionButton.innerHTML =
+        '<div class="ytp-menuitem-content"><div class="ytp-menuitem-toggle-checkbox"></div></div>'
+    newEntry.appendChild(newEntryActionButton)
+
+    panel.prepend(newEntry)
 }
 
 export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(

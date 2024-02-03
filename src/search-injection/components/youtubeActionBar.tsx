@@ -329,7 +329,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 const ParentContainer = styled.div`
     width: 100%;
     border-radius: 8px 8px 8px 8px;
-    margin-top: 10px;
+    margin-top: 5px;
     margin-bottom: 20px;
     overflow: hidden;
     &::-webkit-scrollbar {
