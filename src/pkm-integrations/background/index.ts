@@ -40,9 +40,6 @@ export class PKMSyncBackgroundModule {
             arch = info.arch
         })
 
-        console.log('os', os)
-        console.log('arch', arch)
-
         if (arch === 'aarch64' || arch === 'arm' || arch === 'arm64') {
             arch = 'arm'
         }
@@ -207,7 +204,6 @@ export class PKMSyncBackgroundModule {
     }
 
     async pushPKMSyncUpdate(item, checkForFilteredSpaces) {
-        console.log('item', item)
         if (await this.backendNew.isConnected()) {
             const bufferedItems = await this.getBufferedItems()
             bufferedItems.push(item)
@@ -563,7 +559,6 @@ export class PKMSyncBackgroundModule {
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
-                console.log('createpage update', item.data)
                 annotationsSection = this.annotationObjectDefault(
                     item.data.annotationId,
                     item.data.body
@@ -670,13 +665,6 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
-            console.log(
-                'annotationcreate',
-                item.data,
-                moment(item.data.createdWhen).format(
-                    `${syncDateFormat} hh:mma`,
-                ),
-            )
             const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
@@ -1055,7 +1043,6 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
     ) {
-        console.log('annotation', creationDate)
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = body ? `> ${body.trim()}\n\n` : ''

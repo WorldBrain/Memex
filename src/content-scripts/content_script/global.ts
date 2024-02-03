@@ -454,17 +454,6 @@ export async function main(
         },
     })
 
-    const pageHasBookark =
-        (await bookmarks.pageHasBookmark(fullPageUrl)) ||
-        (await collectionsBG
-            .fetchPageLists({ url: fullPageUrl })
-            .then((lists) => lists.length > 0)) ||
-        (await annotationsBG
-            .getAllAnnotationsByUrl({ url: fullPageUrl })
-            .then((annotations) => annotations.length > 0))
-
-    const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
-
     async function saveHighlight(
         shouldShare: boolean,
         shouldCopyShareLink: boolean,
@@ -632,7 +621,6 @@ export async function main(
             shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
             commentText?: string,
-            includeLastFewSecs?: number,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
@@ -710,6 +698,7 @@ export async function main(
                 )
                 await createPromise
             } else if (window.location.href.includes('youtube.com')) {
+                console.log('commentText', commentText)
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
                     commentText: commentText,
@@ -769,14 +758,6 @@ export async function main(
                 includeLastFewSecs,
             )
 
-            if (timestampToPass == null) {
-                const aIbutton = document.getElementById(
-                    'AItimeStampButtonInner',
-                )
-                aIbutton.innerHTML = `<div class="ytp-menuitem-label" id="AItimeStampButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">No Transcript Available</div>`
-                return
-            }
-
             inPageUI.showSidebar({
                 action: 'create_youtube_timestamp_with_AI_summary',
                 videoRangeTimestamps: timestampToPass,
@@ -790,11 +771,6 @@ export async function main(
             inPageUI.hideTooltip()
         },
         createTimestampWithScreenshot: async () => {
-            const screenshotButton = document.getElementById(
-                'screenshotButtonInner',
-            )
-
-            screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Loading Screenshot</div>`
             const targetContainer = document.getElementById('movie_player')
             const screenshotTarget = targetContainer.getElementsByClassName(
                 'html5-main-video',
@@ -809,8 +785,6 @@ export async function main(
                     imageData: dataURL,
                 })
             }
-
-            screenshotButton.innerHTML = `<div class="ytp-menuitem-label" id="screenshotButtonInner" style="font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on; font-family: Satoshi, sans-serif; font-size: 14px;padding: 0px 12 0 6px; align-items: center; justify-content: center; white-space: nowrap; display: flex; align-items: center">Screenshot</div>`
 
             inPageUI.hideTooltip()
         },
@@ -968,9 +942,33 @@ export async function main(
             await execute({
                 syncSettingsBG,
                 requestSearcher: remoteFunction('search'),
+                annotationsFunctions,
             })
         },
     }
+
+    if (
+        shouldIncludeSearchInjection(
+            window.location.hostname,
+            window.location.href,
+        ) ||
+        window.location.href.includes('youtube.com')
+    ) {
+        await contentScriptRegistry.registerSearchInjectionScript(
+            searchInjectionMain,
+        )
+    }
+
+    const pageHasBookark =
+        (await bookmarks.pageHasBookmark(fullPageUrl)) ||
+        (await collectionsBG
+            .fetchPageLists({ url: fullPageUrl })
+            .then((lists) => lists.length > 0)) ||
+        (await annotationsBG
+            .getAllAnnotationsByUrl({ url: fullPageUrl })
+            .then((annotations) => annotations.length > 0))
+
+    const isPageBlacklisted = await checkPageBlacklisted(fullPageUrl)
 
     // 5. Registers remote functions that can be used to interact with components
     // in this tab.
@@ -1036,6 +1034,18 @@ export async function main(
                 return
             }
             await inPageUI.hideRibbon()
+
+            if (
+                shouldIncludeSearchInjection(
+                    window.location.hostname,
+                    window.location.href,
+                ) ||
+                window.location.href.includes('youtube.com')
+            ) {
+                await contentScriptRegistry.registerSearchInjectionScript(
+                    searchInjectionMain,
+                )
+            }
 
             await injectCustomUIperPage(
                 annotationsFunctions,
@@ -1169,6 +1179,7 @@ export async function main(
     ////////////////////////////////////////////
     // CHECK CURRENT PAGE IF NEED BE TO INJECT CUSTOM UI
     ////////////////////////////////////////////
+
     await injectCustomUIperPage(
         annotationsFunctions,
         pkmSyncBG,
@@ -1292,17 +1303,6 @@ export async function main(
                 }
             }
         }, 200)
-    }
-
-    if (
-        shouldIncludeSearchInjection(
-            window.location.hostname,
-            window.location.href,
-        )
-    ) {
-        await contentScriptRegistry.registerSearchInjectionScript(
-            searchInjectionMain,
-        )
     }
 
     if (analyticsBG && hasActivity) {
@@ -1580,16 +1580,16 @@ export async function injectCustomUIperPage(
     pageInfo,
     inPageUI,
 ) {
-    if (window.location.hostname === 'www.youtube.com') {
-        const existingButtons = document.getElementsByClassName(
-            'memex-youtube-buttons',
-        )[0]
+    // if (window.location.hostname === 'www.youtube.com') {
+    //     const existingButtons = document.getElementsByClassName(
+    //         'memex-youtube-buttons',
+    //     )[0]
 
-        if (existingButtons) {
-            existingButtons.remove()
-        }
-        loadYoutubeButtons(annotationsFunctions)
-    }
+    //     if (existingButtons) {
+    //         existingButtons.remove()
+    //     }
+    //     loadYoutubeButtons(annotationsFunctions)
+    // }
 
     const checkIfSubstackHeader = () => {
         const headerLinks = document.head.getElementsByTagName('link')

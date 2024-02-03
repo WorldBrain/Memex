@@ -7,6 +7,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 interface ResultsProps {
     position: string
@@ -23,7 +24,12 @@ interface ResultsProps {
     renderResultItems: Function
     renderNotification: React.ReactNode
     getRootElement: () => HTMLElement
+    isSticky: boolean
+    toggleStickyContainer: (isSticky: boolean) => Promise<void>
+    updateQuery: (query: string) => Promise<void>
+    query: string
 }
+
 interface ResultsState {
     themeVariant?: MemexThemeVariant
 }
@@ -65,7 +71,62 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                         location="search"
                     />
                     <TopBarArea hideResults={props.hideResults}>
-                        <ResultsBox>
+                        <SearchContainer>
+                            <SearchField
+                                fontSize="16px"
+                                onChange={(e) => {
+                                    props.updateQuery(
+                                        (e.target as HTMLInputElement).value,
+                                    )
+                                    props.toggleHideResults(false)
+                                }}
+                                placeholder={props.query}
+                                icon="searchIcon"
+                                padding={'0px 10px'}
+                                actionButton={
+                                    <ResultsBox>
+                                        <TotalCount>
+                                            {props.totalCount}
+                                        </TotalCount>
+                                    </ResultsBox>
+                                }
+                            />
+                        </SearchContainer>
+
+                        <IconArea>
+                            <TooltipBox
+                                placement={'bottom'}
+                                tooltipText={'Go to Dashboard'}
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    filePath={'searchIcon'}
+                                    heightAndWidth="18px"
+                                    padding="5px"
+                                    onClick={props.seeMoreResults}
+                                />
+                            </TooltipBox>
+                            <TooltipBox
+                                placement={'bottom'}
+                                tooltipText={'Pin Search Results'}
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    filePath={'pin'}
+                                    heightAndWidth="18px"
+                                    padding="5px"
+                                    color={
+                                        this.props.isSticky
+                                            ? 'prime1'
+                                            : 'greyScale6'
+                                    }
+                                    onClick={() =>
+                                        props.toggleStickyContainer(
+                                            !this.props.isSticky,
+                                        )
+                                    }
+                                />
+                            </TooltipBox>
                             <TooltipBox
                                 placement={'bottom'}
                                 tooltipText={
@@ -82,23 +143,11 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                             : 'compress'
                                     }
                                     heightAndWidth="22px"
-                                    onClick={props.toggleHideResults}
-                                />
-                            </TooltipBox>
-                            <TotalCount>{props.totalCount}</TotalCount>
-                            <ResultsText>Memex Results</ResultsText>
-                        </ResultsBox>
-                        <IconArea>
-                            <TooltipBox
-                                placement={'bottom'}
-                                tooltipText={'Go to Dashboard'}
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <Icon
-                                    filePath={'searchIcon'}
-                                    heightAndWidth="18px"
-                                    padding="5px"
-                                    onClick={props.seeMoreResults}
+                                    onClick={() =>
+                                        props.toggleHideResults(
+                                            !props.hideResults,
+                                        )
+                                    }
                                 />
                             </TooltipBox>
                             <SettingsButtonContainer>
@@ -129,18 +178,48 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                             {props.renderResultItems()}
                         </ResultsContainer>
                     )}
+                    <MemexLogo>
+                        <Icon
+                            icon={'memexLogoGrey'}
+                            originalImage
+                            height="20px"
+                            width="130px"
+                            hoverOff
+                        />
+                    </MemexLogo>
                 </MemexContainer>
             </>
         )
     }
 }
 
+const MemexLogo = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    background: ${(props) => props.theme.colors.black}95;
+    position: absolute;
+    bottom: -4px;
+    padding: 5px 0px 10px 0px;
+`
+
+const SearchContainer = styled.div`
+    display: flex;
+    width: fill-available;
+    flex: 1;
+    min-width: 20%;
+`
+
+const SearchField = styled(TextField)``
+
 const SettingsButtonContainer = styled.div``
 
 const MemexContainer = styled.div`
     display: flex;
     flex-direction: column;
-    max-height: ${(props) => (props.hideResults ? 'fit-content' : '650px')};
+    height: ${(props) => (props.hideResults ? 'fit-content' : '650px')};
     width: ${(props) =>
         props.position === 'above' ? 'fill-available' : '450px'};
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
@@ -154,7 +233,7 @@ const MemexContainer = styled.div`
     background: ${(props) => props.theme.colors.black};
     font-family: ${(props) => props.theme.fonts.primary};
     border-radius: 12px;
-    overflow: visible;
+    overflow: hidden;
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
@@ -170,7 +249,8 @@ const TopBarArea = styled.div<{ hideResults }>`
     align-items: center;
     display: flex;
     justify-content: space-between;
-    padding: 0 20px;
+    padding: 10px 20px;
+    grid-gap: 15px;
 `
 
 const ResultsBox = styled.div`
@@ -179,6 +259,8 @@ const ResultsBox = styled.div`
     align-items: center;
     grid-auto-flow: column;
     align-items: center;
+    height: 24px;
+    width: 24px;
 `
 
 const TotalCount = styled.div`
@@ -200,13 +282,21 @@ const IconArea = styled.div`
     grid-auto-flow: column;
 `
 
+const ResultsContainerBox = styled.div`
+    height: 100%;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    overflow: scroll;
+`
+
 const ResultsContainer = styled.div`
     display: flex;
-    flex: 1;
-    height: fill-available;
     flex-direction: column;
+    flex: 1;
+    height: 100%;
     overflow: scroll;
-    height: 500px;
+    padding-bottom: 30px;
 
     scrollbar-width: none;
 
