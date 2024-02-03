@@ -58,7 +58,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         }
         const parentWidth = this.parentContainerRef.current.offsetWidth
         const childWidth = this.memexButtonContainerRef.current.offsetWidth
-        const scaleFactor = parentWidth / childWidth
+        let scaleFactor = parentWidth / childWidth
+
+        if (scaleFactor > 1.2) {
+            scaleFactor = 1.2
+        }
         this.memexButtonContainerRef.current.style.transform = `scale(${scaleFactor})`
         this.memexButtonContainerRef.current.style.transformOrigin = 'left top'
 
@@ -188,7 +192,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     '/img/clockForYoutubeInjection.svg',
                                 )}
                                 heightAndWidth="20px"
-                                color={'prime1'}
+                                color={'greyScale6'}
                                 hoverOff
                             />
                             <YTPMenuItemLabel>
@@ -199,8 +203,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     filePath={runtime.getURL(
                                         '/img/historyYoutubeInjection.svg',
                                     )}
-                                    heightAndWidth="20px"
-                                    color={'prime1'}
+                                    heightAndWidth="16px"
+                                    color={'greyScale5'}
                                     hoverOff
                                 />
                                 <TextField
@@ -211,6 +215,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     id="secondsInPastFieldNote"
                                     onClick={(e) => {
                                         e.stopPropagation()
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            this.handleAnnotateButtonClick()
+                                        }
                                     }}
                                 />
                             </TextFieldContainer>
@@ -233,7 +242,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     '/img/summarizeIconForYoutubeInjection.svg',
                                 )}
                                 heightAndWidth="20px"
-                                color={'prime1'}
+                                color={'greyScale6'}
                                 hoverOff
                             />
                             <YTPMenuItemLabel>Summarize Video</YTPMenuItemLabel>
@@ -259,7 +268,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     '/img/starsYoutube.svg',
                                 )}
                                 heightAndWidth="20px"
-                                color={'prime1'}
+                                color={'greyScale6'}
                                 hoverOff
                             />
                             <YTPMenuItemLabel>AI Note</YTPMenuItemLabel>
@@ -269,8 +278,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     filePath={runtime.getURL(
                                         '/img/historyYoutubeInjection.svg',
                                     )}
-                                    heightAndWidth="20px"
-                                    color={'prime1'}
+                                    heightAndWidth="16px"
+                                    color={'greyScale5'}
                                 />
                                 <TextField
                                     type="text"
@@ -280,6 +289,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     id="secondsInPastSetting"
                                     onClick={(e) => {
                                         e.stopPropagation()
+                                    }}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter') {
+                                            this.handleAItimeStampButtonClick()
+                                        }
                                     }}
                                 />
                             </TextFieldContainer>
@@ -300,7 +314,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             <Icon
                                 filePath={runtime.getURL('/img/cameraIcon.svg')}
                                 heightAndWidth="20px"
-                                color={'prime1'}
+                                color={'greyScale6'}
                                 hoverOff
                             />
                             <YTPMenuItemLabel>Screenshot</YTPMenuItemLabel>
@@ -314,8 +328,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
 const ParentContainer = styled.div`
     width: 100%;
-    background-color: ${(props) => props.theme.colors.black};
     border-radius: 8px 8px 8px 8px;
+    margin-top: 5px;
     margin-bottom: 20px;
     overflow: hidden;
     &::-webkit-scrollbar {
@@ -335,6 +349,8 @@ const MemexButtonContainer = styled.div`
     display: flex;
     align-items: center;
     width: fit-content;
+    background-color: ${(props) => props.theme.colors.black};
+    border-radius: 8px 8px 8px 8px;
 
     &::-webkit-scrollbar {
         display: none;
@@ -374,7 +390,7 @@ const YTPMenuItem = styled.div`
 const YTPMenuItemLabel = styled.div`
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
     font-family: Satoshi, sans-serif;
-    font-size: 14px;
+    font-size: 12px;
     padding: 0px 12px 0 6px;
     align-items: center;
     justify-content: center;
@@ -397,25 +413,27 @@ const TextFieldContainer = styled.div`
         props.theme.variant === 'light'
             ? props.theme.colors.greyScale1
             : props.theme.colors.greyScale3};
-    width: 84px;
-    height: 26px;
+    width: 55px;
+    height: 24px;
     position: relative;
+    padding-right: 5px;
 `
 
 const TextField = styled.input`
     height: 100%;
-    width: 84px;
+    width: 44px;
     border-radius: 6px;
-    padding: 5px 10px;
+    padding: 5px 10px 5px 10px;
     overflow: hidden;
     background: transparent;
     outline: none;
+    font-size: 12px;
     color: ${(props) =>
         props.theme.variant === 'light'
             ? props.theme.colors.greyScale5
             : props.theme.colors.greyScale7};
 
-    text-align: center;
+    text-align: right;
     position: absolute;
     border: none;
 `

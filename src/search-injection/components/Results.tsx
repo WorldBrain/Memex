@@ -178,15 +178,17 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                             {props.renderResultItems()}
                         </ResultsContainer>
                     )}
-                    <MemexLogo>
-                        <Icon
-                            icon={'memexLogoGrey'}
-                            originalImage
-                            height="20px"
-                            width="130px"
-                            hoverOff
-                        />
-                    </MemexLogo>
+                    {!props.hideResults && (
+                        <MemexLogo>
+                            <Icon
+                                icon={'memexLogoGrey'}
+                                originalImage
+                                height="20px"
+                                width="130px"
+                                hoverOff
+                            />
+                        </MemexLogo>
+                    )}
                 </MemexContainer>
             </>
         )
