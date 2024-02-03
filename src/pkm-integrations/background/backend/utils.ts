@@ -17,15 +17,48 @@ export async function shareAnnotationWithPKM(
         data: annotationData,
     }
 
-    if (item.data.comment) {
-        item.data.comment = await replaceImgSrcWithFunctionOutput(
-            item.data.comment,
-            imageSupport,
-            true,
-        )
-    }
+    if (
+        item.data.pageUrl.includes('twitter.com') ||
+        item.data.pageUrl.includes('x.com')
+    ) {
+        if (item.data.pageTitle.length === 0) {
+            return
+        }
+        let title = item.data.pageTitle?.replace(/[^a-zA-Z0-9]/g, ' ')
+        title = item.data.pageTitle?.substring(0, 100).trim()
+        title = item.data.pageTitle
+            ?.substring(0, 100)
+            .trim()
+            .replace(/\n/g, ' ')
 
-    await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+        if (annotationData.comment) {
+            annotationData = await replaceImgSrcWithFunctionOutput(
+                annotationData.comment,
+                imageSupport,
+                true,
+            )
+        }
+
+        const itemToSync = {
+            annotationId: annotationData.annotationId,
+            pageTitle: title,
+            body: annotationData.body,
+            comment: annotationData.comment,
+            createdWhen: annotationData.createdWhen,
+            color: annotationData.color,
+            pageCreatedWhen: annotationData.pageCreatedWhen,
+            pageUrl: annotationData.pageUrl,
+        }
+
+        item = {
+            type: 'annotation',
+            data: itemToSync,
+        }
+
+        await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    } else {
+        await pkmSyncBG.pushPKMSyncUpdate(item, checkForFilteredSpaces)
+    }
 }
 export async function sharePageWithPKM(
     pageData,

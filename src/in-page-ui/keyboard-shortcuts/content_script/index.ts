@@ -116,13 +116,25 @@ function getShortcutHandlers({
         //     : inPageUI.showTooltip('AImode'),
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createSharedAnnotation: () =>
-            annotationFunctions.createAnnotation(window.getSelection(), true),
+            annotationFunctions.createAnnotation(
+                window.getSelection(),
+                true,
+                true,
+                false,
+                null,
+            ),
         createSharedHighlight: () =>
             annotationFunctions.createHighlight(window.getSelection(), true),
         createHighlight: () =>
             annotationFunctions.createHighlight(window.getSelection(), false),
         createAnnotation: () =>
-            annotationFunctions.createAnnotation(window.getSelection(), false),
+            annotationFunctions.createAnnotation(
+                window.getSelection(),
+                false,
+                false,
+                false,
+                null,
+            ),
         copyHighlightLink: () =>
             annotationFunctions.createHighlight(
                 window.getSelection(),

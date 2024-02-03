@@ -4316,7 +4316,7 @@ export class AnnotationsSidebar extends React.Component<
                         />
                     </TooltipBox>
                     <TooltipBox
-                        tooltipText={'Copy & Paste Note'}
+                        tooltipText={'Copy & Paste Page with its notes'}
                         placement={'bottom'}
                         getPortalRoot={this.props.getRootElement}
                     >
