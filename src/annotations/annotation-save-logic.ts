@@ -157,12 +157,14 @@ export async function createAnnotation({
                     privacyLevelOverride ?? shareOptsToPrivacyLvl(shareOpts),
             })
 
-            createAndCopyShareLink(
-                shareData.remoteId,
-                annotationUrl,
-                contentSharingBG,
-                syncSettingsBG,
-            )
+            if (shareData.remoteId != null) {
+                createAndCopyShareLink(
+                    shareData.remoteId,
+                    annotationUrl,
+                    contentSharingBG,
+                    syncSettingsBG,
+                )
+            }
 
             return annotationUrl
         })(),

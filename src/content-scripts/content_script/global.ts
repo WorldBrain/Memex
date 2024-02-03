@@ -517,6 +517,9 @@ export async function main(
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
+            const highlightColorSettingStorage = await getHighlightColorSettings()
+            const highlightColor =
+                highlightColorSetting ?? highlightColorSettingStorage[0]
             if (inPageUI.componentsShown.sidebar) {
                 inPageUI.showSidebar({
                     action: 'show_annotation',
@@ -550,7 +553,7 @@ export async function main(
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupport,
-                    highlightColorSetting,
+                    highlightColor,
                 )
 
                 await results.createPromise
@@ -564,7 +567,7 @@ export async function main(
                     null,
                     null,
                     null,
-                    highlightColorSetting,
+                    highlightColor,
                 )
                 await results.createPromise
             }

@@ -76,6 +76,8 @@ function getShortcutHandlers({
                     window.getSelection(),
                     false,
                     true,
+                    true,
+                    null,
                 )
             } else {
                 await inPageUI.showRibbon({ action: 'list' })
@@ -91,6 +93,8 @@ function getShortcutHandlers({
                     window.getSelection(),
                     true,
                     true,
+                    true,
+                    null,
                 )
             } else {
                 await inPageUI.showRibbon({ action: 'list' })
