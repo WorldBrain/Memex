@@ -187,7 +187,7 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             return (
                 <PopoutBox
                     targetElementRef={this.autoAddButtonRef?.current}
-                    placement="bottom-end"
+                    placement="left"
                     width="320px"
                     closeComponent={() =>
                         this.setState({ showAutoAddMenu: false })
@@ -195,14 +195,13 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                     offsetY={-100}
                     offsetX={-100}
                     instaClose
-                    strategy="fixed"
                     getPortalRoot={this.props.getRootElement}
                 >
                     <AutoAddDefaultContainer>
                         <DefaultCheckBoxContainer>
                             <Checkbox
-                                key={3}
-                                id={'3'}
+                                key={33}
+                                id={'33'}
                                 width="fit-content"
                                 isChecked={this.state.isAutoAddEnabled === true}
                                 handleChange={() => this.toggleAutoAdd()}
