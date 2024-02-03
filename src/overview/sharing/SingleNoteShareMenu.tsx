@@ -187,13 +187,13 @@ export default class SingleNoteShareMenu extends React.PureComponent<
             return (
                 <PopoutBox
                     targetElementRef={this.autoAddButtonRef?.current}
-                    placement="left"
+                    placement="bottom"
                     width="320px"
                     closeComponent={() =>
                         this.setState({ showAutoAddMenu: false })
                     }
-                    offsetY={-100}
-                    offsetX={-100}
+                    // offsetY={-100}
+                    // offsetX={-100}
                     instaClose
                     getPortalRoot={this.props.getRootElement}
                 >
