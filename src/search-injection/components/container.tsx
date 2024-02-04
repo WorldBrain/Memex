@@ -138,7 +138,7 @@ class Container extends React.Component<Props, State> {
         if (isSticky) {
             target.style.position = 'sticky'
             target.style.top = '100px'
-            target.style.zIndex = '30000'
+            target.style.zIndex = '100'
 
             const parentElement = target.parentElement
             if (parentElement && parentElement.id === 'rcnt') {
@@ -165,7 +165,7 @@ class Container extends React.Component<Props, State> {
         if (isSticky) {
             target.style.position = 'sticky'
             target.style.top = '100px'
-            target.style.zIndex = '30000'
+            target.style.zIndex = '100'
 
             const parentElement = target.parentElement
             if (parentElement && parentElement.id === 'rcnt') {

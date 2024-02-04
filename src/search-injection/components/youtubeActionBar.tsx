@@ -60,8 +60,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         const childWidth = this.memexButtonContainerRef.current.offsetWidth
         let scaleFactor = parentWidth / childWidth
 
-        if (scaleFactor > 1.2) {
-            scaleFactor = 1.2
+        if (scaleFactor >= 1) {
+            scaleFactor = 1
         }
         this.memexButtonContainerRef.current.style.transform = `scale(${scaleFactor})`
         this.memexButtonContainerRef.current.style.transformOrigin = 'left top'

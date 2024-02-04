@@ -2154,6 +2154,9 @@ export class AnnotationsSidebar extends React.Component<
                                                 : 'summarize'
                                         }
                                         keepSelectedState
+                                        getRootElement={
+                                            this.props.getRootElement
+                                        }
                                     />
                                 )}
                                 <DropdownMenuBtnSmall
@@ -2186,6 +2189,7 @@ export class AnnotationsSidebar extends React.Component<
                                     }}
                                     initSelectedItem={'gpt-3.5-turbo-1106'}
                                     keepSelectedState
+                                    getRootElement={this.props.getRootElement}
                                 />
 
                                 {!this.props.fullPageUrl.includes(
@@ -4312,7 +4316,7 @@ export class AnnotationsSidebar extends React.Component<
                         />
                     </TooltipBox>
                     <TooltipBox
-                        tooltipText={'Copy & Paste Note'}
+                        tooltipText={'Copy & Paste Page with its notes'}
                         placement={'bottom'}
                         getPortalRoot={this.props.getRootElement}
                     >

@@ -182,8 +182,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                     {this.renderLinkContent()}
                                 </LinkCopierBox>
                                 <Checkbox
-                                    key={2}
-                                    id={'2'}
+                                    key={23}
+                                    id={'23'}
                                     isChecked={
                                         this.props.autoCreateLinkSetting ===
                                         true
@@ -226,18 +226,19 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                 >
                                     {this.props.renderAutoAddDefaultSettings}
                                     <Checkbox
-                                        key={1}
-                                        id={'1'}
+                                        key={13}
+                                        id={'13'}
                                         isChecked={
                                             this.props.privacyOptions[1]
                                                 .isSelected
                                         }
-                                        handleChange={() =>
+                                        handleChange={() => {
+                                            console.log('clicked')
                                             this.props.privacyOptions[1]
                                                 .isSelected
                                                 ? this.props.privacyOptions[0].onClick()
                                                 : this.props.privacyOptions[1].onClick()
-                                        }
+                                        }}
                                         // isDisabled={!this.state.shortcutsEnabled}
                                         name={'Boost'}
                                         label={
