@@ -4379,17 +4379,19 @@ export class SidebarContainerLogic extends UILogic<
             event.sharedListId,
         )
 
-        if (!cachedList.localId) {
+        if (cachedList == null) {
             const existingLocalListId = await this.options.contentSharingBG.fetchLocalListDataByRemoteId(
                 { remoteListId: event.sharedListId },
             )
 
-            let listInCache = this.options.annotationsCache.getListByRemoteId(
-                event.sharedListId,
-            )
+            if (existingLocalListId != null) {
+                let listInCache = this.options.annotationsCache.getListByRemoteId(
+                    event.sharedListId,
+                )
 
-            listInCache.localId = existingLocalListId
-            this.options.annotationsCache.updateList(listInCache)
+                listInCache.localId = existingLocalListId
+                this.options.annotationsCache.updateList(listInCache)
+            }
         }
 
         // If locally available, proceed as usual
@@ -4484,8 +4486,14 @@ export class SidebarContainerLogic extends UILogic<
                 }
                 this.emitMutation({
                     hasListDataBeenManuallyPulled: { $set: true },
+                    spaceTitleEditValue: { $set: sharedList.title },
                 })
             }
+
+            this.emitMutation({
+                spaceTitleEditValue: { $set: sharedList.title },
+            })
+
 
             let unifiedListId: string
             const listCommon = {

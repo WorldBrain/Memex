@@ -375,7 +375,7 @@ export default class ContentSharingBackground {
             await this.storage.getRemoteListShareMetadata({
                 remoteListId: remoteListId,
             })
-        ).localId
+        )?.localId
 
         return sharedListMetaData
     }
