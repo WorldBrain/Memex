@@ -41,17 +41,14 @@ export const ROAM_MD_TEMPLATE: Template = {
     {{#NoteText}}
            - {{{NoteText}}}
     {{/NoteText}}
-    {{#NoteTags}}
-          Spaces: {{{NoteTags}}}
-    {{/NoteTags}}
+    {{#NoteSpaces}}
+          Spaces: {{{NoteSpaces}}}
+    {{/NoteSpaces}}
     {{/NoteHighlight}}
         {{^NoteHighlight}}
           {{{NoteText}}}
     {{/NoteHighlight}}
-    {{#NoteTags}}
-          {{{NoteTags}}}
-    {{/NoteTags}}
-          {{/Notes}}
+    {{/Notes}}
 `,
 }
 
