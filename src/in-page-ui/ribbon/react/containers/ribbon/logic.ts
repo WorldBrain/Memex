@@ -1,17 +1,17 @@
 import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { RibbonContainerDependencies } from './types'
+import type { RibbonContainerDependencies } from './types'
 import * as componentTypes from '../../components/types'
-import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
-import { TaskState } from 'ui-logic-core/lib/types'
-import { loadInitial } from 'src/util/ui-logic'
+import type { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import {
     generateAnnotationUrl,
     shareOptsToPrivacyLvl,
 } from 'src/annotations/utils'
 import { resolvablePromise } from 'src/util/resolvable'
-import { FocusableComponent } from 'src/annotations/components/types'
-import { Analytics } from 'src/analytics'
+import type { FocusableComponent } from 'src/annotations/components/types'
+import type { Analytics } from 'src/analytics'
 import { createAnnotation } from 'src/annotations/annotation-save-logic'
 import browser, { Storage } from 'webextension-polyfill'
 import {
@@ -20,8 +20,8 @@ import {
 } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type PropKeys<Base, ValueCondition> = keyof Pick<
     Base,
@@ -162,6 +162,7 @@ export class RibbonContainerLogic extends UILogic<
             },
             commentBox: INITIAL_RIBBON_COMMENT_BOX_STATE,
             bookmark: {
+                loadState: 'pristine',
                 isBookmarked: false,
                 lastBookmarkTimestamp: undefined,
             },
@@ -583,59 +584,67 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
-        const allowed = await pageActionAllowed(this.dependencies.analyticsBG)
+        if (!(await pageActionAllowed(this.dependencies.analyticsBG))) {
+            return
+        }
 
-        if (allowed) {
-            const postInitState = await this.waitForPostInitState(previousState)
-
-            await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
-                true,
-                postInitState.fullPageUrl,
-            )
-
-            const updateState = (isBookmarked) =>
-                this.emitMutation({
-                    bookmark: {
-                        isBookmarked: { $set: isBookmarked },
-                        lastBookmarkTimestamp: {
-                            $set: Math.floor(Date.now() / 1000),
-                        },
-                    },
-                })
-
-            const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
-
-            let title: string = document.title
-
-            if (window.location.href.includes('web.telegram.org')) {
-                title = getTelegramUserDisplayName(
-                    document,
-                    window.location.href,
+        await executeUITask(
+            this,
+            (state) => ({ bookmark: { loadState: { $set: state } } }),
+            async () => {
+                const postInitState = await this.waitForPostInitState(
+                    previousState,
                 )
-            }
-            if (
-                window.location.href.includes('x.com/messages/') ||
-                window.location.href.includes('twitter.com/messages/')
-            ) {
-                title = document.title
-            }
 
-            try {
-                if (shouldBeBookmarked) {
-                    updateState(shouldBeBookmarked)
-                    await this.dependencies.bookmarks.addPageBookmark({
-                        fullUrl: postInitState.fullPageUrl,
-                        tabId: this.dependencies.currentTab.id,
-                        metaData: {
-                            pageTitle: title,
+                await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
+                    true,
+                    postInitState.fullPageUrl,
+                )
+
+                const updateState = (isBookmarked: boolean) =>
+                    this.emitMutation({
+                        bookmark: {
+                            isBookmarked: { $set: isBookmarked },
+                            lastBookmarkTimestamp: {
+                                $set: Math.floor(Date.now() / 1000),
+                            },
                         },
                     })
+
+                const shouldBeBookmarked = !postInitState.bookmark.isBookmarked
+
+                let title: string = document.title
+
+                if (window.location.href.includes('web.telegram.org')) {
+                    title = getTelegramUserDisplayName(
+                        document,
+                        window.location.href,
+                    )
                 }
-            } catch (err) {
-                updateState(!shouldBeBookmarked)
-                throw err
-            }
-        }
+                if (
+                    window.location.href.includes('x.com/messages/') ||
+                    window.location.href.includes('twitter.com/messages/')
+                ) {
+                    title = document.title
+                }
+
+                try {
+                    if (shouldBeBookmarked) {
+                        updateState(shouldBeBookmarked)
+                        await this.dependencies.bookmarks.addPageBookmark({
+                            fullUrl: postInitState.fullPageUrl,
+                            tabId: this.dependencies.currentTab.id,
+                            metaData: {
+                                pageTitle: title,
+                            },
+                        })
+                    }
+                } catch (err) {
+                    updateState(!shouldBeBookmarked)
+                    throw err
+                }
+            },
+        )
     }
 
     //

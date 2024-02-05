@@ -1,7 +1,4 @@
-import type {
-    PickerUpdateHandler,
-    PickerUpdateHandlerArgs,
-} from 'src/common-ui/GenericPicker/types'
+import type { PickerUpdateHandlerArgs } from 'src/common-ui/GenericPicker/types'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { Props as ActivityIndicatorProps } from 'src/activity-indicator/ui'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -13,6 +10,7 @@ import type {
 } from 'src/annotations/cache/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
 
 export interface RibbonSubcomponentProps {
     highlights: RibbonHighlightsProps
@@ -74,6 +72,7 @@ export interface RibbonCommentBoxProps {
 
 export interface RibbonBookmarkProps {
     isBookmarked: boolean
+    loadState: TaskState
     toggleBookmark: () => void
     lastBookmarkTimestamp: number
 }
