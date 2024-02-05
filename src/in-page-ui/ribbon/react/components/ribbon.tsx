@@ -704,7 +704,10 @@ export default class Ribbon extends Component<Props, State> {
                         ? 10
                         : 10
                 }
-                closeComponent={() => this.props.toggleRemoveMenu()}
+                closeComponent={() => {
+                    this.props.toggleRemoveMenu()
+                }}
+                instaClose
                 getPortalRoot={this.props.getRootElement}
             >
                 <RemoveMenuContainer ribbonPosition={this.props.ribbonPosition}>
@@ -862,24 +865,6 @@ export default class Ribbon extends Component<Props, State> {
                 </RemoveMenuContainer>
             </PopoutBox>
         )
-    }
-
-    private timer
-
-    handleHover() {
-        // Clear any previously set timer
-        clearTimeout(this.timer)
-
-        // Set a new timer for 500ms
-        this.timer = setTimeout(() => {
-            // Do something here, like show a tooltip or reveal additional information
-            this.props.toggleRemoveMenu()
-        }, 200)
-    }
-
-    handleMouseLeave() {
-        // Clear the timer when the mouse leaves the div
-        clearTimeout(this.timer)
     }
 
     renderFeedButton() {
@@ -1573,31 +1558,65 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     renderCloseRibbonButton() {
+        const topRight = this.props.ribbonPosition === 'topRight'
+        const bottomRight = this.props.ribbonPosition === 'bottomRight'
         return (
-            <>
+            <TooltipBox
+                tooltipText={
+                    <span>
+                        One Click: More Options
+                        <br /> Double Click: Instant remove action bar
+                    </span>
+                }
+                placement={
+                    this.props.sidebar.isSidebarOpen
+                        ? 'left-end'
+                        : topRight
+                        ? 'bottom-end'
+                        : bottomRight
+                        ? 'top-end'
+                        : 'left'
+                }
+                offsetX={15}
+                getPortalRoot={this.props.getRootElement}
+            >
                 {!this.props.sidebar.isSidebarOpen && (
-                    <Icon
-                        onClick={(event) => {
-                            this.handleHover()
+                    <CloseIconContainer
+                        onMouseDown={(event) => {
+                            if (!this.props.showRemoveMenu) {
+                                this.props.toggleRemoveMenu()
+                            }
                         }}
-                        onMouseLeave={(event) => {
-                            this.handleMouseLeave()
+                        onMouseUp={(event) => {
+                            if (!this.props.showRemoveMenu) {
+                                this.props.handleRemoveRibbon()
+                            }
                         }}
-                        // onClick={(event) => {
-                        //     if (event.shiftKey && this.props.isRibbonEnabled) {
-                        //         this.props.handleHover()
-                        //     } else {
-                        //         this.props.handleRemoveRibbon()
-                        //     }
-                        // }}
-                        color={'greyScale5'}
-                        heightAndWidth="24px"
-                        padding="4px"
-                        filePath={icons.removeX}
-                        containerRef={this.removeMenuButtonRef}
-                    />
+                    >
+                        <Icon
+                            // onClick={(event) => {
+                            //     if (this.props.showRemoveMenu) {
+                            //         this.props.handleRemoveRibbon()
+                            //     } else {
+                            //         this.props.toggleRemoveMenu()
+                            //     }
+                            // }}
+                            // onClick={(event) => {
+                            //     if (event.shiftKey && this.props.isRibbonEnabled) {
+                            //         this.props.handleHover()
+                            //     } else {
+                            //         this.props.handleRemoveRibbon()
+                            //     }
+                            // }}
+                            color={'greyScale5'}
+                            heightAndWidth="24px"
+                            padding="4px"
+                            filePath={icons.removeX}
+                            containerRef={this.removeMenuButtonRef}
+                        />
+                    </CloseIconContainer>
                 )}
-            </>
+            </TooltipBox>
         )
     }
 
@@ -1890,6 +1909,8 @@ export default class Ribbon extends Component<Props, State> {
         return null
     }
 }
+
+const CloseIconContainer = styled.div``
 
 const TooltipContentBox = styled.div`
     display: flex;

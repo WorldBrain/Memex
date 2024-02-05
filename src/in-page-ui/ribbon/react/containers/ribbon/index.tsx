@@ -66,12 +66,12 @@ export default class RibbonContainer extends StatefulUIElement<
     }
 
     componentDidUpdate(prevProps: RibbonContainerProps) {
-        if (
-            !this.props.inPageUI.componentsShown.ribbon &&
-            this.state.showRemoveMenu
-        ) {
-            this.processEvent('toggleRemoveMenu', false)
-        }
+        // if (
+        //     !this.props.inPageUI.componentsShown.ribbon &&
+        //     this.state.showRemoveMenu
+        // ) {
+        //     this.processEvent('toggleRemoveMenu', false)
+        // }
         const { currentTab } = this.props
 
         if (currentTab.url !== prevProps.currentTab.url) {
@@ -159,7 +159,10 @@ export default class RibbonContainer extends StatefulUIElement<
                     this.processEvent('toggleShowExtraButtons', null)
                 }}
                 toggleRemoveMenu={() => {
-                    this.processEvent('toggleRemoveMenu', null)
+                    this.processEvent(
+                        'toggleRemoveMenu',
+                        !this.state.showRemoveMenu,
+                    )
                 }}
                 toggleAskAI={() => {
                     this.processEvent('toggleAskAI', null)
