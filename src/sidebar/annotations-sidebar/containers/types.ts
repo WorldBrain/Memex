@@ -118,7 +118,10 @@ export type SuggestionsTab =
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
     cacheLoadState: TaskState
+    noteError: string | null
+    noteEditState: TaskState
     noteCreateState: TaskState
+    noteColorUpdateState: TaskState
     pageLinkCreateState: TaskState
     firstTimeSharingPageLink: boolean
     secondarySearchState: TaskState
