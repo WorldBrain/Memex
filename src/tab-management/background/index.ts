@@ -10,7 +10,7 @@ import { fetchFavIcon } from 'src/page-analysis/background/get-fav-icon'
 import { isLoggable } from 'src/activity-logger'
 import { captureException } from 'src/util/raven'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { isExtensionTab } from '../utils'
+import { isBrowserPageTab, isExtensionTab } from '../utils'
 import type { RawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 
 const SCROLL_UPDATE_FN = 'updateScrollState'
@@ -137,24 +137,35 @@ export default class TabManagementBackground {
         await mapChunks(tabs, chunkSize, mapFn, onError)
     }
 
+    private canTabRunContentScripts(tab?: Tabs.Tab): boolean {
+        const url = tab?.url
+
+        return !(
+            url == null ||
+            isExtensionTab({ url }) ||
+            isBrowserPageTab({ url }) ||
+            !isLoggable({ url })
+        )
+    }
+
     async injectContentScriptsIfNeeded(tabId: number) {
+        const tab = await this.options.browserAPIs.tabs.get(tabId)
+        if (!this.canTabRunContentScripts(tab)) {
+            return
+        }
+
         try {
             await runInTab<InPageUIContentScriptRemoteInterface>(tabId, {
                 quietConsole: true,
-            }).ping()
+            }).confirmTabScriptLoaded()
         } catch (err) {
             // If the ping fails, the content script is not yet set up
-            const _tab = await this.options.browserAPIs.tabs.get(tabId)
-            await this.injectContentScripts(_tab)
+            await this.injectContentScripts(tab)
         }
     }
 
     async injectContentScripts(tab: Tabs.Tab) {
-        if (
-            tab.url == null ||
-            !isLoggable({ url: tab.url }) ||
-            isExtensionTab({ url: tab.url! })
-        ) {
+        if (!this.canTabRunContentScripts(tab)) {
             return
         }
 
