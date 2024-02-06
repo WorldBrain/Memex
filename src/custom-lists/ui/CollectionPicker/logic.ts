@@ -1,5 +1,5 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
-import { loadInitial } from 'src/util/ui-logic'
+import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import type { CollectionsSettings } from 'src/custom-lists/background/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
@@ -145,6 +145,8 @@ export default class SpacePickerLogic extends UILogic<
         selectedListIds: [],
         filteredListIds: null,
         loadState: 'pristine',
+        spaceCreateState: 'pristine',
+        spaceWriteError: null,
         renameListErrorMessage: null,
         contextMenuListId: null,
         contextMenuPositionX: 0,
@@ -913,23 +915,33 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry, analyticsBG },
         previousState,
     }) => {
-        if (!(await pageActionAllowed(analyticsBG))) {
-            return
-        }
+        await executeUITask(this, 'spaceCreateState', async () => {
+            if (!(await pageActionAllowed(analyticsBG))) {
+                return
+            }
 
-        // NOTE: This is here as the enter press event from the context menu to confirm a space rename
-        //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
-        //   Resulting in both a new space create + existing space rename. This is a hack to prevent that.
-        if (previousState.contextMenuListId != null) {
-            return
-        }
+            // NOTE: This is here as the enter press event from the context menu to confirm a space rename
+            //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
+            //   Resulting in both a new space create + existing space rename. This is a hack to prevent that.
+            if (previousState.contextMenuListId != null) {
+                return
+            }
 
-        const { valid } = this.validateSpaceName(entry)
-        if (!valid) {
-            return
-        }
-        const listId = await this.createAndDisplayNewList(entry, previousState)
-        await this.dependencies.selectEntry(listId)
+            const { valid } = this.validateSpaceName(entry)
+            if (!valid) {
+                return
+            }
+            try {
+                const listId = await this.createAndDisplayNewList(
+                    entry,
+                    previousState,
+                )
+                await this.dependencies.selectEntry(listId)
+            } catch (err) {
+                this.emitMutation({ spaceWriteError: { $set: err.message } })
+                throw err
+            }
+        })
     }
 
     newEntryAllPress: EventHandler<'newEntryAllPress'> = async ({
