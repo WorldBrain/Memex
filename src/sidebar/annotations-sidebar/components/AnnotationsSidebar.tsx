@@ -94,6 +94,7 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { sleepPromise } from 'src/util/promises'
+import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -275,6 +276,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         | 'obsidian'
         | 'logseq'
     getRootElement: () => HTMLElement
+    setNoteWriteError: (error) => void
 }
 
 interface AnnotationsSidebarState {
@@ -4391,6 +4393,18 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
+                {this.props.noteWriteError && (
+                    <ErrorNotification
+                        closeComponent={() =>
+                            this.props.setNoteWriteError(null)
+                        }
+                        getPortalRoot={this.props.getRootElement}
+                        blockedBackground
+                        positioning="centerCenter"
+                        title="Error saving note"
+                        errorMessage={this.props.noteWriteError}
+                    />
+                )}
                 {/* <GlobalStyle sidebarContext={this.props.sidebarContext} /> */}
                 <TopBar sidebarContext={this.props.sidebarContext}>
                     {this.renderTopBarSwitcher()}

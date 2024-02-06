@@ -480,6 +480,7 @@ interface SidebarEvents {
     }
     setCopyPasterAnnotationInstanceId: { instanceId: string | null }
     setShareMenuAnnotationInstanceId: { instanceId: string | null }
+    setNoteWriteError: { error: string | null }
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }

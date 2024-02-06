@@ -77,7 +77,7 @@ export class ContentScriptsBackground {
 
         this.options.browserAPIs.tabs.onUpdated.addListener(
             (tabId, changeInfo) => {
-                if (changeInfo.url.includes('mail.google.com/mail')) {
+                if (changeInfo?.url?.includes('mail.google.com/mail')) {
                     runInTab<InPageUIContentScriptRemoteInterface>(
                         tabId,
                     ).handleHistoryStateUpdate(tabId)

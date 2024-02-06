@@ -888,6 +888,11 @@ export class AnnotationsSidebarContainer<
                                     feedUrl,
                                 })
                             }}
+                            setNoteWriteError={(error) => {
+                                this.processEvent('setNoteWriteError', {
+                                    error: error,
+                                })
+                            }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}

@@ -2284,6 +2284,13 @@ export class SidebarContainerLogic extends UILogic<
         this.options.focusCreateForm()
     }
 
+    setNoteWriteError: EventHandler<'setNoteWriteError'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            noteWriteError: { $set: event.error },
+        })
+    }
     setNewPageNoteText: EventHandler<'setNewPageNoteText'> = async ({
         event,
     }) => {
