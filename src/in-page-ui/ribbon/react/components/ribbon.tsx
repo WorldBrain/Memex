@@ -45,6 +45,7 @@ import {
 import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
+import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -77,6 +78,7 @@ export interface Props extends RibbonSubcomponentProps {
     toggleTheme: () => void
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface
+    setWriteError: (error: string) => void
 }
 
 interface State {
@@ -1795,6 +1797,18 @@ export default class Ribbon extends Component<Props, State> {
                     {this.renderTutorial()}
                     {this.renderFeedInfo()}
                     {this.renderRemoveMenu()}
+                    {this.props.bookmark.writeError && (
+                        <ErrorNotification
+                            closeComponent={() => {
+                                this.props.setWriteError(null)
+                            }}
+                            getPortalRoot={this.props.getRootElement}
+                            blockedBackground
+                            positioning="centerCenter"
+                            title="Error saving note"
+                            errorMessage={this.props.bookmark.writeError}
+                        />
+                    )}
                 </>
             )
         }
@@ -1803,6 +1817,19 @@ export default class Ribbon extends Component<Props, State> {
     renderVerticalRibbon() {
         return (
             <>
+                {this.props.bookmark.writeError && (
+                    <ErrorNotification
+                        closeComponent={() => {
+                            this.props.setWriteError(null)
+                        }}
+                        getPortalRoot={this.props.getRootElement}
+                        blockedBackground
+                        positioning="centerCenter"
+                        title="Error saving note"
+                        errorMessage={this.props.bookmark.writeError}
+                    />
+                )}
+
                 <InnerRibbon
                     ref={this.props.setRef}
                     isPeeking={this.props.isExpanded}

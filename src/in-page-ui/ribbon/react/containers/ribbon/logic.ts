@@ -79,6 +79,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleShowExtraButtons: null
         selectRibbonPositionOption: null
         toggleRemoveMenu: boolean | null
+        setWriteError: { error: string }
         toggleShowTutorial: null
         toggleFeed: null
         toggleReadingView: null
@@ -509,6 +510,12 @@ export class RibbonContainerLogic extends UILogic<
         } else {
             this.emitMutation(mutation)
         }
+    }
+
+    setWriteError: EventHandler<'setWriteError'> = async ({ event }) => {
+        this.emitMutation({
+            bookmark: { writeError: { $set: event.error } },
+        })
     }
 
     toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({

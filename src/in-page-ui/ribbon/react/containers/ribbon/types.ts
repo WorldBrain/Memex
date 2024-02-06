@@ -45,4 +45,5 @@ export interface RibbonContainerDependencies {
     currentUser?: UserReference
     getRootElement: () => HTMLElement
     openPDFinViewer: (url: string) => Promise<void>
+    setWriteError: (error: string) => void
 }
