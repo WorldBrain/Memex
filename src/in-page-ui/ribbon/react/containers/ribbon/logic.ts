@@ -515,6 +515,7 @@ export class RibbonContainerLogic extends UILogic<
     setWriteError: EventHandler<'setWriteError'> = async ({ event }) => {
         this.emitMutation({
             bookmark: { writeError: { $set: event.error } },
+            lists: { writeError: { $set: event.error } },
         })
     }
 

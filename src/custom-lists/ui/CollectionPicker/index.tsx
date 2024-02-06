@@ -35,12 +35,14 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
     onListFocus?: (listId: UnifiedList['localId']) => void
     bgScriptBG?: RemoteBGScriptInterface
     getRootElement?: () => HTMLElement
+    setSpace
 }
 
 class SpacePicker extends StatefulUIElement<
@@ -552,6 +554,21 @@ class SpacePicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
+                {this.state.spaceWriteError && (
+                    <ErrorNotification
+                        closeComponent={() => {
+                            this.processEvent('setSpaceWriteError', {
+                                error: null,
+                            })
+                        }}
+                        getPortalRoot={this.props.getRootElement}
+                        blockedBackground
+                        positioning="centerCenter"
+                        title="Error saving note"
+                        errorMessage={this.state.spaceWriteError}
+                    />
+                )}
+
                 <OuterSearchBox
                     onClick={this.handleOuterSearchBoxClick}
                     width={this.props.width}

@@ -911,6 +911,14 @@ export default class SpacePickerLogic extends UILogic<
         return localListId
     }
 
+    setSpaceWriteError: EventHandler<'setSpaceWriteError'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            spaceWriteError: { $set: event.error },
+        })
+    }
+
     newEntryPress: EventHandler<'newEntryPress'> = async ({
         event: { entry, analyticsBG },
         previousState,

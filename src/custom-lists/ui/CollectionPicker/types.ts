@@ -48,6 +48,7 @@ export type SpacePickerEvent = UIEvent<{
         entry: UnifiedList
         analyticsBG: AnalyticsCoreInterface
     }
+    setSpaceWriteError: { error: string }
     newEntryAllPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
     resultEntryPress: {
         entry: Pick<UnifiedList, 'localId'>
