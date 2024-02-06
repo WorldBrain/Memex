@@ -257,6 +257,7 @@ export class SidebarContainerLogic extends UILogic<
 
             activeTab: 'annotations',
 
+            noteListsUpdateState: 'pristine',
             cacheLoadState: this.options.shouldHydrateCacheOnInit
                 ? 'pristine'
                 : 'success',
@@ -2550,31 +2551,40 @@ export class SidebarContainerLogic extends UILogic<
             { keepListsIfUnsharing: event.options?.protectAnnotation },
         )
 
-        const { sharingState } = await bgPromise
+        await executeUITask(this, 'noteListsUpdateState', async () => {
+            try {
+                const { sharingState } = await bgPromise
 
-        // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
-        annotationsCache.updateAnnotation(
-            {
-                comment: existing.comment,
-                body: existing.body,
-                remoteId: sharingState.remoteId
-                    ? sharingState.remoteId.toString()
-                    : existing.remoteId,
-                unifiedId: event.unifiedAnnotationId,
-                privacyLevel: sharingState.privacyLevel,
-                unifiedListIds: [
-                    ...sharingState.privateListIds,
-                    ...sharingState.sharedListIds,
-                ]
-                    .map(
-                        (localListId) =>
-                            annotationsCache.getListByLocalId(localListId)
-                                ?.unifiedId,
-                    )
-                    .filter((id) => !!id),
-            },
-            { forceListUpdate: true },
-        )
+                // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
+                annotationsCache.updateAnnotation(
+                    {
+                        comment: existing.comment,
+                        body: existing.body,
+                        remoteId: sharingState.remoteId
+                            ? sharingState.remoteId.toString()
+                            : existing.remoteId,
+                        unifiedId: event.unifiedAnnotationId,
+                        privacyLevel: sharingState.privacyLevel,
+                        unifiedListIds: [
+                            ...sharingState.privateListIds,
+                            ...sharingState.sharedListIds,
+                        ]
+                            .map(
+                                (localListId) =>
+                                    annotationsCache.getListByLocalId(
+                                        localListId,
+                                    )?.unifiedId,
+                            )
+                            .filter((id) => !!id),
+                    },
+                    { forceListUpdate: true },
+                )
+            } catch (err) {
+                this.emitMutation({ noteWriteError: { $set: err.message } })
+                annotationsCache.updateAnnotation(existing)
+                throw err
+            }
+        })
     }
 
     setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({

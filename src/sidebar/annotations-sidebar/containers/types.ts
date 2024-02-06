@@ -121,6 +121,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     noteWriteError: string | null
     noteEditState: TaskState
     noteCreateState: TaskState
+    noteListsUpdateState: TaskState
     noteColorUpdateState: TaskState
     pageLinkCreateState: TaskState
     firstTimeSharingPageLink: boolean

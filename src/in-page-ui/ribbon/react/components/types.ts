@@ -86,6 +86,8 @@ export interface ListEntryArgs {
 export interface RibbonListsProps {
     pageListIds: number[]
     showListsPicker: boolean
+    loadState: TaskState
+    writeError: string | null
     updateLists: (
         args: PickerUpdateHandlerArgs<number> & { skipPageIndexing?: boolean },
     ) => Promise<void>

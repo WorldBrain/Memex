@@ -162,11 +162,14 @@ export class RibbonContainerLogic extends UILogic<
             },
             commentBox: INITIAL_RIBBON_COMMENT_BOX_STATE,
             bookmark: {
+                writeError: null,
                 loadState: 'pristine',
                 isBookmarked: false,
                 lastBookmarkTimestamp: undefined,
             },
             lists: {
+                writeError: null,
+                loadState: 'pristine',
                 showListsPicker: false,
                 pageListIds: [],
             },
@@ -778,53 +781,87 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
-        const pageListsSet = new Set(previousState.lists.pageListIds)
-        if (event.value.added != null) {
-            pageListsSet.add(event.value.added)
-        } else {
-            pageListsSet.delete(event.value.deleted)
-        }
-        this.emitMutation({
-            lists: { pageListIds: { $set: [...pageListsSet] } },
-            bookmark: {
-                isBookmarked: { $set: true },
-                lastBookmarkTimestamp: { $set: Math.floor(Date.now() / 1000) },
+        await executeUITask(
+            this,
+            (state) => ({ lists: { loadState: { $set: state } } }),
+            async () => {
+                const pageListsSet = new Set(previousState.lists.pageListIds)
+                if (event.value.added != null) {
+                    pageListsSet.add(event.value.added)
+                } else {
+                    pageListsSet.delete(event.value.deleted)
+                }
+                this.emitMutation({
+                    lists: { pageListIds: { $set: [...pageListsSet] } },
+                    bookmark: {
+                        isBookmarked: { $set: true },
+                        lastBookmarkTimestamp: {
+                            $set: Math.floor(Date.now() / 1000),
+                        },
+                    },
+                })
+
+                const { annotationsCache } = this.dependencies
+                const unifiedListIds = [...pageListsSet]
+                    .map(
+                        (localListId) =>
+                            annotationsCache.getListByLocalId(localListId)
+                                ?.unifiedId,
+                    )
+                    .filter((id) => id != null)
+                annotationsCache.setPageData(
+                    normalizeUrl(previousState.fullPageUrl),
+                    unifiedListIds,
+                )
+
+                let title
+
+                if (window.location.href.includes('web.telegram.org')) {
+                    title = getTelegramUserDisplayName(
+                        document,
+                        window.location.href,
+                    )
+                }
+
+                if (
+                    window.location.href.includes('x.com/messages/') ||
+                    window.location.href.includes('twitter.com/messages/')
+                ) {
+                    title = document.title
+                }
+
+                try {
+                    await this.dependencies.customLists.updateListForPage({
+                        added: event.value.added,
+                        deleted: event.value.deleted,
+                        url: previousState.fullPageUrl,
+                        tabId: this.dependencies.currentTab.id,
+                        skipPageIndexing: event.value.skipPageIndexing,
+                        pageTitle: title,
+                    })
+                } catch (err) {
+                    this.emitMutation({
+                        lists: {
+                            pageListIds: {
+                                $set: [...previousState.lists.pageListIds],
+                            },
+                            writeError: { $set: err.message },
+                        },
+                        bookmark: {
+                            isBookmarked: {
+                                $set: previousState.bookmark.isBookmarked,
+                            },
+                            lastBookmarkTimestamp: {
+                                $set:
+                                    previousState.bookmark
+                                        .lastBookmarkTimestamp,
+                            },
+                        },
+                    })
+                    throw err
+                }
             },
-        })
-
-        const { annotationsCache } = this.dependencies
-        const unifiedListIds = [...pageListsSet]
-            .map(
-                (localListId) =>
-                    annotationsCache.getListByLocalId(localListId)?.unifiedId,
-            )
-            .filter((id) => id != null)
-        annotationsCache.setPageData(
-            normalizeUrl(previousState.fullPageUrl),
-            unifiedListIds,
         )
-
-        let title
-
-        if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document, window.location.href)
-        }
-
-        if (
-            window.location.href.includes('x.com/messages/') ||
-            window.location.href.includes('twitter.com/messages/')
-        ) {
-            title = document.title
-        }
-
-        return this.dependencies.customLists.updateListForPage({
-            added: event.value.added,
-            deleted: event.value.deleted,
-            url: previousState.fullPageUrl,
-            tabId: this.dependencies.currentTab.id,
-            skipPageIndexing: event.value.skipPageIndexing,
-            pageTitle: title,
-        })
     }
 
     listAllTabs: EventHandler<'listAllTabs'> = ({ event }) => {
