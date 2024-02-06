@@ -262,18 +262,13 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('updateLists', {
                             value: { added: null, deleted: id, selected: [] },
                         }),
-                    createNewEntry: async (name) => {
-                        const listId = Date.now()
+                    onSpaceCreate: async ({ localListId }) => {
                         await this.processEvent('updateLists', {
                             value: {
-                                added: listId,
+                                added: localListId,
                                 deleted: null,
                                 selected: [],
                             },
-                        })
-                        return this.props.customLists.createCustomList({
-                            name: name,
-                            id: listId,
                         })
                     },
                 }}

@@ -71,7 +71,7 @@ const setupLogicHelper = async ({
 }: {
     device: UILogicTestDevice
     shouldHydrateCacheOnInit?: boolean
-    createNewEntry?: SpacePickerDependencies['createNewEntry']
+    onSpaceCreate?: SpacePickerDependencies['onSpaceCreate']
     selectEntry?: (id: string | number) => Promise<void>
     unselectEntry?: (id: string | number) => Promise<void>
     queryEntries?: (query: string) => Promise<UnifiedList[]>
@@ -91,8 +91,8 @@ const setupLogicHelper = async ({
         annotationsCache,
         localStorageAPI: device.browserAPIs.storage.local,
         shouldHydrateCacheOnInit: shouldHydrateCacheOnInit ?? true,
-        createNewEntry:
-            args.createNewEntry ??
+        onSpaceCreate:
+            args.onSpaceCreate ??
             (async (name) => ({ localListId: generatedIds++ } as any)),
         selectEntry: args.selectEntry ?? (async (id) => {}),
         unselectEntry: args.unselectEntry ?? (async (id) => {}),
@@ -844,16 +844,16 @@ describe('SpacePickerLogic', () => {
     it('should show default entries again + new entry after selecting a new entry', async ({
         device,
     }) => {
-        const newEntryId = 1000
+        let newEntryId = 1000
         const newEntryText = 'test'
 
         let selectedEntry = null
         let newEntryName = null
         const { testLogic } = await setupLogicHelper({
             device,
-            createNewEntry: async (entryName) => {
-                newEntryName = entryName
-                return { localListId: newEntryId } as any
+            onSpaceCreate: async ({ name, localListId }) => {
+                newEntryName = name
+                newEntryId = localListId
             },
             selectEntry: async (entryId) => {
                 selectedEntry = entryId
@@ -913,15 +913,15 @@ describe('SpacePickerLogic', () => {
     })
 
     it('should correctly add a new entry to all tabs', async ({ device }) => {
-        const newEntryId = 1000
+        let newEntryId = 1000
         const newEntryText = 'test'
 
         let newEntryName = null
         const { testLogic } = await setupLogicHelper({
             device,
-            createNewEntry: async (entryName) => {
-                newEntryName = entryName
-                return { localListId: newEntryId } as any
+            onSpaceCreate: async ({ name, localListId }) => {
+                newEntryName = name
+                newEntryId = localListId
             },
         })
 

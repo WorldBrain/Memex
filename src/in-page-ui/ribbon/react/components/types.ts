@@ -93,7 +93,7 @@ export interface RibbonListsProps {
     fetchInitialListSelections: () => Promise<number[]>
     selectEntry: SpacePickerDependencies['selectEntry']
     unselectEntry: SpacePickerDependencies['unselectEntry']
-    createNewEntry: SpacePickerDependencies['createNewEntry']
+    onSpaceCreate: SpacePickerDependencies['onSpaceCreate']
 }
 
 export interface RibbonSearchProps {

@@ -360,7 +360,9 @@ export default class SpacePickerLogic extends UILogic<
         this.currentKeysPressed = currentKeys
 
         if (
-            (currentKeys.includes('Enter') && currentKeys.includes('Meta')) ||
+            (!this.dependencies.filterMode &&
+                currentKeys.includes('Enter') &&
+                currentKeys.includes('Meta')) ||
             (event.key === 'Enter' &&
                 previousState.filteredListIds?.length === 0)
         ) {
@@ -839,11 +841,21 @@ export default class SpacePickerLogic extends UILogic<
         name: string,
         previousState: SpacePickerState,
     ): Promise<number> {
+        if (this.dependencies.filterMode) {
+            return
+        }
+
         const {
             collabKey,
             localListId,
             remoteListId,
-        } = await this.dependencies.createNewEntry(name)
+        } = await this.dependencies.spacesBG.createCustomList({ name })
+        this.dependencies.onSpaceCreate?.({
+            name,
+            localListId,
+            collabKey,
+            remoteListId,
+        })
         this.dependencies.annotationsCache.addList({
             name,
             collabKey,

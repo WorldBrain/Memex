@@ -1,10 +1,10 @@
-import Storex from '@worldbrain/storex'
-import { Tabs, Browser } from 'webextension-polyfill'
+import type Storex from '@worldbrain/storex'
+import type { Tabs, Browser } from 'webextension-polyfill'
 import {
     normalizeUrl,
     isFullUrl,
 } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
+import type { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
 
 import {
     makeRemotelyCallable,
@@ -12,26 +12,25 @@ import {
     runInTab,
 } from 'src/util/webextensionRPC'
 import AnnotationStorage from './storage'
-import { AnnotSearchParams } from 'src/search/background/types'
-import { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
-import SocialBG from 'src/social-integration/background'
+import type { AnnotSearchParams } from 'src/search/background/types'
+import type { KeyboardActions } from 'src/sidebar-overlay/sidebar/types'
+import type SocialBG from 'src/social-integration/background'
 import { buildPostUrlId } from 'src/social-integration/util'
 import type { Annotation } from 'src/annotations/types'
 import type { AnnotationInterface, CreateAnnotationParams } from './types'
-import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
+import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import type { InPageUIRibbonAction } from 'src/in-page-ui/shared-state/types'
 import { generateAnnotationUrl } from 'src/annotations/utils'
 import { PageIndexingBackground } from 'src/page-indexing/background'
-import { Analytics } from 'src/analytics/types'
+import type { Analytics } from 'src/analytics/types'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 import { ServerStorageModules } from 'src/storage/types'
-import { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
+import type { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/user-management/types'
 import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
-import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
-import { AuthBackground } from 'src/authentication/background'
-import { RGBAColor } from '@worldbrain/memex-common/lib/annotations/types'
+import type { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import type { AuthBackground } from 'src/authentication/background'
 
 interface TabArg {
     tab: Tabs.Tab

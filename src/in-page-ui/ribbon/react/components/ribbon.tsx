@@ -324,6 +324,7 @@ export default class Ribbon extends Component<Props, State> {
                     initialSelectedListIds={
                         this.props.lists.fetchInitialListSelections
                     }
+                    onSpaceCreate={this.props.lists.onSpaceCreate}
                     closePicker={this.hideListPicker}
                     onListShare={this.props.onListShare}
                     onListFocus={(listId: UnifiedList['localId']) => {

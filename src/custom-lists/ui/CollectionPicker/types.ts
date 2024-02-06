@@ -77,13 +77,12 @@ export interface SpacePickerDependencies {
     localStorageAPI: Storage.LocalStorageArea
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
-    createNewEntry: (
-        name: string,
-    ) => Promise<{
+    onSpaceCreate?: (args: {
         localListId: number
         remoteListId: string
         collabKey: string
-    }>
+        name: string
+    }) => void
     selectEntry: (
         listId: number,
         options?: { protectAnnotation?: boolean },
