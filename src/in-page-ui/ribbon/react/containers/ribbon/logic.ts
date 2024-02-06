@@ -642,6 +642,9 @@ export class RibbonContainerLogic extends UILogic<
                     }
                 } catch (err) {
                     updateState(!shouldBeBookmarked)
+                    this.emitMutation({
+                        bookmark: { writeError: { $set: err.message } },
+                    })
                     throw err
                 }
             },

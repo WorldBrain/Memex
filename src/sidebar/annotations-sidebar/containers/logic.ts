@@ -260,7 +260,7 @@ export class SidebarContainerLogic extends UILogic<
             cacheLoadState: this.options.shouldHydrateCacheOnInit
                 ? 'pristine'
                 : 'success',
-            noteError: null,
+            noteWriteError: null,
             loadState: 'running',
             noteEditState: 'pristine',
             noteCreateState: 'pristine',
@@ -652,7 +652,7 @@ export class SidebarContainerLogic extends UILogic<
                 await savePromise
             } catch (err) {
                 this.options.annotationsCache.updateAnnotation(annotationData)
-                this.emitMutation({ noteError: { $set: err.message } })
+                this.emitMutation({ noteWriteError: { $set: err.message } })
                 throw err
             }
         })
@@ -2226,7 +2226,7 @@ export class SidebarContainerLogic extends UILogic<
                 await savePromise
             } catch (err) {
                 this.options.annotationsCache.updateAnnotation(annotationData)
-                this.emitMutation({ noteError: { $set: err.message } })
+                this.emitMutation({ noteWriteError: { $set: err.message } })
                 throw err
             }
         })
@@ -2466,7 +2466,7 @@ export class SidebarContainerLogic extends UILogic<
                 await savePromise
             } catch (err) {
                 this.options.annotationsCache.removeAnnotation(cachedAnnotation)
-                this.emitMutation({ noteError: { $set: err.message } })
+                this.emitMutation({ noteWriteError: { $set: err.message } })
                 throw err
             }
         })

@@ -73,6 +73,7 @@ export interface RibbonCommentBoxProps {
 export interface RibbonBookmarkProps {
     isBookmarked: boolean
     loadState: TaskState
+    writeError: string | null
     toggleBookmark: () => void
     lastBookmarkTimestamp: number
 }
