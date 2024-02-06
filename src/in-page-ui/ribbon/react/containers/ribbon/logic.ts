@@ -531,6 +531,7 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        this.dependencies.setRibbonShouldAutoHide(previousState.showRemoveMenu)
         const mutation: UIMutation<RibbonContainerState> = {
             showRemoveMenu: {
                 $set: event != null ? event : !previousState.showRemoveMenu,
