@@ -10,8 +10,7 @@ import {
     ErrorNotification,
     ErrorNotificationProps,
 } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
-
-const REACT_ROOT_ID = '__MEMEX-ERROR-ROOT'
+import * as constants from './constants'
 
 type RootProps = Pick<
     ErrorNotificationProps,
@@ -67,12 +66,14 @@ export type ErrorDisplayProps = Omit<RootProps, 'rootEl'>
 export const renderErrorDisplay = async (
     props: ErrorDisplayProps,
 ): Promise<void> => {
-    const existingRoot = document.getElementById(REACT_ROOT_ID)
+    const existingRoot = document.getElementById(
+        constants.REACT_ROOTS.errorDisplay,
+    )
     if (existingRoot) {
         existingRoot.remove()
     }
     const root = document.createElement('div')
-    root.setAttribute('id', REACT_ROOT_ID)
+    root.setAttribute('id', constants.REACT_ROOTS.errorDisplay)
 
     const renderComponent = () => {
         document.body.appendChild(root)
