@@ -573,7 +573,8 @@ export async function main(
             }
 
             await inPageUI.hideTooltip()
-            if (preventHideTooltip) {
+
+            if (preventHideTooltip && selection.toString().length > 0) {
                 const styleSheet = document.createElement('style')
                 styleSheet.type = 'text/css'
                 styleSheet.innerText = `
