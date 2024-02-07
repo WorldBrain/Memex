@@ -4,7 +4,6 @@ import type {
     SharedInPageUIInterface,
     InPageUIComponentShowState,
     ShouldSetUpOptions,
-    InPageErrorType,
 } from 'src/in-page-ui/shared-state/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 
@@ -14,13 +13,11 @@ export interface RibbonHolderState {
     keepPageActivityIndicatorHidden: boolean
     isRibbonEnabled?: boolean
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
-    inPageErrorType?: InPageErrorType
 }
 
 export type RibbonHolderEvents = UIEvent<{
     show: null
     hide: null
-    setInPageError: { type?: InPageErrorType }
     openSidebarToSharedSpaces: null
     selectRibbonPositionOption: null
 }>
@@ -117,14 +114,6 @@ export class RibbonHolderLogic extends UILogic<
 
     hide: EventHandler<'hide'> = () => {
         return { state: { $set: 'hidden' } }
-    }
-
-    setInPageError: EventHandler<'setInPageError'> = async ({ event }) => {
-        if (event == null) {
-            this.emitMutation({ inPageErrorType: { $set: null } })
-        } else {
-            this.emitMutation({ inPageErrorType: { $set: event.type } })
-        }
     }
 
     openSidebarToSharedSpaces: EventHandler<

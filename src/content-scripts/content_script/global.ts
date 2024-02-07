@@ -488,7 +488,6 @@ export async function main(
             return { annotationId, createPromise }
         } catch (err) {
             captureException(err)
-            await inPageUI.toggleErrorMessage({ type: 'annotation' })
             throw err
         }
     }

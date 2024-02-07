@@ -59,8 +59,6 @@ export interface SidebarActionOptions {
     prompt?: string
 }
 
-export type InPageErrorType = 'annotation' // Add more specific error types here
-
 export interface SharedInPageUIEvents {
     stateChanged: (event: {
         newState: InPageUIComponentShowState
@@ -74,14 +72,12 @@ export interface SharedInPageUIEvents {
         options?: ShouldSetUpOptions
     }) => void
     componentShouldDestroy: (event: { component: InPageUIComponent }) => void
-    displayErrorMessage: (event: { type: InPageErrorType }) => void
 }
 
 export interface ShouldSetUpOptions {
     keepRibbonHidden?: boolean
     showSidebarOnLoad?: boolean
     showPageActivityIndicator?: boolean
-    inPageErrorType?: InPageErrorType
     openInAIMode?: boolean
 }
 
@@ -117,6 +113,4 @@ export interface SharedInPageUIInterface {
     showHighlights(): Promise<void>
     hideHighlights(): Promise<void>
     toggleHighlights(): Promise<void>
-
-    toggleErrorMessage(args: { type: InPageErrorType }): Promise<void>
 }
