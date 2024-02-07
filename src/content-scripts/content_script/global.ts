@@ -85,7 +85,10 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
+import {
+    PdfScreenshot,
+    promptPdfScreenshot,
+} from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { PDFRemoteInterface } from 'src/pdf/background/types'
@@ -454,6 +457,7 @@ export async function main(
         },
     })
 
+    // TODO: Type this
     async function saveHighlight(
         shouldShare: boolean,
         shouldCopyShareLink: boolean,
@@ -488,6 +492,14 @@ export async function main(
             return { annotationId, createPromise }
         } catch (err) {
             captureException(err)
+            await contentScriptRegistry.registerSearchInjectionScript(
+                searchInjectionMain,
+                {
+                    errorMessage: err.message,
+                    title: 'Error saving note',
+                    blockedBackground: true,
+                },
+            )
             throw err
         }
     }
@@ -524,7 +536,7 @@ export async function main(
                     action: 'show_annotation',
                 })
             }
-            let screenshotGrabResult
+            let screenshotGrabResult: PdfScreenshot
             if (
                 isPdfViewerRunning &&
                 window.getSelection().toString().length === 0
@@ -838,7 +850,7 @@ export async function main(
     // dependencies
 
     const contentScriptRegistry: ContentScriptRegistry = {
-        async registerRibbonScript(execute): Promise<void> {
+        async registerRibbonScript(execute) {
             await execute({
                 inPageUI,
                 currentUser,
@@ -873,7 +885,7 @@ export async function main(
             })
             components.ribbon?.resolve()
         },
-        async registerHighlightingScript(execute): Promise<void> {
+        async registerHighlightingScript(execute) {
             await execute({
                 inPageUI,
                 annotationsCache,
@@ -883,7 +895,7 @@ export async function main(
             })
             components.highlights?.resolve()
         },
-        async registerSidebarScript(execute): Promise<void> {
+        async registerSidebarScript(execute) {
             await execute({
                 events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
@@ -918,7 +930,7 @@ export async function main(
             })
             components.sidebar?.resolve()
         },
-        async registerTooltipScript(execute): Promise<void> {
+        async registerTooltipScript(execute) {
             await execute({
                 inPageUI,
                 createHighlight: annotationsFunctions.createHighlight({
@@ -941,11 +953,12 @@ export async function main(
             })
             components.tooltip?.resolve()
         },
-        async registerSearchInjectionScript(execute): Promise<void> {
+        async registerSearchInjectionScript(execute, errorDisplayProps) {
             await execute({
                 syncSettingsBG,
                 requestSearcher: remoteFunction('search'),
                 annotationsFunctions,
+                errorDisplayProps,
             })
         },
     }
