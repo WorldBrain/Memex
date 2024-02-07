@@ -117,7 +117,7 @@ export default class SpacePickerLogic extends UILogic<
     private focusIndex = -1
 
     // For now, the only thing that needs to know if this has finished, is the tests.
-    private _processingUpstreamOperation: Promise<void>
+    private processingUpstreamOperation: Promise<void>
 
     constructor(protected dependencies: SpacePickerDependencies) {
         super()
@@ -125,13 +125,6 @@ export default class SpacePickerLogic extends UILogic<
             dependencies.localStorageAPI,
             { prefix: 'custom-lists_' },
         )
-    }
-
-    get processingUpstreamOperation() {
-        return this._processingUpstreamOperation
-    }
-    set processingUpstreamOperation(val) {
-        this._processingUpstreamOperation = val
     }
 
     getInitialState = (): SpacePickerState => ({
@@ -146,6 +139,7 @@ export default class SpacePickerLogic extends UILogic<
         filteredListIds: null,
         loadState: 'pristine',
         spaceCreateState: 'pristine',
+        spaceAddRemoveState: 'pristine',
         spaceWriteError: null,
         renameListErrorMessage: null,
         contextMenuListId: null,
@@ -587,7 +581,7 @@ export default class SpacePickerLogic extends UILogic<
         })
     }
 
-    searchInputChanged: EventHandler<'searchInputChanged'> = async ({
+    searchInputChanged: EventHandler<'searchInputChanged'> = ({
         event: { query },
         previousState,
     }) => {
@@ -752,60 +746,58 @@ export default class SpacePickerLogic extends UILogic<
             { source: 'resultEntryPress' },
         )
 
-        // If we're going to unselect it
-        try {
-            let entrySelectPromise: Promise<void>
-            if (previousState.selectedListIds.includes(entry.localId)) {
-                this.selectedListIds = previousState.selectedListIds.filter(
-                    (id) => id !== entry.localId,
-                )
+        await executeUITask(this, 'spaceAddRemoveState', async () => {
+            try {
+                let entrySelectPromise: Promise<void>
+                // If we're going to unselect it
+                if (previousState.selectedListIds.includes(entry.localId)) {
+                    this.selectedListIds = previousState.selectedListIds.filter(
+                        (id) => id !== entry.localId,
+                    )
 
-                entrySelectPromise = this.dependencies.unselectEntry(
-                    entry.localId,
-                )
-            } else {
-                this.localListIdsMRU = Array.from(
-                    new Set([listData.localId, ...this.localListIdsMRU]),
-                )
-                this.selectedListIds = Array.from(
-                    new Set([
-                        listData.localId,
-                        ...previousState.selectedListIds,
-                    ]),
-                )
+                    entrySelectPromise = this.dependencies.unselectEntry(
+                        entry.localId,
+                    )
+                } else {
+                    // If we're going to select it
+                    this.localListIdsMRU = Array.from(
+                        new Set([listData.localId, ...this.localListIdsMRU]),
+                    )
+                    this.selectedListIds = Array.from(
+                        new Set([
+                            listData.localId,
+                            ...previousState.selectedListIds,
+                        ]),
+                    )
 
-                entrySelectPromise = this.dependencies.selectEntry(
-                    entry.localId,
-                )
+                    entrySelectPromise = this.dependencies.selectEntry(
+                        entry.localId,
+                    )
+                }
+
+                nextState = this.applyAndEmitMutation(previousState, {
+                    selectedListIds: { $set: this.selectedListIds },
+                })
+
+                // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
+                if (shouldRerender) {
+                    this.cacheListsSubscription(
+                        this.dependencies.annotationsCache.lists,
+                    )
+                }
+
+                await entrySelectPromise
+            } catch (e) {
+                this.selectedListIds = previousState.selectedListIds
+                nextState = this.applyAndEmitMutation(previousState, {
+                    spaceWriteError: { $set: e.message },
+                    selectedListIds: { $set: this.selectedListIds },
+                })
+                throw e
             }
+        })
 
-            const mutation: UIMutation<SpacePickerState> = {
-                selectedListIds: { $set: this.selectedListIds },
-            }
-
-            this.emitMutation(mutation)
-            nextState = this.withMutation(previousState, mutation)
-
-            // Manually trigger list subscription - which does the list state mutation - as it won't be auto-triggered here
-            if (shouldRerender) {
-                this.cacheListsSubscription(
-                    this.dependencies.annotationsCache.lists,
-                )
-            }
-
-            await entrySelectPromise
-        } catch (e) {
-            this.selectedListIds = previousState.selectedListIds
-            const mutation: UIMutation<SpacePickerState> = {
-                selectedListIds: { $set: this.selectedListIds },
-            }
-
-            this.emitMutation(mutation)
-            nextState = this.withMutation(previousState, mutation)
-            throw new Error(e)
-        }
-
-        await this.searchInputChanged({
+        this.searchInputChanged({
             event: { query: previousState.query },
             previousState: nextState,
         })
@@ -818,25 +810,35 @@ export default class SpacePickerLogic extends UILogic<
         if (!(await pageActionAllowed(analyticsBG))) {
             return
         }
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
-            entry.localId,
-        )
-        const isAlreadySelected = previousState.selectedListIds.includes(
-            entry.localId,
-        )
 
-        const selectedIds = [entry.localId, ...previousState.selectedListIds]
+        await executeUITask(this, 'spaceAddRemoveState', async () => {
+            this.processingUpstreamOperation = this.dependencies.actOnAllTabs(
+                entry.localId,
+            )
 
-        let addedToAllIdsnew = [
-            parseFloat(entry.unifiedId),
-            ...(previousState.addedToAllIds ?? []),
-        ]
+            const selectedIds = [
+                entry.localId,
+                ...previousState.selectedListIds,
+            ]
 
-        this.emitMutation({
-            selectedListIds: { $set: selectedIds },
-            addedToAllIds: { $set: addedToAllIdsnew },
+            let addedToAllIdsnew = [
+                parseFloat(entry.unifiedId),
+                ...(previousState.addedToAllIds ?? []),
+            ]
+
+            this.emitMutation({
+                selectedListIds: { $set: selectedIds },
+                addedToAllIds: { $set: addedToAllIdsnew },
+            })
+            this.selectedListIds = selectedIds
+
+            try {
+                await this.processingUpstreamOperation
+            } catch (e) {
+                this.emitMutation({ spaceWriteError: { $set: e.message } })
+                throw e
+            }
         })
-        this.selectedListIds = selectedIds
     }
 
     private async createAndDisplayNewList(
@@ -960,10 +962,37 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
 
-        const newId = await this.createAndDisplayNewList(entry, previousState)
-        this._processingUpstreamOperation = this.dependencies.actOnAllTabs(
-            newId,
+        let newSpaceId: number
+        const { success } = await executeUITask(
+            this,
+            'spaceCreateState',
+            async () => {
+                try {
+                    newSpaceId = await this.createAndDisplayNewList(
+                        entry,
+                        previousState,
+                    )
+                } catch (e) {
+                    this.emitMutation({ spaceWriteError: { $set: e.message } })
+                    throw e
+                }
+            },
         )
+        if (!success) {
+            return
+        }
+
+        await executeUITask(this, 'spaceAddRemoveState', async () => {
+            this.processingUpstreamOperation = this.dependencies.actOnAllTabs(
+                newSpaceId,
+            )
+            try {
+                await this.processingUpstreamOperation
+            } catch (e) {
+                this.emitMutation({ spaceWriteError: { $set: e.message } })
+                throw e
+            }
+        })
     }
 
     resultEntryFocus: EventHandler<'resultEntryFocus'> = ({

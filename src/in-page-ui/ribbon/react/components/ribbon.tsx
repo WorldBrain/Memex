@@ -1797,22 +1797,18 @@ export default class Ribbon extends Component<Props, State> {
                     {this.renderTutorial()}
                     {this.renderFeedInfo()}
                     {this.renderRemoveMenu()}
-                    {this.props.bookmark.writeError ||
-                        (this.props.lists.writeError && (
-                            <ErrorNotification
-                                closeComponent={() => {
-                                    this.props.setWriteError(null)
-                                }}
-                                getPortalRoot={this.props.getRootElement}
-                                blockedBackground
-                                positioning="centerCenter"
-                                title="Error saving note"
-                                errorMessage={
-                                    this.props.bookmark.writeError ||
-                                    this.props.lists.writeError
-                                }
-                            />
-                        ))}
+                    {this.props.bookmark.writeError && (
+                        <ErrorNotification
+                            closeComponent={() => {
+                                this.props.setWriteError(null)
+                            }}
+                            getPortalRoot={this.props.getRootElement}
+                            blockedBackground
+                            positioning="centerCenter"
+                            title="Error saving note"
+                            errorMessage={this.props.bookmark.writeError}
+                        />
+                    )}
                 </>
             )
         }

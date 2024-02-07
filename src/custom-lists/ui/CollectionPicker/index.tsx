@@ -42,7 +42,6 @@ export interface Props extends SpacePickerDependencies {
     onListFocus?: (listId: UnifiedList['localId']) => void
     bgScriptBG?: RemoteBGScriptInterface
     getRootElement?: () => HTMLElement
-    setSpace
 }
 
 class SpacePicker extends StatefulUIElement<

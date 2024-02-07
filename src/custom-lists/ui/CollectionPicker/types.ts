@@ -34,6 +34,7 @@ export interface SpacePickerState {
     editMenuListId: number | null
     loadState: TaskState
     spaceCreateState: TaskState
+    spaceAddRemoveState: TaskState
     spaceWriteError: string | null
     renameListErrorMessage: string | null
     allTabsButtonPressed?: string

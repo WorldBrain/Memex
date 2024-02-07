@@ -681,7 +681,7 @@ describe('SpacePickerLogic', () => {
             entry: DATA.TEST_USER_LIST_SUGGESTIONS[0],
             analyticsBG: device.backgroundModules.analyticsBG,
         })
-        await entryPickerLogic.processingUpstreamOperation
+        await entryPickerLogic['processingUpstreamOperation']
 
         expect(testLogic.state.selectedListIds).toEqual([
             DATA.TEST_USER_LIST_SUGGESTIONS[0].localId,
