@@ -81,6 +81,7 @@ export interface SyncSettingsByFeature {
     openAI: {
         apiKey: string
         promptSuggestions: string[]
+        videoPromptSetting: string
     }
     inPageUI: {
         ribbonEnabled: boolean

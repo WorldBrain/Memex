@@ -329,6 +329,7 @@ interface SidebarEvents {
             startTimeSecs: number
             endTimeSecs: number
         }
+        prompt: string
     }
     setExistingSourcesOptions:
         | 'pristine'

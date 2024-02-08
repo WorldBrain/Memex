@@ -4292,8 +4292,7 @@ export class SidebarContainerLogic extends UILogic<
             .map((item) => item.text)
             .join(' ')
 
-        let prompt =
-            'You are given a text snippet that is from a transcript of a section of a video. Summarize it by talking abstractly about its content and aim for brevity in your summary. The primary purpose of your summary is to help users identify video sections and their content. Do not refer to it as "video sections" or "text" or "transcript", just talk about the content abstractly. Also do not include the prompt in the summary. The transcript may contain errors; kindly correct them while retaining the original intent. Avoid using list formats. Here is the excerpt for your review:'
+        let prompt = event.prompt ?? 'Summarise this concisely and briefly'
 
         await this.queryAI(
             undefined,
@@ -4493,7 +4492,6 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 spaceTitleEditValue: { $set: sharedList.title },
             })
-
 
             let unifiedListId: string
             const listCommon = {

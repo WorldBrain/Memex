@@ -1606,6 +1606,7 @@ const ContainerStyled = styled.div<{
             right: -600px;
             opacity: 0;
             position: fixed;
+            z-index: -1;
         `}
 
     ${(props) =>

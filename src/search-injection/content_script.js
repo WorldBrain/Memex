@@ -2,7 +2,6 @@ import * as constants from './constants'
 import * as utils from './utils'
 import { handleRenderSearchInjection } from './searchInjection'
 import { handleRenderYoutubeInterface } from './youtubeInterface'
-import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 const url = window.location.href
 const matched = utils.matchURL(url)
@@ -12,14 +11,17 @@ const matched = utils.matchURL(url)
  * If set, proceed with matching URL and fetching search query
  */
 export async function initSearchInjection({
-    requestSearcher,
+    syncSettings,
     syncSettingsBG,
+    requestSearcher,
     annotationsFunctions,
 }) {
-    const syncSettings = createSyncSettingsStore({ syncSettingsBG })
-
     if (url.includes('youtube.com')) {
-        await handleRenderYoutubeInterface(syncSettings, annotationsFunctions)
+        await handleRenderYoutubeInterface(
+            syncSettings,
+            syncSettingsBG,
+            annotationsFunctions,
+        )
     }
 
     if (matched) {

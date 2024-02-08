@@ -1,7 +1,12 @@
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
+import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import React, { Component } from 'react'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { SyncSettingsStore } from 'src/sync-settings/util'
 import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
 
@@ -9,6 +14,8 @@ interface Props {
     runtime: any
     annotationsFunctions: any
     getRootElement: (() => HTMLElement) | null
+    syncSettingsBG: RemoteSyncSettingsInterface
+    syncSettings: SyncSettingsStore<'openAI'>
 }
 
 interface State {
@@ -16,23 +23,59 @@ interface State {
     existingMemexButtons: boolean
     smartNoteSeconds: string
     noteSeconds: string
+    showSummarizeTooltip: boolean
+    showAINoteTooltip: boolean
+    summarizePrompt: string
 }
 
 export default class YoutubeButtonMenu extends React.Component<Props, State> {
     memexButtonContainerRef = React.createRef<HTMLDivElement>()
     parentContainerRef = React.createRef<HTMLDivElement>() // Assuming you have a ref to the parent container
+    summarizeButtonRef = React.createRef<HTMLDivElement>() // Assuming you have a ref to the parent container
+    AIButtonRef = React.createRef<HTMLDivElement>() // Assuming you have a ref to the parent container
+    summarizePromptRef = React.createRef<HTMLInputElement>() // Assuming you have a ref to the parent container
 
     constructor(props) {
         super(props)
+
         this.state = {
             YTChapterContainerVisible: false,
             existingMemexButtons: false,
             smartNoteSeconds: '',
             noteSeconds: '',
+            showSummarizeTooltip: false,
+            showAINoteTooltip: false,
+            summarizePrompt: '',
         }
     }
 
     async componentDidMount() {
+        if (this.props.syncSettings != null) {
+            let summarizeVideoPromptSetting
+            let apikey = await this.props.syncSettings.openAI?.get('apiKey')
+            try {
+                summarizeVideoPromptSetting = await this.props.syncSettings.openAI?.get(
+                    'videoPromptSetting',
+                )
+            } catch (e) {
+                if (summarizeVideoPromptSetting == null) {
+                    await this.props.syncSettings.openAI?.set(
+                        'videoPromptSetting',
+                        'Summarise this video and include timestamps',
+                    )
+                }
+            }
+
+            if (summarizeVideoPromptSetting == null) {
+                summarizeVideoPromptSetting =
+                    'Summarise this video and include timestamps'
+            }
+
+            this.setState({
+                summarizePrompt: summarizeVideoPromptSetting,
+            })
+        }
+
         // Logic to check for YTChapterContainer and existingMemexButtons
         // Logic to retrieve smartNoteSeconds and noteSeconds from storage
         this.adjustScaleToFitParent()
@@ -102,10 +145,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             ['noteSecondsStorage']: includeLastFewSecs,
         })
 
-        console.log(
-            'createAnnotation',
-            this.getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
-        )
         this.props.annotationsFunctions.createAnnotation()(
             false,
             false,
@@ -115,9 +154,28 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         )
     }
 
-    handleSummarizeButtonClick = () => {
+    handleSummarizeButtonClick = async () => {
         // Logic for summarize button click
-        this.props.annotationsFunctions.askAI()(false, false)
+        if (
+            (await this.props.syncSettings?.openAI?.get(
+                'videoPromptSetting',
+            )) != this.state.summarizePrompt
+        ) {
+            await this.props.syncSettings?.openAI?.set(
+                'videoPromptSetting',
+                this.state.summarizePrompt,
+            )
+        }
+
+        this.setState({
+            showSummarizeTooltip: false,
+            showAINoteTooltip: false,
+        })
+
+        this.props.annotationsFunctions.askAI()(
+            false,
+            this.state.summarizePrompt,
+        )
     }
 
     handleAItimeStampButtonClick = async () => {
@@ -128,8 +186,14 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             ['smartNoteSecondsStorage']: includeLastFewSecs,
         })
 
+        this.setState({
+            showSummarizeTooltip: false,
+            showAINoteTooltip: false,
+        })
+
         this.props.annotationsFunctions.createTimestampWithAISummary(
             includeLastFewSecs,
+            this.state.summarizePrompt,
         )(
             false,
             false,
@@ -153,6 +217,68 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         }
         // Logic for text field input
         this.setState({ noteSeconds: event.target.value })
+    }
+
+    renderPromptTooltip = (ref) => {
+        let elementRef
+        if (ref === 'summarizeVideo') {
+            elementRef = this.summarizeButtonRef
+        }
+        if (ref === 'AInote') {
+            elementRef = this.AIButtonRef
+        }
+
+        let actionFunction
+
+        if (ref === 'summarizeVideo') {
+            actionFunction = this.handleSummarizeButtonClick
+        }
+        if (ref === 'AInote') {
+            actionFunction = this.handleAItimeStampButtonClick
+        }
+
+        return (
+            <PopoutBox
+                targetElementRef={elementRef.current}
+                closeComponent={() => {
+                    this.setState({
+                        showSummarizeTooltip: false,
+                        showAINoteTooltip: false,
+                    })
+                }}
+                getPortalRoot={this.props.getRootElement}
+                placement="bottom"
+                strategy="fixed"
+                width="fit-content"
+                offsetX={10}
+                instaClose
+            >
+                <TextFieldContainerPrompt>
+                    <TextArea
+                        type="text"
+                        placeholder={'Add your custom prompt here'}
+                        value={this.state.summarizePrompt}
+                        onChange={(event) => {
+                            this.setState({
+                                summarizePrompt: (event.target as HTMLTextAreaElement)
+                                    .value,
+                            })
+                        }}
+                        onClick={(e) => {
+                            e.stopPropagation()
+                        }}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && !e.shiftKey) {
+                                actionFunction()
+                            }
+                        }}
+                        width="300px"
+                        autoFocus={true}
+                    />
+                    Use a custom prompt. Click again to apply.
+                </TextFieldContainerPrompt>
+            </PopoutBox>
+        )
     }
 
     render() {
@@ -207,7 +333,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     color={'greyScale5'}
                                     hoverOff
                                 />
-                                <TextField
+                                <TextFieldSmall
                                     type="text"
                                     placeholder="0s"
                                     value={this.state.noteSeconds}
@@ -217,7 +343,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                         e.stopPropagation()
                                     }}
                                     onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
                                             this.handleAnnotateButtonClick()
                                         }
                                     }}
@@ -236,7 +362,17 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         }
                         placement="bottom"
                     >
-                        <YTPMenuItem onClick={this.handleSummarizeButtonClick}>
+                        <YTPMenuItem
+                            onMouseDown={() =>
+                                this.setState({ showSummarizeTooltip: true })
+                            }
+                            onMouseUp={() => {
+                                if (!this.state.showSummarizeTooltip) {
+                                    this.handleSummarizeButtonClick()
+                                }
+                            }}
+                            ref={this.summarizeButtonRef}
+                        >
                             <Icon
                                 filePath={runtime.getURL(
                                     '/img/summarizeIconForYoutubeInjection.svg',
@@ -261,7 +397,15 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         placement="bottom"
                     >
                         <YTPMenuItem
-                            onClick={this.handleAItimeStampButtonClick}
+                            onMouseDown={() =>
+                                this.setState({ showAINoteTooltip: true })
+                            }
+                            onMouseUp={() => {
+                                if (!this.state.showAINoteTooltip) {
+                                    this.handleAItimeStampButtonClick()
+                                }
+                            }}
+                            ref={this.AIButtonRef}
                         >
                             <Icon
                                 filePath={runtime.getURL(
@@ -281,7 +425,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     heightAndWidth="16px"
                                     color={'greyScale5'}
                                 />
-                                <TextField
+                                <TextFieldSmall
                                     type="text"
                                     placeholder="60s"
                                     value={this.state.smartNoteSeconds}
@@ -291,7 +435,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                         e.stopPropagation()
                                     }}
                                     onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
+                                        if (e.key === 'Enter' && !e.shiftKey) {
                                             this.handleAItimeStampButtonClick()
                                         }
                                     }}
@@ -320,11 +464,29 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             <YTPMenuItemLabel>Screenshot</YTPMenuItemLabel>
                         </YTPMenuItem>
                     </TooltipBox>
+                    {this.state.showAINoteTooltip
+                        ? this.renderPromptTooltip('AInote')
+                        : null}
+                    {this.state.showSummarizeTooltip
+                        ? this.renderPromptTooltip('summarizeVideo')
+                        : null}
                 </MemexButtonContainer>
             </ParentContainer>
         )
     }
 }
+
+const TextFieldContainerPrompt = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
+    padding: 5px 5px 10px 5px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 14px;
+    text-align: center;
+`
 
 const ParentContainer = styled.div`
     width: 100%;
@@ -419,7 +581,7 @@ const TextFieldContainer = styled.div`
     padding-right: 5px;
 `
 
-const TextField = styled.input`
+const TextFieldSmall = styled.input`
     height: 100%;
     width: 44px;
     border-radius: 6px;
