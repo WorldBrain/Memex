@@ -1,0 +1,31 @@
+name: Memex Extension CI checks
+
+on:
+    push:
+        branches:
+            - feature/ci
+
+jobs:
+    test-suite:
+        name: Memex Extension Test Suite
+        runs-on: ubuntu-latest
+
+        steps:
+            - name: Checkout super repo
+              uses: actions/checkout@v4
+
+            - name: Add SSH private keys for pulling submodule private repositories
+              uses: webfactory/ssh-agent@0.9.0
+              with:
+                  ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+            - name: Pull submodules
+              run: git submodule update --init --recursive --remote
+
+            - name: Install Node.js, NPM and Yarn
+              uses: actions/setup-node@v4
+              with:
+                  node-version: 16
+
+            - name: Run tests
+              run: yarn test
