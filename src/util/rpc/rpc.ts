@@ -39,8 +39,7 @@ export type RpcSideName =
     | 'extension-page-options'
 
 export class PortBasedRPCManager {
-    private ports = new Map<string, Runtime.Port>()
-    private pendingRequests = new Map<string, PendingRequest>()
+    static MAX_RETRY_ATTEMPTS = 20
 
     static createRPCResponseObject = (
         params: Omit<RPCObject, 'headers'> & {
@@ -113,6 +112,9 @@ export class PortBasedRPCManager {
     private ensuredFirstConnection = false
     private ensuringBGConnection?: Resolvable<void>
     private ensuringTabConnections: { [tabId: number]: Resolvable<void> } = {}
+    private perTabConnectionRetryCounts: { [tabId: number]: number } = {}
+    private ports = new Map<string, Runtime.Port>()
+    private pendingRequests = new Map<string, PendingRequest>()
 
     constructor(
         private options: {
@@ -225,6 +227,16 @@ export class PortBasedRPCManager {
         ensuringConnection.resolve()
     }
 
+    private checkTabConnectionRetries(tabId: number): void {
+        const retries = (this.perTabConnectionRetryCounts[tabId] ?? 0) + 1
+        if (retries >= PortBasedRPCManager.MAX_RETRY_ATTEMPTS) {
+            throw new Error(
+                `Max retries exceeded when ensuring connection to tab: ${tabId}`,
+            )
+        }
+        this.perTabConnectionRetryCounts[tabId] = retries
+    }
+
     async ensureConnectionToTab(options: {
         tabId: number
         timeout: number
@@ -234,6 +246,7 @@ export class PortBasedRPCManager {
             return this.ensuringTabConnections[options.tabId]
         }
 
+        this.checkTabConnectionRetries(options.tabId)
         const ensuringConnection = createResolvable()
         this.ensuringTabConnections[options.tabId] = ensuringConnection
         while (true) {
