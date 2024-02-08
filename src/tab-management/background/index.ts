@@ -137,7 +137,7 @@ export default class TabManagementBackground {
         await mapChunks(tabs, chunkSize, mapFn, onError)
     }
 
-    private canTabRunContentScripts(tab?: Tabs.Tab): boolean {
+    canTabRunContentScripts(tab?: Tabs.Tab): boolean {
         const url = tab?.url
 
         return !(
