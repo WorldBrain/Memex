@@ -20,7 +20,7 @@ jobs:
                   ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
             - name: Pull submodules
-              run: git submodule update --init --recursive --remote --checkout
+              run: git submodule update --init --recursive
 
             - name: Install Node.js, NPM and Yarn
               uses: actions/setup-node@v4
