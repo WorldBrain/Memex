@@ -3,7 +3,8 @@ name: Memex Extension CI checks
 on:
     push:
         branches:
-            - feature/ci
+            - 'hotfix/**'
+            - 'release/**'
 
 jobs:
     test-suite:
