@@ -36,7 +36,7 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
-import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
+import { main as InPageUIInjectionMain } from 'src/content-scripts/content_script/search-injection'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
@@ -492,8 +492,8 @@ export async function main(
             return { annotationId, createPromise }
         } catch (err) {
             captureException(err)
-            await contentScriptRegistry.registerSearchInjectionScript(
-                searchInjectionMain,
+            await contentScriptRegistry.registerInPageUIInjectionScript(
+                InPageUIInjectionMain,
                 {
                     errorMessage: err.message,
                     title: 'Error saving note',
@@ -953,7 +953,7 @@ export async function main(
             })
             components.tooltip?.resolve()
         },
-        async registerSearchInjectionScript(execute, errorDisplayProps) {
+        async registerInPageUIInjectionScript(execute, errorDisplayProps) {
             await execute({
                 syncSettingsBG,
                 requestSearcher: remoteFunction('search'),
@@ -970,8 +970,8 @@ export async function main(
         ) ||
         window.location.href.includes('youtube.com')
     ) {
-        await contentScriptRegistry.registerSearchInjectionScript(
-            searchInjectionMain,
+        await contentScriptRegistry.registerInPageUIInjectionScript(
+            InPageUIInjectionMain,
         )
     }
 
@@ -1058,8 +1058,8 @@ export async function main(
                 ) ||
                 window.location.href.includes('youtube.com')
             ) {
-                await contentScriptRegistry.registerSearchInjectionScript(
-                    searchInjectionMain,
+                await contentScriptRegistry.registerInPageUIInjectionScript(
+                    InPageUIInjectionMain,
                 )
             }
 

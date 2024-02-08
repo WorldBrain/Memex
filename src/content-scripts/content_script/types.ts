@@ -17,7 +17,7 @@ export interface ContentScriptRegistry {
     registerSidebarScript(main: SidebarScriptMain): Promise<void>
     registerHighlightingScript(main: HighlightsScriptMain): Promise<void>
     registerTooltipScript(main: TooltipScriptMain): Promise<void>
-    registerSearchInjectionScript(
+    registerInPageUIInjectionScript(
         main: SearchInjectionMain,
         errorDisplayProps?: ErrorDisplayProps,
     ): Promise<void>
