@@ -109,9 +109,10 @@ export class PortBasedRPCManager {
         )
     }
 
-    _paused?: Resolvable<void>
-    _ensuredFirstConnection = false
-    _ensuringConnection?: Resolvable<void>
+    private isPaused?: Resolvable<void>
+    private ensuredFirstConnection = false
+    private ensuringBGConnection?: Resolvable<void>
+    private ensuringTabConnections: { [tabId: number]: Resolvable<void> } = {}
 
     constructor(
         private options: {
@@ -127,7 +128,7 @@ export class PortBasedRPCManager {
         },
     ) {
         if (options.paused) {
-            this._paused = createResolvable()
+            this.isPaused = createResolvable()
         }
     }
 
@@ -148,8 +149,8 @@ export class PortBasedRPCManager {
     }
 
     unpause() {
-        const paused = this._paused
-        delete this._paused
+        const paused = this.isPaused
+        delete this.isPaused
         paused?.resolve()
     }
 
@@ -192,12 +193,12 @@ export class PortBasedRPCManager {
         timeout: number
         reconnectOnTimeout?: boolean
     }) {
-        if (this._ensuringConnection) {
-            return this._ensuringConnection
+        if (this.ensuringBGConnection) {
+            return this.ensuringBGConnection
         }
 
         const ensuringConnection = createResolvable()
-        this._ensuringConnection = ensuringConnection
+        this.ensuringBGConnection = ensuringConnection
         while (true) {
             const sleeping = sleepPromise(options.timeout)
             const result = await Promise.race([
@@ -220,7 +221,7 @@ export class PortBasedRPCManager {
                 await this.registerConnectionToBackground()
             }
         }
-        delete this._ensuringConnection
+        delete this.ensuringBGConnection
         ensuringConnection.resolve()
     }
 
@@ -229,12 +230,12 @@ export class PortBasedRPCManager {
         timeout: number
         quietConsole?: boolean
     }) {
-        if (this._ensuringConnection) {
-            return this._ensuringConnection
+        if (this.ensuringTabConnections[options.tabId]) {
+            return this.ensuringTabConnections[options.tabId]
         }
 
         const ensuringConnection = createResolvable()
-        this._ensuringConnection = ensuringConnection
+        this.ensuringTabConnections[options.tabId] = ensuringConnection
         while (true) {
             const sleeping = sleepPromise(options.timeout)
             const result = await Promise.race([
@@ -254,7 +255,7 @@ export class PortBasedRPCManager {
                 await sleeping
             }
         }
-        delete this._ensuringConnection
+        delete this.ensuringTabConnections[options.tabId]
         ensuringConnection.resolve()
     }
 
@@ -281,7 +282,7 @@ export class PortBasedRPCManager {
         options?: { skipEnsure?: boolean },
     ) {
         if (!options?.skipEnsure) {
-            if (this._ensuredFirstConnection) {
+            if (this.ensuredFirstConnection) {
                 // await this._ensuringFirstConnection
                 await this.ensureConnectionToBackground({
                     timeout: 1000,
@@ -415,7 +416,7 @@ export class PortBasedRPCManager {
         packet: RPCObject,
         port: Runtime.Port,
     ) => {
-        await this._paused
+        await this.isPaused
 
         const { headers, payload, error, serializedError } = packet
         const { id, name, type } = headers
