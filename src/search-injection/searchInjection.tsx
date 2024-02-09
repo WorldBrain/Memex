@@ -1,7 +1,6 @@
 /*
 DOM manipulation helper functions
 */
-import browser from 'webextension-polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
@@ -9,25 +8,22 @@ import debounce from 'lodash/debounce'
 
 import Container from './components/container'
 import * as constants from './constants'
-import { injectCSS } from '../util/content-injection'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { ResultItemProps } from './types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { ResultItemProps, SearchEngineName } from './types'
 
 interface RootProps {
-    target: HTMLDivElement
-    query: any
-    requestSearcher: any
+    rootEl: HTMLElement
+    query: string
+    requestSearcher: any // TODO: type this
     renderComponent: () => Promise<void>
-    searchEngine: any
+    searchEngine: SearchEngineName
     syncSettings: SyncSettingsStoreInterface
     position: 'side' | 'above'
-    getRootElement: () => HTMLElement
 }
 
 interface RootState {
@@ -77,14 +73,14 @@ class Root extends React.Component<RootProps, RootState> {
         const { props } = this
 
         return (
-            <StyleSheetManager target={props.target}>
+            <StyleSheetManager target={props.rootEl}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <Container
                         // len={searchRes.totalCount}
                         rerender={props.renderComponent}
                         searchEngine={props.searchEngine}
                         syncSettings={props.syncSettings}
-                        getRootElement={this.props.getRootElement}
+                        getRootElement={() => this.props.rootEl}
                         searchResDocs={this.state.searchResDocsProcessed}
                         updateQuery={this.updateQuery}
                         query={props.query}
@@ -95,13 +91,13 @@ class Root extends React.Component<RootProps, RootState> {
     }
 }
 
+// TODO: Type this
 export const handleRenderSearchInjection = async (
     query,
     requestSearcher,
     //{ docs, totalCount },
     searchEngine,
     syncSettings: SyncSettingsStoreInterface,
-    getRootElement,
 ) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
@@ -121,7 +117,9 @@ export const handleRenderSearchInjection = async (
         //     return false
         // }
 
-        const component = document.getElementById('memexResults')
+        const component = document.getElementById(
+            constants.REACT_ROOTS.searchInjection,
+        )
         if (component) {
             component.parentNode.removeChild(component)
             component.style.position = 'sticky'
@@ -134,8 +132,8 @@ export const handleRenderSearchInjection = async (
             sideBox.style.marginLeft = '40px'
         }
 
-        const target = document.createElement('div')
-        target.setAttribute('id', 'memexResults')
+        const root = document.createElement('div')
+        root.setAttribute('id', constants.REACT_ROOTS.searchInjection)
 
         const containerIdentifier = searchEngineObj.container[position]
 
@@ -159,7 +157,7 @@ export const handleRenderSearchInjection = async (
                     searchList.style.gap = '130px'
                     searchList.style.flexDirection = 'row'
                     searchList.style.gridAutoFlow = 'column'
-                    searchList.insertAdjacentElement('beforeend', target)
+                    searchList.insertAdjacentElement('beforeend', root)
                 } else if (!suggestionsContainer) {
                     containerWithSuggestions.style.display = 'grid'
                     containerWithSuggestions.style.gap = '130px'
@@ -170,11 +168,11 @@ export const handleRenderSearchInjection = async (
 
                     containerWithSuggestions.insertAdjacentElement(
                         'beforeend',
-                        target,
+                        root,
                     )
                 } else {
                     suggestionsContainer.insertBefore(
-                        target,
+                        root,
                         suggestionsContainer.firstChild,
                     )
                 }
@@ -182,7 +180,7 @@ export const handleRenderSearchInjection = async (
                 const containerAbove = document.getElementById(
                     searchEngineObj.container.above,
                 )
-                containerAbove.insertBefore(target, containerAbove.firstChild)
+                containerAbove.insertBefore(root, containerAbove.firstChild)
             }
         }
 
@@ -205,11 +203,11 @@ export const handleRenderSearchInjection = async (
 
                     containerWithSuggestions.insertAdjacentElement(
                         'beforeend',
-                        target,
+                        root,
                     )
                 } else {
                     suggestionsContainer.insertBefore(
-                        target,
+                        root,
                         suggestionsContainer.firstChild,
                     )
                 }
@@ -217,7 +215,7 @@ export const handleRenderSearchInjection = async (
                 const containerAbove = document.getElementById(
                     searchEngineObj.container.above,
                 )
-                containerAbove.insertBefore(target, containerAbove.firstChild)
+                containerAbove.insertBefore(root, containerAbove.firstChild)
             }
         }
 
@@ -240,11 +238,11 @@ export const handleRenderSearchInjection = async (
 
                     containerWithSuggestions.insertAdjacentElement(
                         'beforeend',
-                        target,
+                        root,
                     )
                 } else {
                     suggestionsContainer.insertBefore(
-                        target,
+                        root,
                         suggestionsContainer.firstChild,
                     )
                 }
@@ -252,7 +250,7 @@ export const handleRenderSearchInjection = async (
                 const containerAbove = document.getElementById(
                     searchEngineObj.container.above,
                 )
-                containerAbove.insertBefore(target, containerAbove.firstChild)
+                containerAbove.insertBefore(root, containerAbove.firstChild)
             }
         }
 
@@ -260,17 +258,17 @@ export const handleRenderSearchInjection = async (
             const container = document.getElementsByClassName(
                 containerIdentifier,
             )[0]
-            container.insertBefore(target, container.firstChild)
+            container.insertBefore(root, container.firstChild)
         }
 
         // // If re-rendering remove the already present component
-        // const component = document.getElementById('memexResults')
+        // const component = document.getElementById(CONSTANTS.REACT_ROOTS.SEARCHINJECTION)
         // if (component) {
         //     component.parentNode.removeChild(component)
         // }
 
         // const target = document.createElement('div')
-        // target.setAttribute('id', 'memexResults')
+        // target.setAttribute('id', CONSTANTS.REACT_ROOTS.SEARCHINJECTION)
         // container.insertBefore('beforeend', target)
 
         // Render the React component on the target element
@@ -278,18 +276,15 @@ export const handleRenderSearchInjection = async (
 
         ReactDOM.render(
             <Root
-                {...{
-                    searchEngine,
-                    position,
-                    query,
-                    renderComponent,
-                    requestSearcher,
-                    syncSettings,
-                    target,
-                }}
-                getRootElement={getRootElement}
+                query={query}
+                rootEl={root}
+                position={position}
+                syncSettings={syncSettings}
+                searchEngine={searchEngine}
+                renderComponent={renderComponent}
+                requestSearcher={requestSearcher}
             />,
-            target,
+            root,
         )
     }
 

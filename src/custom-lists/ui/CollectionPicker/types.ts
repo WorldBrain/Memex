@@ -14,7 +14,7 @@ import type { ContentSharingInterface } from 'src/content-sharing/background/typ
 import type { NormalizedState } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 
 type SpacePickerTab = 'user-lists' | 'page-links'
 
@@ -33,6 +33,9 @@ export interface SpacePickerState {
     contextMenuListId: number | null
     editMenuListId: number | null
     loadState: TaskState
+    spaceCreateState: TaskState
+    spaceAddRemoveState: TaskState
+    spaceWriteError: string | null
     renameListErrorMessage: string | null
     allTabsButtonPressed?: string
     keyboardNavActive: boolean
@@ -46,6 +49,7 @@ export type SpacePickerEvent = UIEvent<{
         entry: UnifiedList
         analyticsBG: AnalyticsCoreInterface
     }
+    setSpaceWriteError: { error: string }
     newEntryAllPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
     resultEntryPress: {
         entry: Pick<UnifiedList, 'localId'>
@@ -77,13 +81,12 @@ export interface SpacePickerDependencies {
     localStorageAPI: Storage.LocalStorageArea
     shouldHydrateCacheOnInit?: boolean
     annotationsCache: PageAnnotationsCacheInterface
-    createNewEntry: (
-        name: string,
-    ) => Promise<{
+    onSpaceCreate?: (args: {
         localListId: number
         remoteListId: string
         collabKey: string
-    }>
+        name: string
+    }) => void
     selectEntry: (
         listId: number,
         options?: { protectAnnotation?: boolean },

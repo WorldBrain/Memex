@@ -63,7 +63,6 @@ const timestampToString = (timestamp: number) =>
 
 type NewNoteInteractionProps = AnnotationCreateEventProps & {
     addPageToList: SpacePickerDependencies['selectEntry']
-    createNewList: SpacePickerDependencies['createNewEntry']
     removePageFromList: SpacePickerDependencies['unselectEntry']
 }
 
@@ -374,7 +373,6 @@ export default class SearchResultsContainer extends React.Component<
                                 },
                             })
                         }
-                        createNewEntry={interactionProps.createNewList}
                         normalizedPageUrlToFilterPageLinksBy={pageId}
                         analyticsBG={this.props.analyticsBG}
                     />
@@ -412,7 +410,6 @@ export default class SearchResultsContainer extends React.Component<
                                     deleted: listId,
                                     selected: [],
                                 }),
-                            createNewEntry: interactionProps.createNewList,
                             analyticsBG: this.props.analyticsBG,
                         }}
                         getRootElement={this.props.getRootElement}
@@ -485,7 +482,6 @@ export default class SearchResultsContainer extends React.Component<
                             annotationsCache={this.props.annotationsCache}
                             initialSelectedListIds={() => lists}
                             selectEntry={boundAnnotCreateProps.addPageToList}
-                            createNewEntry={boundAnnotCreateProps.createNewList}
                             unselectEntry={
                                 boundAnnotCreateProps.removePageFromList
                             }

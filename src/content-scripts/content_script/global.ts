@@ -36,7 +36,7 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
-import { main as searchInjectionMain } from 'src/content-scripts/content_script/search-injection'
+import { main as InPageUIInjectionMain } from 'src/content-scripts/content_script/search-injection'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
@@ -85,7 +85,10 @@ import {
     trackPageActivityIndicatorHit,
 } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { promptPdfScreenshot } from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
+import {
+    PdfScreenshot,
+    promptPdfScreenshot,
+} from '@worldbrain/memex-common/lib/pdf/screenshots/selection'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import { theme } from 'src/common-ui/components/design-library/theme'
 import { PDFRemoteInterface } from 'src/pdf/background/types'
@@ -454,6 +457,7 @@ export async function main(
         },
     })
 
+    // TODO: Type this
     async function saveHighlight(
         shouldShare: boolean,
         shouldCopyShareLink: boolean,
@@ -462,6 +466,18 @@ export async function main(
         imageSupport?,
         highlightColor?: { color: RGBAColor; id: string; label: string },
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
+        const handleError = async (err: Error) => {
+            captureException(err)
+            await contentScriptRegistry.registerInPageUIInjectionScript(
+                InPageUIInjectionMain,
+                {
+                    errorMessage: err.message,
+                    title: 'Error saving note',
+                    blockedBackground: true,
+                },
+            )
+        }
+
         try {
             const result = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
@@ -483,12 +499,11 @@ export async function main(
                 highlightColor,
             })
             const annotationId = result.annotationId
-            const createPromise = result.createPromise
+            const createPromise = result.createPromise.catch(handleError)
 
             return { annotationId, createPromise }
         } catch (err) {
-            captureException(err)
-            await inPageUI.toggleErrorMessage({ type: 'annotation' })
+            await handleError(err)
             throw err
         }
     }
@@ -525,7 +540,7 @@ export async function main(
                     action: 'show_annotation',
                 })
             }
-            let screenshotGrabResult
+            let screenshotGrabResult: PdfScreenshot
             if (
                 isPdfViewerRunning &&
                 window.getSelection().toString().length === 0
@@ -839,7 +854,7 @@ export async function main(
     // dependencies
 
     const contentScriptRegistry: ContentScriptRegistry = {
-        async registerRibbonScript(execute): Promise<void> {
+        async registerRibbonScript(execute) {
             await execute({
                 inPageUI,
                 currentUser,
@@ -874,7 +889,7 @@ export async function main(
             })
             components.ribbon?.resolve()
         },
-        async registerHighlightingScript(execute): Promise<void> {
+        async registerHighlightingScript(execute) {
             await execute({
                 inPageUI,
                 annotationsCache,
@@ -884,7 +899,7 @@ export async function main(
             })
             components.highlights?.resolve()
         },
-        async registerSidebarScript(execute): Promise<void> {
+        async registerSidebarScript(execute) {
             await execute({
                 events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
@@ -919,7 +934,7 @@ export async function main(
             })
             components.sidebar?.resolve()
         },
-        async registerTooltipScript(execute): Promise<void> {
+        async registerTooltipScript(execute) {
             await execute({
                 inPageUI,
                 createHighlight: annotationsFunctions.createHighlight({
@@ -942,11 +957,12 @@ export async function main(
             })
             components.tooltip?.resolve()
         },
-        async registerSearchInjectionScript(execute): Promise<void> {
+        async registerInPageUIInjectionScript(execute, errorDisplayProps) {
             await execute({
                 syncSettingsBG,
                 requestSearcher: remoteFunction('search'),
                 annotationsFunctions,
+                errorDisplayProps,
             })
         },
     }
@@ -958,8 +974,8 @@ export async function main(
         ) ||
         window.location.href.includes('youtube.com')
     ) {
-        await contentScriptRegistry.registerSearchInjectionScript(
-            searchInjectionMain,
+        await contentScriptRegistry.registerInPageUIInjectionScript(
+            InPageUIInjectionMain,
         )
     }
 
@@ -984,7 +1000,7 @@ export async function main(
             }
             return extractRawPageContent(doc, url)
         },
-        ping: async () => true,
+        confirmTabScriptLoaded: async () => {},
         showSidebar: inPageUI.showSidebar.bind(inPageUI),
         showRibbon: inPageUI.showRibbon.bind(inPageUI),
         testIfSidebarSetup: inPageUI.testIfSidebarSetup.bind(inPageUI),
@@ -1046,8 +1062,8 @@ export async function main(
                 ) ||
                 window.location.href.includes('youtube.com')
             ) {
-                await contentScriptRegistry.registerSearchInjectionScript(
-                    searchInjectionMain,
+                await contentScriptRegistry.registerInPageUIInjectionScript(
+                    InPageUIInjectionMain,
                 )
             }
 

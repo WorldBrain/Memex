@@ -327,7 +327,8 @@ export class DashboardContainer extends StatefulUIElement<
                             }),
                     }
                 }
-                spacePickerProps={{
+                spacePickerFilterProps={{
+                    filterMode: true,
                     authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
@@ -336,7 +337,6 @@ export class DashboardContainer extends StatefulUIElement<
                     analyticsBG: this.props.analyticsBG,
                     annotationsCache: this.props.annotationsCache,
                     pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
-                    createNewEntry: () => undefined,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
                     dashboardSelectedListId: selectedLocalListId,
                     selectEntry: (spaceId) =>
@@ -979,8 +979,6 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             shareStates,
                         }),
-                    createNewList: (day, pageId) => async (name) =>
-                        this.props.listsBG.createCustomList({ name }),
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
@@ -1012,8 +1010,6 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             value,
                         }),
-                    createNewList: (day, pageId) => async (name) =>
-                        this.props.listsBG.createCustomList({ name }),
                     addPageToList: (day, pageId) => (listId) => {
                         const listData = this.props.annotationsCache.getListByLocalId(
                             listId,
@@ -1158,8 +1154,6 @@ export class DashboardContainer extends StatefulUIElement<
                             },
                         )
                     },
-                    createNewList: (noteId) => async (name) =>
-                        this.props.listsBG.createCustomList({ name }),
                     onTrashBtnClick: (noteId, day, pageId) => () =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,
@@ -1704,10 +1698,7 @@ export class DashboardContainer extends StatefulUIElement<
                                         )
                                     }}
                                     unselectEntry={null}
-                                    createNewEntry={async (name) => {
-                                        const res = await this.props.listsBG.createCustomList(
-                                            { name },
-                                        )
+                                    onSpaceCreate={async ({ localListId }) => {
                                         // await this.props.annotationsCache.addList(
                                         //     {
                                         //         name,
@@ -1724,9 +1715,8 @@ export class DashboardContainer extends StatefulUIElement<
                                         // )
                                         await this.processEvent(
                                             'setBulkEditSpace',
-                                            { listId: res.localListId },
+                                            { listId: localListId },
                                         )
-                                        return res
                                     }}
                                     width={'300px'}
                                     autoFocus={false}

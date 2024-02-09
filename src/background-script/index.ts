@@ -6,7 +6,6 @@ import * as utils from './utils'
 import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
 import type { StorageChangesManager } from '../util/storage-changes'
 import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
-import { removeDupeSpaces } from './quick-and-dirty-migrations/tag-space-dupe-removal'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
@@ -33,11 +32,9 @@ import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { MISSING_PDF_QUERY_PARAM } from 'src/dashboard-refactor/constants'
 import type { BackgroundModules } from './setup'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { isExtensionTab, isBrowserPageTab } from 'src/tab-management/utils'
 import { captureException } from 'src/util/raven'
-import { browser } from 'webextension-polyfill-ts'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 
 interface Dependencies {
@@ -164,7 +161,7 @@ class BackgroundScript {
             },
         }
 
-        await browser.storage.local.set(tutorials)
+        await this.deps.storageAPI.local.set(tutorials)
     }
 
     /**
@@ -321,17 +318,17 @@ class BackgroundScript {
         runtimeAPI.onUpdateAvailable.addListener(async () => {
             try {
                 await bgModules.tabManagement.mapTabChunks(
-                    async ({ url, id }) => {
+                    async (tab) => {
                         if (
-                            !url ||
-                            isExtensionTab({ url }) ||
-                            isBrowserPageTab({ url })
+                            !bgModules.tabManagement.canTabRunContentScripts(
+                                tab,
+                            )
                         ) {
                             return
                         }
 
                         await runInTab<InPageUIContentScriptRemoteInterface>(
-                            id,
+                            tab.id,
                         ).teardownContentScripts()
                     },
                     {

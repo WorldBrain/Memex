@@ -127,6 +127,11 @@ export default class RibbonContainer extends StatefulUIElement<
         return (
             <Ribbon
                 getRootElement={this.props.getRootElement}
+                setWriteError={() =>
+                    this.processEvent('setWriteError', {
+                        error: null,
+                    })
+                }
                 isTrial={this.state.isTrial}
                 signupDate={this.state.signupDate}
                 pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
@@ -182,7 +187,10 @@ export default class RibbonContainer extends StatefulUIElement<
                 toggleFeed={() => {
                     this.processEvent('toggleFeed', null)
                 }}
-                isExpanded={this.props.state === 'visible'}
+                isExpanded={
+                    this.props.state === 'visible' ||
+                    !!this.state.bookmark.writeError
+                }
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
                 isRibbonEnabled={this.state.isRibbonEnabled}
@@ -262,18 +270,13 @@ export default class RibbonContainer extends StatefulUIElement<
                         this.processEvent('updateLists', {
                             value: { added: null, deleted: id, selected: [] },
                         }),
-                    createNewEntry: async (name) => {
-                        const listId = Date.now()
+                    onSpaceCreate: async ({ localListId }) => {
                         await this.processEvent('updateLists', {
                             value: {
-                                added: listId,
+                                added: localListId,
                                 deleted: null,
                                 selected: [],
                             },
-                        })
-                        return this.props.customLists.createCustomList({
-                            name: name,
-                            id: listId,
                         })
                     },
                 }}

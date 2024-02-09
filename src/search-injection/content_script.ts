@@ -2,7 +2,9 @@ import * as constants from './constants'
 import * as utils from './utils'
 import { handleRenderSearchInjection } from './searchInjection'
 import { handleRenderYoutubeInterface } from './youtubeInterface'
+import { renderErrorDisplay } from './error-display'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
+import type { SearchInjectionDependencies } from 'src/content-scripts/content_script/types'
 
 const url = window.location.href
 const matched = utils.matchURL(url)
@@ -15,11 +17,19 @@ export async function initSearchInjection({
     requestSearcher,
     syncSettingsBG,
     annotationsFunctions,
-}) {
+    errorDisplayProps,
+}: SearchInjectionDependencies) {
+    console.log('in it!', errorDisplayProps)
+    if (errorDisplayProps != null) {
+        await renderErrorDisplay(errorDisplayProps)
+        return
+    }
+
     const syncSettings = createSyncSettingsStore({ syncSettingsBG })
 
     if (url.includes('youtube.com')) {
         await handleRenderYoutubeInterface(syncSettings, annotationsFunctions)
+        return
     }
 
     if (matched) {

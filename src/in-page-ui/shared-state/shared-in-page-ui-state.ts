@@ -330,15 +330,4 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             this.componentsSetUp[component] = true
         }
     }
-
-    toggleErrorMessage: SharedInPageUIInterface['toggleErrorMessage'] = async ({
-        type,
-    }) => {
-        // Ensure ribbon is loaded so we can display the error in the ribbon holder's React DOM
-        await this.loadComponent('ribbon', {
-            keepRibbonHidden: true,
-            inPageErrorType: type,
-        })
-        this.events.emit('displayErrorMessage', { type })
-    }
 }

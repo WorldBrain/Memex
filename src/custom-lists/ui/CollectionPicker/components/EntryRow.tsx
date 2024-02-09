@@ -270,7 +270,7 @@ class EntryRow extends React.Component<Props> {
 
         return (
             <Row
-                onMouseDown={this.handleResultPress}
+                onClick={this.handleResultPress}
                 ref={this.resultEntryRef}
                 onMouseEnter={() => {
                     if (!keyboardNavActive) {
