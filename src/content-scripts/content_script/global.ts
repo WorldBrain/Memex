@@ -466,6 +466,18 @@ export async function main(
         imageSupport?,
         highlightColor?: { color: RGBAColor; id: string; label: string },
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
+        const handleError = async (err: Error) => {
+            captureException(err)
+            await contentScriptRegistry.registerInPageUIInjectionScript(
+                InPageUIInjectionMain,
+                {
+                    errorMessage: err.message,
+                    title: 'Error saving note',
+                    blockedBackground: true,
+                },
+            )
+        }
+
         try {
             const result = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
@@ -487,19 +499,11 @@ export async function main(
                 highlightColor,
             })
             const annotationId = result.annotationId
-            const createPromise = result.createPromise
+            const createPromise = result.createPromise.catch(handleError)
 
             return { annotationId, createPromise }
         } catch (err) {
-            captureException(err)
-            await contentScriptRegistry.registerInPageUIInjectionScript(
-                InPageUIInjectionMain,
-                {
-                    errorMessage: err.message,
-                    title: 'Error saving note',
-                    blockedBackground: true,
-                },
-            )
+            await handleError(err)
             throw err
         }
     }

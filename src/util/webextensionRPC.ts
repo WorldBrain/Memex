@@ -101,11 +101,6 @@ export function registerRemoteFunctions<Functions>(
 
 // === Initiating side ===
 
-// The extra options available when calling a remote function
-interface RPCOpts {
-    tabId?: number
-}
-
 // runInBackground and runInTab create a Proxy object that look like the real interface but actually call remote functions
 //
 // When the Proxy is asked for a property (such as a method)

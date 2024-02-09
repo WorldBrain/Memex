@@ -298,7 +298,11 @@ export class PortBasedRPCManager {
             }
         }
         const port = this.getExtensionPort(name)
-        return this.postMessageToRPC(port, name, payload)
+        const request = PortBasedRPCManager.createRPCRequestObject({
+            name,
+            payload,
+        })
+        return this.postMessageRequestToRPC(request, port, name)
     }
 
     async postMessageRequestToTab(
@@ -316,7 +320,11 @@ export class PortBasedRPCManager {
         }
 
         const port = this.getTabPort(tabId, name, options?.quietConsole)
-        return this.postMessageToRPC(port, name, payload)
+        const request = PortBasedRPCManager.createRPCRequestObject({
+            name,
+            payload,
+        })
+        return this.postMessageRequestToRPC(request, port, name)
     }
 
     // Since only the background script maintains a connection to all the other
@@ -363,26 +371,15 @@ export class PortBasedRPCManager {
         return port
     }
 
-    private postMessageToRPC = async (
-        port: Runtime.Port,
-        name: string,
-        payload: any,
-    ) => {
-        const request = PortBasedRPCManager.createRPCRequestObject({
-            name,
-            payload,
-        })
-        return this.postMessageRequestToRPC(request, port, name)
-    }
-
-    private async postMessageRequestToRPC(
+    private async postMessageRequestToRPC<T = any>(
         request: RPCObject,
         port: Runtime.Port,
         name: string,
+        timeout = 10000,
     ) {
         // Return the promise for to await for and allow the promise to be resolved by
         // incoming messages
-        const pendingRequest = new Promise((resolve, reject) => {
+        const pendingRequest = new Promise<T>((resolve, reject) => {
             this.pendingRequests.set(request.headers.id, {
                 request,
                 promise: { resolve, reject },
@@ -394,16 +391,25 @@ export class PortBasedRPCManager {
             { request },
         )
 
-        let ret: any
+        let ret: T | 'timeout'
         try {
             port.postMessage(request)
-            ret = await pendingRequest
+            const sleeping = sleepPromise(timeout).then(
+                () => 'timeout' as const,
+            )
+            ret = await Promise.race([pendingRequest, sleeping])
         } catch (err) {
             if (err.fromBgScript) {
                 throw new RpcError('Error occured in bg script: ' + err.message)
             } else {
                 throw new RpcError(err.message)
             }
+        }
+
+        if (ret === 'timeout') {
+            throw new RpcError(
+                `RPC to method '${name}' timed out after waiting ${timeout}ms to resolve.`,
+            )
         }
         this.log(
             `RPC::messageRequester::to-PortName(${port.name}):: Response for [${name}]`,
