@@ -261,6 +261,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                     startTimeSecs: event.videoRangeTimestamps[0],
                     endTimeSecs: event.videoRangeTimestamps[1],
                 },
+                prompt: event.prompt,
             })
             return true
         } else if (event.action === 'open_chapter_summary') {

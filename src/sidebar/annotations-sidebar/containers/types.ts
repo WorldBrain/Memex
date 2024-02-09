@@ -118,7 +118,10 @@ export type SuggestionsTab =
 export interface SidebarContainerState extends AnnotationConversationsState {
     loadState: TaskState
     cacheLoadState: TaskState
+    noteWriteError: string | null
+    noteEditState: TaskState
     noteCreateState: TaskState
+    noteColorUpdateState: TaskState
     pageLinkCreateState: TaskState
     firstTimeSharingPageLink: boolean
     secondarySearchState: TaskState
@@ -329,6 +332,7 @@ interface SidebarEvents {
             startTimeSecs: number
             endTimeSecs: number
         }
+        prompt: string
     }
     setExistingSourcesOptions:
         | 'pristine'
@@ -476,6 +480,7 @@ interface SidebarEvents {
     }
     setCopyPasterAnnotationInstanceId: { instanceId: string | null }
     setShareMenuAnnotationInstanceId: { instanceId: string | null }
+    setNoteWriteError: { error: string | null }
 
     // Selected space management
     setSelectedList: { unifiedListId: UnifiedList['unifiedId'] | null }

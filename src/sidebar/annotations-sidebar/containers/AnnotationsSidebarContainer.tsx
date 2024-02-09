@@ -139,16 +139,6 @@ export class AnnotationsSidebarContainer<
         })
     }
 
-    private createNewList = (
-        annotationId?: UnifiedAnnotation['unifiedId'],
-    ) => async (name: string) => {
-        const listId = Date.now()
-        return this.props.customListsBG.createCustomList({
-            name: name,
-            id: listId,
-        })
-    }
-
     private getListDetailsById: ListDetailsGetter = (listId) => {
         const list = this.props.annotationsCache.getListByLocalId(listId)
         return {
@@ -381,7 +371,6 @@ export class AnnotationsSidebarContainer<
                             ),
                         })
                     }
-                    createNewEntry={this.createNewList()}
                     annotationsCache={this.props.annotationsCache}
                     pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                     contentSharingBG={this.props.contentSharingBG}
@@ -419,7 +408,7 @@ export class AnnotationsSidebarContainer<
         })
     }
 
-    private getSpacePickerProps = (params: {
+    private getSpacePickerPropsForAnnot = (params: {
         annotation: UnifiedAnnotation
         showExternalConfirmations?: boolean
     }): SpacePickerDependencies => {
@@ -452,7 +441,6 @@ export class AnnotationsSidebarContainer<
             bgScriptBG: this.props.bgScriptBG,
             localStorageAPI: this.props.storageAPI.local,
             unifiedAnnotationId: params.annotation.unifiedId,
-            createNewEntry: this.createNewList(params.annotation.unifiedId),
             initialSelectedListIds: () =>
                 cacheUtils.getLocalListIdsForCacheIds(
                     annotationsCache,
@@ -508,7 +496,7 @@ export class AnnotationsSidebarContainer<
 
         return (
             <CollectionPicker
-                {...this.getSpacePickerProps({
+                {...this.getSpacePickerPropsForAnnot({
                     annotation,
                 })}
                 bgScriptBG={this.props.bgScriptBG}
@@ -569,7 +557,7 @@ export class AnnotationsSidebarContainer<
                     })
                 }
                 syncSettingsBG={this.props.syncSettingsBG}
-                spacePickerProps={this.getSpacePickerProps({
+                spacePickerProps={this.getSpacePickerPropsForAnnot({
                     annotation,
                 })}
                 showLink={
@@ -898,6 +886,11 @@ export class AnnotationsSidebarContainer<
                             removeFeedSource={(feedUrl) => {
                                 this.processEvent('removeFeedSource', {
                                     feedUrl,
+                                })
+                            }}
+                            setNoteWriteError={(error) => {
+                                this.processEvent('setNoteWriteError', {
+                                    error: error,
                                 })
                             }}
                             showChapters={this.state.showChapters}
@@ -1606,6 +1599,7 @@ const ContainerStyled = styled.div<{
             right: -600px;
             opacity: 0;
             position: fixed;
+            z-index: -1;
         `}
 
     ${(props) =>

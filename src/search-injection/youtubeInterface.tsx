@@ -1,32 +1,29 @@
 /*
 DOM manipulation helper functions
 */
-import browser from 'webextension-polyfill'
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { StyleSheetManager, ThemeProvider } from 'styled-components'
 
-import Container from './components/container'
-import * as constants from './constants'
-import { injectCSS } from '../util/content-injection'
-import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
-import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { runtime } from 'webextension-polyfill'
 import YoutubeButtonMenu from './components/youtubeActionBar'
 import { sleepPromise } from 'src/util/promises'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { SyncSettingsStore } from 'src/sync-settings/util'
+import * as constants from './constants'
 
 interface RootProps {
-    renderComponent: () => Promise<void>
-    syncSettings: SyncSettingsStoreInterface
-    target: HTMLElement
+    rootEl: HTMLElement
+    syncSettingsBG: RemoteSyncSettingsInterface
+    syncSettings: SyncSettingsStore<'openAI'>
     annotationsFunctions: any
-    getRootElement: (() => HTMLElement) | null
 }
 
 interface RootState {
@@ -50,12 +47,14 @@ class Root extends React.Component<RootProps, RootState> {
         const { props } = this
 
         return (
-            <StyleSheetManager target={props.target}>
+            <StyleSheetManager target={props.rootEl}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>
                     <YoutubeButtonMenu
                         runtime={runtime}
                         annotationsFunctions={props.annotationsFunctions}
-                        getRootElement={this.props.getRootElement}
+                        syncSettingsBG={props.syncSettingsBG}
+                        syncSettings={props.syncSettings}
+                        getRootElement={() => props.rootEl}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -64,19 +63,20 @@ class Root extends React.Component<RootProps, RootState> {
 }
 
 export const handleRenderYoutubeInterface = async (
-    syncSettings: SyncSettingsStoreInterface,
+    syncSettings: SyncSettingsStore<'openAI'>,
+    syncSettingsBG: RemoteSyncSettingsInterface,
     annotationsFunctions: any,
 ) => {
-    const existingButton = document.getElementById('youtubeInjectionContainer')
+    const existingButton = document.getElementById(
+        constants.REACT_ROOTS.youtubeInterface,
+    )
 
     if (existingButton) {
         existingButton.remove()
     }
     const target = document.createElement('div')
-    target.setAttribute('id', 'youtubeInjectionContainer')
-    const renderComponent = async () => {
-        console.log('rendering youtube interface')
-
+    target.setAttribute('id', constants.REACT_ROOTS.youtubeInterface)
+    const renderComponent = () => {
         const below = document.querySelector('#below')
         const player = document.querySelector('#player')
         const url = new URL(window.location.href)
@@ -235,13 +235,10 @@ export const handleRenderYoutubeInterface = async (
 
         ReactDOM.render(
             <Root
-                {...{
-                    renderComponent,
-                    syncSettings,
-                    target,
-                    annotationsFunctions,
-                }}
-                getRootElement={() => document.body}
+                rootEl={target}
+                syncSettings={syncSettings}
+                annotationsFunctions={annotationsFunctions}
+                syncSettingsBG={syncSettingsBG}
             />,
             target,
         )
@@ -290,7 +287,6 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     const observer = new MutationObserver((mutation) => {
         const targetObject = mutation[0]
         const targetElement = targetObject.target as HTMLElement
-        console.log('targetElement', targetElement)
         if (targetElement.classList.contains('ytp-contextmenu')) {
             const targetChildren = targetElement.children
             console.log('targetChildren', targetChildren)

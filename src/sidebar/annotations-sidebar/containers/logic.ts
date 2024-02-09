@@ -260,8 +260,11 @@ export class SidebarContainerLogic extends UILogic<
             cacheLoadState: this.options.shouldHydrateCacheOnInit
                 ? 'pristine'
                 : 'success',
+            noteWriteError: null,
             loadState: 'running',
+            noteEditState: 'pristine',
             noteCreateState: 'pristine',
+            noteColorUpdateState: 'pristine',
             pageLinkCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
@@ -598,52 +601,63 @@ export class SidebarContainerLogic extends UILogic<
             return
         }
 
-        await updateAnnotation({
-            annotationsBG: this.options.annotationsBG,
-            contentSharingBG: this.options.contentSharingBG,
-            keepListsIfUnsharing: true,
-            annotationData: {
+        await executeUITask(this, 'noteColorUpdateState', async () => {
+            const { savePromise } = await updateAnnotation({
+                annotationsBG: this.options.annotationsBG,
+                contentSharingBG: this.options.contentSharingBG,
+                keepListsIfUnsharing: true,
+                annotationData: {
+                    comment: annotationData?.comment ?? '',
+                    localId: annotationData?.localId,
+                    color: event.colorId,
+                    body: annotationData.body,
+                },
+                shareOpts: {
+                    shouldShare:
+                        annotationData?.privacyLevel === 200 ? true : false,
+                    skipPrivacyLevelUpdate: true,
+                },
+            })
+
+            this.options.annotationsCache.updateAnnotation({
+                ...annotationData,
                 comment: annotationData?.comment ?? '',
-                localId: annotationData?.localId,
-                color: event.colorId,
-                body: annotationData.body,
-            },
-            shareOpts: {
-                shouldShare:
-                    annotationData?.privacyLevel === 200 ? true : false,
-                skipPrivacyLevelUpdate: true,
-            },
-        })
+                body: annotationData?.body ?? '',
+                color: event.color,
+                unifiedListIds: annotationData?.unifiedListIds,
+            })
 
-        this.options.annotationsCache.updateAnnotation({
-            ...annotationData,
-            comment: annotationData?.comment ?? '',
-            body: annotationData?.body ?? '',
-            color: event.color,
-            unifiedListIds: annotationData?.unifiedListIds,
-        })
-
-        let highlights: HTMLCollection = document.getElementsByTagName(
-            'hypothesis-highlight',
-        )
-
-        let memexHighlights: Element[] = Array.from(
-            highlights,
-        ).filter((highlight) =>
-            highlight.classList.contains(`memex-highlight-${event.noteId}`),
-        )
-
-        for (let item of memexHighlights) {
-            item.setAttribute(
-                'style',
-                `background-color:${RGBAobjectToString(event.color)};`,
+            let highlights: HTMLCollection = document.getElementsByTagName(
+                'hypothesis-highlight',
             )
-            item.setAttribute(
-                'highlightcolor',
-                `${RGBAobjectToString(event.color)}`,
+
+            let memexHighlights: Element[] = Array.from(
+                highlights,
+            ).filter((highlight) =>
+                highlight.classList.contains(`memex-highlight-${event.noteId}`),
             )
-        }
+
+            for (let item of memexHighlights) {
+                item.setAttribute(
+                    'style',
+                    `background-color:${RGBAobjectToString(event.color)};`,
+                )
+                item.setAttribute(
+                    'highlightcolor',
+                    `${RGBAobjectToString(event.color)}`,
+                )
+            }
+
+            try {
+                await savePromise
+            } catch (err) {
+                this.options.annotationsCache.updateAnnotation(annotationData)
+                this.emitMutation({ noteWriteError: { $set: err.message } })
+                throw err
+            }
+        })
     }
+
     saveHighlightColorSettings: EventHandler<
         'saveHighlightColorSettings'
     > = async ({ event, previousState }) => {
@@ -2136,78 +2150,86 @@ export class SidebarContainerLogic extends UILogic<
         const body = formData.body?.trim()
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
-        let commentForSaving = await processCommentForImageUpload(
-            comment,
-            annotationData.normalizedPageUrl,
-            annotationData.localId,
-            this.options.imageSupport,
-        )
+        await executeUITask(this, 'noteEditState', async () => {
+            let commentForSaving = await processCommentForImageUpload(
+                comment,
+                annotationData.normalizedPageUrl,
+                annotationData.localId,
+                this.options.imageSupport,
+            )
 
-        // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
-        // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
-        //  to make a SAS annotation private protected upon save btn press
-        // TODO: properly update lists state
-        // existing.lists = event.mainBtnPressed
-        //     ? existing.lists
-        //     : this.getAnnotListsAfterShareStateChange({
-        //           previousState,
-        //           annotationIndex,
-        //           keepListsIfUnsharing: event.keepListsIfUnsharing,
-        //           incomingPrivacyState: {
-        //               public: event.shouldShare,
-        //               protected: !!event.isProtected,
-        //           },
-        //       })
+            // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
+            // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
+            //  to make a SAS annotation private protected upon save btn press
+            // TODO: properly update lists state
+            // existing.lists = event.mainBtnPressed
+            //     ? existing.lists
+            //     : this.getAnnotListsAfterShareStateChange({
+            //           previousState,
+            //           annotationIndex,
+            //           keepListsIfUnsharing: event.keepListsIfUnsharing,
+            //           incomingPrivacyState: {
+            //               public: event.shouldShare,
+            //               protected: !!event.isProtected,
+            //           },
+            //       })
 
-        const { remoteAnnotationId, savePromise } = await updateAnnotation({
-            annotationsBG: this.options.annotationsBG,
-            contentSharingBG: this.options.contentSharingBG,
-            keepListsIfUnsharing: event.keepListsIfUnsharing,
-            annotationData: {
-                body: body,
-                comment:
-                    commentForSaving !== annotationData.comment
-                        ? commentForSaving
-                        : null,
-                localId: annotationData.localId,
-            },
-            shareOpts: {
-                shouldShare: event.shouldShare,
-                shouldCopyShareLink: event.shouldShare,
-                isBulkShareProtected:
-                    event.isProtected || !!event.keepListsIfUnsharing,
-                skipPrivacyLevelUpdate: event.mainBtnPressed,
-            },
-        })
-
-        this.options.annotationsCache.updateAnnotation(
-            {
-                ...annotationData,
-                comment: comment,
-                body: body,
-                remoteId: remoteAnnotationId ?? undefined,
-                privacyLevel: shareOptsToPrivacyLvl({
+            const { remoteAnnotationId, savePromise } = await updateAnnotation({
+                annotationsBG: this.options.annotationsBG,
+                contentSharingBG: this.options.contentSharingBG,
+                keepListsIfUnsharing: event.keepListsIfUnsharing,
+                annotationData: {
+                    body: body,
+                    comment:
+                        commentForSaving !== annotationData.comment
+                            ? commentForSaving
+                            : null,
+                    localId: annotationData.localId,
+                },
+                shareOpts: {
                     shouldShare: event.shouldShare,
+                    shouldCopyShareLink: event.shouldShare,
                     isBulkShareProtected:
                         event.isProtected || !!event.keepListsIfUnsharing,
-                }),
-            },
-            { updateLastEditedTimestamp: hasCoreAnnotChanged, now },
-        )
-
-        this.emitMutation({
-            annotationCardInstances: {
-                [cardId]: {
-                    isCommentEditing: { $set: false },
-                    isHighlightEditing: { $set: false },
+                    skipPrivacyLevelUpdate: event.mainBtnPressed,
                 },
-            },
-            confirmPrivatizeNoteArgs: {
-                $set: null,
-            },
-        })
+            })
 
-        await savePromise
+            this.options.annotationsCache.updateAnnotation(
+                {
+                    ...annotationData,
+                    comment: comment,
+                    body: body,
+                    remoteId: remoteAnnotationId ?? undefined,
+                    privacyLevel: shareOptsToPrivacyLvl({
+                        shouldShare: event.shouldShare,
+                        isBulkShareProtected:
+                            event.isProtected || !!event.keepListsIfUnsharing,
+                    }),
+                },
+                { updateLastEditedTimestamp: hasCoreAnnotChanged, now },
+            )
+
+            this.emitMutation({
+                annotationCardInstances: {
+                    [cardId]: {
+                        isCommentEditing: { $set: false },
+                        isHighlightEditing: { $set: false },
+                    },
+                },
+                confirmPrivatizeNoteArgs: {
+                    $set: null,
+                },
+            })
+
+            try {
+                await savePromise
+            } catch (err) {
+                this.options.annotationsCache.updateAnnotation(annotationData)
+                this.emitMutation({ noteWriteError: { $set: err.message } })
+                throw err
+            }
+        })
     }
 
     setSpacePickerAnnotationInstance: EventHandler<
@@ -2261,6 +2283,13 @@ export class SidebarContainerLogic extends UILogic<
         this.options.focusCreateForm()
     }
 
+    setNoteWriteError: EventHandler<'setNoteWriteError'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            noteWriteError: { $set: event.error },
+        })
+    }
     setNewPageNoteText: EventHandler<'setNewPageNoteText'> = async ({
         event,
     }) => {
@@ -2408,19 +2437,21 @@ export class SidebarContainerLogic extends UILogic<
                 },
             })
 
-            this.options.annotationsCache.addAnnotation({
-                localId: annotationId,
-                remoteId: remoteAnnotationId ?? undefined,
-                normalizedPageUrl: normalizeUrl(fullPageUrl),
-                creator: this.options.getCurrentUser(),
-                createdWhen: now,
-                lastEdited: now,
-                privacyLevel,
-                // These only contain lists added in the UI dropdown (to be checked in case any are shared, which should influence the annot privacy level)
-                localListIds: [...commentBox.lists],
-                unifiedListIds, // These contain the context list (selected list or list instance)
-                comment: OriginalCommentForCache,
-            })
+            const cachedAnnotation = this.options.annotationsCache.addAnnotation(
+                {
+                    localId: annotationId,
+                    remoteId: remoteAnnotationId ?? undefined,
+                    normalizedPageUrl: normalizeUrl(fullPageUrl),
+                    creator: this.options.getCurrentUser(),
+                    createdWhen: now,
+                    lastEdited: now,
+                    privacyLevel,
+                    // These only contain lists added in the UI dropdown (to be checked in case any are shared, which should influence the annot privacy level)
+                    localListIds: [...commentBox.lists],
+                    unifiedListIds, // These contain the context list (selected list or list instance)
+                    comment: OriginalCommentForCache,
+                },
+            )
 
             if (remoteAnnotationId != null && remoteListIds.length > 0) {
                 this.emitMutation({
@@ -2438,7 +2469,13 @@ export class SidebarContainerLogic extends UILogic<
                 })
             }
 
-            await savePromise
+            try {
+                await savePromise
+            } catch (err) {
+                this.options.annotationsCache.removeAnnotation(cachedAnnotation)
+                this.emitMutation({ noteWriteError: { $set: err.message } })
+                throw err
+            }
         })
     }
 
@@ -2520,31 +2557,36 @@ export class SidebarContainerLogic extends UILogic<
             { keepListsIfUnsharing: event.options?.protectAnnotation },
         )
 
-        const { sharingState } = await bgPromise
+        try {
+            const { sharingState } = await bgPromise
 
-        // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
-        annotationsCache.updateAnnotation(
-            {
-                comment: existing.comment,
-                body: existing.body,
-                remoteId: sharingState.remoteId
-                    ? sharingState.remoteId.toString()
-                    : existing.remoteId,
-                unifiedId: event.unifiedAnnotationId,
-                privacyLevel: sharingState.privacyLevel,
-                unifiedListIds: [
-                    ...sharingState.privateListIds,
-                    ...sharingState.sharedListIds,
-                ]
-                    .map(
-                        (localListId) =>
-                            annotationsCache.getListByLocalId(localListId)
-                                ?.unifiedId,
-                    )
-                    .filter((id) => !!id),
-            },
-            { forceListUpdate: true },
-        )
+            // Update again with the calculated lists and privacy lvl from the BG ops (TODO: there's gotta be a nicer way to handle this optimistically in the UI)
+            annotationsCache.updateAnnotation(
+                {
+                    comment: existing.comment,
+                    body: existing.body,
+                    remoteId: sharingState.remoteId
+                        ? sharingState.remoteId.toString()
+                        : existing.remoteId,
+                    unifiedId: event.unifiedAnnotationId,
+                    privacyLevel: sharingState.privacyLevel,
+                    unifiedListIds: [
+                        ...sharingState.privateListIds,
+                        ...sharingState.sharedListIds,
+                    ]
+                        .map(
+                            (localListId) =>
+                                annotationsCache.getListByLocalId(localListId)
+                                    ?.unifiedId,
+                        )
+                        .filter((id) => !!id),
+                },
+                { forceListUpdate: true },
+            )
+        } catch (err) {
+            annotationsCache.updateAnnotation(existing)
+            throw err
+        }
     }
 
     setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({
@@ -4292,8 +4334,7 @@ export class SidebarContainerLogic extends UILogic<
             .map((item) => item.text)
             .join(' ')
 
-        let prompt =
-            'You are given a text snippet that is from a transcript of a section of a video. Summarize it by talking abstractly about its content and aim for brevity in your summary. The primary purpose of your summary is to help users identify video sections and their content. Do not refer to it as "video sections" or "text" or "transcript", just talk about the content abstractly. Also do not include the prompt in the summary. The transcript may contain errors; kindly correct them while retaining the original intent. Avoid using list formats. Here is the excerpt for your review:'
+        let prompt = event.prompt ?? 'Summarise this concisely and briefly'
 
         await this.queryAI(
             undefined,
@@ -4493,7 +4534,6 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 spaceTitleEditValue: { $set: sharedList.title },
             })
-
 
             let unifiedListId: string
             const listCommon = {

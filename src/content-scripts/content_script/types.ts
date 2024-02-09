@@ -10,13 +10,18 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { MaybePromise } from 'src/util/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { SyncSettingsStore } from 'src/sync-settings/util'
+import type { ErrorDisplayProps } from 'src/search-injection/error-display'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
     registerSidebarScript(main: SidebarScriptMain): Promise<void>
     registerHighlightingScript(main: HighlightsScriptMain): Promise<void>
     registerTooltipScript(main: TooltipScriptMain): Promise<void>
-    registerSearchInjectionScript(main: SearchInjectionMain): Promise<void>
+    registerInPageUIInjectionScript(
+        main: SearchInjectionMain,
+        errorDisplayProps?: ErrorDisplayProps,
+    ): Promise<void>
 }
 
 export type SidebarScriptMain = (
@@ -52,7 +57,16 @@ export interface HighlightDependencies {
 export interface SearchInjectionDependencies {
     requestSearcher: any
     syncSettingsBG: RemoteSyncSettingsInterface
+    syncSettings: SyncSettingsStore<
+        | 'extension'
+        | 'inPageUI'
+        | 'activityIndicator'
+        | 'openAI'
+        | 'searchInjection'
+        | 'dashboard'
+    >
     annotationsFunctions: any
+    errorDisplayProps?: ErrorDisplayProps
 }
 
 export type HighlightsScriptMain = (

@@ -88,14 +88,7 @@ export async function createAnnotation({
 }: SaveAnnotationParams<AnnotationCreateData>): Promise<
     SaveAnnotationReturnValue
 > {
-    let remoteAnnotationId: string = null
-
-    let syncSettings: SyncSettingsStore<'extension'>
-
-    syncSettings = createSyncSettingsStore({
-        syncSettingsBG: syncSettingsBG,
-    })
-
+    const remoteAnnotationId = await contentSharingBG.generateRemoteAnnotationId()
     return {
         remoteAnnotationId,
         savePromise: (async () => {
