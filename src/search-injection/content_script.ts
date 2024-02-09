@@ -3,7 +3,6 @@ import * as utils from './utils'
 import { handleRenderSearchInjection } from './searchInjection'
 import { handleRenderYoutubeInterface } from './youtubeInterface'
 import { renderErrorDisplay } from './error-display'
-import { createSyncSettingsStore } from 'src/sync-settings/util'
 import type { SearchInjectionDependencies } from 'src/content-scripts/content_script/types'
 
 const url = window.location.href
@@ -14,21 +13,23 @@ const matched = utils.matchURL(url)
  * If set, proceed with matching URL and fetching search query
  */
 export async function initSearchInjection({
-    requestSearcher,
+    syncSettings,
     syncSettingsBG,
+    requestSearcher,
     annotationsFunctions,
     errorDisplayProps,
 }: SearchInjectionDependencies) {
-    console.log('in it!', errorDisplayProps)
     if (errorDisplayProps != null) {
         await renderErrorDisplay(errorDisplayProps)
         return
     }
 
-    const syncSettings = createSyncSettingsStore({ syncSettingsBG })
-
     if (url.includes('youtube.com')) {
-        await handleRenderYoutubeInterface(syncSettings, annotationsFunctions)
+        await handleRenderYoutubeInterface(
+            syncSettings,
+            syncSettingsBG,
+            annotationsFunctions,
+        )
         return
     }
 
@@ -39,6 +40,8 @@ export async function initSearchInjection({
         if (searchInjection[matched]) {
             try {
                 const query = utils.fetchQuery(url)
+
+                console.log('SearchInjection: Fetching search query', query)
 
                 await handleRenderSearchInjection(
                     query,

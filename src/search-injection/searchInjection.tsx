@@ -15,6 +15,7 @@ import {
 import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { ResultItemProps, SearchEngineName } from './types'
+import { SyncSettingsStore } from 'src/sync-settings/util'
 
 interface RootProps {
     rootEl: HTMLElement
@@ -22,7 +23,14 @@ interface RootProps {
     requestSearcher: any // TODO: type this
     renderComponent: () => Promise<void>
     searchEngine: SearchEngineName
-    syncSettings: SyncSettingsStoreInterface
+    syncSettings: SyncSettingsStore<
+        | 'extension'
+        | 'inPageUI'
+        | 'activityIndicator'
+        | 'openAI'
+        | 'searchInjection'
+        | 'dashboard'
+    >
     position: 'side' | 'above'
 }
 
@@ -97,7 +105,14 @@ export const handleRenderSearchInjection = async (
     requestSearcher,
     //{ docs, totalCount },
     searchEngine,
-    syncSettings: SyncSettingsStoreInterface,
+    syncSettings: SyncSettingsStore<
+        | 'extension'
+        | 'inPageUI'
+        | 'activityIndicator'
+        | 'openAI'
+        | 'searchInjection'
+        | 'dashboard'
+    >,
 ) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
@@ -105,6 +120,7 @@ export const handleRenderSearchInjection = async (
     // Calls renderComponent to render the react component
 
     const renderComponent = async () => {
+        console.log('redering search injection')
         // Accesses docs, totalCount from parent through closure
         // Gets position from settings
         // Renders React Component on the respective container
@@ -315,9 +331,8 @@ export const handleRenderSearchInjection = async (
                 })
 
                 if (isTargetNodeAdded) {
+                    console.log('render2')
                     renderComponent()
-                    // Optionally, disconnect the observer if it's a one-time observation
-                    // observer.disconnect();
                 }
             }
         }
@@ -326,8 +341,12 @@ export const handleRenderSearchInjection = async (
     const targetNode = document.getElementById(
         constants.SEARCH_ENGINES[searchEngine].container.sideAlternative,
     )
+    const existingInjection = document.getElementById(
+        '__MEMEX-SEARCH-INJECTION-ROOT',
+    )
 
-    if (targetNode) {
+    if (targetNode && !existingInjection) {
+        console.log('render1')
         renderComponent()
     } else {
         // Configuration for the observer (which mutations to observe)

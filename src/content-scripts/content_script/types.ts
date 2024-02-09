@@ -9,7 +9,8 @@ import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-c
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { MaybePromise } from 'src/util/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { SyncSettingsStore } from 'src/sync-settings/util'
 import type { ErrorDisplayProps } from 'src/search-injection/error-display'
 
 export interface ContentScriptRegistry {
@@ -56,7 +57,15 @@ export interface HighlightDependencies {
 export interface SearchInjectionDependencies {
     requestSearcher: any
     syncSettingsBG: RemoteSyncSettingsInterface
-    annotationsFunctions: any // TODO: Type this
+    syncSettings: SyncSettingsStore<
+        | 'extension'
+        | 'inPageUI'
+        | 'activityIndicator'
+        | 'openAI'
+        | 'searchInjection'
+        | 'dashboard'
+    >
+    annotationsFunctions: any
     errorDisplayProps?: ErrorDisplayProps
 }
 

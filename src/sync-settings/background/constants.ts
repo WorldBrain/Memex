@@ -67,6 +67,7 @@ export const SETTING_NAMES: SyncSettingNames = {
     openAI: {
         apiKey: FEATURE_PREFIX.OPENAI + 'apiKey',
         promptSuggestions: FEATURE_PREFIX.OPENAI + 'promptSuggestions',
+        videoPromptSetting: FEATURE_PREFIX.OPENAI + 'videoPromptSetting',
     },
     highlightColors: {
         highlightColors: FEATURE_PREFIX.HIGHLIGHT_COLORS + 'highlightColors',

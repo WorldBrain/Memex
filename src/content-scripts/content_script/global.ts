@@ -772,7 +772,7 @@ export async function main(
             })
             inPageUI.hideTooltip()
         },
-        createTimestampWithAISummary: async (includeLastFewSecs) => {
+        createTimestampWithAISummary: async (includeLastFewSecs, prompt) => {
             const timestampToPass = await getTimestampedNoteWithAIsummaryForYoutubeNotes(
                 includeLastFewSecs,
             )
@@ -780,6 +780,7 @@ export async function main(
             inPageUI.showSidebar({
                 action: 'create_youtube_timestamp_with_AI_summary',
                 videoRangeTimestamps: timestampToPass,
+                prompt,
             })
             inPageUI.hideTooltip()
         },
@@ -960,6 +961,7 @@ export async function main(
         async registerInPageUIInjectionScript(execute, errorDisplayProps) {
             await execute({
                 syncSettingsBG,
+                syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 requestSearcher: remoteFunction('search'),
                 annotationsFunctions,
                 errorDisplayProps,
