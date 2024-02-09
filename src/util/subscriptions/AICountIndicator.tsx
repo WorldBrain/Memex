@@ -291,11 +291,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                         ? this.state.openAIKey
                                         : 'Enter API Key'
                                 }
-                                value={this.state.openAIKey}
+                                value={this.state.openAIKey.trim()}
                                 onChange={(e) => {
                                     this.setState({
-                                        openAIKey: (e.target as HTMLInputElement)
-                                            .value,
+                                        openAIKey: (e.target as HTMLInputElement).value.trim(),
                                         showSaveButton: true,
                                     })
                                 }}
@@ -303,11 +302,14 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                     if (e.key === 'Enter') {
                                         await this.syncSettings.openAI.set(
                                             'apiKey',
-                                            this.state.openAIKey,
+                                            this.state.openAIKey.trim(),
                                         )
                                         this.setState({
                                             showSaveButton: false,
                                         })
+                                    }
+                                    if (e.key === ' ') {
+                                        e.preventDefault()
                                     }
                                 }}
                             />
@@ -316,7 +318,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                     onClick={async () => {
                                         await this.syncSettings.openAI.set(
                                             'apiKey',
-                                            this.state.openAIKey,
+                                            this.state.openAIKey.trim(),
                                         )
                                         this.setState({
                                             showSaveButton: false,
