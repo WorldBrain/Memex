@@ -857,15 +857,12 @@ export class SidebarContainerLogic extends UILogic<
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey.trim().startsWith('sk-')
 
-        console.log('openAIKey', '"', openAIKey.trim(), '"')
         this.emitMutation({
             hasKey: { $set: hasAPIKey },
         })
         const signupDate = new Date(
             await (await this.options.authBG.getCurrentUser()).creationTime,
         ).getTime()
-
-        console.log('signupDate', signupDate)
 
         this.emitMutation({
             signupDate: { $set: signupDate },
@@ -2568,7 +2565,7 @@ export class SidebarContainerLogic extends UILogic<
                 {
                     comment: existing.comment,
                     body: existing.body,
-                    remoteId: sharingState.remoteId
+                    remoteId: sharingState?.remoteId
                         ? sharingState.remoteId.toString()
                         : existing.remoteId,
                     unifiedId: event.unifiedAnnotationId,
@@ -2946,8 +2943,6 @@ export class SidebarContainerLogic extends UILogic<
 
             await this.updateSuggestionResults(results)
         }
-
-        console.log('model', previousState.AImodel)
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
@@ -4722,7 +4717,7 @@ export class SidebarContainerLogic extends UILogic<
                 .filter((id) => !!id)
 
             annotationsCache.updateAnnotation({
-                remoteId: sharingState.remoteId
+                remoteId: sharingState?.remoteId
                     ? sharingState.remoteId.toString()
                     : undefined,
                 unifiedId: annotation.unifiedId,

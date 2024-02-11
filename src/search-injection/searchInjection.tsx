@@ -120,7 +120,6 @@ export const handleRenderSearchInjection = async (
     // Calls renderComponent to render the react component
 
     const renderComponent = async () => {
-        console.log('redering search injection')
         // Accesses docs, totalCount from parent through closure
         // Gets position from settings
         // Renders React Component on the respective container
@@ -331,7 +330,6 @@ export const handleRenderSearchInjection = async (
                 })
 
                 if (isTargetNodeAdded) {
-                    console.log('render2')
                     renderComponent()
                 }
             }
@@ -346,7 +344,6 @@ export const handleRenderSearchInjection = async (
     )
 
     if (targetNode && !existingInjection) {
-        console.log('render1')
         renderComponent()
     } else {
         // Configuration for the observer (which mutations to observe)

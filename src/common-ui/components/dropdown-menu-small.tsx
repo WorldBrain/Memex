@@ -108,8 +108,6 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
         //     })
         // }
 
-        console.log('items', this.props.menuItems)
-
         return (
             <MenuItemContainerUnfolded isOpen={this.state.isOpened}>
                 {this.props.menuItems.map((item) => (

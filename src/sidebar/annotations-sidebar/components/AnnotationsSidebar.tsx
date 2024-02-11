@@ -1895,8 +1895,6 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        console.log('this.props.', this.props.hasKey)
-
         return (
             <AISidebarContainer>
                 {this.props.sidebarContext === 'in-page' &&

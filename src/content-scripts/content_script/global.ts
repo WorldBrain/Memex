@@ -717,7 +717,6 @@ export async function main(
                 )
                 await createPromise
             } else if (window.location.href.includes('youtube.com')) {
-                console.log('commentText', commentText)
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
                     commentText: commentText,
