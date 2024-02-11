@@ -133,7 +133,7 @@ export async function createAnnotation({
                         ? 'https://memex.social'
                         : 'http://staging.memex.social'
 
-                const link = baseUrl + '/a/' + shareData.remoteId
+                const link = baseUrl + '/a/' + shareData?.remoteId
                 navigator.clipboard.writeText(link)
             } else if (shareOpts?.shouldShare) {
                 shareData = await contentSharingBG.shareAnnotation({
@@ -150,7 +150,7 @@ export async function createAnnotation({
                     privacyLevelOverride ?? shareOptsToPrivacyLvl(shareOpts),
             })
 
-            if (shareData.remoteId != null) {
+            if (shareData?.remoteId != null) {
                 createAndCopyShareLink(
                     shareData.remoteId,
                     annotationUrl,
