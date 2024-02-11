@@ -41,8 +41,6 @@ export async function initSearchInjection({
             try {
                 const query = utils.fetchQuery(url)
 
-                console.log('SearchInjection: Fetching search query', query)
-
                 await handleRenderSearchInjection(
                     query,
                     requestSearcher,

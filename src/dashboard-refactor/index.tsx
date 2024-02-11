@@ -187,7 +187,7 @@ export class DashboardContainer extends StatefulUIElement<
         const listData = getListData(listsSidebar.selectedListId, {
             listsSidebar,
         })
-        const remoteLink = listData.remoteId
+        const remoteLink = listData?.remoteId
             ? getListShareUrl({ remoteListId: listData.remoteId })
             : undefined // TODO: ensure this comes with key for collab'd lists
         const isOwnedList = listData.creator?.id === currentUser?.id

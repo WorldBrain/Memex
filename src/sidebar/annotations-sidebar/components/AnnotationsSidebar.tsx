@@ -1895,40 +1895,40 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
-        console.log('this.props.', this.props.hasKey)
-
         return (
             <AISidebarContainer>
-                {this.props.sidebarContext === 'in-page' && (
-                    <SuggestionsListSwitcher>
-                        <SuggestionsSwitcherButton
-                            onClick={this.props.setActiveAITab('ThisPage')}
-                            active={this.props.activeAITab === 'ThisPage'}
-                        >
-                            This Page
-                        </SuggestionsSwitcherButton>
-                        <SuggestionsSwitcherButton
-                            onClick={this.props.setActiveAITab(
-                                'ExistingKnowledge',
-                            )}
-                            active={
-                                this.props.activeAITab === 'ExistingKnowledge'
-                            }
-                        >
-                            Saved by me
-                        </SuggestionsSwitcherButton>
-                        <SuggestionsSwitcherButton
-                            onClick={this.props.setActiveAITab(
-                                'InFollowedFeeds',
-                            )}
-                            active={
-                                this.props.activeAITab === 'InFollowedFeeds'
-                            }
-                        >
-                            In Followed
-                        </SuggestionsSwitcherButton>
-                    </SuggestionsListSwitcher>
-                )}
+                {this.props.sidebarContext === 'in-page' &&
+                    this.props.rabbitHoleBetaFeatureAccess === 'onboarded' && (
+                        <SuggestionsListSwitcher>
+                            <SuggestionsSwitcherButton
+                                onClick={this.props.setActiveAITab('ThisPage')}
+                                active={this.props.activeAITab === 'ThisPage'}
+                            >
+                                This Page
+                            </SuggestionsSwitcherButton>
+                            <SuggestionsSwitcherButton
+                                onClick={this.props.setActiveAITab(
+                                    'ExistingKnowledge',
+                                )}
+                                active={
+                                    this.props.activeAITab ===
+                                    'ExistingKnowledge'
+                                }
+                            >
+                                Saved by me
+                            </SuggestionsSwitcherButton>
+                            <SuggestionsSwitcherButton
+                                onClick={this.props.setActiveAITab(
+                                    'InFollowedFeeds',
+                                )}
+                                active={
+                                    this.props.activeAITab === 'InFollowedFeeds'
+                                }
+                            >
+                                In Followed
+                            </SuggestionsSwitcherButton>
+                        </SuggestionsListSwitcher>
+                    )}
                 {this.props.showFeedSourcesMenu ? (
                     this.renderSourcesMenu(
                         this.props.activeAITab === 'ExistingKnowledge'
@@ -3816,18 +3816,20 @@ export class AnnotationsSidebar extends React.Component<
                         padding={'3px 6px'}
                         height={'30px'}
                     />
-                    {this.props.sidebarContext === 'in-page' && (
-                        <PrimaryAction
-                            onClick={this.props.setActiveTab('rabbitHole')}
-                            label={'RabbitHole'}
-                            active={this.props.activeTab === 'rabbitHole'}
-                            type={'tertiary'}
-                            size={'medium'}
-                            iconPosition={'right'}
-                            padding={'3px 6px'}
-                            height={'30px'}
-                        />
-                    )}
+                    {this.props.sidebarContext === 'in-page' &&
+                        this.props.rabbitHoleBetaFeatureAccess ===
+                            'onboarded' && (
+                            <PrimaryAction
+                                onClick={this.props.setActiveTab('rabbitHole')}
+                                label={'RabbitHole'}
+                                active={this.props.activeTab === 'rabbitHole'}
+                                type={'tertiary'}
+                                size={'medium'}
+                                iconPosition={'right'}
+                                padding={'3px 6px'}
+                                height={'30px'}
+                            />
+                        )}
                     {/* <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
                         label={'Spaces'}

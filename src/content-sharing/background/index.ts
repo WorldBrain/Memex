@@ -630,7 +630,7 @@ export default class ContentSharingBackground {
             return null
         }
 
-        return contents.remoteId
+        return contents?.remoteId
     }
 
     ensureRemotePageId: ContentSharingInterface['ensureRemotePageId'] = async (

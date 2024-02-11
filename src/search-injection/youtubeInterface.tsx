@@ -273,13 +273,9 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
         'ytp-popup ytp-contextmenu',
     )
     if (contextMenu.length > 0) {
-        console.log('contextMenu', contextMenu)
         panel = contextMenu[0]?.querySelector('.ytp-panel-menu')
-
-        console.log('panel', panel)
     }
     if (panel) {
-        console.log('panel', panel)
         renderYoutubeMenuButton(panel, annotationsFunctions, icon)
         return
     }
@@ -289,10 +285,8 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
         const targetElement = targetObject.target as HTMLElement
         if (targetElement.classList.contains('ytp-contextmenu')) {
             const targetChildren = targetElement.children
-            console.log('targetChildren', targetChildren)
 
             for (let i = 0; i < targetChildren.length; i++) {
-                console.log('targetChildren[i]', targetChildren[i])
                 if (targetChildren[i].classList.contains('ytp-panel')) {
                     const potentialPanel = targetChildren[i].querySelector(
                         '.ytp-panel-menu',
