@@ -40,7 +40,7 @@ export interface FiltersBarProps {
     toggleDomainsFilter: () => void
     tagPickerProps?: TagPickerDependencies
     datePickerProps: DateRangeSelectionProps
-    spacePickerProps: SpacePickerDependencies
+    spacePickerFilterProps: SpacePickerDependencies
     domainPickerProps: DomainPickerDependencies
     spaceSidebarLocked: boolean
     getRootElement: () => HTMLElement
@@ -209,7 +209,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                 getPortalRoot={this.props.getRootElement}
             >
                 <SpacePicker
-                    {...this.props.spacePickerProps}
+                    {...this.props.spacePickerFilterProps}
                     searchInputPlaceholder="Add Space filters"
                     removeTooltipText="Remove Space filter"
                     filterMode
@@ -280,7 +280,7 @@ export default class FiltersBar extends PureComponent<FiltersBarProps> {
                             this.props.areSpacesFiltered
                                 ? 'collectionsFull'
                                 : 'collectionsEmpty',
-                            this.props.spacePickerProps,
+                            this.props.spacePickerFilterProps,
                             this.spaceFilterButtonRef,
                         )}
                     </FilterBtnsContainer>

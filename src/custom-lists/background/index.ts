@@ -2,13 +2,11 @@ import type Storex from '@worldbrain/storex'
 import type { Windows, Tabs, Storage } from 'webextension-polyfill'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/utils'
-
 import CustomListStorage from './storage'
 import type { SearchIndex } from 'src/search'
 import type {
     RemoteCollectionsInterface,
     CollectionsSettings,
-    PageList,
     PageListEntry,
 } from './types'
 import { maybeIndexTabs } from 'src/page-indexing/utils'
@@ -19,7 +17,6 @@ import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type TabManagementBackground from 'src/tab-management/background'
 import type { AuthServices } from 'src/services/types'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import { isExtensionTab } from 'src/tab-management/utils'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
@@ -624,13 +621,9 @@ export default class CustomListBackground {
 
         // Ensure content scripts are injected into each tab, so they can init page content identifier
         await Promise.all(
-            tabs
-                .filter((tab) => !isExtensionTab(tab))
-                .map(async (tab) => {
-                    await this.options.tabManagement.injectContentScriptsIfNeeded(
-                        tab.id,
-                    )
-                }),
+            tabs.map((tab) =>
+                this.options.tabManagement.injectContentScriptsIfNeeded(tab.id),
+            ),
         )
 
         const indexed = await maybeIndexTabs(tabs, {

@@ -77,3 +77,9 @@ export const SEARCH_INJECTION_DEFAULT = {
     brave: true,
     bing: true,
 }
+
+export const REACT_ROOTS = {
+    youtubeInterface: '__MEMEX-YOUTUBE-INTERFACE-ROOT',
+    searchInjection: '__MEMEX-SEARCH-INJECTION-ROOT',
+    errorDisplay: '__MEMEX-ERROR-ROOT',
+}

@@ -94,6 +94,7 @@ import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { sleepPromise } from 'src/util/promises'
+import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -275,6 +276,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         | 'obsidian'
         | 'logseq'
     getRootElement: () => HTMLElement
+    setNoteWriteError: (error) => void
 }
 
 interface AnnotationsSidebarState {
@@ -1893,6 +1895,8 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
+        console.log('this.props.', this.props.hasKey)
+
         return (
             <AISidebarContainer>
                 {this.props.sidebarContext === 'in-page' && (
@@ -2187,7 +2191,10 @@ export class AnnotationsSidebar extends React.Component<
                                     onMenuItemClick={async (item) => {
                                         this.props.setAIModel(item.id)
                                     }}
-                                    initSelectedItem={'gpt-3.5-turbo-1106'}
+                                    initSelectedItem={
+                                        this.props.AImodel ??
+                                        'gpt-3.5-turbo-1106'
+                                    }
                                     keepSelectedState
                                     getRootElement={this.props.getRootElement}
                                 />
@@ -4391,6 +4398,18 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
+                {this.props.noteWriteError && (
+                    <ErrorNotification
+                        closeComponent={() =>
+                            this.props.setNoteWriteError(null)
+                        }
+                        getPortalRoot={this.props.getRootElement}
+                        blockedBackground
+                        positioning="centerCenter"
+                        title="Error saving note"
+                        errorMessage={this.props.noteWriteError}
+                    />
+                )}
                 {/* <GlobalStyle sidebarContext={this.props.sidebarContext} /> */}
                 <TopBar sidebarContext={this.props.sidebarContext}>
                     {this.renderTopBarSwitcher()}
@@ -5573,8 +5592,9 @@ const AnnotationActions = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: fill-available;
-    height: 30px;
+    height: 20px;
     padding-bottom: 5px;
+    padding-top: 5px;
 `
 
 const ActionButtons = styled.div`
