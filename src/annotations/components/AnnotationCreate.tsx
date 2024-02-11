@@ -23,6 +23,7 @@ import delay from 'src/util/delay'
 import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-sidebar/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { sleepPromise } from 'src/util/promises'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 interface State {
     isTagPickerShown: boolean
@@ -357,7 +358,7 @@ export class AnnotationCreate extends React.Component<Props, State>
     render() {
         return (
             <>
-                <TextBoxContainerStyled>
+                <TextBoxContainerStyled hasLists={this.displayLists.length > 0}>
                     <EditorContainer>
                         {this.state.onEditClick || this.props.autoFocus ? (
                             <MemexEditor
@@ -426,27 +427,38 @@ export class AnnotationCreate extends React.Component<Props, State>
                     {this.props.comment.length > 0 &&
                         (this.state.onEditClick || this.props.autoFocus) && (
                             <FooterContainer>
-                                <ListsSegment
-                                    newLineOrientation={true}
-                                    lists={this.displayLists}
-                                    onMouseEnter={this.props.onListsHover}
-                                    onListClick={undefined}
-                                    onEditBtnClick={() =>
-                                        this.setState({
-                                            isListPickerShown: true,
-                                        })
-                                    }
-                                    spacePickerButtonRef={
-                                        this.spacePickerButtonRef
-                                    }
-                                    renderSpacePicker={this.renderSpacePicker}
-                                />
-                                {this.renderSpacePicker()}
                                 <SaveActionBar>
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.setState({
+                                                isListPickerShown: true,
+                                            })
+                                        }
+                                        label="Spaces"
+                                        innerRef={this.spacePickerButtonRef}
+                                        icon="plus"
+                                        iconColor="prime1"
+                                        size="small"
+                                        type="tertiary"
+                                    />
                                     {this.renderActionButtons()}
                                 </SaveActionBar>
+                                {this.renderSpacePicker()}
                             </FooterContainer>
                         )}
+                    <ListsSegment
+                        newLineOrientation={true}
+                        lists={this.displayLists}
+                        onMouseEnter={this.props.onListsHover}
+                        onListClick={undefined}
+                        onEditBtnClick={() =>
+                            this.setState({
+                                isListPickerShown: true,
+                            })
+                        }
+                        spacePickerButtonRef={this.spacePickerButtonRef}
+                        renderSpacePicker={this.renderSpacePicker}
+                    />
                 </TextBoxContainerStyled>
             </>
         )
@@ -564,8 +576,10 @@ const FooterContainer = styled.div`
 
 const SaveActionBar = styled.div`
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
+    width: fill-available;
+    width: -moz-available;
 
     z-index: 1001;
     grid-gap: 10px;
@@ -590,7 +604,9 @@ const MarkdownButtonContainer = styled.div`
     }
 `
 
-const TextBoxContainerStyled = styled.div`
+const TextBoxContainerStyled = styled.div<{
+    hasLists: boolean
+}>`
     box-shadow: none;
     cursor: default;
     box-sizing: border-box;
@@ -598,9 +614,16 @@ const TextBoxContainerStyled = styled.div`
     flex-direction: column;
     font-size: 14px;
     width: calc(100% - 1px);
-    border-radius: 8px;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
     }
+
+    ${(props) =>
+        props.hasLists
+            ? css`
+                  padding-bottom: 10px;
+              `
+            : undefined}
 `

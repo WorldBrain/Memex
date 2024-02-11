@@ -854,16 +854,19 @@ export class SidebarContainerLogic extends UILogic<
             }, 1000)
         }
 
+        const openAIKey = await this.syncSettings.openAI.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey.trim().startsWith('sk-')
+
+        console.log('openAIKey', '"', openAIKey.trim(), '"')
+        this.emitMutation({
+            hasKey: { $set: hasAPIKey },
+        })
         const signupDate = new Date(
             await (await this.options.authBG.getCurrentUser()).creationTime,
         ).getTime()
 
-        const openAIKey = await this.syncSettings.openAI.get('apiKey')
-        const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
+        console.log('signupDate', signupDate)
 
-        this.emitMutation({
-            hasKey: { $set: hasAPIKey },
-        })
         this.emitMutation({
             signupDate: { $set: signupDate },
             isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
@@ -2809,8 +2812,8 @@ export class SidebarContainerLogic extends UILogic<
 
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
-        const openAIKey = await this.syncSettings.openAI.get('apiKey')
-        const hasAPIKey = openAIKey && openAIKey.startsWith('sk-')
+        const openAIKey = (await this.syncSettings.openAI.get('apiKey')).trim()
+        const hasAPIKey = openAIKey && openAIKey.trim().startsWith('sk-')
 
         if (!hasAPIKey) {
             let canQueryAI = false
@@ -2943,6 +2946,8 @@ export class SidebarContainerLogic extends UILogic<
 
             await this.updateSuggestionResults(results)
         }
+
+        console.log('model', previousState.AImodel)
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:

@@ -1895,6 +1895,8 @@ export class AnnotationsSidebar extends React.Component<
             )
         }
 
+        console.log('this.props.', this.props.hasKey)
+
         return (
             <AISidebarContainer>
                 {this.props.sidebarContext === 'in-page' && (
@@ -2189,7 +2191,10 @@ export class AnnotationsSidebar extends React.Component<
                                     onMenuItemClick={async (item) => {
                                         this.props.setAIModel(item.id)
                                     }}
-                                    initSelectedItem={'gpt-3.5-turbo-1106'}
+                                    initSelectedItem={
+                                        this.props.AImodel ??
+                                        'gpt-3.5-turbo-1106'
+                                    }
                                     keepSelectedState
                                     getRootElement={this.props.getRootElement}
                                 />
@@ -5587,8 +5592,9 @@ const AnnotationActions = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: fill-available;
-    height: 30px;
+    height: 20px;
     padding-bottom: 5px;
+    padding-top: 5px;
 `
 
 const ActionButtons = styled.div`
