@@ -68,6 +68,7 @@ export interface RibbonContainerState {
     isTrial: boolean
     signupDate: number
     themeVariant: MemexThemeVariant
+    showRabbitHoleButton: boolean
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -184,6 +185,7 @@ export class RibbonContainerLogic extends UILogic<
             isTrial: false,
             signupDate: null,
             themeVariant: null,
+            showRabbitHoleButton: false,
         }
     }
 
@@ -224,6 +226,21 @@ export class RibbonContainerLogic extends UILogic<
             }
         } catch (error) {
             console.error('error in updatePageCounter', error)
+        }
+
+        const onboardingComplete = await browser.storage.local.get(
+            'rabbitHoleBetaFeatureAccessOnboardingDone',
+        )
+
+        console.log(
+            'onboardingcomlete',
+            onboardingComplete['rabbitHoleBetaFeatureAccessOnboardingDone'],
+        )
+
+        if (onboardingComplete['rabbitHoleBetaFeatureAccessOnboardingDone']) {
+            this.emitMutation({
+                showRabbitHoleButton: { $set: true },
+            })
         }
     }
 
