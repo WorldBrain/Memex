@@ -132,15 +132,6 @@ export const handleRenderSearchInjection = async (
         //     return false
         // }
 
-        const component = document.getElementById(
-            constants.REACT_ROOTS.searchInjection,
-        )
-        if (component) {
-            component.parentNode.removeChild(component)
-            component.style.position = 'sticky'
-            component.style.top = '100px'
-            component.style.zIndex = '30000'
-        }
         const sideBox = document.getElementById(searchEngineObj.container.side)
 
         if (sideBox) {
@@ -174,6 +165,26 @@ export const handleRenderSearchInjection = async (
                     searchList.style.gridAutoFlow = 'column'
                     searchList.insertAdjacentElement('beforeend', root)
                 } else if (!suggestionsContainer) {
+                    const containerAbove = document.getElementById(
+                        searchEngineObj.container.above,
+                    )
+
+                    const newDiv = document.createElement('div')
+                    newDiv.style.display = 'flex'
+                    newDiv.style.gap = '50px'
+                    if (containerAbove) {
+                        newDiv.appendChild(containerAbove)
+                        containerWithSuggestions.appendChild(newDiv)
+                    }
+                    const sideBoxContainer = document.createElement('div')
+                    sideBoxContainer.style.height = '100%'
+                    sideBoxContainer.style.overflow = 'visible'
+                    sideBoxContainer.appendChild(root)
+
+                    root.style.position = 'sticky'
+                    root.style.top = '100px'
+                    root.style.zIndex = '100'
+
                     containerWithSuggestions.style.display = 'grid'
                     containerWithSuggestions.style.gap = '130px'
                     containerWithSuggestions.style.flexDirection = 'row'
@@ -181,10 +192,7 @@ export const handleRenderSearchInjection = async (
                     containerWithSuggestions.style.justifyContent =
                         'space-between'
 
-                    containerWithSuggestions.insertAdjacentElement(
-                        'beforeend',
-                        root,
-                    )
+                    newDiv.insertAdjacentElement('beforeend', sideBoxContainer)
                 } else {
                     suggestionsContainer.insertBefore(
                         root,
@@ -289,6 +297,23 @@ export const handleRenderSearchInjection = async (
         // Render the React component on the target element
         // Passing this same function so that it can change position
 
+        // const component = document.getElementById(
+        //     constants.REACT_ROOTS.searchInjection,
+        // )
+        // console.log('component', component)
+        // if (component) {
+        //     if (!sideBox) {
+        //         console.log('sidebooox')
+        //         component.parentNode.removeChild(component)
+
+        //         const sideBoxContainer = document.createElement('div')
+        //         sideBoxContainer.style.height = '100%'
+        //         sideBoxContainer.appendChild(component)
+        //     }
+        //     component.style.position = 'sticky'
+        //     component.style.top = '100px'
+        //     component.style.zIndex = '100'
+        // }
         ReactDOM.render(
             <Root
                 query={query}
