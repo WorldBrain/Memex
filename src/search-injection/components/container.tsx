@@ -133,19 +133,14 @@ class Container extends React.Component<Props, State> {
             isStickyContainer: isSticky,
         })
 
-        const target = document.getElementById('memexResults')
+        const target = document.getElementById(
+            constants.REACT_ROOTS.searchInjection,
+        )
 
         if (isSticky) {
             target.style.position = 'sticky'
             target.style.top = '100px'
             target.style.zIndex = '100'
-
-            const parentElement = target.parentElement
-            if (parentElement && parentElement.id === 'rcnt') {
-                const wrapperDiv = document.createElement('div')
-                parentElement.replaceChild(wrapperDiv, target)
-                wrapperDiv.appendChild(target)
-            }
         } else {
             target.style.position = 'relative'
             target.style.top = 'unset'
@@ -160,19 +155,14 @@ class Container extends React.Component<Props, State> {
             isSticky,
         )
 
-        const target = document.getElementById('memexResults')
+        const target = document.getElementById(
+            constants.REACT_ROOTS.searchInjection,
+        )
 
         if (isSticky) {
             target.style.position = 'sticky'
             target.style.top = '100px'
             target.style.zIndex = '100'
-
-            const parentElement = target.parentElement
-            if (parentElement && parentElement.id === 'rcnt') {
-                const wrapperDiv = document.createElement('div')
-                parentElement.replaceChild(wrapperDiv, target)
-                wrapperDiv.appendChild(target)
-            }
         } else {
             target.style.position = 'relative'
             target.style.top = 'unset'

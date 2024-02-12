@@ -152,7 +152,7 @@ export async function createAnnotation({
 
             if (shareData?.remoteId != null) {
                 createAndCopyShareLink(
-                    shareData.remoteId,
+                    shareData?.remoteId,
                     annotationUrl,
                     contentSharingBG,
                     syncSettingsBG,
