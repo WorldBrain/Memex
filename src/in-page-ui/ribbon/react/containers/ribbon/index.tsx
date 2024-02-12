@@ -133,6 +133,7 @@ export default class RibbonContainer extends StatefulUIElement<
                     })
                 }
                 isTrial={this.state.isTrial}
+                showRabbitHoleButton={this.state.showRabbitHoleButton}
                 signupDate={this.state.signupDate}
                 pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
                 contentSharingBG={this.props.contentSharing}

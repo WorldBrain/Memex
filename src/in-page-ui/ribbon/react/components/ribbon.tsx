@@ -79,6 +79,7 @@ export interface Props extends RibbonSubcomponentProps {
     getRootElement: () => HTMLElement
     bgScriptBG: RemoteBGScriptInterface
     setWriteError: (error: string) => void
+    showRabbitHoleButton: boolean
 }
 
 interface State {
@@ -1683,6 +1684,7 @@ export default class Ribbon extends Component<Props, State> {
                 </IconContainer>
             )
         } else {
+            console.log('showRabbitHoleButton', this.props.showRabbitHoleButton)
             return (
                 <>
                     <InnerRibbon
@@ -1775,6 +1777,8 @@ export default class Ribbon extends Component<Props, State> {
                                                 this.renderAItriggerButton()}
                                             {!this.props.sidebar
                                                 .isSidebarOpen &&
+                                                this.props
+                                                    .showRabbitHoleButton &&
                                                 this.renderRabbitHoleTriggerButton()}
                                             {!this.props.sidebar
                                                 .isSidebarOpen &&
