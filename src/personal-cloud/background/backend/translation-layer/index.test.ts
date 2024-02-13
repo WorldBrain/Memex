@@ -53,6 +53,9 @@ import omit from 'lodash/omit'
 import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { ListTree } from 'src/custom-lists/background/types'
 import delay from 'src/util/delay'
+import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
+import type { PipelineRes } from 'src/search'
+import { extractTerms } from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 
 const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
 
@@ -576,6 +579,115 @@ describe('Personal cloud translation layer', () => {
         })
 
         it('should update pages', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                serverStorageManager,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
+            await insertTestPages(setups[0].storageManager)
+            // Add a shared annotation to trigger creation of sharedPageInfo for our page
+            await setups[0].storageManager
+                .collection('annotations')
+                .createObject(LOCAL_TEST_DATA_V24.annotations.first)
+            await setups[0].storageManager
+                .collection('sharedAnnotationMetadata')
+                .createObject(
+                    LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
+                )
+            const updatedTitle = 'Updated title'
+
+            const localPage: PipelineRes = await setups[0].storageManager
+                .collection('pages')
+                .findOneObject({
+                    url: LOCAL_TEST_DATA_V24.pages.first.url,
+                })
+            expect(localPage).toEqual({
+                ...LOCAL_TEST_DATA_V24.pages.first,
+                titleTerms: expect.any(Array),
+                urlTerms: expect.any(Array),
+            })
+
+            await setups[0].backgroundModules.pages.updatePageTitle({
+                normaliedPageUrl: LOCAL_TEST_DATA_V24.pages.first.url,
+                title: updatedTitle,
+            })
+            expect(
+                await setups[0].storageManager
+                    .collection('pages')
+                    .findOneObject({
+                        url: LOCAL_TEST_DATA_V24.pages.first.url,
+                    }),
+            ).toEqual({
+                ...LOCAL_TEST_DATA_V24.pages.first,
+                fullTitle: updatedTitle,
+                titleTerms: mergeTermFields(
+                    'titleTerms',
+                    { titleTerms: extractTerms(updatedTitle) },
+                    { titleTerms: localPage.titleTerms },
+                ),
+                urlTerms: expect.any(Array),
+            })
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentLocator',
+                    'sharedPageInfo',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
+                ], { skipChanges: 7 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
+                personalContentMetadata: [
+                    {
+                        ...testMetadata.first,
+                        title: updatedTitle,
+                    },
+                    testMetadata.second,
+                ],
+                personalContentLocator: [testLocators.first, testLocators.second],
+                sharedPageInfo: [{
+                    id: expect.anything(),
+                    creator: TEST_USER.id,
+                    fullTitle: updatedTitle,
+                    normalizedUrl: localPage.url,
+                    originalUrl: localPage.fullUrl,
+                    updatedWhen: expect.anything(),
+                    createdWhen: expect.anything(),
+                }],
+            })
+            // prettier-ignore
+            await testDownload([
+                {
+                    type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: {
+                        ...LOCAL_TEST_DATA_V24.pages.first,
+                        fullTitle: updatedTitle
+                    }
+                },
+            ], { skip: 4 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should update page titles', async () => {
             const {
                 setups,
                 serverIdCapturer,
