@@ -86,7 +86,7 @@ export type Events = UIEvent<{
     cancelListDelete: null
 
     updateSelectedListDescription: { description: string }
-    toggleTheme: { themeVariant: MemexThemeVariant }
+    toggleTheme: null
     switchToFeed: null
 }>
 

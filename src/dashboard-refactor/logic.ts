@@ -1,6 +1,6 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
+import type { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
@@ -8,11 +8,9 @@ import {
 } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
-import { RootState as State, DashboardDependencies, Events } from './types'
-import { setLocalStorage } from 'src/util/storage'
+import type { RootState as State, DashboardDependencies, Events } from './types'
 import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
-
 import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
     PAGE_SIZE,
@@ -28,7 +26,7 @@ import {
     getListData,
 } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { NoResultsType } from './search-results/types'
+import type { NoResultsType } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import {
@@ -50,7 +48,7 @@ import {
 } from 'src/annotations/annotation-save-logic'
 import { setUserContext as setSentryUserContext } from 'src/util/raven'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
-import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
@@ -66,7 +64,6 @@ import type {
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { browser } from 'webextension-polyfill-ts'
 import {
     clearBulkEditItems,
     getBulkEditItems,
@@ -577,7 +574,9 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     async initThemeVariant() {
-        const variantStorage = await browser.storage.local.get('themeVariant')
+        const variantStorage = await this.options.localStorage.get(
+            'themeVariant',
+        )
         const variant = variantStorage['themeVariant']
         return variant ?? 'dark'
     }
@@ -661,14 +660,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         } else {
             const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
-            await setLocalStorage(
-                ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
-                activityStatus === 'has-unseen',
-            )
+            const hasFeedActivity = activityStatus === 'has-unseen'
+            await this.options.localStorage.set({
+                [ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY]: hasFeedActivity,
+            })
             this.emitMutation({
-                listsSidebar: {
-                    hasFeedActivity: { $set: activityStatus === 'has-unseen' },
-                },
+                listsSidebar: { hasFeedActivity: { $set: hasFeedActivity } },
             })
         }
     }
@@ -4552,15 +4549,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
-        await browser.storage.local.set({
-            themeVariant:
-                previousState.themeVariant === 'dark' ? 'light' : 'dark',
-        })
-        this.emitMutation({
-            themeVariant: {
-                $set: previousState.themeVariant === 'dark' ? 'light' : 'dark',
-            },
-        })
+        const nextTheme =
+            previousState.themeVariant === 'dark' ? 'light' : 'dark'
+        await this.options.localStorage.set({ themeVariant: nextTheme })
+        this.emitMutation({ themeVariant: { $set: nextTheme } })
     }
 
     updateSelectedListDescription: EventHandler<
@@ -4786,7 +4778,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                     hasFeedActivity: { $set: false },
                 },
             })
-            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+            await this.options.localStorage.set({
+                [ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY]: false,
+            })
             await this.options.activityIndicatorBG.markActivitiesAsSeen()
         }
     }

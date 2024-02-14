@@ -6,7 +6,7 @@ import { createGlobalStyle } from 'styled-components'
 import { sizeConstants } from 'src/dashboard-refactor/constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { DashboardLogic } from './logic'
-import { RootState, Events, DashboardDependencies, ListSource } from './types'
+import type { RootState, Events, DashboardDependencies } from './types'
 import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
 import HeaderContainer from './header'
@@ -27,15 +27,10 @@ import { deriveStatusIconColor } from './header/sync-status-menu/util'
 import { FILTER_PICKERS_LIMIT } from './constants'
 import DragElement from './components/DragElement'
 import Margin from './components/Margin'
-import { getFeedUrl, getListShareUrl } from 'src/content-sharing/utils'
+import { getListShareUrl } from 'src/content-sharing/utils'
 import type { Props as ListDetailsProps } from './search-results/components/list-details'
-import {
-    SPECIAL_LIST_IDS,
-    SPECIAL_LIST_NAMES,
-} from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import LoginModal from 'src/overview/sharing/components/LoginModal'
 import DisplayNameModal from 'src/overview/sharing/components/DisplayNameModal'
-import PdfLocator from './components/PdfLocator'
 import ConfirmModal from 'src/common-ui/components/ConfirmModal'
 import ConfirmDialog from 'src/common-ui/components/ConfirmDialog'
 import {
@@ -51,9 +46,6 @@ import type { ListDetailsGetter } from 'src/annotations/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SearchCopyPaster from './search-results/components/search-copy-paster'
 import ExpandAllNotes from './search-results/components/expand-all-notes'
-import SyncStatusMenu from './header/sync-status-menu'
-import { SETTINGS_URL } from 'src/constants'
-import { SyncStatusIcon } from './header/sync-status-menu/sync-status-icon'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
@@ -62,16 +54,10 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
-import {
-    MemexTheme,
-    MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
-import { RGBAColor } from 'src/annotations/cache/types'
-
-const memexIconDarkMode = browser.runtime.getURL('img/memexIconDarkMode.svg')
-const memexIconLightMode = browser.runtime.getURL('img/memexIconLightMode.svg')
+import type { RGBAColor } from 'src/annotations/cache/types'
 
 export interface Props extends DashboardDependencies {
     theme: MemexTheme
@@ -89,6 +75,14 @@ export class DashboardContainer extends StatefulUIElement<
         process.env.NODE_ENV === 'production'
             ? 'https://memex.social'
             : 'https://staging.memex.social'
+
+    private get memexIcon(): string {
+        const iconPath =
+            this.props.theme.variant === 'dark'
+                ? 'img/memexIconDarkMode.svg'
+                : 'img/memexIconLightMode.svg'
+        return this.props.runtimeAPI.getURL(iconPath)
+    }
 
     static defaultProps: Pick<
         Props,
@@ -1441,15 +1435,11 @@ export class DashboardContainer extends StatefulUIElement<
                         {!this.state.activePageID && (
                             <MemexLogoContainer>
                                 <Icon
-                                    icon={
-                                        this.props.theme.variant === 'dark'
-                                            ? memexIconDarkMode
-                                            : memexIconLightMode
-                                    }
+                                    icon={this.memexIcon}
                                     height={'26px'}
                                     width={'180px'}
-                                    hoverOff
                                     originalImage
+                                    hoverOff
                                 />
                             </MemexLogoContainer>
                         )}
@@ -1640,11 +1630,7 @@ export class DashboardContainer extends StatefulUIElement<
                     <HelpBtn
                         theme={this.props.theme.variant}
                         toggleTheme={() =>
-                            this.processEvent('toggleTheme', {
-                                themeVariant:
-                                    this.state.themeVariant ||
-                                    this.props.theme.variant,
-                            })
+                            this.processEvent('toggleTheme', null)
                         }
                         getRootElement={this.props.getRootElement}
                     />
