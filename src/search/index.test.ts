@@ -55,27 +55,6 @@ describe('Search index integration', () => {
             visits: [DATA.VISIT_1],
         })
 
-        // Add some test tags
-        await params.tags.addTagToExistingUrl({
-            url: DATA.PAGE_3.url,
-            tag: 'good',
-        })
-        await params.tags.addTagToExistingUrl({
-            url: DATA.PAGE_3.url,
-            tag: 'quality',
-        })
-        await params.tags.addTagToExistingUrl({
-            url: DATA.PAGE_2.url,
-            tag: 'quality',
-        })
-    }
-
-    // NOTE: this test data setup logic is separate as adding it to the main logic above failed a bunch of these tests.
-    //  These are some of our older, and more poorly setup, tests, which def need more attention. Though we're lacking
-    //  the time to do it right now, hence the separation.
-    async function insertSpaceTestData(
-        params: Pick<BackgroundModules, 'customLists'>,
-    ) {
         await params.customLists.createCustomList({
             id: DATA.SPACE_1_ID,
             name: DATA.SPACE_1,
@@ -106,7 +85,6 @@ describe('Search index integration', () => {
                 expect(currPage).toBeDefined()
                 expect(currPage).not.toBeNull()
                 expect(currPage.hasBookmark).toBe(false)
-                expect(currPage.tags).toEqual(['good', 'quality'])
 
                 expect(currPage.latest).toEqual(DATA.VISIT_3)
             }
@@ -225,26 +203,12 @@ describe('Search index integration', () => {
             runChecks(docsC)
         })
 
-        test('time-filtered + terms + tags search', async () => {
-            const { search } = await setupTest()
-            const { docs } = await search({
-                startDate: DATA.VISIT_1,
-                endDate: DATA.VISIT_2,
-                query: 'lorem ipsum',
-                tags: ['quality'],
-            })
-
-            expect(docs.length).toBe(1)
-            expect(docs[0]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])
-        })
-
-        test('time-filtered + terms + tags + bookmarks search', async () => {
+        test('time-filtered + terms + bookmarks search', async () => {
             const { search } = await setupTest()
             const { docs } = await search({
                 startDate: DATA.BOOKMARK_1,
                 endDate: DATA.VISIT_2,
                 query: 'lorem ipsum',
-                tags: ['quality'],
                 showOnlyBookmarks: true,
             })
 
@@ -269,14 +233,13 @@ describe('Search index integration', () => {
         })
 
         // NOTE: some differences with how domain filtering works in new index
-        test('time-filtered + terms + domains + tags search', async () => {
+        test('time-filtered + terms + domains search', async () => {
             const { search } = await setupTest()
             const { docs } = await search({
                 startDate: DATA.VISIT_1,
                 endDate: DATA.VISIT_2,
                 query: 'lorem ipsum',
                 domains: ['sub.lorem.com'],
-                tags: ['quality'],
             })
 
             expect(docs.length).toBe(1)
@@ -386,35 +349,8 @@ describe('Search index integration', () => {
             expect(b).toEqual([])
         })
 
-        const testTags = (singleQuery, multiQuery) => async () => {
-            const { search } = await setupTest()
-            const runChecks = (docs) => {
-                expect(docs.length).toBe(2)
-                expect(docs[0]).toEqual([DATA.PAGE_ID_3, DATA.VISIT_3])
-                expect(docs[1]).toEqual([DATA.PAGE_ID_2, DATA.VISIT_2])
-            }
-
-            // Single tag
-            const { docs: qualityDocs } = await search(singleQuery)
-            runChecks(qualityDocs)
-
-            // Multi tag
-            const { docs: multiDocs } = await search(multiQuery)
-            runChecks(multiDocs) // Same checks should pass as both contain these tags
-        }
-
-        test(
-            'tags search (query)',
-            testTags({ query: '#quality' }, { query: '#quality #good' }),
-        )
-        test(
-            'tags search (filter)',
-            testTags({ tags: ['quality'] }, { tags: ['quality', 'good'] }),
-        )
-
         test('spaces filtered search', async () => {
             const { search, customLists } = await setupTest()
-            await insertSpaceTestData({ customLists })
 
             const { docs: docsA } = await search({ lists: [DATA.SPACE_1_ID] })
             expect(docsA).toEqual([[DATA.PAGE_ID_1, DATA.VISIT_1]])
@@ -430,47 +366,6 @@ describe('Search index integration', () => {
             })
             expect(docsC).toEqual([[DATA.PAGE_ID_1, DATA.VISIT_1]])
         })
-
-        // TODO: Suggest code moved to storex plugin; Move these tests too
-        // test('domains suggest', async () => {
-        //     const expected1 = ['lorem.com']
-        //     expect(await searchIndex.suggestaddTag('l', 'domain')).toEqual(expected1)
-        //     expect(await searchIndex.suggestaddTag('lo', 'domain')).toEqual(expected1)
-        //     expect(await searchIndex.suggestaddTag('lol', 'domain')).not.toEqual(
-        //         expected1,
-        //     )
-
-        //     const expected2 = ['test.com']
-        //     expect(await searchIndex.suggestaddTag('t', 'domain')).toEqual(expected2)
-        //     expect(await searchIndex.suggestaddTag('te', 'domain')).toEqual(expected2)
-        //     expect(await searchIndex.suggestaddTag('tet', 'domain')).not.toEqual(
-        //         expected2,
-        //     )
-
-        //     // New implementation should also support hostnames
-        //     const expected3 = ['sub.lorem.com']
-        //     expect(await searchIndex.suggestaddTag('s', 'domain')).toEqual(expected3)
-        //     expect(await searchIndex.suggestaddTag('su', 'domain')).toEqual(expected3)
-        //     expect(await searchIndex.suggestaddTag('sus', 'domain')).not.toEqual(
-        //         expected3,
-        //     )
-        // })
-
-        // test('tags suggest', async () => {
-        //     const expected1 = ['quality']
-        //     expect(await searchIndex.suggestaddTag('q', 'tag')).toEqual(expected1)
-        //     expect(await searchIndex.suggestaddTag('qu', 'tag')).toEqual(expected1)
-        //     expect(await searchIndex.suggestaddTag('quq', 'tag')).not.toEqual(
-        //         expected1,
-        //     )
-
-        //     const expected2 = ['good']
-        //     expect(await searchIndex.suggestaddTag('g', 'tag')).toEqual(expected2)
-        //     expect(await searchIndex.suggestaddTag('go', 'tag')).toEqual(expected2)
-        //     expect(await searchIndex.suggestaddTag('gog', 'tag')).not.toEqual(
-        //         expected2,
-        //     )
-        // })
 
         test('blank search', async () => {
             const { search } = await setupTest()
@@ -494,17 +389,6 @@ describe('Search index integration', () => {
     })
 
     describe('read-write ops', () => {
-        let origTimeout
-
-        // beforeEach(async () => {
-        //     // These tests will change the index data, so reset each time to avoid side-effects from other tests
-        //     // await insertTestData()
-        //     origTimeout = jasmine.DEFAULT_TIMEOUT_INTERVAL
-        //     jasmine.DEFAULT_TIMEOUT_INTERVAL = 10000
-        // })
-
-        // afterEach(() => (jasmine.DEFAULT_TIMEOUT_INTERVAL = origTimeout))
-
         test('add page with extra data', async () => {
             const { searchIndex, storageManager, pages } = await setupTest()
             pages.storage.disableBlobProcessing = true
@@ -651,47 +535,8 @@ describe('Search index integration', () => {
             )
         })
 
-        test('tag adding affects search', async () => {
-            const { search, tags } = await setupTest()
-            const { docs: before } = await search({ tags: ['quality'] })
-            expect(before.length).toBe(2)
-            expect(before).not.toEqual(
-                expect.arrayContaining([[DATA.PAGE_ID_1, DATA.VISIT_1]]),
-            )
-
-            // This page doesn't have any tags; 'quality' tag has 2 other pages
-            await tags.addTagToExistingUrl({
-                url: DATA.PAGE_1.url,
-                tag: 'quality',
-            })
-
-            const { docs: after } = await search({ tags: ['quality'] })
-            expect(after.length).toBe(3)
-            expect(after).toEqual(
-                expect.arrayContaining([[DATA.PAGE_ID_1, DATA.VISIT_1]]),
-            )
-        })
-
-        test('tag deleting affects search', async () => {
-            const { search, tags } = await setupTest()
-            const { docs: before } = await search({ tags: ['quality'] })
-            expect(before.length).toBe(2)
-            expect(before).toEqual(
-                expect.arrayContaining([[DATA.PAGE_ID_2, DATA.VISIT_2]]),
-            )
-
-            await tags.delTag({ url: DATA.PAGE_2.url, tag: 'quality' })
-
-            const { docs: after } = await search({ tags: ['quality'] })
-            expect(after.length).toBe(1)
-            expect(after).not.toEqual(
-                expect.arrayContaining([[DATA.PAGE_ID_2, DATA.VISIT_2]]),
-            )
-        })
-
         test('space adding affects search', async () => {
             const { search, customLists } = await setupTest()
-            await insertSpaceTestData({ customLists })
             const { docs: before } = await search({ lists: [DATA.SPACE_1_ID] })
             expect(before).toEqual([[DATA.PAGE_ID_1, DATA.VISIT_1]])
 
@@ -711,7 +556,6 @@ describe('Search index integration', () => {
 
         test('space deleting affects search', async () => {
             const { search, customLists } = await setupTest()
-            await insertSpaceTestData({ customLists })
 
             await customLists.insertPageToList({
                 url: DATA.PAGE_2.url,
@@ -811,8 +655,8 @@ describe('Search index integration', () => {
             )
             expect(pageAfter1.fullUrl.length).toBe(pageBefore.fullUrl.length)
 
-            // Try an update with a tag data change
-            pageAfter1.addTag('test')
+            // Try an update with a vist data change
+            pageAfter1.addVisit()
             await pageAfter1.save()
 
             const pageAfter2 = await searchIndex.getPage(DATA.PAGE_3.url)
