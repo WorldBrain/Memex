@@ -9,6 +9,7 @@ import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import TurndownService from 'turndown'
 import MarkdownIt from 'markdown-it'
 import { TaskState } from 'ui-logic-core/lib/types'
+import { orderGap } from './components/TemplateList'
 
 interface State {
     isLoading: boolean
@@ -49,8 +50,8 @@ export default class CopyPasterContainer extends React.PureComponent<
         id: -1,
         title: '',
         code: '',
-        isFavourite: false,
-        outputFormat: 'markdown',
+        order: 1,
+        outputFormat: 'rich-text',
     }
 
     private copyPasterBG: RemoteCopyPasterInterface
@@ -66,6 +67,9 @@ export default class CopyPasterContainer extends React.PureComponent<
         templates: this.props.initTemplates ?? [],
         isNew: undefined,
         copySuccess: false,
+        previewString: '',
+        templateType: 'originalPage',
+        isPreviewLoading: 'pristine',
     }
 
     async componentDidMount() {
@@ -89,19 +93,6 @@ export default class CopyPasterContainer extends React.PureComponent<
         }
 
         return template
-    }
-
-    private handleTemplateFavourite = async (
-        id: number,
-        isFavourite: boolean,
-    ) => {
-        const template = this.findTemplateForId(id)
-
-        await this.copyPasterBG.updateTemplate({
-            ...template,
-            isFavourite,
-        })
-        await this.syncTemplates()
     }
 
     private handleTemplateDelete = async () => {
@@ -213,7 +204,7 @@ export default class CopyPasterContainer extends React.PureComponent<
     }
 
     private handleReorderTemplates = async (id, order) => {
-        const { tmpTemplate } = this.state
+        console.log('templa', this.state.templates)
 
         const templateToReorder = this.state.templates.find(
             (template) => template.id === id,
@@ -226,11 +217,20 @@ export default class CopyPasterContainer extends React.PureComponent<
             return
         } else {
             templateToReorder.order = order
+            console.log('templateToReorder1', templateToReorder)
             let templates = this.state.templates
 
             templates = templates.map((template) =>
-                template.id === tmpTemplate.id ? templateToReorder : null,
+                template.id === id ? templateToReorder : template,
             )
+
+            templates.forEach((template, index) => {
+                if (template && template.order == null) {
+                    template.order = template.id * orderGap
+                }
+            })
+
+            console.log('templates', templates)
 
             this.setState({
                 tmpTemplate: undefined,

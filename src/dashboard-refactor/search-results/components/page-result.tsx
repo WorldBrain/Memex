@@ -218,6 +218,7 @@ export default class PageResultView extends PureComponent<Props> {
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
                         onClickOutside={this.props.onCopyPasterBtnClick}
+                        getRootElement={this.props.getRootElement}
                     />
                 </PopoutBox>
             )

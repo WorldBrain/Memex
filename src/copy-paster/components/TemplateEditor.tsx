@@ -1,13 +1,9 @@
 import React, { PureComponent } from 'react'
 import { Template } from '../types'
 import styled, { css } from 'styled-components'
-import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import TextAreaMarkedUp from '@worldbrain/memex-common/lib/common-ui/components/text-area-marked-up'
-import { TiptapTemplateEditor } from './TipTapForTemplates'
-import CodeEditor from '@uiw/react-textarea-code-editor'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -218,6 +214,7 @@ export default class TemplateEditor extends PureComponent<
     render() {
         const { template } = this.props
 
+        console.log('this.props.previewString', this.props.previewString)
         return (
             <EditorContainer>
                 <Header>
@@ -426,64 +423,6 @@ export default class TemplateEditor extends PureComponent<
                                         />
                                     </TooltipBox>
                                 </LeftSidePreviewBar>
-                                <OutputSwitcherContainer>
-                                    <TooltipBox
-                                        tooltipText={
-                                            <span>
-                                                Text in the output will be
-                                                <br />
-                                                copied as-is
-                                            </span>
-                                        }
-                                        placement="bottom"
-                                        strategy="fixed"
-                                        getPortalRoot={
-                                            this.props.getRootElement
-                                        }
-                                    >
-                                        <OutputSwitcher
-                                            onClick={() =>
-                                                this.props.changeTemplateType(
-                                                    'originalPage',
-                                                )
-                                            }
-                                            outputFormatSelected={
-                                                this.props.templateType ===
-                                                'originalPage'
-                                            }
-                                        >
-                                            Current Document(s)
-                                        </OutputSwitcher>
-                                    </TooltipBox>
-                                    <TooltipBox
-                                        tooltipText={
-                                            <span>
-                                                Text in the output will retain
-                                                <br />
-                                                formatting and links
-                                            </span>
-                                        }
-                                        placement="bottom"
-                                        strategy="fixed"
-                                        getPortalRoot={
-                                            this.props.getRootElement
-                                        }
-                                    >
-                                        <OutputSwitcher
-                                            onClick={() =>
-                                                this.props.changeTemplateType(
-                                                    'examplePage',
-                                                )
-                                            }
-                                            outputFormatSelected={
-                                                this.props.templateType ===
-                                                'examplePage'
-                                            }
-                                        >
-                                            Example Documents
-                                        </OutputSwitcher>
-                                    </TooltipBox>
-                                </OutputSwitcherContainer>
                             </HeaderBox>
                             <PreviewEditorBox>
                                 {this.props.template?.outputFormat ===
@@ -834,12 +773,13 @@ const PreviewInput = styled.textarea`
     width: fill-available;
     line-height: 21px;
     font-size: 14px;
-    overflow-x: scroll;
+    overflow: scroll;
     resize: none;
     outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     border-radius: 8px;
     flex: 1;
     min-height: 60%;
+    text-overflow: nowrap;
 
     &:focus {
         background: none;
@@ -859,11 +799,12 @@ const PreviewRichText = styled.div`
     width: fill-available;
     line-height: 21px;
     font-size: 14px;
-    overflow-x: scroll;
+    overflow: scroll;
     resize: none;
     outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     border-radius: 8px;
     min-height: 60%;
+    text-overflow: nowrap;
     flex: 1;
 
     &:focus {

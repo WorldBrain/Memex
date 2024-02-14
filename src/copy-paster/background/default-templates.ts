@@ -9,7 +9,7 @@ export const PERFORMED_STORAGE_FLAG = '@TextExport-default_templates_inserted_1'
 export const JUST_URL: Template = {
     id: 1,
     title: 'Page URL',
-    isFavourite: false,
+    order: 1000000000,
     outputFormat: 'markdown',
     code: `{{{PageUrl}}}`,
 }
@@ -17,7 +17,7 @@ export const JUST_URL: Template = {
 export const URL_AND_TITLE: Template = {
     id: 2,
     title: 'Page URL & Title',
-    isFavourite: false,
+    order: 2000000000,
     outputFormat: 'markdown',
     code: `{{{PageTitle}}}
 {{{PageUrl}}}`,
@@ -26,7 +26,7 @@ export const URL_AND_TITLE: Template = {
 export const ROAM_MD_TEMPLATE: Template = {
     id: 3,
     title: 'Roam Markdown',
-    isFavourite: false,
+    order: 3000000000,
     outputFormat: 'markdown',
     code: `[[{{{PageTitle}}}]]
     {{#PageUrl}}
@@ -52,10 +52,24 @@ export const ROAM_MD_TEMPLATE: Template = {
 `,
 }
 
+export const TANA_PASTE_TEMPLATE: Template = {
+    id: 4,
+    title: 'Notion Markdown',
+    order: 4000000000,
+    outputFormat: 'markdown',
+    code: `%tana%
+[{{{PageTitle}}}]({{{PageUrl}}})
+{{#Notes}}
+* {{{NoteHighlight}}} 
+  * {{{NoteText}}}  
+    {{{NoteSpaces}}}
+{{/Notes}}
+`,
+}
 export const NOTION_MD_TEMPLATE: Template = {
     id: 4,
     title: 'Notion Markdown',
-    isFavourite: false,
+    order: 5000000000,
     outputFormat: 'markdown',
     code: `[{{{PageTitle}}}]({{{PageUrl}}})
 {{#Notes}}
@@ -69,7 +83,7 @@ export const NOTION_MD_TEMPLATE: Template = {
 export const HTML_TEMPLATE: Template = {
     id: 5,
     title: 'HTML',
-    isFavourite: false,
+    order: 6000000000,
     outputFormat: 'markdown',
     code: `<a target="_blank"  href="{{{PageUrl}}}">{{{PageTitle}}}</a>
 <ul>

@@ -2,7 +2,7 @@ export interface Template {
     id: number
     title: string
     code: string
-    isFavourite: boolean
+    order: number
     outputFormat?: 'markdown' | 'rich-text'
 }
 

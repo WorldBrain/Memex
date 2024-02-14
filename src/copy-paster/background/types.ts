@@ -11,9 +11,19 @@ export interface RemoteCopyPasterInterface {
         id: number
         searchParams: BackgroundSearchParams
     }): Promise<string>
+    renderPreviewForPageSearch(args: {
+        template: Template
+        searchParams: BackgroundSearchParams
+        templateType: string
+    }): Promise<string>
     renderTemplateForAnnotationSearch(args: {
         id: number
         searchParams: BackgroundSearchParams
+    }): Promise<string>
+    renderPreviewForAnnotationSearch(args: {
+        template: Template
+        searchParams: BackgroundSearchParams
+        templateType: string
     }): Promise<string>
     renderTemplate(args: {
         id: number

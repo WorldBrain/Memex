@@ -36,12 +36,12 @@ interface CopyPasterProps {
 
     onTitleChange: (title: string) => void
     onCodeChange: (code: string) => void
-    onSetIsFavourite: (id: number, isFavourite: boolean) => void
     onOutputFormatChange: (format: Template['outputFormat']) => void
 
-
     changeTemplateType: (templateType: string) => void
+    getRootElement: () => HTMLElement
     onClickOutside?: React.MouseEventHandler
+    onReorderSave: (id: number, order: number) => void
 }
 
 class CopyPaster extends PureComponent<CopyPasterProps> {
@@ -51,6 +51,50 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
         }
         if (this.props.onClickOutside) {
             this.props.onClickOutside(e)
+        }
+    }
+
+    state = {
+        focusIndex: 0,
+    }
+
+    componentDidMount() {
+        document.addEventListener('keydown', this.handleKeyDown)
+    }
+
+    componentDidUpdate(prevProps) {
+        if (
+            prevProps.copyPasterEditingTemplate &&
+            !this.props.copyPasterEditingTemplate
+        ) {
+            document.addEventListener('keydown', this.handleKeyDown)
+        } else if (
+            !prevProps.copyPasterEditingTemplate &&
+            this.props.copyPasterEditingTemplate
+        ) {
+            document.removeEventListener('keydown', this.handleKeyDown)
+        }
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyDown)
+    }
+
+    handleKeyDown = (event) => {
+        const { templates } = this.props
+        const { focusIndex } = this.state
+        console.log('event.key', event.key)
+        if (event.key === 'ArrowUp') {
+            this.setState({
+                focusIndex: Math.max(0, focusIndex - 1),
+            })
+        } else if (event.key === 'ArrowDown') {
+            this.setState({
+                focusIndex: Math.min(templates.length - 1, focusIndex + 1),
+            })
+        }
+        if (event.key === 'Enter') {
+            this.props.onClickCopy(templates[focusIndex].id)
         }
     }
 
@@ -95,6 +139,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         onClickCopy={this.props.onClickCopy}
                         getRootElement={this.props.getRootElement}
                         onReorderSave={this.props.onReorderSave}
+                        focusIndex={this.state.focusIndex}
                     />
                 )}
             </CopyPasterWrapper>

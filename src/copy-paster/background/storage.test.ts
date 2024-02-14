@@ -18,7 +18,7 @@ describe('Copy-paster template storage tests', () => {
         const newTemplate: Omit<Template, 'id'> = {
             title: 'template test',
             code: '',
-            isFavourite: false,
+            order: 0,
             outputFormat: 'markdown',
         }
 
@@ -35,7 +35,7 @@ describe('Copy-paster template storage tests', () => {
         const id = await copyPaster.createTemplate({
             title: 'template test',
             code: '',
-            isFavourite: false,
+            order: 1,
             outputFormat: 'markdown',
         })
 
@@ -43,7 +43,7 @@ describe('Copy-paster template storage tests', () => {
             id,
             title: 'test 2',
             code: '',
-            isFavourite: false,
+            order: 2,
             outputFormat: 'markdown',
         })
 
@@ -53,7 +53,7 @@ describe('Copy-paster template storage tests', () => {
             id,
             title: 'test 2',
             code: '',
-            isFavourite: false,
+            order: 2,
         })
     })
 
@@ -64,7 +64,7 @@ describe('Copy-paster template storage tests', () => {
         const id = await copyPaster.createTemplate({
             title: 'template test',
             code: '',
-            isFavourite: false,
+            order: 2,
             outputFormat: 'markdown',
         })
 
