@@ -93,11 +93,13 @@ export class DashboardContainer extends StatefulUIElement<
         | 'runtimeAPI'
         | 'localStorage'
         | 'annotationsCache'
+        | 'analyticsBG'
         | 'contentScriptsBG'
         | 'pageActivityIndicatorBG'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
         | 'contentShareBG'
+        | 'contentShareByTabsBG'
         | 'pageIndexingBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
@@ -120,7 +122,9 @@ export class DashboardContainer extends StatefulUIElement<
         localStorage: browser.storage.local,
         pageActivityIndicatorBG: runInBackground(),
         summarizeBG: runInBackground(),
+        analyticsBG: runInBackground(),
         contentConversationsBG: runInBackground(),
+        contentShareByTabsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentScriptsBG: runInBackground(),
         pageIndexingBG: runInBackground(),

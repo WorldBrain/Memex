@@ -20,7 +20,10 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { SearchInterface } from 'src/search/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type {
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import type { Analytics } from 'src/analytics'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 import type { SearchFiltersState, SearchFilterEvents } from './header/types'
@@ -38,7 +41,10 @@ import type {
 } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type {
+    MemexTheme,
+    MemexThemeVariant,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface RootState {
@@ -77,10 +83,12 @@ export interface DashboardDependencies {
     document: Document
     location: Location
     history: History
+    theme: MemexTheme
     analytics: Analytics
     analyticsBG: AnalyticsCoreInterface
     authBG: AuthRemoteFunctionsInterface
     contentShareBG: ContentSharingInterface
+    contentShareByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface
