@@ -20,13 +20,9 @@ import type { RemoteCollectionsInterface } from 'src/custom-lists/background/typ
 import type { SearchInterface } from 'src/search/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
-import type {
-    ContentSharingInterface,
-    RemoteContentSharingByTabsInterface,
-} from 'src/content-sharing/background/types'
+import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { Analytics } from 'src/analytics'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
@@ -41,12 +37,9 @@ import type {
     RGBAColor,
 } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import {
-    MemexTheme,
-    MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -85,12 +78,9 @@ export interface DashboardDependencies {
     location: Location
     history: History
     analytics: Analytics
-    theme: MemexTheme
     analyticsBG: AnalyticsCoreInterface
     authBG: AuthRemoteFunctionsInterface
-    backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
-    contentShareByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
     searchBG: SearchInterface

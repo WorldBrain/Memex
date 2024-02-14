@@ -447,12 +447,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { annotationsCache, authBG } = this.options
         this.setupRemoteEventListeners()
-        const user = await authBG.getCurrentUser()
-        setSentryUserContext(user)
-        this.emitMutation({
-            currentUser: { $set: user },
-        })
-
         const searchParams = this.getURLSearchParams()
         const spacesQuery = searchParams.get('spaces')
         const selectedSpaceQuery = searchParams.get('selectedSpace')
@@ -485,6 +479,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         await loadInitial(this, async () => {
+            await this.initThemeVariant()
+            const user = await authBG.getCurrentUser()
+            setSentryUserContext(user)
+            this.emitMutation({
+                currentUser: { $set: user },
+            })
             await executeUITask(
                 this,
                 (taskState) => ({
@@ -549,12 +549,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
 
-            const themeVariant = await this.initThemeVariant()
-
-            this.emitMutation({
-                themeVariant: { $set: themeVariant },
-            })
-
             let syncSettings: SyncSettingsStore<'highlightColors'>
 
             syncSettings = createSyncSettingsStore({
@@ -577,8 +571,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         const variantStorage = await this.options.localStorage.get(
             'themeVariant',
         )
-        const variant = variantStorage['themeVariant']
-        return variant ?? 'dark'
+        const variant = variantStorage['themeVariant'] ?? 'dark'
+        this.emitMutation({ themeVariant: { $set: variant } })
     }
 
     cleanup: EventHandler<'cleanup'> = async ({}) => {

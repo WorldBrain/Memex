@@ -54,13 +54,11 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import * as cacheUtils from 'src/annotations/cache/utils'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
-import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import type { RGBAColor } from 'src/annotations/cache/types'
 
 export interface Props extends DashboardDependencies {
-    theme: MemexTheme
     getRootElement: () => HTMLElement
 }
 
@@ -78,7 +76,7 @@ export class DashboardContainer extends StatefulUIElement<
 
     private get memexIcon(): string {
         const iconPath =
-            this.props.theme.variant === 'dark'
+            this.state.themeVariant === 'dark'
                 ? 'img/memexIconDarkMode.svg'
                 : 'img/memexIconLightMode.svg'
         return this.props.runtimeAPI.getURL(iconPath)
@@ -99,14 +97,12 @@ export class DashboardContainer extends StatefulUIElement<
         | 'pageActivityIndicatorBG'
         | 'contentConversationsBG'
         | 'activityIndicatorBG'
-        | 'contentShareByTabsBG'
         | 'contentShareBG'
         | 'pageIndexingBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
         | 'pdfViewerBG'
         | 'searchBG'
-        | 'backupBG'
         | 'listsBG'
         | 'authBG'
         | 'openCollectionPage'
@@ -129,12 +125,10 @@ export class DashboardContainer extends StatefulUIElement<
         contentScriptsBG: runInBackground(),
         pageIndexingBG: runInBackground(),
         contentShareBG: runInBackground(),
-        contentShareByTabsBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         pdfViewerBG: runInBackground(),
         searchBG: runInBackground(),
-        backupBG: runInBackground(),
         listsBG: runInBackground(),
         authBG: runInBackground(),
         annotationsCache: new PageAnnotationsCache({
@@ -1619,7 +1613,7 @@ export class DashboardContainer extends StatefulUIElement<
                     </MainFrame>
                     {this.renderModals()}
                     <HelpBtn
-                        theme={this.props.theme.variant}
+                        theme={this.state.themeVariant}
                         toggleTheme={() =>
                             this.processEvent('toggleTheme', null)
                         }

@@ -6,7 +6,6 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface DashboardResultsDependencies {
-    theme: MemexTheme
     services: UIServices
     analyticsBG: AnalyticsCoreInterface
 }

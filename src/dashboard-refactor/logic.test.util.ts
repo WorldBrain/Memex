@@ -163,13 +163,10 @@ export async function setupTest(
     }
     const annotationsCache = new PageAnnotationsCache({})
 
-    const themeVariant = await this.initThemeVariant()
-
     const logic = new DashboardLogic({
         location,
         history,
         analytics,
-        theme: themeVariant,
         annotationsCache,
         annotationsBG: insertBackgroundFunctionTab(
             device.backgroundModules.directLinking.remoteFunctions,
@@ -197,13 +194,7 @@ export async function setupTest(
                 ),
         },
         searchBG: device.backgroundModules.search.remoteFunctions.search,
-        backupBG: insertBackgroundFunctionTab(
-            device.backgroundModules.backupModule.remoteFunctions,
-        ) as any,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
-        contentShareByTabsBG: insertBackgroundFunctionTab(
-            device.backgroundModules.contentSharing.remoteFunctionsByTab,
-        ) as any,
         pdfViewerBG: device.backgroundModules.pdfBg.remoteFunctions,
         contentConversationsBG:
             device.backgroundModules.contentConversations.remoteFunctions,

@@ -43,7 +43,6 @@ class Overview extends React.Component<Props, State> {
         return (
             <DashboardContainer
                 services={this.props.services}
-                theme={this.state.theme}
                 renderUpdateNotifBanner={() => (
                     <UpdateNotifBanner
                         theme={{ ...this.state.theme, position: 'fixed' }}

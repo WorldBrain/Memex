@@ -96,7 +96,6 @@ export default class DashboardResultsContainer extends StatefulUIElement<
                     <ThemeProvider theme={this.state.theme ?? null}>
                         <DashboardContainer
                             services={this.props.services}
-                            theme={this.state.theme}
                             renderUpdateNotifBanner={() => (
                                 <UpdateNotifBanner
                                     theme={{
