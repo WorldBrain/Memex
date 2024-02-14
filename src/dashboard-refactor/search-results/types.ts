@@ -98,7 +98,6 @@ export type NoteInteractionAugdProps = {
 
 export interface PagePickerProps {
     onListPickerUpdate: PickerUpdateHandler<number>
-    onTagPickerUpdate: PickerUpdateHandler<string>
 }
 
 // NOTE: Derived type - edit the original
@@ -288,12 +287,6 @@ export type Events = UIEvent<{
     dismissSubscriptionBanner: null
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
-    setPageTags: {
-        id: string
-        fullPageUrl: string
-        added?: string
-        deleted?: string
-    }
     setPageLists: {
         id: string
         fullPageUrl: string
@@ -339,7 +332,6 @@ export type Events = UIEvent<{
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
-    setPageNewNoteTags: PageEventArgs & { tags: string[] }
     setPageNewNoteLists: PageEventArgs & { lists: string[] }
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {

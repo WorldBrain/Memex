@@ -108,7 +108,6 @@ export class DashboardContainer extends StatefulUIElement<
         | 'searchBG'
         | 'backupBG'
         | 'listsBG'
-        | 'tagsBG'
         | 'authBG'
         | 'openCollectionPage'
         | 'summarizeBG'
@@ -137,7 +136,6 @@ export class DashboardContainer extends StatefulUIElement<
         searchBG: runInBackground(),
         backupBG: runInBackground(),
         listsBG: runInBackground(),
-        tagsBG: runInBackground(),
         authBG: runInBackground(),
         annotationsCache: new PageAnnotationsCache({
             syncSettingsBG: runInBackground(),
@@ -981,13 +979,6 @@ export class DashboardContainer extends StatefulUIElement<
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                             ...this.localListPickerArgIdsToCached(args),
-                        }),
-                    onTagPickerUpdate: (pageId) => (args) =>
-                        this.processEvent('setPageTags', {
-                            id: pageId,
-                            fullPageUrl:
-                                searchResults.pageData.byId[pageId].fullUrl,
-                            ...args,
                         }),
                 }}
                 newNoteInteractionProps={{
