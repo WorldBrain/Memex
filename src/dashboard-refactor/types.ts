@@ -112,6 +112,7 @@ export interface DashboardDependencies {
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
     imageSupport: ImageSupportInterface<'caller'>
+    inPageMode?: boolean
 }
 
 export interface DropReceivingState {

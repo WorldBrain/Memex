@@ -65,8 +65,9 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
-import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { DashboardContainer } from 'src/dashboard-refactor'
+import { createUIServices } from 'src/services/ui'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -92,6 +93,7 @@ export class AnnotationsSidebarContainer<
     private annotationInstanceRefs: {
         [instanceId: string]: AnnotationInstanceRefs
     } = {}
+    private services = createUIServices()
 
     static defaultProps: Pick<Props, 'runtimeAPI' | 'storageAPI'> = {
         runtimeAPI: browser.runtime,
@@ -861,6 +863,47 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
+                            __renderDashboard={() => (
+                                <DashboardContainer
+                                    inPageMode
+                                    theme={this.props.theme}
+                                    analytics={this.props.analytics}
+                                    services={this.services}
+                                    annotationsCache={
+                                        this.props.annotationsCache
+                                    }
+                                    authBG={this.props.authBG}
+                                    listsBG={this.props.customListsBG}
+                                    analyticsBG={this.props.analyticsBG}
+                                    summarizeBG={this.props.summarizeBG}
+                                    annotationsBG={this.props.annotationsBG}
+                                    pageIndexingBG={this.props.pageIndexingBG}
+                                    syncSettingsBG={this.props.syncSettingsBG}
+                                    contentShareBG={this.props.contentSharingBG}
+                                    contentShareByTabsBG={
+                                        this.props.contentSharingByTabsBG
+                                    }
+                                    contentScriptsBG={
+                                        this.props.contentScriptsBG
+                                    }
+                                    contentConversationsBG={
+                                        this.props.contentConversationsBG
+                                    }
+                                    pageActivityIndicatorBG={
+                                        this.props.pageActivityIndicatorBG
+                                    }
+                                    activityIndicatorBG={
+                                        this.props.activityIndicatorBG
+                                    }
+                                    searchBG={this.props.searchBG}
+                                    pdfViewerBG={this.props.pdfViewerBG}
+                                    renderUpdateNotifBanner={() => null}
+                                />
+                                // <DashboardResultsContainer
+                                //     services={this.services}
+                                //     analyticsBG={this.props.analyticsBG}
+                                // />
+                            )}
                             imageSupport={this.props.imageSupport}
                             getVideoChapters={() => {
                                 this.processEvent('getVideoChapters', null)

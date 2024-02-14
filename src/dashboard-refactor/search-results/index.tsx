@@ -156,7 +156,12 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     listenToContentSwitcherSizeChanges() {
-        let topBarElement = document.getElementById('SearchTypeSwitchContainer')
+        const topBarElement = document.getElementById(
+            'SearchTypeSwitchContainer',
+        )
+        if (!topBarElement) {
+            return
+        }
 
         if (topBarElement.clientWidth < topBarElement.scrollWidth) {
             this.setState({

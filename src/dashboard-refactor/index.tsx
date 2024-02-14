@@ -1525,95 +1525,102 @@ export class DashboardContainer extends StatefulUIElement<
                                 </>
                             )}
                         </MainContent>
-                        <NotesSidebar
-                            imageSupport={this.props.imageSupport}
-                            theme={this.props.theme}
-                            hasFeedActivity={listsSidebar.hasFeedActivity}
-                            clickFeedActivityIndicator={() =>
-                                this.processEvent('switchToFeed', null)
-                            }
-                            shouldHydrateCacheOnInit
-                            annotationsCache={this.props.annotationsCache}
-                            youtubeService={this.youtubeService}
-                            authBG={this.props.authBG}
-                            refSidebar={this.notesSidebarRef}
-                            customListsBG={this.props.listsBG}
-                            annotationsBG={this.props.annotationsBG}
-                            contentSharingBG={this.props.contentShareBG}
-                            contentSharingByTabsBG={
-                                this.props.contentShareByTabsBG
-                            }
-                            contentScriptsBG={this.props.contentScriptsBG}
-                            syncSettingsBG={this.props.syncSettingsBG}
-                            pageIndexingBG={this.props.pageIndexingBG}
-                            pageActivityIndicatorBG={
-                                this.props.pageActivityIndicatorBG
-                            }
-                            summarizeBG={this.props.summarizeBG}
-                            contentConversationsBG={
-                                this.props.contentConversationsBG
-                            }
-                            getCurrentUser={() =>
-                                this.state.currentUser
-                                    ? {
-                                          id: this.state.currentUser?.id,
-                                          type: 'user-reference',
-                                      }
-                                    : null
-                            }
-                            setLoginModalShown={(isShown) =>
-                                this.processEvent('setShowLoginModal', {
-                                    isShown,
-                                })
-                            }
-                            setDisplayNameModalShown={(isShown) =>
-                                this.processEvent(
-                                    'setShowDisplayNameSetupModal',
-                                    {
+                        {this.props.inPageMode && (
+                            <NotesSidebar
+                                imageSupport={this.props.imageSupport}
+                                theme={this.props.theme}
+                                hasFeedActivity={listsSidebar.hasFeedActivity}
+                                clickFeedActivityIndicator={() =>
+                                    this.processEvent('switchToFeed', null)
+                                }
+                                shouldHydrateCacheOnInit
+                                annotationsCache={this.props.annotationsCache}
+                                youtubeService={this.youtubeService}
+                                authBG={this.props.authBG}
+                                refSidebar={this.notesSidebarRef}
+                                customListsBG={this.props.listsBG}
+                                annotationsBG={this.props.annotationsBG}
+                                contentSharingBG={this.props.contentShareBG}
+                                contentSharingByTabsBG={
+                                    this.props.contentShareByTabsBG
+                                }
+                                contentScriptsBG={this.props.contentScriptsBG}
+                                syncSettingsBG={this.props.syncSettingsBG}
+                                pageIndexingBG={this.props.pageIndexingBG}
+                                pageActivityIndicatorBG={
+                                    this.props.pageActivityIndicatorBG
+                                }
+                                summarizeBG={this.props.summarizeBG}
+                                contentConversationsBG={
+                                    this.props.contentConversationsBG
+                                }
+                                getCurrentUser={() =>
+                                    this.state.currentUser
+                                        ? {
+                                              id: this.state.currentUser?.id,
+                                              type: 'user-reference',
+                                          }
+                                        : null
+                                }
+                                setLoginModalShown={(isShown) =>
+                                    this.processEvent('setShowLoginModal', {
                                         isShown,
-                                    },
-                                )
-                            }
-                            showAnnotationShareModal={() =>
-                                this.processEvent(
-                                    'setShowNoteShareOnboardingModal',
-                                    {
-                                        isShown: true,
-                                    },
-                                )
-                            }
-                            onNotesSidebarClose={() =>
-                                this.processEvent('setActivePage', {
-                                    activeDay: undefined,
-                                    activePageID: undefined,
-                                    activePage: false,
-                                })
-                            }
-                            saveHighlightColor={(id, color, unifiedId) => {
-                                {
-                                    this.processEvent('saveHighlightColor', {
-                                        noteId: id,
-                                        color: color,
-                                        unifiedId: unifiedId,
                                     })
                                 }
-                            }}
-                            saveHighlightColorSettings={(newState) => {
-                                this.processEvent(
-                                    'saveHighlightColorSettings',
+                                setDisplayNameModalShown={(isShown) =>
+                                    this.processEvent(
+                                        'setShowDisplayNameSetupModal',
+                                        {
+                                            isShown,
+                                        },
+                                    )
+                                }
+                                showAnnotationShareModal={() =>
+                                    this.processEvent(
+                                        'setShowNoteShareOnboardingModal',
+                                        {
+                                            isShown: true,
+                                        },
+                                    )
+                                }
+                                onNotesSidebarClose={() =>
+                                    this.processEvent('setActivePage', {
+                                        activeDay: undefined,
+                                        activePageID: undefined,
+                                        activePage: false,
+                                    })
+                                }
+                                saveHighlightColor={(id, color, unifiedId) => {
                                     {
-                                        newState: newState,
-                                    },
-                                )
-                            }}
-                            getHighlightColorSettings={() =>
-                                this.processEvent(
-                                    'getHighlightColorSettings',
-                                    null,
-                                )
-                            }
-                            highlightColorSettings={this.state.highlightColors}
-                        />
+                                        this.processEvent(
+                                            'saveHighlightColor',
+                                            {
+                                                noteId: id,
+                                                color: color,
+                                                unifiedId: unifiedId,
+                                            },
+                                        )
+                                    }
+                                }}
+                                saveHighlightColorSettings={(newState) => {
+                                    this.processEvent(
+                                        'saveHighlightColorSettings',
+                                        {
+                                            newState: newState,
+                                        },
+                                    )
+                                }}
+                                getHighlightColorSettings={() =>
+                                    this.processEvent(
+                                        'getHighlightColorSettings',
+                                        null,
+                                    )
+                                }
+                                highlightColorSettings={
+                                    this.state.highlightColors
+                                }
+                            />
+                        )}
                     </MainFrame>
                     {this.renderModals()}
                     <HelpBtn

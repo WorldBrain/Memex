@@ -40,10 +40,10 @@ import type { Storage, Runtime } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
-import { Annotation } from 'src/annotations/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import type { SearchInterface } from 'src/search/background/types'
+import type { PDFRemoteInterface } from 'src/pdf/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -65,6 +65,9 @@ export interface SidebarContainerDependencies {
     analyticsBG: AnalyticsCoreInterface
 
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
+    activityIndicatorBG: ActivityIndicatorInterface
+    searchBG: SearchInterface
+    pdfViewerBG: PDFRemoteInterface
     summarizeBG: SummarizationInterface<'caller'>
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG: RemoteCollectionsInterface

@@ -107,6 +107,7 @@ import {
 import { injectSubstackButtons } from './injectionUtils/substack'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
+import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -228,6 +229,7 @@ export async function main(
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
     >()
+    const activityIndicatorBG = runInBackground<ActivityIndicatorInterface>()
     const pdfBG = runInBackground<PDFRemoteInterface>()
     const annotationsManager = new AnnotationsManager()
 
@@ -867,7 +869,7 @@ export async function main(
                 bgScriptBG,
                 analyticsBG,
                 pageActivityIndicatorBG,
-                activityIndicatorBG: runInBackground(),
+                activityIndicatorBG,
                 contentSharing: contentSharingBG,
                 bookmarks,
                 syncSettingsBG: syncSettingsBG,
@@ -926,10 +928,13 @@ export async function main(
                 getFullPageUrl: pageInfo.getFullPageUrl,
                 copyPaster,
                 subscription,
+                activityIndicatorBG,
                 contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
+                pdfViewerBG: runInBackground(),
                 pkmSyncBG: runInBackground(),
+                searchBG: runInBackground(),
                 getRootElement: null,
             })
             components.sidebar?.resolve()

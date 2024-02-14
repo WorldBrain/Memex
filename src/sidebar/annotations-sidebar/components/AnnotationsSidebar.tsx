@@ -101,6 +101,7 @@ const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 type Refs = { [unifiedListId: string]: React.RefObject<HTMLDivElement> }
 
 export interface AnnotationsSidebarProps extends SidebarContainerState {
+    __renderDashboard: () => JSX.Element
     annotationsCache: PageAnnotationsCacheInterface
     currentUser?: UserReference
     // sidebarActions: () => void
@@ -1377,6 +1378,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
+        return this.props.__renderDashboard()
         const {
             lists,
             currentUser,
@@ -5881,7 +5883,7 @@ const FollowedListRow = styled(Margin)<{
     cursor: pointer;
     border-radius: 8px;
     height: 44px;
-    
+
     padding: 0px 15px 0px 10px;
     z-index: ${(props) => 1000 - props.zIndex};
 
