@@ -5,7 +5,11 @@ import CopyPasterStorage from './storage'
 import { RemoteCopyPasterInterface } from './types'
 import { Template } from '../types'
 import generateTemplateDocs from '../template-doc-generation'
-import { joinTemplateDocs, analyzeTemplate } from '../utils'
+import {
+    joinTemplateDocs,
+    analyzeTemplate,
+    convertHTMlTemplateToMarkdown,
+} from '../utils'
 import ContentSharingBackground from 'src/content-sharing/background'
 import { getTemplateDataFetchers } from './template-data-fetchers'
 import SearchBackground from 'src/search/background'
@@ -43,6 +47,7 @@ export default class CopyPasterBackground {
             deleteTemplate: bindMethod(this, 'deleteTemplate'),
             findAllTemplates: bindMethod(this, 'findAllTemplates'),
             renderTemplate: this.renderTemplate,
+            renderPreview: this.renderPreview,
             renderTemplateForPageSearch: this.renderTemplateForPageSearch,
             renderTemplateForAnnotationSearch: this
                 .renderTemplateForAnnotationSearch,
@@ -69,6 +74,45 @@ export default class CopyPasterBackground {
         return this.storage.findAllTemplates()
     }
 
+    renderPreview: RemoteCopyPasterInterface['renderPreview'] = async ({
+        template,
+        annotationUrls,
+        normalizedPageUrls,
+        templateType,
+    }) => {
+        let templateDocs = []
+
+        if (templateType === 'examplePage') {
+            templateDocs = [
+                {
+                    HasNotes: true,
+                    Notes: [
+                        {
+                            NoteHighlight:
+                                '@startvalue%Testing this highlight@endvalue%',
+                            NoteText:
+                                '@startvalue%Testing this note @endvalue%',
+                        },
+                    ],
+                    PageTitle: '@startvalue%Testing Page Title @endvalue%',
+                    PageUrl: '@startvalue%Testing Page URL @endvalue%',
+                    title: '@startvalue%Testing Title @endvalue%',
+                    url:
+                        '@startvalue%https://en.wikipedia.org/wiki/NCAA_Division_I@endvalue%',
+                },
+            ]
+        } else {
+            console.log('data', { annotationUrls, normalizedPageUrls })
+            templateDocs = await generateTemplateDocs({
+                annotationUrls,
+                normalizedPageUrls,
+                templateAnalysis: analyzeTemplate(template),
+                dataFetchers: getTemplateDataFetchers(this.options),
+            })
+        }
+
+        return joinTemplateDocs(templateDocs, template)
+    }
     renderTemplate: RemoteCopyPasterInterface['renderTemplate'] = async ({
         id,
         annotationUrls,
@@ -81,6 +125,7 @@ export default class CopyPasterBackground {
             templateAnalysis: analyzeTemplate(template),
             dataFetchers: getTemplateDataFetchers(this.options),
         })
+
         return joinTemplateDocs(templateDocs, template)
     }
 

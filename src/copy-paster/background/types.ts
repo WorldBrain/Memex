@@ -20,4 +20,10 @@ export interface RemoteCopyPasterInterface {
         annotationUrls: string[]
         normalizedPageUrls: string[]
     }): Promise<string>
+    renderPreview(args: {
+        template: Template
+        annotationUrls: string[]
+        normalizedPageUrls: string[]
+        templateType: string
+    }): Promise<string>
 }

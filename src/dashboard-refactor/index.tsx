@@ -1648,11 +1648,14 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         getRootElement={this.props.getRootElement}
                     />
-                    <DragElement
-                        isHoveringOverListItem={
-                            listsSidebar.dragOverListId != null
-                        }
-                    />
+                    {this.state.listsSidebar.draggedListId != null ||
+                        (this.state.searchResults.draggedPageId != null && (
+                            <DragElement
+                                isHoveringOverListItem={
+                                    listsSidebar.dragOverListId != null
+                                }
+                            />
+                        ))}
                     {this.props.renderUpdateNotifBanner()}
                     <BulkEditWidget
                         deleteBulkSelection={(pageId) =>

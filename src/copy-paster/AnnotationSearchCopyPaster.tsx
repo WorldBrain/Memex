@@ -6,6 +6,7 @@ import { runInBackground } from 'src/util/webextensionRPC'
 
 export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
     searchParams: BackgroundSearchParams
+    getRootElement: () => HTMLElement
 }
 
 export default class AnnotationSearchCopyPaster extends React.PureComponent<
