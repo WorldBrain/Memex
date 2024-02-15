@@ -48,6 +48,7 @@ export type PageInteractionProps = Omit<
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
     onClick: React.MouseEventHandler
+    onEditPageBtnClick: (normalizedPageUrl, changedTitle) => void
 }
 
 // NOTE: Derived type - edit the original
