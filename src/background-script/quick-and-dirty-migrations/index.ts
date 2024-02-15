@@ -76,13 +76,15 @@ export const migrations: Migrations = {
         storex,
     }) => {
         const templates = await bgModules.copyPaster.findAllTemplates()
-        const batch: OperationBatch = templates.map((template, i) => ({
-            operation: 'updateObjects',
-            collection: 'templates',
-            placeholder: `template-${template.id}`,
-            where: { id: template.id },
-            updates: { order: DEFAULT_KEY + i * DEFAULT_SPACE_BETWEEN },
-        }))
+        const batch: OperationBatch = templates
+            .filter((template) => template.order == null)
+            .map((template, i) => ({
+                operation: 'updateObjects',
+                collection: 'templates',
+                placeholder: `template-${template.id}`,
+                where: { id: template.id },
+                updates: { order: DEFAULT_KEY + i * DEFAULT_SPACE_BETWEEN },
+            }))
         if (batch.length) {
             await storex.operation('executeBatch', batch)
         }
