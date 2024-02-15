@@ -19,13 +19,13 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
 import {
-    defaultTreeNodeSorter,
     forEachTreeTraverse,
     mapTreeTraverse,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import {
+    defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
@@ -158,7 +158,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                     list.parentUnifiedId === unifiedId &&
                     list.type === 'user-list',
             ),
-        ].sort(defaultTreeNodeSorter)
+        ].sort(defaultOrderableSorter)
     }
 
     private prepareListForCaching = (

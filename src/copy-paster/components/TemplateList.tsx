@@ -209,8 +209,6 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
     render() {
         const { templates } = this.props
 
-        console.log('templates', templates)
-
         const sortedTemplates = templates?.sort((a, b) => a.order - b.order)
 
         if (templates.length === 0) {

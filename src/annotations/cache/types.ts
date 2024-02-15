@@ -6,7 +6,7 @@ import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import type { Anchor } from 'src/highlighting/types'
 import type { Annotation } from '../types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { Orderable } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import type { Orderable } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export interface PageAnnotationsCacheEvents {
     updatedPageData: (
