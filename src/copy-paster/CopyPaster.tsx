@@ -1,14 +1,12 @@
 import React from 'react'
-
 import analytics from 'src/analytics'
-import { Template } from './types'
+import type { Template } from './types'
 import CopyPaster from './components/CopyPaster'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import * as Raven from 'src/util/raven'
-import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
-import TurndownService from 'turndown'
+import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import MarkdownIt from 'markdown-it'
-import { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
 import { orderGap } from './components/TemplateList'
 
 interface State {
@@ -22,12 +20,6 @@ interface State {
     isPreviewLoading: TaskState
 }
 
-const turndownService = new TurndownService({
-    headingStyle: 'atx',
-    hr: '---',
-    codeBlockStyle: 'fenced',
-    bulletListMarker: '-',
-})
 const md = new MarkdownIt()
 export interface Props {
     initTemplates?: Template[]
@@ -51,6 +43,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         title: '',
         code: '',
         order: 1,
+        isFavourite: false,
         outputFormat: 'rich-text',
     }
 
