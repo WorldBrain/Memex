@@ -273,7 +273,9 @@ export default class TemplateEditor extends PureComponent<
                         value={template?.title}
                         onKeyDown={(e) => e.stopPropagation()}
                         onChange={(e) =>
-                            this.props.onTitleChange(e.target.value)
+                            this.props.onTitleChange(
+                                (e.target as HTMLInputElement).value,
+                            )
                         }
                         height="30px"
                         width="fill-available"
@@ -352,16 +354,19 @@ export default class TemplateEditor extends PureComponent<
                                     this.props.onCodeChange(e.target.value)
                                 }}
                                 onDragOver={(event) => {
-                                    event.target.focus()
+                                    ;(event.target as HTMLTextAreaElement).focus()
                                     const target = event.target as HTMLTextAreaElement
                                     target.selectionStart = target.selectionEnd
                                 }}
                                 onKeyDown={(e) => {
                                     if (e.key === 'Tab') {
                                         e.preventDefault()
-                                        const start = e.target.selectionStart
-                                        const end = e.target.selectionEnd
-                                        const value = e.target.value
+                                        const start = (e.target as HTMLTextAreaElement)
+                                            .selectionStart
+                                        const end = (e.target as HTMLTextAreaElement)
+                                            .selectionEnd
+                                        const value = (e.target as HTMLTextAreaElement)
+                                            .value
                                         let newValue, newCursorPos
                                         if (!e.shiftKey) {
                                             newValue =
@@ -390,7 +395,7 @@ export default class TemplateEditor extends PureComponent<
                                         this.props.onCodeChange(newValue)
                                         // Move the cursor to the right of the inserted tab or back if shift+tab
                                         setTimeout(() => {
-                                            e.target.selectionStart = e.target.selectionEnd = newCursorPos
+                                            ;(e.target as HTMLTextAreaElement).selectionStart = (e.target as HTMLTextAreaElement).selectionEnd = newCursorPos
                                         }, 0)
                                     }
                                 }}
@@ -471,7 +476,6 @@ export default class TemplateEditor extends PureComponent<
                         >
                             <DragButton
                                 draggable="true"
-                                value={button.insertedText}
                                 onDrag={(e) => {
                                     e.preventDefault()
                                     null
@@ -481,9 +485,7 @@ export default class TemplateEditor extends PureComponent<
                                     const dragIcon = document.createElement(
                                         'div',
                                     )
-                                    const value = e.currentTarget.getAttribute(
-                                        'value',
-                                    )
+                                    const value = button.insertedText
                                     dragIcon.style.opacity = '1'
                                     dragIcon.style.pointerEvents = 'none'
                                     dragIcon.style.top = '-10000px'
@@ -563,9 +565,7 @@ const DragButtonsContainer = styled.div`
     position: relative;
     max-width: 900px;
 `
-const DragButton = styled.div<{
-    dragged: boolean
-}>`
+const DragButton = styled.div<{}>`
     color: ${(props) => props.theme.colors.greyScale5};
     background: ${(props) => props.theme.colors.greyScale1};
     font-size: 13px;
@@ -573,11 +573,6 @@ const DragButton = styled.div<{
     border-radius: 5px;
     z-index: 10;
     cursor: grab;
-    ${(props) =>
-        props.dragged &&
-        css`
-            display: none;
-        `}
 `
 const HeaderBox = styled.div`
     height: 34px;
@@ -597,39 +592,6 @@ const TextInputBox = styled.div`
     height: fill-available;
     height: -moz-available;
     min-height: 40%;
-`
-
-const Button = styled.button`
-    font-family: ${(props) => props.theme.fonts.primary};
-    font-style: normal;
-    font-weight: normal;
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.primary};
-    cursor: pointer;
-    padding: 0 0 0 5px;
-    margin-right: 10px;
-
-    outline: none;
-    border: none;
-    background: transparent;
-
-    ${(props) =>
-        props.small &&
-        css`
-            font-size: 12px;
-        `}
-
-    ${(props) =>
-        props.danger &&
-        css`
-            color: #f29d9d;
-        `}
-
-    ${(props) =>
-        props.disabled &&
-        css`
-            color: #a2a2a2;
-        `}
 `
 
 const Header = styled.div`

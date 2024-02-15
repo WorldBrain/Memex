@@ -13,7 +13,7 @@ interface Props {
     searchInputPlaceholder: string
     value: string
     before?: JSX.Element
-    searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
+    searchInputRef?: React.RefObject<HTMLInputElement>
     showPlaceholder?: boolean
     loading?: boolean
 }
@@ -38,6 +38,8 @@ export const keyEvents: KeyEvent[] = [
 export class PickerSearchInput extends React.Component<Props, State> {
     state = { isFocused: false }
 
+    searchInputRef = React.createRef<HTMLTextAreaElement | HTMLInputElement>()
+
     onChange: ChangeEventHandler = (e) =>
         this.props.onChange((e.target as HTMLInputElement).value)
 
@@ -54,7 +56,8 @@ export class PickerSearchInput extends React.Component<Props, State> {
                 value={this.props.value}
                 onChange={this.onChange}
                 onKeyDown={(e) => {
-                    this.props.onKeyPress(e.key), e.stopPropagation()
+                    this.props.onKeyPress(e.key as KeyEvent),
+                        e.stopPropagation()
                 }}
                 type={'input'}
                 componentRef={this.props.searchInputRef}
@@ -63,33 +66,6 @@ export class PickerSearchInput extends React.Component<Props, State> {
         )
     }
 }
-
-const StyledSearchIcon = styled.div`
-    color: ${(props) => props.theme.tag.searchIcon};
-    stroke-width: 2px;
-    margin-right: 8px;
-`
-
-const SearchBox = styled.div`
-    align-items: center;
-    background-color: ${(props) => props.theme.colors.greyScale2};
-    border-radius: 3px;
-    color: ${(props) => props.theme.colors.white};
-    display: flex;
-    flex-wrap: wrap;
-    font-size: 1rem;
-    padding: 10px;
-    transition: border 0.1s;
-    margin-bottom: 4px;
-    grid-gap: 5px;
-    min-height: 20px;
-
-    ${(props) =>
-        props.isFocused &&
-        css`
-            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-        `}
-`
 
 const SearchInput = styled(TextField)`
     border: none;

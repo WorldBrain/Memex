@@ -631,7 +631,7 @@ const RightSideIconBox = styled.div`
     grid-gap: 5px;
 `
 
-const Container = styled.div<{ spaceSidebarWidth: number }>`
+const Container = styled.div<{ spaceSidebarWidth: string }>`
     position: sticky;
     z-index: 2147483645;
     width: ${(props) => props.spaceSidebarWidth};
@@ -775,7 +775,7 @@ const NewItemsCountInnerDiv = styled.div`
     padding: 2px 0px;
 `
 
-const NestedListInput = styled.div`
+const NestedListInput = styled.div<{ indentSteps: number }>`
     margin-left: ${(props) =>
         props.indentSteps > 0
             ? (props.indentSteps - 1) * 20

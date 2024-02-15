@@ -14,7 +14,7 @@ const rotate = (rotation: number) => {
 export interface IconProps {
     heightAndWidth?: string
     path?: string
-    rotation?: string
+    rotation?: number
     faded?: boolean
     paddingHorizontal?: string
     color?: ColorThemeKeys
@@ -126,10 +126,6 @@ export const LoadingIndicator = styled.div<{ backgroundColor: string }>`
     }
 
     &::after {
-        ${(props) =>
-            css`
-                background: ${props.black ? props.black : '#fff'};
-            `};
         width: 65%;
         height: 65%;
         border-radius: 50%;

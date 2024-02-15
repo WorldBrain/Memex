@@ -8,11 +8,11 @@ const search = browser.runtime.getURL('/img/search.svg')
 
 interface Props {
     onChange: (value: string) => void
-    onKeyDown: (e: KeyboardEvent) => void
-    onKeyUp: (e: KeyboardEvent) => void
+    onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void // Adjusted type here
+    onKeyUp: (e: React.KeyboardEvent<HTMLInputElement>) => void // Adjusted type here
     searchInputPlaceholder: string
     value: string
-    searchInputRef?: (e: HTMLTextAreaElement | HTMLInputElement) => void
+    searchInputRef?: React.RefObject<HTMLInputElement>
     showPlaceholder?: boolean
     loading?: boolean
     autoFocus?: boolean

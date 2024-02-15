@@ -174,7 +174,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                 ) : (
                     <>
                         {this.props.showLink && (
-                            <TopArea>
+                            <TopArea context={this.props.context}>
                                 {/* <PrivacyTitle>
                                         {this.props.linkTitleCopy}
                                     </PrivacyTitle> */}

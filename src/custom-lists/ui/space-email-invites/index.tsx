@@ -55,9 +55,9 @@ export default class SpaceEmailInvites extends StatefulUIElement<
         return !alreadyInvited
     }
 
-    private handleInviteInputChange: React.KeyboardEventHandler = async (
-        event,
-    ) => {
+    private handleInviteInputChange: React.ChangeEventHandler<
+        HTMLInputElement
+    > = async (event) => {
         const value = (event.target as HTMLInputElement).value
         await this.processEvent('updateEmailInviteInputValue', { value })
     }

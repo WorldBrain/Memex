@@ -11,7 +11,6 @@ import {
 
 const StyledOnboardingAction = styled.div`
     padding: 15px 30px;
-    background: ${props => (props.disabled ? colorDisabled : colorPrimary)};
     border-radius: 50px;
     cursor: pointer;
     display: inline-block;
@@ -31,10 +30,7 @@ export const OnboardingAction = ({
     onClick: () => void
     disabled?: boolean
 }) => (
-    <StyledOnboardingAction
-        onClick={disabled === true ? undefined : onClick}
-        disabled={disabled}
-    >
+    <StyledOnboardingAction onClick={disabled === true ? undefined : onClick}>
         <StyledOnboardingActionLinkText>{label}</StyledOnboardingActionLinkText>
     </StyledOnboardingAction>
 )

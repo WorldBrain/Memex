@@ -197,7 +197,7 @@ const LocalPDFWarning = styled.div`
     font-size: 14px;
 `
 
-const LoadingStatusContainer = styled.div<{ padding: string }>`
+const LoadingStatusContainer = styled.div<{ padding?: string }>`
     display: flex;
     align-items: center;
     grid-gap: 15px;

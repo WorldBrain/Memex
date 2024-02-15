@@ -133,12 +133,6 @@ const reorder = (
     return result
 }
 
-interface Template {
-    id: number
-    order: number
-    // include other properties of Template as needed
-}
-
 const getStyle = (isDragging) => ({
     // Example: change opacity and add a border if dragging
     opacity: isDragging ? 0.8 : 1,
@@ -215,6 +209,8 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
     render() {
         const { templates } = this.props
 
+        console.log('templates', templates)
+
         const sortedTemplates = templates?.sort((a, b) => a.order - b.order)
 
         if (templates.length === 0) {
@@ -247,63 +243,68 @@ class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
                             {...provided.droppableProps}
                             ref={provided.innerRef}
                         >
-                            {sortedTemplates.map((template, index) => (
-                                <Draggable
-                                    key={template.id}
-                                    draggableId={String(template.id)}
-                                    index={index}
-                                >
-                                    {(provided, snapshot) => {
-                                        // Use a portal for the dragging item
-                                        const draggableContent = (
-                                            <div
-                                                ref={provided.innerRef}
-                                                {...provided.draggableProps}
-                                                {...provided.dragHandleProps}
-                                                style={{
-                                                    ...provided.draggableProps
-                                                        .style,
-                                                    zIndex: 30000000000000,
-                                                    // Additional styles if needed
-                                                }}
-                                            >
-                                                <TemplateRow
-                                                    template={template}
-                                                    onClick={() => {
-                                                        this.props.onClickCopy(
-                                                            template.id,
-                                                        )
+                            {sortedTemplates.map(
+                                (template: Template, index) => (
+                                    <Draggable
+                                        key={template.id}
+                                        draggableId={String(template.id)}
+                                        index={index}
+                                    >
+                                        {(provided, snapshot) => {
+                                            // Use a portal for the dragging item
+                                            const draggableContent = (
+                                                <div
+                                                    ref={provided.innerRef}
+                                                    {...provided.draggableProps}
+                                                    {...provided.dragHandleProps}
+                                                    style={{
+                                                        ...provided
+                                                            .draggableProps
+                                                            .style,
+                                                        zIndex: 30000000000000,
+                                                        // Additional styles if needed
                                                     }}
-                                                    isDefault={index === 0}
-                                                    onClickEdit={() =>
-                                                        this.props.onClickEdit(
-                                                            template.id,
-                                                        )
-                                                    }
-                                                    inFocus={
-                                                        this.props
-                                                            .focusIndex ===
-                                                        index
-                                                    }
-                                                />
-                                            </div>
-                                        )
-
-                                        const portalRoot =
-                                            this.props.getRootElement?.() ??
-                                            document.querySelector('body')
-
-                                        if (snapshot.isDragging) {
-                                            return ReactDOM.createPortal(
-                                                draggableContent,
-                                                portalRoot,
+                                                >
+                                                    <TemplateRow
+                                                        templateTitle={
+                                                            template.title
+                                                        }
+                                                        onClick={() => {
+                                                            this.props.onClickCopy(
+                                                                template.id,
+                                                            )
+                                                        }}
+                                                        // isDefault={index === 0}
+                                                        onClickEdit={() =>
+                                                            this.props.onClickEdit(
+                                                                template.id,
+                                                            )
+                                                        }
+                                                        inFocus={
+                                                            this.props
+                                                                .focusIndex ===
+                                                            index
+                                                        }
+                                                    />
+                                                </div>
                                             )
-                                        }
 
-                                        return draggableContent
-                                    }}
-                                </Draggable>
-                            ))}
+                                            const portalRoot =
+                                                this.props.getRootElement?.() ??
+                                                document.querySelector('body')
+
+                                            if (snapshot.isDragging) {
+                                                return ReactDOM.createPortal(
+                                                    draggableContent,
+                                                    portalRoot,
+                                                )
+                                            }
+
+                                            return draggableContent
+                                        }}
+                                    </Draggable>
+                                ),
+                            )}
                             {provided.placeholder}
                         </div>
                     )}
@@ -347,7 +348,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                 <Center>
                     <LoadingIndicator size={25} />
                     <InfoTextTitle>Copying Content</InfoTextTitle>
-                    <InfoText small>Don't close this modal</InfoText>
+                    <InfoText>Don't close this modal</InfoText>
                 </Center>
             )
         }

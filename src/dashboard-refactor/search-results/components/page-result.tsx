@@ -449,7 +449,7 @@ export default class PageResultView extends PureComponent<Props> {
                             //         : undefined
                             // }
                             tabIndex={-1}
-                            hasSpaces={this.displayLists}
+                            hasSpaces={this.displayLists.length > 0}
                         >
                             <BlockContent
                                 type={this.props.type}

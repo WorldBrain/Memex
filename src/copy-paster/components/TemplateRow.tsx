@@ -10,7 +10,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 const COPY_TIMEOUT = 2000
 
 export interface Props {
-    template: Template
+    templateTitle: string
     // onClickChangeOrder: (oldOrder: number) => void
 
     onClick: () => Promise<void> | void
@@ -61,7 +61,7 @@ export default class TemplateRow extends Component<Props, State> {
     }
 
     private renderRowBody() {
-        const { title, order } = this.props.template
+        const title = this.props.templateTitle
 
         if (this.state.isLoading) {
             return (
@@ -188,7 +188,7 @@ const Row = styled.div<{
         `}
 `
 
-const Title = styled.div`
+const Title = styled.div<{ fullWidth?: boolean }>`
     display: ${(props) => (props.fullWidth ? 'flex' : 'block')};
     justify-content: center;
     width: 100%;

@@ -1464,14 +1464,14 @@ export class DashboardContainer extends StatefulUIElement<
                         )}
                     </SidebarHeaderContainer>
                     <PeekTrigger
-                        onMouseEnter={(isPeeking) => {
+                        onMouseEnter={() => {
                             this.processEvent('setSidebarPeeking', {
-                                isPeeking,
+                                isPeeking: true,
                             })
                         }}
-                        onDragEnter={(isPeeking) => {
+                        onDragEnter={() => {
                             this.processEvent('setSidebarPeeking', {
-                                isPeeking,
+                                isPeeking: true,
                             })
                         }}
                     />
@@ -1848,7 +1848,7 @@ const HeaderBar = styled.div`
     box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale3};
 `
 
-const MainContent = styled.div<{ responsiveWidth: string }>`
+const MainContent = styled.div`
     width: fill-available;
     align-items: center;
     display: flex;
@@ -1857,12 +1857,6 @@ const MainContent = styled.div<{ responsiveWidth: string }>`
     height: 100%;
     flex: 1;
     width: 360px;
-
-    ${(props) =>
-        props.responsiveWidth &&
-        css<{ responsiveWidth: string }>`
-            width: ${(props) => props.responsiveWidth};
-        `};
 
     &::-webkit-scrollbar {
         display: none;
@@ -1966,27 +1960,6 @@ const FeedFrame = styled.iframe`
     border: none;
 `
 
-const TitleContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    grid-gap: 10px;
-    width: fill-available;
-    padding: 0 30px;
-`
-
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.white};
-    font-size: 24px;
-    font-weight: bold;
-`
-const SectionDescription = styled.div`
-    color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 16px;
-    font-weight: 300;
-`
-
 const MainFrame = styled.div`
     display: flex;
     flex-direction: row;
@@ -2065,74 +2038,5 @@ const SidebarHeaderContainer = styled.div`
 
     & div {
         justify-content: flex-start;
-    }
-`
-
-const SettingsSection = styled(Margin)`
-    width: min-content;
-    cursor: pointer;
-    height: 24px;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 3px;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1};
-    }
-`
-
-const RightHeader = styled.div`
-    width: min-content;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 1;
-    position: absolute;
-    right: 10px;
-`
-
-const SyncStatusHeaderBox = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 3px;
-    height: 24px;
-    grid-gap: 5px;
-
-    & > div {
-        width: auto;
-    }
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1};
-    }
-
-    @media screen and (max-width: 900px) {
-        padding: 4px 4px 4px 4px;
-        margin-left: 15px;
-        width: 20px;
-    }
-`
-
-const SyncStatusHeaderText = styled.span<{
-    textCentered: boolean
-}>`
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    font-weight: 500;
-    color: ${(props) => props.theme.colors.white};
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    ${(props) => (props.textCentered ? 'text-align: center;' : '')}
-
-    @media screen and (max-width: 600px) {
-        display: none;
     }
 `

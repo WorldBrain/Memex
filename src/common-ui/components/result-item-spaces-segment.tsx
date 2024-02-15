@@ -85,7 +85,7 @@ export default function ListsSegment({
     ...props
 }: Props) {
     return (
-        <Container padding={padding} {...props}>
+        <Container padding={padding.toString()} {...props}>
             <ListsContainer newLineOrientation={newLineOrientation === true}>
                 <SpacesListContainer>
                     {lists.slice(0).map((space) => {
@@ -97,7 +97,11 @@ export default function ListsSegment({
                                     onListClick(space.id)
                                 }}
                                 isLoading={space.name == null && space != null}
-                                title={space.name}
+                                title={
+                                    typeof space.name === 'string'
+                                        ? space.name
+                                        : ''
+                                }
                                 spaceId={space.id ?? null}
                             >
                                 {' '}
@@ -156,7 +160,7 @@ const SpacesListContainer = styled.div`
     align-items: center;
 `
 
-const Container = styled.div<{ padding: string }>`
+const Container = styled.div<{ padding?: string }>`
     display: flex;
     grid-gap: 10px;
     align-items: flex-start;

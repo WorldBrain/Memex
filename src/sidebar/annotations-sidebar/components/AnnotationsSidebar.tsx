@@ -953,7 +953,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <FollowedNotesContainer zIndex={listData.unifiedId}>
+            <FollowedNotesContainer zIndex={parseFloat(listData.unifiedId)}>
                 {(cacheUtils.deriveListOwnershipStatus(
                     listData,
                     this.props.currentUser,
@@ -1079,7 +1079,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <FollowedListNotesContainer
                 bottom={listInstance.isOpen ? '0px' : '0px'}
-                key={listData.unifiedId}
+                key={parseFloat(listData.unifiedId)}
                 top="5px"
                 onMouseOver={() => {
                     this.setState({
@@ -1100,10 +1100,12 @@ export class AnnotationsSidebar extends React.Component<
                     onClick={() =>
                         this.props.onUnifiedListSelect(listData.unifiedId)
                     }
-                    zIndex={listData.unifiedId}
+                    zIndex={parseFloat(listData.unifiedId)}
                     keepHovered={keepHovered}
                 >
-                    <FollowedListTitleContainer>
+                    <FollowedListTitleContainer
+                        context={this.props.sidebarContext}
+                    >
                         <TooltipBox
                             tooltipText={
                                 <span>
@@ -1133,7 +1135,11 @@ export class AnnotationsSidebar extends React.Component<
                             />
                         </TooltipBox>
                         <FollowedListTitleBox title={title}>
-                            <FollowedListTitle>{title}</FollowedListTitle>
+                            <FollowedListTitle
+                                context={this.props.sidebarContext}
+                            >
+                                {title}
+                            </FollowedListTitle>
                         </FollowedListTitleBox>
                     </FollowedListTitleContainer>
                     <ButtonContainer>
@@ -1654,7 +1660,7 @@ export class AnnotationsSidebar extends React.Component<
                 {this.props.activeAITab !== 'ThisPage' && (
                     <SuggestionsListSwitcher>
                         <SuggestionsSwitcherButton
-                            onClick={this.props.setSummaryMode('Answer')}
+                            onClick={() => this.props.setSummaryMode('Answer')}
                             active={
                                 this.props.summaryModeActiveTab === 'Answer'
                             }
@@ -1662,7 +1668,9 @@ export class AnnotationsSidebar extends React.Component<
                             Answer
                         </SuggestionsSwitcherButton>
                         <SuggestionsSwitcherButton
-                            onClick={this.props.setSummaryMode('References')}
+                            onClick={() =>
+                                this.props.setSummaryMode('References')
+                            }
                             active={
                                 this.props.summaryModeActiveTab === 'References'
                             }
@@ -1681,12 +1689,7 @@ export class AnnotationsSidebar extends React.Component<
                     this.renderRabbitHoleList()}
                 {(this.props.summaryModeActiveTab === 'Answer' ||
                     this.props.activeAITab === 'ThisPage') && (
-                    <SummaryContainer
-                        isSummaryShown={
-                            this.props.activeTab === 'summary' ||
-                            this.props.pageSummary?.length > 0
-                        }
-                    >
+                    <SummaryContainer>
                         {this.props.showLengthError &&
                             this.props.queryMode === 'summarize' && (
                                 <ErrorContainer>
@@ -3933,9 +3936,9 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
-        event,
-    ) => {
+    private handleNameEditInputKeyDown: React.KeyboardEventHandler<
+        HTMLInputElement
+    > = async (event) => {
         const selectedList = this.props.annotationsCache.lists.byId[
             this.props.selectedListId
         ]
@@ -4535,7 +4538,10 @@ const ExistingSourcesListItem = styled.div`
     }
 `
 
-const ExistingKnowledgeContainer = styled.div<{ padding: string; gap: string }>`
+const ExistingKnowledgeContainer = styled.div<{
+    padding?: string
+    gap?: string
+}>`
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -4725,7 +4731,7 @@ const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
     padding: 0px 20px 20px 30px;
 `
 
-const HighlightStyled = styled.div<{ hasComment: boolean }>`
+const HighlightStyled = styled.div`
     font-weight: 400;
     font-size: 14px;
     letter-spacing: 0.5px;
@@ -4739,7 +4745,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     margin-bottom: 15px;
 `
 
-const StyledPageResult = styled.div<{ isAnnotation: boolean }>`
+const StyledPageResult = styled.div<{ isAnnotation: boolean; href: string }>`
     display: flex;
     flex-direction: column;
     position: relative;
@@ -4760,7 +4766,7 @@ const StyledPageResult = styled.div<{ isAnnotation: boolean }>`
         `};
 `
 
-const PageContentBox = styled.div<{ hasSpaces: boolean }>`
+const PageContentBox = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
@@ -4847,7 +4853,7 @@ const ChapterSummaryText = styled(Markdown)`
     margin-bottom: 20px;
 `
 
-const Highlightbar = styled.div<{ barColor: string }>`
+const Highlightbar = styled.div`
     background: ${(props) => props.theme.colors.prime1};
     margin-right: 10px;
     border-radius: 2px;
@@ -5446,18 +5452,12 @@ const SpacesCounter = styled.div`
     margin-left: 20px;
 `
 
-const SpaceTypeSectionContainer = styled.div<{ SpaceTypeSectionOpen: boolean }>`
+const SpaceTypeSectionContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
     padding-bottom: 30px;
     margin-top: -20px;
-
-    ${(props) =>
-        props.SpaceTypeSectionOpen &&
-        css`
-            display: flex;
-        `};
 `
 
 const CreatorActionButtons = styled.div`
@@ -5606,7 +5606,7 @@ const ActionButtons = styled.div`
     grid-gap: 10px;
 `
 
-const LoaderBox = styled.div<{ height: string }>`
+const LoaderBox = styled.div<{ height?: string }>`
     height: ${(props) => (props.height ? props.height : '100px')};
     width: 100%;
     align-items: center;
@@ -5620,7 +5620,7 @@ const Link = styled.span`
     cursor: pointer;
 `
 
-const LoadingBox = styled.div<{ hasToolTip }>`
+const LoadingBox = styled.div<{ hasToolTip? }>`
     display: flex;
     justify-content: center;
     position: absolute;
@@ -5646,7 +5646,7 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
         `};
 `
 
-const TopBar = styled.div`
+const TopBar = styled.div<{ sidebarContext: string }>`
     font-size: 14px;
     color: ${(props) => props.theme.colors.white};
     display: flex;
@@ -5749,8 +5749,8 @@ const SearchIcon = styled.span`
 `
 
 const FollowedListNotesContainer = styled(Margin)<{
-    key: number
-    isHovered: boolean
+    key?: number
+    isHovered?: boolean
 }>`
     display: flex;
     flex-direction: column;
@@ -5866,8 +5866,6 @@ const FollowedListsMsg = styled.span`
 `
 
 const FollowedListRow = styled(Margin)<{
-    key: number
-    context: string
     zIndex?: number
     keepHovered?: boolean
 }>`
@@ -5950,7 +5948,7 @@ const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
 `
 
 // TODO: stop referring to these styled components as containers
-const FollowedListTitleContainer = styled(Margin)`
+const FollowedListTitleContainer = styled(Margin)<{ context: string }>`
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -5988,7 +5986,7 @@ const FollowedListTitle = styled.span<{ context: string }>`
     overflow: hidden;
     display: block;
 `
-const FollowedListTitleBox = styled.div<{ context: string }>`
+const FollowedListTitleBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-start;

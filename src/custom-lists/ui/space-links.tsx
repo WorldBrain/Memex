@@ -53,13 +53,13 @@ export default class SpaceLinks extends React.PureComponent<Props> {
     render() {
         if (this.props.loadState === 'running') {
             return (
-                <ShareSectionContainer onClick={__wrapClick}>
+                <ShareSectionContainer>
                     <LoadingIndicator size={20} />
                 </ShareSectionContainer>
             )
         }
         return (
-            <ShareSectionContainer onClick={__wrapClick}>
+            <ShareSectionContainer>
                 {this.props.inviteLinks.map(({ link, roleID }, linkIdx) => (
                     <ListItem zIndex={10 - linkIdx}>
                         <TooltipBox
@@ -86,7 +86,6 @@ export default class SpaceLinks extends React.PureComponent<Props> {
                             >
                                 <CopyLinkBox>
                                     <LinkBox
-                                        left="small"
                                         onClick={__wrapClick(async (e) => {
                                             this.showCopyMessage(linkIdx)
                                             this.props.copyLink(link)
@@ -176,7 +175,6 @@ const ShareSectionContainer = styled.div`
 
 const LinkAndRoleBox = styled.div<{
     viewportBreakpoint: string
-    zIndex: number
 }>`
     width: fill-available;
     display: flex;
@@ -213,17 +211,19 @@ const LinkAndRoleBox = styled.div<{
 
 `
 
-const LinkBox = styled(Margin)`
+const LinkBox = styled.div`
     width: fill-available;
     display: flex;
     font-size: 14px;
     border-radius: 3px;
     text-align: left;
+    margin-left: 10spx;
     height: 40px;
     cursor: pointer;
     color: ${(props) => props.theme.colors.white};
     justify-content: space-between;
     padding-right: 10px;
+    align-items: center;
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};

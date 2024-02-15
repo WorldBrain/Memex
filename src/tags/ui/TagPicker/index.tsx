@@ -141,17 +141,12 @@ class TagPicker extends StatefulUIElement<
 
     renderNewTagAllTabsButton = () =>
         this.props.actOnAllTabs && (
-            <IconStyleWrapper show>
+            <IconStyleWrapper>
                 <TooltipBox
                     tooltipText="Tag all tabs in window"
                     placement="left"
                     getPortalRoot={null}
-                >
-                    <ActOnAllTabsButton
-                        size={20}
-                        onClick={this.handleNewTagAllPress}
-                    />
-                </TooltipBox>
+                ></TooltipBox>
             </IconStyleWrapper>
         )
 
@@ -223,7 +218,6 @@ class TagPicker extends StatefulUIElement<
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state.selectedEntries.length === 0}
-                    searchInputRef={this.handleSetSearchInputRef}
                     onChange={this.handleSearchInputChanged}
                     onKeyPress={this.handleKeyPress}
                     value={this.state.query}
@@ -278,10 +272,7 @@ class TagPicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <OuterSearchBox
-                    onKeyPress={this.handleKeyPress}
-                    onClick={this.handleOuterSearchBoxClick}
-                >
+                <OuterSearchBox onClick={this.handleOuterSearchBoxClick}>
                     {this.renderMainContent()}
                     {this.props.children}
                 </OuterSearchBox>

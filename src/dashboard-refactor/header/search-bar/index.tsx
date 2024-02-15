@@ -28,10 +28,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         this.inputRef.current.focus()
     }
 
-    handleChange: React.KeyboardEventHandler = (evt) => {
-        // need to amend getFilterStrings function to pull through search terms as well, then
-        // bundle them in an object to send with the onSearchQueryChange func
-        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
+    handleChange: React.ChangeEventHandler<HTMLInputElement> = (evt) => {
+        this.props.onSearchQueryChange(evt.target.value)
     }
 
     handleClearSearch() {

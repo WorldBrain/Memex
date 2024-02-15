@@ -386,7 +386,7 @@ const SystemSelectionMenu = styled.div`
     justify-content: flex-start;
 `
 
-const SystemSelectionMenuItem = styled.div`
+const SystemSelectionMenuItem = styled.div<{ isSelected?: boolean }>`
     background: ${(props) => props.isSelected && props.theme.colors.greyScale2};
     padding: 10px 10px;
     line-height: 20px;
@@ -409,20 +409,6 @@ const SystemSelectionMenuItem = styled.div`
     &:last-child {
         margin-bottom: 10px;
     }
-
-    ${(props) =>
-        !props.isSelected &&
-        css`
-            cursor: pointer;
-
-            &:hover {
-                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-            }
-
-            & * {
-                cursor: pointer;
-            }
-        `};
 `
 
 const CopyTokenInstructionText = styled.div`

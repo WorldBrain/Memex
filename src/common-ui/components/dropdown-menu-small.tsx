@@ -121,12 +121,14 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                     >
                         <MenuItemName
                             isSelected={this.state.selected.id === item.id}
+                            isOpened={this.state.isOpened}
                         >
-                            <MenuItemBox>
+                            <MenuItemBox isOpened={this.state.isOpened}>
                                 <MenuItemName
                                     isSelected={
                                         this.state.selected.id === item.id
                                     }
+                                    isOpened={this.state.isOpened}
                                 >
                                     {item.name}
                                 </MenuItemName>
@@ -187,7 +189,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         e.stopPropagation
                     }}
                     width={this.props.width}
-                    leftPosition={this.theme.leftMenuOffset}
+                    isOpen={this.state.isOpened}
                 >
                     {' '}
                     <MenuItem
@@ -200,8 +202,12 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         backgroundColor={this.props.backgroundColor}
                         elementHeight={this.props.elementHeight}
                         isOpened={this.state.isOpened}
+                        isDisabled={selectedMenuItem.isDisabled}
                     >
-                        <MenuItemName isSelected={true}>
+                        <MenuItemName
+                            isOpened={this.state.isOpened}
+                            isSelected={true}
+                        >
                             <MenuItemBox isOpened={false}>
                                 {selectedMenuItem.name}
                             </MenuItemBox>
@@ -325,7 +331,11 @@ const MenuItemInfo = styled.div<{
         `}
 `
 
-const Menu = styled.div<{ isOpen: boolean; elementHeight: string }>`
+const Menu = styled.div<{
+    isOpen: boolean
+    elementHeight: string
+    width: string
+}>`
     list-style: none;
     border-radius: 6px;
     width: ${(props) => props.width ?? 'max-content'};
@@ -338,16 +348,12 @@ const Menu = styled.div<{ isOpen: boolean; elementHeight: string }>`
 
 const MenuItemContainerUnfolded = styled.div<{
     isOpen: boolean
-    backgroundColor: string
 }>`
     display: flex;
     flex-direction: column;
     width: 100%;
     border-radius: 6px;
-    background: ${(props) =>
-        props.backgroundColor
-            ? props.theme.colors[props.backgroundColor]
-            : props.theme.colors.greyScale2};
+    background: ${(props) => props.theme.colors.greyScale2};
 
     ${(props) =>
         props.isOpen &&

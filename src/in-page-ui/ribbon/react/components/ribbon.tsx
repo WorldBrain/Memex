@@ -383,8 +383,7 @@ export default class Ribbon extends Component<Props, State> {
                             <LoadingIndicator size={30} />
                             <FeedFrame
                                 src="https://memex.featurebase.app"
-                                frameborder="0"
-                                onmousewheel=""
+                                frameBorder="0"
                                 width="100%"
                                 height="533"
                             />
@@ -1642,8 +1641,8 @@ export default class Ribbon extends Component<Props, State> {
             return (
                 <IconContainer
                     ref={this.props.setRef}
-                    isPeeking={this.props.isExpanded}
-                    isSidebarOpen={this.props.sidebar.isSidebarOpen}
+                    // isPeeking={this.props.isExpanded}
+                    // isSidebarOpen={this.props.sidebar.isSidebarOpen}
                     ribbonPosition={this.props.ribbonPosition}
                 >
                     {this.props.hasFeedActivity && (
@@ -1987,13 +1986,6 @@ const FeedButtonContainer = styled.div<{ ribbonPosition }>`
     display: flex;
     align-items: center;
     justify-content: center;
-
-    ${(props) =>
-        props.isSidebarOpen &&
-        props.ribbonPosition === 'centerRight' &&
-        css`
-            width: 34px;
-        `}
 `
 
 const IconBox = styled.div`
@@ -2444,7 +2436,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
 
 `
 
-const ExtraButtonRow = styled.div<{ deactivateHover }>`
+const ExtraButtonRow = styled.div<{ deactivateHover? }>`
     height: 40px;
     display: flex;
     grid-gap: 10px;

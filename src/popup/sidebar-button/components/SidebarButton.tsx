@@ -23,7 +23,7 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    handleChange: CheckboxToggle
+    handleChange: React.MouseEventHandler<HTMLDivElement>
     openSidebar: React.MouseEventHandler
     initState: () => Promise<void>
 }
@@ -57,7 +57,10 @@ class TooltipButton extends PureComponent<Props, State> {
 
     render() {
         return (
-            <ButtonItem onClick={this.props.handleChange}>
+            <ButtonItem
+                disabled={!this.props.isEnabled}
+                onClick={this.props.handleChange}
+            >
                 <ButtonInnerContainer>
                     <Icon
                         filePath={icons.quickActionRibbon}

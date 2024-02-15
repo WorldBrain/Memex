@@ -23,6 +23,8 @@ class DomainPicker extends StatefulUIElement<
     DomainPickerState,
     DomainPickerEvent
 > {
+    private searchInputRef = React.createRef<HTMLInputElement>()
+
     constructor(props: DomainPickerDependencies) {
         super(props, new DomainPickerLogic(props))
     }
@@ -86,9 +88,11 @@ class DomainPicker extends StatefulUIElement<
     private handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: domain, index })
 
-    private handleKeyPress = (key: KeyEvent) =>
-        this.processEvent('keyPress', { key })
-
+    private handleKeyPress = (key: KeyEvent) => {
+        // Extract the key from the event and cast it to KeyEvent
+        // Pass the extracted key to processEvent
+        return this.processEvent('keyPress', { key })
+    }
     private renderDomainRow = (domain: DisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultDomainPress}
@@ -150,9 +154,9 @@ class DomainPicker extends StatefulUIElement<
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state?.selectedEntries.length === 0}
-                    searchInputRef={this.handleSetSearchInputRef}
+                    searchInputRef={this.searchInputRef}
                     onChange={this.handleSearchInputChanged}
-                    onKeyPress={this.handleKeyPress}
+                    onKeyPress={(key) => this.handleKeyPress(key)}
                     value={this.state?.query}
                     loading={this.state?.loadingQueryResults}
                     // before={
@@ -176,10 +180,7 @@ class DomainPicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <OuterSearchBox
-                    onKeyPress={this.handleKeyPress}
-                    onClick={this.handleOuterSearchBoxClick}
-                >
+                <OuterSearchBox onClick={this.handleOuterSearchBoxClick}>
                     {this.renderMainContent()}
                     {this.props.children}
                 </OuterSearchBox>

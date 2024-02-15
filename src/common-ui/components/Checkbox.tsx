@@ -126,7 +126,9 @@ const LabelTitle = styled.div<{ fontSize: number }>`
     white-space: nowrap;
 `
 
-const SubLabel = styled.div`
+const SubLabel = styled.div<{
+    fontSize?: number
+}>`
     color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '14px')};
@@ -147,7 +149,7 @@ const ChildrenBox = styled.span<{ mode }>`
     }
 `
 
-const LabelContainer = styled.label<{ zIndex?: number; width: boolean }>`
+const LabelContainer = styled.label<{ zIndex?: number; width?: string }>`
     display: flex;
     align-items: center;
     width: ${(props) => (props.width ? props.width : '100%')};

@@ -1,4 +1,4 @@
-import React, { HTMLProps } from 'react'
+import React, { HTMLProps, RefObject } from 'react'
 import QRCode from 'qrcode'
 import styled from 'styled-components'
 
@@ -28,8 +28,11 @@ export default class QRCanvas extends React.PureComponent<Props> {
         }
     }
 
-    private setRef = (el: HTMLCanvasElement) => (this.canvasEl = el)
-
+    private setRef:
+        | ((el: HTMLCanvasElement | null) => void)
+        | RefObject<HTMLCanvasElement> = (el: HTMLCanvasElement | null) => {
+        if (el) this.canvasEl = el
+    }
     render() {
         const { toEncode, errorHandler, ...canvasProps } = this.props
 

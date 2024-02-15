@@ -51,6 +51,9 @@ export default class CopyPasterBackground {
             renderTemplateForPageSearch: this.renderTemplateForPageSearch,
             renderTemplateForAnnotationSearch: this
                 .renderTemplateForAnnotationSearch,
+            renderPreviewForPageSearch: this.renderPreviewForPageSearch, // Add this line
+            renderPreviewForAnnotationSearch: this
+                .renderPreviewForAnnotationSearch, // And this line
         }
     }
 

@@ -91,7 +91,7 @@ class SharePrivacyOption extends React.PureComponent<Props, State> {
 
 export default SharePrivacyOption
 
-const PrivacyOptionItem = styled(Margin)`
+const PrivacyOptionItem = styled(Margin)<{ isSelected: boolean }>`
     display: flex;
     justify-content: space-between;
     align-items: center;

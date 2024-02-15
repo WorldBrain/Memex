@@ -63,7 +63,9 @@ class ConfirmModal extends PureComponent<Props> {
     }
 }
 
-const IconContainer = styled.div`
+const IconContainer = styled.div<{
+    type: string
+}>`
     height: 48px;
     width: 48px;
     border-radius: 8px;

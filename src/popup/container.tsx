@@ -197,7 +197,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         if (this.browserName === 'firefox' && location === 'local') {
             return (
-                <BlurredNotice browser={this.browserName}>
+                <BlurredNotice location={location} browser={this.browserName}>
                     <NoticeTitle>
                         Annotating local PDFs <br />
                         is not possible on Firefox
@@ -215,7 +215,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
             !this.state.isFileAccessAllowed
         ) {
             return (
-                <BlurredNotice browser={this.browserName}>
+                <BlurredNotice location={location} browser={this.browserName}>
                     <NoticeTitle>
                         To annotate file based PDFs enable the setting
                     </NoticeTitle>
@@ -236,7 +236,7 @@ class PopupContainer extends StatefulUIElement<Props, State, Event> {
 
         if (mode === 'original') {
             return (
-                <BlurredNotice browser={this.browserName}>
+                <BlurredNotice location={location} browser={this.browserName}>
                     <NoticeTitle>Save & annotate this PDF</NoticeTitle>
                     <PrimaryAction
                         label="Open Memex PDF Reader"
