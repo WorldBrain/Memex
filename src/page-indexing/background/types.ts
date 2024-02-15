@@ -25,6 +25,10 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         { fullPageUrl: string },
         string | null
     >
+    updatePageTitle: RemoteFunctionWithExtraArgs<
+        Role,
+        { normaliedPageUrl: string; title: string }
+    >
 }
 
 export interface InitContentIdentifierParams {

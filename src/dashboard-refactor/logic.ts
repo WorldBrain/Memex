@@ -3794,6 +3794,27 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    updatePageTitle: EventHandler<'updatePageTitle'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [event.normalizedPageUrl]: {
+                            fullTitle: { $set: event.changedTitle },
+                        },
+                    },
+                },
+            },
+        })
+        this.options.pageIndexingBG.updatePageTitle({
+            normaliedPageUrl: event.normalizedPageUrl,
+            title: event.changedTitle,
+        })
+    }
+
     setDragOverListId: EventHandler<'setDragOverListId'> = async ({
         event,
     }) => {

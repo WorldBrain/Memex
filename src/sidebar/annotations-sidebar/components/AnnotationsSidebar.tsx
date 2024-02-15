@@ -1392,12 +1392,12 @@ export class AnnotationsSidebar extends React.Component<
             : undefined
         const allLists = normalizedStateToArray(lists).filter(
             (listData) =>
-                listData.unifiedAnnotationIds?.length > 0 ||
-                listData.hasRemoteAnnotationsToLoad ||
-                (listData.type === 'page-link' &&
-                    listData.normalizedPageUrl === normalizedPageUrl) ||
-                pageListIds.has(listData.unifiedId) ||
-                pageActiveListIds.includes(listData.unifiedId),
+                pageListIds.has(listData.unifiedId) &&
+                (listData.unifiedAnnotationIds?.length > 0 ||
+                    listData.hasRemoteAnnotationsToLoad ||
+                    (listData.type === 'page-link' &&
+                        listData.normalizedPageUrl === normalizedPageUrl) ||
+                    pageActiveListIds.includes(listData.unifiedId)),
         )
 
         if (allLists?.length === 0) {
@@ -1431,9 +1431,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Page Links{' '}
-                        <SpacesCounter>{pageLinkLists?.length}</SpacesCounter>
+                        <SpacesCounter>{pageLinkLists.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {pageLinkLists?.length > 0 && (
+                    {pageLinkLists.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {pageLinkLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
@@ -1450,9 +1450,9 @@ export class AnnotationsSidebar extends React.Component<
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         My Spaces{' '}
-                        <SpacesCounter>{myLists?.length}</SpacesCounter>
+                        <SpacesCounter>{myLists.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {myLists?.length > 0 ? (
+                    {myLists.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {myLists.map((listData) => {
                                 this.maybeCreateContextBtnRef(listData)
@@ -1463,15 +1463,15 @@ export class AnnotationsSidebar extends React.Component<
                                 )
                             })}
                         </SpaceTypeSectionContainer>
-                    ) : undefined}
+                    )}
                 </SpaceTypeSection>
 
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Followed Spaces{' '}
-                        <SpacesCounter>{followedLists?.length}</SpacesCounter>
+                        <SpacesCounter>{followedLists.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {followedLists?.length > 0 ? (
+                    {followedLists.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {followedLists.map((listData) =>
                                 this.renderSpacesItem(
@@ -1480,15 +1480,15 @@ export class AnnotationsSidebar extends React.Component<
                                 ),
                             )}
                         </SpaceTypeSectionContainer>
-                    ) : undefined}
+                    )}
                 </SpaceTypeSection>
 
                 <SpaceTypeSection>
                     <SpaceTypeSectionHeader>
                         Joined Spaces{' '}
-                        <SpacesCounter>{joinedLists?.length}</SpacesCounter>
+                        <SpacesCounter>{joinedLists.length}</SpacesCounter>
                     </SpaceTypeSectionHeader>
-                    {joinedLists?.length > 0 ? (
+                    {joinedLists.length > 0 && (
                         <SpaceTypeSectionContainer>
                             {joinedLists.map((listData) =>
                                 this.renderSpacesItem(
@@ -1497,7 +1497,7 @@ export class AnnotationsSidebar extends React.Component<
                                 ),
                             )}
                         </SpaceTypeSectionContainer>
-                    ) : undefined}
+                    )}
                 </SpaceTypeSection>
             </>
         )
@@ -3461,9 +3461,8 @@ export class AnnotationsSidebar extends React.Component<
                                 ),
                             )}
 
-                        {this.props.activeTab === 'spaces' && (
-                            <>{this.renderSharedNotesByList()}</>
-                        )}
+                        {this.props.activeTab === 'spaces' &&
+                            this.renderSharedNotesByList()}
                     </AnnotationsSectionStyled>
                 )}
                 <UpdateNotifBanner

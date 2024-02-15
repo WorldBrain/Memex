@@ -1058,6 +1058,15 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             shareStates,
                         }),
+                    onEditPageBtnClick: (day, pageId) => (
+                        normalizedPageUrl,
+                        changedTitle,
+                    ) => {
+                        this.processEvent('updatePageTitle', {
+                            normalizedPageUrl,
+                            changedTitle,
+                        })
+                    },
                 }}
                 pagePickerProps={{
                     onListPickerUpdate: (pageId) => (args) =>
