@@ -9,7 +9,6 @@ import { DashboardLogic } from './logic'
 import type { RootState, Events, DashboardDependencies } from './types'
 import ListsSidebarContainer from './lists-sidebar'
 import SearchResultsContainer from './search-results'
-import HeaderContainer from './header'
 import { runInBackground } from 'src/util/webextensionRPC'
 import * as searchResultUtils from './search-results/util'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
@@ -57,6 +56,15 @@ import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import type { RGBAColor } from 'src/annotations/cache/types'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import SyncStatusMenu from './header/sync-status-menu'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import SearchBar from './header/search-bar'
+import { SETTINGS_URL } from 'src/constants'
+import {
+    ColorThemeKeys,
+    IconKeys,
+} from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface Props extends DashboardDependencies {
     getRootElement: () => HTMLElement
@@ -145,6 +153,7 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()
+    private syncStatusButtonRef = React.createRef<HTMLDivElement>()
     youtubeService: YoutubeService
 
     private bindRouteGoTo = (route: 'import' | 'sync' | 'backup') => () => {
@@ -351,85 +360,165 @@ export class DashboardContainer extends StatefulUIElement<
         } = this.state
         const syncStatusIconState = deriveStatusIconColor(this.state)
 
+        function getSyncStatusIcon(status): IconKeys {
+            if (status === 'green') {
+                return 'check'
+            }
+            if (status === 'yellow') {
+                return 'reload'
+            }
+
+            if (status === 'red') {
+                return 'warning'
+            }
+        }
+
+        function getSyncIconColor(status): ColorThemeKeys {
+            if (status === 'green') {
+                return 'prime1'
+            }
+            if (status === 'yellow') {
+                return 'white'
+            }
+
+            if (status === 'red') {
+                return 'warning'
+            }
+        }
+
         return (
-            <HeaderContainer
-                searchBarProps={{
-                    renderExpandButton: () => (
-                        <ExpandAllNotes
-                            isEnabled={searchResultUtils.areAllNotesShown(
-                                searchResults,
-                            )}
+            <HeaderContainer>
+                {/* <PlaceholderContainer /> */}
+                <SearchSection vertical="auto" left="24px">
+                    <SearchBar
+                        {...{
+                            renderExpandButton: () => (
+                                <ExpandAllNotes
+                                    isEnabled={searchResultUtils.areAllNotesShown(
+                                        searchResults,
+                                    )}
+                                    onClick={() =>
+                                        this.processEvent(
+                                            'setAllNotesShown',
+                                            null,
+                                        )
+                                    }
+                                    getRootElement={this.props.getRootElement}
+                                />
+                            ),
+                            renderCopyPasterButton: () => (
+                                <SearchCopyPaster
+                                    searchType={searchResults.searchType}
+                                    searchParams={stateToSearchParams(
+                                        this.state,
+                                        this.props.annotationsCache,
+                                    )}
+                                    isCopyPasterShown={
+                                        searchResults.isSearchCopyPasterShown
+                                    }
+                                    isCopyPasterBtnShown
+                                    hideCopyPaster={() =>
+                                        this.processEvent(
+                                            'setSearchCopyPasterShown',
+                                            {
+                                                isShown: false,
+                                            },
+                                        )
+                                    }
+                                    toggleCopyPaster={() =>
+                                        this.processEvent(
+                                            'setSearchCopyPasterShown',
+                                            {
+                                                isShown: !searchResults.isSearchCopyPasterShown,
+                                            },
+                                        )
+                                    }
+                                    getRootElement={this.props.getRootElement}
+                                />
+                            ),
+                            searchQuery: searchFilters.searchQuery,
+                            isSidebarLocked: listsSidebar.isSidebarLocked,
+                            searchFiltersOpen: searchFilters.searchFiltersOpen,
+                            onSearchFiltersOpen: () =>
+                                this.processEvent('setSearchFiltersOpen', {
+                                    isOpen: !searchFilters.searchFiltersOpen,
+                                }),
+                            onSearchQueryChange: (query) =>
+                                this.processEvent('setSearchQuery', { query }),
+                            onInputClear: () =>
+                                this.processEvent('setSearchQuery', {
+                                    query: '',
+                                }),
+                            getRootElement: this.props.getRootElement,
+                        }}
+                    />
+                </SearchSection>
+                <RightHeader>
+                    <ActionWrapper>
+                        <PrimaryAction
                             onClick={() =>
-                                this.processEvent('setAllNotesShown', null)
+                                this.processEvent(
+                                    'setSyncStatusMenuDisplayState',
+                                    {
+                                        isShown: syncMenu.isDisplayed,
+                                    },
+                                )
                             }
-                            getRootElement={this.props.getRootElement}
+                            label={'Sync Status'}
+                            size={'medium'}
+                            icon={getSyncStatusIcon(syncStatusIconState)}
+                            type={'tertiary'}
+                            iconColor={getSyncIconColor(syncStatusIconState)}
+                            spinningIcon={syncStatusIconState === 'yellow'}
+                            innerRef={this.syncStatusButtonRef}
                         />
-                    ),
-                    renderCopyPasterButton: () => (
-                        <SearchCopyPaster
-                            searchType={searchResults.searchType}
-                            searchParams={stateToSearchParams(
-                                this.state,
-                                this.props.annotationsCache,
-                            )}
-                            isCopyPasterShown={
-                                searchResults.isSearchCopyPasterShown
-                            }
-                            isCopyPasterBtnShown
-                            hideCopyPaster={() =>
-                                this.processEvent('setSearchCopyPasterShown', {
-                                    isShown: false,
-                                })
-                            }
-                            toggleCopyPaster={() =>
-                                this.processEvent('setSearchCopyPasterShown', {
-                                    isShown: !searchResults.isSearchCopyPasterShown,
-                                })
-                            }
-                            getRootElement={this.props.getRootElement}
+                    </ActionWrapper>
+                    {!this.props.inPageMode && (
+                        <Icon
+                            onClick={() => window.open(SETTINGS_URL, '_self')}
+                            heightAndWidth="22px"
+                            padding={'6px'}
+                            filePath={icons.settings}
                         />
-                    ),
-                    searchQuery: searchFilters.searchQuery,
-                    isSidebarLocked: listsSidebar.isSidebarLocked,
-                    searchFiltersOpen: searchFilters.searchFiltersOpen,
-                    onSearchFiltersOpen: () =>
-                        this.processEvent('setSearchFiltersOpen', {
-                            isOpen: !searchFilters.searchFiltersOpen,
-                        }),
-                    onSearchQueryChange: (query) =>
-                        this.processEvent('setSearchQuery', { query }),
-                    onInputClear: () =>
-                        this.processEvent('setSearchQuery', { query: '' }),
-                    getRootElement: this.props.getRootElement,
-                }}
-                selectedListName={
-                    listsSidebar.lists.byId[listsSidebar.selectedListId]?.name
-                }
-                activityStatus={listsSidebar.hasFeedActivity}
-                syncStatusIconState={syncStatusIconState}
-                syncStatusMenuProps={{
-                    ...syncMenu,
-                    syncStatusIconState,
-                    isLoggedIn: currentUser != null,
-                    outsideClickIgnoreClass:
-                        HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
-                    onLoginClick: () =>
-                        this.processEvent('setShowLoginModal', {
-                            isShown: true,
-                        }),
-                    onClickOutside: () =>
-                        this.processEvent('setSyncStatusMenuDisplayState', {
-                            isShown: false,
-                        }),
-                    onToggleDisplayState: () => {
+                    )}
+                </RightHeader>
+                <PopoutBox
+                    targetElementRef={this.syncStatusButtonRef.current}
+                    offsetX={15}
+                    offsetY={5}
+                    closeComponent={() =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
                             isShown: syncMenu.isDisplayed,
                         })
-                    },
-                    getRootElement: this.props.getRootElement,
-                }}
-                getRootElement={this.props.getRootElement}
-            />
+                    }
+                    placement={'bottom-end'}
+                    getPortalRoot={this.props.getRootElement}
+                >
+                    <SyncStatusMenu
+                        {...{
+                            ...syncMenu,
+                            syncStatusIconState,
+                            isLoggedIn: currentUser != null,
+                            outsideClickIgnoreClass:
+                                HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
+                            onLoginClick: () =>
+                                this.processEvent('setShowLoginModal', {
+                                    isShown: true,
+                                }),
+                            onClickOutside: () =>
+                                this.processEvent(
+                                    'setSyncStatusMenuDisplayState',
+                                    {
+                                        isShown: false,
+                                    },
+                                ),
+                            onToggleDisplayState: () => {},
+                            getRootElement: this.props.getRootElement,
+                        }}
+                        syncStatusIconState={syncStatusIconState}
+                    />
+                </PopoutBox>
+            </HeaderContainer>
         )
     }
 
@@ -1390,49 +1479,55 @@ export class DashboardContainer extends StatefulUIElement<
             >
                 {this.renderPdfLocator()}
                 <MainContainer>
-                    <SidebarHeaderContainer>
-                        <SidebarToggleBox>
-                            <SidebarToggle
-                                isSidebarLocked={listsSidebar.isSidebarLocked}
-                                toggleSidebarLockedState={() =>
-                                    this.processEvent('setSidebarLocked', {
-                                        isLocked: !listsSidebar.isSidebarLocked,
-                                    })
-                                }
-                                isHovered={listsSidebar.isSidebarToggleHovered}
-                                onHoverEnter={() =>
-                                    this.processEvent(
-                                        'setSidebarToggleHovered',
-                                        {
-                                            isHovered: true,
-                                        },
-                                    )
-                                }
-                                onHoverLeave={() =>
-                                    this.processEvent(
-                                        'setSidebarToggleHovered',
-                                        {
-                                            isHovered: false,
-                                        },
-                                    )
-                                }
-                            />
-                            <ActivityIndicator
-                                hasActivities={listsSidebar.hasFeedActivity}
-                            />
-                        </SidebarToggleBox>
-                        {!this.state.activePageID && (
-                            <MemexLogoContainer>
-                                <Icon
-                                    icon={this.memexIcon}
-                                    height={'26px'}
-                                    width={'180px'}
-                                    originalImage
-                                    hoverOff
+                    {!this.props.inPageMode && (
+                        <SidebarHeaderContainer>
+                            <SidebarToggleBox>
+                                <SidebarToggle
+                                    isSidebarLocked={
+                                        listsSidebar.isSidebarLocked
+                                    }
+                                    toggleSidebarLockedState={() =>
+                                        this.processEvent('setSidebarLocked', {
+                                            isLocked: !listsSidebar.isSidebarLocked,
+                                        })
+                                    }
+                                    isHovered={
+                                        listsSidebar.isSidebarToggleHovered
+                                    }
+                                    onHoverEnter={() =>
+                                        this.processEvent(
+                                            'setSidebarToggleHovered',
+                                            {
+                                                isHovered: true,
+                                            },
+                                        )
+                                    }
+                                    onHoverLeave={() =>
+                                        this.processEvent(
+                                            'setSidebarToggleHovered',
+                                            {
+                                                isHovered: false,
+                                            },
+                                        )
+                                    }
                                 />
-                            </MemexLogoContainer>
-                        )}
-                    </SidebarHeaderContainer>
+                                <ActivityIndicator
+                                    hasActivities={listsSidebar.hasFeedActivity}
+                                />
+                            </SidebarToggleBox>
+                            {!this.state.activePageID && (
+                                <MemexLogoContainer>
+                                    <Icon
+                                        icon={this.memexIcon}
+                                        height={'26px'}
+                                        width={'180px'}
+                                        originalImage
+                                        hoverOff
+                                    />
+                                </MemexLogoContainer>
+                            )}
+                        </SidebarHeaderContainer>
+                    )}
                     <PeekTrigger
                         onMouseEnter={(isPeeking) => {
                             this.processEvent('setSidebarPeeking', {
@@ -1446,62 +1541,74 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                     />
                     <MainFrame>
-                        <ListSidebarContent
-                            style={style}
-                            size={{
-                                height: listsSidebar.isSidebarPeeking
-                                    ? '90vh'
-                                    : '100vh',
-                            }}
-                            peeking={
-                                listsSidebar.isSidebarPeeking
-                                    ? listsSidebar.isSidebarPeeking.toString()
-                                    : undefined
-                            }
-                            position={{
-                                x:
-                                    listsSidebar.isSidebarLocked &&
-                                    `$sizeConstants.header.heightPxpx`,
-                            }}
-                            locked={
-                                listsSidebar.isSidebarLocked
-                                    ? listsSidebar.isSidebarLocked.toString()
-                                    : undefined
-                            }
-                            onMouseLeave={() => {
-                                if (this.state.listsSidebar.isSidebarPeeking) {
-                                    this.processEvent('setSidebarPeeking', {
-                                        isPeeking: false,
-                                    })
+                        {!this.props.inPageMode && (
+                            <ListSidebarContent
+                                style={style}
+                                size={{
+                                    height: listsSidebar.isSidebarPeeking
+                                        ? '90vh'
+                                        : '100vh',
+                                }}
+                                peeking={
+                                    listsSidebar.isSidebarPeeking
+                                        ? listsSidebar.isSidebarPeeking.toString()
+                                        : undefined
                                 }
-                            }}
-                            // default={{ width: sizeConstants.listsSidebar.widthPx }}
-                            resizeHandleClasses={{
-                                right: 'sidebarResizeHandleSidebar',
-                            }}
-                            resizeGrid={[1, 0]}
-                            dragAxis={'none'}
-                            minWidth={sizeConstants.listsSidebar.width + 'px'}
-                            maxWidth={'500px'}
-                            disableDragging={true}
-                            enableResizing={{
-                                top: false,
-                                right: true,
-                                bottom: false,
-                                left: false,
-                                topRight: false,
-                                bottomRight: false,
-                                bottomLeft: false,
-                                topLeft: false,
-                            }}
-                            onResize={(e, direction, ref, delta, position) => {
-                                this.processEvent('setSpaceSidebarWidth', {
-                                    width: ref.style.width,
-                                })
-                            }}
-                        >
-                            {this.renderListsSidebar()}
-                        </ListSidebarContent>
+                                position={{
+                                    x:
+                                        listsSidebar.isSidebarLocked &&
+                                        `$sizeConstants.header.heightPxpx`,
+                                }}
+                                locked={
+                                    listsSidebar.isSidebarLocked
+                                        ? listsSidebar.isSidebarLocked.toString()
+                                        : undefined
+                                }
+                                onMouseLeave={() => {
+                                    if (
+                                        this.state.listsSidebar.isSidebarPeeking
+                                    ) {
+                                        this.processEvent('setSidebarPeeking', {
+                                            isPeeking: false,
+                                        })
+                                    }
+                                }}
+                                // default={{ width: sizeConstants.listsSidebar.widthPx }}
+                                resizeHandleClasses={{
+                                    right: 'sidebarResizeHandleSidebar',
+                                }}
+                                resizeGrid={[1, 0]}
+                                dragAxis={'none'}
+                                minWidth={
+                                    sizeConstants.listsSidebar.width + 'px'
+                                }
+                                maxWidth={'500px'}
+                                disableDragging={true}
+                                enableResizing={{
+                                    top: false,
+                                    right: true,
+                                    bottom: false,
+                                    left: false,
+                                    topRight: false,
+                                    bottomRight: false,
+                                    bottomLeft: false,
+                                    topLeft: false,
+                                }}
+                                onResize={(
+                                    e,
+                                    direction,
+                                    ref,
+                                    delta,
+                                    position,
+                                ) => {
+                                    this.processEvent('setSpaceSidebarWidth', {
+                                        width: ref.style.width,
+                                    })
+                                }}
+                            >
+                                {this.renderListsSidebar()}
+                            </ListSidebarContent>
+                        )}
                         <MainContent>
                             {this.state.listsSidebar.selectedListId ===
                             SPECIAL_LIST_STRING_IDS.FEED ? (
@@ -1525,7 +1632,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 </>
                             )}
                         </MainContent>
-                        {this.props.inPageMode && (
+                        {!this.props.inPageMode && (
                             <NotesSidebar
                                 imageSupport={this.props.imageSupport}
                                 theme={this.props.theme}
@@ -2053,16 +2160,6 @@ const SettingsSection = styled(Margin)`
     }
 `
 
-const RightHeader = styled.div`
-    width: min-content;
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex: 1;
-    position: absolute;
-    right: 10px;
-`
-
 const SyncStatusHeaderBox = styled.div`
     display: flex;
     flex-direction: row;
@@ -2104,5 +2201,59 @@ const SyncStatusHeaderText = styled.span<{
 
     @media screen and (max-width: 600px) {
         display: none;
+    }
+`
+
+const ActionWrapper = styled.div`
+    & span {
+        @media screen and (max-width: 900px) {
+            display: none;
+        }
+    }
+
+    & > div {
+        @media screen and (max-width: 900px) {
+            width: 34px;
+        }
+    }
+`
+
+const HeaderContainer = styled.div`
+    height: ${sizeConstants.header.heightPx}px;
+    width: 100%;
+    position: sticky;
+    top: 0;
+    left: 150px;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
+    background-color: ${(props) => props.theme.colors.black};
+    z-index: 3500;
+    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale2};
+`
+
+const SearchSection = styled(Margin)`
+    justify-content: flex-start !important;
+    max-width: 825px !important;
+    height: 60px;
+
+    & > div {
+        justify-content: flex-start !important;
+    }
+`
+
+const RightHeader = styled.div`
+    width: min-content;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 1;
+    position: absolute;
+    right: 30px;
+    grid-gap: 10px;
+
+    @media screen and (max-width: 900px) {
+        right: 15px;
     }
 `
