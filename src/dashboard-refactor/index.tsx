@@ -66,7 +66,7 @@ import {
     IconKeys,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
-export interface Props extends DashboardDependencies {
+export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
 }
 

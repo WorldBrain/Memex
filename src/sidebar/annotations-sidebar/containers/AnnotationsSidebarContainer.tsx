@@ -866,6 +866,9 @@ export class AnnotationsSidebarContainer<
                             __renderDashboard={() => (
                                 <DashboardContainer
                                     inPageMode
+                                    onResultSelect={(exportedResultText) =>
+                                        null
+                                    } // TODO: Hook up to a this.processEvent call
                                     theme={this.props.theme}
                                     analytics={this.props.analytics}
                                     services={this.services}

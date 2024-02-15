@@ -79,7 +79,7 @@ export type Events = UIEvent<
         }
 >
 
-export interface DashboardDependencies {
+export type DashboardDependencies = {
     document: Document
     location: Location
     history: History
@@ -112,8 +112,20 @@ export interface DashboardDependencies {
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
     imageSupport: ImageSupportInterface<'caller'>
-    inPageMode?: boolean
-}
+} & (
+    | {
+          inPageMode: true
+          /**
+           * This provides the exported text for the page/annotation result that is selected for use
+           * in whatever context the dashboard search has been invoked from.
+           * TODO: Hook it up to buttons on page/annot results
+           */
+          onResultSelect: (exportedResultText: string) => void
+      }
+    | {
+          inPageMode?: never
+      }
+)
 
 export interface DropReceivingState {
     isDraggedOver?: boolean
