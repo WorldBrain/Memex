@@ -6,7 +6,7 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/copy-paster/constants'
-import { Template } from '../types'
+import type { Template } from '../types'
 
 export default class CopyPasterStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
@@ -75,7 +75,7 @@ export default class CopyPasterStorage extends StorageModule {
         return object.id
     }
 
-    async findTemplate({ id }: { id: number }) {
+    async findTemplate({ id }: { id: number }): Promise<Template | null> {
         return this.operation('findTemplate', { id })
     }
 
@@ -93,7 +93,7 @@ export default class CopyPasterStorage extends StorageModule {
         return this.operation('deleteTemplate', { id })
     }
 
-    async findAllTemplates() {
+    async findAllTemplates(): Promise<Template[]> {
         return this.operation('findAllTemplates', {})
     }
 }

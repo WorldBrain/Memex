@@ -47,6 +47,7 @@ export interface MigrationProps {
         | 'auth'
         | 'customLists'
         | 'contentSharing'
+        | 'copyPaster'
     >
     localExtSettingStore: SettingStore<LocalExtensionSettings>
     syncSettingsStore: SyncSettingsStore<'extension'>
@@ -65,6 +66,27 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This exists as we added an `order` field to templates collection when
+     * we realized the importance of being able to order your templates in the text
+     * exporter list
+     */
+    [MIGRATION_PREFIX + 'set-order-for-templates-01']: async ({
+        bgModules,
+        storex,
+    }) => {
+        const templates = await bgModules.copyPaster.findAllTemplates()
+        const batch: OperationBatch = templates.map((template, i) => ({
+            operation: 'updateObjects',
+            collection: 'templates',
+            placeholder: `template-${template.id}`,
+            where: { id: template.id },
+            updates: { order: DEFAULT_KEY + i * DEFAULT_SPACE_BETWEEN },
+        }))
+        if (batch.length) {
+            await storex.operation('executeBatch', batch)
+        }
+    },
     /*
      * This exists as the main default highlight color was living in local storage while we had since moved custom
      * highlight colors to live in sync settings (DB coll). This moves the local storage default highlight color to
