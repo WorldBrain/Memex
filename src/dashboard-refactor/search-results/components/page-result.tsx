@@ -468,6 +468,12 @@ export default class PageResultView extends PureComponent<Props> {
                                 }
                                 memexIcon={MemexIcon}
                                 getRootElement={this.props.getRootElement}
+                                onEditPageBtnClick={(changedTitle) => {
+                                    this.props.onEditPageBtnClick(
+                                        this.props.normalizedUrl,
+                                        changedTitle,
+                                    )
+                                }}
                             />
                         </PageContentBox>
                         {this.displayLists.length > 0 && (

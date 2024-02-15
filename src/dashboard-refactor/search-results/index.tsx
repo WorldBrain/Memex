@@ -132,6 +132,10 @@ export type Props = RootState &
         getHighlightColorSettings?: () => void
         highlightColorSettings: string
         getRootElement: () => HTMLElement
+        // onEditPageBtnClick: (
+        //     normalizedPageUrl: string,
+        //     changedTitle: string,
+        // ) => void
     }
 
 export interface State {

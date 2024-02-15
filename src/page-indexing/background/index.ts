@@ -32,7 +32,9 @@ import {
     PipelineRes,
 } from 'src/search/types'
 import { extractUrlParts } from '@worldbrain/memex-common/lib/url-utils/extract-parts'
-import pagePipeline from '@worldbrain/memex-common/lib/page-indexing/pipeline'
+import pagePipeline, {
+    extractTerms,
+} from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import { initErrHandler } from 'src/search/storage'
 import { Page, PageCreationProps, PageCreationOpts } from 'src/search'
 import { DexieUtilsPlugin } from 'src/search/plugins'
@@ -120,6 +122,9 @@ export class PageIndexingBackground {
         })
 
         this.remoteFunctions = {
+            updatePageTitle: remoteFunctionWithExtraArgs((info, params) =>
+                this.updatePageTitle(params),
+            ),
             initContentIdentifier: remoteFunctionWithExtraArgs((info, params) =>
                 this.initContentIdentifier({
                     ...params,
@@ -374,6 +379,28 @@ export class PageIndexingBackground {
         // Create Visits for each specified time, or a single Visit for "now" if no assoc event
         visits = !visits.length ? [Date.now()] : visits
         await this.storage.createVisitsIfNeeded(pageData.url, visits)
+    }
+
+    async updatePageTitle(params: {
+        normaliedPageUrl: string
+        title: string
+    }): Promise<void> {
+        const title = params.title.trim()
+        if (!title.length) {
+            throw new Error(`Cannot set empty title`)
+        }
+        const existingPage = await this.storage.getPage(params.normaliedPageUrl)
+        if (!existingPage) {
+            throw new Error(`Cannot update title for non-existent page`)
+        }
+        await this.storage.updatePage(
+            {
+                ...existingPage,
+                fullTitle: title,
+                titleTerms: [...extractTerms(title)],
+            },
+            existingPage,
+        )
     }
 
     async addFavIconIfNeeded(url: string, favIcon: string) {
