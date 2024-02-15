@@ -316,7 +316,6 @@ async function convertHTMLintoMarkdown(inputHtml, imageSupport) {
             codeBlockStyle: 'fenced',
         })
         const markdown = turndownService.turndown(html)
-        console.log('markdown', markdown)
         return markdown
     } else {
         return
