@@ -2807,11 +2807,13 @@ export class SidebarContainerLogic extends UILogic<
         const selectedText =
             highlightedText || previousState?.selectedTextAIPreview
 
+        console.log('beforeeyasdfasf')
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
-        const openAIKey = (await this.syncSettings.openAI.get('apiKey')).trim()
-        const hasAPIKey = openAIKey && openAIKey.trim().startsWith('sk-')
+        const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
+        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
+        console.log('beforeey')
         if (!hasAPIKey) {
             let canQueryAI = false
             if (previousState.isTrial) {
@@ -2826,6 +2828,8 @@ export class SidebarContainerLogic extends UILogic<
                 return
             }
         }
+
+        console.log('afterkey')
 
         let queryPrompt = prompt
 
