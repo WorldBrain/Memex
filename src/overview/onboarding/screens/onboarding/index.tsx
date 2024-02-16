@@ -796,49 +796,6 @@ const WelcomeContainer = styled.div`
     width: 100vw;
 `
 
-const openAnimation = keyframes`
- 0% { opacity: 0; margin-top: 100px;}
- 100% { opacity: 1; margin-top: 0px;}
-`
-
-const AnnotationBox = styled.div<{
-    isActive: boolean
-    zIndex: number
-    order: number
-}>`
-    width: 99%;
-    z-index: ${(props) => props.zIndex};
-
-    animation-name: ${openAnimation};
-    animation-duration: 600ms;
-    animation-delay: ${(props) => props.order * 40}ms;
-    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
-    animation-fill-mode: backwards;
-    position: relative;
-`
-
-const LeftSide = styled.div`
-    width: fill-available;
-    display: flex;
-    align-items: center;
-    z-index: 2;
-    flex-direction: row;
-    z-index: 2;
-    /* position: absolute; */
-    justify-content: flex-start;
-    margin-left: 20%;
-    animation-name: ${openAnimation};
-    animation-duration: 600ms;
-    animation-delay: ${(props) => props.order * 40}ms;
-    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
-    animation-fill-mode: backwards;
-    position: relative;
-
-    @media (max-width: 1000px) {
-        width: 100%;
-    }
-`
-
 const LogoImg = styled.img`
     height: 50px;
     width: auto;

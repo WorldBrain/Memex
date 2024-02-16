@@ -45,7 +45,7 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
 
     render() {
         return (
-            <Container>
+            <Container spaceSidebarWidth={this.props.spaceSidebarWidth}>
                 <GroupHeaderContainer
                     spaceSidebarWidth={this.props.spaceSidebarWidth}
                     onClick={this.props.onExpandBtnClick}
@@ -93,14 +93,12 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
 }
 
 const Container = styled.div<{
-    spaceSidebarWidth: number
-    zIndex: number
+    spaceSidebarWidth: string
 }>`
     max-width: ${(props) => props.spaceSidebarWidth};
     position: relative;
     user-select: none;
     cursor: pointer;
-    z-index: ${(props) => props.zIndex};
 
     & * {
         cursor: pointer;
@@ -117,7 +115,7 @@ const LoadingContainer = styled.div`
 `
 
 const GroupHeaderContainer = styled.div<{
-    spaceSidebarWidth: number
+    spaceSidebarWidth: string
 }>`
     height: 40px;
     width: ${(props) => props.spaceSidebarWidth};
@@ -184,7 +182,7 @@ const ErrorMsg = styled.div`
 `
 
 const GroupScrollContainer = styled.div<{
-    spaceSidebarWidth: number
+    spaceSidebarWidth: string
 }>`
     overflow: scroll;
     width: calc(${(props) => props.spaceSidebarWidth});

@@ -68,7 +68,9 @@ export default class DataDumper extends UIElement<Props, State, Event> {
                 <>
                     <LoadingIndicator />
                     <Header>Data Dump In Progress</Header>
-                    <Text>This may take a couple of minutes.</Text>
+                    <Text dimmed clickable bold>
+                        This may take a couple of minutes.
+                    </Text>
                 </>
             )
         }
@@ -77,7 +79,7 @@ export default class DataDumper extends UIElement<Props, State, Event> {
                 <>
                     <Icon icon="warning" height="20px" />
                     <Header>There was an error</Header>
-                    <Text>
+                    <Text dimmed clickable bold>
                         <a href={this.props.supportLink}>Contact support</a> if
                         problem persists.
                     </Text>

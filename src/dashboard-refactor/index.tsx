@@ -1538,14 +1538,14 @@ export class DashboardContainer extends StatefulUIElement<
                         </SidebarHeaderContainer>
                     )}
                     <PeekTrigger
-                        onMouseEnter={(isPeeking) => {
+                        onMouseEnter={() => {
                             this.processEvent('setSidebarPeeking', {
-                                isPeeking,
+                                isPeeking: true,
                             })
                         }}
-                        onDragEnter={(isPeeking) => {
+                        onDragEnter={() => {
                             this.processEvent('setSidebarPeeking', {
-                                isPeeking,
+                                isPeeking: true,
                             })
                         }}
                     />
@@ -1746,11 +1746,14 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         getRootElement={this.props.getRootElement}
                     />
-                    <DragElement
-                        isHoveringOverListItem={
-                            listsSidebar.dragOverListId != null
-                        }
-                    />
+                    {this.state.listsSidebar.draggedListId != null ||
+                        (this.state.searchResults.draggedPageId != null && (
+                            <DragElement
+                                isHoveringOverListItem={
+                                    listsSidebar.dragOverListId != null
+                                }
+                            />
+                        ))}
                     {this.props.renderUpdateNotifBanner()}
                     <BulkEditWidget
                         deleteBulkSelection={(pageId) =>
@@ -1911,30 +1914,7 @@ const DropZoneTitle = styled.div`
     text-align: center;
 `
 
-const ContentArea = styled.div`
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    width: fill-available;
-    height: fill-available;
-`
-
-const HeaderBar = styled.div`
-    height: ${sizeConstants.header.heightPx}px;
-    width: fill-available;
-    position: sticky;
-    top: 0;
-    left: 150px;
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    background-color: ${(props) => props.theme.colors.black};
-    z-index: 30;
-    box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale3};
-`
-
-const MainContent = styled.div<{ responsiveWidth: string }>`
+const MainContent = styled.div`
     width: fill-available;
     align-items: center;
     display: flex;
@@ -1943,12 +1923,6 @@ const MainContent = styled.div<{ responsiveWidth: string }>`
     height: 100%;
     flex: 1;
     width: 360px;
-
-    ${(props) =>
-        props.responsiveWidth &&
-        css<{ responsiveWidth: string }>`
-            width: ${(props) => props.responsiveWidth};
-        `};
 
     &::-webkit-scrollbar {
         display: none;
@@ -2022,18 +1996,6 @@ const ListSidebarContent = styled(Rnd)<{
             `};
 `
 
-// const ListSidebarContent = styled.div`
-//     width: fit-content;
-//     block-size: fit-content;
-// `
-
-const LoadingBox = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0 10px;
-`
-
 const FeedContainer = styled.div`
     display: flex;
     width: fill-available;
@@ -2050,27 +2012,6 @@ const FeedFrame = styled.iframe`
     min-height: 100vh;
     height: 100%;
     border: none;
-`
-
-const TitleContainer = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: center;
-    grid-gap: 10px;
-    width: fill-available;
-    padding: 0 30px;
-`
-
-const SectionTitle = styled.div`
-    color: ${(props) => props.theme.colors.white};
-    font-size: 24px;
-    font-weight: bold;
-`
-const SectionDescription = styled.div`
-    color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 16px;
-    font-weight: 300;
 `
 
 const MainFrame = styled.div`
@@ -2151,65 +2092,6 @@ const SidebarHeaderContainer = styled.div`
 
     & div {
         justify-content: flex-start;
-    }
-`
-
-const SettingsSection = styled(Margin)`
-    width: min-content;
-    cursor: pointer;
-    height: 24px;
-    width: 24px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    border-radius: 3px;
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1};
-    }
-`
-
-const SyncStatusHeaderBox = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: center;
-    cursor: pointer;
-    padding: 4px 8px;
-    border-radius: 3px;
-    height: 24px;
-    grid-gap: 5px;
-
-    & > div {
-        width: auto;
-    }
-
-    &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale1};
-    }
-
-    @media screen and (max-width: 900px) {
-        padding: 4px 4px 4px 4px;
-        margin-left: 15px;
-        width: 20px;
-    }
-`
-
-const SyncStatusHeaderText = styled.span<{
-    textCentered: boolean
-}>`
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    font-weight: 500;
-    color: ${(props) => props.theme.colors.white};
-    font-size: 14px;
-    white-space: nowrap;
-    overflow: hidden;
-    ${(props) => (props.textCentered ? 'text-align: center;' : '')}
-
-    @media screen and (max-width: 600px) {
-        display: none;
     }
 `
 

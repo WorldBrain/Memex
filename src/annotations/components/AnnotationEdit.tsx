@@ -137,7 +137,7 @@ class AnnotationEdit extends React.Component<Props> {
 
     render() {
         return (
-            <EditorContainer editorHeight={this.props.editorHeight}>
+            <EditorContainer>
                 <MemexEditor
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     onContentUpdate={(content) =>

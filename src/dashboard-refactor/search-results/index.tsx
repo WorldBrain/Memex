@@ -775,6 +775,7 @@ export default class SearchResultsContainer extends React.Component<
                                         showTutorialVideo: true,
                                     })
                                 }
+                                showTutorialVideo={this.state.showTutorialVideo}
                             >
                                 <TutorialPlayButton>
                                     <Icon
@@ -1437,7 +1438,7 @@ const Loader = styled.div`
     height: 300px;
 `
 
-const ResultsBox = styled.div<{ zIndex: number }>`
+const ResultsBox = styled.div`
     display: flex;
     margin-top: 2px;
     flex-direction: column;

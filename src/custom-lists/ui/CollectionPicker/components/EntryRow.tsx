@@ -394,7 +394,7 @@ class EntryRow extends React.Component<Props> {
                         </ButtonContainer>
                     )} */}
                     {selected && (
-                        <ButtonContainer selected={selected}>
+                        <ButtonContainer>
                             <SelectionBox
                                 onMouseEnter={() =>
                                     this.setState({ checkBoxHover: true })
@@ -451,7 +451,7 @@ export const ActOnAllTabsButton = styled.div`
     pointer-events: auto !important;
 `
 
-const ButtonContainer = styled.div<{ selected }>`
+const ButtonContainer = styled.div`
     height: 20px;
     width: 20px;
     display: flex;

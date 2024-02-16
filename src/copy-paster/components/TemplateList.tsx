@@ -1,17 +1,24 @@
 import React, { PureComponent } from 'react'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import styled from 'styled-components'
-import { Template } from '../types'
+import type { Template } from '../types'
+import ReactDOM from 'react-dom'
 import TemplateRow from './TemplateRow'
 import { LesserLink } from 'src/common-ui/components/design-library/actions/LesserLink'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import {
+    DragDropContext,
+    Droppable,
+    Draggable,
+    OnDragEndResponder,
+} from 'react-beautiful-dnd'
 
 const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 0px 18px;
+    padding: 10px 15px 0px 27px;
     height: 30px;
     align-items: center;
 `
@@ -67,6 +74,8 @@ const ContentBlock = styled.div`
     padding: 5px 10px 10px 10px;
     max-height: 300px;
     overflow: scroll;
+    display: flex;
+    flex-direction: column;
 
     scrollbar-width: none;
 
@@ -100,71 +109,36 @@ const InfoTextTitle = styled.div`
     margin-top: 20px;
 `
 
-interface InternalTemplateListProps {
-    templates: Template[]
-
-    onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
-    onClickEdit: (id: number) => void
-    onClickCopy: (id: number) => void
-    onClickHowto: () => void
-}
-
-class InternalTemplateList extends PureComponent<InternalTemplateListProps> {
-    render() {
-        const { templates } = this.props
-
-        if (templates.length === 0) {
-            return (
-                <NoResultsBox>
-                    <SectionCircle>
-                        <Icon
-                            filePath={icons.copy}
-                            heightAndWidth="16px"
-                            color="prime1"
-                            hoverOff
-                        />
-                    </SectionCircle>
-                    <InfoText>
-                        Create custom templates to copy/paste content into your
-                        workflow
-                    </InfoText>
-                    <LesserLink
-                        label={'Learn More >'}
-                        onClick={this.props.onClickHowto}
-                    />
-                </NoResultsBox>
-            )
-        }
-
-        return templates.map((template) => (
-            <TemplateRow
-                key={template.id}
-                template={template}
-                onClick={() => {
-                    this.props.onClickCopy(template.id)
-                }}
-                onClickSetIsFavourite={(isFavourite) =>
-                    this.props.onClickSetIsFavourite(template.id, isFavourite)
-                }
-                onClickEdit={() => this.props.onClickEdit(template.id)}
-            />
-        ))
-    }
-}
-
 interface TemplateListProps {
     isLoading?: boolean
     copySuccess?: boolean
     templates: Template[]
+    focusIndex: number
 
-    onClickSetIsFavourite: (id: number, isFavourite: boolean) => void
     onClickEdit: (id: number) => void
     onClickCopy: (id: number) => void
     onClickNew: () => void
     onClickHowto: () => void
+    getRootElement: () => HTMLElement
+    onReorder: (id: number, oldIndex: number, newIndex: number) => void
 }
 
 export default class TemplateList extends PureComponent<TemplateListProps> {
+    private onDragEnd: OnDragEndResponder = (result) => {
+        if (
+            !result.destination ||
+            result.source.index === result.destination.index
+        ) {
+            return
+        }
+
+        this.props.onReorder(
+            Number(result.draggableId),
+            result.source.index,
+            result.destination.index,
+        )
+    }
+
     render() {
         if (this.props.copySuccess) {
             return (
@@ -184,7 +158,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                 <Center>
                     <LoadingIndicator size={25} />
                     <InfoTextTitle>Copying Content</InfoTextTitle>
-                    <InfoText small>Don't close this modal</InfoText>
+                    <InfoText>Don't close this modal</InfoText>
                 </Center>
             )
         }
@@ -214,13 +188,110 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                     </ButtonBox>
                 </Header>
                 <ContentBlock>
-                    <InternalTemplateList
-                        templates={this.props.templates}
-                        onClickCopy={this.props.onClickCopy}
-                        onClickSetIsFavourite={this.props.onClickSetIsFavourite}
-                        onClickEdit={this.props.onClickEdit}
-                        onClickHowto={this.props.onClickHowto}
-                    />
+                    {!this.props.templates.length ? (
+                        <NoResultsBox>
+                            <SectionCircle>
+                                <Icon
+                                    filePath={icons.copy}
+                                    heightAndWidth="16px"
+                                    color="prime1"
+                                    hoverOff
+                                />
+                            </SectionCircle>
+                            <InfoText>
+                                Create custom templates to copy/paste content
+                                into your workflow
+                            </InfoText>
+                            <LesserLink
+                                label={'Learn More >'}
+                                onClick={this.props.onClickHowto}
+                            />
+                        </NoResultsBox>
+                    ) : (
+                        <DragDropContext onDragEnd={this.onDragEnd}>
+                            <Droppable droppableId="droppableTemplates">
+                                {(provided) => (
+                                    <div
+                                        {...provided.droppableProps}
+                                        ref={provided.innerRef}
+                                    >
+                                        {this.props.templates.map(
+                                            (template, index) => (
+                                                <Draggable
+                                                    key={template.id}
+                                                    draggableId={String(
+                                                        template.id,
+                                                    )}
+                                                    index={index}
+                                                >
+                                                    {(provided, snapshot) => {
+                                                        // Use a portal for the dragging item
+                                                        const draggableContent = (
+                                                            <div
+                                                                ref={
+                                                                    provided.innerRef
+                                                                }
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                style={{
+                                                                    ...provided
+                                                                        .draggableProps
+                                                                        .style,
+                                                                    zIndex: 30000000000000,
+                                                                    // Additional styles if needed
+                                                                }}
+                                                            >
+                                                                <TemplateRow
+                                                                    templateTitle={
+                                                                        template.title
+                                                                    }
+                                                                    onClick={() => {
+                                                                        this.props.onClickCopy(
+                                                                            template.id,
+                                                                        )
+                                                                    }}
+                                                                    // isDefault={index === 0}
+                                                                    onClickEdit={() =>
+                                                                        this.props.onClickEdit(
+                                                                            template.id,
+                                                                        )
+                                                                    }
+                                                                    inFocus={
+                                                                        this
+                                                                            .props
+                                                                            .focusIndex ===
+                                                                        index
+                                                                    }
+                                                                />
+                                                            </div>
+                                                        )
+
+                                                        const portalRoot =
+                                                            this.props.getRootElement?.() ??
+                                                            document.querySelector(
+                                                                'body',
+                                                            )
+
+                                                        if (
+                                                            snapshot.isDragging
+                                                        ) {
+                                                            return ReactDOM.createPortal(
+                                                                draggableContent,
+                                                                portalRoot,
+                                                            )
+                                                        }
+
+                                                        return draggableContent
+                                                    }}
+                                                </Draggable>
+                                            ),
+                                        )}
+                                        {provided.placeholder}
+                                    </div>
+                                )}
+                            </Droppable>
+                        </DragDropContext>
+                    )}
                 </ContentBlock>
             </>
         )

@@ -49,8 +49,6 @@ const SubTitleText = styled.div`
     color: ${(props) => props.theme.colors.darkgrey};
     font-size: 16px;
     font-weight: 400;
-
-    padding-bottom: ${(props) => (props.routeToLoginBtn ? '20px' : '0px')};
 `
 
 const Margin = styled.div`

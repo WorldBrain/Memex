@@ -218,6 +218,7 @@ export default class PageResultView extends PureComponent<Props> {
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
                         onClickOutside={this.props.onCopyPasterBtnClick}
+                        getRootElement={this.props.getRootElement}
                     />
                 </PopoutBox>
             )
@@ -448,7 +449,7 @@ export default class PageResultView extends PureComponent<Props> {
                             //         : undefined
                             // }
                             tabIndex={-1}
-                            hasSpaces={this.displayLists}
+                            hasSpaces={this.displayLists.length > 0}
                         >
                             <BlockContent
                                 type={this.props.type}

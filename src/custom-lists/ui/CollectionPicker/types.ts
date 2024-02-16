@@ -67,8 +67,8 @@ export type SpacePickerEvent = UIEvent<{
     deleteList: { listId: number }
     newEntryPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
     switchTab: { tab: SpacePickerTab }
-    keyPress: { event: KeyboardEvent }
-    onKeyUp: { event: KeyboardEvent }
+    keyPress: { event: React.KeyboardEvent<HTMLInputElement> }
+    onKeyUp: { event: React.KeyboardEvent<HTMLInputElement> }
     focusInput: {}
 }>
 

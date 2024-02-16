@@ -66,16 +66,24 @@ export interface SidebarToggleProps {
 }
 
 export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
+    handleHoverEnter = (event: React.MouseEvent<HTMLDivElement>) => {
+        const id = event.currentTarget.id
+        this.props.onHoverEnter(id)
+    }
+
+    handleHoverLeave = (event: React.MouseEvent<HTMLDivElement>) => {
+        const id = event.currentTarget.id
+        this.props.onHoverLeave(id)
+    }
+
     render() {
         const { onHoverEnter, onHoverLeave, isHovered } = this.props
 
         return (
             <Container
-                isHovered={isHovered}
-                // onMouseLeave={onHoverLeave}
                 onClick={this.props.toggleSidebarLockedState}
-                onMouseEnter={onHoverEnter}
-                onMouseOver={onHoverEnter}
+                onMouseEnter={this.handleHoverEnter}
+                onMouseLeave={this.handleHoverLeave}
                 id="testingthis"
             >
                 {!this.props.isSidebarLocked ? (
@@ -83,7 +91,7 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                         {isHovered ? (
                             <Icon
                                 path={icons.arrowRight}
-                                rotation="0"
+                                rotation={0}
                                 heightAndWidth="26px"
                             />
                         ) : (
@@ -94,8 +102,8 @@ export default class SidebarToggle extends PureComponent<SidebarToggleProps> {
                         )}
                         {isHovered && (
                             <TriggerArea
-                                onMouseEnter={onHoverEnter}
-                                onMouseLeave={onHoverLeave}
+                                onMouseEnter={this.handleHoverEnter}
+                                onMouseLeave={this.handleHoverLeave}
                             />
                         )}
                     </>

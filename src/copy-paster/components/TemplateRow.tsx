@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { Template } from '../types'
 import ResultItemActionBtn from 'src/common-ui/components/result-item-action-btn'
@@ -10,11 +10,12 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 const COPY_TIMEOUT = 2000
 
 export interface Props {
-    template: Template
+    templateTitle: string
+    // onClickChangeOrder: (oldOrder: number) => void
 
     onClick: () => Promise<void> | void
-    onClickSetIsFavourite: (isFavourite: boolean) => void
     onClickEdit: () => void
+    inFocus?: boolean
 }
 
 interface State {
@@ -33,7 +34,7 @@ export default class TemplateRow extends Component<Props, State> {
         }
     }
 
-    private handleSingleCopy = async () => {
+    private handleSingleCopy = async (event) => {
         if (this.copyPromise) {
             return this.copyPromise
         }
@@ -42,6 +43,7 @@ export default class TemplateRow extends Component<Props, State> {
 
         await this.copyPromise
         this.copyPromise = null
+        event.stopPropagation()
     }
 
     private copy = async () => {
@@ -59,7 +61,7 @@ export default class TemplateRow extends Component<Props, State> {
     }
 
     private renderRowBody() {
-        const { title, isFavourite } = this.props.template
+        const title = this.props.templateTitle
 
         if (this.state.isLoading) {
             return (
@@ -74,7 +76,15 @@ export default class TemplateRow extends Component<Props, State> {
         }
 
         return (
-            <>
+            <RowContainer>
+                <DragIconContainer>
+                    <Icon
+                        icon={'dragList'}
+                        rotation={180}
+                        heightAndWidth="16px"
+                        hoverOff
+                    />
+                </DragIconContainer>
                 <Title>{title}</Title>
                 <ActionsContainer>
                     <Icon
@@ -91,14 +101,42 @@ export default class TemplateRow extends Component<Props, State> {
                         }}
                     />
                 </ActionsContainer>
-            </>
+            </RowContainer>
         )
     }
 
     render() {
-        return <Row onClick={this.handleSingleCopy}>{this.renderRowBody()}</Row>
+        return (
+            <Row onClick={this.handleSingleCopy} inFocus={this.props.inFocus}>
+                {this.renderRowBody()}
+            </Row>
+        )
     }
 }
+
+const RowContainer = styled.div`
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+`
+
+const DragIconContainer = styled.div`
+    position: absolute;
+    left: -22px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    display: none;
+
+    &:hover {
+        cursor: grab;
+    }
+    &:hover * {
+        cursor: grab;
+    }
+`
 
 const ActionsContainer = styled.div`
     flex-direction: row;
@@ -106,16 +144,25 @@ const ActionsContainer = styled.div`
     justify-content: flex-end;
     grid-gap: 5px;
     display: none;
+    position: absolute;
+    background-color: ${(props) => props.theme.colors.greyScale2}90;
+    backdrop-filter: blur(4px);
+    right: 0px;
+    height: 40px;
+    padding: 0 10px;
 `
 
-const Row = styled.div`
+const Row = styled.div<{
+    inFocus?: boolean
+}>`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
     height: 40px;
+    position: relative;
     border-radius: 5px;
-    padding: 0px 10px;
+    padding: 0px 0 0 18px;
     // border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 
     &:last-child {
@@ -129,9 +176,19 @@ const Row = styled.div`
             display: flex;
         }
     }
+
+    &:hover ${DragIconContainer} {
+        display: flex;
+    }
+
+    ${(props) =>
+        props.inFocus &&
+        css`
+            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        `}
 `
 
-const Title = styled.div`
+const Title = styled.div<{ fullWidth?: boolean }>`
     display: ${(props) => (props.fullWidth ? 'flex' : 'block')};
     justify-content: center;
     width: 100%;

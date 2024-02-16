@@ -317,6 +317,7 @@ export function createSelfTests(options: {
                     await backgroundModules.copyPaster.createTemplate({
                         title: 'Test template',
                         code: 'Soem test code {{{PageTitle}}}',
+                        order: 2,
                         isFavourite: false,
                         outputFormat: 'markdown',
                     })

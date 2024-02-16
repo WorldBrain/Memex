@@ -66,7 +66,7 @@ export default class DataCleaner extends React.PureComponent<Props> {
             return (
                 <>
                     <Header>Cleaning out old data</Header>
-                    <Text>
+                    <Text dimmed clickable bold>
                         You've been using Memex since when we still had the
                         history full-text search.
                         <br />
@@ -85,7 +85,7 @@ export default class DataCleaner extends React.PureComponent<Props> {
                 <>
                     <LoadingIndicator />
                     <Header>Cleaning out old data</Header>
-                    <Text>
+                    <Text dimmed clickable bold>
                         This may take a couple of minutes. You can't use Memex
                         in the mean time.
                     </Text>
@@ -97,7 +97,7 @@ export default class DataCleaner extends React.PureComponent<Props> {
                 <>
                     <Icon icon="warning" height="20px" />
                     <Header>There was an error</Header>
-                    <Text>
+                    <Text dimmed clickable bold>
                         <a href={supportLink}>Contact support</a> if problem
                         persists.
                     </Text>

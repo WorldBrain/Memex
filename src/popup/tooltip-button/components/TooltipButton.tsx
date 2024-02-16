@@ -23,11 +23,10 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    handleChange: CheckboxToggle
+    handleChange: React.MouseEventHandler<HTMLDivElement>
     showTooltip: React.MouseEventHandler
     initState: () => Promise<void>
 }
-
 export type Props = OwnProps & StateProps & DispatchProps
 
 class InPageSwitches extends PureComponent<Props> {
@@ -37,7 +36,10 @@ class InPageSwitches extends PureComponent<Props> {
 
     render() {
         return (
-            <ButtonItem onClick={this.props.handleChange}>
+            <ButtonItem
+                disabled={!this.props.isEnabled}
+                onClick={this.props.handleChange}
+            >
                 <ButtonInnerContainer>
                     <Icon
                         filePath={icons.tooltipOn}

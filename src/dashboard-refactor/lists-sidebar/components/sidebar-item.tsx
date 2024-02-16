@@ -24,6 +24,7 @@ export interface Props {
     forceRightSidePermanentDisplay?: boolean
     spaceSidebarWidth: string
     sidebarItemRef?: (el: any) => void
+    isMenuDisplayed?: boolean
 }
 
 export interface State {
@@ -89,6 +90,8 @@ export default class ListsSidebarItem extends React.PureComponent<
                     indentSteps={this.props.indentSteps ?? 0}
                     isSelected={this.props.isSelected}
                     dropReceivingState={this.props.dropReceivingState}
+                    name={this.props.name} // Add this line
+                    onClick={this.props.onClick} // A
                 >
                     <LeftSideIconContainer
                         alwaysShowRightSideIcon={
@@ -202,7 +205,9 @@ const Name = styled.div`
     color: ${(props) => props.theme.colors.greyScale6};
 `
 
-const TitleBox = styled.div<Props>`
+const TitleBox = styled.div<{
+    draggable: boolean
+}>`
     display: flex;
     flex: 0 1 100%;
     width: 30%;

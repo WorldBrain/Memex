@@ -263,9 +263,7 @@ const CheckBoxContainer = styled.div`
     cursor: pointer;
 `
 
-const CheckBoxRow = styled.div<{
-    zIndex: number
-}>`
+const CheckBoxRow = styled.div<{}>`
     height: 50px;
     margin-left: -10px;
     padding: 10px;
@@ -273,11 +271,9 @@ const CheckBoxRow = styled.div<{
     display: flex;
     align-items: center;
     justify-content: flex-end;
-    z-index: ${(props) => props.zIndex};
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-        z-index: ${(props) => props.zIndex};
     }
 `
 

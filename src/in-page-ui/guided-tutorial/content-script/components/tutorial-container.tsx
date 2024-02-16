@@ -80,15 +80,6 @@ export default class TutorialContainer extends React.Component<Props, State> {
                         this.props.content[this.state.cardIndex].component.props
                             .height
                     }
-                    screenWidth={this.state.windowSize}
-                    showHoverArea={
-                        this.props.content[this.state.cardIndex].component.props
-                            .showHoverArea
-                    }
-                    position={
-                        this.props.content[this.state.cardIndex].component.props
-                            .position
-                    }
                 >
                     <TopArea firstContainer={this.state.cardIndex === 0}>
                         <CardBody>
@@ -223,7 +214,6 @@ const TutorialCardContainer = styled.div<{
     right: string
     width: string
     height: string
-    screenWidth: string
 }>`
     top: ${(props) => (props.top ? props.top : null)};
     bottom: ${(props) => (props.bottom ? props.bottom : null)};

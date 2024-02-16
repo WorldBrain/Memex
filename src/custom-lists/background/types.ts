@@ -1,14 +1,14 @@
 import type { LoadPageAnnotationRefsForListsResult } from '@worldbrain/memex-common/lib/content-sharing/backend/types'
 import type { SharedCollectionType } from '@worldbrain/memex-common/lib/content-sharing/storage/types'
-import type { Orderable } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type {
     SharedAnnotation,
     SharedAnnotationReference,
     SharedList,
 } from '@worldbrain/memex-common/lib/content-sharing/types'
+import type { Orderable } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { ListShareResult } from 'src/content-sharing/background/types'
-import { SuggestionCard } from 'src/sidebar/annotations-sidebar/containers/types'
+import type { SuggestionCard } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export interface PageList extends Orderable {
     id: number

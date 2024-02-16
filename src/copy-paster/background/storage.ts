@@ -6,7 +6,7 @@ import {
     COLLECTION_DEFINITIONS,
     COLLECTION_NAMES,
 } from '@worldbrain/memex-common/lib/storage/modules/copy-paster/constants'
-import { Template } from '../types'
+import type { Template } from '../types'
 
 export default class CopyPasterStorage extends StorageModule {
     getConfig = (): StorageModuleConfig => ({
@@ -27,9 +27,9 @@ export default class CopyPasterStorage extends StorageModule {
                 args: [
                     { id: '$id:pk' },
                     {
-                        title: '$title:string',
                         code: '$code:string',
-                        isFavourite: '$isFavourite:boolean',
+                        title: '$title:string',
+                        order: '$order:number',
                         outputFormat: '$outputFormat:string',
                     },
                 ],
@@ -60,36 +60,31 @@ export default class CopyPasterStorage extends StorageModule {
     async createTemplate({
         title,
         code,
-        isFavourite,
+        order,
         outputFormat,
     }: Omit<Template, 'id'>) {
         const { object } = await this.operation('createTemplate', {
             id: this.getId(),
             title,
             code,
-            isFavourite,
+            order,
+            isFavourite: false,
             outputFormat,
         })
 
         return object.id
     }
 
-    async findTemplate({ id }: { id: number }) {
+    async findTemplate({ id }: { id: number }): Promise<Template | null> {
         return this.operation('findTemplate', { id })
     }
 
-    async updateTemplate({
-        id,
-        title,
-        code,
-        isFavourite,
-        outputFormat,
-    }: Template) {
+    async updateTemplate({ id, title, code, order, outputFormat }: Template) {
         return this.operation('updateTemplate', {
             id,
-            title,
             code,
-            isFavourite,
+            title,
+            order,
             outputFormat,
         })
     }
@@ -98,7 +93,7 @@ export default class CopyPasterStorage extends StorageModule {
         return this.operation('deleteTemplate', { id })
     }
 
-    async findAllTemplates() {
+    async findAllTemplates(): Promise<Template[]> {
         return this.operation('findAllTemplates', {})
     }
 }

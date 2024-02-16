@@ -135,3 +135,10 @@ export function analyzeTemplate(
 
     return { usesLegacyTags, expectedContext, requirements }
 }
+
+export function convertHTMlTemplateToMarkdown(htmlTemplate) {
+    const markdownTemplate = htmlTemplate
+        .replace(/<br\s*\/?>/g, '\n')
+        .replace(/<[^>]+>/g, '')
+    return markdownTemplate
+}

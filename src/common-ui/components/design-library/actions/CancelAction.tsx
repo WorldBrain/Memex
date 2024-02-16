@@ -11,7 +11,6 @@ import {
 
 const StyledCancelAction = styled.div`
     padding: 10px 20px;
-    background: ${(props) => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;
     display: flex;
@@ -30,10 +29,7 @@ export const CancelAction = ({
     onClick: () => void
     disabled?: boolean
 }) => (
-    <StyledCancelAction
-        onClick={disabled === true ? undefined : onClick}
-        disabled={disabled}
-    >
+    <StyledCancelAction onClick={disabled === true ? undefined : onClick}>
         <StyledCancelActionLinkText>{label}</StyledCancelActionLinkText>
     </StyledCancelAction>
 )
