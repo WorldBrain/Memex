@@ -63,10 +63,6 @@ export interface Props
     copyLoadingState: UITaskState
 }
 
-interface State {
-    copyLoadingState: UITaskState
-}
-
 export default class PageResultView extends PureComponent<Props> {
     private get fullUrl(): string {
         return this.props.type === 'pdf'
@@ -77,10 +73,6 @@ export default class PageResultView extends PureComponent<Props> {
     spacePickerButtonRef = React.createRef<HTMLDivElement>()
     spacePickerBarRef = React.createRef<HTMLDivElement>()
     copyPasteronPageButtonRef = React.createRef<HTMLDivElement>()
-
-    state = {
-        copyLoadingState: 'pristine',
-    }
 
     private get domain(): string {
         let fullUrl: URL
@@ -224,25 +216,16 @@ export default class PageResultView extends PureComponent<Props> {
                     strategy={'fixed'}
                     closeComponent={this.props.onCopyPasterBtnClick}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose={true}
                 >
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
                         onClickOutside={this.props.onCopyPasterBtnClick}
                         getRootElement={this.props.getRootElement}
-                        setLoadingState={(loadingState) =>
-                            this.setState({ copyLoadingState: loadingState })
-                        }
                     />
                 </PopoutBox>
             )
         }
-    }
-
-    private renderPopouts() {
-        if (this.props.isShareMenuShown) {
-            return <AllNotesShareMenu {...this.props.shareMenuProps} />
-        }
-        return null
     }
 
     private renderRemoveFromListBtn(): JSX.Element {
@@ -385,16 +368,19 @@ export default class PageResultView extends PureComponent<Props> {
                 {
                     key: 'copy-paste-page-btn',
                     image:
-                        this.state.copyLoadingState === 'success'
+                        this.props.copyLoadingState === 'success'
                             ? 'check'
                             : 'copy',
-                    isLoading: this.state.copyLoadingState === 'running',
-                    onClick: (event) => {
+                    isLoading: this.props.copyLoadingState === 'running',
+                    onMouseDown: (event) => {
                         if (!this.props.isCopyPasterShown) {
                             this.props.showPopoutsForResultBox(this.props.index)
                             this.props.onCopyPasterBtnClick(event)
-                        } else {
-                            this.props.onCopyPasterBtnClick(event)
+                        }
+                    },
+                    onMouseUp: (event) => {
+                        if (!this.props.isCopyPasterShown) {
+                            this.props.onCopyPasterDefaultExecute(event)
                         }
                     },
                     buttonRef: this.copyPasteronPageButtonRef,

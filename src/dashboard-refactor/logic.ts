@@ -74,15 +74,23 @@ import {
 } from 'src/bulk-edit/utils'
 import type { DragToListAction } from './lists-sidebar/types'
 import {
+    defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import MarkdownIt from 'markdown-it'
+
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import Raven from 'raven-js'
+import analytics from 'src/analytics'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
     Events,
     EventName
 >
+
+const md = new MarkdownIt()
 
 /**
  * Helper used to build a mutation to remove a page from all results days in which it occurs.
@@ -2012,8 +2020,155 @@ export class DashboardLogic extends UILogic<State, Events> {
     //     )
     // }
 
+    private handleDefaultTemplateCopy = async (
+        annotationUrls,
+        normalizedPageUrls,
+    ) => {
+        try {
+            const templates = await this.options.copyPasterBG.findAllTemplates()
+            console.log('templates', templates)
+            const sortedTemplates = templates.sort(defaultOrderableSorter)
+            console.log('sortedTemplates', sortedTemplates)
+            const id = sortedTemplates[0].id
+
+            const item = templates.find((item) => item.id === id)
+
+            const rendered = await this.options.copyPasterBG.renderTemplate({
+                id,
+                annotationUrls: annotationUrls,
+                normalizedPageUrls: normalizedPageUrls,
+            })
+
+            console.log('rendered', rendered)
+
+            if (item) {
+                if (
+                    item.outputFormat === 'markdown' ||
+                    item.outputFormat == null
+                ) {
+                    await copyToClipboard(rendered)
+                }
+                if (item.outputFormat === 'rich-text') {
+                    const htmlString = md.render(rendered)
+                    await this.copyRichTextToClipboard(htmlString)
+                }
+            }
+        } catch (err) {
+            console.error('Something went really bad copying:', err.message)
+            Raven.captureException(err)
+            return false
+        } finally {
+            analytics.trackEvent({
+                category: 'TextExporter',
+                action: 'copyToClipboard',
+            })
+
+            return true
+        }
+    }
+
+    async copyRichTextToClipboard(html: string) {
+        // Create a hidden content-editable div
+        const hiddenDiv = document.createElement('div')
+
+        hiddenDiv.contentEditable = 'true'
+        hiddenDiv.style.position = 'absolute'
+        hiddenDiv.style.left = '-9999px'
+        hiddenDiv.innerHTML = html
+
+        // Append the hidden div to the body
+        document.body.appendChild(hiddenDiv)
+
+        // Select the content of the hidden div
+        const range = document.createRange()
+        range.selectNodeContents(hiddenDiv)
+        const selection = window.getSelection()
+        selection.removeAllRanges()
+        selection.addRange(range)
+
+        // Copy the selected content to the clipboard
+        document.execCommand('copy')
+
+        // Remove the hidden div from the body
+        document.body.removeChild(hiddenDiv)
+    }
+
+    setCopyPasterDefaultExecute: EventHandler<
+        'setCopyPasterDefaultExecute'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    copyLoadingState: {
+                                        $set: 'running',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+
+        let templateCopyResult
+        if (
+            !previousState.searchResults.results[event.day].pages.byId[
+                event.pageId
+            ].isCopyPasterShown
+        ) {
+            templateCopyResult = await this.handleDefaultTemplateCopy(
+                [null],
+                [event.pageId],
+            )
+        }
+
+        if (templateCopyResult) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [event.day]: {
+                            pages: {
+                                byId: {
+                                    [event.pageId]: {
+                                        copyLoadingState: {
+                                            $set: 'success',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+
+            setTimeout(() => {
+                this.emitMutation({
+                    searchResults: {
+                        results: {
+                            [event.day]: {
+                                pages: {
+                                    byId: {
+                                        [event.pageId]: {
+                                            copyLoadingState: {
+                                                $set: 'pristine',
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                })
+            }, 3000)
+        }
+    }
     setPageCopyPasterShown: EventHandler<'setPageCopyPasterShown'> = ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             searchResults: {

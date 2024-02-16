@@ -178,26 +178,22 @@ export default class CopyPasterBackground {
                 },
             ]
         } else {
-            try {
-                const searchResponse = await this.options.search.searchPages({
-                    ...searchParams,
-                    skip: 0,
-                    limit: 100000,
-                })
+            const searchResponse = await this.options.search.searchPages({
+                ...searchParams,
+                skip: 0,
+                limit: 100000,
+            })
 
-                const normalizedPageUrls = searchResponse.docs.map(
-                    (page) => page.url,
-                )
+            const normalizedPageUrls = searchResponse.docs.map(
+                (page) => page.url,
+            )
 
-                templateDocs = await generateTemplateDocs({
-                    annotationUrls: [],
-                    normalizedPageUrls,
-                    templateAnalysis: analyzeTemplate(template),
-                    dataFetchers: getTemplateDataFetchers(this.options),
-                })
-            } catch (e) {
-                console.log('eeee', e)
-            }
+            templateDocs = await generateTemplateDocs({
+                annotationUrls: [],
+                normalizedPageUrls,
+                templateAnalysis: analyzeTemplate(template),
+                dataFetchers: getTemplateDataFetchers(this.options),
+            })
         }
         return joinTemplateDocs(templateDocs, template)
     }

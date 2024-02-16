@@ -48,6 +48,7 @@ import {
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -92,6 +93,7 @@ export interface DashboardDependencies {
     authBG: AuthRemoteFunctionsInterface
     backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
+    copyPasterBG: RemoteCopyPasterInterface
     contentShareByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
