@@ -12,11 +12,12 @@ const COPY_TIMEOUT = 2000
 export interface Props {
     templateTitle: string
     // onClickChangeOrder: (oldOrder: number) => void
-
+    itemIndex: number
     onClick: () => Promise<void> | void
     onClickEdit: () => void
     inFocus?: boolean
     isDefault?: boolean
+    focusOnElement: (index: number) => void
 }
 
 interface State {
@@ -92,7 +93,11 @@ export default class TemplateRow extends Component<Props, State> {
                         <DefaultLabel>Default</DefaultLabel>
                     )}
                 </TitleBox>
-                <ActionsContainer>
+                <ActionsContainer
+                    onClick={(event) => {
+                        event.stopPropagation()
+                    }}
+                >
                     <Icon
                         filePath={icons.copy}
                         heightAndWidth="16px"
@@ -113,7 +118,13 @@ export default class TemplateRow extends Component<Props, State> {
 
     render() {
         return (
-            <Row onClick={this.handleSingleCopy} inFocus={this.props.inFocus}>
+            <Row
+                onClick={this.handleSingleCopy}
+                inFocus={this.props.inFocus}
+                onMouseEnter={() =>
+                    this.props.focusOnElement(this.props.itemIndex)
+                }
+            >
                 {this.renderRowBody()}
             </Row>
         )
@@ -139,7 +150,6 @@ const DefaultLabel = styled.div`
     padding: 2px 5px;
     border-radius: 5px;
     background-color: ${(props) => props.theme.colors.greyScale2};
-    margin-bottom: 3px;
     text-align: center;
     align-self: flex-start;
     justify-self: flex-start;
@@ -208,8 +218,6 @@ const Row = styled.div<{
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-
         ${ActionsContainer} { // if DeleteButtonContainer is not under an hovered ContainerSection
             display: flex;
         }

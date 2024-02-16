@@ -15,6 +15,7 @@ interface TemplateEditorProps {
     isNew?: boolean
     templateType: 'originalPage' | 'examplePage'
     isPreviewLoading: TaskState
+    previewErrorMessage?: string
 
     onClickSave: () => void
     onClickCancel: () => void
@@ -433,25 +434,42 @@ export default class TemplateEditor extends PureComponent<
                                 </LeftSidePreviewBar>
                             </HeaderBox>
                             <PreviewEditorBox>
-                                {this.props.template?.outputFormat ===
-                                'markdown' ? (
-                                    <PreviewInput
-                                        value={this.props.previewString}
-                                        readOnly
-                                    />
+                                {this.props.isPreviewLoading === 'error' ? (
+                                    <ErrorContainer>
+                                        <Icon
+                                            icon={'warning'}
+                                            heightAndWidth="24px"
+                                            hoverOff
+                                            color={'warning'}
+                                        />
+                                        <ErrorText>
+                                            {this.props.previewErrorMessage}
+                                        </ErrorText>
+                                    </ErrorContainer>
                                 ) : (
-                                    <PreviewRichText
-                                        ref={(element) => {
-                                            if (element) {
-                                                element.innerHTML = this.props.previewString
-                                            }
-                                        }}
-                                    />
-                                )}
-                                {this.props.isPreviewLoading === 'running' && (
-                                    <LoadingBox>
-                                        <LoadingIndicator size={30} />
-                                    </LoadingBox>
+                                    <>
+                                        {this.props.template?.outputFormat ===
+                                        'markdown' ? (
+                                            <PreviewInput
+                                                value={this.props.previewString}
+                                                readOnly
+                                            />
+                                        ) : (
+                                            <PreviewRichText
+                                                ref={(element) => {
+                                                    if (element) {
+                                                        element.innerHTML = this.props.previewString
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        {this.props.isPreviewLoading ===
+                                            'running' && (
+                                            <LoadingBox>
+                                                <LoadingIndicator size={30} />
+                                            </LoadingBox>
+                                        )}
+                                    </>
                                 )}
                             </PreviewEditorBox>
                         </EditorBox>
@@ -749,6 +767,37 @@ const PreviewInput = styled.textarea`
     &:focus {
         background: none;
     }
+
+    scrollbar-width: none;
+`
+
+const ErrorText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    text-align: center;
+    line-height: 21px;
+    font-size: 16px;
+`
+
+const ErrorContainer = styled.div`
+    height: fill-available;
+    height: -moz-available;
+    width: fill-available;
+    width: -moz-available;
+    border: none;
+    background: none;
+    padding: 10px;
+    width: fill-available;
+    resize: none;
+    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    border-radius: 8px;
+    min-height: 60%;
+    text-overflow: nowrap;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
 
     scrollbar-width: none;
 `

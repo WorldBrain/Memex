@@ -22,6 +22,7 @@ interface State {
     previewString: string
     templateType: 'originalPage' | 'examplePage'
     isPreviewLoading: TaskState
+    previewErrorMessage?: string | JSX.Element
 }
 
 const md = new MarkdownIt()
@@ -67,6 +68,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         previewString: '',
         templateType: 'originalPage',
         isPreviewLoading: 'pristine',
+        previewErrorMessage: undefined,
     }
 
     async componentDidMount() {
@@ -194,7 +196,12 @@ export default class CopyPasterContainer extends React.PureComponent<
         } catch (err) {
             console.log('err', err)
             this.setState({
-                previewString: err.message,
+                previewErrorMessage: (
+                    <span>
+                        Syntax error in the template. <br /> Usually a missing
+                        bracket
+                    </span>
+                ),
                 isPreviewLoading: 'error',
             })
         }
@@ -273,6 +280,7 @@ export default class CopyPasterContainer extends React.PureComponent<
                 onClickDelete={this.handleTemplateDelete}
                 onClickOutside={this.props.onClickOutside}
                 previewString={this.state.previewString}
+                previewErrorMessage={this.state.previewErrorMessage}
                 copyPasterEditingTemplate={this.state.tmpTemplate}
                 onClickEdit={async (id) => {
                     const template = this.findTemplateForId(id)
