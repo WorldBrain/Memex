@@ -427,6 +427,7 @@ export default class SearchResultsContainer extends React.Component<
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
                     body: noteData.editNoteForm.bodyInputValue,
+                    isLoading: noteData.copyLoadingState,
                     onListsBarPickerBtnClick:
                         interactionProps.onListPickerBarBtnClick,
                     onCommentChange: (content) =>
@@ -440,6 +441,8 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onBodyChange(content),
                 }}
                 annotationFooterDependencies={{
+                    onCopyPasterDefaultExecute:
+                        interactionProps.onCopyPasterDefaultExecute,
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,

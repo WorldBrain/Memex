@@ -3552,6 +3552,7 @@ export class AnnotationsSidebar extends React.Component<
                         }
                         offsetX={10}
                         getPortalRoot={this.props.getRootElement}
+                        instaClose
                     >
                         {this.props.renderCopyPasterForAnnotation(
                             copyPasterAnnotationInstanceId,

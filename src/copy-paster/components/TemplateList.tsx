@@ -158,7 +158,6 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
             event.preventDefault()
             event.stopPropagation()
-            console.log('keydown')
         }
     }
     render() {

@@ -1997,9 +1997,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     ) => {
         try {
             const templates = await this.options.copyPasterBG.findAllTemplates()
-            console.log('templates', templates)
             const sortedTemplates = templates.sort(defaultOrderableSorter)
-            console.log('sortedTemplates', sortedTemplates)
             const id = sortedTemplates[0].id
 
             const item = templates.find((item) => item.id === id)
@@ -2009,8 +2007,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 annotationUrls: annotationUrls,
                 normalizedPageUrls: normalizedPageUrls,
             })
-
-            console.log('rendered', rendered)
 
             if (item) {
                 if (
@@ -2825,6 +2821,63 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
+    }
+
+    setCopyPasterDefaultNoteExecute: EventHandler<
+        'setCopyPasterDefaultNoteExecute'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            copyLoadingState: { $set: 'running' },
+                        },
+                    },
+                },
+            },
+        })
+
+        let templateCopyResult
+        if (
+            !previousState.searchResults.noteData.byId[event.noteId]
+                .isCopyPasterShown
+        ) {
+            templateCopyResult = await this.handleDefaultTemplateCopy(
+                [event.noteId],
+                null,
+            )
+        }
+
+        console.log('templateCopyResult', templateCopyResult, event.noteId)
+
+        if (templateCopyResult) {
+            this.emitMutation({
+                searchResults: {
+                    noteData: {
+                        byId: {
+                            [event.noteId]: {
+                                copyLoadingState: { $set: 'success' },
+                            },
+                        },
+                    },
+                },
+            })
+
+            setTimeout(() => {
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [event.noteId]: {
+                                    copyLoadingState: { $set: 'pristine' },
+                                },
+                            },
+                        },
+                    },
+                })
+            }, 3000)
+        }
     }
 
     setNoteRepliesShown: EventHandler<'setNoteRepliesShown'> = ({ event }) => {

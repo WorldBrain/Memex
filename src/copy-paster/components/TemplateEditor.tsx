@@ -15,7 +15,7 @@ interface TemplateEditorProps {
     isNew?: boolean
     templateType: 'originalPage' | 'examplePage'
     isPreviewLoading: TaskState
-    previewErrorMessage?: string
+    previewErrorMessage?: string | JSX.Element
 
     onClickSave: () => void
     onClickCancel: () => void

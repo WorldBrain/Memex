@@ -8,6 +8,7 @@ import MemexEditor, {
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 interface State {
     editorHeight: string
@@ -30,6 +31,7 @@ export interface AnnotationEditEventProps {
     onBodyChange: (body: string) => void
     onListsBarPickerBtnClick: React.MouseEventHandler
     imageSupport: ImageSupportInterface<'caller'>
+    isLoading: TaskState
 }
 
 export interface AnnotationEditGeneralProps {

@@ -110,6 +110,7 @@ import { createUIServices } from 'src/services/ui'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
 import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -214,6 +215,7 @@ export async function main(
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
+    const copyPasterBG = runInBackground<RemoteCopyPasterInterface>()
     const imageSupportBG = runInBackground<ImageSupportInterface<'caller'>>()
     const contentConversationsBG = runInBackground<
         ContentConversationsInterface
@@ -999,6 +1001,7 @@ export async function main(
         contentConversationsBG,
         contentScriptsBG,
         imageSupportBG,
+        copyPasterBG,
         syncSettingsBG,
         analytics,
         document,

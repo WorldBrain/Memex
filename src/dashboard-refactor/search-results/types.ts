@@ -23,7 +23,6 @@ import type {
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
-    onCopyPasterDefaultExecute: React.MouseEventHandler
     onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBarBtnClick: React.MouseEventHandler
     onListPickerFooterBtnClick: React.MouseEventHandler
@@ -41,6 +40,7 @@ export type PageInteractionProps = Omit<
     // updatePageNotesShareInfo: (info: NoteShareInfo) => void
     onRemoveFromListBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
+    onCopyPasterDefaultExecute: React.MouseEventHandler
     onPageDrag: React.DragEventHandler
     onPageDrop: React.DragEventHandler
     onMainContentHover: React.MouseEventHandler
@@ -87,6 +87,7 @@ export type NoteInteractionProps = Omit<
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: (content: string) => void
     onBodyChange: (content: string) => void
+    onCopyPasterDefaultExecute: React.MouseEventHandler
 }
 
 // NOTE: Derived type - edit the original
@@ -188,6 +189,7 @@ export interface NoteResult {
     areRepliesShown: boolean
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
+    copyLoadingState: TaskState
     listPickerShowStatus: ListPickerShowState
     shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     editNoteForm: NoteFormState
@@ -309,6 +311,9 @@ export type Events = UIEvent<{
     }
     setCopyPasterDefaultExecute: PageEventArgs & {
         isShown: boolean
+        event: React.MouseEvent
+    }
+    setCopyPasterDefaultNoteExecute: NoteEventArgs & {
         event: React.MouseEvent
     }
     setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }

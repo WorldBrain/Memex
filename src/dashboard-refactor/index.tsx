@@ -139,7 +139,6 @@ export class DashboardContainer extends StatefulUIElement<
         contentScriptsBG: runInBackground(),
         pageIndexingBG: runInBackground(),
         contentShareBG: runInBackground(),
-        contentShareByTabsBG: runInBackground(),
         copyPasterBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
@@ -1230,6 +1229,13 @@ export class DashboardContainer extends StatefulUIElement<
                             isShown: !searchResults.noteData.byId[noteId]
                                 .isCopyPasterShown,
                         }),
+
+                    onCopyPasterDefaultExecute: (noteId) => (event) => {
+                        this.processEvent('setCopyPasterDefaultNoteExecute', {
+                            noteId,
+                            event: event,
+                        })
+                    },
                     onReplyBtnClick: (noteId) => () =>
                         this.processEvent('setNoteRepliesShown', {
                             noteId,
@@ -1508,8 +1514,6 @@ export class DashboardContainer extends StatefulUIElement<
         const isPeeking = this.state.listsSidebar.isSidebarPeeking
             ? this.state.listsSidebar.isSidebarPeeking
             : undefined
-
-        console.log('inpage mode', this.props.inPageMode)
 
         return (
             <Container
