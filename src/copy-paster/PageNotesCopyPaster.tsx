@@ -21,16 +21,25 @@ export default class PageNotesCopyPaster extends React.PureComponent<Props> {
             annotationUrls: this.props.annotationUrls,
             normalizedPageUrls: this.props.normalizedPageUrls,
         })
-    private renderPreview = (
+    private renderPreview = async (
         template: Template,
         templateType: 'originalPage' | 'examplePage',
-    ) =>
-        this.props.copyPaster.renderPreview({
-            template,
-            annotationUrls: this.props.annotationUrls,
-            normalizedPageUrls: this.props.normalizedPageUrls,
-            templateType: templateType,
-        })
+    ) => {
+        console.log('before preview')
+        let returnValue: string
+        try {
+            returnValue = await this.props.copyPaster.renderPreview({
+                template,
+                annotationUrls: this.props.annotationUrls,
+                normalizedPageUrls: this.props.normalizedPageUrls,
+                templateType: templateType,
+            })
+        } catch (e) {
+            console.log('next step', e)
+            throw e
+        }
+        return returnValue
+    }
 
     render() {
         return (

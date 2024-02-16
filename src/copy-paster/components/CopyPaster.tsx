@@ -100,6 +100,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
     render() {
         const { copyPasterEditingTemplate, templates } = this.props
 
+        console.log('elementroot', this.props.getRootElement)
         return (
             <CopyPasterWrapper>
                 {copyPasterEditingTemplate ? (

@@ -192,11 +192,11 @@ export default class CopyPasterContainer extends React.PureComponent<
                 return htmlString
             }
         } catch (err) {
-            console.error(
-                'Something did not work when updating the preview:',
-                err.message,
-            )
-            Raven.captureException(err)
+            console.log('err', err)
+            this.setState({
+                previewString: err.message,
+                isPreviewLoading: 'error',
+            })
         }
     }
 
@@ -234,7 +234,6 @@ export default class CopyPasterContainer extends React.PureComponent<
         })
 
         await this.copyPasterBG.updateTemplate(templateToReorder)
-        this.props.preventClosingBcEditState(false)
     }
 
     private handleTemplateSave = async () => {
@@ -256,7 +255,6 @@ export default class CopyPasterContainer extends React.PureComponent<
             await this.copyPasterBG.updateTemplate(tmpTemplate)
         }
         this.setState({ tmpTemplate: undefined, isNew: undefined })
-        this.props.preventClosingBcEditState(false)
         await this.syncTemplates()
     }
 
@@ -287,21 +285,18 @@ export default class CopyPasterContainer extends React.PureComponent<
                         isNew: false,
                         previewString: previewString,
                     })
-                    this.props.preventClosingBcEditState(true)
                 }}
                 onClickCancel={() => {
                     this.setState({
                         tmpTemplate: undefined,
                         isNew: undefined,
                     })
-                    this.props.preventClosingBcEditState(false)
                 }}
                 onClickNew={() => {
                     this.setState({
                         tmpTemplate: CopyPasterContainer.DEF_TEMPLATE,
                         isNew: true,
                     })
-                    this.props.preventClosingBcEditState(true)
                 }}
                 onClickHowto={() => {
                     window.open(
@@ -356,11 +351,16 @@ export default class CopyPasterContainer extends React.PureComponent<
 
                     currentTemplate.code = code
 
-                    const previewString = await this.handleTemplatePreview(
-                        currentTemplate,
-                    )
+                    try {
+                        const previewString = await this.handleTemplatePreview(
+                            currentTemplate,
+                        )
 
-                    this.setState({ previewString: previewString })
+                        this.setState({ previewString: previewString })
+                    } catch (err) {
+                        console.log('errr', err.message)
+                        this.setState({ previewString: err.message })
+                    }
                 }}
                 changeTemplateType={async (
                     templateType: 'originalPage' | 'examplePage',

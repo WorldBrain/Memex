@@ -16,6 +16,7 @@ export interface Props {
     onClick: () => Promise<void> | void
     onClickEdit: () => void
     inFocus?: boolean
+    isDefault?: boolean
 }
 
 interface State {
@@ -85,7 +86,12 @@ export default class TemplateRow extends Component<Props, State> {
                         hoverOff
                     />
                 </DragIconContainer>
-                <Title>{title}</Title>
+                <TitleBox>
+                    <Title isDefault={this.props.isDefault}>{title}</Title>
+                    {this.props.isDefault && (
+                        <DefaultLabel>Default</DefaultLabel>
+                    )}
+                </TitleBox>
                 <ActionsContainer>
                     <Icon
                         filePath={icons.copy}
@@ -113,6 +119,38 @@ export default class TemplateRow extends Component<Props, State> {
         )
     }
 }
+
+const TitleBox = styled.div`
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    grid-gap: 3px;
+    width: fill-available;
+    width: -moz-available;
+`
+
+const DefaultLabel = styled.div`
+    font-size: 10px;
+    font-weight: 500;
+    color: ${(props) => props.theme.colors.greyScale5};
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    padding: 2px 5px;
+    border-radius: 5px;
+    background-color: ${(props) => props.theme.colors.greyScale2};
+    margin-bottom: 3px;
+    text-align: center;
+    align-self: flex-start;
+    justify-self: flex-start;
+    display: inline-block;
+    position: relative;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 10px;
+    width: fit-content;
+`
 
 const RowContainer = styled.div`
     position: relative;
@@ -162,7 +200,7 @@ const Row = styled.div<{
     height: 40px;
     position: relative;
     border-radius: 5px;
-    padding: 0px 0 0 18px;
+    padding: 0px 0px 0 18px;
     // border-bottom: 1px solid ${(props) => props.theme.colors.lightgrey};
 
     &:last-child {
@@ -186,12 +224,13 @@ const Row = styled.div<{
         css`
             outline: 1px solid ${(props) => props.theme.colors.greyScale3};
         `}
+
+    
 `
 
-const Title = styled.div<{ fullWidth?: boolean }>`
+const Title = styled.div<{ fullWidth?: boolean; isDefault?: boolean }>`
     display: ${(props) => (props.fullWidth ? 'flex' : 'block')};
     justify-content: center;
-    width: 100%;
     cursor: pointer;
     text-align: left;
 
@@ -205,4 +244,14 @@ const Title = styled.div<{ fullWidth?: boolean }>`
 
     outline: none;
     border: none;
+    overflow: hidden;
+    max-width: 220px;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+
+    ${(props) =>
+        props.isDefault &&
+        css`
+            max-width: 230px;
+        `}
 `

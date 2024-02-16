@@ -105,7 +105,6 @@ export default class CopyPasterBackground {
                 },
             ]
         } else {
-            console.log('data', { annotationUrls, normalizedPageUrls })
             templateDocs = await generateTemplateDocs({
                 annotationUrls,
                 normalizedPageUrls,
@@ -179,22 +178,26 @@ export default class CopyPasterBackground {
                 },
             ]
         } else {
-            const searchResponse = await this.options.search.searchPages({
-                ...searchParams,
-                skip: 0,
-                limit: 100000,
-            })
+            try {
+                const searchResponse = await this.options.search.searchPages({
+                    ...searchParams,
+                    skip: 0,
+                    limit: 100000,
+                })
 
-            const normalizedPageUrls = searchResponse.docs.map(
-                (page) => page.url,
-            )
+                const normalizedPageUrls = searchResponse.docs.map(
+                    (page) => page.url,
+                )
 
-            templateDocs = await generateTemplateDocs({
-                annotationUrls: [],
-                normalizedPageUrls,
-                templateAnalysis: analyzeTemplate(template),
-                dataFetchers: getTemplateDataFetchers(this.options),
-            })
+                templateDocs = await generateTemplateDocs({
+                    annotationUrls: [],
+                    normalizedPageUrls,
+                    templateAnalysis: analyzeTemplate(template),
+                    dataFetchers: getTemplateDataFetchers(this.options),
+                })
+            } catch (e) {
+                console.log('eeee', e)
+            }
         }
         return joinTemplateDocs(templateDocs, template)
     }

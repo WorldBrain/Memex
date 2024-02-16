@@ -377,7 +377,24 @@ export default class PageResultView extends PureComponent<Props> {
                         this.props.onCopyPasterBtnClick(event)
                     },
                     buttonRef: this.copyPasteronPageButtonRef,
-                    tooltipText: 'Copy Page',
+                    tooltipText: (
+                        <span>
+                            <strong
+                                style={{ color: 'white', marginRight: '3px' }}
+                            >
+                                Click
+                            </strong>
+                            to open templates
+                            <br />{' '}
+                            <strong
+                                style={{ color: 'white', marginRight: '3px' }}
+                            >
+                                Double Click
+                            </strong>
+                            to use default
+                            <br />
+                        </span>
+                    ),
                     active: this.props.isCopyPasterShown,
                 },
                 // {
@@ -388,7 +405,7 @@ export default class PageResultView extends PureComponent<Props> {
                 // },
                 // {
                 //     key: 'add-spaces-btn',
-                //     image: 'plus',
+                //     image: 'plus',</>
                 //     imageColor: 'prime1',
                 //     ButtonText: 'Spaces',
                 //     iconSize: '14px',

@@ -538,6 +538,7 @@ export class AnnotationsSidebar extends React.Component<
                     copyPaster={this.props.copyPaster}
                     annotationUrls={localAnnotationIds}
                     normalizedPageUrls={this.props.normalizedPageUrls}
+                    getRootElement={this.props.getRootElement}
                 />
             </PopoutBox>
         )

@@ -144,7 +144,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'HAS variable X',
-        insertedText: `{{1ReplaceWithX}} {{/ReplaceWithX}} `,
+        insertedText: `{{^ReplaceWithX}} {{/ReplaceWithX}} `,
         TooltipText: (
             <span>
                 The text between between elements will be shown
@@ -173,7 +173,10 @@ export default class TemplateEditor extends PureComponent<
     State
 > {
     private get isSaveDisabled(): boolean {
-        return !this.props.template?.title.length
+        return (
+            !this.props.template?.title.length ||
+            !this.props.template?.code.length
+        )
     }
 
     state = {
@@ -214,7 +217,6 @@ export default class TemplateEditor extends PureComponent<
     render() {
         const { template } = this.props
 
-        console.log('this.props.previewString', this.props.previewString)
         return (
             <EditorContainer>
                 <Header>
@@ -256,6 +258,7 @@ export default class TemplateEditor extends PureComponent<
                             type={'primary'}
                             size={'small'}
                             icon={'check'}
+                            disabled={this.isSaveDisabled}
                             padding={'3px 10px 3px 5px'}
                             onClick={
                                 this.state.confirmDelete

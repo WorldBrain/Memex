@@ -480,6 +480,7 @@ export class AnnotationsSidebarContainer<
                 copyPaster={this.props.copyPaster}
                 annotationUrls={[annotation.localId]}
                 normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
+                getRootElement={this.props.getRootElement}
             />
         )
     }

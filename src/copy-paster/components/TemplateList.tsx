@@ -250,7 +250,10 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                                                             template.id,
                                                                         )
                                                                     }}
-                                                                    // isDefault={index === 0}
+                                                                    isDefault={
+                                                                        index ===
+                                                                        0
+                                                                    }
                                                                     onClickEdit={() =>
                                                                         this.props.onClickEdit(
                                                                             template.id,
