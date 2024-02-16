@@ -3,7 +3,7 @@ import * as utils from './utils'
 import { handleRenderSearchInjection } from './searchInjection'
 import { handleRenderYoutubeInterface } from './youtubeInterface'
 import { renderErrorDisplay } from './error-display'
-import type { SearchInjectionDependencies } from 'src/content-scripts/content_script/types'
+import type { InPageUIInjectionsDependencies } from 'src/content-scripts/content_script/types'
 
 const url = window.location.href
 const matched = utils.matchURL(url)
@@ -12,13 +12,13 @@ const matched = utils.matchURL(url)
  * Fetches SearchInjection user preferance from storage.
  * If set, proceed with matching URL and fetching search query
  */
-export async function initSearchInjection({
+export async function initInPageUIInjections({
     syncSettings,
     syncSettingsBG,
     requestSearcher,
     annotationsFunctions,
     errorDisplayProps,
-}: SearchInjectionDependencies) {
+}: InPageUIInjectionsDependencies) {
     if (errorDisplayProps != null) {
         await renderErrorDisplay(errorDisplayProps)
         return
