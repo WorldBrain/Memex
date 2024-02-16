@@ -108,6 +108,8 @@ export class DashboardContainer extends StatefulUIElement<
         | 'activityIndicatorBG'
         | 'contentShareBG'
         | 'contentShareByTabsBG'
+        | 'contentShareBG'
+        | 'copyPasterBG'
         | 'pageIndexingBG'
         | 'syncSettingsBG'
         | 'annotationsBG'
@@ -137,6 +139,8 @@ export class DashboardContainer extends StatefulUIElement<
         contentScriptsBG: runInBackground(),
         pageIndexingBG: runInBackground(),
         contentShareBG: runInBackground(),
+        contentShareByTabsBG: runInBackground(),
+        copyPasterBG: runInBackground(),
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         pdfViewerBG: runInBackground(),
@@ -1000,13 +1004,23 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             show: 'lists-bar',
                         }),
-                    onCopyPasterBtnClick: (day, pageId) => () =>
+                    onCopyPasterBtnClick: (day, pageId) => (event) =>
                         this.processEvent('setPageCopyPasterShown', {
                             day,
                             pageId,
                             isShown: !searchResults.results[day].pages.byId[
                                 pageId
                             ].isCopyPasterShown,
+                            event: event,
+                        }),
+                    onCopyPasterDefaultExecute: (day, pageId) => (event) =>
+                        this.processEvent('setCopyPasterDefaultExecute', {
+                            day,
+                            pageId,
+                            isShown: !searchResults.results[day].pages.byId[
+                                pageId
+                            ].isCopyPasterShown,
+                            event: event,
                         }),
                     onTrashBtnClick: (day, pageId) => () =>
                         this.processEvent('setDeletingPageArgs', {

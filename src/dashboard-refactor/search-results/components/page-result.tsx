@@ -32,6 +32,7 @@ import { Checkbox } from 'src/common-ui/components'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -59,6 +60,7 @@ export interface Props
     shiftSelectItem: () => void
     uploadedPdfLinkLoadState: TaskState
     getRootElement: () => HTMLElement
+    copyLoadingState: UITaskState
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -214,6 +216,7 @@ export default class PageResultView extends PureComponent<Props> {
                     strategy={'fixed'}
                     closeComponent={this.props.onCopyPasterBtnClick}
                     getPortalRoot={this.props.getRootElement}
+                    instaClose={true}
                 >
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
@@ -223,13 +226,6 @@ export default class PageResultView extends PureComponent<Props> {
                 </PopoutBox>
             )
         }
-    }
-
-    private renderPopouts() {
-        if (this.props.isShareMenuShown) {
-            return <AllNotesShareMenu {...this.props.shareMenuProps} />
-        }
-        return null
     }
 
     private renderRemoveFromListBtn(): JSX.Element {
@@ -371,13 +367,47 @@ export default class PageResultView extends PureComponent<Props> {
                 },
                 {
                     key: 'copy-paste-page-btn',
-                    image: 'copy',
-                    onClick: (event) => {
-                        this.props.showPopoutsForResultBox(this.props.index)
-                        this.props.onCopyPasterBtnClick(event)
+                    image:
+                        this.props.copyLoadingState === 'success'
+                            ? 'check'
+                            : 'copy',
+                    isLoading: this.props.copyLoadingState === 'running',
+                    onMouseDown: (event) => {
+                        if (!this.props.isCopyPasterShown) {
+                            this.props.showPopoutsForResultBox(this.props.index)
+                            this.props.onCopyPasterBtnClick(event)
+                        }
+                    },
+                    onMouseUp: (event) => {
+                        if (!this.props.isCopyPasterShown) {
+                            this.props.onCopyPasterDefaultExecute(event)
+                        }
                     },
                     buttonRef: this.copyPasteronPageButtonRef,
-                    tooltipText: 'Copy Page',
+                    tooltipText: (
+                        <span>
+                            <strong
+                                style={{
+                                    color: 'white',
+                                    marginRight: '3px',
+                                }}
+                            >
+                                Click
+                            </strong>
+                            to select templates
+                            <br />{' '}
+                            <strong
+                                style={{
+                                    color: 'white',
+                                    marginRight: '3px',
+                                }}
+                            >
+                                Double Click
+                            </strong>
+                            to use default
+                            <br />
+                        </span>
+                    ),
                     active: this.props.isCopyPasterShown,
                 },
                 // {
@@ -388,7 +418,7 @@ export default class PageResultView extends PureComponent<Props> {
                 // },
                 // {
                 //     key: 'add-spaces-btn',
-                //     image: 'plus',
+                //     image: 'plus',</>
                 //     imageColor: 'prime1',
                 //     ButtonText: 'Spaces',
                 //     iconSize: '14px',

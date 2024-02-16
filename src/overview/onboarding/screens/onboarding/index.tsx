@@ -173,7 +173,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                 <>
                     <MemexActionButtonIntro
                         onMouseEnter={() => {
-                            console.log('hovered')
                             this.processEvent('hoverOverOnboardingIcon', null)
                         }}
                         src={'img/memexActionButtonIntro.svg'}

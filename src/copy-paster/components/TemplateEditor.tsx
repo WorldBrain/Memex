@@ -15,6 +15,7 @@ interface TemplateEditorProps {
     isNew?: boolean
     templateType: 'originalPage' | 'examplePage'
     isPreviewLoading: TaskState
+    previewErrorMessage?: string
 
     onClickSave: () => void
     onClickCancel: () => void
@@ -144,7 +145,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'HAS variable X',
-        insertedText: `{{1ReplaceWithX}} {{/ReplaceWithX}} `,
+        insertedText: `{{^ReplaceWithX}} {{/ReplaceWithX}} `,
         TooltipText: (
             <span>
                 The text between between elements will be shown
@@ -173,7 +174,10 @@ export default class TemplateEditor extends PureComponent<
     State
 > {
     private get isSaveDisabled(): boolean {
-        return !this.props.template?.title.length
+        return (
+            !this.props.template?.title.length ||
+            !this.props.template?.code.length
+        )
     }
 
     state = {
@@ -214,7 +218,6 @@ export default class TemplateEditor extends PureComponent<
     render() {
         const { template } = this.props
 
-        console.log('this.props.previewString', this.props.previewString)
         return (
             <EditorContainer>
                 <Header>
@@ -256,6 +259,7 @@ export default class TemplateEditor extends PureComponent<
                             type={'primary'}
                             size={'small'}
                             icon={'check'}
+                            disabled={this.isSaveDisabled}
                             padding={'3px 10px 3px 5px'}
                             onClick={
                                 this.state.confirmDelete
@@ -430,25 +434,42 @@ export default class TemplateEditor extends PureComponent<
                                 </LeftSidePreviewBar>
                             </HeaderBox>
                             <PreviewEditorBox>
-                                {this.props.template?.outputFormat ===
-                                'markdown' ? (
-                                    <PreviewInput
-                                        value={this.props.previewString}
-                                        readOnly
-                                    />
+                                {this.props.isPreviewLoading === 'error' ? (
+                                    <ErrorContainer>
+                                        <Icon
+                                            icon={'warning'}
+                                            heightAndWidth="24px"
+                                            hoverOff
+                                            color={'warning'}
+                                        />
+                                        <ErrorText>
+                                            {this.props.previewErrorMessage}
+                                        </ErrorText>
+                                    </ErrorContainer>
                                 ) : (
-                                    <PreviewRichText
-                                        ref={(element) => {
-                                            if (element) {
-                                                element.innerHTML = this.props.previewString
-                                            }
-                                        }}
-                                    />
-                                )}
-                                {this.props.isPreviewLoading === 'running' && (
-                                    <LoadingBox>
-                                        <LoadingIndicator size={30} />
-                                    </LoadingBox>
+                                    <>
+                                        {this.props.template?.outputFormat ===
+                                        'markdown' ? (
+                                            <PreviewInput
+                                                value={this.props.previewString}
+                                                readOnly
+                                            />
+                                        ) : (
+                                            <PreviewRichText
+                                                ref={(element) => {
+                                                    if (element) {
+                                                        element.innerHTML = this.props.previewString
+                                                    }
+                                                }}
+                                            />
+                                        )}
+                                        {this.props.isPreviewLoading ===
+                                            'running' && (
+                                            <LoadingBox>
+                                                <LoadingIndicator size={30} />
+                                            </LoadingBox>
+                                        )}
+                                    </>
                                 )}
                             </PreviewEditorBox>
                         </EditorBox>
@@ -503,7 +524,6 @@ export default class TemplateEditor extends PureComponent<
                                         100,
                                     ) // Adjust these values as needed
 
-                                    console.log('dragging', value)
                                     e.dataTransfer.setData('text/plain', value)
                                     setTimeout(
                                         () =>
@@ -746,6 +766,37 @@ const PreviewInput = styled.textarea`
     &:focus {
         background: none;
     }
+
+    scrollbar-width: none;
+`
+
+const ErrorText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    text-align: center;
+    line-height: 21px;
+    font-size: 16px;
+`
+
+const ErrorContainer = styled.div`
+    height: fill-available;
+    height: -moz-available;
+    width: fill-available;
+    width: -moz-available;
+    border: none;
+    background: none;
+    padding: 10px;
+    width: fill-available;
+    resize: none;
+    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    border-radius: 8px;
+    min-height: 60%;
+    text-overflow: nowrap;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
 
     scrollbar-width: none;
 `

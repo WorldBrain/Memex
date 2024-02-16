@@ -105,7 +105,6 @@ export default class CopyPasterBackground {
                 },
             ]
         } else {
-            console.log('data', { annotationUrls, normalizedPageUrls })
             templateDocs = await generateTemplateDocs({
                 annotationUrls,
                 normalizedPageUrls,

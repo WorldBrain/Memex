@@ -121,6 +121,7 @@ interface TemplateListProps {
     onClickHowto: () => void
     getRootElement: () => HTMLElement
     onReorder: (id: number, oldIndex: number, newIndex: number) => void
+    focusOnElement: (index: number) => void
 }
 
 export default class TemplateList extends PureComponent<TemplateListProps> {
@@ -139,6 +140,27 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         )
     }
 
+    componentDidMount(): void {
+        this.handleKeyDown = this.handleKeyDown.bind(this)
+        window.addEventListener('keydown', this.handleKeyDown)
+    }
+
+    componentWillUnmount(): void {
+        window.removeEventListener('keydown', this.handleKeyDown)
+    }
+
+    handleKeyDown(event: KeyboardEvent): void {
+        // event has already been used for drag and drop
+        if (event.defaultPrevented) {
+            return
+        }
+
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            event.preventDefault()
+            event.stopPropagation()
+            console.log('keydown')
+        }
+    }
     render() {
         if (this.props.copySuccess) {
             return (
@@ -250,7 +272,10 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                                                             template.id,
                                                                         )
                                                                     }}
-                                                                    // isDefault={index === 0}
+                                                                    isDefault={
+                                                                        index ===
+                                                                        0
+                                                                    }
                                                                     onClickEdit={() =>
                                                                         this.props.onClickEdit(
                                                                             template.id,
@@ -260,6 +285,14 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                                                         this
                                                                             .props
                                                                             .focusIndex ===
+                                                                        index
+                                                                    }
+                                                                    focusOnElement={
+                                                                        this
+                                                                            .props
+                                                                            .focusOnElement
+                                                                    }
+                                                                    itemIndex={
                                                                         index
                                                                     }
                                                                 />

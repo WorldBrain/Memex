@@ -170,29 +170,3 @@ const EditorContainer = styled.div`
         border-top: none;
     }
 `
-
-const StyledTextArea = styled.textarea`
-    background-color: #fff;
-    box-sizing: border-box;
-    resize: vertical;
-    font-weight: 400;
-    font-size: 14px;
-    color: #222;
-    font-family: ${(props) => props.theme.fonts.primary};
-    border-radius: 3px;
-    border: none;
-    padding: 10px 7px;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.primary};
-        opacity: 0.5;
-    }
-
-    &:focus {
-        outline: none;
-        box-shadow: none;
-        border: none;
-    }
-
-    min-height: 300px;
-`

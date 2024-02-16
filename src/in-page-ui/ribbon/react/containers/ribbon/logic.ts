@@ -233,11 +233,6 @@ export class RibbonContainerLogic extends UILogic<
             'rabbitHoleBetaFeatureAccessOnboardingDone',
         )
 
-        console.log(
-            'onboardingcomlete',
-            onboardingComplete['rabbitHoleBetaFeatureAccessOnboardingDone'],
-        )
-
         if (onboardingComplete['rabbitHoleBetaFeatureAccessOnboardingDone']) {
             this.emitMutation({
                 showRabbitHoleButton: { $set: true },

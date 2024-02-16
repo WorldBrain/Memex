@@ -233,7 +233,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                                                 .isSelected
                                         }
                                         handleChange={() => {
-                                            console.log('clicked')
                                             this.props.privacyOptions[1]
                                                 .isSelected
                                                 ? this.props.privacyOptions[0].onClick()

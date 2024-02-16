@@ -23,6 +23,7 @@ import type {
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
+    onCopyPasterDefaultExecute: React.MouseEventHandler
     onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBarBtnClick: React.MouseEventHandler
     onListPickerFooterBtnClick: React.MouseEventHandler
@@ -200,6 +201,7 @@ export interface PageResult {
     isShareMenuShown: boolean
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
+    copyLoadingState: TaskState
     listPickerShowStatus: ListPickerShowState
     loadNotesState: TaskState
     newNoteForm: NoteFormState
@@ -301,7 +303,14 @@ export type Events = UIEvent<{
     bulkDeleteItem: { pageId: string }
     // Page result state mutations (*specific to each* occurrence of the page in different days)
     clickPageResult: PageEventArgs & { synthEvent: React.MouseEvent }
-    setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
+    setPageCopyPasterShown: PageEventArgs & {
+        isShown: boolean
+        event: React.MouseEvent
+    }
+    setCopyPasterDefaultExecute: PageEventArgs & {
+        isShown: boolean
+        event: React.MouseEvent
+    }
     setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
