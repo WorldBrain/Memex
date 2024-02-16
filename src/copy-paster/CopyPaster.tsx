@@ -241,7 +241,16 @@ export default class CopyPasterContainer extends React.PureComponent<
         const { tmpTemplate } = this.state
 
         if (tmpTemplate.id === -1) {
-            // TODO: Choose order for new one
+            const orderedItems = this.state.templates.map((template) => ({
+                id: template.id,
+                key: template.order,
+            }))
+            // Order new templates at the start of the list
+            const changes =
+                orderedItems.length === 0
+                    ? pushOrderedItem(orderedItems, -1)
+                    : insertOrderedItemBeforeIndex(orderedItems, -1, 0)
+            tmpTemplate.order = changes.create.key
             await this.copyPasterBG.createTemplate(tmpTemplate)
         } else {
             await this.copyPasterBG.updateTemplate(tmpTemplate)
