@@ -9,7 +9,7 @@ import {
 import type { DashboardDependencies } from 'src/dashboard-refactor/types'
 import * as constants from './constants'
 import { DashboardContainer } from 'src/dashboard-refactor'
-import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
+import { InPageSearchModal } from '@worldbrain/memex-common/lib/common-ui/components/inPage-search-modal'
 
 type RootProps = Omit<DashboardDependencies, 'theme' | 'openSpaceInWebUI'> & {
     rootEl: HTMLElement
@@ -38,7 +38,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
         return (
             <StyleSheetManager target={rootEl}>
                 <ThemeProvider theme={memexTheme}>
-                    <OverlayModals
+                    <InPageSearchModal
                         closeComponent={() => rootEl.remove()}
                         getPortalRoot={() => rootEl}
                         positioning="centerCenter"
@@ -51,7 +51,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
                             getRootElement={() => rootEl}
                             onResultSelect={(exportedResultText) => null}
                         />
-                    </OverlayModals>
+                    </InPageSearchModal>
                 </ThemeProvider>
             </StyleSheetManager>
         )
