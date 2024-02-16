@@ -392,9 +392,7 @@ export class RibbonContainerLogic extends UILogic<
     toggleQuickSearch: EventHandler<'toggleQuickSearch'> = async ({
         previousState,
     }) => {
-        await this.dependencies.inPageUI.showSidebar({
-            action: 'quick_search_open',
-        })
+        await this.dependencies.inPageUI.showSearch()
     }
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
         await browser.storage.local.set({

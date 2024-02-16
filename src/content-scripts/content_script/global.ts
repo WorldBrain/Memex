@@ -105,10 +105,11 @@ import { injectSubstackButtons } from './injectionUtils/substack'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import { SearchDisplayProps } from 'src/search-injection/search-display'
+import type { SearchDisplayProps } from 'src/search-injection/search-display'
 import { createUIServices } from 'src/services/ui'
-import { ImageSupportInterface } from 'src/image-support/background/types'
-import { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -202,12 +203,7 @@ export async function main(
     // 1. Create a local object with promises to track each content script
     // initialisation and provide a function which can initialise a content script
     // or ignore if already loaded.
-    const components: {
-        ribbon?: Resolvable<void>
-        sidebar?: Resolvable<void>
-        tooltip?: Resolvable<void>
-        highlights?: Resolvable<void>
-    } = {}
+    const components: { [C in InPageUIComponent]?: Resolvable<void> } = {}
 
     // 2. Initialise dependencies required by content scripts
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
@@ -445,11 +441,21 @@ export async function main(
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
         getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
-        loadComponent: (component) => {
+        loadComponent: async (component) => {
             // Treat highlights differently as they're not a separate content script
             if (component === 'highlights') {
                 components.highlights = resolvablePromise<void>()
                 components.highlights.resolve()
+            }
+
+            if (component === 'search') {
+                await contentScriptRegistry.registerInPageUIInjectionScript(
+                    InPageUIInjectionMain,
+                    {
+                        searchDisplayProps,
+                    },
+                )
+                return
             }
 
             if (!components[component]) {
