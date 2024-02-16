@@ -232,7 +232,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
-                    imageSupport: options.imageSupport,
+                    imageSupport: options.imageSupportBG,
                 },
             ),
         )
@@ -2073,7 +2073,7 @@ export class SidebarContainerLogic extends UILogic<
                 event.comment,
                 annotation.normalizedPageUrl,
                 annotation.localId,
-                this.options.imageSupport,
+                this.options.imageSupportBG,
                 true,
             )
         ).toString()
@@ -2153,7 +2153,7 @@ export class SidebarContainerLogic extends UILogic<
                 comment,
                 annotationData.normalizedPageUrl,
                 annotationData.localId,
-                this.options.imageSupport,
+                this.options.imageSupportBG,
             )
 
             // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
@@ -2343,7 +2343,7 @@ export class SidebarContainerLogic extends UILogic<
             OriginalCommentForCache,
             normalizeUrl(fullPageUrl),
             annotationId,
-            this.options.imageSupport,
+            this.options.imageSupportBG,
         )
 
         this.emitMutation({
@@ -3970,7 +3970,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
-                    imageSupport: this.options.imageSupport,
+                    imageSupport: this.options.imageSupportBG,
                 })
             },
         )

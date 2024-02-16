@@ -29,7 +29,6 @@ import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
-import { getListShareUrl } from 'src/content-sharing/utils'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { Props as SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker'
@@ -55,19 +54,17 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
-import { DashboardContainer } from 'src/dashboard-refactor'
-import { createUIServices } from 'src/services/ui'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -93,7 +90,6 @@ export class AnnotationsSidebarContainer<
     private annotationInstanceRefs: {
         [instanceId: string]: AnnotationInstanceRefs
     } = {}
-    private services = createUIServices()
 
     static defaultProps: Pick<Props, 'runtimeAPI' | 'storageAPI'> = {
         runtimeAPI: browser.runtime,
@@ -118,7 +114,7 @@ export class AnnotationsSidebarContainer<
                         annotationId,
                     )
                 },
-                imageSupport: props.imageSupport,
+                imageSupportBG: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
                 storage: props.storageAPI,
                 pkmSyncBG: props.pkmSyncBG,
@@ -863,50 +859,6 @@ export class AnnotationsSidebarContainer<
                     >
                         <AnnotationsSidebar
                             {...this.state}
-                            __renderDashboard={() => (
-                                <DashboardContainer
-                                    inPageMode
-                                    onResultSelect={(exportedResultText) =>
-                                        null
-                                    } // TODO: Hook up to a this.processEvent call
-                                    theme={this.props.theme}
-                                    analytics={this.props.analytics}
-                                    services={this.services}
-                                    annotationsCache={
-                                        this.props.annotationsCache
-                                    }
-                                    authBG={this.props.authBG}
-                                    listsBG={this.props.customListsBG}
-                                    analyticsBG={this.props.analyticsBG}
-                                    summarizeBG={this.props.summarizeBG}
-                                    annotationsBG={this.props.annotationsBG}
-                                    pageIndexingBG={this.props.pageIndexingBG}
-                                    syncSettingsBG={this.props.syncSettingsBG}
-                                    contentShareBG={this.props.contentSharingBG}
-                                    contentShareByTabsBG={
-                                        this.props.contentSharingByTabsBG
-                                    }
-                                    contentScriptsBG={
-                                        this.props.contentScriptsBG
-                                    }
-                                    contentConversationsBG={
-                                        this.props.contentConversationsBG
-                                    }
-                                    pageActivityIndicatorBG={
-                                        this.props.pageActivityIndicatorBG
-                                    }
-                                    activityIndicatorBG={
-                                        this.props.activityIndicatorBG
-                                    }
-                                    searchBG={this.props.searchBG}
-                                    pdfViewerBG={this.props.pdfViewerBG}
-                                    renderUpdateNotifBanner={() => null}
-                                />
-                                // <DashboardResultsContainer
-                                //     services={this.services}
-                                //     analyticsBG={this.props.analyticsBG}
-                                // />
-                            )}
                             imageSupport={this.props.imageSupport}
                             getVideoChapters={() => {
                                 this.processEvent('getVideoChapters', null)

@@ -208,11 +208,11 @@ export async function setupTest(
             device.backgroundModules.activityIndicator.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
-        openCollectionPage: () => {},
+        openSpaceInWebUI: () => {},
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),
         analyticsBG: device.backgroundModules.analyticsBG,
-        imageSupport: device.backgroundModules.imageSupport,
+        imageSupportBG: device.backgroundModules.imageSupport,
     })
 
     if (args.overrideSearchTrigger) {

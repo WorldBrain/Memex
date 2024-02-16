@@ -1,4 +1,4 @@
-import { Runtime, Storage } from 'webextension-polyfill-ts'
+import { Runtime, Storage } from 'webextension-polyfill'
 import { indexRSSfeed } from './utils'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 

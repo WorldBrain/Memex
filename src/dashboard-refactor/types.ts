@@ -105,13 +105,13 @@ export type DashboardDependencies = {
     localStorage: Browser['storage']['local']
     runtimeAPI: Browser['runtime']
     tabsAPI: Browser['tabs']
-    openCollectionPage: (remoteCollectionId: string) => void
+    openSpaceInWebUI: (remoteCollectionId: string) => void
     renderUpdateNotifBanner: () => JSX.Element
     services: Pick<
         UIServices,
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
-    imageSupport: ImageSupportInterface<'caller'>
+    imageSupportBG: ImageSupportInterface<'caller'>
 } & (
     | {
           inPageMode: true

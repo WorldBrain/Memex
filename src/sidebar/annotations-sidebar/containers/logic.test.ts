@@ -117,12 +117,8 @@ const setupLogicHelper = async ({
         contentSharingByTabsBG: insertBackgroundFunctionTab(
             backgroundModules.contentSharing.remoteFunctionsByTab,
         ) as any,
-        activityIndicatorBG:
-            backgroundModules.activityIndicator.remoteFunctions,
         pageActivityIndicatorBG:
             backgroundModules.pageActivityIndicator.remoteFunctions,
-        pdfViewerBG: backgroundModules.pdfBg.remoteFunctions,
-        searchBG: backgroundModules.search.remoteFunctions.search,
         contentScriptsBG: insertBackgroundFunctionTab(
             backgroundModules.contentScripts.remoteFunctions,
         ) as any,
@@ -150,7 +146,7 @@ const setupLogicHelper = async ({
         focusEditNoteForm,
         focusCreateForm,
         copyToClipboard,
-        imageSupport: backgroundModules.imageSupport,
+        imageSupportBG: backgroundModules.imageSupport,
         getRootElement: null,
     })
 

@@ -115,9 +115,9 @@ export class DashboardContainer extends StatefulUIElement<
         | 'searchBG'
         | 'listsBG'
         | 'authBG'
-        | 'openCollectionPage'
+        | 'openSpaceInWebUI'
         | 'summarizeBG'
-        | 'imageSupport'
+        | 'imageSupportBG'
         | 'getRootElement'
     > = {
         analytics,
@@ -146,9 +146,9 @@ export class DashboardContainer extends StatefulUIElement<
         annotationsCache: new PageAnnotationsCache({
             syncSettingsBG: runInBackground(),
         }),
-        openCollectionPage: (remoteListId) =>
+        openSpaceInWebUI: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
-        imageSupport: runInBackground(),
+        imageSupportBG: runInBackground(),
         getRootElement: () => document.getElementById('body'),
     }
 
@@ -211,7 +211,7 @@ export class DashboardContainer extends StatefulUIElement<
                           listId: listData.unifiedId,
                       })
                 : undefined,
-            imageSupport: this.props.imageSupport,
+            imageSupport: this.props.imageSupportBG,
             getRootElement: this.props.getRootElement,
         }
     }
@@ -588,7 +588,7 @@ export class DashboardContainer extends StatefulUIElement<
                     this.processEvent('createdNestedList', { parentListId })
                 }
                 openRemoteListPage={(remoteListId) =>
-                    this.props.openCollectionPage(remoteListId)
+                    this.props.openSpaceInWebUI(remoteListId)
                 }
                 onConfirmListEdit={(listId: string, value: string) => {
                     this.processEvent('confirmListEdit', { value, listId })
@@ -760,7 +760,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
-                imageSupport={this.props.imageSupport}
+                imageSupport={this.props.imageSupportBG}
                 annotationsCache={this.props.annotationsCache}
                 filterByList={(localListId) => {
                     const listData = this.props.annotationsCache.getListByLocalId(
@@ -1658,7 +1658,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
-                            imageSupport={this.props.imageSupport}
+                            imageSupport={this.props.imageSupportBG}
                             theme={this.props.theme}
                             hasFeedActivity={listsSidebar.hasFeedActivity}
                             clickFeedActivityIndicator={() =>
@@ -1932,7 +1932,6 @@ const DropZoneTitle = styled.div`
 `
 
 const MainContent = styled.div<{
-    responsiveWidth: string
     inPageMode: boolean
 }>`
     width: fill-available;

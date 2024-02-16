@@ -67,7 +67,7 @@ import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/util
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
@@ -96,10 +96,7 @@ import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { injectTelegramCustomUI } from './injectionUtils/telegram'
 import { renderSpacesBar } from './injectionUtils/utils'
-import {
-    getTimestampedNoteWithAIsummaryForYoutubeNotes,
-    loadYoutubeButtons,
-} from './injectionUtils/youtube'
+import { getTimestampedNoteWithAIsummaryForYoutubeNotes } from './injectionUtils/youtube'
 import {
     injectTwitterProfileUI,
     trackTwitterMessageList,
@@ -108,6 +105,10 @@ import { injectSubstackButtons } from './injectionUtils/substack'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import { SearchDisplayProps } from 'src/search-injection/search-display'
+import { createUIServices } from 'src/services/ui'
+import { ImageSupportInterface } from 'src/image-support/background/types'
+import { ContentConversationsInterface } from 'src/content-conversations/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -217,7 +218,10 @@ export async function main(
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
-    const imageSupport = runInBackground()
+    const imageSupportBG = runInBackground<ImageSupportInterface<'caller'>>()
+    const contentConversationsBG = runInBackground<
+        ContentConversationsInterface
+    >()
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
@@ -380,7 +384,7 @@ export async function main(
                     data.body,
                     data.fullPageUrl,
                     localId,
-                    imageSupport,
+                    imageSupportBG,
                     false,
                 )
 
@@ -571,7 +575,7 @@ export async function main(
                     shouldCopyShareLink,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
-                    imageSupport,
+                    imageSupportBG,
                     highlightColor,
                 )
 
@@ -676,7 +680,7 @@ export async function main(
                     shouldCopyShareLink,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
-                    imageSupport,
+                    imageSupportBG,
                 )
 
                 const annotationId = result.annotationId
@@ -920,7 +924,9 @@ export async function main(
                 summarizeBG,
                 pageIndexingBG,
                 syncSettingsBG,
+                imageSupportBG,
                 contentSharingBG,
+                contentConversationsBG,
                 contentSharingByTabsBG,
                 pageActivityIndicatorBG,
                 customListsBG: collectionsBG,
@@ -930,13 +936,9 @@ export async function main(
                 getFullPageUrl: pageInfo.getFullPageUrl,
                 copyPaster,
                 subscription,
-                activityIndicatorBG,
-                contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
-                pdfViewerBG: runInBackground(),
                 pkmSyncBG: runInBackground(),
-                searchBG: runInBackground(),
                 getRootElement: null,
             })
             components.sidebar?.resolve()
@@ -973,6 +975,36 @@ export async function main(
                 onDemandDisplay,
             })
         },
+    }
+
+    const searchDisplayProps: SearchDisplayProps = {
+        activityIndicatorBG,
+        searchBG: runInBackground(),
+        pdfViewerBG: runInBackground(),
+        summarizeBG,
+        analyticsBG,
+        authBG,
+        annotationsBG,
+        pageIndexingBG,
+        contentShareBG: contentSharingBG,
+        contentShareByTabsBG: contentSharingByTabsBG,
+        pageActivityIndicatorBG,
+        listsBG: collectionsBG,
+        contentConversationsBG,
+        contentScriptsBG,
+        imageSupportBG,
+        syncSettingsBG,
+        analytics,
+        document,
+        location,
+        history,
+        annotationsCache,
+        copyToClipboard,
+        tabsAPI: browser.tabs,
+        runtimeAPI: browser.runtime,
+        localStorage: browser.storage.local,
+        services: createUIServices(),
+        renderUpdateNotifBanner: () => null,
     }
 
     if (

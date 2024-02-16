@@ -76,7 +76,6 @@ import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/typ
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 import {
     getFeedUrl,
@@ -101,7 +100,6 @@ const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 type Refs = { [unifiedListId: string]: React.RefObject<HTMLDivElement> }
 
 export interface AnnotationsSidebarProps extends SidebarContainerState {
-    __renderDashboard: () => JSX.Element
     annotationsCache: PageAnnotationsCacheInterface
     currentUser?: UserReference
     // sidebarActions: () => void
@@ -1384,7 +1382,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderSharedNotesByList() {
-        return this.props.__renderDashboard()
         const {
             lists,
             currentUser,

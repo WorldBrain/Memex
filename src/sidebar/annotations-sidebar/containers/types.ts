@@ -41,9 +41,6 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
-import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import type { SearchInterface } from 'src/search/background/types'
-import type { PDFRemoteInterface } from 'src/pdf/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -65,16 +62,13 @@ export interface SidebarContainerDependencies {
     analyticsBG: AnalyticsCoreInterface
 
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
-    activityIndicatorBG: ActivityIndicatorInterface
-    searchBG: SearchInterface
-    pdfViewerBG: PDFRemoteInterface
     summarizeBG: SummarizationInterface<'caller'>
     annotationsBG: AnnotationInterface<'caller'>
     customListsBG: RemoteCollectionsInterface
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
-    imageSupport?: ImageSupportInterface<'caller'>
+    imageSupportBG: ImageSupportInterface<'caller'>
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>
