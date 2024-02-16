@@ -21,7 +21,6 @@ type RootProps = Pick<
 
 interface RootState {
     themeVariant: MemexThemeVariant | null
-    show: boolean
 }
 
 class Root extends React.PureComponent<RootProps, RootState> {
@@ -33,7 +32,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
         blockedBackground: true,
     }
 
-    state: RootState = { themeVariant: null, show: true }
+    state: RootState = { themeVariant: null }
 
     async componentDidMount() {
         this.setState({
@@ -42,14 +41,15 @@ class Root extends React.PureComponent<RootProps, RootState> {
     }
 
     render() {
-        const { themeVariant, show } = this.state
-        if (!themeVariant || !show) {
+        if (!this.state.themeVariant) {
             return null
         }
 
         return (
             <StyleSheetManager target={this.props.rootEl}>
-                <ThemeProvider theme={theme({ variant: themeVariant })}>
+                <ThemeProvider
+                    theme={theme({ variant: this.state.themeVariant })}
+                >
                     <ErrorNotification
                         closeComponent={() => this.props.rootEl.remove()}
                         getPortalRoot={() => this.props.rootEl}
@@ -63,9 +63,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
 
 export type ErrorDisplayProps = Omit<RootProps, 'rootEl'>
 
-export const renderErrorDisplay = async (
-    props: ErrorDisplayProps,
-): Promise<void> => {
+export const renderErrorDisplay = (props: ErrorDisplayProps): void => {
     const existingRoot = document.getElementById(
         constants.REACT_ROOTS.errorDisplay,
     )

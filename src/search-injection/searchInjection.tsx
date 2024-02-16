@@ -139,7 +139,7 @@ export const handleRenderSearchInjection = async (
         }
 
         const root = document.createElement('div')
-        root.setAttribute('id', constants.REACT_ROOTS.searchInjection)
+        root.setAttribute('id', constants.REACT_ROOTS.searchEngineInjection)
 
         const containerIdentifier = searchEngineObj.container[position]
 

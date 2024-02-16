@@ -473,9 +473,11 @@ export async function main(
             await contentScriptRegistry.registerInPageUIInjectionScript(
                 InPageUIInjectionMain,
                 {
-                    errorMessage: err.message,
-                    title: 'Error saving note',
-                    blockedBackground: true,
+                    errorDisplayProps: {
+                        errorMessage: err.message,
+                        title: 'Error saving note',
+                        blockedBackground: true,
+                    },
                 },
             )
         }
@@ -962,13 +964,13 @@ export async function main(
             })
             components.tooltip?.resolve()
         },
-        async registerInPageUIInjectionScript(execute, errorDisplayProps) {
+        async registerInPageUIInjectionScript(execute, onDemandDisplay) {
             await execute({
                 syncSettingsBG,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 requestSearcher: remoteFunction('search'),
                 annotationsFunctions,
-                errorDisplayProps,
+                onDemandDisplay,
             })
         },
     }

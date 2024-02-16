@@ -12,6 +12,7 @@ import type { MaybePromise } from 'src/util/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { ErrorDisplayProps } from 'src/search-injection/error-display'
+import type { SearchDisplayProps } from 'src/search-injection/search-display'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -20,7 +21,10 @@ export interface ContentScriptRegistry {
     registerTooltipScript(main: TooltipScriptMain): Promise<void>
     registerInPageUIInjectionScript(
         main: InPageUIInjectionsMain,
-        errorDisplayProps?: ErrorDisplayProps,
+        onDemandDisplay?: {
+            errorDisplayProps?: ErrorDisplayProps
+            searchDisplayProps?: SearchDisplayProps
+        },
     ): Promise<void>
 }
 
@@ -66,7 +70,10 @@ export interface InPageUIInjectionsDependencies {
         | 'dashboard'
     >
     annotationsFunctions: any
-    errorDisplayProps?: ErrorDisplayProps
+    onDemandDisplay?: {
+        errorDisplayProps?: ErrorDisplayProps
+        searchDisplayProps?: SearchDisplayProps
+    }
 }
 
 export type HighlightsScriptMain = (

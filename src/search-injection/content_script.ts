@@ -3,6 +3,7 @@ import * as utils from './utils'
 import { handleRenderSearchInjection } from './searchInjection'
 import { handleRenderYoutubeInterface } from './youtubeInterface'
 import { renderErrorDisplay } from './error-display'
+import { renderSearchDisplay } from './search-display'
 import type { InPageUIInjectionsDependencies } from 'src/content-scripts/content_script/types'
 
 const url = window.location.href
@@ -17,10 +18,15 @@ export async function initInPageUIInjections({
     syncSettingsBG,
     requestSearcher,
     annotationsFunctions,
-    errorDisplayProps,
+    onDemandDisplay,
 }: InPageUIInjectionsDependencies) {
-    if (errorDisplayProps != null) {
-        await renderErrorDisplay(errorDisplayProps)
+    if (onDemandDisplay?.errorDisplayProps != null) {
+        renderErrorDisplay(onDemandDisplay.errorDisplayProps)
+        return
+    }
+
+    if (onDemandDisplay?.searchDisplayProps != null) {
+        renderSearchDisplay(onDemandDisplay.searchDisplayProps)
         return
     }
 
