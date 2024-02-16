@@ -3199,11 +3199,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.updateQueryStringParameter('query', event.query)
-
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { searchQuery: { $set: event.query } },
         })
+        if (!event.isInPageMode) {
+            this.updateQueryStringParameter('query', event.query)
+        }
     }
 
     setSearchFiltersOpen: EventHandler<'setSearchFiltersOpen'> = async ({

@@ -19,6 +19,7 @@ export type InPageUISidebarAction =
     | 'check_sidebar_status'
     | 'show_page_summary'
     | 'rabbit_hole_open'
+    | 'quick_search_open'
     | 'youtube_timestamp'
     | 'share_page'
     | 'set_focus_mode'

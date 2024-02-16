@@ -444,51 +444,71 @@ export class DashboardContainer extends StatefulUIElement<
                                     isOpen: !searchFilters.searchFiltersOpen,
                                 }),
                             onSearchQueryChange: (query) =>
-                                this.processEvent('setSearchQuery', { query }),
+                                this.processEvent('setSearchQuery', {
+                                    query: query,
+                                    isInPageMode: this.props.inPageMode,
+                                }),
                             onInputClear: () =>
                                 this.processEvent('setSearchQuery', {
                                     query: '',
+                                    isInPageMode: this.props.inPageMode,
                                 }),
                             getRootElement: this.props.getRootElement,
                         }}
                     />
                 </SearchSection>
-                <RightHeader>
-                    <ActionWrapper>
-                        <PrimaryAction
-                            onClick={() =>
-                                this.processEvent(
-                                    'setSyncStatusMenuDisplayState',
-                                    {
-                                        isShown: syncMenu.isDisplayed,
-                                    },
-                                )
-                            }
-                            label={'Sync Status'}
-                            size={'medium'}
-                            icon={getSyncStatusIcon(syncStatusIconState)}
-                            type={'tertiary'}
-                            iconColor={getSyncIconColor(syncStatusIconState)}
-                            spinningIcon={syncStatusIconState === 'yellow'}
-                            innerRef={this.syncStatusButtonRef}
-                        />
-                    </ActionWrapper>
-                    {!this.props.inPageMode && (
-                        <Icon
-                            onClick={() => window.open(SETTINGS_URL, '_self')}
-                            heightAndWidth="22px"
-                            padding={'6px'}
-                            filePath={icons.settings}
-                        />
-                    )}
-                </RightHeader>
+                {!this.props.inPageMode && (
+                    <RightHeader>
+                        <ActionWrapper>
+                            <PrimaryAction
+                                onClick={() =>
+                                    this.processEvent(
+                                        'setSyncStatusMenuDisplayState',
+                                        {
+                                            isShown: syncMenu.isDisplayed,
+                                        },
+                                    )
+                                }
+                                label={'Sync Status'}
+                                size={'medium'}
+                                icon={getSyncStatusIcon(syncStatusIconState)}
+                                type={'tertiary'}
+                                iconColor={getSyncIconColor(
+                                    syncStatusIconState,
+                                )}
+                                spinningIcon={syncStatusIconState === 'yellow'}
+                                innerRef={this.syncStatusButtonRef}
+                            />
+                        </ActionWrapper>
+                        {!this.props.inPageMode && (
+                            <>
+                                <Icon
+                                    onClick={() =>
+                                        window.open(SETTINGS_URL, '_self')
+                                    }
+                                    heightAndWidth="22px"
+                                    padding={'6px'}
+                                    filePath={icons.settings}
+                                />
+                                {this.renderStatusMenu(syncStatusIconState)}
+                            </>
+                        )}
+                    </RightHeader>
+                )}
+            </HeaderContainer>
+        )
+    }
+
+    renderStatusMenu(syncStatusIconState) {
+        if (this.state.syncMenu.isDisplayed) {
+            return (
                 <PopoutBox
                     targetElementRef={this.syncStatusButtonRef.current}
                     offsetX={15}
                     offsetY={5}
                     closeComponent={() =>
                         this.processEvent('setSyncStatusMenuDisplayState', {
-                            isShown: syncMenu.isDisplayed,
+                            isShown: this.state.syncMenu.isDisplayed,
                         })
                     }
                     placement={'bottom-end'}
@@ -496,30 +516,23 @@ export class DashboardContainer extends StatefulUIElement<
                 >
                     <SyncStatusMenu
                         {...{
-                            ...syncMenu,
+                            ...this.state.syncMenu,
                             syncStatusIconState,
-                            isLoggedIn: currentUser != null,
+                            isLoggedIn: this.state.currentUser != null,
                             outsideClickIgnoreClass:
                                 HeaderContainer.SYNC_MENU_TOGGLE_BTN_CLASS,
                             onLoginClick: () =>
                                 this.processEvent('setShowLoginModal', {
                                     isShown: true,
                                 }),
-                            onClickOutside: () =>
-                                this.processEvent(
-                                    'setSyncStatusMenuDisplayState',
-                                    {
-                                        isShown: false,
-                                    },
-                                ),
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
                         }}
                         syncStatusIconState={syncStatusIconState}
                     />
                 </PopoutBox>
-            </HeaderContainer>
-        )
+            )
+        }
     }
 
     private renderListsSidebar() {
@@ -1482,12 +1495,15 @@ export class DashboardContainer extends StatefulUIElement<
             ? this.state.listsSidebar.isSidebarPeeking
             : undefined
 
+        console.log('inpage mode', this.props.inPageMode)
+
         return (
             <Container
                 onDragEnter={(event) => this.processEvent('dragFile', event)}
+                inPageMode={this.props.inPageMode}
             >
                 {this.renderPdfLocator()}
-                <MainContainer>
+                <MainContainer inPageMode={this.props.inPageMode}>
                     {!this.props.inPageMode && (
                         <SidebarHeaderContainer>
                             <SidebarToggleBox>
@@ -1549,7 +1565,7 @@ export class DashboardContainer extends StatefulUIElement<
                             })
                         }}
                     />
-                    <MainFrame>
+                    <MainFrame inPageMode={this.props.inPageMode}>
                         {!this.props.inPageMode && (
                             <ListSidebarContent
                                 style={style}
@@ -1618,7 +1634,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 {this.renderListsSidebar()}
                             </ListSidebarContent>
                         )}
-                        <MainContent>
+                        <MainContent inPageMode={this.props.inPageMode}>
                             {this.state.listsSidebar.selectedListId ===
                             SPECIAL_LIST_STRING_IDS.FEED ? (
                                 <FeedContainer>
@@ -1641,102 +1657,95 @@ export class DashboardContainer extends StatefulUIElement<
                                 </>
                             )}
                         </MainContent>
-                        {!this.props.inPageMode && (
-                            <NotesSidebar
-                                imageSupport={this.props.imageSupport}
-                                theme={this.props.theme}
-                                hasFeedActivity={listsSidebar.hasFeedActivity}
-                                clickFeedActivityIndicator={() =>
-                                    this.processEvent('switchToFeed', null)
-                                }
-                                shouldHydrateCacheOnInit
-                                annotationsCache={this.props.annotationsCache}
-                                youtubeService={this.youtubeService}
-                                authBG={this.props.authBG}
-                                refSidebar={this.notesSidebarRef}
-                                customListsBG={this.props.listsBG}
-                                annotationsBG={this.props.annotationsBG}
-                                contentSharingBG={this.props.contentShareBG}
-                                contentSharingByTabsBG={
-                                    this.props.contentShareByTabsBG
-                                }
-                                contentScriptsBG={this.props.contentScriptsBG}
-                                syncSettingsBG={this.props.syncSettingsBG}
-                                pageIndexingBG={this.props.pageIndexingBG}
-                                pageActivityIndicatorBG={
-                                    this.props.pageActivityIndicatorBG
-                                }
-                                summarizeBG={this.props.summarizeBG}
-                                contentConversationsBG={
-                                    this.props.contentConversationsBG
-                                }
-                                getCurrentUser={() =>
-                                    this.state.currentUser
-                                        ? {
-                                              id: this.state.currentUser?.id,
-                                              type: 'user-reference',
-                                          }
-                                        : null
-                                }
-                                setLoginModalShown={(isShown) =>
-                                    this.processEvent('setShowLoginModal', {
-                                        isShown,
-                                    })
-                                }
-                                setDisplayNameModalShown={(isShown) =>
-                                    this.processEvent(
-                                        'setShowDisplayNameSetupModal',
-                                        {
-                                            isShown,
-                                        },
-                                    )
-                                }
-                                showAnnotationShareModal={() =>
-                                    this.processEvent(
-                                        'setShowNoteShareOnboardingModal',
-                                        {
-                                            isShown: true,
-                                        },
-                                    )
-                                }
-                                onNotesSidebarClose={() =>
-                                    this.processEvent('setActivePage', {
-                                        activeDay: undefined,
-                                        activePageID: undefined,
-                                        activePage: false,
-                                    })
-                                }
-                                saveHighlightColor={(id, color, unifiedId) => {
+                        <NotesSidebar
+                            imageSupport={this.props.imageSupport}
+                            theme={this.props.theme}
+                            hasFeedActivity={listsSidebar.hasFeedActivity}
+                            clickFeedActivityIndicator={() =>
+                                this.processEvent('switchToFeed', null)
+                            }
+                            shouldHydrateCacheOnInit
+                            annotationsCache={this.props.annotationsCache}
+                            youtubeService={this.youtubeService}
+                            authBG={this.props.authBG}
+                            refSidebar={this.notesSidebarRef}
+                            customListsBG={this.props.listsBG}
+                            annotationsBG={this.props.annotationsBG}
+                            contentSharingBG={this.props.contentShareBG}
+                            contentSharingByTabsBG={
+                                this.props.contentShareByTabsBG
+                            }
+                            contentScriptsBG={this.props.contentScriptsBG}
+                            syncSettingsBG={this.props.syncSettingsBG}
+                            pageIndexingBG={this.props.pageIndexingBG}
+                            pageActivityIndicatorBG={
+                                this.props.pageActivityIndicatorBG
+                            }
+                            summarizeBG={this.props.summarizeBG}
+                            contentConversationsBG={
+                                this.props.contentConversationsBG
+                            }
+                            getCurrentUser={() =>
+                                this.state.currentUser
+                                    ? {
+                                          id: this.state.currentUser?.id,
+                                          type: 'user-reference',
+                                      }
+                                    : null
+                            }
+                            setLoginModalShown={(isShown) =>
+                                this.processEvent('setShowLoginModal', {
+                                    isShown,
+                                })
+                            }
+                            setDisplayNameModalShown={(isShown) =>
+                                this.processEvent(
+                                    'setShowDisplayNameSetupModal',
                                     {
-                                        this.processEvent(
-                                            'saveHighlightColor',
-                                            {
-                                                noteId: id,
-                                                color: color,
-                                                unifiedId: unifiedId,
-                                            },
-                                        )
-                                    }
-                                }}
-                                saveHighlightColorSettings={(newState) => {
-                                    this.processEvent(
-                                        'saveHighlightColorSettings',
-                                        {
-                                            newState: newState,
-                                        },
-                                    )
-                                }}
-                                getHighlightColorSettings={() =>
-                                    this.processEvent(
-                                        'getHighlightColorSettings',
-                                        null,
-                                    )
+                                        isShown,
+                                    },
+                                )
+                            }
+                            showAnnotationShareModal={() =>
+                                this.processEvent(
+                                    'setShowNoteShareOnboardingModal',
+                                    {
+                                        isShown: true,
+                                    },
+                                )
+                            }
+                            onNotesSidebarClose={() =>
+                                this.processEvent('setActivePage', {
+                                    activeDay: undefined,
+                                    activePageID: undefined,
+                                    activePage: false,
+                                })
+                            }
+                            saveHighlightColor={(id, color, unifiedId) => {
+                                {
+                                    this.processEvent('saveHighlightColor', {
+                                        noteId: id,
+                                        color: color,
+                                        unifiedId: unifiedId,
+                                    })
                                 }
-                                highlightColorSettings={
-                                    this.state.highlightColors
-                                }
-                            />
-                        )}
+                            }}
+                            saveHighlightColorSettings={(newState) => {
+                                this.processEvent(
+                                    'saveHighlightColorSettings',
+                                    {
+                                        newState: newState,
+                                    },
+                                )
+                            }}
+                            getHighlightColorSettings={() =>
+                                this.processEvent(
+                                    'getHighlightColorSettings',
+                                    null,
+                                )
+                            }
+                            highlightColorSettings={this.state.highlightColors}
+                        />
                     </MainFrame>
                     {this.renderModals()}
                     <HelpBtn
@@ -1856,12 +1865,20 @@ const MemexLogoContainer = styled.div`
     }
 `
 
-const MainContainer = styled.div`
+const MainContainer = styled.div<{
+    inPageMode: boolean
+}>`
     display: flex;
     display: flex;
     flex-direction: column;
     height: fill-available;
     width: fill-available;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            min-height: fit-content;
+        `}
 `
 
 const DropZoneBackground = styled.div`
@@ -1914,7 +1931,10 @@ const DropZoneTitle = styled.div`
     text-align: center;
 `
 
-const MainContent = styled.div`
+const MainContent = styled.div<{
+    responsiveWidth: string
+    inPageMode: boolean
+}>`
     width: fill-available;
     align-items: center;
     display: flex;
@@ -1929,6 +1949,12 @@ const MainContent = styled.div`
     }
 
     scrollbar-width: none;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            min-height: fit-content;
+        `}
 `
 
 const ListSidebarContent = styled(Rnd)<{
@@ -2014,7 +2040,30 @@ const FeedFrame = styled.iframe`
     border: none;
 `
 
-const MainFrame = styled.div`
+const TitleContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
+    grid-gap: 10px;
+    width: fill-available;
+    padding: 0 30px;
+`
+
+const SectionTitle = styled.div`
+    color: ${(props) => props.theme.colors.white};
+    font-size: 24px;
+    font-weight: bold;
+`
+const SectionDescription = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 16px;
+    font-weight: 300;
+`
+
+const MainFrame = styled.div<{
+    inPageMode: boolean
+}>`
     display: flex;
     flex-direction: row;
     min-height: 100vh;
@@ -2026,9 +2075,17 @@ const MainFrame = styled.div`
     }
 
     scrollbar-width: none;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            min-height: fit-content;
+        `}
 `
 
-const Container = styled.div`
+const Container = styled.div<{
+    inPageMode: boolean
+}>`
     display: flex;
     flex-direction: column;
     width: fill-available;
@@ -2049,6 +2106,13 @@ const Container = styled.div`
         font-family: 'Satoshi', sans-serif;
 font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;,
     }
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            min-height: fit-content;
+            height: fill-available;
+        `}
 `
 
 const PeekTrigger = styled.div`

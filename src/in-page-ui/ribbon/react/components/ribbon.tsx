@@ -69,6 +69,7 @@ export interface Props extends RibbonSubcomponentProps {
     showFeed: boolean
     toggleAskAI: () => void
     toggleRabbitHole: () => void
+    toggleQuickSearch: () => void
     openPDFinViewer: () => void
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
@@ -1303,12 +1304,12 @@ export default class Ribbon extends Component<Props, State> {
                         type="tertiary"
                         label={'Search'}
                         fontColor={'greyScale8'}
-                        onClick={() => this.props.bgScriptBG.openOverviewTab()}
+                        onClick={() => this.props.toggleQuickSearch()}
                         icon={'searchIcon'}
                     />
                 ) : (
                     <Icon
-                        onClick={() => this.props.bgScriptBG.openOverviewTab()}
+                        onClick={() => this.props.toggleQuickSearch()}
                         color={'greyScale6'}
                         heightAndWidth="20px"
                         filePath={icons.searchIcon}

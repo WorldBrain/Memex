@@ -62,15 +62,12 @@ export interface SyncStatusMenuProps extends RootState {
     pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
     onLoginClick: React.MouseEventHandler
-    onClickOutside: React.MouseEventHandler
     syncStatusIconState?: any
     getRootElement: () => HTMLElement
     onToggleDisplayState?: () => void
 }
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
-    handleClickOutside = this.props.onClickOutside
-
     private renderTitleText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
