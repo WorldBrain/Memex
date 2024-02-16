@@ -7,7 +7,11 @@ import * as Raven from 'src/util/raven'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import MarkdownIt from 'markdown-it'
 import type { TaskState } from 'ui-logic-core/lib/types'
-import { orderGap } from './components/TemplateList'
+import {
+    defaultOrderableSorter,
+    insertOrderedItemBeforeIndex,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 interface State {
     isLoading: boolean
@@ -73,7 +77,8 @@ export default class CopyPasterContainer extends React.PureComponent<
     private async syncTemplates() {
         this.setState({ isLoading: true })
         const templates = await this.copyPasterBG.findAllTemplates()
-        this.setState({ templates, isLoading: false })
+        const sortedTemplates = templates.sort(defaultOrderableSorter)
+        this.setState({ templates: sortedTemplates, isLoading: false })
     }
 
     private findTemplateForId(id: number): Template {
@@ -81,8 +86,7 @@ export default class CopyPasterContainer extends React.PureComponent<
 
         if (!template) {
             // TODO: error UI state
-            console.error(`can't find template for ${id}`)
-            return
+            throw new Error(`Can't find template for ${id}`)
         }
 
         return template
@@ -98,7 +102,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         await this.syncTemplates()
     }
 
-    async copyRichTextToClipboard(html) {
+    async copyRichTextToClipboard(html: string) {
         // Create a hidden content-editable div
         const hiddenDiv = document.createElement('div')
 
@@ -196,70 +200,53 @@ export default class CopyPasterContainer extends React.PureComponent<
         }
     }
 
-    private handleReorderTemplates = async (id, order) => {
-        console.log('templa', this.state.templates)
+    private handleTemplateReorder = async (
+        id: number,
+        oldIndex: number,
+        newIndex: number,
+    ) => {
+        const templateToReorder = { ...this.findTemplateForId(id) }
 
-        const templateToReorder = this.state.templates.find(
-            (template) => template.id === id,
-        )
+        const orderedItems = this.state.templates.map((template) => ({
+            id: template.id,
+            key: template.order,
+        }))
+        // Moving an item "forwards" requires a +1 offset due to the algo inserting _before_ an index (see usage)
+        const indexOffset = oldIndex < newIndex ? 1 : 0
+        const changes =
+            newIndex + 1 === orderedItems.length
+                ? pushOrderedItem(orderedItems, id)
+                : insertOrderedItemBeforeIndex(
+                      orderedItems,
+                      id,
+                      newIndex + indexOffset,
+                  )
+        templateToReorder.order = changes.create.key
 
-        console.log('templateToReorder', templateToReorder)
+        this.setState({
+            tmpTemplate: undefined,
+            isNew: undefined,
+            templates: [
+                ...this.state.templates
+                    .map((t) => (t.id === id ? templateToReorder : t))
+                    .sort(defaultOrderableSorter),
+            ],
+        })
 
-        if (!templateToReorder) {
-            console.error('Template not found')
-            return
-        } else {
-            templateToReorder.order = order
-            console.log('templateToReorder1', templateToReorder)
-            let templates = this.state.templates
-
-            templates = templates.map((template) =>
-                template.id === id ? templateToReorder : template,
-            )
-
-            templates.forEach((template, index) => {
-                if (template && template.order == null) {
-                    template.order = template.id * orderGap
-                }
-            })
-
-            console.log('templates', templates)
-
-            this.setState({
-                tmpTemplate: undefined,
-                isNew: undefined,
-                templates: templates,
-            })
-
-            console.log('templateToReorder2', templateToReorder)
-
-            await this.copyPasterBG.updateTemplate(templateToReorder)
-
-            this.props.preventClosingBcEditState(false)
-            await this.syncTemplates()
-        }
+        await this.copyPasterBG.updateTemplate(templateToReorder)
+        this.props.preventClosingBcEditState(false)
     }
 
     private handleTemplateSave = async () => {
         const { tmpTemplate } = this.state
 
         if (tmpTemplate.id === -1) {
+            // TODO: Choose order for new one
             await this.copyPasterBG.createTemplate(tmpTemplate)
         } else {
             await this.copyPasterBG.updateTemplate(tmpTemplate)
         }
-
-        let templates = this.state.templates
-
-        templates = templates.map((template) =>
-            template.id === tmpTemplate.id ? tmpTemplate : template,
-        )
-
-        this.setState({
-            tmpTemplate: undefined,
-            isNew: undefined,
-            templates: templates,
-        })
+        this.setState({ tmpTemplate: undefined, isNew: undefined })
         this.props.preventClosingBcEditState(false)
         await this.syncTemplates()
     }
@@ -275,7 +262,7 @@ export default class CopyPasterContainer extends React.PureComponent<
                 copySuccess={this.state.copySuccess}
                 onClickCopy={this.handleTemplateCopy}
                 onClickSave={this.handleTemplateSave}
-                onReorderSave={this.handleReorderTemplates}
+                onReorder={this.handleTemplateReorder}
                 onClickDelete={this.handleTemplateDelete}
                 onClickOutside={this.props.onClickOutside}
                 previewString={this.state.previewString}

@@ -41,7 +41,7 @@ interface CopyPasterProps {
     changeTemplateType: (templateType: string) => void
     getRootElement: () => HTMLElement
     onClickOutside?: React.MouseEventHandler
-    onReorderSave: (id: number, order: number) => void
+    onReorder: (id: number, oldIndex: number, newIndex: number) => void
 }
 
 class CopyPaster extends PureComponent<CopyPasterProps> {
@@ -83,7 +83,6 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
     handleKeyDown = (event) => {
         const { templates } = this.props
         const { focusIndex } = this.state
-        console.log('event.key', event.key)
         if (event.key === 'ArrowUp') {
             this.setState({
                 focusIndex: Math.max(0, focusIndex - 1),
@@ -138,7 +137,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         onClickNew={this.props.onClickNew}
                         onClickCopy={this.props.onClickCopy}
                         getRootElement={this.props.getRootElement}
-                        onReorderSave={this.props.onReorderSave}
+                        onReorder={this.props.onReorder}
                         focusIndex={this.state.focusIndex}
                     />
                 )}
