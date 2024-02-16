@@ -12,6 +12,7 @@ import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 interface State {
     isLoading: boolean
@@ -37,6 +38,7 @@ export interface Props {
     copyPaster?: RemoteCopyPasterInterface
     preventClosingBcEditState?: (state) => void
     getRootElement: () => HTMLElement
+    setLoadingState?: (loading: UITaskState) => void
 }
 
 export default class CopyPasterContainer extends React.PureComponent<
@@ -130,12 +132,18 @@ export default class CopyPasterContainer extends React.PureComponent<
         document.body.removeChild(hiddenDiv)
     }
 
+    private handleDefaultTemplateCopy = async () => {
+        const id = this.state.templates[0].id
+        await this.handleTemplateCopy(id)
+    }
+
     private handleTemplateCopy = async (id: number) => {
         this.setState({ isLoading: true })
+        this.props.setLoadingState?.('running')
 
         try {
-            const rendered = await this.props.renderTemplate(id)
             const item = this.state.templates.find((item) => item.id === id)
+            const rendered = await this.props.renderTemplate(id)
 
             if (item) {
                 if (
@@ -158,7 +166,11 @@ export default class CopyPasterContainer extends React.PureComponent<
                 action: 'copyToClipboard',
             })
             this.setState({ isLoading: false, copySuccess: true })
-            setTimeout(() => this.setState({ copySuccess: false }), 3000)
+            this.props.setLoadingState?.('success')
+            setTimeout(() => {
+                this.setState({ copySuccess: false })
+                this.props.setLoadingState?.('pristine')
+            }, 3000)
         }
     }
 
@@ -194,7 +206,6 @@ export default class CopyPasterContainer extends React.PureComponent<
                 return htmlString
             }
         } catch (err) {
-            console.log('err', err)
             this.setState({
                 previewErrorMessage: (
                     <span>
@@ -366,7 +377,6 @@ export default class CopyPasterContainer extends React.PureComponent<
 
                         this.setState({ previewString: previewString })
                     } catch (err) {
-                        console.log('errr', err.message)
                         this.setState({ previewString: err.message })
                     }
                 }}

@@ -524,7 +524,6 @@ export default class TemplateEditor extends PureComponent<
                                         100,
                                     ) // Adjust these values as needed
 
-                                    console.log('dragging', value)
                                     e.dataTransfer.setData('text/plain', value)
                                     setTimeout(
                                         () =>

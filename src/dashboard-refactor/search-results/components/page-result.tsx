@@ -32,6 +32,7 @@ import { Checkbox } from 'src/common-ui/components'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -59,6 +60,11 @@ export interface Props
     shiftSelectItem: () => void
     uploadedPdfLinkLoadState: TaskState
     getRootElement: () => HTMLElement
+    copyLoadingState: UITaskState
+}
+
+interface State {
+    copyLoadingState: UITaskState
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -71,6 +77,10 @@ export default class PageResultView extends PureComponent<Props> {
     spacePickerButtonRef = React.createRef<HTMLDivElement>()
     spacePickerBarRef = React.createRef<HTMLDivElement>()
     copyPasteronPageButtonRef = React.createRef<HTMLDivElement>()
+
+    state = {
+        copyLoadingState: 'pristine',
+    }
 
     private get domain(): string {
         let fullUrl: URL
@@ -219,6 +229,9 @@ export default class PageResultView extends PureComponent<Props> {
                         normalizedPageUrls={[this.props.normalizedUrl]}
                         onClickOutside={this.props.onCopyPasterBtnClick}
                         getRootElement={this.props.getRootElement}
+                        setLoadingState={(loadingState) =>
+                            this.setState({ copyLoadingState: loadingState })
+                        }
                     />
                 </PopoutBox>
             )
@@ -371,23 +384,37 @@ export default class PageResultView extends PureComponent<Props> {
                 },
                 {
                     key: 'copy-paste-page-btn',
-                    image: 'copy',
+                    image:
+                        this.state.copyLoadingState === 'success'
+                            ? 'check'
+                            : 'copy',
+                    isLoading: this.state.copyLoadingState === 'running',
                     onClick: (event) => {
-                        this.props.showPopoutsForResultBox(this.props.index)
-                        this.props.onCopyPasterBtnClick(event)
+                        if (!this.props.isCopyPasterShown) {
+                            this.props.showPopoutsForResultBox(this.props.index)
+                            this.props.onCopyPasterBtnClick(event)
+                        } else {
+                            this.props.onCopyPasterBtnClick(event)
+                        }
                     },
                     buttonRef: this.copyPasteronPageButtonRef,
                     tooltipText: (
                         <span>
                             <strong
-                                style={{ color: 'white', marginRight: '3px' }}
+                                style={{
+                                    color: 'white',
+                                    marginRight: '3px',
+                                }}
                             >
                                 Click
                             </strong>
-                            to open templates
+                            to select templates
                             <br />{' '}
                             <strong
-                                style={{ color: 'white', marginRight: '3px' }}
+                                style={{
+                                    color: 'white',
+                                    marginRight: '3px',
+                                }}
                             >
                                 Double Click
                             </strong>

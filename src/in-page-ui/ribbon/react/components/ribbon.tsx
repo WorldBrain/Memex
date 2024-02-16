@@ -1683,7 +1683,6 @@ export default class Ribbon extends Component<Props, State> {
                 </IconContainer>
             )
         } else {
-            console.log('showRabbitHoleButton', this.props.showRabbitHoleButton)
             return (
                 <>
                     <InnerRibbon

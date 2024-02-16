@@ -3,10 +3,12 @@ import React from 'react'
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { Template } from './types'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
     normalizedPageUrls: string[]
     annotationUrls?: string[]
+    setLoadingState: (loading: UITaskState) => void
 }
 
 export default class PageNotesCopyPaster extends React.PureComponent<Props> {
@@ -25,7 +27,6 @@ export default class PageNotesCopyPaster extends React.PureComponent<Props> {
         template: Template,
         templateType: 'originalPage' | 'examplePage',
     ) => {
-        console.log('before preview')
         let returnValue: string
         try {
             returnValue = await this.props.copyPaster.renderPreview({
@@ -35,7 +36,6 @@ export default class PageNotesCopyPaster extends React.PureComponent<Props> {
                 templateType: templateType,
             })
         } catch (e) {
-            console.log('next step', e)
             throw e
         }
         return returnValue
@@ -47,6 +47,7 @@ export default class PageNotesCopyPaster extends React.PureComponent<Props> {
                 {...this.props}
                 renderPreview={this.renderPreview}
                 renderTemplate={this.renderTemplate}
+                setLoadingState={this.props.setLoadingState}
             />
         )
     }
