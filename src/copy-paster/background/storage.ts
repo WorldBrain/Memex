@@ -27,9 +27,9 @@ export default class CopyPasterStorage extends StorageModule {
                 args: [
                     { id: '$id:pk' },
                     {
-                        title: '$title:string',
                         code: '$code:string',
-                        isFavourite: '$isFavourite:boolean',
+                        title: '$title:string',
+                        order: '$order:number',
                         outputFormat: '$outputFormat:string',
                     },
                 ],
@@ -82,8 +82,8 @@ export default class CopyPasterStorage extends StorageModule {
     async updateTemplate({ id, title, code, order, outputFormat }: Template) {
         return this.operation('updateTemplate', {
             id,
-            title,
             code,
+            title,
             order,
             outputFormat,
         })
