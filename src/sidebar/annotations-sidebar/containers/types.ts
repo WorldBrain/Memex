@@ -204,6 +204,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
+    deleteConfirmMode: boolean
 
     spacePickerAnnotationInstance: {
         instanceId: string
@@ -556,6 +557,9 @@ interface SidebarEvents {
     addLocalFolder: null
     removeLocalFolder: { id: number }
     getLocalFolders: null
+    setCopyPasterDefaultNoteExecute: AnnotationCardInstanceEvent<{
+        noteId: string
+    }>
 }
 
 export type SidebarContainerEvents = UIEvent<
@@ -580,6 +584,7 @@ export interface AnnotationCardInstance {
     comment: string
     body: string
     color: string
+    copyLoadingState: TaskState
 }
 export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']

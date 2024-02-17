@@ -148,6 +148,7 @@ const LabelText = styled.span<{ fontSize? }>`
     cursor: pointer;
     width: fill-available;
     height: fill-available;
+    justify-content: center;
 
     &:hover {
         color: ${(props) => props.theme.colors.black};

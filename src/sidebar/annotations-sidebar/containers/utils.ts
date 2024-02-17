@@ -26,6 +26,7 @@ export const initAnnotationCardInstance = (
     body: annot.body ?? '',
     cardMode: 'none',
     color: null,
+    copyLoadingState: 'pristine',
 })
 
 export const initListInstance = (

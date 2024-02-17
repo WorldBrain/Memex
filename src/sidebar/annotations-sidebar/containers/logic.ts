@@ -111,6 +111,14 @@ import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/compo
 import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import Raven from 'raven-js'
+import analytics from 'src/analytics'
+
+import MarkdownIt from 'markdown-it'
+const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -128,6 +136,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     spacesBG?: SpacePickerDependencies['spacesBG']
     pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
+    copyPasterBG: RemoteCopyPasterInterface
 }
 
 type EventHandler<
@@ -310,6 +319,7 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationId: null, // TODO: make unified ID
 
             showCommentBox: false,
+            deleteConfirmMode: false,
             showCongratsMessage: false,
             showClearFiltersBtn: false,
             showFiltersSidebar: false,
@@ -2111,8 +2121,67 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private handleKeyPress = (
+        event: KeyboardEvent,
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) => {
+        return () => {
+            // Ensure a function is returned
+
+            event.stopPropagation()
+            if (event.key === 'Enter') {
+                this.processUIEvent('deleteAnnotation', {
+                    event: { unifiedAnnotationId },
+                    previousState,
+                })
+            } else if (event.key === 'Escape') {
+                event.preventDefault()
+                this.processUIEvent('setAnnotationCardMode', {
+                    event: {
+                        instanceLocation: instanceLocation,
+                        unifiedAnnotationId: unifiedAnnotationId,
+                        mode: 'none',
+                    },
+                    previousState,
+                })
+            }
+        }
+    }
+
+    private setupNoteDeletionEventListener(
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) {
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.handleKeyPress(
+                event,
+                instanceLocation,
+                unifiedAnnotationId,
+                previousState,
+            )()
+        })
+    }
+    private tearDownNoteDeletionEventListener(
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) {
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.handleKeyPress(
+                event,
+                instanceLocation,
+                unifiedAnnotationId,
+                previousState,
+            )()
+        })
+    }
+
     setAnnotationCardMode: EventHandler<'setAnnotationCardMode'> = ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             annotationCardInstances: {
@@ -2121,6 +2190,27 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
+
+        if (event.mode === 'delete-confirm') {
+            this.setupNoteDeletionEventListener(
+                event.instanceLocation,
+                event.unifiedAnnotationId,
+                previousState,
+            )
+            this.emitMutation({
+                deleteConfirmMode: { $set: true },
+            })
+        }
+        if (event.mode === 'none') {
+            this.tearDownNoteDeletionEventListener(
+                event.instanceLocation,
+                event.unifiedAnnotationId,
+                previousState,
+            )
+            this.emitMutation({
+                deleteConfirmMode: { $set: false },
+            })
+        }
     }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({
@@ -3579,6 +3669,115 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             localFoldersList: { $set: localFolders },
         })
+    }
+
+    async copyRichTextToClipboard(html: string) {
+        // Create a hidden content-editable div
+        const hiddenDiv = document.createElement('div')
+
+        hiddenDiv.contentEditable = 'true'
+        hiddenDiv.style.position = 'absolute'
+        hiddenDiv.style.left = '-9999px'
+        hiddenDiv.innerHTML = html
+
+        // Append the hidden div to the body
+        document.body.appendChild(hiddenDiv)
+
+        // Select the content of the hidden div
+        const range = document.createRange()
+        range.selectNodeContents(hiddenDiv)
+        const selection = window.getSelection()
+        selection.removeAllRanges()
+        selection.addRange(range)
+
+        // Copy the selected content to the clipboard
+        document.execCommand('copy')
+
+        // Remove the hidden div from the body
+        document.body.removeChild(hiddenDiv)
+    }
+
+    private handleDefaultTemplateCopy = async (
+        annotationUrls,
+        normalizedPageUrls,
+    ) => {
+        try {
+            const templates = await this.options.copyPasterBG.findAllTemplates()
+            const sortedTemplates = templates.sort(defaultOrderableSorter)
+            const id = sortedTemplates[0].id
+
+            const item = templates.find((item) => item.id === id)
+
+            const rendered = await this.options.copyPasterBG.renderTemplate({
+                id,
+                annotationUrls: annotationUrls,
+                normalizedPageUrls: normalizedPageUrls,
+            })
+
+            if (item) {
+                if (
+                    item.outputFormat === 'markdown' ||
+                    item.outputFormat == null
+                ) {
+                    await copyToClipboard(rendered)
+                }
+                if (item.outputFormat === 'rich-text') {
+                    const htmlString = md.render(rendered)
+                    await this.copyRichTextToClipboard(htmlString)
+                }
+            }
+            return true
+        } catch (err) {
+            console.error('Something went really bad copying:', err.message)
+            Raven.captureException(err)
+            return false
+        } finally {
+            analytics.trackEvent({
+                category: 'TextExporter',
+                action: 'copyToClipboard',
+            })
+        }
+    }
+
+    setCopyPasterDefaultNoteExecute: EventHandler<
+        'setCopyPasterDefaultNoteExecute'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    copyLoadingState: { $set: 'running' },
+                },
+            },
+        })
+
+        const annotationURL = await this.options.annotationsCache.annotations
+            .byId[event.noteId].localId
+
+        let templateCopyResult
+        templateCopyResult = await this.handleDefaultTemplateCopy(
+            [annotationURL],
+            null,
+        )
+
+        if (templateCopyResult) {
+            this.emitMutation({
+                annotationCardInstances: {
+                    [getAnnotCardInstanceId(event)]: {
+                        copyLoadingState: { $set: 'success' },
+                    },
+                },
+            })
+
+            setTimeout(() => {
+                this.emitMutation({
+                    annotationCardInstances: {
+                        [getAnnotCardInstanceId(event)]: {
+                            copyLoadingState: { $set: 'pristine' },
+                        },
+                    },
+                })
+            }, 3000)
+        }
     }
 
     async updateSuggestionResults(results: SuggestionCard[]) {

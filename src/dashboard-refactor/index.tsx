@@ -983,6 +983,13 @@ export class DashboardContainer extends StatefulUIElement<
                         //     })
                         // }
                     },
+                    onAIResultBtnClick: (day, pageId) => () => {
+                        const pageData = searchResults.pageData.byId[pageId]
+
+                        this.notesSidebarRef.current.toggleAIShowForPageId(
+                            pageData.fullUrl,
+                        )
+                    },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
                             day,
@@ -1084,13 +1091,26 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             shareStates,
                         }),
-                    onEditPageBtnClick: (day, pageId) => (
+                    onEditTitleSave: (day, pageId) => (
                         normalizedPageUrl,
                         changedTitle,
                     ) => {
                         this.processEvent('updatePageTitle', {
                             normalizedPageUrl,
                             changedTitle,
+                            day,
+                            pageId,
+                        })
+                    },
+                    onEditTitleChange: (day, pageId) => (
+                        normalizedPageUrl,
+                        changedTitle,
+                    ) => {
+                        this.processEvent('updatePageTitleState', {
+                            normalizedPageUrl,
+                            changedTitle,
+                            day,
+                            pageId,
                         })
                     },
                 }}
@@ -1230,10 +1250,9 @@ export class DashboardContainer extends StatefulUIElement<
                                 .isCopyPasterShown,
                         }),
 
-                    onCopyPasterDefaultExecute: (noteId) => (event) => {
+                    onCopyPasterDefaultExecute: (noteId) => () => {
                         this.processEvent('setCopyPasterDefaultNoteExecute', {
                             noteId,
-                            event: event,
                         })
                     },
                     onReplyBtnClick: (noteId) => () =>
@@ -1687,6 +1706,7 @@ export class DashboardContainer extends StatefulUIElement<
                             youtubeService={this.youtubeService}
                             authBG={this.props.authBG}
                             refSidebar={this.notesSidebarRef}
+                            copyPaster={this.props.copyPasterBG}
                             customListsBG={this.props.listsBG}
                             annotationsBG={this.props.annotationsBG}
                             contentSharingBG={this.props.contentShareBG}

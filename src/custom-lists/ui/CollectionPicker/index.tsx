@@ -709,6 +709,7 @@ const OuterSearchBox = styled.div<{
     width: ${(props) => (props.width ? props.width : '300px')};
     padding: 0 5px;
     padding-top: 5px;
+    min-height: 300px;
 
     ${(props) =>
         props.context === 'popup' &&

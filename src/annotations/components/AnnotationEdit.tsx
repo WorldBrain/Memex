@@ -31,7 +31,7 @@ export interface AnnotationEditEventProps {
     onBodyChange: (body: string) => void
     onListsBarPickerBtnClick: React.MouseEventHandler
     imageSupport: ImageSupportInterface<'caller'>
-    isLoading: TaskState
+    copyLoadingState: TaskState
 }
 
 export interface AnnotationEditGeneralProps {

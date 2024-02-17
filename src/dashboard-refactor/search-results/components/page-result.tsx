@@ -33,6 +33,8 @@ import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import { keyframes } from 'styled-components'
+import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -216,7 +218,6 @@ export default class PageResultView extends PureComponent<Props> {
                     strategy={'fixed'}
                     closeComponent={this.props.onCopyPasterBtnClick}
                     getPortalRoot={this.props.getRootElement}
-                    instaClose={true}
                 >
                     <PageNotesCopyPaster
                         normalizedPageUrls={[this.props.normalizedUrl]}
@@ -289,29 +290,9 @@ export default class PageResultView extends PureComponent<Props> {
                             event.stopPropagation()
                         }
                     }}
-                    size={18}
+                    size={16}
                 />
             </BulkSelectButtonBox>
-            /* <Icon
-                    heightAndWidth="22px"
-                    filePath={
-                        this.props.isBulkSelected
-                            ? icons.checkRound
-                            : icons.clock
-                    }
-                    darkBackground
-                    onClick={(event) => {
-                        {
-                            const itemData = {
-                                url: this.props.normalizedUrl,
-                                title: this.props.fullTitle,
-                                type: 'page',
-                            }
-                            this.props.selectItem(itemData)
-                            event.preventDefault()
-                        }
-                    }}
-                /> */
         )
     }
 
@@ -334,121 +315,117 @@ export default class PageResultView extends PureComponent<Props> {
     }
 
     private calcFooterActions(): ItemBoxBottomAction[] {
-        if (this.props.hoverState === null) {
-            return [
-                {
-                    key: 'expand-notes-btn',
-                    image: this.hasNotes ? 'commentFull' : 'commentAdd',
-                    ButtonText:
-                        this.props.noteIds[this.props.notesType].length > 0 &&
-                        this.props.noteIds[
-                            this.props.notesType
-                        ].length.toString(),
-                    imageColor: 'prime1',
-                    onClick: this.props.onNotesBtnClick,
-                    tooltipText: (
-                        <span>
-                            <strong>Add/View Notes</strong>
-                            <br />
-                            shift+click to open inline
-                        </span>
-                    ),
-                },
-            ]
-        }
+        // if (this.props.hoverState === null) {
+        //     return [
+        //         {
+        //             key: 'expand-notes-btn',
+        //             image: this.hasNotes ? 'commentFull' : 'commentAdd',
+        //             ButtonText:
+        //                 this.props.noteIds[this.props.notesType].length > 0 &&
+        //                 this.props.noteIds[
+        //                     this.props.notesType
+        //                 ].length.toString(),
+        //             imageColor: 'prime1',
+        //             onClick: this.props.onNotesBtnClick,
+        //             tooltipText: (
+        //                 <span>
+        //                     <strong>Add/View Notes</strong>
+        //                     <br />
+        //                     shift+click to open inline
+        //                 </span>
+        //             ),
+        //         },
+        //     ]
+        // }
 
-        if (this.props.hoverState === 'main-content') {
-            return [
-                {
-                    key: 'delete-page-btn',
-                    image: 'trash',
-                    onClick: this.props.onTrashBtnClick,
-                    tooltipText: 'Delete Page & all related content',
+        return [
+            {
+                key: 'add-spaces-to-note-btn',
+                image: 'plus',
+                onClick: (event) => {
+                    this.props.showPopoutsForResultBox(this.props.index)
+                    this.props.onListPickerFooterBtnClick(event)
                 },
-                {
-                    key: 'copy-paste-page-btn',
-                    image:
-                        this.props.copyLoadingState === 'success'
-                            ? 'check'
-                            : 'copy',
-                    isLoading: this.props.copyLoadingState === 'running',
-                    onMouseDown: (event) => {
-                        if (!this.props.isCopyPasterShown) {
-                            this.props.showPopoutsForResultBox(this.props.index)
-                            this.props.onCopyPasterBtnClick(event)
-                        }
-                    },
-                    onMouseUp: (event) => {
-                        if (!this.props.isCopyPasterShown) {
-                            this.props.onCopyPasterDefaultExecute(event)
-                        }
-                    },
-                    buttonRef: this.copyPasteronPageButtonRef,
-                    tooltipText: (
+                tooltipText: 'Add to Space(s)',
+                ButtonText: 'Spaces',
+                active: this.props.listPickerShowStatus === 'footer',
+                buttonRef: this.spacePickerButtonRef,
+            },
+            {
+                key: 'copy-paste-page-btn',
+                image:
+                    this.props.copyLoadingState === 'success'
+                        ? 'check'
+                        : 'copy',
+                isLoading: this.props.copyLoadingState === 'running',
+                onClick: (event) => {
+                    if (event.shiftKey) {
+                        this.props.onCopyPasterDefaultExecute(event)
+                    } else {
+                        this.props.onCopyPasterBtnClick?.(event)
+                    }
+                },
+                buttonRef: this.copyPasteronPageButtonRef,
+                ButtonText: 'Cite',
+                tooltipText: (
+                    <span>
+                        <strong>Click</strong>
+                        to select templates
+                        <br />{' '}
+                        <strong
+                            style={{
+                                color: 'white',
+                                marginRight: '3px',
+                            }}
+                        >
+                            Shift + Click
+                        </strong>
+                        to use default
+                        <br />
+                    </span>
+                ),
+                active: this.props.isCopyPasterShown,
+            },
+            {
+                key: 'ask-ai-on-page-btn',
+                image: 'feed',
+                onClick: (event) => {
+                    this.props.onAIResultBtnClick(event)
+                },
+                tooltipText: 'Ask AI & Summarise page',
+                ButtonText: 'Ask AI',
+                buttonRef: null,
+            },
+            {
+                key: 'expand-notes-btn',
+                image: this.hasNotes ? 'commentFull' : 'commentAdd',
+                ButtonText:
+                    this.props.noteIds[this.props.notesType].length > 0 ? (
                         <span>
-                            <strong
-                                style={{
-                                    color: 'white',
-                                    marginRight: '3px',
-                                }}
-                            >
-                                Click
-                            </strong>
-                            to select templates
-                            <br />{' '}
-                            <strong
-                                style={{
-                                    color: 'white',
-                                    marginRight: '3px',
-                                }}
-                            >
-                                Double Click
-                            </strong>
-                            to use default
-                            <br />
+                            Notes{' '}
+                            <NoteCounter>
+                                {this.props.noteIds[
+                                    this.props.notesType
+                                ]?.length.toString()}
+                            </NoteCounter>
                         </span>
+                    ) : (
+                        'Add Notes'
                     ),
-                    active: this.props.isCopyPasterShown,
-                },
-                // {
-                //     key: 'share-page-btn',
-                //     image: this.props.isShared ? icons.shared : icons.link,
-                //     onClick: this.props.onShareBtnClick,
-                //     tooltipText: 'Share Page and Notes',
-                // },
-                // {
-                //     key: 'add-spaces-btn',
-                //     image: 'plus',</>
-                //     imageColor: 'prime1',
-                //     ButtonText: 'Spaces',
-                //     iconSize: '14px',
-                //     onClick: (event) => {
-                //         this.props.showPopoutsForResultBox(this.props.index)
-                //         this.props.onListPickerFooterBtnClick(event)
-                //     },
-                //     buttonRef: this.spacePickerButtonRef,
-                //     active: this.props.listPickerShowStatus === 'footer',
-                // },
-                {
-                    key: 'expand-notes-btn',
-                    image: this.hasNotes ? 'commentFull' : 'commentAdd',
-                    ButtonText:
-                        this.props.noteIds[this.props.notesType].length > 0 &&
-                        this.props.noteIds[
-                            this.props.notesType
-                        ].length.toString(),
-                    imageColor: 'prime1',
-                    onClick: this.props.onNotesBtnClick,
-                    tooltipText: (
-                        <span>
-                            <strong>Add/View Notes</strong>
-                            <br />
-                            shift+click to open inline
-                        </span>
-                    ),
-                },
-            ]
-        }
+                imageColor:
+                    this.props.noteIds[this.props.notesType].length > 0
+                        ? 'prime1'
+                        : null,
+                onClick: this.props.onNotesBtnClick,
+                tooltipText: (
+                    <span>
+                        <strong>Add/View Notes</strong>
+                        <br />
+                        shift+click to open inline
+                    </span>
+                ),
+            },
+        ]
     }
 
     render() {
@@ -481,6 +458,39 @@ export default class PageResultView extends PureComponent<Props> {
                             tabIndex={-1}
                             hasSpaces={this.displayLists.length > 0}
                         >
+                            {this.props.hoverState != null ||
+                            this.props.isBulkSelected ? (
+                                <PageActionBox>
+                                    {this.props.hoverState != null && (
+                                        <ExtraButtonsActionBar>
+                                            {' '}
+                                            <Icon
+                                                heightAndWidth="20px"
+                                                filePath={icons.edit}
+                                                onClick={() => {
+                                                    this.props.onEditTitleChange(
+                                                        this.props
+                                                            .normalizedUrl,
+                                                        this.props.fullTitle ??
+                                                            this.props
+                                                                .normalizedUrl,
+                                                    )
+                                                }}
+                                            />
+                                            <Icon
+                                                heightAndWidth="20px"
+                                                filePath={icons.trash}
+                                                onClick={
+                                                    this.props.onTrashBtnClick
+                                                }
+                                            />
+                                        </ExtraButtonsActionBar>
+                                    )}
+
+                                    {this.renderBulkSelectBtn()}
+                                </PageActionBox>
+                            ) : undefined}
+
                             <BlockContent
                                 type={this.props.type}
                                 normalizedUrl={this.props.normalizedUrl}
@@ -491,20 +501,33 @@ export default class PageResultView extends PureComponent<Props> {
                                 favIcon={this.props.favIconURI}
                                 youtubeService={this.props.youtubeService}
                                 removeFromList={this.renderRemoveFromListBtn()}
-                                bulkSelect={this.renderBulkSelectBtn()}
                                 mainContentHover={
                                     this.props.hoverState != null
                                         ? this.props.hoverState
                                         : undefined
                                 }
+                                renderCreationInfo={() => {
+                                    return this.props.displayTime ? (
+                                        <CreationInfo
+                                            createdWhen={this.props.displayTime}
+                                        />
+                                    ) : null
+                                }}
                                 memexIcon={MemexIcon}
                                 getRootElement={this.props.getRootElement}
-                                onEditPageBtnClick={(changedTitle) => {
-                                    this.props.onEditPageBtnClick(
+                                onEditTitleChange={(changedTitle) => {
+                                    this.props.onEditTitleChange(
                                         this.props.normalizedUrl,
                                         changedTitle,
                                     )
                                 }}
+                                onEditTitleSave={(changedTitle) => {
+                                    this.props.onEditTitleSave(
+                                        this.props.normalizedUrl,
+                                        changedTitle,
+                                    )
+                                }}
+                                editTitleState={this.props.editTitleState}
                             />
                         </PageContentBox>
                         {this.displayLists.length > 0 && (
@@ -523,22 +546,24 @@ export default class PageResultView extends PureComponent<Props> {
                                         : null
                                 }
                                 filteredbyListID={this.props.filteredbyListID}
-                                padding={'0px 20px 10px 20px'}
+                                padding={'0px 20px 0px 20px'}
                                 spacePickerButtonRef={this.spacePickerBarRef}
                             />
                         )}
-                        <ItemBoxBottom
-                            // firstDivProps={{
-                            //     onMouseEnter: this.props.onFooterHover,
-                            //     onMouseOver: this.props.onFooterHover,
-                            // }}
-                            creationInfo={{
-                                createdWhen: this.props.displayTime,
-                            }}
-                            actions={this.calcFooterActions()}
-                            spacesButton={this.renderSpacesButton()}
-                            getRootElement={this.props.getRootElement}
-                        />
+                        <FooterBar>
+                            <ItemBoxBottom
+                                // firstDivProps={{
+                                //     onMouseEnter: this.props.onFooterHover,
+                                //     onMouseOver: this.props.onFooterHover,
+                                // }}
+                                creationInfo={{
+                                    createdWhen: this.props.displayTime,
+                                }}
+                                actions={this.calcFooterActions()}
+                                spacesButton={this.renderSpacesButton()}
+                                getRootElement={this.props.getRootElement}
+                            />
+                        </FooterBar>
                         {this.renderSpacePicker()}
                         {this.renderCopyPaster()}
                     </StyledPageResult>
@@ -547,6 +572,54 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
+
+const slideInFromBottom = keyframes`
+  0% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+  60% {
+    transform: translateY(0%);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+`
+
+const FooterBar = styled.div`
+    animation: ${slideInFromBottom} 0.2s cubic-bezier(0.22, 0.61, 0.36, 1)
+        forwards;
+    bottom: 0;
+    width: 100%;
+    backdrop-filter: blur(10px);
+    background: ${(props) => props.theme.colors.greyScale0_5}90;
+    z-index: 999999;
+    border-radius: 0 0 10px 10px;
+`
+
+const ExtraButtonsActionBar = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 5px;
+    justify-content: center;
+    animation: slideInFromRight 0.3s cubic-bezier(0.22, 0.68, 0.36, 1) forwards;
+
+    @keyframes slideInFromRight {
+        0% {
+            transform: translateX(100%);
+            opacity: 0;
+        }
+        60% {
+            opacity: 0.3;
+        }
+        100% {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+`
 
 const BulkSelectButtonBox = styled.div`
     display: flex;
@@ -577,6 +650,7 @@ const PageContentBox = styled.div<{ hasSpaces: boolean }>`
     cursor: pointer;
     text-decoration: none;
     border-radius: 10px;
+    position: relative;
 `
 
 const LoadingBox = styled.div`
@@ -585,4 +659,31 @@ const LoadingBox = styled.div`
     align-items: center;
     height: 80px;
     width: 100%;
+`
+
+const PageActionBox = styled.div`
+    display: flex;
+    justify-content: space-between;
+    grid-gap: 5px;
+    padding: 5px;
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 999;
+    background: ${(props) => props.theme.colors.black}95;
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
+    align-items: center;
+`
+
+const NoteCounter = styled.span`
+    color: ${(props) => props.theme.colors.black};
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: 5px;
+    border-radius: 30px;
+    padding: 2px 10px;
+    min-width: 30px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    text-align: center;
 `

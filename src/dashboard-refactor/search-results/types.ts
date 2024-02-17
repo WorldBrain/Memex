@@ -49,7 +49,9 @@ export type PageInteractionProps = Omit<
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
     onClick: React.MouseEventHandler
-    onEditPageBtnClick: (normalizedPageUrl, changedTitle) => void
+    onAIResultBtnClick: React.MouseEventHandler
+    onEditTitleChange: (normalizedPageUrl, changedTitle) => void
+    onEditTitleSave: (normalizedPageUrl, changedTitle) => void
 }
 
 // NOTE: Derived type - edit the original
@@ -87,7 +89,7 @@ export type NoteInteractionProps = Omit<
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: (content: string) => void
     onBodyChange: (content: string) => void
-    onCopyPasterDefaultExecute: React.MouseEventHandler
+    onCopyPasterDefaultExecute: () => void
 }
 
 // NOTE: Derived type - edit the original
@@ -162,6 +164,7 @@ export type PageData = Pick<
     isShared?: boolean
     fullPdfUrl?: string
     uploadedPdfLinkLoadState?: TaskState
+    editTitleState?: string
 }
 
 export type NoResultsType =
@@ -209,6 +212,7 @@ export interface PageResult {
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
     hoverState: ResultHoverState
+    editTitleState?: string
 }
 
 export interface PageResultsByDay {
@@ -313,9 +317,7 @@ export type Events = UIEvent<{
         isShown: boolean
         event: React.MouseEvent
     }
-    setCopyPasterDefaultNoteExecute: NoteEventArgs & {
-        event: React.MouseEvent
-    }
+    setCopyPasterDefaultNoteExecute: NoteEventArgs
     setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }

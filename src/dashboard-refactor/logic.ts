@@ -2849,8 +2849,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             )
         }
 
-        console.log('templateCopyResult', templateCopyResult, event.noteId)
-
         if (templateCopyResult) {
             this.emitMutation({
                 searchResults: {
@@ -4016,11 +4014,56 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 },
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    editTitleState: {
+                                        $set: null,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         })
+
         this.options.pageIndexingBG.updatePageTitle({
             normaliedPageUrl: event.normalizedPageUrl,
             title: event.changedTitle,
+        })
+    }
+    updatePageTitleState: EventHandler<'updatePageTitle'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [event.normalizedPageUrl]: {
+                            editTitleState: {
+                                $set: event.changedTitle,
+                            },
+                        },
+                    },
+                },
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    editTitleState: {
+                                        $set: event.changedTitle,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
         })
     }
 

@@ -172,6 +172,7 @@ const LabelText = styled.span<{ fontSize; textPosition }>`
     cursor: pointer;
     width: fill-available;
     height: fill-available;
+    justify-content: center;
     grid-gap: ${(props) => (props.fontSize < 14 ? '5px' : '15px')};
 
     &:hover {

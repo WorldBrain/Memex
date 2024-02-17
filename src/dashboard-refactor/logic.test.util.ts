@@ -20,6 +20,7 @@ import {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import { PageAnnotationsCache } from 'src/annotations/cache'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -145,6 +146,7 @@ export async function setupTest(
         seedData?: DataSeeder
         overrideSearchTrigger?: boolean
         copyToClipboard?: (text: string) => Promise<boolean>
+        copyPaster?: RemoteCopyPasterInterface
         renderUpdateNotifBanner?: () => JSX.Element
     } = {
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
@@ -206,6 +208,7 @@ export async function setupTest(
             device.backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:
             device.backgroundModules.activityIndicator.remoteFunctions,
+        copyPasterBG: device.backgroundModules.copyPaster.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
         openSpaceInWebUI: () => {},
