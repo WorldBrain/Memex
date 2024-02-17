@@ -26,7 +26,6 @@ export interface CommonInteractionProps {
     onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBarBtnClick: React.MouseEventHandler
     onListPickerFooterBtnClick: React.MouseEventHandler
-    onAIResultBtnClick: React.MouseEventHandler
 
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
@@ -50,6 +49,7 @@ export type PageInteractionProps = Omit<
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
     onClick: React.MouseEventHandler
+    onAIResultBtnClick: React.MouseEventHandler
     onEditTitleChange: (normalizedPageUrl, changedTitle) => void
     onEditTitleSave: (normalizedPageUrl, changedTitle) => void
 }

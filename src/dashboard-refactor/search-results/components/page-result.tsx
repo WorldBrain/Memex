@@ -33,6 +33,8 @@ import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import { keyframes } from 'styled-components'
+import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -504,6 +506,13 @@ export default class PageResultView extends PureComponent<Props> {
                                         ? this.props.hoverState
                                         : undefined
                                 }
+                                renderCreationInfo={() => {
+                                    return this.props.displayTime ? (
+                                        <CreationInfo
+                                            createdWhen={this.props.displayTime}
+                                        />
+                                    ) : null
+                                }}
                                 memexIcon={MemexIcon}
                                 getRootElement={this.props.getRootElement}
                                 onEditTitleChange={(changedTitle) => {
@@ -563,8 +572,6 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 }
-
-import { keyframes } from 'styled-components'
 
 const slideInFromBottom = keyframes`
   0% {

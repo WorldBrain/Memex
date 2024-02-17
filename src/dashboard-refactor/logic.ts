@@ -2826,7 +2826,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     setCopyPasterDefaultNoteExecute: EventHandler<
         'setCopyPasterDefaultNoteExecute'
     > = async ({ event, previousState }) => {
-        console.log('setCopyPasterDefaultNoteExecute')
         this.emitMutation({
             searchResults: {
                 noteData: {

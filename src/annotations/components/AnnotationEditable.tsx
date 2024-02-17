@@ -1038,7 +1038,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 targetElementRef={referenceElement.current}
                 placement={'bottom-end'}
                 closeComponent={() => {
-                    console.log('closeComponent')
                     this.setState({
                         showCopyPaster: false,
                     })

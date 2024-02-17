@@ -408,7 +408,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    hideSidebar() {
+    async hideSidebar() {
         super.hideSidebar()
         this.props.inPageUI.hideRibbon()
         this.props.inPageUI.hideSidebar()

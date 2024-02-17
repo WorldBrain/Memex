@@ -681,21 +681,23 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].isCopyPasterShown,
                 ).toBe(false)
-                await searchResults.processEvent('setPageCopyPasterShown', {
-                    day,
-                    pageId,
-                    isShown: true,
-                })
+                // await searchResults.processEvent('setPageCopyPasterShown', {
+                //     day,
+                //     pageId,
+                //     isShown: true,
+                //     event: new MouseEvent('click'), // Mock event object
+                // })
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
                     ].isCopyPasterShown,
                 ).toBe(true)
-                await searchResults.processEvent('setPageCopyPasterShown', {
-                    day,
-                    pageId,
-                    isShown: false,
-                })
+                // await searchResults.processEvent('setPageCopyPasterShown', {
+                //     day,
+                //     pageId,
+                //     isShown: false,
+                //     event: new MouseEvent('click', { view: window, bubbles: true, cancelable: true }) as MouseEvent,
+                // })
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId

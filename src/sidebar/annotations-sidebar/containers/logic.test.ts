@@ -117,6 +117,7 @@ const setupLogicHelper = async ({
         contentSharingByTabsBG: insertBackgroundFunctionTab(
             backgroundModules.contentSharing.remoteFunctionsByTab,
         ) as any,
+        copyPasterBG: backgroundModules.copyPaster.remoteFunctions,
         pageActivityIndicatorBG:
             backgroundModules.pageActivityIndicator.remoteFunctions,
         contentScriptsBG: insertBackgroundFunctionTab(
