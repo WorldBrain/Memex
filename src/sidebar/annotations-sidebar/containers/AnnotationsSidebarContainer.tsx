@@ -206,10 +206,9 @@ export class AnnotationsSidebarContainer<
     }
 
     async hideSidebar() {
-        await this.processEvent('setPageUrl', null)
         this.processEvent('hide', null)
-
         if (this.props.sidebarContext === 'dashboard') {
+            console.log('dashboard')
             setTimeout(() => {
                 document.removeEventListener('keydown', this.listenToEsc)
                 this.props.onNotesSidebarClose()
@@ -218,6 +217,7 @@ export class AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
+        console.log('esc')
         if (event.key === 'Escape' && !this.state.deleteConfirmMode) {
             this.hideSidebar()
         }

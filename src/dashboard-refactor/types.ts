@@ -67,6 +67,7 @@ export interface RootState {
     bulkEditSpacesLoadingState?: TaskState
     highlightColors: string
     isNoteSidebarShown: boolean
+    blurEffectReset: boolean
 }
 
 export type Events = UIEvent<

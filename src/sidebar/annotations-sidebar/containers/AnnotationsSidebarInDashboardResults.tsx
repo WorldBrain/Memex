@@ -52,7 +52,7 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
 }
 
 const SlideInWrapper = styled.div`
-    transition: width 1s ease-in-out, opacity 0.5s ease-in-out;
+    transition: width 1s ease-in-out, opacity 0.3s ease-in-out;
 
     display: flex;
     justify-content: flex-start;

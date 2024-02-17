@@ -132,6 +132,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         | 'highlightColors'
     >
     currentSearchID = 0
+    observer: MutationObserver // This line explicitly declares the observer property for clarity.
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -487,6 +488,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         await loadInitial(this, async () => {
+            this.observeBlurContainer()
             await this.initThemeVariant()
             const user = await authBG.getCurrentUser()
             setSentryUserContext(user)
@@ -573,6 +575,93 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         })
+    }
+
+    observeBlurContainer() {
+        console.log('iscalled')
+        const container = document.getElementById('BlurContainer')
+        console.log('container', container)
+
+        if (!container) return
+        const config = { attributes: true, attributeFilter: ['style'] }
+        this.observer = new MutationObserver((mutationsList, observer) => {
+            mutationsList.forEach((mutation) => {
+                if ((mutation.target as HTMLElement).id === 'BlurContainer') {
+                    console.log(
+                        'Changes detected in BlurContainer:',
+                        mutation.target,
+                        'New style:',
+                        (mutation.target as HTMLElement).style.cssText,
+                    )
+                    this.ensureBlurEffect(container)
+                }
+            })
+        })
+
+        this.observer.observe(container, config)
+        this.setupResizeListener()
+    }
+
+    setupResizeListener() {
+        window.addEventListener('resize', this.handleWindowResize)
+    }
+
+    handleWindowResize = () => {
+        const container = document.getElementById('BlurContainer')
+        if (container) {
+            this.ensureBlurEffect(container)
+        }
+    }
+
+    increment = 0
+
+    ensureBlurEffect(container: HTMLElement) {
+        this.increment++
+        if (
+            !container.style.backdropFilter ||
+            container.style.backdropFilter !== 'blur(10px)'
+        ) {
+            console.log('Applying blur effect')
+
+            if (this.increment > 1) {
+                console.log('make background')
+                const blurContainer = document.getElementById('BlurContainer')
+                blurContainer.style.background = '#313239'
+            } else {
+                this.emitMutation({
+                    blurEffectReset: { $set: true },
+                })
+
+                setTimeout(() => {
+                    this.emitMutation({
+                        blurEffectReset: { $set: false },
+                    })
+                    setTimeout(() => {
+                        const blurContainer = document.getElementById(
+                            'BlurContainer',
+                        )
+                        blurContainer.style.background = '#313239'
+                        if (
+                            !blurContainer.style.backdropFilter ||
+                            blurContainer.style.backdropFilter !== 'blur(10px)'
+                        ) {
+                            console.log(
+                                'Failed to apply blur effect within 100ms, attempting again.',
+                            )
+                            blurContainer.style.backdropFilter = 'blur(10px)'
+                            blurContainer.style.background = '#313239'
+                        }
+                    }, 50)
+                }, 100)
+            }
+        }
+    }
+
+    cleanupBlurObserver() {
+        if (this.observer) {
+            this.observer.disconnect()
+        }
+        window.removeEventListener('resize', this.handleWindowResize)
     }
 
     async initThemeVariant() {
@@ -3823,9 +3912,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (previousState.listsSidebar.isSidebarLocked) {
             return
         }
-        this.emitMutation({
-            listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
-        })
+        if (event.isPeeking) {
+            this.emitMutation({
+                listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
+            })
+        }
     }
 
     setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({

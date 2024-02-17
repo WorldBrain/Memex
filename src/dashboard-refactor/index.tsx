@@ -169,7 +169,6 @@ export class DashboardContainer extends StatefulUIElement<
         this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
         ;(window as any)['_state'] = () => ({ ...this.state })
     }
-
     private getListDetailsById: ListDetailsGetter = (id) => {
         const listData = this.props.annotationsCache.getListByLocalId(id)
         return {
@@ -1510,8 +1509,11 @@ export class DashboardContainer extends StatefulUIElement<
                 onDragEnter={(event) => this.processEvent('dragFile', event)}
                 inPageMode={this.props.inPageMode}
                 fullSizeInPage={this.state.isNoteSidebarShown}
+                id={'BlurContainer'}
             >
-                {this.props.inPageMode && <InPageBackground />}
+                {this.props.inPageMode && this.state.blurEffectReset && (
+                    <InPageBackground key={Date.now()} />
+                )}
                 {this.renderPdfLocator()}
                 <MainContainer inPageMode={this.props.inPageMode}>
                     <SidebarHeaderContainer>
@@ -1911,7 +1913,7 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
             min-height: fill-available;
             height: fill-available;
             border-radius: 30px;
-            background-color: ${(props) => props.theme.colors.black}98;
+            background-color: ${(props) => props.theme.colors.black}de;
             backdrop-filter: blur(10px);
         `}
     ${(props) =>
@@ -2041,7 +2043,7 @@ const ListSidebarContent = styled(Rnd)<{
             height: 100vh;
             background-color: ${(props) => props.theme.colors.greyScale1};
             border-right: solid 1px ${(props) => props.theme.colors.greyScale2};
-            padding-top: ${sizeConstants.header.heightPx}px;
+            padding-top: ${sizeConstants.header.heightPx - 15}px;
         `}
     ${(props) =>
         props.peeking &&
@@ -2261,14 +2263,15 @@ const RightHeader = styled.div`
 `
 
 const InPageBackground = styled.div`
-    position: absolute;
-    height: 100%;
-    width: 100%;
+    height: 10vh;
+    width: 10vw;
     top: 0px;
-    left: 0px;
-    background: ${(props) => props.theme.colors.black}90;
+    right: 0px;
+    background: transparent;
     display: flex;
     cursor: pointer;
     justify-content: center;
     align-items: center;
+    position: fixed;
+    z-index: 10000;
 `
