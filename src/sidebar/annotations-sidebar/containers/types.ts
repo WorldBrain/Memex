@@ -204,6 +204,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
+    deleteConfirmMode: boolean
 
     spacePickerAnnotationInstance: {
         instanceId: string

@@ -319,6 +319,7 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationId: null, // TODO: make unified ID
 
             showCommentBox: false,
+            deleteConfirmMode: false,
             showCongratsMessage: false,
             showClearFiltersBtn: false,
             showFiltersSidebar: false,
@@ -2120,8 +2121,67 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private handleKeyPress = (
+        event: KeyboardEvent,
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) => {
+        return () => {
+            // Ensure a function is returned
+
+            event.stopPropagation()
+            if (event.key === 'Enter') {
+                this.processUIEvent('deleteAnnotation', {
+                    event: { unifiedAnnotationId },
+                    previousState,
+                })
+            } else if (event.key === 'Escape') {
+                event.preventDefault()
+                this.processUIEvent('setAnnotationCardMode', {
+                    event: {
+                        instanceLocation: instanceLocation,
+                        unifiedAnnotationId: unifiedAnnotationId,
+                        mode: 'none',
+                    },
+                    previousState,
+                })
+            }
+        }
+    }
+
+    private setupNoteDeletionEventListener(
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) {
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.handleKeyPress(
+                event,
+                instanceLocation,
+                unifiedAnnotationId,
+                previousState,
+            )()
+        })
+    }
+    private tearDownNoteDeletionEventListener(
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) {
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.handleKeyPress(
+                event,
+                instanceLocation,
+                unifiedAnnotationId,
+                previousState,
+            )()
+        })
+    }
+
     setAnnotationCardMode: EventHandler<'setAnnotationCardMode'> = ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             annotationCardInstances: {
@@ -2130,6 +2190,27 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
+
+        if (event.mode === 'delete-confirm') {
+            this.setupNoteDeletionEventListener(
+                event.instanceLocation,
+                event.unifiedAnnotationId,
+                previousState,
+            )
+            this.emitMutation({
+                deleteConfirmMode: { $set: true },
+            })
+        }
+        if (event.mode === 'none') {
+            this.tearDownNoteDeletionEventListener(
+                event.instanceLocation,
+                event.unifiedAnnotationId,
+                previousState,
+            )
+            this.emitMutation({
+                deleteConfirmMode: { $set: false },
+            })
+        }
     }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({
@@ -3621,11 +3702,6 @@ export class SidebarContainerLogic extends UILogic<
         normalizedPageUrls,
     ) => {
         try {
-            console.log(
-                'annotationUrls',
-                annotationUrls,
-                this.options.copyPasterBG,
-            )
             const templates = await this.options.copyPasterBG.findAllTemplates()
             const sortedTemplates = templates.sort(defaultOrderableSorter)
             const id = sortedTemplates[0].id
@@ -3637,8 +3713,6 @@ export class SidebarContainerLogic extends UILogic<
                 annotationUrls: annotationUrls,
                 normalizedPageUrls: normalizedPageUrls,
             })
-
-            console.log('rendered', rendered)
 
             if (item) {
                 if (
@@ -3668,7 +3742,6 @@ export class SidebarContainerLogic extends UILogic<
     setCopyPasterDefaultNoteExecute: EventHandler<
         'setCopyPasterDefaultNoteExecute'
     > = async ({ event, previousState }) => {
-        console.log('setCopyPasterDefaultNoteExecute')
         this.emitMutation({
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
@@ -3680,15 +3753,11 @@ export class SidebarContainerLogic extends UILogic<
         const annotationURL = await this.options.annotationsCache.annotations
             .byId[event.noteId].localId
 
-        console.log('annotationURL', annotationURL)
-
         let templateCopyResult
         templateCopyResult = await this.handleDefaultTemplateCopy(
             [annotationURL],
             null,
         )
-
-        console.log('templateCopyResult', templateCopyResult)
 
         if (templateCopyResult) {
             this.emitMutation({

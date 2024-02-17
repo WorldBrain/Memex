@@ -983,6 +983,13 @@ export class DashboardContainer extends StatefulUIElement<
                         //     })
                         // }
                     },
+                    onAIResultBtnClick: (day, pageId) => () => {
+                        const pageData = searchResults.pageData.byId[pageId]
+
+                        this.notesSidebarRef.current.toggleAIShowForPageId(
+                            pageData.fullUrl,
+                        )
+                    },
                     onTagPickerBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageTagPickerShown', {
                             day,
@@ -1084,13 +1091,26 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             shareStates,
                         }),
-                    onEditPageBtnClick: (day, pageId) => (
+                    onEditTitleSave: (day, pageId) => (
                         normalizedPageUrl,
                         changedTitle,
                     ) => {
                         this.processEvent('updatePageTitle', {
                             normalizedPageUrl,
                             changedTitle,
+                            day,
+                            pageId,
+                        })
+                    },
+                    onEditTitleChange: (day, pageId) => (
+                        normalizedPageUrl,
+                        changedTitle,
+                    ) => {
+                        this.processEvent('updatePageTitleState', {
+                            normalizedPageUrl,
+                            changedTitle,
+                            day,
+                            pageId,
                         })
                     },
                 }}

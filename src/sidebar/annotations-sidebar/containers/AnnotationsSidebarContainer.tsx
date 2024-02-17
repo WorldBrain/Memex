@@ -97,7 +97,6 @@ export class AnnotationsSidebarContainer<
     }
 
     constructor(props: P) {
-        console.log('copypaster', props.copyPaster)
         super(
             props,
             new SidebarContainerLogic({
@@ -150,13 +149,47 @@ export class AnnotationsSidebarContainer<
     }
 
     async toggleSidebarShowForPageId(fullPageUrl: string) {
-        const isAlreadyOpenForOtherPage = fullPageUrl !== this.state.fullPageUrl
+        const newURL = fullPageUrl
+        const previousURL = this.state?.fullPageUrl ?? null
 
-        if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
+        if (this.state.showState === 'hidden') {
             this.showSidebar()
-            await this.processEvent('setPageUrl', { fullPageUrl })
-        } else if (this.state.showState === 'visible') {
+        }
+
+        if (
+            this.state.activeTab === 'annotations' &&
+            newURL === previousURL &&
+            this.state.showState === 'visible'
+        ) {
             this.hideSidebar()
+            return
+        }
+
+        await this.processEvent('setActiveSidebarTab', {
+            tab: 'annotations',
+        })
+        await this.processEvent('setPageUrl', { fullPageUrl })
+    }
+    async toggleAIShowForPageId(fullPageUrl: string) {
+        const newURL = fullPageUrl
+        const previousURL = this.state?.fullPageUrl ?? null
+
+        if (this.state.showState === 'hidden') {
+            this.showSidebar()
+        }
+
+        if (newURL !== previousURL) {
+            await this.processEvent('setPageUrl', { fullPageUrl: newURL })
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('askAIviaInPageInteractions', null)
+        }
+        if (newURL === previousURL) {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('askAIviaInPageInteractions', null)
         }
     }
 
@@ -172,7 +205,8 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    hideSidebar() {
+    async hideSidebar() {
+        await this.processEvent('setPageUrl', null)
         this.processEvent('hide', null)
 
         if (this.props.sidebarContext === 'dashboard') {
@@ -184,7 +218,7 @@ export class AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
-        if (event.key === 'Escape') {
+        if (event.key === 'Escape' && !this.state.deleteConfirmMode) {
             this.hideSidebar()
         }
     }
@@ -204,6 +238,27 @@ export class AnnotationsSidebarContainer<
                     : SIDEBAR_WIDTH_STORAGE_KEY,
                 isWidthLocked: true,
             })
+        }
+    }
+
+    private handleKeyPress = (
+        event: KeyboardEvent,
+        instanceLocation,
+        unifiedAnnotationId,
+    ) => {
+        return () => {
+            // Ensure a function is returned
+
+            event.stopPropagation()
+            if (event.key === 'Enter') {
+                this.processEvent('deleteAnnotation', { unifiedAnnotationId })
+            } else if (event.key === 'Escape') {
+                this.processEvent('setAnnotationCardMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    mode: 'none',
+                })
+            }
         }
     }
 
@@ -234,20 +289,23 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     isEditing: !annotationCardInstance.isHighlightEditing,
                 }),
-            onDeleteIconClick: () =>
+            onDeleteIconClick: (event) => {
                 this.processEvent('setAnnotationCardMode', {
                     instanceLocation,
                     unifiedAnnotationId,
                     mode: 'delete-confirm',
-                }),
-            onDeleteCancel: () =>
+                })
+            },
+            onDeleteCancel: (event) => {
                 this.processEvent('setAnnotationCardMode', {
                     instanceLocation,
                     unifiedAnnotationId,
                     mode: 'none',
-                }),
-            onDeleteConfirm: () =>
-                this.processEvent('deleteAnnotation', { unifiedAnnotationId }),
+                })
+            },
+            onDeleteConfirm: (event) => {
+                this.processEvent('deleteAnnotation', { unifiedAnnotationId })
+            },
             onShareClick: (mouseEvent) =>
                 // TODO: work out if this is needed/how to unfiy with editAnnotation
                 this.processEvent('editAnnotation', {

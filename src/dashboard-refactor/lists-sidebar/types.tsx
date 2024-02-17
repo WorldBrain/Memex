@@ -67,7 +67,18 @@ export type Events = UIEvent<{
     setListPrivacy: { listId: string; isPrivate: boolean }
     confirmListEdit: { value: string; listId: string; skipDBOps?: boolean }
     cancelListEdit: null
-    updatePageTitle: { normalizedPageUrl: string; changedTitle: string }
+    updatePageTitle: {
+        normalizedPageUrl: string
+        changedTitle: string
+        day: number
+        pageId: string
+    }
+    updatePageTitleState: {
+        normalizedPageUrl: string
+        changedTitle: string
+        day: number
+        pageId: string
+    }
     setDragOverListId: { listId?: string }
     setEditingListId: { listId: string }
     setSelectedListId: { listId: string }

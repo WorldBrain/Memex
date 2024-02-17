@@ -26,6 +26,7 @@ export interface CommonInteractionProps {
     onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBarBtnClick: React.MouseEventHandler
     onListPickerFooterBtnClick: React.MouseEventHandler
+    onAIResultBtnClick: React.MouseEventHandler
 
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: React.MouseEventHandler
@@ -49,7 +50,8 @@ export type PageInteractionProps = Omit<
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
     onClick: React.MouseEventHandler
-    onEditPageBtnClick: (normalizedPageUrl, changedTitle) => void
+    onEditTitleChange: (normalizedPageUrl, changedTitle) => void
+    onEditTitleSave: (normalizedPageUrl, changedTitle) => void
 }
 
 // NOTE: Derived type - edit the original
@@ -162,6 +164,7 @@ export type PageData = Pick<
     isShared?: boolean
     fullPdfUrl?: string
     uploadedPdfLinkLoadState?: TaskState
+    editTitleState?: string
 }
 
 export type NoResultsType =
@@ -209,6 +212,7 @@ export interface PageResult {
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
     hoverState: ResultHoverState
+    editTitleState?: string
 }
 
 export interface PageResultsByDay {

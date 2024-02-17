@@ -1,5 +1,5 @@
 import * as React from 'react'
-import styled, { ThemeProvider, css } from 'styled-components'
+import styled, { ThemeProvider, css, keyframes } from 'styled-components'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
 import ItemBoxBottom, {
     ItemBoxBottomAction,
@@ -554,6 +554,40 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
     }
 
+    renderDeleteScreen(footerDeps) {
+        if (this.props.isDeleting) {
+            return (
+                <DeleteScreenContainer>
+                    <DeleteScreenTitle>
+                        Deletion is not reversible. <br /> Are you sure?
+                    </DeleteScreenTitle>
+                    <DeleteScreenButtons>
+                        <PrimaryAction
+                            label="Confirm"
+                            subLabel="Enter"
+                            type="glass"
+                            size="medium"
+                            onClick={footerDeps.onDeleteConfirm}
+                            padding={'5px 10px'}
+                            height={'50px'}
+                            width={'120px'}
+                        />
+                        <PrimaryAction
+                            label="Cancel"
+                            subLabel="Escape"
+                            type="glass"
+                            size="medium"
+                            onClick={footerDeps.onDeleteCancel}
+                            height={'50px'}
+                            width={'120px'}
+                            padding={'5px 10px'}
+                        />
+                    </DeleteScreenButtons>
+                </DeleteScreenContainer>
+            )
+        }
+    }
+
     private setTextAreaHeight() {
         let lines = 1
 
@@ -634,9 +668,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                               ?.onEditIconClick
                 }
             >
-                <ActionBox>{actionsBox}</ActionBox>
+                {/* <ActionBox>{actionsBox}</ActionBox> */}
 
-                {!this.theme.hasHighlight &&
+                {/* {!this.theme.hasHighlight &&
                     this.state.hoverCard &&
                     this.props.currentUserId === this.props.creatorId && (
                         <ActionBox>
@@ -662,7 +696,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 />
                             </TooltipBox>
                         </ActionBox>
-                    )}
+                    )} */}
                 <NoteTextBox hasHighlight={this.theme.hasHighlight}>
                     <NoteText
                         contextLocation={this.props.contextLocation}
@@ -722,10 +756,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         return [
             {
                 key: 'add-spaces-to-note-btn',
-                image: 'plus',
-                isLoading:
-                    this.props.annotationEditDependencies.copyLoadingState ===
-                    'running',
+                image: this.props.isShared ? 'spread' : 'plus',
+                imageColor: this.props.isShared ? 'prime1' : null,
+                iconSize: this.props.isShared && '20px',
                 onClick: () => {
                     this.props.onShareMenuToggle?.()
                     this.setState({
@@ -765,7 +798,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 },
                 tooltipText: (
                     <span>
-                        <strong>Click</strong> to show options. <br />
+                        <strong>Click</strong> to show copy templates. <br />
                         <strong>Shift+Click</strong> to copy note with default
                         template.
                     </span>
@@ -776,82 +809,22 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     this.props.unifiedId,
                 buttonRef: this.copyPasterButtonRef,
             },
-            // {
-            //     key: 'ask-ai-note-btn',
-            //     image:
-            //         this.props.annotationEditDependencies.copyLoadingState ===
-            //         'success'
-            //             ? 'check'
-            //             : 'feed',
-            //     isLoading:
-            //         this.props.annotationEditDependencies.copyLoadingState ===
-            //         'running',
-            //     onMouseDown: (event) => {
-            //         // if (!this.state.showCopyPaster) {
-            //         //     // this.props.showPopoutsForResultBox(this.props.index)
-            //         //     this.props.onCopyPasterToggle?.()
-            //         //     this.setState({ showCopyPaster: true })
-            //         // }
-            //     },
-            //     onMouseUp: (event) => {
-            //         // if (!this.state.showCopyPaster) {
-            //         //     console.log('onMouseUp')
-            //         //     this.props.annotationFooterDependencies.onCopyPasterDefaultExecute(
-            //         //         event,
-            //         //     )
-            //         // }
-            //     },
-            //     tooltipText: 'Ask AI',
-            //     ButtonText: 'Ask AI',
-            //     // active:
-            //     //     this.props.copyPasterAnnotationInstanceId ===
-            //     //     this.props.unifiedId,
-            //     // buttonRef: this.copyPasterButtonRef,
-            // },
-            // appendRepliesToggle && {
-            //     key: 'show-replies-notes-btn',
-            //     image:
-            //         this.props.annotationEditDependencies.copyLoadingState ===
-            //         'success'
-            //             ? 'check'
-            //             : 'commentAdd',
-            //     isLoading:
-            //         this.props.annotationEditDependencies.copyLoadingState ===
-            //         'running',
-            //     onMouseDown: (event) => {
-            //         // if (!this.state.showCopyPaster) {
-            //         //     // this.props.showPopoutsForResultBox(this.props.index)
-            //         //     this.props.onCopyPasterToggle?.()
-            //         //     this.setState({ showCopyPaster: true })
-            //         // }
-            //     },
-            //     onMouseUp: (event) => {
-            //         if (!this.state.showCopyPaster) {
-            //             // console.log('onMouseUp')
-            //             // this.props.annotationFooterDependencies.onCopyPasterDefaultExecute(
-            //             //     event,
-            //             // )
-            //         }
-            //     },
-            //     tooltipText: 'Ask AI',
-            //     ButtonText: 'Replies',
-            //     // active:
-            //     //     this.props.copyPasterAnnotationInstanceId ===
-            //     //     this.props.unifiedId,
-            //     // buttonRef: this.copyPasterButtonRef,
-            // },
-            // {
-            //     key: 'add-spaces-btn',
-            //     image: 'plus',
-            //     imageColor: 'prime1',
-            //     tooltipText: 'Add Note to Spaces',
-            //     onClick: () => this.updateSpacePickerState('footer'),
-            //     buttonRef: this.spacePickerFooterButtonRef,
-            //     active:
-            //         this.props.spacePickerAnnotationInstance ===
-            //         this.props.unifiedId,
-            // },
-            // appendRepliesToggle && repliesToggle,
+            appendRepliesToggle && {
+                key: 'show-replies-notes-btn',
+                image: hasReplies ? 'commentFull' : 'commentAdd',
+                onClick: onReplyBtnClick,
+                isLoading: repliesLoadingState === 'running',
+                onMouseUp: (event) => {
+                    if (!this.state.showCopyPaster) {
+                        // console.log('onMouseUp')
+                        // this.props.annotationFooterDependencies.onCopyPasterDefaultExecute(
+                        //     event,
+                        // )
+                    }
+                },
+                tooltipText: 'Ask AI',
+                ButtonText: 'Replies',
+            },
         ]
     }
 
@@ -881,65 +854,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         ) {
             return (
                 <DefaultFooterStyled>
-                    {/* {footerDeps != null && (
-                        <TooltipBox
-                            tooltipText={
-                                shareIconData.label === 'Private' ? (
-                                    <span>Only manually added to Spaces</span>
-                                ) : shareIconData.label === 'Shared' ? (
-                                    <span>Shared in some Spaces</span>
-                                ) : (
-                                    <span>
-                                        Auto-added to all Spaces <br /> the
-                                        document is in
-                                    </span>
-                                )
-                            }
-                            placement="bottom-start"
-                            getPortalRoot={this.props.getRootElement}
-                        >
-                            <PrimaryAction
-                                onClick={() => {
-                                    this.props.onShareMenuToggle?.()
-                                    this.setState({
-                                        showShareMenu: true,
-                                    })
-                                }}
-                                label={'Spaces'}
-                                icon={
-                                    this.displayLists.length > 0 ? (
-                                        <ListCounter isShared={isShared}>
-                                            {isShared && (
-                                                <Icon
-                                                    icon={'spread'}
-                                                    heightAndWidth="24px"
-                                                    color={'prime1'}
-                                                    hoverOff
-                                                />
-                                            )}
-                                            {this.displayLists.length}
-                                        </ListCounter>
-                                    ) : (
-                                        'plus'
-                                    )
-                                }
-                                iconColor={
-                                    this.displayLists.length > 0
-                                        ? 'white'
-                                        : 'prime1'
-                                }
-                                size={'small'}
-                                type={'tertiary'}
-                                padding="0px 4px 0px 2px"
-                                innerRef={this.shareMenuButtonRef}
-                                active={
-                                    this.props.shareMenuAnnotationInstanceId ===
-                                    this.props.unifiedId
-                                }
-                            />
-                        </TooltipBox>
-                    )} */}
-
                     <ItemBoxBottom
                         borderTop={false}
                         creationInfo={this.creationInfo}
@@ -1148,6 +1062,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         const actionsBox =
             !this.props.isEditingHighlight && this.state.hoverCard ? (
                 <HighlightActionsBox>
+                    {footerDeps.onDeleteIconClick && (
+                        <TooltipBox
+                            tooltipText="Delete Note"
+                            placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
+                        >
+                            <Icon
+                                onClick={footerDeps.onDeleteIconClick}
+                                filePath={'trash'}
+                                heightAndWidth={'20px'}
+                                borderColor={'transparent'}
+                                hoverOff
+                            />
+                        </TooltipBox>
+                    )}
                     {onGoToAnnotation && (
                         <TooltipBox
                             tooltipText="Open in Page"
@@ -1205,6 +1134,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             id: ANNOT_BOX_ID_PREFIX + this.props.unifiedId,
                         }}
                     >
+                        {this.renderDeleteScreen(footerDeps)}
                         <AnnotationStyled>
                             <ActionBox>{actionsBox}</ActionBox>
                             <ContentContainer
@@ -1272,6 +1202,66 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 }
+
+const DeleteScreenContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    height: fill-available;
+    width: fill-available;
+    background: ${(props) => props.theme.colors.black}95;
+    backdrop-filter: blur(5px);
+    animation: increaseBlur 0.3s forwards;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 10000000;
+    border-radius: 10px;
+
+    @keyframes increaseBlur {
+        from {
+            backdrop-filter: blur(5px);
+        }
+        to {
+            backdrop-filter: blur(10px);
+        }
+    }
+`
+
+const fadeInUpAnimation = keyframes`
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+`
+
+const fadeInUp = css`
+    opacity: 0;
+    transform: translateY(15px);
+    animation: ${fadeInUpAnimation} 0.2s ease-out forwards;
+`
+const DeleteScreenTitle = styled.div`
+    font-size: 20px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    margin-bottom: 20px;
+    padding: 0 20px;
+    line-height: 30px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    animation-delay: 0.15s;
+    ${fadeInUp}
+`
+
+const DeleteScreenButtons = styled.div`
+    display: flex;
+    grid-gap: 10px;
+    ${fadeInUp}
+`
 
 const HighlightSection = styled.div`
     display: flex;
@@ -1382,6 +1372,10 @@ const HighlightActionsBox = styled.div`
 
     backdrop-filter: blur(5px);
     border-radius: 8px;
+
+    & * {
+        cursor: pointer;
+    }
 `
 
 const NoteTextBox = styled.div<{ hasHighlight: boolean }>`
@@ -1410,7 +1404,7 @@ const NoteText = styled(Markdown)`
 `
 
 const ActionBox = styled.div`
-    z-index: 10000000;
+    z-index: 100000;
     position: absolute;
     right: 15px;
     top: 15px;
