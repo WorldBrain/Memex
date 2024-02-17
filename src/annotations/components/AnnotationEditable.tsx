@@ -38,6 +38,7 @@ import tinycolor from 'tinycolor2'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { sleepPromise } from 'src/util/promises'
+import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -206,53 +207,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     componentDidMount() {
         this.setTextAreaHeight()
-        // const defaultHighlightColor = highlightColorSettings.find(
-        //     (setting) => setting.id === 'default',
-        // )
 
         this.setState({
             currentHighlightColor: this.props.color,
-            // defaultHighlightColor: defaultHighlightColor,
         })
-
-        // let needsTruncation: boolean
-
-        // if (this.props.comment?.length || this.props.body?.length) {
-        //     if (
-        //         truncateText(this.props?.comment)['isTooLong'] ||
-        //         truncateText(this.props?.body)['isTooLong']
-        //     ) {
-        //         needsTruncation = true
-        //     }
-        // }
-
-        // if (this.props.comment) {
-        //     this.setState({
-        //         isTruncatedNote:
-        //             truncateText(this.props?.comment)['isTooLong'] ?? false,
-        //         truncatedTextComment:
-        //             truncateText(this.props?.comment)['text'] ?? '',
-        //     })
-        // }
-
-        // if (this.props.body) {
-        //     this.setState({
-        //         isTruncatedHighlight:
-        //             truncateText(this.props?.body)['isTooLong'] ?? false,
-        //         truncatedTextHighlight:
-        //             truncateText(this.props?.body)['text'] ?? '',
-        //     })
-        // }
-
-        // if (this.props?.body || this.props?.comment) {
-        //     this.setState({
-        //         needsTruncation:
-        //             truncateText(this.props?.comment)['isTooLong'] ||
-        //             truncateText(this.props?.body)['isTooLong']
-        //                 ? true
-        //                 : false,
-        //     })
-        // }
     }
 
     // This is a hack to ensure this state, which isn't available on init, only gets set once
@@ -291,6 +249,34 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 defaultHighlightColor: defaultHighlightColor,
             })
         }
+        if (!prevProps.isActive && this.props.isActive) {
+            document.addEventListener('keydown', this.handleCmdCKeyPress)
+        }
+        if (prevProps.isActive && !this.props.isActive) {
+            document.removeEventListener('keydown', this.handleCmdCKeyPress)
+        }
+    }
+
+    private handleCmdCKeyPress = (event: KeyboardEvent) => {
+        if (event.key === 'c' && (event.metaKey || event.ctrlKey)) {
+            this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
+            this.setState({ showCopyPaster: false })
+        }
+    }
+
+    private copyAnnotationToClipboard = () => {
+        const { body, comment } = this.props
+        const textToCopy = `Comment: ${comment || 'N/A'}\n\nBody: ${
+            body || 'N/A'
+        }`
+        navigator.clipboard.writeText(textToCopy).then(
+            () => {
+                console.log('Annotation copied to clipboard')
+            },
+            (err) => {
+                console.error('Could not copy annotation to clipboard: ', err)
+            },
+        )
     }
 
     private updateSpacePickerState(showState: ListPickerShowState) {
@@ -392,53 +378,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         if (!this.props.body) {
             return
         }
-        const {
-            annotationFooterDependencies: footerDeps,
-            onGoToAnnotation,
-        } = this.props
-
-        const actionsBox =
-            !this.props.isEditingHighlight && this.state.hoverCard ? (
-                <HighlightActionsBox>
-                    {onGoToAnnotation && (
-                        <TooltipBox
-                            tooltipText="Open in Page"
-                            placement="bottom"
-                            getPortalRoot={this.props.getRootElement}
-                        >
-                            <Icon
-                                onClick={onGoToAnnotation}
-                                filePath={'goTo'}
-                                heightAndWidth={'18px'}
-                                borderColor={'greyScale3'}
-                                background={'greyScale1'}
-                            />
-                        </TooltipBox>
-                    )}
-                    {footerDeps?.onEditHighlightIconClick &&
-                    this.props.currentUserId === this.props.creatorId ? (
-                        <TooltipBox
-                            tooltipText={
-                                <span>
-                                    <strong>Add/Edit Note</strong>
-                                    <br />
-                                    or double-click card
-                                </span>
-                            }
-                            placement="bottom"
-                            getPortalRoot={this.props.getRootElement}
-                        >
-                            <Icon
-                                onClick={footerDeps.onEditHighlightIconClick}
-                                icon={'edit'}
-                                heightAndWidth={'18px'}
-                                borderColor={'greyScale3'}
-                                background={'greyScale1'}
-                            />
-                        </TooltipBox>
-                    ) : undefined}
-                </HighlightActionsBox>
-            ) : null
 
         const isScreenshotAnnotation = this.props.selector?.dimensions != null
         let barColor = null
@@ -454,77 +393,82 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             <HighlightStyled
                 onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
+                onDoubleClick={
+                    this.props.isEditingHighlight
+                        ? undefined
+                        : this.props.annotationFooterDependencies
+                              ?.onEditHighlightIconClick
+                }
             >
-                {this.renderHighlightsColorPicker(
-                    this.props.unifiedId,
-                    this.props.color,
+                {this.creationInfo?.createdWhen && (
+                    <CreationInfo {...this.creationInfo} />
                 )}
+                <HighlightSection>
+                    {this.renderHighlightsColorPicker(
+                        this.props.unifiedId,
+                        this.props.color,
+                    )}
 
-                {this.renderHighlightsColorTooltip()}
-                <ActionBox>{actionsBox}</ActionBox>
-                {!isScreenshotAnnotation && (
-                    <Highlightbar
-                        onMouseEnter={() =>
-                            this.setState({
-                                showHighlightColorTooltip: true,
-                            })
-                        }
-                        onMouseLeave={() =>
-                            this.setState({
-                                showHighlightColorTooltip: false,
-                            })
-                        }
-                        ref={this.highlightsBarRef}
-                        onClick={() =>
-                            this.setState({
-                                showHighlightColorPicker: !this.state
-                                    .showHighlightColorPicker,
-                            })
-                        }
-                        barColor={barColor}
-                    />
-                )}
-                {/* This is the highlight Editing section, not the annotationEditSection */}
-                {this.props.isEditingHighlight ? (
-                    <HighlightEditContainer
-                        hasHighlight={this.theme.hasHighlight}
-                        onDoubleClick={
-                            this.props.isEditingHighlight
-                                ? undefined
-                                : this.props.annotationFooterDependencies
-                                      ?.onEditHighlightIconClick
-                        }
-                    >
-                        <AnnotationEdit
-                            ref={this.annotEditRef}
-                            {...this.props.annotationEditDependencies}
-                            rows={2}
-                            editorHeight={this.state.editorHeight}
-                            isShared={this.props.isShared}
-                            isBulkShareProtected={
-                                this.props.isBulkShareProtected
+                    {this.renderHighlightsColorTooltip()}
+
+                    {!isScreenshotAnnotation && (
+                        <Highlightbar
+                            onMouseEnter={() =>
+                                this.setState({
+                                    showHighlightColorTooltip: true,
+                                })
                             }
-                            getYoutubePlayer={this.props.getYoutubePlayer}
-                            imageSupport={this.props.imageSupport}
-                            comment={this.props.body}
-                            onCommentChange={
-                                this.props.annotationEditDependencies
-                                    .onBodyChange
+                            onMouseLeave={() =>
+                                this.setState({
+                                    showHighlightColorTooltip: false,
+                                })
                             }
-                            slimEditorActions={true}
+                            ref={this.highlightsBarRef}
+                            onClick={() =>
+                                this.setState({
+                                    showHighlightColorPicker: !this.state
+                                        .showHighlightColorPicker,
+                                })
+                            }
+                            barColor={barColor}
                         />
-                    </HighlightEditContainer>
-                ) : (
-                    <Markdown
-                        imageSupport={this.props.imageSupport}
-                        isHighlight
-                        pageUrl={this.props.pageUrl}
-                    >
-                        {this.state.isTruncatedHighlight
-                            ? this.state.truncatedTextHighlight
-                            : this.props.body}
-                    </Markdown>
-                )}
+                    )}
+                    {/* This is the highlight Editing section, not the annotationEditSection */}
+                    {this.props.isEditingHighlight ? (
+                        <HighlightEditContainer
+                            hasHighlight={this.theme.hasHighlight}
+                        >
+                            <AnnotationEdit
+                                ref={this.annotEditRef}
+                                {...this.props.annotationEditDependencies}
+                                rows={2}
+                                editorHeight={this.state.editorHeight}
+                                isShared={this.props.isShared}
+                                isBulkShareProtected={
+                                    this.props.isBulkShareProtected
+                                }
+                                getYoutubePlayer={this.props.getYoutubePlayer}
+                                imageSupport={this.props.imageSupport}
+                                comment={this.props.body}
+                                onCommentChange={
+                                    this.props.annotationEditDependencies
+                                        .onBodyChange
+                                }
+                                slimEditorActions={true}
+                            />
+                        </HighlightEditContainer>
+                    ) : (
+                        <Markdown
+                            imageSupport={this.props.imageSupport}
+                            isHighlight
+                            pageUrl={this.props.pageUrl}
+                        >
+                            {this.state.isTruncatedHighlight
+                                ? this.state.truncatedTextHighlight
+                                : this.props.body}
+                        </Markdown>
+                    )}
+                </HighlightSection>
             </HighlightStyled>
         )
     }
@@ -753,80 +697,161 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             hasReplies,
         } = this.props
 
-        const repliesToggle: ItemBoxBottomAction =
-            repliesLoadingState === 'success'
-                ? {
-                      key: 'replies-btn',
-                      onClick: onReplyBtnClick,
-                      tooltipText: 'Show replies',
-                      imageColor: 'prime1',
-                      image: hasReplies ? 'commentFull' : 'commentAdd',
-                  }
-                : {
-                      key: 'replies-btn',
-                      node: <LoadingIndicator size={16} />,
-                  }
+        // const repliesToggle: ItemBoxBottomAction =
+        //     repliesLoadingState === 'success'
+        //         ? {
+        //               key: 'replies-btn',
+        //               onClick: onReplyBtnClick,
+        //               tooltipText: 'Show replies',
+        //               imageColor: 'prime1',
+        //               image: hasReplies ? 'commentFull' : 'commentAdd',
+        //           }
+        //         : {
+        //               key: 'replies-btn',
+        //               node: <LoadingIndicator size={16} />,
+        //           }
 
-        if (!footerDeps) {
-            return [repliesToggle]
-        }
+        // if (!footerDeps) {
+        //     return [repliesToggle]
+        // }
 
-        if (!this.state.hoverCard && appendRepliesToggle) {
-            return [repliesToggle]
-        }
-
-        if (this.state.hoverCard || this.isAnyModalOpen()) {
-            return [
-                {
-                    key: 'delete-note-btn',
-                    image: 'trash',
-                    onClick: footerDeps.onDeleteIconClick,
-                    tooltipText: 'Delete Note',
-                },
-                {
-                    key: 'copy-paste-note-btn',
-                    image: 'copy',
-                    onClick: () => {
-                        this.props.onCopyPasterToggle?.()
-                        this.setState({ showCopyPaster: true })
-                    },
-                    tooltipText: 'Copy Note',
-                    active:
-                        this.props.copyPasterAnnotationInstanceId ===
-                        this.props.unifiedId,
-                    buttonRef: this.copyPasterButtonRef,
-                },
-                // {
-                //     key: 'add-spaces-btn',
-                //     image: 'plus',
-                //     imageColor: 'prime1',
-                //     tooltipText: 'Add Note to Spaces',
-                //     onClick: () => this.updateSpacePickerState('footer'),
-                //     buttonRef: this.spacePickerFooterButtonRef,
-                //     active:
-                //         this.props.spacePickerAnnotationInstance ===
-                //         this.props.unifiedId,
-                // },
-                // {
-                //     key: 'share-note-btn',
-                //     image: shareIconData.icon,
-                //     onClick: footerDeps.onShareClick,
-                //     tooltipText: shareIconData.label,
-                // },
-                appendRepliesToggle && repliesToggle,
-            ]
-        }
+        // if (!this.state.hoverCard && appendRepliesToggle) {
+        //     return [repliesToggle]
+        // }
 
         return [
+            {
+                key: 'add-spaces-to-note-btn',
+                image: 'plus',
+                isLoading:
+                    this.props.annotationEditDependencies.copyLoadingState ===
+                    'running',
+                onClick: () => {
+                    this.props.onShareMenuToggle?.()
+                    this.setState({
+                        showShareMenu: true,
+                    })
+                },
+                tooltipText: 'Add to Space(s)',
+                ButtonText: 'Spaces',
+                active:
+                    this.props.shareMenuAnnotationInstanceId ===
+                    this.props.unifiedId,
+                buttonRef: this.shareMenuButtonRef,
+            },
+            {
+                key: 'copy-paste-note-btn',
+                image:
+                    this.props.annotationEditDependencies.copyLoadingState ===
+                    'success'
+                        ? 'check'
+                        : 'copy',
+                isLoading:
+                    this.props.annotationEditDependencies.copyLoadingState ===
+                    'running',
+                onClick: (event) => {
+                    if (event.shiftKey) {
+                        this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
+                        this.setState({ showCopyPaster: false })
+                    } else {
+                        this.props.onCopyPasterToggle?.()
+                        this.setState({ showCopyPaster: true })
+                    }
+                },
+                onMouseDown: (event) => {
+                    if (event.shiftKey && this.state.showCopyPaster) {
+                        this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
+                    }
+                },
+                tooltipText: (
+                    <span>
+                        <strong>Click</strong> to show options. <br />
+                        <strong>Shift+Click</strong> to copy note with default
+                        template.
+                    </span>
+                ),
+                ButtonText: 'Cite',
+                active:
+                    this.props.copyPasterAnnotationInstanceId ===
+                    this.props.unifiedId,
+                buttonRef: this.copyPasterButtonRef,
+            },
+            // {
+            //     key: 'ask-ai-note-btn',
+            //     image:
+            //         this.props.annotationEditDependencies.copyLoadingState ===
+            //         'success'
+            //             ? 'check'
+            //             : 'feed',
+            //     isLoading:
+            //         this.props.annotationEditDependencies.copyLoadingState ===
+            //         'running',
+            //     onMouseDown: (event) => {
+            //         // if (!this.state.showCopyPaster) {
+            //         //     // this.props.showPopoutsForResultBox(this.props.index)
+            //         //     this.props.onCopyPasterToggle?.()
+            //         //     this.setState({ showCopyPaster: true })
+            //         // }
+            //     },
+            //     onMouseUp: (event) => {
+            //         // if (!this.state.showCopyPaster) {
+            //         //     console.log('onMouseUp')
+            //         //     this.props.annotationFooterDependencies.onCopyPasterDefaultExecute(
+            //         //         event,
+            //         //     )
+            //         // }
+            //     },
+            //     tooltipText: 'Ask AI',
+            //     ButtonText: 'Ask AI',
+            //     // active:
+            //     //     this.props.copyPasterAnnotationInstanceId ===
+            //     //     this.props.unifiedId,
+            //     // buttonRef: this.copyPasterButtonRef,
+            // },
+            // appendRepliesToggle && {
+            //     key: 'show-replies-notes-btn',
+            //     image:
+            //         this.props.annotationEditDependencies.copyLoadingState ===
+            //         'success'
+            //             ? 'check'
+            //             : 'commentAdd',
+            //     isLoading:
+            //         this.props.annotationEditDependencies.copyLoadingState ===
+            //         'running',
+            //     onMouseDown: (event) => {
+            //         // if (!this.state.showCopyPaster) {
+            //         //     // this.props.showPopoutsForResultBox(this.props.index)
+            //         //     this.props.onCopyPasterToggle?.()
+            //         //     this.setState({ showCopyPaster: true })
+            //         // }
+            //     },
+            //     onMouseUp: (event) => {
+            //         if (!this.state.showCopyPaster) {
+            //             // console.log('onMouseUp')
+            //             // this.props.annotationFooterDependencies.onCopyPasterDefaultExecute(
+            //             //     event,
+            //             // )
+            //         }
+            //     },
+            //     tooltipText: 'Ask AI',
+            //     ButtonText: 'Replies',
+            //     // active:
+            //     //     this.props.copyPasterAnnotationInstanceId ===
+            //     //     this.props.unifiedId,
+            //     // buttonRef: this.copyPasterButtonRef,
+            // },
             // {
             //     key: 'add-spaces-btn',
             //     image: 'plus',
             //     imageColor: 'prime1',
-            //     // onClick: () => this.updateSpacePickerState('footer'),
-            //     // buttonRef: this.props.spacePickerButtonRef,
-            //     // active: this.state.showSpacePicker === 'footer',
+            //     tooltipText: 'Add Note to Spaces',
+            //     onClick: () => this.updateSpacePickerState('footer'),
+            //     buttonRef: this.spacePickerFooterButtonRef,
+            //     active:
+            //         this.props.spacePickerAnnotationInstance ===
+            //         this.props.unifiedId,
             // },
-            appendRepliesToggle && repliesToggle,
+            // appendRepliesToggle && repliesToggle,
         ]
     }
 
@@ -856,7 +881,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         ) {
             return (
                 <DefaultFooterStyled>
-                    {footerDeps != null && (
+                    {/* {footerDeps != null && (
                         <TooltipBox
                             tooltipText={
                                 shareIconData.label === 'Private' ? (
@@ -913,7 +938,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 }
                             />
                         </TooltipBox>
-                    )}
+                    )} */}
+
                     <ItemBoxBottom
                         borderTop={false}
                         creationInfo={this.creationInfo}
@@ -1098,6 +1124,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 targetElementRef={referenceElement.current}
                 placement={'bottom-end'}
                 closeComponent={() => {
+                    console.log('closeComponent')
                     this.setState({
                         showCopyPaster: false,
                     })
@@ -1112,6 +1139,54 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
     render() {
         const { annotationFooterDependencies } = this.props
+
+        const {
+            annotationFooterDependencies: footerDeps,
+            onGoToAnnotation,
+        } = this.props
+
+        const actionsBox =
+            !this.props.isEditingHighlight && this.state.hoverCard ? (
+                <HighlightActionsBox>
+                    {onGoToAnnotation && (
+                        <TooltipBox
+                            tooltipText="Open in Page"
+                            placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
+                        >
+                            <Icon
+                                onClick={onGoToAnnotation}
+                                filePath={'goTo'}
+                                heightAndWidth={'20px'}
+                                borderColor={'transparent'}
+                                hoverOff
+                            />
+                        </TooltipBox>
+                    )}
+                    {footerDeps?.onEditHighlightIconClick &&
+                    this.props.currentUserId === this.props.creatorId ? (
+                        <TooltipBox
+                            tooltipText={
+                                <span>
+                                    <strong>Add/Edit Note</strong>
+                                    <br />
+                                    or double-click card
+                                </span>
+                            }
+                            placement="bottom"
+                            getPortalRoot={this.props.getRootElement}
+                        >
+                            <Icon
+                                onClick={footerDeps.onEditHighlightIconClick}
+                                filePath={'edit'}
+                                heightAndWidth={'20px'}
+                                borderColor={'transparent'}
+                                hoverOff
+                            />
+                        </TooltipBox>
+                    ) : undefined}
+                </HighlightActionsBox>
+            ) : null
 
         return (
             <ThemeProvider theme={this.theme}>
@@ -1131,6 +1206,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         }}
                     >
                         <AnnotationStyled>
+                            <ActionBox>{actionsBox}</ActionBox>
                             <ContentContainer
                                 isEditMode={
                                     this.props.isEditing ||
@@ -1196,6 +1272,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 }
+
+const HighlightSection = styled.div`
+    display: flex;
+    margin-top: 5px;
+`
 
 const ShareMenuContainer = styled.div`
     display: flex;
@@ -1292,10 +1373,15 @@ const HighlightActionsBox = styled.div`
     position: absolute;
     right: 0px;
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     z-index: 10000;
-    top: -4px;
+    top: 0px;
     grid-gap: 5px;
+    background: ${(props) => props.theme.colors.black}95;
+    padding: 5px;
+
+    backdrop-filter: blur(5px);
+    border-radius: 8px;
 `
 
 const NoteTextBox = styled.div<{ hasHighlight: boolean }>`
@@ -1324,9 +1410,10 @@ const NoteText = styled(Markdown)`
 `
 
 const ActionBox = styled.div`
-    z-index: 1;
+    z-index: 10000000;
     position: absolute;
     right: 15px;
+    top: 15px;
 `
 
 const HighlightTextBox = styled.div`
@@ -1352,15 +1439,16 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     padding: 15px 10px 7px 15px;
     line-height: 20px;
     text-align: left;
+    grid-gap: 2px;
     line-break: normal;
     display: flex;
     position: relative;
-
+    flex-direction: column;
     ${(props) =>
         !props.hasComment &&
         css`
             padding: 15px 10px 15px 15px;
-        `}
+        `};
 `
 
 const CommentBox = styled.div`
@@ -1398,8 +1486,7 @@ const DefaultFooterStyled = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
-    padding: 0px 0px 0px 10px;
+    padding-bottom: 5px;
 `
 
 const AnnotationStyled = styled.div`

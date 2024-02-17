@@ -1230,10 +1230,9 @@ export class DashboardContainer extends StatefulUIElement<
                                 .isCopyPasterShown,
                         }),
 
-                    onCopyPasterDefaultExecute: (noteId) => (event) => {
+                    onCopyPasterDefaultExecute: (noteId) => () => {
                         this.processEvent('setCopyPasterDefaultNoteExecute', {
                             noteId,
-                            event: event,
                         })
                     },
                     onReplyBtnClick: (noteId) => () =>
@@ -1687,6 +1686,7 @@ export class DashboardContainer extends StatefulUIElement<
                             youtubeService={this.youtubeService}
                             authBG={this.props.authBG}
                             refSidebar={this.notesSidebarRef}
+                            copyPaster={this.props.copyPasterBG}
                             customListsBG={this.props.listsBG}
                             annotationsBG={this.props.annotationsBG}
                             contentSharingBG={this.props.contentShareBG}

@@ -2826,6 +2826,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     setCopyPasterDefaultNoteExecute: EventHandler<
         'setCopyPasterDefaultNoteExecute'
     > = async ({ event, previousState }) => {
+        console.log('setCopyPasterDefaultNoteExecute')
         this.emitMutation({
             searchResults: {
                 noteData: {
@@ -2848,8 +2849,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 null,
             )
         }
-
-        console.log('templateCopyResult', templateCopyResult, event.noteId)
 
         if (templateCopyResult) {
             this.emitMutation({

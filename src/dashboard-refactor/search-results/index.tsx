@@ -427,7 +427,7 @@ export default class SearchResultsContainer extends React.Component<
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
                     body: noteData.editNoteForm.bodyInputValue,
-                    isLoading: noteData.copyLoadingState,
+                    copyLoadingState: noteData.copyLoadingState,
                     onListsBarPickerBtnClick:
                         interactionProps.onListPickerBarBtnClick,
                     onCommentChange: (content) =>

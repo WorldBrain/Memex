@@ -97,12 +97,14 @@ export class AnnotationsSidebarContainer<
     }
 
     constructor(props: P) {
+        console.log('copypaster', props.copyPaster)
         super(
             props,
             new SidebarContainerLogic({
                 ...props,
                 analytics,
                 copyToClipboard,
+                copyPasterBG: props.copyPaster,
                 focusCreateForm: () => {
                     ;(this.sidebarRef
                         ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
@@ -267,6 +269,13 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     mode: 'copy-paster',
                 }),
+            onCopyPasterDefaultExecute: () => {
+                this.processEvent('setCopyPasterDefaultNoteExecute', {
+                    instanceLocation: instanceLocation,
+                    unifiedAnnotationId: unifiedAnnotationId,
+                    noteId: unifiedAnnotationId,
+                })
+            },
         }
     }
 
@@ -340,6 +349,7 @@ export class AnnotationsSidebarContainer<
                 }),
             imageSupport: this.props.imageSupport,
             getRootElement: this.props.getRootElement,
+            copyLoadingState: annotationCardInstance?.copyLoadingState,
         }
     }
 

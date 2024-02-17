@@ -87,7 +87,7 @@ export type NoteInteractionProps = Omit<
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: (content: string) => void
     onBodyChange: (content: string) => void
-    onCopyPasterDefaultExecute: React.MouseEventHandler
+    onCopyPasterDefaultExecute: () => void
 }
 
 // NOTE: Derived type - edit the original
@@ -313,9 +313,7 @@ export type Events = UIEvent<{
         isShown: boolean
         event: React.MouseEvent
     }
-    setCopyPasterDefaultNoteExecute: NoteEventArgs & {
-        event: React.MouseEvent
-    }
+    setCopyPasterDefaultNoteExecute: NoteEventArgs
     setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }

@@ -916,6 +916,7 @@ export async function main(
             components.highlights?.resolve()
         },
         async registerSidebarScript(execute) {
+            console.log('copyyyy', copyPaster)
             await execute({
                 events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
