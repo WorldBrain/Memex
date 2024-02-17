@@ -63,6 +63,7 @@ export interface Props
     uploadedPdfLinkLoadState: TaskState
     getRootElement: () => HTMLElement
     copyLoadingState: UITaskState
+    inPageMode?: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -398,19 +399,36 @@ export default class PageResultView extends PureComponent<Props> {
             },
             {
                 key: 'expand-notes-btn',
-                image: this.hasNotes ? 'commentFull' : 'commentAdd',
                 ButtonText:
                     this.props.noteIds[this.props.notesType].length > 0 ? (
-                        <span>
-                            Notes{' '}
+                        <NotesCounterContainer>
+                            <NotesCounterTitle>
+                                <Icon
+                                    heightAndWidth="16px"
+                                    icon={
+                                        this.hasNotes
+                                            ? 'commentFull'
+                                            : 'commentAdd'
+                                    }
+                                    hoverOff
+                                />
+                                Notes
+                            </NotesCounterTitle>
                             <NoteCounter>
                                 {this.props.noteIds[
                                     this.props.notesType
                                 ]?.length.toString()}
                             </NoteCounter>
-                        </span>
+                        </NotesCounterContainer>
                     ) : (
-                        'Add Notes'
+                        <NotesCounterTitle>
+                            <Icon
+                                heightAndWidth="16px"
+                                icon={'commentAdd'}
+                                hoverOff
+                            />
+                            Add Notes
+                        </NotesCounterTitle>
                     ),
                 imageColor:
                     this.props.noteIds[this.props.notesType].length > 0
@@ -499,6 +517,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 fullTitle={this.props.fullTitle}
                                 pdfUrl={this.props.fullPdfUrl}
                                 favIcon={this.props.favIconURI}
+                                inPageMode={this.props.inPageMode}
                                 youtubeService={this.props.youtubeService}
                                 removeFromList={this.renderRemoveFromListBtn()}
                                 mainContentHover={
@@ -550,7 +569,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 spacePickerButtonRef={this.spacePickerBarRef}
                             />
                         )}
-                        <FooterBar>
+                        <FooterBar inPageMode={this.props.inPageMode}>
                             <ItemBoxBottom
                                 // firstDivProps={{
                                 //     onMouseEnter: this.props.onFooterHover,
@@ -562,6 +581,7 @@ export default class PageResultView extends PureComponent<Props> {
                                 actions={this.calcFooterActions()}
                                 spacesButton={this.renderSpacesButton()}
                                 getRootElement={this.props.getRootElement}
+                                inPageMode={this.props.inPageMode}
                             />
                         </FooterBar>
                         {this.renderSpacePicker()}
@@ -588,7 +608,9 @@ const slideInFromBottom = keyframes`
   }
 `
 
-const FooterBar = styled.div`
+const FooterBar = styled.div<{
+    inPageMode?: boolean
+}>`
     animation: ${slideInFromBottom} 0.2s cubic-bezier(0.22, 0.61, 0.36, 1)
         forwards;
     bottom: 0;
@@ -597,6 +619,13 @@ const FooterBar = styled.div`
     background: ${(props) => props.theme.colors.greyScale0_5}90;
     z-index: 999999;
     border-radius: 0 0 10px 10px;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            backdrop-filter: unset;
+            background: unset;
+        `}
 `
 
 const ExtraButtonsActionBar = styled.div`
@@ -676,6 +705,21 @@ const PageActionBox = styled.div`
     align-items: center;
 `
 
+const NotesCounterContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fill-available;
+    position: relative;
+`
+
+const NotesCounterTitle = styled.span`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+`
+
 const NoteCounter = styled.span`
     color: ${(props) => props.theme.colors.black};
     font-weight: 400;
@@ -683,7 +727,8 @@ const NoteCounter = styled.span`
     margin-left: 5px;
     border-radius: 30px;
     padding: 2px 10px;
-    min-width: 30px;
     background: ${(props) => props.theme.colors.headerGradient};
     text-align: center;
+    position: absolute;
+    right: 0;
 `

@@ -136,6 +136,7 @@ export type Props = RootState &
         //     normalizedPageUrl: string,
         //     changedTitle: string,
         // ) => void
+        inPageMode?: boolean
     }
 
 export interface State {
@@ -597,6 +598,7 @@ export default class SearchResultsContainer extends React.Component<
                 order={order}
             >
                 <PageResult
+                    inPageMode={this.props.inPageMode}
                     index={index}
                     activePage={this.props.activePage}
                     annotationsCache={this.props.annotationsCache}
@@ -1100,27 +1102,48 @@ export default class SearchResultsContainer extends React.Component<
                             rightSide={undefined}
                         />
                     </PageTopBarBox>
-                    {this.renderOnboardingTutorials()}
-                    {this.renderResultsByDay()}
-                    {this.props.areResultsExhausted &&
-                        this.props.searchState === 'success' &&
-                        this.props.clearInboxLoadState !== 'running' &&
-                        this.props.searchResults.allIds.length > 0 && (
-                            <ResultsExhaustedMessage>
-                                <Icon
-                                    filePath="checkRound"
-                                    heightAndWidth="22px"
-                                    hoverOff
-                                    color={'greyScale4'}
-                                />
-                                End of results
-                            </ResultsExhaustedMessage>
-                        )}
+                    <ResultsScrollContainer>
+                        {this.renderOnboardingTutorials()}
+                        {this.renderResultsByDay()}
+                        {this.props.areResultsExhausted &&
+                            this.props.searchState === 'success' &&
+                            this.props.clearInboxLoadState !== 'running' &&
+                            this.props.searchResults.allIds.length > 0 && (
+                                <ResultsExhaustedMessage>
+                                    <Icon
+                                        filePath="checkRound"
+                                        heightAndWidth="22px"
+                                        hoverOff
+                                        color={'greyScale4'}
+                                    />
+                                    End of results
+                                </ResultsExhaustedMessage>
+                            )}
+                    </ResultsScrollContainer>
                 </ResultsBox>
             </ResultsContainer>
         )
     }
 }
+
+const ResultsScrollContainer = styled.div`
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: fill-available;
+    width: fill-available;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-bottom: 100px;
+    justify-content: flex-start;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
 
 const NoteResultContainer = styled.div`
     display: flex;
@@ -1130,14 +1153,6 @@ const NoteResultContainer = styled.div`
     align-items: flex-start;
     width: fill-available;
 `
-
-const SortButtonContainer = styled.div`
-    position: absolute;
-    top: 6px;
-    left: -23px;
-    z-index: 100;
-`
-
 const PaginationLoaderBox = styled.div`
     margin-top: -30px;
 `
@@ -1352,21 +1367,16 @@ const ContentTypeSwitchContainer = styled.div`
     scrollbar-width: none; */
 `
 
-const ResultsMessage = styled.div`
-    padding-top: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-`
-
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.darkText};
     font-size: 14px;
     font-weight: 300;
 `
 
-const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
+const PageTopBarBox = styled.div<{
+    isDisplayed: boolean
+    inPageMode?: boolean
+}>`
     /* padding: 0px 15px; */
     height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 20px);
@@ -1374,10 +1384,14 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     position: sticky;
     top: 0px;
     margin-top: -1px;
-    background: ${(props) => props.theme.colors.black}80;
-    backdrop-filter: blur(8px);
     width: fill-available;
     width: -moz-available;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            position: relative;
+        `}
 `
 
 const ReferencesContainer = styled.div`
@@ -1427,12 +1441,6 @@ const PageNotesBox = styled(Margin)`
     align-items: flex-start;
 `
 
-const Separator = styled.div`
-    width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
-    margin-bottom: -2px;
-`
-
 const Loader = styled.div`
     width: 100%;
     display: flex;
@@ -1446,17 +1454,10 @@ const ResultsBox = styled.div`
     margin-top: 2px;
     flex-direction: column;
     width: fill-available;
-    height: 100vh;
+    height: fill-available;
     grid-gap: 1px;
-    overflow: scroll;
-    padding-bottom: 100px;
+    overflow: hidden;
     align-items: center;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    scrollbar-width: none;
 `
 
 const ResultsContainer = styled(Margin)`
@@ -1477,53 +1478,4 @@ const ResultsContainer = styled(Margin)`
     }
 
     scrollbar-width: none;
-`
-
-const TopBarRightSideWrapper = styled.div`
-    display: flex;
-    flex-direction: row;
-`
-
-const ShareBtn = styled.button`
-    border: none;
-    background: none;
-    cursor: pointer;
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none;
-    border-radius: 3px;
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
-`
-
-const IconImg = styled.img`
-    height: 18px;
-    width: 18px;
-`
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.greyScale2};
-    border: 1px solid ${(props) => props.theme.colors.greyScale6};
-    border-radius: 8px;
-    height: 60px;
-    width: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const ImportInfo = styled.span`
-    color: ${(props) => props.theme.colors.prime1};
-    margin-bottom: 40px;
-    font-weight: 500;
-    cursor: pointer;
 `

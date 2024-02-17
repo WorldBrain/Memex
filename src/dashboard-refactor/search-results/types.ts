@@ -382,6 +382,8 @@ export type Events = UIEvent<{
     goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
+    toggleNoteSidebarOn: null
+    toggleNoteSidebarOff: null
 
     // Note edit form state mutations
     setNoteEditCommentValue: NoteEventArgs & { value: string }

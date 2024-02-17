@@ -756,8 +756,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         return [
             {
                 key: 'add-spaces-to-note-btn',
-                image: this.props.isShared ? 'spread' : 'plus',
-                imageColor: this.props.isShared ? 'prime1' : null,
                 iconSize: this.props.isShared && '20px',
                 onClick: () => {
                     this.props.onShareMenuToggle?.()
@@ -766,7 +764,31 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     })
                 },
                 tooltipText: 'Add to Space(s)',
-                ButtonText: 'Spaces',
+                ButtonText: (
+                    <NotesCounterContainer>
+                        <NoteCounter>
+                            <Icon
+                                heightAndWidth="24px"
+                                icon={'spread'}
+                                hoverOff
+                                color={
+                                    this.props.isShared
+                                        ? 'prime1'
+                                        : 'greyScale3'
+                                }
+                            />
+                        </NoteCounter>
+                        <NotesCounterTitle>
+                            <Icon
+                                heightAndWidth="16px"
+                                icon={'plus'}
+                                hoverOff
+                                color={this.props.isShared ? 'prime1' : null}
+                            />
+                            Add Space(s)
+                        </NotesCounterTitle>
+                    </NotesCounterContainer>
+                ),
                 active:
                     this.props.shareMenuAnnotationInstanceId ===
                     this.props.unifiedId,
@@ -1571,4 +1593,31 @@ const DeletionBox = styled.div`
     justify-content: space-between;
     align-items: center;
     padding: 5px 5px 5px 15px;
+`
+
+const NotesCounterContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: fill-available;
+    position: relative;
+`
+
+const NotesCounterTitle = styled.span`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+`
+
+const NoteCounter = styled.span`
+    color: ${(props) => props.theme.colors.black};
+    font-weight: 400;
+    font-size: 12px;
+    margin-left: -15px;
+    border-radius: 5px;
+    padding: 2px 10px;
+    text-align: center;
+    position: absolute;
+    left: 0;
 `

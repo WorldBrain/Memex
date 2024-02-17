@@ -66,6 +66,7 @@ export interface RootState {
     bulkSelectedUrls: string[]
     bulkEditSpacesLoadingState?: TaskState
     highlightColors: string
+    isNoteSidebarShown: boolean
 }
 
 export type Events = UIEvent<

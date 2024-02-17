@@ -307,9 +307,9 @@ const MenuTitle = styled.div`
 const MenuItemName = styled.div<{ isSelected; isOpened }>`
     color: ${(props) =>
         props.isOpened
-            ? props.theme.colors.greyScale5
+            ? props.theme.colors.greyScale6
             : props.theme.colors.white};
-    font-size: 12px;
+    font-size: 14px;
     font-weight: 400;
     display: flex;
     align-items: center;

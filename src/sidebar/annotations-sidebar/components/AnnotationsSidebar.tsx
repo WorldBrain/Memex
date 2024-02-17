@@ -2174,7 +2174,7 @@ export class AnnotationsSidebar extends React.Component<
                                             id: 'gpt-3.5-turbo-1106',
                                             name: 'GPT 3.5',
                                             info:
-                                                'Fast & good for summarization',
+                                                'Faster & good for summarization',
                                         },
                                         {
                                             id: 'gpt-4-1106-preview',
@@ -2184,7 +2184,8 @@ export class AnnotationsSidebar extends React.Component<
                                                 : true,
                                             info: (
                                                 <span>
-                                                    Better at generation of text
+                                                    Better at reasoning and with
+                                                    complexity
                                                     <br />
                                                     ONLY WITH OWN KEY
                                                 </span>

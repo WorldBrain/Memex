@@ -457,6 +457,7 @@ export class DashboardContainer extends StatefulUIElement<
                                     isInPageMode: this.props.inPageMode,
                                 }),
                             getRootElement: this.props.getRootElement,
+                            inPageMode: this.props.inPageMode,
                         }}
                     />
                 </SearchSection>
@@ -538,7 +539,7 @@ export class DashboardContainer extends StatefulUIElement<
         }
     }
 
-    private renderListsSidebar() {
+    private renderListsSidebar(isInPageMode: boolean) {
         const { listsSidebar, currentUser } = this.state
 
         let allLists = normalizedStateToArray(listsSidebar.lists)
@@ -715,6 +716,7 @@ export class DashboardContainer extends StatefulUIElement<
                         listsSidebar.lists.byId[listId]?.wasPageDropped,
                 })}
                 getRootElement={this.props.getRootElement}
+                isInPageMode={isInPageMode}
             />
         )
     }
@@ -763,6 +765,7 @@ export class DashboardContainer extends StatefulUIElement<
 
         return (
             <SearchResultsContainer
+                inPageMode={this.props.inPageMode}
                 imageSupport={this.props.imageSupportBG}
                 annotationsCache={this.props.annotationsCache}
                 filterByList={(localListId) => {
@@ -923,7 +926,14 @@ export class DashboardContainer extends StatefulUIElement<
                             synthEvent: event,
                         }),
                     onNotesBtnClick: (day, pageId) => (e) => {
+                        this.processEvent('toggleNoteSidebarOn', null)
                         const pageData = searchResults.pageData.byId[pageId]
+                        this.processEvent('setActivePage', {
+                            activeDay: day,
+                            activePageID: pageId,
+                            activePage: true,
+                        })
+
                         if (e.shiftKey) {
                             this.processEvent('setPageNotesShown', {
                                 day,
@@ -934,56 +944,17 @@ export class DashboardContainer extends StatefulUIElement<
                             return
                         }
 
-                        this.notesSidebarRef.current.toggleSidebarShowForPageId(
-                            pageData.fullUrl,
+                        setTimeout(
+                            () => {
+                                this.notesSidebarRef.current.toggleSidebarShowForPageId(
+                                    pageData.fullUrl,
+                                )
+                            },
+                            this.props.inPageMode ? 1000 : 0,
                         )
-
-                        // this.processEvent('setPageNotesShown', {
-                        //     day,
-                        //     pageId,
-                        //     areShown: !searchResults.results[day].pages.byId[
-                        //         pageId
-                        //     ].areNotesShown,
-                        // })
-
-                        this.processEvent('setActivePage', {
-                            activeDay: day,
-                            activePageID: pageId,
-                            activePage: true,
-                        })
-
-                        // if (
-                        //     searchResults.results[day].pages.byId[pageId]
-                        //         .activePage
-                        // ) {
-                        //     this.processEvent('setActivePage', {
-                        //         activeDay: undefined,
-                        //         activePageID: undefined,
-                        //         activePage: false,
-                        //     })
-                        //     this.processEvent('setPageNotesShown', {
-                        //         day,
-                        //         pageId,
-                        //         areShown:
-                        //             searchResults.results[day].pages.byId[
-                        //                 pageId
-                        //             ].areNotesShown && false,
-                        //     })
-                        // } else if (this.state.activePageID) {
-                        //     this.processEvent('setActivePage', {
-                        //         activeDay: this.state.activeDay,
-                        //         activePageID: this.state.activePageID,
-                        //         activePage: false,
-                        //     })
-                        // } else {
-                        //     this.processEvent('setActivePage', {
-                        //         activeDay: day,
-                        //         activePageID: pageId,
-                        //         activePage: true,
-                        //     })
-                        // }
                     },
                     onAIResultBtnClick: (day, pageId) => () => {
+                        this.processEvent('toggleNoteSidebarOn', null)
                         const pageData = searchResults.pageData.byId[pageId]
 
                         this.notesSidebarRef.current.toggleAIShowForPageId(
@@ -1538,58 +1509,54 @@ export class DashboardContainer extends StatefulUIElement<
             <Container
                 onDragEnter={(event) => this.processEvent('dragFile', event)}
                 inPageMode={this.props.inPageMode}
+                fullSizeInPage={this.state.isNoteSidebarShown}
             >
+                {this.props.inPageMode && <InPageBackground />}
                 {this.renderPdfLocator()}
                 <MainContainer inPageMode={this.props.inPageMode}>
-                    {!this.props.inPageMode && (
-                        <SidebarHeaderContainer>
-                            <SidebarToggleBox>
-                                <SidebarToggle
-                                    isSidebarLocked={
-                                        listsSidebar.isSidebarLocked
-                                    }
-                                    toggleSidebarLockedState={() =>
-                                        this.processEvent('setSidebarLocked', {
-                                            isLocked: !listsSidebar.isSidebarLocked,
-                                        })
-                                    }
-                                    isHovered={
-                                        listsSidebar.isSidebarToggleHovered
-                                    }
-                                    onHoverEnter={() =>
-                                        this.processEvent(
-                                            'setSidebarToggleHovered',
-                                            {
-                                                isHovered: true,
-                                            },
-                                        )
-                                    }
-                                    onHoverLeave={() =>
-                                        this.processEvent(
-                                            'setSidebarToggleHovered',
-                                            {
-                                                isHovered: false,
-                                            },
-                                        )
-                                    }
+                    <SidebarHeaderContainer>
+                        <SidebarToggleBox>
+                            <SidebarToggle
+                                isSidebarLocked={listsSidebar.isSidebarLocked}
+                                toggleSidebarLockedState={() =>
+                                    this.processEvent('setSidebarLocked', {
+                                        isLocked: !listsSidebar.isSidebarLocked,
+                                    })
+                                }
+                                isHovered={listsSidebar.isSidebarToggleHovered}
+                                onHoverEnter={() =>
+                                    this.processEvent(
+                                        'setSidebarToggleHovered',
+                                        {
+                                            isHovered: true,
+                                        },
+                                    )
+                                }
+                                onHoverLeave={() =>
+                                    this.processEvent(
+                                        'setSidebarToggleHovered',
+                                        {
+                                            isHovered: false,
+                                        },
+                                    )
+                                }
+                            />
+                            <ActivityIndicator
+                                hasActivities={listsSidebar.hasFeedActivity}
+                            />
+                        </SidebarToggleBox>
+                        {!this.state.activePageID && !this.props.inPageMode && (
+                            <MemexLogoContainer>
+                                <Icon
+                                    icon={'memexLogo'}
+                                    height={'26px'}
+                                    width={'180px'}
+                                    originalImage
+                                    hoverOff
                                 />
-                                <ActivityIndicator
-                                    hasActivities={listsSidebar.hasFeedActivity}
-                                />
-                            </SidebarToggleBox>
-                            {!this.state.activePageID && (
-                                <MemexLogoContainer>
-                                    <Icon
-                                        icon={this.memexIcon}
-                                        height={'26px'}
-                                        width={'180px'}
-                                        originalImage
-                                        hoverOff
-                                    />
-                                </MemexLogoContainer>
-                            )}
-                        </SidebarHeaderContainer>
-                    )}
+                            </MemexLogoContainer>
+                        )}
+                    </SidebarHeaderContainer>
                     <PeekTrigger
                         onMouseEnter={() => {
                             this.processEvent('setSidebarPeeking', {
@@ -1603,74 +1570,63 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                     />
                     <MainFrame inPageMode={this.props.inPageMode}>
-                        {!this.props.inPageMode && (
-                            <ListSidebarContent
-                                style={style}
-                                size={{
-                                    height: listsSidebar.isSidebarPeeking
-                                        ? '90vh'
-                                        : '100vh',
-                                }}
-                                peeking={
-                                    listsSidebar.isSidebarPeeking
-                                        ? listsSidebar.isSidebarPeeking.toString()
-                                        : undefined
-                                }
-                                position={{
-                                    x:
-                                        listsSidebar.isSidebarLocked &&
-                                        `$sizeConstants.header.heightPxpx`,
-                                }}
-                                locked={
-                                    listsSidebar.isSidebarLocked
-                                        ? listsSidebar.isSidebarLocked.toString()
-                                        : undefined
-                                }
-                                onMouseLeave={() => {
-                                    if (
-                                        this.state.listsSidebar.isSidebarPeeking
-                                    ) {
-                                        this.processEvent('setSidebarPeeking', {
-                                            isPeeking: false,
-                                        })
-                                    }
-                                }}
-                                // default={{ width: sizeConstants.listsSidebar.widthPx }}
-                                resizeHandleClasses={{
-                                    right: 'sidebarResizeHandleSidebar',
-                                }}
-                                resizeGrid={[1, 0]}
-                                dragAxis={'none'}
-                                minWidth={
-                                    sizeConstants.listsSidebar.width + 'px'
-                                }
-                                maxWidth={'500px'}
-                                disableDragging={true}
-                                enableResizing={{
-                                    top: false,
-                                    right: true,
-                                    bottom: false,
-                                    left: false,
-                                    topRight: false,
-                                    bottomRight: false,
-                                    bottomLeft: false,
-                                    topLeft: false,
-                                }}
-                                onResize={(
-                                    e,
-                                    direction,
-                                    ref,
-                                    delta,
-                                    position,
-                                ) => {
-                                    this.processEvent('setSpaceSidebarWidth', {
-                                        width: ref.style.width,
+                        <ListSidebarContent
+                            isInPageMode={this.props.inPageMode}
+                            style={style}
+                            size={{
+                                height: listsSidebar.isSidebarPeeking
+                                    ? '90vh'
+                                    : '100vh',
+                            }}
+                            peeking={
+                                listsSidebar.isSidebarPeeking
+                                    ? listsSidebar.isSidebarPeeking.toString()
+                                    : undefined
+                            }
+                            position={{
+                                x:
+                                    listsSidebar.isSidebarLocked &&
+                                    `$sizeConstants.header.heightPxpx`,
+                            }}
+                            locked={
+                                listsSidebar.isSidebarLocked
+                                    ? listsSidebar.isSidebarLocked.toString()
+                                    : undefined
+                            }
+                            onMouseLeave={() => {
+                                if (this.state.listsSidebar.isSidebarPeeking) {
+                                    this.processEvent('setSidebarPeeking', {
+                                        isPeeking: false,
                                     })
-                                }}
-                            >
-                                {this.renderListsSidebar()}
-                            </ListSidebarContent>
-                        )}
+                                }
+                            }}
+                            // default={{ width: sizeConstants.listsSidebar.widthPx }}
+                            resizeHandleClasses={{
+                                right: 'sidebarResizeHandleSidebar',
+                            }}
+                            resizeGrid={[1, 0]}
+                            dragAxis={'none'}
+                            minWidth={sizeConstants.listsSidebar.width + 'px'}
+                            maxWidth={'500px'}
+                            disableDragging={true}
+                            enableResizing={{
+                                top: false,
+                                right: true,
+                                bottom: false,
+                                left: false,
+                                topRight: false,
+                                bottomRight: false,
+                                bottomLeft: false,
+                                topLeft: false,
+                            }}
+                            onResize={(e, direction, ref, delta, position) => {
+                                this.processEvent('setSpaceSidebarWidth', {
+                                    width: ref.style.width,
+                                })
+                            }}
+                        >
+                            {this.renderListsSidebar(this.props.inPageMode)}
+                        </ListSidebarContent>
                         <MainContent inPageMode={this.props.inPageMode}>
                             {this.state.listsSidebar.selectedListId ===
                             SPECIAL_LIST_STRING_IDS.FEED ? (
@@ -1752,13 +1708,14 @@ export class DashboardContainer extends StatefulUIElement<
                                     },
                                 )
                             }
-                            onNotesSidebarClose={() =>
+                            onNotesSidebarClose={() => {
+                                this.processEvent('toggleNoteSidebarOff', null)
                                 this.processEvent('setActivePage', {
                                     activeDay: undefined,
                                     activePageID: undefined,
                                     activePage: false,
                                 })
-                            }
+                            }}
                             saveHighlightColor={(id, color, unifiedId) => {
                                 {
                                     this.processEvent('saveHighlightColor', {
@@ -1873,6 +1830,17 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                     />
                 </MainContainer>
+                {!this.state.activePageID && (
+                    <MemexLogoContainer location={'bottomLeft'}>
+                        <Icon
+                            icon={'memexIconOnly'}
+                            height={'26px'}
+                            width={'30px'}
+                            originalImage
+                            hoverOff
+                        />
+                    </MemexLogoContainer>
+                )}
             </Container>
         )
     }
@@ -1893,7 +1861,9 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
     }
 `
 
-const MemexLogoContainer = styled.div`
+const MemexLogoContainer = styled.div<{
+    location?: 'bottomLeft' | 'topLeft'
+}>`
     position: absolute;
     top: 16px;
     left: 28px;
@@ -1901,22 +1871,81 @@ const MemexLogoContainer = styled.div`
     @media (max-width: 1200px) {
         display: none;
     }
+
+    ${(props) =>
+        props.location === 'bottomLeft' &&
+        css`
+            left: 15px;
+            bottom: 15px;
+            top: unset;
+        `}
+`
+
+const Container = styled.div<{
+    inPageMode: boolean
+    fullSizeInPage: boolean
+}>`
+    display: flex;
+    flex-direction: column;
+    width: fill-available;
+    background-color: ${(props) => props.theme.colors.black};
+    height: 100vh;
+    width: 100vw;
+    /* min-width: fit-content; */
+    overflow: hidden;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+
+    & * {
+        font-family: 'Satoshi', sans-serif;
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;,
+    }
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            min-height: fill-available;
+            height: fill-available;
+            border-radius: 30px;
+            background-color: ${(props) => props.theme.colors.black}98;
+            backdrop-filter: blur(10px);
+        `}
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            height: 80vh;
+            width: 80vw;
+        `}
+    ${(props) =>
+        props.inPageMode &&
+        props.fullSizeInPage &&
+        css`
+            animation: ${resizeAnimation} 200ms ease-in-out forwards;
+        `}
+    `
+
+const resizeAnimation = keyframes`
+    0% {
+        height: 80vh;
+    width: 80vw;
+    }
+    100% {
+        height: 95vh;
+        width: 95vw;
+    }
 `
 
 const MainContainer = styled.div<{
     inPageMode: boolean
 }>`
     display: flex;
-    display: flex;
     flex-direction: column;
     height: fill-available;
     width: fill-available;
-
-    ${(props) =>
-        props.inPageMode &&
-        css`
-            min-height: fit-content;
-        `}
 `
 
 const DropZoneBackground = styled.div`
@@ -1997,12 +2026,14 @@ const MainContent = styled.div<{
 const ListSidebarContent = styled(Rnd)<{
     locked: boolean
     peeking: boolean
+    isInPageMode: boolean
 }>`
     display: flex;
     flex-direction: column;
     justify-content: start;
     z-index: 3000;
     left: 0px;
+
 
     ${(props) =>
         props.locked &&
@@ -2031,6 +2062,17 @@ const ListSidebarContent = styled(Rnd)<{
             animation-duration: 0.15s;
             border: 1px solid ${(props) => props.theme.colors.greyScale2};
         `}
+
+    ${(props) =>
+        props.isInPageMode &&
+        props.peeking &&
+        css`
+            position: relative;
+            height: fill-available;
+            left: 'unset';
+        `}
+
+
     ${(props) =>
         !props.peeking &&
         !props.locked &&
@@ -2120,38 +2162,6 @@ const MainFrame = styled.div<{
         `}
 `
 
-const Container = styled.div<{
-    inPageMode: boolean
-}>`
-    display: flex;
-    flex-direction: column;
-    width: fill-available;
-    background-color: ${(props) => props.theme.colors.black};
-    min-height: 100vh;
-    height: 100vh;
-    /* min-width: fit-content; */
-    width: fill-available;
-    overflow: hidden;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    scrollbar-width: none;
-
-    & * {
-        font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;,
-    }
-
-    ${(props) =>
-        props.inPageMode &&
-        css`
-            min-height: fit-content;
-            height: fill-available;
-        `}
-`
-
 const PeekTrigger = styled.div`
     height: 100vh;
     width: 10px;
@@ -2220,7 +2230,7 @@ const HeaderContainer = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) => props.theme.colors.black}75;
     z-index: 3500;
     box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale2};
 `
@@ -2248,4 +2258,17 @@ const RightHeader = styled.div`
     @media screen and (max-width: 900px) {
         right: 15px;
     }
+`
+
+const InPageBackground = styled.div`
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    top: 0px;
+    left: 0px;
+    background: ${(props) => props.theme.colors.black}90;
+    display: flex;
+    cursor: pointer;
+    justify-content: center;
+    align-items: center;
 `

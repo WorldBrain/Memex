@@ -610,6 +610,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             STORAGE_KEYS.mobileAdSeen,
         ])
 
+        const islikelyInPage = this.options.location.href.startsWith('http')
+
         const [
             listsSidebarLocked,
             onboardingMsgSeen,
@@ -639,7 +641,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
             listsSidebar: {
-                isSidebarLocked: { $set: listsSidebarLocked ?? true },
+                isSidebarLocked: {
+                    $set: islikelyInPage ? false : listsSidebarLocked ?? true,
+                },
             },
             syncMenu: {
                 lastSuccessfulSyncDate: { $set: new Date(lastSyncTime) },
@@ -2687,6 +2691,23 @@ export class DashboardLogic extends UILogic<State, Events> {
     cancelNoteDelete: EventHandler<'cancelNoteDelete'> = async ({}) => {
         this.emitMutation({
             modals: { deletingNoteArgs: { $set: undefined } },
+        })
+    }
+
+    toggleNoteSidebarOn: EventHandler<'toggleNoteSidebarOn'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            isNoteSidebarShown: { $set: true },
+        })
+    }
+    toggleNoteSidebarOff: EventHandler<'toggleNoteSidebarOn'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            isNoteSidebarShown: { $set: false },
         })
     }
 

@@ -77,6 +77,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     spaceSidebarWidth: string
     someListIsDragging: boolean
     getRootElement: () => HTMLElement
+    isInPageMode: boolean
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {

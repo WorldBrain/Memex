@@ -19,6 +19,7 @@ export interface SearchBarProps {
     renderCopyPasterButton: () => ReactElement
     renderExpandButton: () => ReactElement
     getRootElement: () => HTMLElement
+    inPageMode?: boolean
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -119,7 +120,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                     {renderCopyPasterButton()}
                     {renderExpandButton()}
                 </ActionButtons>
-                <Placeholder />
+                {!this.props.inPageMode && <Placeholder />}
             </Margin>
         )
     }
