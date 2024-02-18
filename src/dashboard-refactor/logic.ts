@@ -415,6 +415,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             isNoteSidebarShown: null,
             showFullScreen: null,
             blurEffectReset: false,
+            focusLockUntilMouseStart: false,
         }
     }
 
@@ -924,6 +925,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             bulkSelectedUrls: { $set: [] },
         })
         await clearBulkEditItems()
+    }
+    setFocusLock: EventHandler<'setFocusLock'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            focusLockUntilMouseStart: { $set: event },
+        })
     }
 
     changeFocusItem: EventHandler<'changeFocusItem'> = async ({

@@ -70,6 +70,7 @@ export interface RootState {
     isNoteSidebarShown: boolean
     blurEffectReset: boolean
     showFullScreen: boolean
+    focusLockUntilMouseStart: boolean
 }
 
 export type Events = UIEvent<
@@ -187,6 +188,7 @@ export type DashboardModalsEvents = UIEvent<{
     clearBulkSelection: null
     setBulkEditSpace: { listId: number }
     changeFocusItem: { direction?: string; pageId?: string }
+    setFocusLock: boolean
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']

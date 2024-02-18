@@ -65,6 +65,7 @@ import {
     ColorThemeKeys,
     IconKeys,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { debounce } from 'lodash'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -183,6 +184,12 @@ export class DashboardContainer extends StatefulUIElement<
             }
 
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                if (!this.state.focusLockUntilMouseStart) {
+                    document.addEventListener('mousemove', this.releaseLock, {
+                        once: true,
+                    })
+                    this.processEvent('setFocusLock', true)
+                }
                 const searchBox = document.getElementById('search-bar')
                 searchBox.blur()
                 this.processEvent('changeFocusItem', {
@@ -192,6 +199,11 @@ export class DashboardContainer extends StatefulUIElement<
                 event.preventDefault()
             }
         }
+    }
+
+    releaseLock = () => {
+        this.processEvent('setFocusLock', false)
+        document.removeEventListener('mousemove', this.releaseLock)
     }
 
     private getListDetailsById: ListDetailsGetter = (id) => {
@@ -1037,6 +1049,9 @@ export class DashboardContainer extends StatefulUIElement<
                             ].isShareMenuShown,
                         }),
                     onMainContentHover: (day, pageId) => () => {
+                        if (this.state.focusLockUntilMouseStart) {
+                            return
+                        }
                         this.processEvent('setPageHover', {
                             day,
                             pageId,
