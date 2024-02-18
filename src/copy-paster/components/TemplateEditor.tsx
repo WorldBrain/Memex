@@ -402,6 +402,7 @@ export default class TemplateEditor extends PureComponent<
                                             ;(e.target as HTMLTextAreaElement).selectionStart = (e.target as HTMLTextAreaElement).selectionEnd = newCursorPos
                                         }, 0)
                                     }
+                                    e.stopPropagation()
                                 }}
                             />
                         </EditorBox>

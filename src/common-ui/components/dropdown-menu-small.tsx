@@ -216,6 +216,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                                 color="greyScale6"
                                 heightAndWidth="18px"
                                 hoverOff
+                                padding={'0px'}
                             />
                         </MenuItemName>
                     </MenuItem>
@@ -247,8 +248,6 @@ const MenuItem = styled.div<{
 }>`
     background: ${(props) =>
         props.backgroundColor && props.theme.colors[props.backgroundColor]};
-    padding: ${(props) =>
-        props.isOpened ? '10px 10px 10px 15px' : '5px 10px 5px 15px'};
     line-height: 20px;
     width: fill-available;
     display: flex;
@@ -266,10 +265,6 @@ const MenuItem = styled.div<{
         css`
             cursor: pointer;
 
-            &:hover {
-                background: ${(props) => props.theme.colors.greyScale3};
-            }
-
             & * {
                 cursor: pointer;
             }
@@ -277,10 +272,6 @@ const MenuItem = styled.div<{
     ${(props) =>
         !props.isOpened &&
         css`
-            &:hover {
-                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-            }
-
             & * {
                 cursor: pointer;
             }
@@ -308,13 +299,13 @@ const MenuItemName = styled.div<{ isSelected; isOpened }>`
     color: ${(props) =>
         props.isOpened
             ? props.theme.colors.greyScale6
-            : props.theme.colors.white};
+            : props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 400;
     display: flex;
     align-items: center;
     grid-gap: 5px;
-    justify-content: space-between;
+    justify-content: flex-start;
     width: -webkit-fill-available;
 `
 
@@ -341,7 +332,6 @@ const Menu = styled.div<{
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
     z-index: 1000;
-    width: 100%;
     position: relative;
     overflow: visible;
 `
@@ -351,9 +341,9 @@ const MenuItemContainerUnfolded = styled.div<{
 }>`
     display: flex;
     flex-direction: column;
-    width: 100%;
     border-radius: 6px;
     background: ${(props) => props.theme.colors.greyScale2};
+    padding: 15px;
 
     ${(props) =>
         props.isOpen &&

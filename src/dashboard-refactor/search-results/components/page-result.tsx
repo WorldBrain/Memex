@@ -65,7 +65,6 @@ export interface Props
     copyLoadingState: UITaskState
     inPageMode?: boolean
     resultsRef?: React.RefObject<HTMLDivElement>
-    setFocusOnItem: (index: number) => void
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -79,6 +78,7 @@ export default class PageResultView extends PureComponent<Props> {
     spacePickerBarRef = React.createRef<HTMLDivElement>()
     copyPasteronPageButtonRef = React.createRef<HTMLDivElement>()
     itemBoxRef = React.createRef<HTMLDivElement>() // Assuming ItemBox renders a div element
+    citeMenuButtonRef = React.createRef<HTMLDivElement>()
 
     private get domain(): string {
         let fullUrl: URL
@@ -227,6 +227,46 @@ export default class PageResultView extends PureComponent<Props> {
         return this.props.onListPickerBarBtnClick
     }
 
+    private renderCopyPaster() {
+        if (this.props.isCopyPasterShown) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.copyPasteronPageButtonRef.current}
+                    placement={'bottom-end'}
+                    offsetX={10}
+                    strategy={'fixed'}
+                    closeComponent={this.props.onCopyPasterBtnClick}
+                    getPortalRoot={this.props.getRootElement}
+                >
+                    <PageNotesCopyPaster
+                        normalizedPageUrls={[this.props.normalizedUrl]}
+                        onClickOutside={this.props.onCopyPasterBtnClick}
+                        getRootElement={this.props.getRootElement}
+                    />
+                </PopoutBox>
+            )
+        }
+    }
+
+    private renderCiteMenu() {
+        return (
+            <PopoutBox
+                targetElementRef={this.citeMenuButtonRef.current}
+                placement={'bottom-end'}
+                offsetX={10}
+                strategy={'fixed'}
+                closeComponent={this.props.onCopyPasterBtnClick}
+                getPortalRoot={this.props.getRootElement}
+            >
+                <PageNotesCopyPaster
+                    normalizedPageUrls={[this.props.normalizedUrl]}
+                    onClickOutside={this.props.onCopyPasterBtnClick}
+                    getRootElement={this.props.getRootElement}
+                />
+            </PopoutBox>
+        )
+    }
+
     private renderSpacePicker() {
         if (this.props.listPickerShowStatus === 'lists-bar') {
             return (
@@ -299,27 +339,6 @@ export default class PageResultView extends PureComponent<Props> {
                         closePicker={(event) =>
                             this.listPickerBtnClickHandler(event)
                         }
-                    />
-                </PopoutBox>
-            )
-        }
-    }
-
-    private renderCopyPaster() {
-        if (this.props.isCopyPasterShown) {
-            return (
-                <PopoutBox
-                    targetElementRef={this.copyPasteronPageButtonRef.current}
-                    placement={'bottom-end'}
-                    offsetX={10}
-                    strategy={'fixed'}
-                    closeComponent={this.props.onCopyPasterBtnClick}
-                    getPortalRoot={this.props.getRootElement}
-                >
-                    <PageNotesCopyPaster
-                        normalizedPageUrls={[this.props.normalizedUrl]}
-                        onClickOutside={this.props.onCopyPasterBtnClick}
-                        getRootElement={this.props.getRootElement}
                     />
                 </PopoutBox>
             )
@@ -717,8 +736,6 @@ const FooterBar = styled.div<{
         forwards;
     bottom: 0;
     width: 100%;
-    backdrop-filter: blur(10px);
-    background: ${(props) => props.theme.colors.greyScale0_5}90;
     z-index: 999999;
     border-radius: 0 0 10px 10px;
 

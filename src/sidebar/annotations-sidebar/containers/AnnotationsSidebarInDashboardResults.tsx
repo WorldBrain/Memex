@@ -17,6 +17,7 @@ type Props = SidebarContainerOptions & {
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
     highlightColorSettings: string
+    inPageMode?: boolean
 }
 
 export class AnnotationsSidebarInDashboardResults extends React.Component<
@@ -52,7 +53,7 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
 }
 
 const SlideInWrapper = styled.div`
-    transition: width 1s ease-in-out, opacity 0.3s ease-in-out;
+    transition: width 200ms ease-in-out, opacity 200ms ease-in-out;
 
     display: flex;
     justify-content: flex-start;

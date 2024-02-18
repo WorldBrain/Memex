@@ -172,21 +172,25 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     handleChangeFocusItem = (event: KeyboardEvent) => {
-        if (event.key === 'Escape' && this.props.inPageMode) {
-            const getPopoutBoxes = document.getElementById('popout-boxes')
-            if (!getPopoutBoxes && !this.state.isNoteSidebarShown) {
+        const getPopoutBoxes = document.getElementById('popout-boxes')
+        if (!getPopoutBoxes) {
+            if (
+                event.key === 'Escape' &&
+                this.props.inPageMode &&
+                !this.state.isNoteSidebarShown
+            ) {
                 this.props.closeInPageMode()
             }
-        }
 
-        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-            const searchBox = document.getElementById('search-bar')
-            searchBox.blur()
-            this.processEvent('changeFocusItem', {
-                direction: event.key === 'ArrowUp' ? 'up' : 'down',
-            })
-            event.stopPropagation()
-            event.preventDefault()
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                const searchBox = document.getElementById('search-bar')
+                searchBox.blur()
+                this.processEvent('changeFocusItem', {
+                    direction: event.key === 'ArrowUp' ? 'up' : 'down',
+                })
+                event.stopPropagation()
+                event.preventDefault()
+            }
         }
     }
 
@@ -970,7 +974,7 @@ export class DashboardContainer extends StatefulUIElement<
                                     pageData.fullUrl,
                                 )
                             },
-                            this.props.inPageMode ? 1000 : 0,
+                            this.props.inPageMode ? 200 : 0,
                         )
                     },
                     onAIResultBtnClick: (day, pageId) => () => {
@@ -1534,7 +1538,7 @@ export class DashboardContainer extends StatefulUIElement<
             <Container
                 onDragEnter={(event) => this.processEvent('dragFile', event)}
                 inPageMode={this.props.inPageMode}
-                fullSizeInPage={this.state.isNoteSidebarShown}
+                fullSizeInPage={this.state.showFullScreen}
                 id={'BlurContainer'}
             >
                 {this.props.inPageMode && this.state.blurEffectReset && (
@@ -1702,6 +1706,7 @@ export class DashboardContainer extends StatefulUIElement<
                             )}
                         </MainContent>
                         <NotesSidebar
+                            inPageMode={this.props.inPageMode}
                             imageSupport={this.props.imageSupportBG}
                             theme={this.props.theme}
                             hasFeedActivity={listsSidebar.hasFeedActivity}
@@ -1962,8 +1967,8 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
             min-height: fill-available;
             height: fill-available;
             border-radius: 30px;
-            background-color: ${(props) => props.theme.colors.black}de;
-            backdrop-filter: blur(10px);
+            background-color: #313239;
+            backdrop-filter: blur(30px);
         `}
     ${(props) =>
         props.inPageMode &&
@@ -2278,7 +2283,7 @@ const HeaderContainer = styled.div`
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    background-color: ${(props) => props.theme.colors.black}75;
+    background-color: ${(props) => props.theme.colors.black2}75;
     z-index: 3500;
     box-shadow: 0px 1px 0px ${(props) => props.theme.colors.greyScale2};
 `

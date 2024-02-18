@@ -81,6 +81,7 @@ export interface Props extends SidebarContainerOptions {
     highlightColorSettings?: string
     pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
+    inPageMode?: boolean
 }
 
 export class AnnotationsSidebarContainer<
@@ -889,6 +890,7 @@ export class AnnotationsSidebarContainer<
                         this.state.sidebarRightBorderPosition != null &&
                         this.state.sidebarRightBorderPosition
                     }
+                    inPageMode={this.props.inPageMode}
                 >
                     <Rnd
                         style={style}
@@ -1560,6 +1562,7 @@ export class AnnotationsSidebarContainer<
                                 )
                             }}
                             getRootElement={this.props.getRootElement}
+                            inPageMode={this.props.inPageMode}
                         />
                     </Rnd>
                 </ContainerStyled>
@@ -1631,6 +1634,7 @@ const ContainerStyled = styled.div<{
     isShown: string
     theme
     rightPosition?: number
+    inPageMode?: boolean
 }>`
     height: 100vh;
     overflow-x: visible;
@@ -1643,7 +1647,7 @@ const ContainerStyled = styled.div<{
             : '2147483645'}; /* This is to combat pages setting high values on certain elements under the sidebar */
                     background: ${(props) =>
                         props.theme.variant === 'dark'
-                            ? props.theme.colors.black + 'eb'
+                            ? props.theme.colors.black2 + '75'
                             : props.theme.colors.black + 'c9'};
     backdrop-filter: blur(30px);
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
@@ -1653,6 +1657,7 @@ const ContainerStyled = styled.div<{
     right: ${(props) =>
         props.rightPosition ? props.rightPosition + 'px' : TOOLTIP_WIDTH};
 
+    width: ${(props) => props.theme.sidebarWidth};
     &:: -webkit-scrollbar {
         display: none;
     }
@@ -1665,6 +1670,7 @@ const ContainerStyled = styled.div<{
             opacity: 0;
             position: fixed;
             z-index: -1;
+            width: 0px;
         `}
 
     ${(props) =>
@@ -1693,6 +1699,17 @@ const ContainerStyled = styled.div<{
 
 
     scrollbar-width: none;
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            background: ${(props) =>
+                props.theme.variant === 'dark'
+                    ? props.theme.colors.black2 + '75'
+                    : props.theme.colors.black + 'c9'};
+            backdrop-filter: unset;
+            position: relative;
+            height: fill-available;
+        `}
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`

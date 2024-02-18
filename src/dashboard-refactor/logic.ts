@@ -403,6 +403,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 themeVariant: null,
                 draggedListId: null,
                 someListIsDragging: false,
+                disableMouseLeave: false,
             },
             syncMenu: {
                 isDisplayed: false,
@@ -411,6 +412,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 lastSuccessfulSyncDate: null,
             },
             highlightColors: null,
+            isNoteSidebarShown: null,
+            showFullScreen: null,
+            blurEffectReset: false,
         }
     }
 
@@ -621,7 +625,9 @@ export class DashboardLogic extends UILogic<State, Events> {
     ensureBlurEffect(container: HTMLElement) {
         this.increment++
         if (
+            // @ts-ignore
             !container.style.backdropFilter ||
+            // @ts-ignore
             container.style.backdropFilter !== 'blur(10px)'
         ) {
             if (this.increment > 1) {
@@ -642,9 +648,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         )
                         blurContainer.style.background = '#313239'
                         if (
+                            // @ts-ignore
                             !blurContainer.style.backdropFilter ||
+                            // @ts-ignore
                             blurContainer.style.backdropFilter !== 'blur(10px)'
                         ) {
+                            // @ts-ignore
                             blurContainer.style.backdropFilter = 'blur(10px)'
                             blurContainer.style.background = '#313239'
                         }
@@ -942,16 +951,20 @@ export class DashboardLogic extends UILogic<State, Events> {
             nextItem = Object.values(previousResults)[focusedItemIndex + 1]
         }
 
-        if (previousItem && nextItem) {
+        if (nextItem) {
             this.emitMutation({
                 searchResults: {
                     results: {
                         [-1]: {
                             pages: {
                                 byId: {
-                                    [previousItem.id]: {
-                                        isInFocus: { $set: false },
-                                    },
+                                    ...(previousItem
+                                        ? {
+                                              [previousItem.id]: {
+                                                  isInFocus: { $set: false },
+                                              },
+                                          }
+                                        : {}),
                                     [nextItem.id]: {
                                         isInFocus: { $set: true },
                                     },
@@ -1151,33 +1164,33 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     })
 
-                    const hasPreviousResults =
-                        Object.keys(previousState.searchResults.results)
-                            .length > 0
+                    // const hasPreviousResults =
+                    //     Object.keys(previousState.searchResults.results)
+                    //         .length > 0
 
-                    if (!hasPreviousResults) {
-                        const firstKey = Object.keys(
-                            results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
-                        )[0]
+                    // if (!hasPreviousResults) {
+                    //     const firstKey = Object.keys(
+                    //         results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
+                    //     )[0]
 
-                        this.emitMutation({
-                            searchResults: {
-                                results: {
-                                    [PAGE_SEARCH_DUMMY_DAY]: {
-                                        pages: {
-                                            byId: {
-                                                [firstKey]: {
-                                                    isInFocus: {
-                                                        $set: true,
-                                                    },
-                                                },
-                                            },
-                                        },
-                                    },
-                                },
-                            },
-                        })
-                    }
+                    //     this.emitMutation({
+                    //         searchResults: {
+                    //             results: {
+                    //                 [PAGE_SEARCH_DUMMY_DAY]: {
+                    //                     pages: {
+                    //                         byId: {
+                    //                             [firstKey]: {
+                    //                                 isInFocus: {
+                    //                                     $set: true,
+                    //                                 },
+                    //                             },
+                    //                         },
+                    //                     },
+                    //                 },
+                    //             },
+                    //         },
+                    //     })
+                    // }
                 }
             },
         )
@@ -2575,6 +2588,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
+        if (previousState.showFullScreen == null) {
+            this.emitMutation({
+                showFullScreen: { $set: true },
+            })
+        }
+
         this.emitMutation({
             isNoteSidebarShown: { $set: true },
         })

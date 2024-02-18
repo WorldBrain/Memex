@@ -69,6 +69,7 @@ export interface RootState {
     highlightColors: string
     isNoteSidebarShown: boolean
     blurEffectReset: boolean
+    showFullScreen: boolean
 }
 
 export type Events = UIEvent<
@@ -117,7 +118,7 @@ export type DashboardDependencies = {
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
     imageSupportBG: ImageSupportInterface<'caller'>
-    closeInPageMode: () => void
+    closeInPageMode?: () => void
 } & (
     | {
           inPageMode: true

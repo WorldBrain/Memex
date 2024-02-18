@@ -14,7 +14,7 @@ export type CheckboxToggle = (
 
 export interface Props {
     id?: string
-    handleChange: CheckboxToggle
+    handleChange?: CheckboxToggle
     name?: string
     isChecked: boolean
     isDisabled?: boolean
@@ -152,7 +152,7 @@ const ChildrenBox = styled.span<{ mode }>`
 const LabelContainer = styled.label<{ zIndex?: number; width?: string }>`
     display: flex;
     align-items: center;
-    width: ${(props) => (props.width ? props.width : '100%')};
+    width: ${(props) => (props.width ? props.width : 'fit-content')};
     cursor: pointer;
     z-index: ${(props) => props.zIndex};
 `
