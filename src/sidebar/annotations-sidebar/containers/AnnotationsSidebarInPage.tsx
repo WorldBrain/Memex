@@ -105,12 +105,10 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
-        console.log('esc key pressed')
         if (
             event.key === 'Escape' &&
             !window.location.href.includes('/pdfjs/viewer.html?file')
         ) {
-            console.log('hide sidebar')
             this.hideSidebar()
         }
     }
@@ -411,7 +409,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     }
 
     async hideSidebar() {
-        console.log('ddddd')
         super.hideSidebar()
         this.props.inPageUI.hideRibbon()
         this.props.inPageUI.hideSidebar()

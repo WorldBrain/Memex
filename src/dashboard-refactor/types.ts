@@ -7,6 +7,7 @@ import type {
     Events as SearchResultEvents,
     NoteDataEventArgs,
     PageEventArgs,
+    PageResult,
 } from './search-results/types'
 import type {
     RootState as ListsSidebarState,
@@ -179,10 +180,11 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
     setSpaceSidebarWidth: { width: string }
+    setDisableMouseLeave: { disable: boolean }
     selectAllCurrentItems: null
     clearBulkSelection: null
     setBulkEditSpace: { listId: number }
-    changeFocusItem: { direction: string }
+    changeFocusItem: { direction?: string; pageId?: string }
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']

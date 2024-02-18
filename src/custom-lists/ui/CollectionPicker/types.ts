@@ -112,6 +112,6 @@ export interface SpacePickerDependencies {
     width?: string
     autoFocus?: boolean
     context?: string
-    closePicker?: () => void
+    closePicker?: (event) => void
     bgScriptBG?: RemoteBGScriptInterface
 }

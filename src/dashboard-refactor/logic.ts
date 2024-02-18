@@ -223,6 +223,9 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     // TODO: Update this to use the URLSearchParams API rather than string manipulation
     private updateQueryStringParameter(key: string, value: string) {
+        if (this.islikelyInPage) {
+            return
+        }
         // Get the current URL of the page
         if (value != null) {
             const url = this.options.location.href
@@ -488,12 +491,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         await loadInitial(this, async () => {
-            // const container = document.getElementById('BlurContainer')
-            // setTimeout(() => {
-            //     console.log('Setting up blur observer', container)
-            //     this.ensureBlurEffect(container)
-            // }, 10000)
-            this.observeBlurContainer()
+            if (this.options.inPageMode) {
+                this.observeBlurContainer()
+            }
             await this.initThemeVariant()
             const user = await authBG.getCurrentUser()
             setSentryUserContext(user)
@@ -582,8 +582,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    componentDidMount() {}
-
     componentWillUnmount() {
         if (this.observer) {
             this.observer.disconnect()
@@ -591,21 +589,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     observeBlurContainer() {
-        console.log('iscalled')
         const container = document.getElementById('BlurContainer')
-        console.log('container', container)
 
         if (!container) return
         const config = { attributes: true, attributeFilter: ['style'] }
         this.observer = new MutationObserver((mutationsList, observer) => {
             mutationsList.forEach((mutation) => {
                 if ((mutation.target as HTMLElement).id === 'BlurContainer') {
-                    console.log(
-                        'Changes detected in BlurContainer:',
-                        mutation.target,
-                        'New style:',
-                        (mutation.target as HTMLElement).style.cssText,
-                    )
                     this.ensureBlurEffect(container)
                 }
             })
@@ -634,10 +624,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             !container.style.backdropFilter ||
             container.style.backdropFilter !== 'blur(10px)'
         ) {
-            console.log('Applying blur effect')
-
             if (this.increment > 1) {
-                console.log('make background')
                 const blurContainer = document.getElementById('BlurContainer')
                 blurContainer.style.background = '#313239'
             } else {
@@ -658,9 +645,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                             !blurContainer.style.backdropFilter ||
                             blurContainer.style.backdropFilter !== 'blur(10px)'
                         ) {
-                            console.log(
-                                'Failed to apply blur effect within 100ms, attempting again.',
-                            )
                             blurContainer.style.backdropFilter = 'blur(10px)'
                             blurContainer.style.background = '#313239'
                         }
@@ -697,6 +681,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
+    // TODO: Make better to check for in -page pro
+    islikelyInPage = this.options.location.href.startsWith('http')
+
     /* START - Misc helper methods */
     private async hydrateStateFromLocalStorage(
         previousState: State,
@@ -711,8 +698,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             CLOUD_STORAGE_KEYS.lastSyncUpload,
             STORAGE_KEYS.mobileAdSeen,
         ])
-
-        const islikelyInPage = this.options.location.href.startsWith('http')
 
         const [
             listsSidebarLocked,
@@ -744,7 +729,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             listsSidebar: {
                 isSidebarLocked: {
-                    $set: islikelyInPage ? false : listsSidebarLocked ?? true,
+                    $set: this.islikelyInPage
+                        ? false
+                        : listsSidebarLocked ?? true,
                 },
             },
             syncMenu: {
@@ -785,6 +772,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 spaceSidebarWidth: { $set: event.width },
+            },
+        })
+    }
+    setDisableMouseLeave: EventHandler<'setDisableMouseLeave'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                disableMouseLeave: { $set: event.disable },
             },
         })
     }
@@ -908,10 +905,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         await setBulkEdit(dataArray, false)
-
-        // this.emitMutation({
-        //     multiSelectResults: { $set: selection },
-        // })
     }
 
     clearBulkSelection: EventHandler<'clearBulkSelection'> = async ({
@@ -924,82 +917,32 @@ export class DashboardLogic extends UILogic<State, Events> {
         await clearBulkEditItems()
     }
 
-    setupKeydownEventListener() {
-        document.addEventListener('keydown', this.handleKeydown)
-    }
-
-    removeKeydownEventListener() {
-        document.removeEventListener('keydown', this.handleKeydown)
-    }
-
-    handleKeydown = (event: KeyboardEvent) => {
-        switch (event.key) {
-            case 'ArrowUp':
-                // Handle arrow up key press
-                console.log('Arrow Up Pressed')
-
-                break
-            case 'ArrowDown':
-                // Handle arrow down key press
-                console.log('Arrow Down Pressed')
-                break
-            default:
-                break
-        }
-    }
-
     changeFocusItem: EventHandler<'changeFocusItem'> = async ({
         previousState,
         event,
     }) => {
-        console.log('asdadsfasdf')
         const previousResults =
             previousState.searchResults.results[-1].pages.byId
-
-        console.log('previousResults', previousResults)
 
         const focusedItemIndex = Object.keys(previousResults).findIndex(
             (key) => previousResults[key].isInFocus === true,
         )
 
-        console.log('focusedItemIndex', focusedItemIndex)
+        let previousItem = Object.values(previousResults)[focusedItemIndex]
+        let nextItem
+
+        if (event.pageId) {
+            nextItem = { id: event.pageId }
+        }
 
         if (event.direction === 'up') {
-            const previousItem = Object.values(previousResults)[
-                focusedItemIndex
-            ]
-            const nextItem = Object.values(previousResults)[
-                focusedItemIndex - 1
-            ]
-
-            console.log('previousItem', previousItem)
-            console.log('nextItem', nextItem)
-            this.emitMutation({
-                searchResults: {
-                    results: {
-                        [-1]: {
-                            pages: {
-                                byId: {
-                                    [previousItem.id]: {
-                                        isInFocus: { $set: false },
-                                    },
-                                    [nextItem.id]: {
-                                        isInFocus: { $set: true },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            })
+            nextItem = Object.values(previousResults)[focusedItemIndex - 1]
         }
         if (event.direction === 'down') {
-            const previousItem = Object.values(previousResults)[
-                focusedItemIndex
-            ]
-            const nextItem = Object.values(previousResults)[
-                focusedItemIndex + 1
-            ]
+            nextItem = Object.values(previousResults)[focusedItemIndex + 1]
+        }
+
+        if (previousItem && nextItem) {
             this.emitMutation({
                 searchResults: {
                     results: {
@@ -1020,6 +963,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
     }
+
     setBulkEditSpace: EventHandler<'setBulkEditSpace'> = async ({
         previousState,
         event,
@@ -1162,8 +1106,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                         }
                     }
 
-                    console.log('results', results)
-
                     if (searchID !== this.currentSearchID) {
                         return
                     }
@@ -1208,29 +1150,34 @@ export class DashboardLogic extends UILogic<State, Events> {
                                   }),
                         },
                     })
-                    const firstKey = Object.keys(
-                        results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
-                    )[0]
 
-                    console.log('firstKey', firstKey)
+                    const hasPreviousResults =
+                        Object.keys(previousState.searchResults.results)
+                            .length > 0
 
-                    this.emitMutation({
-                        searchResults: {
-                            results: {
-                                [PAGE_SEARCH_DUMMY_DAY]: {
-                                    pages: {
-                                        byId: {
-                                            [firstKey]: {
-                                                isInFocus: {
-                                                    $set: true,
+                    if (!hasPreviousResults) {
+                        const firstKey = Object.keys(
+                            results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
+                        )[0]
+
+                        this.emitMutation({
+                            searchResults: {
+                                results: {
+                                    [PAGE_SEARCH_DUMMY_DAY]: {
+                                        pages: {
+                                            byId: {
+                                                [firstKey]: {
+                                                    isInFocus: {
+                                                        $set: true,
+                                                    },
                                                 },
                                             },
                                         },
                                     },
                                 },
                             },
-                        },
-                    })
+                        })
+                    }
                 }
             },
         )
@@ -1428,58 +1375,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     > = async ({ event, previousState }) => {
         const newState = JSON.parse(event.newState)
         await this.syncSettings.highlightColors.set('highlightColors', newState)
-
-        // console.log('newStae', newState)
-
-        // const changedColors = newState
-        //     .map((newItem, index) => {
-        //         const oldItem = JSON.parse(previousState.highlightColors)[index]
-        //         if (
-        //             oldItem &&
-        //             newItem.id === oldItem.id &&
-        //             JSON.stringify(newItem.color) !==
-        //                 JSON.stringify(oldItem.color)
-        //         ) {
-        //             return {
-        //                 id: oldItem.id,
-        //                 oldColor: oldItem.color,
-        //                 newColor: newItem.color,
-        //             }
-        //         }
-        //     })
-        //     .filter((item) => item != null)
-
-        // console.log('changedColors', changedColors)
-
-        // for (let color of changedColors) {
-        //     const annotationLocalIds = await this.options.annotationsBG.listAnnotationIdsByColor(
-        //         color.id,
-        //     )
-
-        //     console.log('annotationLocalIds', annotationLocalIds)
-
-        //     const annotations = []
-
-        //     for (let annotationLocalId of annotationLocalIds) {
-        //         annotations.push(
-        //             await this.options.annotationsCache.getAnnotationByLocalId(
-        //                 annotationLocalId,
-        //             ),
-        //         )
-        //     }
-
-        //     console.log('annotations', annotations)
-
-        //     for (let annotation of annotations) {
-        //         this.options.annotationsCache.updateAnnotation({
-        //             comment: annotation.comment,
-        //             privacyLevel: annotation.privacyLevel,
-        //             unifiedListIds: annotation.unifiedListIds,
-        //             unifiedId: annotation,
-        //             color: color.newColor,
-        //         })
-        //     }
-        // }
 
         this.emitMutation({
             highlightColors: { $set: JSON.stringify(newState) },
@@ -3579,10 +3474,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             }
         }
 
-        this.updateQueryStringParameter(
-            'spaces',
-            Array.from(localListIds).toString(),
-        )
+        if (!this.islikelyInPage) {
+            this.updateQueryStringParameter(
+                'spaces',
+                Array.from(localListIds).toString(),
+            )
+        }
 
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: {
@@ -3607,7 +3504,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         const newListFilter = previousState.searchFilters.spacesIncluded.filter(
             (item) => item !== event.spaceId,
         )
-        this.updateQueryStringParameter('spaces', newListFilter.toString())
+
+        if (!this.islikelyInPage) {
+            this.updateQueryStringParameter('spaces', newListFilter.toString())
+        }
 
         if (newListFilter.length === 0) {
             this.removeQueryString('spaces')
@@ -3805,11 +3705,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (previousState.listsSidebar.isSidebarLocked) {
             return
         }
-        if (event.isPeeking) {
-            this.emitMutation({
-                listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
-            })
-        }
+
+        this.emitMutation({
+            listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
+        })
     }
 
     setSidebarToggleHovered: EventHandler<'setSidebarToggleHovered'> = async ({

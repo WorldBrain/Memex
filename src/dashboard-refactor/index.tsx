@@ -173,10 +173,13 @@ export class DashboardContainer extends StatefulUIElement<
 
     handleChangeFocusItem = (event: KeyboardEvent) => {
         if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
-            console.log('change focus item')
+            const searchBox = document.getElementById('search-bar')
+            searchBox.blur()
             this.processEvent('changeFocusItem', {
                 direction: event.key === 'ArrowUp' ? 'up' : 'down',
             })
+            event.stopPropagation()
+            event.preventDefault()
         }
     }
     private getListDetailsById: ListDetailsGetter = (id) => {
@@ -1021,12 +1024,17 @@ export class DashboardContainer extends StatefulUIElement<
                                 pageId
                             ].isShareMenuShown,
                         }),
-                    onMainContentHover: (day, pageId) => () =>
+                    onMainContentHover: (day, pageId) => () => {
                         this.processEvent('setPageHover', {
                             day,
                             pageId,
                             hover: 'main-content',
-                        }),
+                        })
+
+                        this.processEvent('changeFocusItem', {
+                            pageId: pageId,
+                        })
+                    },
                     onFooterHover: (day, pageId) => () =>
                         this.processEvent('setPageHover', {
                             day,
@@ -1506,13 +1514,13 @@ export class DashboardContainer extends StatefulUIElement<
                     ? 'none'
                     : 'flex',
             top: listsSidebar.isSidebarPeeking ? '20px' : '0',
-            height: listsSidebar.isSidebarPeeking ? '90vh' : '100vh',
+            height: this.props.inPageMode
+                ? 'fill-available'
+                : listsSidebar.isSidebarPeeking
+                ? '90vh'
+                : '100vh',
             position: listsSidebar.isSidebarPeeking ? 'fixed' : 'sticky',
         }
-
-        const isPeeking = this.state.listsSidebar.isSidebarPeeking
-            ? this.state.listsSidebar.isSidebarPeeking
-            : undefined
 
         return (
             <Container
@@ -1580,13 +1588,16 @@ export class DashboardContainer extends StatefulUIElement<
                                 isPeeking: true,
                             })
                         }}
+                        inPageMode={this.props.inPageMode}
                     />
                     <MainFrame inPageMode={this.props.inPageMode}>
                         <ListSidebarContent
-                            isInPageMode={this.props.inPageMode}
+                            inPageMode={this.props.inPageMode}
                             style={style}
                             size={{
-                                height: listsSidebar.isSidebarPeeking
+                                height: this.props.inPageMode
+                                    ? 'fill-available'
+                                    : listsSidebar.isSidebarPeeking
                                     ? '90vh'
                                     : '100vh',
                             }}
@@ -1606,10 +1617,16 @@ export class DashboardContainer extends StatefulUIElement<
                                     : undefined
                             }
                             onMouseLeave={() => {
-                                if (this.state.listsSidebar.isSidebarPeeking) {
-                                    this.processEvent('setSidebarPeeking', {
-                                        isPeeking: false,
-                                    })
+                                if (
+                                    !this.state.listsSidebar.disableMouseLeave
+                                ) {
+                                    if (
+                                        this.state.listsSidebar.isSidebarPeeking
+                                    ) {
+                                        this.processEvent('setSidebarPeeking', {
+                                            isPeeking: false,
+                                        })
+                                    }
                                 }
                             }}
                             // default={{ width: sizeConstants.listsSidebar.widthPx }}
@@ -1634,6 +1651,20 @@ export class DashboardContainer extends StatefulUIElement<
                             onResize={(e, direction, ref, delta, position) => {
                                 this.processEvent('setSpaceSidebarWidth', {
                                     width: ref.style.width,
+                                })
+                                this.processEvent('setDisableMouseLeave', {
+                                    disable: true,
+                                })
+                            }}
+                            onResizeStop={(
+                                e,
+                                direction,
+                                ref,
+                                delta,
+                                position,
+                            ) => {
+                                this.processEvent('setDisableMouseLeave', {
+                                    disable: false,
                                 })
                             }}
                         >
@@ -1958,6 +1989,7 @@ const MainContainer = styled.div<{
     flex-direction: column;
     height: fill-available;
     width: fill-available;
+    overflow: hidden;
 `
 
 const DropZoneBackground = styled.div`
@@ -2018,27 +2050,20 @@ const MainContent = styled.div<{
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    height: 100%;
     flex: 1;
-    width: 360px;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    scrollbar-width: none;
+    overflow: hidden;
 
     ${(props) =>
         props.inPageMode &&
         css`
-            min-height: fit-content;
+            min-height: 60%;
         `}
 `
 
 const ListSidebarContent = styled(Rnd)<{
     locked: boolean
     peeking: boolean
-    isInPageMode: boolean
+    inPageMode: boolean
 }>`
     display: flex;
     flex-direction: column;
@@ -2069,21 +2094,20 @@ const ListSidebarContent = styled(Rnd)<{
             height: 90vh;
             top: 20px;
             left: 0px;
-            border-radius: 10px;
+            border-radius: ${(props) =>
+                props.inPageMode ? '10px 10px 10px 30px' : '10px'};
             animation: slide-in ease-in-out;
             animation-duration: 0.15s;
             border: 1px solid ${(props) => props.theme.colors.greyScale2};
         `}
 
     ${(props) =>
-        props.isInPageMode &&
-        props.peeking &&
+        props.inPageMode &&
         css`
             position: relative;
             height: fill-available;
-            left: 'unset';
+            left: unset;
         `}
-
 
     ${(props) =>
         !props.peeking &&
@@ -2159,14 +2183,9 @@ const MainFrame = styled.div<{
     flex-direction: row;
     min-height: 100vh;
     height: fill-available;
+    overflow: hidden;
 
     width: fill-available;
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    scrollbar-width: none;
-
     ${(props) =>
         props.inPageMode &&
         css`
@@ -2174,12 +2193,21 @@ const MainFrame = styled.div<{
         `}
 `
 
-const PeekTrigger = styled.div`
+const PeekTrigger = styled.div<{
+    inPageMode?: boolean
+}>`
     height: 100vh;
     width: 10px;
     position: fixed;
     background: transparent;
     z-index: 50;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            height: fill-available;
+            height: -moz-available;
+        `}
 `
 
 const SidebarToggleBox = styled(Margin)`

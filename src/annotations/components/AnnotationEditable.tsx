@@ -836,14 +836,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 image: hasReplies ? 'commentFull' : 'commentAdd',
                 onClick: onReplyBtnClick,
                 isLoading: repliesLoadingState === 'running',
-                onMouseUp: (event) => {
-                    if (!this.state.showCopyPaster) {
-                        // console.log('onMouseUp')
-                        // this.props.annotationFooterDependencies.onCopyPasterDefaultExecute(
-                        //     event,
-                        // )
-                    }
-                },
                 tooltipText: 'Ask AI',
                 ButtonText: 'Replies',
             },

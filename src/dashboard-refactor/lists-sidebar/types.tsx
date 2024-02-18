@@ -25,6 +25,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     areJoinedListsExpanded: boolean
     isAddListInputShown: boolean
     spaceSidebarWidth: string
+    disableMouseLeave: boolean
 
     draggedListId: string | null
     someListIsDragging: boolean

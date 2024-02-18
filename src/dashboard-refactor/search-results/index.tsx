@@ -150,6 +150,7 @@ export default class SearchResultsContainer extends React.Component<
     Props,
     State
 > {
+    private ResultsScrollContainerRef = React.createRef<HTMLDivElement>()
     private renderLoader = (props: { key?: string } = {}) => (
         <Loader {...props}>
             <LoadingIndicator />
@@ -598,6 +599,7 @@ export default class SearchResultsContainer extends React.Component<
                 order={order}
             >
                 <PageResult
+                    resultsRef={this.ResultsScrollContainerRef}
                     inPageMode={this.props.inPageMode}
                     index={index}
                     activePage={this.props.activePage}
@@ -1015,7 +1017,7 @@ export default class SearchResultsContainer extends React.Component<
 
     render() {
         return (
-            <ResultsContainer bottom="100px">
+            <ResultsContainer>
                 <ResultsBox>
                     {this.props.selectedListId != null && (
                         <ListDetails
@@ -1102,7 +1104,10 @@ export default class SearchResultsContainer extends React.Component<
                             rightSide={undefined}
                         />
                     </PageTopBarBox>
-                    <ResultsScrollContainer>
+                    <ResultsScrollContainer
+                        id="ResultsScrollContainer"
+                        ref={this.ResultsScrollContainerRef}
+                    >
                         {this.renderOnboardingTutorials()}
                         {this.renderResultsByDay()}
                         {this.props.areResultsExhausted &&
@@ -1143,6 +1148,8 @@ const ResultsScrollContainer = styled.div`
     }
 
     scrollbar-width: none;
+    min-height: 10%;
+    flex: 1;
 `
 
 const NoteResultContainer = styled.div`
@@ -1460,18 +1467,17 @@ const ResultsBox = styled.div`
     align-items: center;
 `
 
-const ResultsContainer = styled(Margin)`
+const ResultsContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-self: center;
     width: fill-available;
-    margin-bottom: ${sizeConstants.header.heightPx}px;
-    width: fill-available;
     padding: 0 24px;
     z-index: 27;
+    min-height: 60%;
+    flex: 1;
     height: fill-available;
-
-    width: fill-available;
+    height: -moz-available;
 
     &::-webkit-scrollbar {
         display: none;

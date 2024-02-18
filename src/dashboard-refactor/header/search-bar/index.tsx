@@ -84,6 +84,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 'Search your saved pages and notes'
                             }
                             value={searchQuery}
+                            id={'search-bar'}
                             onChange={this.handleChange}
                             autoComplete="off"
                         />

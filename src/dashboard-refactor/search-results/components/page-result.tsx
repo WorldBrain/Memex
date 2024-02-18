@@ -64,6 +64,8 @@ export interface Props
     getRootElement: () => HTMLElement
     copyLoadingState: UITaskState
     inPageMode?: boolean
+    resultsRef?: React.RefObject<HTMLDivElement>
+    setFocusOnItem: (index: number) => void
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -76,6 +78,7 @@ export default class PageResultView extends PureComponent<Props> {
     spacePickerButtonRef = React.createRef<HTMLDivElement>()
     spacePickerBarRef = React.createRef<HTMLDivElement>()
     copyPasteronPageButtonRef = React.createRef<HTMLDivElement>()
+    itemBoxRef = React.createRef<HTMLDivElement>() // Assuming ItemBox renders a div element
 
     private get domain(): string {
         let fullUrl: URL
@@ -91,6 +94,91 @@ export default class PageResultView extends PureComponent<Props> {
             return decodeURIComponent(fullUrl.pathname)
         }
         return ''
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (this.props.isInFocus && !prevProps.isInFocus) {
+            this.setupKeyListener()
+            const itemBox = this.itemBoxRef.current
+            const resultBox = this.props.resultsRef.current
+            if (itemBox && !this.props.hoverState) {
+                itemBox.scrollIntoView({ block: 'center' })
+            }
+        } else if (!this.props.isInFocus && prevProps.isInFocus) {
+            this.removeKeyListener()
+        }
+    }
+
+    componentWillUnmount() {
+        this.removeKeyListener()
+    }
+
+    setupKeyListener = () => {
+        document.addEventListener('keydown', this.handleKeyDown)
+    }
+
+    removeKeyListener = () => {
+        document.removeEventListener('keydown', this.handleKeyDown)
+    }
+
+    handleKeyDown = (event: KeyboardEvent) => {
+        if (!this.props.isInFocus) return
+
+        switch (event.key) {
+            case 's':
+                // Perform action for "s" key
+                this.props.showPopoutsForResultBox(this.props.index)
+                this.props.onListPickerFooterBtnClick(event)
+                break
+            case 'c':
+                // Perform action for "c" key
+                if (event.shiftKey) {
+                    this.props.onCopyPasterDefaultExecute(event)
+                } else {
+                    this.props.onCopyPasterBtnClick?.(event)
+                }
+                break
+            case 'y':
+                // Perform action for "y" key
+                this.props.onAIResultBtnClick(event)
+                break
+            case 'n':
+                // Perform action for "n" key
+                this.props.onNotesBtnClick(event)
+                break
+            case 'ArrowRight':
+                // Perform action for "n" key
+                this.props.onNotesBtnClick(event)
+                break
+            case 'ArrowLeft':
+                // Perform action for "n" key
+                this.props.onNotesBtnClick(event)
+                break
+            case 'Enter':
+                if (event.shiftKey) {
+                    // Perform action for "shift+Enter" key
+                    const itemData = {
+                        url: this.props.normalizedUrl,
+                        title: this.props.fullTitle,
+                        type: 'page',
+                    }
+                    if (this.props.isBulkSelected) {
+                        this.props.selectItem(itemData, true)
+                    } else {
+                        this.props.selectItem(itemData, false)
+                    }
+                } else {
+                    // Perform action for "Enter" key
+                    this.props.onClick(event)
+                }
+                break
+            case 'Backspace':
+                // Perform action for "Backspace" key
+                this.props.onTrashBtnClick(event)
+                break
+            default:
+                break
+        }
     }
 
     private spacePickerRef = createRef<HTMLElement>()
@@ -132,9 +220,9 @@ export default class PageResultView extends PureComponent<Props> {
             )
     }
 
-    private get listPickerBtnClickHandler() {
+    private listPickerBtnClickHandler(event: React.MouseEvent) {
         if (this.props.listPickerShowStatus === 'footer') {
-            return this.props.onListPickerFooterBtnClick
+            return this.props.onListPickerFooterBtnClick(event)
         }
         return this.props.onListPickerBarBtnClick
     }
@@ -146,7 +234,9 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerBarRef.current}
                     placement={'bottom-end'}
                     offsetX={10}
-                    closeComponent={this.listPickerBtnClickHandler}
+                    closeComponent={(event) =>
+                        this.listPickerBtnClickHandler(event)
+                    }
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
                 >
@@ -167,7 +257,9 @@ export default class PageResultView extends PureComponent<Props> {
                             })
                         }
                         initialSelectedListIds={() => this.props.lists}
-                        closePicker={() => this.listPickerBtnClickHandler}
+                        closePicker={() => {
+                            this.listPickerBtnClickHandler
+                        }}
                         analyticsBG={this.props.analyticsBG}
                     />
                 </PopoutBox>
@@ -180,7 +272,9 @@ export default class PageResultView extends PureComponent<Props> {
                     targetElementRef={this.spacePickerButtonRef.current}
                     placement={'bottom-start'}
                     offsetX={10}
-                    closeComponent={this.listPickerBtnClickHandler}
+                    closeComponent={(event) =>
+                        this.listPickerBtnClickHandler(event)
+                    }
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
                 >
@@ -202,7 +296,9 @@ export default class PageResultView extends PureComponent<Props> {
                             })
                         }
                         initialSelectedListIds={() => this.props.lists}
-                        closePicker={() => this.listPickerBtnClickHandler}
+                        closePicker={(event) =>
+                            this.listPickerBtnClickHandler(event)
+                        }
                     />
                 </PopoutBox>
             )
@@ -351,6 +447,7 @@ export default class PageResultView extends PureComponent<Props> {
                 ButtonText: 'Spaces',
                 active: this.props.listPickerShowStatus === 'footer',
                 buttonRef: this.spacePickerButtonRef,
+                showKeyShortcut: this.props.isInFocus && 'S',
             },
             {
                 key: 'copy-paste-page-btn',
@@ -386,6 +483,7 @@ export default class PageResultView extends PureComponent<Props> {
                     </span>
                 ),
                 active: this.props.isCopyPasterShown,
+                showKeyShortcut: this.props.isInFocus && 'C',
             },
             {
                 key: 'ask-ai-on-page-btn',
@@ -396,30 +494,22 @@ export default class PageResultView extends PureComponent<Props> {
                 tooltipText: 'Ask AI & Summarise page',
                 ButtonText: 'Ask AI',
                 buttonRef: null,
+                showKeyShortcut: this.props.isInFocus && 'Y',
             },
             {
                 key: 'expand-notes-btn',
                 ButtonText:
                     this.props.noteIds[this.props.notesType].length > 0 ? (
-                        <NotesCounterContainer>
-                            <NotesCounterTitle>
-                                <Icon
-                                    heightAndWidth="16px"
-                                    icon={
-                                        this.hasNotes
-                                            ? 'commentFull'
-                                            : 'commentAdd'
-                                    }
-                                    hoverOff
-                                />
-                                Notes
-                            </NotesCounterTitle>
-                            <NoteCounter>
-                                {this.props.noteIds[
-                                    this.props.notesType
-                                ]?.length.toString()}
-                            </NoteCounter>
-                        </NotesCounterContainer>
+                        <NotesCounterTitle>
+                            <Icon
+                                heightAndWidth="16px"
+                                icon={
+                                    this.hasNotes ? 'commentFull' : 'commentAdd'
+                                }
+                                hoverOff
+                            />
+                            Notes
+                        </NotesCounterTitle>
                     ) : (
                         <NotesCounterTitle>
                             <Icon
@@ -442,16 +532,21 @@ export default class PageResultView extends PureComponent<Props> {
                         shift+click to open inline
                     </span>
                 ),
+                showKeyShortcut: this.props.isInFocus && 'D',
+                showNotesCounter: this.props.noteIds[this.props.notesType]
+                    ?.length > 0 && (
+                    <NoteCounter>
+                        {this.props.noteIds[
+                            this.props.notesType
+                        ]?.length.toString()}
+                    </NoteCounter>
+                ),
             },
         ]
     }
 
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
-
-        if (this.props.isInFocus) {
-            console.log('in focus', this.props.fullUrl)
-        }
 
         return (
             <ItemBox
@@ -465,6 +560,7 @@ export default class PageResultView extends PureComponent<Props> {
                     onDragEnd: this.props.onPageDrop,
                 }}
                 hoverState={this.props.isInFocus}
+                onRef={this.itemBoxRef} // Passing the ref as a prop
             >
                 {this.props.uploadedPdfLinkLoadState === 'running' ? (
                     <LoadingBox>

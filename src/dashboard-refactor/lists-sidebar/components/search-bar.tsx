@@ -201,6 +201,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                         <Input
                             placeholder="Search Spaces"
                             ref={this.inputRef}
+                            id={'spaces-search-bar'}
                             onChange={this.handleInputChange}
                             value={searchQuery}
                             autoFocus
