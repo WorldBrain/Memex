@@ -614,6 +614,9 @@ export default class SearchResultsContainer extends React.Component<
                             showPopoutsForResultBox: show,
                         })
                     }
+                    onMatchingTextToggleClick={
+                        this.props.onMatchingTextToggleClick
+                    }
                     selectItem={this.props.onBulkSelect}
                     shiftSelectItem={() => this.shiftSelectItems(order)}
                     isBulkSelected={this.props.selectedItems?.includes(
@@ -643,6 +646,7 @@ export default class SearchResultsContainer extends React.Component<
                     filterbyList={this.props.filterByList}
                     analyticsBG={this.props.analyticsBG}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
+                    searchQuery={this.props.searchQuery}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>

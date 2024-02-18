@@ -2607,6 +2607,28 @@ export class DashboardLogic extends UILogic<State, Events> {
             isNoteSidebarShown: { $set: true },
         })
     }
+    onMatchingTextToggleClick: EventHandler<
+        'onMatchingTextToggleClick'
+    > = async ({ event, previousState }) => {
+        const previousValue =
+            previousState.searchResults.results[-1].pages.byId[event.pageId]
+                ?.showAllResults
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [-1]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    showAllResults: { $set: !previousValue },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
     toggleNoteSidebarOff: EventHandler<'toggleNoteSidebarOn'> = async ({
         event,
         previousState,

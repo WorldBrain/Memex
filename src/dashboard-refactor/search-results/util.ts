@@ -153,6 +153,7 @@ const pageResultToPageData = (
         tags: pageResult.tags,
         fullUrl: pageResult.fullUrl,
         fullTitle: pageResult.title,
+        text: pageResult.text,
         normalizedUrl: pageResult.url,
         favIconURI: pageResult.favIcon,
         displayTime: pageResult.displayTime,

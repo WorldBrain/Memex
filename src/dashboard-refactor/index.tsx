@@ -961,6 +961,11 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             synthEvent: event,
                         }),
+                    onMatchingTextToggleClick: (day, pageId) => async () =>
+                        this.processEvent('onMatchingTextToggleClick', {
+                            day,
+                            pageId,
+                        }),
                     onNotesBtnClick: (day, pageId) => (e) => {
                         this.processEvent('toggleNoteSidebarOn', null)
                         const pageData = searchResults.pageData.byId[pageId]

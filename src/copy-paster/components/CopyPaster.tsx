@@ -47,7 +47,6 @@ interface CopyPasterProps {
 
 class CopyPaster extends PureComponent<CopyPasterProps> {
     handleClickOutside: React.MouseEventHandler = (e) => {
-        console.log('handleClickOutside')
         if (this.props.isLoading) {
             null
         }

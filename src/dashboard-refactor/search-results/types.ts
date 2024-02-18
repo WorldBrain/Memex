@@ -49,6 +49,7 @@ export type PageInteractionProps = Omit<
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
     onClick: React.MouseEventHandler
+    onMatchingTextToggleClick: React.MouseEventHandler
     onAIResultBtnClick: React.MouseEventHandler
     onEditTitleChange: (normalizedPageUrl, changedTitle) => void
     onEditTitleSave: (normalizedPageUrl, changedTitle) => void
@@ -154,7 +155,7 @@ export interface NoteData {
 
 export type PageData = Pick<
     PipelineRes,
-    'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI'
+    'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI' | 'text'
 > & {
     normalizedUrl: string
     lists: string[]
@@ -165,6 +166,7 @@ export type PageData = Pick<
     fullPdfUrl?: string
     uploadedPdfLinkLoadState?: TaskState
     editTitleState?: string
+    text?: string
 }
 
 export type NoResultsType =
@@ -214,6 +216,7 @@ export interface PageResult {
     noteIds: { [key in NotesType]: string[] }
     hoverState: ResultHoverState
     editTitleState?: string
+    showAllResults?: boolean
 }
 
 export interface PageResultsByDay {
@@ -323,6 +326,7 @@ export type Events = UIEvent<{
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
+    onMatchingTextToggleClick: PageEventArgs
     setActivePage: {
         activePage: boolean
         activeDay?: number

@@ -35,6 +35,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import { keyframes } from 'styled-components'
 import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
+import { sleepPromise } from 'src/util/promises'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -65,6 +66,8 @@ export interface Props
     copyLoadingState: UITaskState
     inPageMode?: boolean
     resultsRef?: React.RefObject<HTMLDivElement>
+    searchQuery?: string
+    onMatchingTextToggleClick: () => void
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -74,12 +77,14 @@ export default class PageResultView extends PureComponent<Props> {
             : this.props.fullUrl
     }
 
+    private maxMatchingTextContainerHeight = 200
     spacePickerButtonRef = React.createRef<HTMLDivElement>()
     spacePickerBarRef = React.createRef<HTMLDivElement>()
     copyPasteronPageButtonRef = React.createRef<HTMLDivElement>()
     itemBoxRef = React.createRef<HTMLDivElement>() // Assuming ItemBox renders a div element
     citeMenuButtonRef = React.createRef<HTMLDivElement>()
 
+    private matchingTextContainerObserver: ResizeObserver
     private get domain(): string {
         let fullUrl: URL
         try {
@@ -109,8 +114,45 @@ export default class PageResultView extends PureComponent<Props> {
         }
     }
 
+    state = {
+        matchingTextContainerHeight: 100,
+    }
+
+    componentDidMount() {
+        this.updateMatchingTextContainerHeight()
+        this.matchingTextContainerObserver = new ResizeObserver((entries) => {
+            for (let entry of entries) {
+                this.updateMatchingTextContainerHeight()
+            }
+        })
+
+        const matchingTextContainer = document.getElementById(
+            'matching-text-container',
+        )
+        if (matchingTextContainer) {
+            this.matchingTextContainerObserver.observe(matchingTextContainer)
+        }
+    }
+
+    updateMatchingTextContainerHeight = async () => {
+        await sleepPromise(50)
+
+        const matchingTextContainer = document.getElementById(
+            'matching-text-container-' + this.props.index,
+        )
+
+        if (matchingTextContainer) {
+            this.setState({
+                matchingTextContainerHeight: matchingTextContainer.scrollHeight,
+            })
+        }
+    }
+
     componentWillUnmount() {
         this.removeKeyListener()
+        if (this.matchingTextContainerObserver) {
+            this.matchingTextContainerObserver.disconnect()
+        }
     }
 
     setupKeyListener = () => {
@@ -564,6 +606,96 @@ export default class PageResultView extends PureComponent<Props> {
         ]
     }
 
+    renderToggleMatchesButton() {
+        if (this.state.matchingTextContainerHeight < 200) {
+            return null
+        }
+
+        return (
+            <MatchingTextViewToggle
+                showAll={this.props.showAllResults}
+                onClick={this.props.onMatchingTextToggleClick}
+            >
+                {this.props.showAllResults
+                    ? 'Disable Scrolling'
+                    : 'Click to Scroll Matches'}
+            </MatchingTextViewToggle>
+        )
+    }
+
+    processPageText(text: string) {
+        const searchTerms = this.props.searchQuery
+            .split(' ')
+            .filter((term) => term.trim() !== '')
+        if (searchTerms.length === 0) {
+            return
+        }
+        const regex = new RegExp(`\\b(${searchTerms.join('|')})\\b`, 'gi')
+        const matches = [...text.matchAll(regex)]
+
+        const chunks = matches.map((match) => {
+            const index = match.index || 0
+            let beforeIndex = index
+            let afterIndex = index + match[0].length
+            let beforeWordCount = 0
+            let afterWordCount = 0
+
+            // Move backwards from the match index to find the start of the chunk
+            while (beforeIndex > 0 && beforeWordCount < 20) {
+                beforeIndex--
+                if (text[beforeIndex] === ' ' || text[beforeIndex] === '\n') {
+                    beforeWordCount++
+                } else if (['.', '!', '?'].includes(text[beforeIndex])) {
+                    beforeIndex++ // Move back to include the punctuation in the chunk
+                    break // Stop if sentence-ending punctuation is found
+                }
+            }
+
+            // Move forwards from the end of the match index to find the end of the chunk
+            while (afterIndex < text.length && afterWordCount < 15) {
+                if (text[afterIndex] === ' ' || text[afterIndex] === '\n') {
+                    afterWordCount++
+                } else if (['.', '!', '?'].includes(text[afterIndex])) {
+                    afterWordCount++ // Include the punctuation in the word count
+                }
+                afterIndex++
+                if (['.', '!', '?'].includes(text[afterIndex - 1])) {
+                    break // Stop if sentence-ending punctuation is found
+                }
+            }
+
+            // Extract the chunk of text around the match
+            return text.substring(beforeIndex, afterIndex)
+        })
+
+        console.log('chunks', chunks)
+
+        return chunks.map((chunk, i) => (
+            <React.Fragment key={i}>
+                <ResultTextString>
+                    {chunk.split(regex).map((part, index, array) =>
+                        index < array.length - 1 &&
+                        array[index + 1]?.match(regex)?.length > 0 ? (
+                            <React.Fragment key={index}>
+                                {part}
+                                <HighlightedTerm>
+                                    {array[index + 1].match(regex)}
+                                </HighlightedTerm>
+                            </React.Fragment>
+                        ) : (
+                            part.replace(regex, '')
+                        ),
+                    )}
+                </ResultTextString>
+                {i < chunks.length - 1 && (
+                    <ResultTextStringSepararator>
+                        ...
+                    </ResultTextStringSepararator>
+                )}
+            </React.Fragment>
+        ))
+    }
+
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
@@ -690,6 +822,24 @@ export default class PageResultView extends PureComponent<Props> {
                                 spacePickerButtonRef={this.spacePickerBarRef}
                             />
                         )}
+                        {this.props.searchQuery?.length > 0 &&
+                            this.props.text?.length > 0 && (
+                                <ResultsMatchingTextToggleContainer
+                                    showAll={this.props.showAllResults}
+                                    id={
+                                        'matching-text-container-' +
+                                        this.props.index
+                                    }
+                                    maxHeight={
+                                        this.maxMatchingTextContainerHeight
+                                    }
+                                >
+                                    <SearchResultsHighlights>
+                                        {this.processPageText(this.props.text)}
+                                    </SearchResultsHighlights>
+                                    {this.renderToggleMatchesButton()}
+                                </ResultsMatchingTextToggleContainer>
+                            )}
                         <FooterBar inPageMode={this.props.inPageMode}>
                             <ItemBoxBottom
                                 // firstDivProps={{
@@ -850,4 +1000,104 @@ const NoteCounter = styled.span`
     text-align: center;
     position: absolute;
     right: 0;
+`
+
+const SearchResultsHighlights = styled.div`
+    margin: 10px 0;
+
+    font-size: 14px;
+    line-height: 26px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    width: fill-available;
+    padding: 0 20px;
+
+    .matchingQueryTerm {
+        color: ${(props) => props.theme.colors.prime1};
+    }
+`
+
+const HighlightedTerm = styled.span`
+    background: ${(props) => props.theme.colors.prime1};
+    color: ${(props) => props.theme.colors.black};
+    padding: 2px 5px;
+    line-height: 21px;
+    border-radius: 3px;
+`
+const ResultTextString = styled.span`
+    font-size: 14px;
+    line-height: 26px;
+`
+
+const ResultTextStringSepararator = styled.span`
+    font-size: 14px;
+    line-height: 26px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    background: ${(props) => props.theme.colors.greyScale3};
+    padding: 2px 5px;
+    border-radius: 3px;
+    margin: 0 5px;
+`
+
+const MatchingTextViewToggle = styled.div<{ showAll: boolean }>`
+    position: sticky;
+    padding: 5px 15px;
+    bottom: 10px;
+    border-radius: 6px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: ${(props) => props.theme.colors.greyScale1}95;
+    backdrop-filter: blur(5px);
+    color: ${(props) => props.theme.colors.greyScale7};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    font-size: 14px;
+    cursor: pointer;
+    opacity: 0.6;
+
+    transition: all 0.3s ease-in-out;
+
+    &:hover {
+        backdrop-filter: blur(10px);
+    }
+
+    ${(props) =>
+        props.showAll &&
+        css`
+            right: 10px;
+            bottom: 10px;
+        `}
+`
+
+const ResultsMatchingTextToggleContainer = styled.div<{
+    showAll: boolean
+    maxHeight: number
+}>`
+    display: flex;
+    flex-direction: column;
+margin-top: 10px;
+border-radius: 8px;
+    align-items: center;
+    justify-content: flex-start;
+    overflow: hidden;
+    max-height: 150px;
+    max-height: ${(props) => props.maxHeight}px;
+    position: relative;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+
+    ${(props) =>
+        props.showAll &&
+        css`
+            max-height: 250px;
+            overflow: scroll;
+        `}
+
+    &:hover ${MatchingTextViewToggle} {
+        opacity: 1;
+    }
 `
