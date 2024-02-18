@@ -50,6 +50,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
                             theme={memexTheme}
                             getRootElement={() => rootEl}
                             onResultSelect={(exportedResultText) => null}
+                            closeInPageMode={() => rootEl.remove()}
                         />
                     </InPageSearchModal>
                 </ThemeProvider>

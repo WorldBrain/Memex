@@ -172,6 +172,13 @@ export class DashboardContainer extends StatefulUIElement<
     }
 
     handleChangeFocusItem = (event: KeyboardEvent) => {
+        if (event.key === 'Escape' && this.props.inPageMode) {
+            const getPopoutBoxes = document.getElementById('popout-boxes')
+            if (!getPopoutBoxes && !this.state.isNoteSidebarShown) {
+                this.props.closeInPageMode()
+            }
+        }
+
         if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
             const searchBox = document.getElementById('search-bar')
             searchBox.blur()
@@ -182,6 +189,7 @@ export class DashboardContainer extends StatefulUIElement<
             event.preventDefault()
         }
     }
+
     private getListDetailsById: ListDetailsGetter = (id) => {
         const listData = this.props.annotationsCache.getListByLocalId(id)
         return {

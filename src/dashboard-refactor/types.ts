@@ -117,6 +117,7 @@ export type DashboardDependencies = {
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
     imageSupportBG: ImageSupportInterface<'caller'>
+    closeInPageMode: () => void
 } & (
     | {
           inPageMode: true
