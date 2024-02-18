@@ -4,20 +4,6 @@ color6 from colors;
 
 @import url('/fonts/Satoshi/satoshi.css');
 
-body {
-    margin: 0;
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-}
-
-* {
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    letter-spacing: 0.8px;
-}
-
 .root {
     background-color: white;
     display: flex;
