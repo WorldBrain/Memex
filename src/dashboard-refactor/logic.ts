@@ -949,6 +949,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         let previousItem = Object.values(previousResults)[focusedItemIndex]
         let nextItem
 
+        nextItem = null
+
         if (event.pageId) {
             nextItem = { id: event.pageId }
         }
@@ -977,6 +979,27 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     [nextItem.id]: {
                                         isInFocus: { $set: true },
                                     },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+        if (!nextItem && previousItem) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [-1]: {
+                            pages: {
+                                byId: {
+                                    ...(previousItem
+                                        ? {
+                                              [previousItem.id]: {
+                                                  isInFocus: { $set: false },
+                                              },
+                                          }
+                                        : {}),
                                 },
                             },
                         },

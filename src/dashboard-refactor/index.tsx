@@ -1085,12 +1085,19 @@ export class DashboardContainer extends StatefulUIElement<
                             pageId,
                             hover: 'lists',
                         }),
-                    onUnhover: (day, pageId) => () =>
+                    onUnhover: (day, pageId) => () => {
                         this.processEvent('setPageHover', {
                             day,
                             pageId,
                             hover: null,
-                        }),
+                        })
+                        if (this.state.focusLockUntilMouseStart) {
+                            return
+                        }
+                        this.processEvent('changeFocusItem', {
+                            pageId: null,
+                        })
+                    },
                     onRemoveFromListBtnClick: (day, pageId) => () => {
                         this.processEvent('removePageFromList', {
                             day,

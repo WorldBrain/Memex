@@ -709,7 +709,9 @@ const EditorContainer = styled.div`
     align-items: center;
     justify-self: center;
     flex-direction: column;
-    background: ${(props) => props.theme.colors.black};
+    background: ${(props) => props.theme.colors.black2}d6;
+    backdrop-filter: blur(12px);
+
     opacity: 0.97;
     padding: 20px;
     border-radius: 10px;
