@@ -207,6 +207,7 @@ export interface PageResult {
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
     copyLoadingState: TaskState
+    isInFocus: boolean
     listPickerShowStatus: ListPickerShowState
     loadNotesState: TaskState
     newNoteForm: NoteFormState

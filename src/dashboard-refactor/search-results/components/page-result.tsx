@@ -448,6 +448,11 @@ export default class PageResultView extends PureComponent<Props> {
 
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
+
+        if (this.props.isInFocus) {
+            console.log('in focus', this.props.fullUrl)
+        }
+
         return (
             <ItemBox
                 onMouseEnter={this.props.onMainContentHover}
@@ -459,6 +464,7 @@ export default class PageResultView extends PureComponent<Props> {
                     onDragStart: this.props.onPageDrag,
                     onDragEnd: this.props.onPageDrop,
                 }}
+                hoverState={this.props.isInFocus}
             >
                 {this.props.uploadedPdfLinkLoadState === 'running' ? (
                     <LoadingBox>

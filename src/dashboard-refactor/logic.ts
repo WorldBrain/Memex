@@ -488,6 +488,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         await loadInitial(this, async () => {
+            // const container = document.getElementById('BlurContainer')
+            // setTimeout(() => {
+            //     console.log('Setting up blur observer', container)
+            //     this.ensureBlurEffect(container)
+            // }, 10000)
             this.observeBlurContainer()
             await this.initThemeVariant()
             const user = await authBG.getCurrentUser()
@@ -575,6 +580,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             })
         })
+    }
+
+    componentDidMount() {}
+
+    componentWillUnmount() {
+        if (this.observer) {
+            this.observer.disconnect()
+        }
     }
 
     observeBlurContainer() {
@@ -805,248 +818,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    // private async loadLocalListsData(previousState: State) {
-    //     const { listsBG, contentShareBG } = this.options
-
-    //     const remoteToLocalIdDict: { [remoteId: string]: number } = {}
-    //     const mutation: UIMutation<State> = {}
-
-    //     await executeUITask(
-    //         this,
-    //         (taskState) => ({
-    //             listsSidebar: {
-    //                 localLists: { loadingState: { $set: taskState } },
-    //             },
-    //         }),
-    //         async () => {
-    //             let allLists = await listsBG.fetchAllLists({
-    //                 limit: 1000,
-    //                 skipMobileList: true,
-    //                 includeDescriptions: true,
-    //             })
-
-    //             let joinedLists = await listsBG.fetchCollaborativeLists({
-    //                 limit: 1000,
-    //             })
-
-    //             // a list of all local lists that also have a remote list (could be joined or created)
-    //             let localToRemoteIdDict = await contentShareBG.getRemoteListIds(
-    //                 { localListIds: allLists.map((list) => list.id) },
-    //             )
-
-    //             // transform the localToRemoteIdDict into an array that can be filtered
-    //             let localToRemoteIdAsArray = [
-    //                 ...Object.entries(localToRemoteIdDict),
-    //             ].map(([localListId, remoteId]) => ({ localListId, remoteId }))
-
-    //             // check for all local entries that also have remoteentries, and cross check them with the joined lists, keep only the ones that are not in joined lists
-    //             const localListsWithoutJoinedStatusButMaybeShared = localToRemoteIdAsArray.filter(
-    //                 (item) => {
-    //                     return !joinedLists.some(
-    //                         (list) => list.remoteId === item.remoteId,
-    //                     )
-    //                 },
-    //             )
-
-    //             // get the locallists by filtering out all IDs that are in the filteredArray
-    //             let localListsNotJoinedButShared = allLists.filter((item) => {
-    //                 return localListsWithoutJoinedStatusButMaybeShared.some(
-    //                     (list) => parseInt(list.localListId) === item.id,
-    //                 )
-    //             })
-    //             let localListsNotShared = allLists.filter((item) => {
-    //                 return !localToRemoteIdAsArray.some(
-    //                     (list) => parseInt(list.localListId) === item.id,
-    //                 )
-    //             })
-
-    //             let localLists = [
-    //                 ...localListsNotShared,
-    //                 ...localListsNotJoinedButShared,
-    //             ]
-
-    //             const listIds: number[] = []
-    //             const listData: { [id: number]: ListData } = {}
-
-    //             localLists = localLists.sort((listDataA, listDataB) => {
-    //                 if (
-    //                     listDataA.name.toLowerCase() <
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return -1
-    //                 }
-    //                 if (
-    //                     listDataA.name.toLowerCase() >
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return 1
-    //                 }
-    //                 return 0
-    //             })
-
-    //             for (const list of allLists) {
-    //                 const remoteId = localToRemoteIdDict[list.id]
-    //                 if (remoteId) {
-    //                     remoteToLocalIdDict[remoteId] = list.id
-    //                 }
-    //             }
-
-    //             for (const list of localLists) {
-    //                 const remoteId = localToRemoteIdDict[list.id]
-    //                 listIds.push(list.id)
-    //                 listData[list.id] = {
-    //                     remoteId,
-    //                     id: list.id,
-    //                     name: list.name,
-    //                     isOwnedList: true,
-    //                     description: list.description,
-    //                 }
-    //             }
-
-    //             mutation.listsSidebar = {
-    //                 listData: { $merge: listData },
-    //                 localLists: {
-    //                     allListIds: { $set: listIds },
-    //                     filteredListIds: { $set: listIds },
-    //                 },
-    //             }
-    //             this.emitMutation(mutation)
-    //         },
-    //     )
-
-    //     return {
-    //         nextState: this.withMutation(previousState, mutation),
-    //         remoteToLocalIdDict,
-    //     }
-    // }
-    // private async loadJoinedListsData(previousState: State) {
-    //     const remoteToLocalIdDict: { [remoteId: string]: number } = {}
-    //     const mutation: UIMutation<State> = {}
-
-    //     await executeUITask(
-    //         this,
-    //         (taskState) => ({
-    //             listsSidebar: {
-    //                 joinedLists: { loadingState: { $set: taskState } },
-    //             },
-    //         }),
-    //         async () => {
-    //             let joinedLists = await this.options.listsBG.fetchCollaborativeLists(
-    //                 {
-    //                     skip: 0,
-    //                     limit: 120,
-    //                 },
-    //             )
-
-    //             // const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
-    //             //     { localListIds: joinedLists.map((list) => list.id) },
-    //             // )
-
-    //             const listIds: number[] = []
-    //             const listData: { [id: number]: ListData } = {}
-
-    //             joinedLists = joinedLists.sort((listDataA, listDataB) => {
-    //                 if (
-    //                     listDataA.name.toLowerCase() <
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return -1
-    //                 }
-    //                 if (
-    //                     listDataA.name.toLowerCase() >
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return 1
-    //                 }
-    //                 return 0
-    //             })
-
-    //             for (const list of joinedLists) {
-    //                 listIds.push(list.id)
-    //                 listData[list.id] = {
-    //                     remoteId: list.remoteId,
-    //                     id: list.id,
-    //                     name: list.name,
-    //                     isOwnedList: false,
-    //                     description: list.description,
-    //                 }
-    //             }
-
-    //             mutation.listsSidebar = {
-    //                 listData: { $merge: listData },
-    //                 joinedLists: {
-    //                     allListIds: { $set: listIds },
-    //                     filteredListIds: { $set: listIds },
-    //                 },
-    //             }
-    //             this.emitMutation(mutation)
-    //         },
-    //     )
-
-    //     return {
-    //         nextState: this.withMutation(previousState, mutation),
-    //         remoteToLocalIdDict,
-    //     }
-    // }
-
-    // private async loadRemoteListsData(
-    //     previousState: State,
-    //     remoteToLocalIdDict: {
-    //         [remoteId: string]: number
-    //     },
-    // ) {
-    //     const { listsBG } = this.options
-
-    //     await executeUITask(
-    //         this,
-    //         (taskState) => ({
-    //             listsSidebar: {
-    //                 followedLists: { loadingState: { $set: taskState } },
-    //             },
-    //         }),
-    //         async () => {
-    //             const followedLists = await listsBG.fetchAllFollowedLists({
-    //                 limit: 1000,
-    //             })
-
-    //             const followedListIds: number[] = []
-    //             const listData: { [id: number]: ListData } = {}
-
-    //             for (const list of followedLists) {
-    //                 const localId =
-    //                     remoteToLocalIdDict[list.remoteId] ?? list.id
-
-    //                 // Joined lists appear in "Local lists" section, so don't include them here
-    //                 if (remoteToLocalIdDict[list.remoteId] == null) {
-    //                     followedListIds.push(localId)
-    //                 }
-
-    //                 listData[localId] = {
-    //                     id: localId,
-    //                     name: list.name,
-    //                     remoteId: list.remoteId,
-    //                     description: list.description,
-    //                     isOwnedList: list.isOwned,
-    //                     // NOTE: this condition assumes that local lists are loaded in state already (joined lists have local data + are "followed")
-    //                     isJoinedList:
-    //                         previousState.listsSidebar.listData[localId] !=
-    //                         null,
-    //                 }
-    //             }
-
-    //             this.emitMutation({
-    //                 listsSidebar: {
-    //                     listData: { $merge: listData },
-    //                     followedLists: {
-    //                         allListIds: { $set: followedListIds },
-    //                         filteredListIds: { $set: followedListIds },
-    //                     },
-    //                 },
-    //             })
-    //         },
-    //     )
-    // }
-
     /**
      * Helper which emits a mutation followed by a search using the post-mutation state.
      */
@@ -1151,6 +922,103 @@ export class DashboardLogic extends UILogic<State, Events> {
             bulkSelectedUrls: { $set: [] },
         })
         await clearBulkEditItems()
+    }
+
+    setupKeydownEventListener() {
+        document.addEventListener('keydown', this.handleKeydown)
+    }
+
+    removeKeydownEventListener() {
+        document.removeEventListener('keydown', this.handleKeydown)
+    }
+
+    handleKeydown = (event: KeyboardEvent) => {
+        switch (event.key) {
+            case 'ArrowUp':
+                // Handle arrow up key press
+                console.log('Arrow Up Pressed')
+
+                break
+            case 'ArrowDown':
+                // Handle arrow down key press
+                console.log('Arrow Down Pressed')
+                break
+            default:
+                break
+        }
+    }
+
+    changeFocusItem: EventHandler<'changeFocusItem'> = async ({
+        previousState,
+        event,
+    }) => {
+        console.log('asdadsfasdf')
+        const previousResults =
+            previousState.searchResults.results[-1].pages.byId
+
+        console.log('previousResults', previousResults)
+
+        const focusedItemIndex = Object.keys(previousResults).findIndex(
+            (key) => previousResults[key].isInFocus === true,
+        )
+
+        console.log('focusedItemIndex', focusedItemIndex)
+
+        if (event.direction === 'up') {
+            const previousItem = Object.values(previousResults)[
+                focusedItemIndex
+            ]
+            const nextItem = Object.values(previousResults)[
+                focusedItemIndex - 1
+            ]
+
+            console.log('previousItem', previousItem)
+            console.log('nextItem', nextItem)
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [-1]: {
+                            pages: {
+                                byId: {
+                                    [previousItem.id]: {
+                                        isInFocus: { $set: false },
+                                    },
+                                    [nextItem.id]: {
+                                        isInFocus: { $set: true },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+        if (event.direction === 'down') {
+            const previousItem = Object.values(previousResults)[
+                focusedItemIndex
+            ]
+            const nextItem = Object.values(previousResults)[
+                focusedItemIndex + 1
+            ]
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [-1]: {
+                            pages: {
+                                byId: {
+                                    [previousItem.id]: {
+                                        isInFocus: { $set: false },
+                                    },
+                                    [nextItem.id]: {
+                                        isInFocus: { $set: true },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
     }
     setBulkEditSpace: EventHandler<'setBulkEditSpace'> = async ({
         previousState,
@@ -1294,6 +1162,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                         }
                     }
 
+                    console.log('results', results)
+
                     if (searchID !== this.currentSearchID) {
                         return
                     }
@@ -1336,6 +1206,29 @@ export class DashboardLogic extends UILogic<State, Events> {
                                       pageData: { $set: pageData },
                                       noteData: { $set: noteData },
                                   }),
+                        },
+                    })
+                    const firstKey = Object.keys(
+                        results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
+                    )[0]
+
+                    console.log('firstKey', firstKey)
+
+                    this.emitMutation({
+                        searchResults: {
+                            results: {
+                                [PAGE_SEARCH_DUMMY_DAY]: {
+                                    pages: {
+                                        byId: {
+                                            [firstKey]: {
+                                                isInFocus: {
+                                                    $set: true,
+                                                },
+                                            },
+                                        },
+                                    },
+                                },
+                            },
                         },
                     })
                 }

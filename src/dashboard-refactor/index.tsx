@@ -168,6 +168,16 @@ export class DashboardContainer extends StatefulUIElement<
 
         this.youtubeService = new YoutubeService(createYoutubeServiceOptions())
         ;(window as any)['_state'] = () => ({ ...this.state })
+        document.addEventListener('keydown', this.handleChangeFocusItem)
+    }
+
+    handleChangeFocusItem = (event: KeyboardEvent) => {
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            console.log('change focus item')
+            this.processEvent('changeFocusItem', {
+                direction: event.key === 'ArrowUp' ? 'up' : 'down',
+            })
+        }
     }
     private getListDetailsById: ListDetailsGetter = (id) => {
         const listData = this.props.annotationsCache.getListByLocalId(id)

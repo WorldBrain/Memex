@@ -120,6 +120,7 @@ export const getInitialPageResultState = (
     noteIds: { user: noteIds, followed: [], search: [] },
     hoverState: null,
     copyLoadingState: 'pristine',
+    isInFocus: false,
     editTitleState: null,
     ...extra,
 })
