@@ -3401,7 +3401,7 @@ export class AnnotationsSidebar extends React.Component<
                                 onClick={this.props.setActiveTab('annotations')}
                                 active={this.props.activeTab === 'annotations'}
                             >
-                                All by Me{' '}
+                                All Notes{' '}
                             </SuggestionsSwitcherButton>
                             <SuggestionsSwitcherButton
                                 onClick={this.props.setActiveTab('spaces')}
@@ -3769,10 +3769,11 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.activeTab === 'annotations' ||
                             this.props.activeTab === 'spaces'
                         }
-                        type={'tertiary'}
+                        type={'menuBar'}
                         size={'medium'}
                         padding={'3px 6px'}
                         height={'30px'}
+                        icon={'commentAdd'}
                     />
                     {this.props.sidebarContext === 'in-page' &&
                         this.props.rabbitHoleBetaFeatureAccess ===
@@ -3823,14 +3824,40 @@ export class AnnotationsSidebar extends React.Component<
                         onClick={this.props.setActiveTab('summary')}
                         label={'Ask'}
                         active={this.props.activeTab === 'summary'}
-                        type={'tertiary'}
+                        type={'menuBar'}
                         size={'medium'}
                         iconPosition={'right'}
                         padding={'3px 6px'}
                         height={'30px'}
+                        icon={'stars'}
                     />
 
                     <PrimaryAction
+                        label={'Cite'}
+                        onClick={this.props.clickCreatePageLinkBtn}
+                        type="menuBar"
+                        iconColor="prime1"
+                        fontColor="white"
+                        size="medium"
+                        active={
+                            this.props.selectedShareMenuPageLinkList != null
+                        }
+                        innerRef={this.sharePageLinkButtonRef}
+                        icon={
+                            this.props.pageLinkCreateState === 'running' ? (
+                                <LoadingIndicator
+                                    margin={'0 5px 0 0'}
+                                    size={14}
+                                />
+                            ) : (
+                                'invite'
+                            )
+                        }
+                        padding={'0px 12px 0 6px'}
+                        height={'30px'}
+                    />
+
+                    {/* <PrimaryAction
                         onClick={(event) => {
                             this.props.setActiveTab('feed')(event)
                             this.props.clickFeedActivityIndicator()
@@ -3859,35 +3886,10 @@ export class AnnotationsSidebar extends React.Component<
                                 </LoadingBox>
                             )
                         }
-                    />
+                    /> */}
                 </TopBarTabsContainer>
-                <TopBarBtnsContainer ref={this.sharePageLinkButtonRef}>
-                    <PrimaryAction
-                        label={'Share Page'}
-                        onClick={this.props.clickCreatePageLinkBtn}
-                        type="tertiary"
-                        iconColor="prime1"
-                        fontColor="white"
-                        size="medium"
-                        active={
-                            this.props.selectedShareMenuPageLinkList != null
-                        }
-                        icon={
-                            this.props.pageLinkCreateState === 'running' ? (
-                                <LoadingIndicator
-                                    margin={'0 5px 0 0'}
-                                    size={14}
-                                />
-                            ) : (
-                                'invite'
-                            )
-                        }
-                        padding={'0px 12px 0 6px'}
-                        height={'30px'}
-                    />
-                    {this.props.selectedShareMenuPageLinkList != null &&
-                        this.renderPageLinkMenu()}
-                </TopBarBtnsContainer>
+                {this.props.selectedShareMenuPageLinkList != null &&
+                    this.renderPageLinkMenu()}
             </TopBarContainer>
         )
     }
@@ -4604,8 +4606,7 @@ const SuggestionsListSwitcher = styled.div`
     position: sticky;
     top: 0px;
     z-index: 1000;
-    background: ${(props) => props.theme.colors.greyScale1}60;
-    backdrop-filter: blur(10px);
+    background: ${(props) => props.theme.colors.greyScale1}5c;
 `
 
 const SuggestionsSwitcherButton = styled.div<{ active }>`
@@ -5291,7 +5292,6 @@ const SpaceTypeSection = styled.div`
     flex-direction: column;
     width: fill-available;
 
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale1};
     &:first-child {
         margin-top: -10px;
     }
@@ -5303,7 +5303,7 @@ const SpaceTypeSection = styled.div`
 
 const SpaceTypeSectionHeader = styled.div`
     display: flex;
-    color: ${(props) => props.theme.colors.greyScale4};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     font-size: 14px;
     padding: 30px 20px 30px 15px;
@@ -5491,16 +5491,12 @@ const TopBar = styled.div<{ sidebarContext: string }>`
         props.sidebarContext === 'dashboard' ? '40px' : '20px'};
     z-index: 11300;
     padding: 10px 10px 10px 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     ${(props) =>
         props.theme.variant === 'light' &&
         css`
             /* box-shadow: ${(props) =>
                 props.theme.borderStyles.boxShadowBottom}; */
-            border-bottom: 1px solid
-                ${(props) =>
-                    props.theme.borderStyles.borderLineColorBigElements};
         `};
 `
 
@@ -5540,6 +5536,9 @@ const TopBarTabsContainer = styled.div`
     display: flex;
     align-items: center;
     grid-gap: 2px;
+    width: fill-available;
+    width: -moz-available;
+    justify-content: space-between;
 `
 
 const TopBarBtnsContainer = styled.div``
@@ -5701,7 +5700,7 @@ const FollowedListRow = styled(Margin)<{
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+        background: ${(props) => props.theme.colors.greyScale2}5c;
     }
 
     ${(props) =>

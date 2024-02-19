@@ -614,7 +614,6 @@ const TextBoxContainerStyled = styled.div<{
     flex-direction: column;
     font-size: 14px;
     width: calc(100% - 1px);
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};
@@ -624,6 +623,8 @@ const TextBoxContainerStyled = styled.div<{
         props.hasLists
             ? css`
                   padding-bottom: 10px;
+                  border-bottom: 1px solid
+                      ${(props) => props.theme.colors.greyScale3};
               `
             : undefined}
 `

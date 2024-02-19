@@ -434,40 +434,41 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         />
                     )}
                     {/* This is the highlight Editing section, not the annotationEditSection */}
-                    {this.props.isEditingHighlight ? (
-                        <HighlightEditContainer
-                            hasHighlight={this.theme.hasHighlight}
-                        >
-                            <AnnotationEdit
-                                ref={this.annotEditRef}
-                                {...this.props.annotationEditDependencies}
-                                rows={2}
-                                editorHeight={this.state.editorHeight}
-                                isShared={this.props.isShared}
-                                isBulkShareProtected={
-                                    this.props.isBulkShareProtected
-                                }
-                                getYoutubePlayer={this.props.getYoutubePlayer}
-                                imageSupport={this.props.imageSupport}
-                                comment={this.props.body}
-                                onCommentChange={
-                                    this.props.annotationEditDependencies
-                                        .onBodyChange
-                                }
-                                slimEditorActions={true}
-                            />
-                        </HighlightEditContainer>
-                    ) : (
-                        <Markdown
+                    {/* {this.props.isEditingHighlight ? ( */}
+                    <HighlightEditContainer
+                        hasHighlight={this.theme.hasHighlight}
+                    >
+                        <AnnotationEdit
+                            ref={this.annotEditRef}
+                            {...this.props.annotationEditDependencies}
+                            rows={2}
+                            editorHeight={this.state.editorHeight}
+                            isShared={this.props.isShared}
+                            isBulkShareProtected={
+                                this.props.isBulkShareProtected
+                            }
+                            getYoutubePlayer={this.props.getYoutubePlayer}
                             imageSupport={this.props.imageSupport}
-                            isHighlight
-                            pageUrl={this.props.pageUrl}
-                        >
-                            {this.state.isTruncatedHighlight
-                                ? this.state.truncatedTextHighlight
-                                : this.props.body}
-                        </Markdown>
-                    )}
+                            comment={this.props.body}
+                            onCommentChange={
+                                this.props.annotationEditDependencies
+                                    .onBodyChange
+                            }
+                            slimEditorActions={true}
+                            isEditMode={this.props.isEditingHighlight}
+                        />
+                    </HighlightEditContainer>
+
+                    {/* //     <Markdown
+                    //         imageSupport={this.props.imageSupport}
+                    //         isHighlight
+                    //         pageUrl={this.props.pageUrl}
+                    //     >
+                    //         {this.state.isTruncatedHighlight
+                    //             ? this.state.truncatedTextHighlight
+                    //             : this.props.body}
+                    //     </Markdown>
+                    // )} */}
                 </HighlightSection>
             </HighlightStyled>
         )
@@ -638,22 +639,22 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 </HighlightActionsBox>
             ) : null
 
-        if (isEditing) {
-            return (
-                <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
-                    <AnnotationEdit
-                        ref={this.annotEditRef}
-                        {...annotationEditDependencies}
-                        rows={2}
-                        editorHeight={this.state.editorHeight}
-                        isShared={this.props.isShared}
-                        isBulkShareProtected={this.props.isBulkShareProtected}
-                        getYoutubePlayer={this.props.getYoutubePlayer}
-                        imageSupport={this.props.imageSupport}
-                    />
-                </AnnotationEditContainer>
-            )
-        }
+        return (
+            <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
+                <AnnotationEdit
+                    ref={this.annotEditRef}
+                    {...annotationEditDependencies}
+                    rows={2}
+                    editorHeight={this.state.editorHeight}
+                    isShared={this.props.isShared}
+                    isBulkShareProtected={this.props.isBulkShareProtected}
+                    getYoutubePlayer={this.props.getYoutubePlayer}
+                    imageSupport={this.props.imageSupport}
+                    isEditMode={this.props.isEditing}
+                    setEditing={annotationFooterDependencies.onEditIconClick}
+                />
+            </AnnotationEditContainer>
+        )
 
         if (!comment?.length) {
             return

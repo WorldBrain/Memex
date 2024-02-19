@@ -45,6 +45,8 @@ export interface AnnotationEditGeneralProps {
     selector?: string
     getRootElement: () => HTMLElement
     slimEditorActions?: boolean
+    isEditMode?: boolean
+    setEditing: React.MouseEventHandler
 }
 
 export interface Props
@@ -138,6 +140,8 @@ class AnnotationEdit extends React.Component<Props> {
     }
 
     render() {
+        this.editorRef?.setEditable(this.props?.isEditMode ?? false)
+
         return (
             <EditorContainer>
                 <MemexEditor
@@ -154,6 +158,8 @@ class AnnotationEdit extends React.Component<Props> {
                     imageSupport={this.props.imageSupport}
                     getRootElement={this.props.getRootElement}
                     slimEditorActions={this.props.slimEditorActions}
+                    editable={this.props.isEditMode}
+                    setEditing={this.props.setEditing}
                 />
             </EditorContainer>
         )

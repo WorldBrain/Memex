@@ -1166,12 +1166,13 @@ export class AnnotationsSidebarContainer<
                                     unifiedListId,
                                 })
                             }
-                            closePageLinkShareMenu={() =>
+                            closePageLinkShareMenu={() => {
+                                console.log('closePageLinkShareMenu')
                                 this.processEvent(
                                     'closePageLinkShareMenu',
                                     null,
                                 )
-                            }
+                            }}
                             openWebUIPage={(unifiedListId) =>
                                 this.processEvent('openWebUIPageForSpace', {
                                     unifiedListId,
@@ -1655,7 +1656,7 @@ const ContainerStyled = styled.div<{
             : '2147483645'}; /* This is to combat pages setting high values on certain elements under the sidebar */
                     background: ${(props) =>
                         props.theme.variant === 'dark'
-                            ? props.theme.colors.black2 + '75'
+                            ? '#424248'
                             : props.theme.colors.black + 'c9'};
     backdrop-filter: blur(30px);
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
