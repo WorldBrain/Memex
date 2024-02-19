@@ -210,6 +210,7 @@ export default class PageResultView extends PureComponent<Props> {
                         this.props.selectItem(itemData, false)
                     }
                 } else {
+                    console.log('enter')
                     // Perform action for "Enter" key
                     this.props.onClick(event)
                 }

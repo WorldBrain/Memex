@@ -4510,85 +4510,95 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const pageData = previousState.searchResults.pageData.byId[event.pageId]
-        if (!pageData || pageData.fullPdfUrl == null) {
+        const pageData =
+            previousState?.searchResults?.pageData?.byId[event.pageId]
+
+        if (!pageData) {
             return
         }
 
-        // This event will be assigned to an anchor <a> el, so we need to override that for PDFs
-        event.synthEvent.preventDefault()
+        if (pageData?.fullPdfUrl) {
+            // This event will be assigned to an anchor <a> el, so we need to override that for PDFs
+            event.synthEvent.preventDefault()
 
-        const memexCloudUrl = new URL(pageData.fullPdfUrl!)
-        const uploadId = memexCloudUrl.searchParams.get('upload_id')
+            const memexCloudUrl = new URL(pageData?.fullPdfUrl!)
+            const uploadId = memexCloudUrl?.searchParams.get('upload_id')
 
-        // Uploaded PDFs need to have temporary access URLs fetched
-        if (uploadId != null) {
-            // Ignore multi-clicks while it's loading
-            // if (
-            //     previousState.searchResults.uploadedPdfLinkLoadState ===
-            //     'running'
-            // ) {
-            //     return
-            // }
+            console.log('also here')
+            // Uploaded PDFs need to have temporary access URLs fetched
+            if (uploadId != null) {
+                // Ignore multi-clicks while it's loading
+                // if (
+                //     previousState.searchResults.uploadedPdfLinkLoadState ===
+                //     'running'
+                // ) {
+                //     return
+                // }
 
-            await executeUITask(
-                this,
-                (taskState) => ({
-                    searchResults: {
-                        pageData: {
-                            byId: {
-                                [event.pageId]: {
-                                    uploadedPdfLinkLoadState: {
-                                        $set: taskState,
+                await executeUITask(
+                    this,
+                    (taskState) => ({
+                        searchResults: {
+                            pageData: {
+                                byId: {
+                                    [event.pageId]: {
+                                        uploadedPdfLinkLoadState: {
+                                            $set: taskState,
+                                        },
                                     },
                                 },
                             },
                         },
+                    }),
+                    async () => {
+                        const tempPdfAccessUrl = await this.options.pdfViewerBG.getTempPdfAccessUrl(
+                            uploadId,
+                        )
+                        await openPDFInViewer(tempPdfAccessUrl, {
+                            tabsAPI: this.options.tabsAPI,
+                            runtimeAPI: this.options.runtimeAPI,
+                        })
                     },
-                }),
-                async () => {
-                    const tempPdfAccessUrl = await this.options.pdfViewerBG.getTempPdfAccessUrl(
-                        uploadId,
-                    )
-                    await openPDFInViewer(tempPdfAccessUrl, {
+                )
+                return
+            }
+
+            if (memexCloudUrl?.protocol === 'blob:') {
+                // Show dropzone for local-only PDFs
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files![0]
+                    const reader = new FileReader()
+                    reader.onload = (event) => {
+                        const pdfDataUrl = event.target!.result as string
+                        // this.emitMutation({ pdfDataUrl: { $set: pdfDataUrl } })
+                    }
+                    reader.readAsDataURL(file)
+
+                    // const file = firstItem.getAsFile()
+                    const pdfObjectUrl = URL.createObjectURL(file)
+
+                    await openPDFInViewer(pdfObjectUrl, {
                         tabsAPI: this.options.tabsAPI,
                         runtimeAPI: this.options.runtimeAPI,
                     })
-                },
-            )
-            return
-        }
-
-        if (memexCloudUrl.protocol === 'blob:') {
-            // Show dropzone for local-only PDFs
-            const input = document.createElement('input')
-            input.type = 'file'
-            input.onchange = async (e) => {
-                const file = (e.target as HTMLInputElement).files![0]
-                const reader = new FileReader()
-                reader.onload = (event) => {
-                    const pdfDataUrl = event.target!.result as string
-                    // this.emitMutation({ pdfDataUrl: { $set: pdfDataUrl } })
+                    this.emitMutation({ showDropArea: { $set: false } })
                 }
-                reader.readAsDataURL(file)
-
-                // const file = firstItem.getAsFile()
-                const pdfObjectUrl = URL.createObjectURL(file)
-
-                await openPDFInViewer(pdfObjectUrl, {
-                    tabsAPI: this.options.tabsAPI,
-                    runtimeAPI: this.options.runtimeAPI,
-                })
-                this.emitMutation({ showDropArea: { $set: false } })
+                input.click()
+                this.emitMutation({ showDropArea: { $set: true } })
             }
-            input.click()
-            this.emitMutation({ showDropArea: { $set: true } })
+
+            await openPDFInViewer(pageData.fullPdfUrl!, {
+                tabsAPI: this.options.tabsAPI,
+                runtimeAPI: this.options.runtimeAPI,
+            })
         }
 
-        await openPDFInViewer(pageData.fullPdfUrl!, {
-            tabsAPI: this.options.tabsAPI,
-            runtimeAPI: this.options.runtimeAPI,
-        })
+        if (pageData?.fullUrl && !pageData?.fullPdfUrl) {
+            console.log('open in new tab')
+            window.open(pageData.fullUrl, '_blank')
+        }
     }
 
     dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {
