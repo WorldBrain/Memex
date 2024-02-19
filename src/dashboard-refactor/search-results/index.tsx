@@ -615,7 +615,7 @@ export default class SearchResultsContainer extends React.Component<
                         })
                     }
                     onMatchingTextToggleClick={
-                        this.props.onMatchingTextToggleClick
+                        interactionProps.onMatchingTextToggleClick
                     }
                     selectItem={this.props.onBulkSelect}
                     shiftSelectItem={() => this.shiftSelectItems(order)}

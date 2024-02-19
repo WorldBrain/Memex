@@ -67,7 +67,7 @@ export interface Props
     inPageMode?: boolean
     resultsRef?: React.RefObject<HTMLDivElement>
     searchQuery?: string
-    onMatchingTextToggleClick: () => void
+    onMatchingTextToggleClick: React.MouseEventHandler
 }
 
 export default class PageResultView extends PureComponent<Props> {
