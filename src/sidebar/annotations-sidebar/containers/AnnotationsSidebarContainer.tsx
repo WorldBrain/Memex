@@ -1654,11 +1654,10 @@ const ContainerStyled = styled.div<{
         props.sidebarContext === 'dashboard'
             ? '3500'
             : '2147483645'}; /* This is to combat pages setting high values on certain elements under the sidebar */
-                    background: ${(props) =>
-                        props.theme.variant === 'dark'
-                            ? '#424248'
-                            : props.theme.colors.black + 'c9'};
-    backdrop-filter: blur(30px);
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? '#424248'
+            : props.theme.colors.black + 'c9'};
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
