@@ -149,7 +149,7 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    async toggleSidebarShowForPageId(fullPageUrl: string) {
+    async toggleSidebarShowForPageId(fullPageUrl: string, spaceId?: string) {
         const newURL = fullPageUrl
         const previousURL = this.state?.fullPageUrl ?? null
 
@@ -165,11 +165,19 @@ export class AnnotationsSidebarContainer<
             this.hideSidebar()
             return
         }
-
-        await this.processEvent('setActiveSidebarTab', {
-            tab: 'annotations',
-        })
         await this.processEvent('setPageUrl', { fullPageUrl })
+        if (spaceId) {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'spaces',
+            })
+            await this.processEvent('setSelectedList', {
+                unifiedListId: spaceId,
+            })
+        } else {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+        }
     }
     async toggleAIShowForPageId(fullPageUrl: string) {
         const newURL = fullPageUrl

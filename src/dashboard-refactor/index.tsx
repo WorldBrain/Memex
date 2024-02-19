@@ -989,6 +989,7 @@ export class DashboardContainer extends StatefulUIElement<
                             () => {
                                 this.notesSidebarRef.current.toggleSidebarShowForPageId(
                                     pageData.fullUrl,
+                                    this.state.listsSidebar.selectedListId,
                                 )
                             },
                             this.props.inPageMode ? 200 : 0,
