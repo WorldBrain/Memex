@@ -4524,7 +4524,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             const memexCloudUrl = new URL(pageData?.fullPdfUrl!)
             const uploadId = memexCloudUrl?.searchParams.get('upload_id')
 
-            console.log('also here')
             // Uploaded PDFs need to have temporary access URLs fetched
             if (uploadId != null) {
                 // Ignore multi-clicks while it's loading
@@ -4596,7 +4595,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (pageData?.fullUrl && !pageData?.fullPdfUrl) {
-            console.log('open in new tab')
             window.open(pageData.fullUrl, '_blank')
         }
     }

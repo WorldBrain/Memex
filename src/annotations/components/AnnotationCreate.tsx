@@ -376,7 +376,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             this.editor?.focus()
                         }}
                     >
-                        {/* <MemexEditor
+                        <MemexEditor
                             onKeyDown={this.handleInputKeyDown}
                             onContentUpdate={(content) => {
                                 this.props.onCommentChange(content)
@@ -400,7 +400,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.setState({ onEditClick: editing })
                             }
                             setDebouncingSaveBlock={this.setDebouncingSaveBlock}
-                        /> */}
+                        />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&
                         (this.state.onEditClick || this.props.autoFocus) && (

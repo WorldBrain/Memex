@@ -216,7 +216,6 @@ export default class PageResultView extends PureComponent<Props> {
                         this.props.selectItem(itemData, false)
                     }
                 } else {
-                    console.log('enter')
                     // Perform action for "Enter" key
                     this.props.onClick(event as any)
                     break
@@ -676,8 +675,6 @@ export default class PageResultView extends PureComponent<Props> {
             // Extract the chunk of text around the match
             return text.substring(beforeIndex, afterIndex)
         })
-
-        console.log('chunks', chunks)
 
         return chunks.map((chunk, i) => (
             <React.Fragment key={i}>
