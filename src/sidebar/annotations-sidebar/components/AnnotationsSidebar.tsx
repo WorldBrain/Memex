@@ -3410,16 +3410,18 @@ export class AnnotationsSidebar extends React.Component<
                                 By Spaces{' '}
                             </SuggestionsSwitcherButton>
                         </SuggestionsListSwitcher>
-                        {this.props.activeTab === 'annotations' &&
-                            this.renderAnnotationsEditable(
-                                cacheUtils.getUserAnnotationsArray(
-                                    { annotations: this.props.annotations },
-                                    this.props.currentUser?.id.toString(),
-                                ),
-                            )}
+                        <AnnotationSectionScrollContainer>
+                            {this.props.activeTab === 'annotations' &&
+                                this.renderAnnotationsEditable(
+                                    cacheUtils.getUserAnnotationsArray(
+                                        { annotations: this.props.annotations },
+                                        this.props.currentUser?.id.toString(),
+                                    ),
+                                )}
 
-                        {this.props.activeTab === 'spaces' &&
-                            this.renderSharedNotesByList()}
+                            {this.props.activeTab === 'spaces' &&
+                                this.renderSharedNotesByList()}
+                        </AnnotationSectionScrollContainer>
                     </AnnotationsSectionStyled>
                 )}
                 <UpdateNotifBanner
@@ -3725,12 +3727,12 @@ export class AnnotationsSidebar extends React.Component<
                             <NewAnnotationBoxMyAnnotations>
                                 {this.renderNewAnnotation()}
                             </NewAnnotationBoxMyAnnotations>
-                            {annots?.length > 1 && (
-                                <AnnotationActions>
-                                    {this.renderTopBarActionButtons()}
-                                </AnnotationActions>
-                            )}
                         </TopAreaContainer>
+                        {annots?.length > 1 && (
+                            <AnnotationActions>
+                                {this.renderTopBarActionButtons()}
+                            </AnnotationActions>
+                        )}
                         {this.props.noteCreateState === 'running' ||
                         annotations?.length > 0 ? (
                             <AnnotationContainer>
@@ -4668,7 +4670,6 @@ const NoteText = styled(Markdown)`
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
-    margin-top: ${(props) => !props.hasHighlight && '10px'};
     padding: 0px 20px 20px 30px;
 `
 
@@ -5415,6 +5416,7 @@ const TopAreaContainer = styled.div`
     }
 
     scrollbar-width: none;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
 
@@ -5429,8 +5431,7 @@ const AnnotationActions = styled.div`
     align-items: center;
     width: fill-available;
     height: 20px;
-    padding-bottom: 5px;
-    padding-top: 5px;
+    padding: 10px 15px 5px 15px;
 `
 
 const ActionButtons = styled.div`
@@ -5594,8 +5595,6 @@ const AnnotationContainer = styled(Margin)`
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */
-    height: calc(100% + 30px);
-    overflow: scroll;
     padding: 0 10px;
     padding-bottom: 100px;
     flex: 1;
@@ -5831,6 +5830,27 @@ const SuggestionsSectionStyled = styled.div`
         display: none;
     }
 `
+const AnnotationSectionScrollContainer = styled.div`
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: fill-available;
+    flex: 1;
+    overflow: scroll;
+    width: fill-available;
+    width: -moz-available;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
 const AnnotationsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
@@ -5843,7 +5863,7 @@ const AnnotationsSectionStyled = styled.div`
     height: fill-available;
     flex: 1;
     z-index: 19;
-    overflow: scroll;
+    overflow: hidden;
 
     scrollbar-width: none;
 

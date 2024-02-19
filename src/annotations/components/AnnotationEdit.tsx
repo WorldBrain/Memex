@@ -13,6 +13,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 interface State {
     editorHeight: string
     youtubeShortcut: string | null
+    isDeboucingEditor: boolean
 }
 
 export interface AnnotationEditEventProps {
@@ -32,6 +33,7 @@ export interface AnnotationEditEventProps {
     onListsBarPickerBtnClick: React.MouseEventHandler
     imageSupport: ImageSupportInterface<'caller'>
     copyLoadingState: TaskState
+    setEditing: React.MouseEventHandler
 }
 
 export interface AnnotationEditGeneralProps {
@@ -46,7 +48,6 @@ export interface AnnotationEditGeneralProps {
     getRootElement: () => HTMLElement
     slimEditorActions?: boolean
     isEditMode?: boolean
-    setEditing: React.MouseEventHandler
 }
 
 export interface Props
@@ -61,6 +62,7 @@ class AnnotationEdit extends React.Component<Props> {
     state: State = {
         editorHeight: '50px',
         youtubeShortcut: null,
+        isDeboucingEditor: false,
     }
 
     async componentDidMount() {
@@ -74,7 +76,9 @@ class AnnotationEdit extends React.Component<Props> {
     }
 
     private saveEdit(shouldShare, isProtected) {
-        this.props.onEditConfirm(true)(shouldShare, isProtected)
+        if (!this.state.isDeboucingEditor) {
+            this.props.onEditConfirm(true)(shouldShare, isProtected)
+        }
         //AnnotationEditable.removeMarkdownHelp()
     }
 
@@ -133,6 +137,10 @@ class AnnotationEdit extends React.Component<Props> {
         }
     }
 
+    setDebouncingSaveBlock = (isDeboucingEditor: boolean) => {
+        this.setState({ isDeboucingEditor })
+    }
+
     private youtubeKeyboardShortcut = async () => {
         const shortcuts = await getKeyboardShortcutsState()
         const youtubeShortcut = shortcuts.createAnnotation.shortcut
@@ -160,6 +168,7 @@ class AnnotationEdit extends React.Component<Props> {
                     slimEditorActions={this.props.slimEditorActions}
                     editable={this.props.isEditMode}
                     setEditing={this.props.setEditing}
+                    setDebouncingSaveBlock={this.setDebouncingSaveBlock}
                 />
             </EditorContainer>
         )
@@ -170,7 +179,7 @@ export default AnnotationEdit
 
 const EditorContainer = styled.div`
     height: fit-content;
-    padding: 0 10px 10px 10px;
+    padding: 0 5px 10px 5px;
     // transition: height 1s ease-in-out;
     // border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 

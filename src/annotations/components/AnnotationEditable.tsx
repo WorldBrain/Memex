@@ -1150,7 +1150,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     >
                         {this.renderDeleteScreen(footerDeps)}
                         <AnnotationStyled>
-                            <ActionBox>{actionsBox}</ActionBox>
+                            {!this.props.isEditing && (
+                                <ActionBox>{actionsBox}</ActionBox>
+                            )}
                             <ContentContainer
                                 isEditMode={
                                     this.props.isEditing ||
