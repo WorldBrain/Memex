@@ -9,7 +9,6 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import SpaceEmailInvites from '../space-email-invites'
-import type { TaskState } from 'ui-logic-core/lib/types'
 import SpaceLinks from '../space-links'
 import { helpIcon } from 'src/common-ui/components/design-library/icons'
 

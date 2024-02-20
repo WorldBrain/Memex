@@ -24,7 +24,6 @@ export interface Dependencies {
     fullPageUrl: string
     autoCreateLinkIfNone?: boolean
     authBG: AuthRemoteFunctionsInterface
-    spacesBG: RemoteCollectionsInterface
     analyticsBG: AnalyticsCoreInterface
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
@@ -44,12 +43,10 @@ export type Event = UIEvent<{
 
 export interface State {
     loadState: TaskState
-    ownershipLoadState: TaskState
     listShareLoadState: TaskState
     pageLinkCreateState: TaskState
     inviteLinksLoadState: TaskState
     inviteLinks: InviteLink[]
-    mode: 'confirm-space-delete' | 'followed-space' | null
     selectedPageLinkList: UnifiedList<'page-link'> | null
 }
 
@@ -68,12 +65,10 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
 
     getInitialState = (): State => ({
         loadState: 'pristine',
-        ownershipLoadState: 'pristine',
         listShareLoadState: 'pristine',
         pageLinkCreateState: 'pristine',
         inviteLinksLoadState: 'pristine',
         inviteLinks: [],
-        mode: null,
         selectedPageLinkList: null,
     })
 
@@ -195,35 +190,6 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
 
     createPageLink: EventHandler<'createPageLink'> = async ({}) => {
         await this._createPageLink()
-    }
-
-    private async loadSpaceOwnership(previousState: State): Promise<State> {
-        const { listData, spacesBG } = this.dependencies
-        const mutation: UIMutation<State> = {}
-
-        await executeUITask(this, 'ownershipLoadState', async () => {
-            if (listData.remoteId == null) {
-                mutation.mode = { $set: null }
-                return
-            }
-
-            // TODO: maybe remove this call
-            const listDataWithOwnership = await spacesBG.fetchSharedListDataWithOwnership(
-                {
-                    remoteListId: listData.remoteId,
-                },
-            )
-            if (listData == null) {
-                throw new Error('Remote list data not found')
-            }
-
-            mutation.mode = {
-                $set: listDataWithOwnership.isOwned ? null : 'followed-space',
-            }
-        })
-
-        this.emitMutation(mutation)
-        return this.withMutation(previousState, mutation)
     }
 
     private async loadInviteLinks(listData: UnifiedListForCache<'page-link'>) {
