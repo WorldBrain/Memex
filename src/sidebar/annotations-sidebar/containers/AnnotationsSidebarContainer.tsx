@@ -550,7 +550,7 @@ export class AnnotationsSidebarContainer<
         }
         return (
             <PageNotesCopyPaster
-                copyPaster={this.props.copyPaster}
+                copyPasterBG={this.props.copyPaster}
                 annotationUrls={[annotation.localId]}
                 normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
                 getRootElement={this.props.getRootElement}
@@ -1403,7 +1403,6 @@ export class AnnotationsSidebarContainer<
                                     contentSharingByTabsBG={
                                         this.props.contentSharingByTabsBG
                                     }
-                                    spacesBG={this.props.customListsBG}
                                     authBG={this.props.authBG}
                                     annotationsCache={
                                         this.props.annotationsCache

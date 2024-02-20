@@ -535,7 +535,7 @@ export class AnnotationsSidebar extends React.Component<
                 getPortalRoot={this.props.getRootElement}
             >
                 <PageNotesCopyPaster
-                    copyPaster={this.props.copyPaster}
+                    copyPasterBG={this.props.copyPaster}
                     annotationUrls={localAnnotationIds}
                     normalizedPageUrls={this.props.normalizedPageUrls}
                     getRootElement={this.props.getRootElement}

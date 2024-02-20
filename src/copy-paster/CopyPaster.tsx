@@ -12,7 +12,7 @@ import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 interface State {
     isLoading: boolean
@@ -35,7 +35,7 @@ export interface Props {
         template: Template,
         templateType: 'originalPage' | 'examplePage',
     ) => Promise<string>
-    copyPaster?: RemoteCopyPasterInterface
+    copyPasterBG: RemoteCopyPasterInterface
     preventClosingBcEditState?: (state) => void
     getRootElement: () => HTMLElement
     setLoadingState?: (loading: UITaskState) => void
@@ -55,11 +55,6 @@ export default class CopyPasterContainer extends React.PureComponent<
     }
 
     private copyPasterBG: RemoteCopyPasterInterface
-
-    constructor(props: Props) {
-        super(props)
-        this.copyPasterBG = props.copyPaster
-    }
 
     state: State = {
         isLoading: false,

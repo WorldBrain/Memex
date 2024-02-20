@@ -34,7 +34,6 @@ import {
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -45,18 +44,25 @@ import ListDetails, {
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type {
+    AnnotationSharingStates,
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import PageCitations from 'src/citations/PageCitations'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -88,6 +94,10 @@ export type Props = RootState &
         selectedListId?: string
         areAllNotesShown: boolean
         analyticsBG: AnalyticsCoreInterface
+        authBG: AuthRemoteFunctionsInterface
+        copyPasterBG: RemoteCopyPasterInterface
+        contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
+        contentSharingBG: ContentSharingInterface
         toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
@@ -625,15 +635,6 @@ export default class SearchResultsContainer extends React.Component<
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     getRootElement={this.props.getRootElement}
-                    shareMenuProps={{
-                        normalizedPageUrl: page.normalizedUrl,
-                        copyLink: this.props.onPageLinkCopy,
-                        postBulkShareHook: (shareInfo) =>
-                            interactionProps.updatePageNotesShareInfo(
-                                shareInfo,
-                            ),
-                        getRootElement: this.props.getRootElement,
-                    }}
                     {...interactionProps}
                     {...pickerProps}
                     {...page}
@@ -647,6 +648,31 @@ export default class SearchResultsContainer extends React.Component<
                     analyticsBG={this.props.analyticsBG}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
                     searchQuery={this.props.searchQuery}
+                    renderPageCitations={() => (
+                        <PageCitations
+                            annotationUrls={page.noteIds['user']}
+                            copyPasterProps={{
+                                copyPasterBG: this.props.copyPasterBG,
+                                getRootElement: this.props.getRootElement,
+                                onClickOutside:
+                                    interactionProps.onCopyPasterBtnClick,
+                            }}
+                            pageLinkProps={{
+                                authBG: this.props.authBG,
+                                analyticsBG: this.props.analyticsBG,
+                                annotationsCache: this.props.annotationsCache,
+                                contentSharingBG: this.props.contentSharingBG,
+                                contentSharingByTabsBG: this.props
+                                    .contentSharingByTabsBG,
+                                copyToClipboard: this.props.onPageLinkCopy,
+                                fullPageUrl: page.fullUrl,
+                                getRootElement: this.props.getRootElement,
+                                showSpacesTab: () => {
+                                    console.warn('TODO: Open sidebar')
+                                },
+                            }}
+                        />
+                    )}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
