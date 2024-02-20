@@ -187,7 +187,7 @@ export default class PageResultView extends PureComponent<Props> {
                 this.props.onAIResultBtnClick(event as any)
                 break
                 break
-            case 'n':
+            case 'd':
                 // Perform action for "n" key
                 this.props.onNotesBtnClick(event as any)
                 break

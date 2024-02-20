@@ -2009,6 +2009,8 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
         props.fullSizeInPage &&
         css`
             animation: ${resizeAnimation} 200ms ease-in-out forwards;
+            max-height: 1000px:
+            max-width: 1280px;
         `}
     `
 

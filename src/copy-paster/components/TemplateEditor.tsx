@@ -409,7 +409,7 @@ export default class TemplateEditor extends PureComponent<
                         <EditorBox>
                             <HeaderBox>
                                 <LeftSidePreviewBar>
-                                    <Title>Preview</Title>
+                                    <Title>Preview from selected item(s)</Title>
                                     <TooltipBox
                                         tooltipText={
                                             <span>
@@ -712,7 +712,6 @@ const EditorContainer = styled.div`
     background: ${(props) => props.theme.colors.black2}d6;
     backdrop-filter: blur(12px);
 
-    opacity: 0.97;
     padding: 20px;
     border-radius: 10px;
     border: 1px solid ${(props) => props.theme.colors.greyScale2};

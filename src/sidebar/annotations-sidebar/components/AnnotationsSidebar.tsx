@@ -2139,61 +2139,62 @@ export class AnnotationsSidebar extends React.Component<
                                 </TooltipBox>
                             </SummaryActionButtonBox>
                             <SummaryActionButtonBox>
-                                {!this.props.fullPageUrl.includes(
-                                    'youtube.com/watch',
-                                ) &&
-                                    this.props.activeAITab === 'ThisPage' &&
-                                    (this.props.sidebarContext === 'in-page' ||
-                                        this.props.queryMode !==
-                                            'question') && (
-                                        <TooltipBox
-                                            tooltipText={
-                                                <>
-                                                    For performance we usually
-                                                    fetch the text via our
-                                                    servers but sometimes we
-                                                    can't reach it. E.g. if you
-                                                    are behind a paywall.
-                                                    <br /> Use this to extract
-                                                    the content from the page.
-                                                </>
+                                <TooltipBox
+                                    tooltipText={
+                                        this.props.fullPageUrl.includes(
+                                            'youtube.com/watch',
+                                        ) ? (
+                                            <>
+                                                Fetches the locally visible
+                                                content instead of a faster
+                                                cloud fetch. <br />
+                                                Not available on YouTube videos.
+                                            </>
+                                        ) : (
+                                            <>
+                                                Fetches the locally visible
+                                                content instead of a faster
+                                                cloud fetch. <br />
+                                                Useful if you are behind a
+                                                paywall or members restricted
+                                                area.
+                                            </>
+                                        )
+                                    }
+                                    placement="bottom"
+                                    width="200px"
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <SummaryActionsButton
+                                        onClick={() => {
+                                            this.props.fetchLocalHTML
+                                                ? this.props.changeFetchLocalHTML(
+                                                      false,
+                                                  )
+                                                : this.props.changeFetchLocalHTML(
+                                                      true,
+                                                  )
+                                        }}
+                                        disabled={this.props.fullPageUrl.includes(
+                                            'youtube.com/watch',
+                                        )}
+                                    >
+                                        <Checkbox
+                                            key={34534453}
+                                            id={'Local'}
+                                            isChecked={
+                                                this.props.fetchLocalHTML
                                             }
-                                            placement="bottom"
-                                            width="150px"
-                                            getPortalRoot={
-                                                this.props.getRootElement
-                                            }
-                                        >
-                                            <SummaryActionsButton
-                                                onClick={() => {
-                                                    this.props.fetchLocalHTML
-                                                        ? this.props.changeFetchLocalHTML(
-                                                              false,
-                                                          )
-                                                        : this.props.changeFetchLocalHTML(
-                                                              true,
-                                                          )
-                                                }}
-                                            >
-                                                <Checkbox
-                                                    key={1}
-                                                    id={'1'}
-                                                    isChecked={
-                                                        this.props
-                                                            .fetchLocalHTML
-                                                    }
-                                                    handleChange={null}
-                                                    // isDisabled={!this.state.shortcutsEnabled}
-                                                    name={'Local'}
-                                                    size={14}
-                                                    fontSize={12}
-                                                    checkBoxColor="black"
-                                                    borderColor="greyScale3"
-                                                />
-                                                Local Content
-                                            </SummaryActionsButton>
-                                        </TooltipBox>
-                                    )}
+                                            // isDisabled={!this.state.shortcutsEnabled}
+                                            name={'Local'}
+                                            size={14}
+                                            fontSize={12}
+                                            checkBoxColor="black"
+                                            borderColor="greyScale3"
+                                        />
+                                        Local Content
+                                    </SummaryActionsButton>
+                                </TooltipBox>
                             </SummaryActionButtonBox>
                             <SummaryActionButtonBox>
                                 <SummaryActionsButton>
@@ -5430,8 +5431,8 @@ const AnnotationActions = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: fill-available;
-    height: 20px;
-    padding: 10px 15px 5px 15px;
+    min-height: 40px;
+    padding: 0px 15px 0px 15px;
 `
 
 const ActionButtons = styled.div`
@@ -5482,16 +5483,16 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
         `};
 `
 
-const TopBar = styled.div<{ sidebarContext: string }>`
+const TopBar = styled.div<{ sidebarContext: string; inPageMode: boolean }>`
     font-size: 14px;
     color: ${(props) => props.theme.colors.white};
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '40px' : '20px'};
+    min-height: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '60px' : '50px'};
     z-index: 11300;
-    padding: 10px 10px 10px 10px;
+    padding: 0 10px;
 
     ${(props) =>
         props.theme.variant === 'light' &&
@@ -5499,6 +5500,12 @@ const TopBar = styled.div<{ sidebarContext: string }>`
             /* box-shadow: ${(props) =>
                 props.theme.borderStyles.boxShadowBottom}; */
         `};
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            background-color: ${(props) => props.theme.colors.greyScale2};
+        `}
 `
 
 const IsolatedViewHeaderContainer = styled.div`
@@ -5536,7 +5543,7 @@ const TopBarContainer = styled.div`
 const TopBarTabsContainer = styled.div`
     display: flex;
     align-items: center;
-    grid-gap: 2px;
+    grid-gap: 5px;
     width: fill-available;
     width: -moz-available;
     justify-content: space-between;

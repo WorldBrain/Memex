@@ -1656,7 +1656,7 @@ const ContainerStyled = styled.div<{
             : '2147483645'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) =>
         props.theme.variant === 'dark'
-            ? '#424248'
+            ? '#23242b'
             : props.theme.colors.black + 'c9'};
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
@@ -1712,7 +1712,7 @@ const ContainerStyled = styled.div<{
         css`
             background: ${(props) =>
                 props.theme.variant === 'dark'
-                    ? props.theme.colors.black2 + '75'
+                    ? '#23242b'
                     : props.theme.colors.black + 'c9'};
             backdrop-filter: unset;
             position: relative;

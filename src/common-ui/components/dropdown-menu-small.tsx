@@ -160,6 +160,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                     targetElementRef={this.menuRef.current}
                     closeComponent={() => this.setState({ isOpened: false })}
                     placement="bottom-start"
+                    width={this.props.width ?? '250px'}
                     getPortalRoot={this.props.getRootElement}
                 >
                     {this.props.children ?? this.renderMenuItems()}
@@ -305,7 +306,8 @@ const MenuItemName = styled.div<{ isSelected; isOpened }>`
     display: flex;
     align-items: center;
     grid-gap: 5px;
-    justify-content: flex-start;
+    justify-content: ${(props) =>
+        props.isOpened ? 'space-between' : 'flex-start'};
     width: -webkit-fill-available;
 `
 
@@ -328,7 +330,7 @@ const Menu = styled.div<{
     width: string
 }>`
     list-style: none;
-    border-radius: 6px;
+    border-radius: 10px;
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
     z-index: 1000;
@@ -341,13 +343,9 @@ const MenuItemContainerUnfolded = styled.div<{
 }>`
     display: flex;
     flex-direction: column;
-    border-radius: 6px;
+    border-radius: 10px;
     background: ${(props) => props.theme.colors.greyScale2};
     padding: 15px;
-
-    ${(props) =>
-        props.isOpen &&
-        css`
-            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-        `}
+    width: fill-available;
+    grid-gap: 10px;
 `

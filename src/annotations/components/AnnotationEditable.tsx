@@ -456,6 +456,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 }
                                 slimEditorActions={true}
                                 isEditMode={this.props.isEditingHighlight}
+                                onEditCancel={
+                                    this.props.annotationEditDependencies
+                                        .onEditCancel
+                                }
                             />
                         </HighlightEditContainer>
                     ) : (
@@ -663,6 +667,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         onCommentChange={
                             this.props.annotationEditDependencies
                                 .onCommentChange
+                        }
+                        onEditCancel={
+                            this.props.annotationEditDependencies.onEditCancel
                         }
                     />
                 </AnnotationEditContainer>
