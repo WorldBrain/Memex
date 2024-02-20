@@ -101,16 +101,18 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
             }
 
             await this.ensureLoggedInUser()
-            const sharedPageListIds = annotationsCache.getSharedPageListIds(
-                normalizeUrl(fullPageUrl),
-            )
+            const sharedPageListIds =
+                annotationsCache.normalizedPageUrlsToPageLinkListIds.get(
+                    normalizeUrl(fullPageUrl),
+                ) ?? new Set()
             let latestPageLinkList: UnifiedList<'page-link'> = null
             for (const listId of sharedPageListIds) {
-                const listData = annotationsCache.lists.byId[listId]
+                const listData = annotationsCache.lists.byId[
+                    listId
+                ] as UnifiedList<'page-link'>
                 if (
-                    listData?.type === 'page-link' &&
-                    (listData?.localId > latestPageLinkList?.localId ||
-                        latestPageLinkList == null)
+                    listData?.localId > latestPageLinkList?.localId ||
+                    latestPageLinkList == null
                 ) {
                     latestPageLinkList = listData
                 }
