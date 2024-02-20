@@ -1972,7 +1972,8 @@ const Container = styled.div<{
     display: flex;
     flex-direction: column;
     width: fill-available;
-    background-color: ${(props) => props.theme.colors.black};
+    background-color: ${(props) =>
+        props.theme.variant === 'dark' ? '#313239' : props.theme.colors.black};
     height: 100vh;
     width: 100vw;
     /* min-width: fit-content; */
@@ -1995,8 +1996,6 @@ font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'l
             min-height: fill-available;
             height: fill-available;
             border-radius: 30px;
-            background-color: #313239;
-            backdrop-filter: blur(30px);
         `}
     ${(props) =>
         props.inPageMode &&
