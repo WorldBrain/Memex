@@ -158,69 +158,74 @@ export default class PageResultView extends PureComponent<Props> {
 
     handleKeyDown = (event: KeyboardEvent) => {
         if (!this.props.isInFocus) return
-
-        switch (event.key) {
-            case 's':
-                // Perform action for "s" key
-                this.props.showPopoutsForResultBox(this.props.index)
-                this.props.onListPickerFooterBtnClick(event as any)
-                break
-            case 'c':
-                // Perform action for "c" key
-                if (event.shiftKey) {
-                    this.props.onCopyPasterDefaultExecute(event as any)
+        if (document.getElementById('popout-boxes') != null) {
+            return
+        } else {
+            switch (event.key) {
+                case 's':
+                    // Perform action for "s" key
+                    this.props.showPopoutsForResultBox(this.props.index)
+                    this.props.onListPickerFooterBtnClick(event as any)
                     break
-                } else {
-                    this.props.onCopyPasterBtnClick?.(event as any)
-                    break
-                }
-                break
-            case 'y':
-                // Perform action for "y" key
-                this.props.onAIResultBtnClick(event as any)
-                break
-                break
-            case 'd':
-                // Perform action for "n" key
-                this.props.onNotesBtnClick(event as any)
-                break
-                break
-            case 'ArrowRight':
-                // Perform action for "n" key
-                this.props.onNotesBtnClick(event as any)
-                break
-                break
-            case 'ArrowLeft':
-                // Perform action for "n" key
-                this.props.onNotesBtnClick(event as any)
-                break
-                break
-            case 'Enter':
-                if (event.shiftKey) {
-                    // Perform action for "shift+Enter" key
-                    const itemData = {
-                        url: this.props.normalizedUrl,
-                        title: this.props.fullTitle,
-                        type: 'page',
-                    }
-                    if (this.props.isBulkSelected) {
-                        this.props.selectItem(itemData, true)
+                case 'c':
+                    // Perform action for "c" key
+                    if (event.shiftKey) {
+                        this.props.onCopyPasterDefaultExecute(event as any)
+                        break
                     } else {
-                        this.props.selectItem(itemData, false)
+                        this.props.onCopyPasterBtnClick?.(event as any)
+                        break
                     }
-                } else {
-                    // Perform action for "Enter" key
-                    this.props.onClick(event as any)
                     break
-                }
-                break
-            case 'Backspace':
-                // Perform action for "Backspace" key
-                this.props.onTrashBtnClick(event as any)
-                break
-                break
-            default:
-                break
+                case 'y':
+                    // Perform action for "y" key
+                    this.props.onAIResultBtnClick(event as any)
+                    break
+                    break
+                case 'd':
+                    // Perform action for "n" key
+                    this.props.onNotesBtnClick(event as any)
+                    break
+                    break
+                case 'ArrowRight':
+                    // Perform action for "n" key
+                    this.props.onNotesBtnClick(event as any)
+                    break
+                    break
+                case 'ArrowLeft':
+                    // Perform action for "n" key
+                    this.props.onNotesBtnClick(event as any)
+                    break
+                    break
+                case 'Enter':
+                    if (event.shiftKey) {
+                        // Perform action for "shift+Enter" key
+                        const itemData = {
+                            url: this.props.normalizedUrl,
+                            title: this.props.fullTitle,
+                            type: 'page',
+                        }
+                        if (this.props.isBulkSelected) {
+                            this.props.selectItem(itemData, true)
+                        } else {
+                            this.props.selectItem(itemData, false)
+                        }
+                        event.stopPropagation()
+                    } else {
+                        // Perform action for "Enter" key
+                        event.stopPropagation()
+                        this.props.onClick(event as any)
+                        break
+                    }
+                    break
+                case 'Backspace':
+                    // Perform action for "Backspace" key
+                    this.props.onTrashBtnClick(event as any)
+                    break
+                    break
+                default:
+                    break
+            }
         }
     }
 

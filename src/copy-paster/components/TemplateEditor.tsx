@@ -240,7 +240,9 @@ export default class TemplateEditor extends PureComponent<
                                 icon={'trash'}
                             />
                         ) : (
-                            <ConfirmText>Sure?</ConfirmText>
+                            !this.props.isNew && (
+                                <ConfirmText>Sure?</ConfirmText>
+                            )
                         )}
                         <PrimaryAction
                             label={'Cancel'}
@@ -254,19 +256,23 @@ export default class TemplateEditor extends PureComponent<
                                     : this.props.onClickCancel
                             }
                         />
-                        <PrimaryAction
-                            label={this.state.confirmDelete ? 'Delete' : 'Save'}
-                            type={'primary'}
-                            size={'small'}
-                            icon={'check'}
-                            disabled={this.isSaveDisabled}
-                            padding={'3px 10px 3px 5px'}
-                            onClick={
-                                this.state.confirmDelete
-                                    ? this.handleConfirmDelete
-                                    : this.props.onClickSave
-                            }
-                        />
+                        {!this.props.isNew && !this.isSaveDisabled && (
+                            <PrimaryAction
+                                label={
+                                    this.state.confirmDelete ? 'Delete' : 'Save'
+                                }
+                                type={'primary'}
+                                size={'small'}
+                                icon={'check'}
+                                disabled={this.isSaveDisabled}
+                                padding={'3px 10px 3px 5px'}
+                                onClick={
+                                    this.state.confirmDelete
+                                        ? this.handleConfirmDelete
+                                        : this.props.onClickSave
+                                }
+                            />
+                        )}
                     </ButtonBox>
                 </Header>
 
@@ -283,6 +289,7 @@ export default class TemplateEditor extends PureComponent<
                         }
                         height="30px"
                         width="fill-available"
+                        background="greyScale3"
                     />
                     <EditorContainers>
                         <EditorBox>
@@ -345,7 +352,7 @@ export default class TemplateEditor extends PureComponent<
                                                     ?.outputFormat == null
                                             }
                                         >
-                                            Markdown
+                                            Plain Text
                                         </OutputSwitcher>
                                     </TooltipBox>
                                 </OutputSwitcherContainer>
@@ -432,6 +439,12 @@ export default class TemplateEditor extends PureComponent<
                                             hoverOff
                                         />
                                     </TooltipBox>
+                                    {this.props.isPreviewLoading ===
+                                        'running' && (
+                                        <LoadingBox>
+                                            <LoadingIndicator size={16} />
+                                        </LoadingBox>
+                                    )}
                                 </LeftSidePreviewBar>
                             </HeaderBox>
                             <PreviewEditorBox>
@@ -463,12 +476,6 @@ export default class TemplateEditor extends PureComponent<
                                                     }
                                                 }}
                                             />
-                                        )}
-                                        {this.props.isPreviewLoading ===
-                                            'running' && (
-                                            <LoadingBox>
-                                                <LoadingIndicator size={30} />
-                                            </LoadingBox>
                                         )}
                                     </>
                                 )}
@@ -553,6 +560,9 @@ const LeftSidePreviewBar = styled.div`
     align-items: center;
     grid-gap: 5px;
     justify-content: flex-start;
+    position: relative;
+    width: fill-available;
+    width: -moz-available;
 `
 
 const PreviewEditorBox = styled.div`
@@ -568,13 +578,7 @@ const LoadingBox = styled.div`
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 0;
-    left: 0;
-    height: fill-available;
-    width: 100%;
-    background: ${(props) => props.theme.colors.black}96;
-    backdrop-filter: blur(4px);
-    border-radius: 10px;
+    right: 10px;
 `
 
 const DragButtonsContainer = styled.div`
@@ -680,11 +684,12 @@ const OutputSwitcher = styled.div<{
     padding: 5px 10px;
     font-size: 12px;
     cursor: pointer;
+    border-radius: 5px;
 
     ${(props) =>
         props.outputFormatSelected &&
         css`
-            background: ${(props) => props.theme.colors.greyScale2};
+            background: ${(props) => props.theme.colors.greyScale3};
         `}
 
     ${(props) =>
@@ -709,12 +714,11 @@ const EditorContainer = styled.div`
     align-items: center;
     justify-self: center;
     flex-direction: column;
-    background: ${(props) => props.theme.colors.black2}d6;
-    backdrop-filter: blur(12px);
+    background: ${(props) => props.theme.colors.black};
 
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+    box-shadow: 0px 8px 26px 4px ${(props) => props.theme.colors.black2}c2;
     padding: 10px 15px;
 
     * {
@@ -759,15 +763,11 @@ const PreviewInput = styled.textarea`
     font-size: 14px;
     overflow: scroll;
     resize: none;
-    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     border-radius: 8px;
     flex: 1;
     min-height: 60%;
     text-overflow: nowrap;
-
-    &:focus {
-        background: none;
-    }
 
     scrollbar-width: none;
 `
@@ -816,7 +816,7 @@ const PreviewRichText = styled.div`
     font-size: 14px;
     overflow: scroll;
     resize: none;
-    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     border-radius: 8px;
     min-height: 60%;
     text-overflow: nowrap;
@@ -847,11 +847,11 @@ const TemplateInput = styled.textarea`
     outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     border-radius: 8px;
     padding: 10px;
-    background: ${(props) => props.theme.colors.greyScale1};
+    background: ${(props) => props.theme.colors.greyScale1}50;
     line-height: 21px;
     font-size: 14px;
     &:focus {
-        background: ${(props) => props.theme.colors.greyScale2};
+        background: ${(props) => props.theme.colors.greyScale1}60;
     }
     overflow-x: scroll;
     resize: none;

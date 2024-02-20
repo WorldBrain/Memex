@@ -13,12 +13,13 @@ import {
     Draggable,
     OnDragEndResponder,
 } from 'react-beautiful-dnd'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 0px 27px;
+    padding: 0px 15px 0px 15px;
     height: 30px;
     align-items: center;
 `
@@ -159,6 +160,18 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
             event.preventDefault()
             event.stopPropagation()
         }
+        if (event.key === 'Enter') {
+            event.stopPropagation()
+            event.stopImmediatePropagation()
+            event.preventDefault()
+            const currentTemplate = this.props.templates[this.props.focusIndex]
+
+            if (event.shiftKey) {
+                this.props.onClickEdit(currentTemplate.id)
+            } else {
+                this.props.onClickCopy(currentTemplate.id)
+            }
+        }
     }
     render() {
         if (this.props.copySuccess) {
@@ -187,7 +200,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         return (
             <>
                 <Header>
-                    <SectionTitle>Copy/Paste Templates</SectionTitle>
+                    <SectionTitle>Templates</SectionTitle>
                     <ButtonBox>
                         <Icon
                             filePath={icons.helpIcon}
@@ -199,12 +212,15 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                 )
                             }
                         />
-                        <Icon
-                            filePath={icons.plus}
-                            color="prime1"
-                            padding={'5px'}
-                            heightAndWidth="16px"
+
+                        <PrimaryAction
+                            label={'New'}
                             onClick={this.props.onClickNew}
+                            size="small"
+                            type="forth"
+                            icon={'plus'}
+                            iconColor="prime1"
+                            padding={'0px 6px 0 0'}
                         />
                     </ButtonBox>
                 </Header>

@@ -367,12 +367,12 @@ export class DashboardContainer extends StatefulUIElement<
                 }
                 spacePickerFilterProps={{
                     filterMode: true,
-                    authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,
                     onClickOutside: toggleSpacesFilter,
-                    localStorageAPI: this.props.localStorage,
+                    authBG: this.props.authBG,
                     contentSharingBG: this.props.contentShareBG,
                     analyticsBG: this.props.analyticsBG,
+                    localStorageAPI: this.props.localStorage,
                     annotationsCache: this.props.annotationsCache,
                     pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
                     initialSelectedListIds: () => searchFilters.spacesIncluded,
@@ -804,6 +804,12 @@ export class DashboardContainer extends StatefulUIElement<
                 inPageMode={this.props.inPageMode}
                 imageSupport={this.props.imageSupportBG}
                 annotationsCache={this.props.annotationsCache}
+                showSpacesTab={(pageUrl) => {
+                    this.notesSidebarRef.current.toggleSidebarShowForPageId(
+                        pageUrl,
+                        'all',
+                    )
+                }}
                 filterByList={(localListId) => {
                     const listData = this.props.annotationsCache.getListByLocalId(
                         localListId,
@@ -1991,7 +1997,7 @@ const Container = styled.div<{
 
     & * {
         font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;,
+font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
     }
 
     ${(props) =>

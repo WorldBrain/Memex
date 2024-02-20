@@ -306,6 +306,9 @@ export default class CopyPasterContainer extends React.PureComponent<
                 }}
                 onClickNew={() => {
                     this.setState({
+                        previewString: null,
+                    })
+                    this.setState({
                         tmpTemplate: CopyPasterContainer.DEF_TEMPLATE,
                         isNew: true,
                     })

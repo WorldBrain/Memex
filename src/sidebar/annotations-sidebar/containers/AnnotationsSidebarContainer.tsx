@@ -170,9 +170,11 @@ export class AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'spaces',
             })
-            await this.processEvent('setSelectedList', {
-                unifiedListId: spaceId,
-            })
+            if (spaceId !== 'all') {
+                await this.processEvent('setSelectedList', {
+                    unifiedListId: spaceId,
+                })
+            }
         } else {
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'annotations',
@@ -1393,46 +1395,98 @@ export class AnnotationsSidebarContainer<
                                     />
                                 )
                             }}
-                            renderPageLinkMenuForList={() => (
-                                <PageLinkMenu
-                                    autoCreateLinkIfNone
-                                    analyticsBG={this.props.analyticsBG}
-                                    contentSharingBG={
-                                        this.props.contentSharingBG
-                                    }
-                                    contentSharingByTabsBG={
-                                        this.props.contentSharingByTabsBG
-                                    }
-                                    authBG={this.props.authBG}
-                                    annotationsCache={
-                                        this.props.annotationsCache
-                                    }
-                                    fullPageUrl={this.state.fullPageUrl!}
-                                    showSpacesTab={() => {
-                                        this.processEvent(
-                                            'closePageLinkShareMenu',
-                                            null,
-                                        )
-                                        this.processEvent(
-                                            'setActiveSidebarTab',
-                                            { tab: 'spaces' },
-                                        )
-                                        this.processEvent('setSelectedList', {
-                                            unifiedListId: null,
-                                        })
-                                    }}
-                                    onNewPageLinkCreate={async (
-                                        pageLinkListId,
-                                    ) => {
-                                        await (this
-                                            .logic as SidebarContainerLogic).setLocallyAvailableSelectedList(
-                                            this.state,
-                                            pageLinkListId,
-                                        )
-                                    }}
-                                    getRootElement={this.props.getRootElement}
-                                />
-                            )}
+                            renderPageLinkMenuForList={() => null}
+                            //     <>
+                            //         <PageCitations
+                            //             annotationUrls={page.noteIds['user']}
+                            //             copyPasterProps={{
+                            //                 copyPasterBG: this.props
+                            //                     .copyPasterBG,
+                            //                 getRootElement: this.props
+                            //                     .getRootElement,
+                            //                 onClickOutside:
+                            //                     interactionProps.onCopyPasterBtnClick,
+                            //             }}
+                            //             pageLinkProps={{
+                            //                 authBG: this.props.authBG,
+                            //                 analyticsBG: this.props.analyticsBG,
+                            //                 annotationsCache: this.props
+                            //                     .annotationsCache,
+                            //                 contentSharingBG: this.props
+                            //                     .contentSharingBG,
+                            //                 contentSharingByTabsBG: this.props
+                            //                     .contentSharingByTabsBG,
+                            //                 copyToClipboard: this.props
+                            //                     .onPageLinkCopy,
+                            //                 fullPageUrl: page.fullUrl,
+                            //                 getRootElement: this.props
+                            //                     .getRootElement,
+                            //                 showSpacesTab: this.props
+                            //                     .showSpacesTab,
+                            //             }}
+                            //         />
+                            //         <PageLinkMenu
+                            //             autoCreateLinkIfNone
+                            //             analyticsBG={this.props.analyticsBG}
+                            //             contentSharingBG={
+                            //                 this.props.contentSharingBG
+                            //             }
+                            //             contentSharingByTabsBG={
+                            //                 this.props.contentSharingByTabsBG
+                            //             }
+                            //             authBG={this.props.authBG}
+                            //             annotationsCache={
+                            //                 this.props.annotationsCache
+                            //             }
+                            //             fullPageUrl={this.state.fullPageUrl!}
+                            //             showSpacesTab={() => {
+                            //                 this.processEvent(
+                            //                     'closePageLinkShareMenu',
+                            //                     null,
+                            //                 )
+                            //                 this.processEvent(
+                            //                     'setActiveSidebarTab',
+                            //                     { tab: 'spaces' },
+                            //                 )
+                            //                 this.processEvent(
+                            //                     'setSelectedList',
+                            //                     {
+                            //                         unifiedListId: null,
+                            //                     },
+                            //                 )
+                            //             }}
+                            //             onNewPageLinkCreate={async (
+                            //                 pageLinkListId,
+                            //             ) => {
+                            //                 await (this
+                            //                     .logic as SidebarContainerLogic).setLocallyAvailableSelectedList(
+                            //                     this.state,
+                            //                     pageLinkListId,
+                            //                 )
+                            //             }}
+                            //             getRootElement={
+                            //                 this.props.getRootElement
+                            //             }
+                            //         />
+                            //     </>
+                            // )}
+                            authBG={this.props.authBG}
+                            contentSharingBG={this.props.contentSharingBG}
+                            contentSharingByTabsBG={
+                                this.props.contentSharingByTabsBG
+                            }
+                            showSpacesTab={() => {
+                                this.processEvent(
+                                    'closePageLinkShareMenu',
+                                    null,
+                                )
+                                this.processEvent('setActiveSidebarTab', {
+                                    tab: 'spaces',
+                                })
+                                this.processEvent('setSelectedList', {
+                                    unifiedListId: null,
+                                })
+                            }}
                             activeShareMenuNoteId={
                                 this.state.activeShareMenuNoteId
                             }

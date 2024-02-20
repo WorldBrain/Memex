@@ -52,7 +52,10 @@ import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
 import { PageNotesCopyPaster } from 'src/copy-paster'
-import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type {
+    AnnotationSharingStates,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
@@ -94,6 +97,9 @@ import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { sleepPromise } from 'src/util/promises'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import PageCitations from 'src/citations/PageCitations'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -277,6 +283,12 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     getRootElement: () => HTMLElement
     setNoteWriteError: (error) => void
     inPageMode?: boolean
+    authBG: AuthRemoteFunctionsInterface
+    analyticsBG: AnalyticsCoreInterface
+    contentSharingBG: ContentSharingInterface
+    contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
+    copyToClipboard: (text: string) => Promise<void>
+    showSpacesTab: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -1355,6 +1367,8 @@ export class AnnotationsSidebar extends React.Component<
             return null
         }
 
+        const localAnnotationIds = this.props.getLocalAnnotationIds()
+
         return (
             <PopoutBox
                 strategy="fixed"
@@ -1365,6 +1379,28 @@ export class AnnotationsSidebar extends React.Component<
                 closeComponent={this.props.closePageLinkShareMenu}
                 getPortalRoot={this.props.getRootElement}
             >
+                <PageCitations
+                    annotationUrls={localAnnotationIds}
+                    copyPasterProps={{
+                        copyPasterBG: this.props.copyPaster,
+                        getRootElement: this.props.getRootElement,
+                        onClickOutside: this.props.closePageLinkShareMenu,
+                    }}
+                    pageLinkProps={{
+                        authBG: this.props.authBG,
+                        analyticsBG: this.props.analyticsBG,
+                        annotationsCache: this.props.annotationsCache,
+                        contentSharingBG: this.props.contentSharingBG,
+                        contentSharingByTabsBG: this.props
+                            .contentSharingByTabsBG,
+                        copyToClipboard: this.props.copyToClipboard,
+                        fullPageUrl: this.props.fullPageUrl,
+                        getRootElement: this.props.getRootElement,
+                        showSpacesTab: this.props.showSpacesTab,
+                        setLoadingState: this.props.setload,
+                    }}
+                    getRootElement={this.props.getRootElement}
+                />
                 {this.props.renderPageLinkMenuForList()}
             </PopoutBox>
         )
@@ -3829,11 +3865,11 @@ export class AnnotationsSidebar extends React.Component<
                         iconColor="prime1"
                         fontColor="white"
                         size="medium"
-                        active={this.props.showPageLinkShareMenu}
                         innerRef={this.sharePageLinkButtonRef}
-                        icon="invite"
+                        icon="copy"
                         padding={'0px 12px 0 6px'}
                         height={'30px'}
+                        hoverState={this.props.showPageLinkShareMenu}
                     />
 
                     {/* <PrimaryAction

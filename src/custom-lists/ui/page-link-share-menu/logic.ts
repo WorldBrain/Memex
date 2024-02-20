@@ -33,6 +33,7 @@ export interface Dependencies {
         pageLinkListId: UnifiedList['unifiedId'],
     ) => Promise<void>
     copyToClipboard: (text: string) => Promise<void>
+    setLoadingState: (loading: TaskState) => void
 }
 
 export type Event = UIEvent<{
@@ -135,6 +136,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
 
     private async _createPageLink() {
         await executeUITask(this, 'pageLinkCreateState', async () => {
+            this.dependencies.setLoadingState('running')
             // TODO: Refactor title to be passed down - not relevant here
             let title: string
             if (window.location.href.includes('web.telegram.org')) {
@@ -185,6 +187,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
                 this.dependencies.onNewPageLinkCreate?.(unifiedId),
                 this.loadInviteLinks(cachedList),
             ])
+            this.dependencies.setLoadingState('success')
         })
     }
 

@@ -142,6 +142,7 @@ export type Props = RootState &
         getHighlightColorSettings?: () => void
         highlightColorSettings: string
         getRootElement: () => HTMLElement
+        showSpacesTab: (pageUrl) => void
         // onEditPageBtnClick: (
         //     normalizedPageUrl: string,
         //     changedTitle: string,
@@ -667,9 +668,7 @@ export default class SearchResultsContainer extends React.Component<
                                 copyToClipboard: this.props.onPageLinkCopy,
                                 fullPageUrl: page.fullUrl,
                                 getRootElement: this.props.getRootElement,
-                                showSpacesTab: () => {
-                                    console.warn('TODO: Open sidebar')
-                                },
+                                showSpacesTab: this.props.showSpacesTab,
                             }}
                         />
                     )}
@@ -1172,6 +1171,7 @@ const ResultsScrollContainer = styled.div`
     align-items: center;
     padding-bottom: 100px;
     justify-content: flex-start;
+    padding-top: 2px;
 
     &::-webkit-scrollbar {
         display: none;

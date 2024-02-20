@@ -200,6 +200,7 @@ const ActionsContainer = styled.div`
     right: 0px;
     height: 40px;
     padding: 0 10px;
+    border-radius: 0 6px 6px 0;
 `
 
 const Row = styled.div<{

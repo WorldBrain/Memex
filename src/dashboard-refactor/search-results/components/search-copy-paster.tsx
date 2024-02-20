@@ -58,7 +58,7 @@ class SearchCopyPaster extends React.Component<Props> {
                     targetElementRef={this.copypasterButtonRef.current}
                     getPortalRoot={this.props.getRootElement}
                 >
-                    {this.renderCopyPaster()}
+                    <CopyPasterBox>{this.renderCopyPaster()}</CopyPasterBox>
                 </PopoutBox>
             )
         } else {
@@ -92,6 +92,10 @@ class SearchCopyPaster extends React.Component<Props> {
 export default SearchCopyPaster
 
 // TODO: inheirits from .nakedSquareButton
+
+const CopyPasterBox = styled.div`
+    padding-top: 10px;
+`
 
 const Container = styled.div``
 const ActionBtn = styled.button`

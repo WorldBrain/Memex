@@ -51,6 +51,8 @@ const StyledContainer = styled.div`
     margin: 5px 0px 0 0px;
     border-radius: 6px;
     flex-direction: column;
+    padding: 2px;
+    justify-content: center
 
     &::-webkit-scrollbar {
         display: none;

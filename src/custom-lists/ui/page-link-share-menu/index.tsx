@@ -11,9 +11,10 @@ import { StatefulUIElement } from 'src/util/ui-logic'
 import SpaceEmailInvites from '../space-email-invites'
 import SpaceLinks from '../space-links'
 import { helpIcon } from 'src/common-ui/components/design-library/icons'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface Props extends Dependencies {
-    showSpacesTab: () => void
+    showSpacesTab: (pageUrl) => void
     getRootElement: () => HTMLElement
 }
 
@@ -54,8 +55,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
         if (!this.state.selectedPageLinkList) {
             return (
                 <ContextMenuContainer>
-                    No Page Link exists yet for this page
-                    <BottomSection>
+                    <BigNewButtonBox>
                         <PrimaryAction
                             label={'New'}
                             onClick={async (e) => {
@@ -63,59 +63,27 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                 e.stopPropagation()
                                 await this.processEvent('createPageLink', null)
                             }}
-                            size="small"
+                            size="medium"
+                            width="fill-available"
                             type="forth"
                             icon={'plus'}
                             iconColor="prime1"
                             padding={'0px 6px 0 0'}
                         />
-                    </BottomSection>
+                    </BigNewButtonBox>
+                    <TitleSection>
+                        <Title>Share links to annotated pages</Title>
+                        <Subtitle>
+                            Receivers can open them without an account or extra
+                            software.
+                        </Subtitle>
+                    </TitleSection>
                 </ContextMenuContainer>
             )
         }
 
         return (
             <ContextMenuContainer>
-                {this.state.pageLinkCreateState === 'running' ? (
-                    <LoadingStatusContainer>
-                        <LoadingIndicator size={24} />
-                        <LoadingStatusTextBox>
-                            <LoadingStatusTitle>
-                                Uploading shared data
-                            </LoadingStatusTitle>
-                            <LoadingStatusSubtitle>
-                                Link not online yet but you can copy it
-                            </LoadingStatusSubtitle>
-                        </LoadingStatusTextBox>
-                    </LoadingStatusContainer>
-                ) : (
-                    <LoadingStatusContainer padding={'10px 10px'}>
-                        <Icon
-                            icon={'check'}
-                            heightAndWidth={'24px'}
-                            hoverOff
-                            color="prime1"
-                        />
-                        <LoadingSuccessBox>
-                            <LoadingStatusTitle>
-                                Sharing link available online
-                            </LoadingStatusTitle>
-                            {/* <PrimaryAction
-                                label={'Open'}
-                                icon={'globe'}
-                                onClick={() =>
-                                    window.open(
-                                        this.state.inviteLinks[0].link +
-                                            '?noAutoOpen=true',
-                                        '_blank',
-                                    )
-                                }
-                                size="small"
-                                type="secondary"
-                            /> */}
-                        </LoadingSuccessBox>
-                    </LoadingStatusContainer>
-                )}
                 <BottomSection>
                     {this.state.selectedPageLinkList.remoteId != null && (
                         <SectionTopbar>
@@ -140,6 +108,28 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                     />
                                 </TooltipBox>
                             </SectionTitle>
+                            <TooltipBox
+                                tooltipText={
+                                    <span>
+                                        View previously generated invite link
+                                        sets
+                                    </span>
+                                }
+                                placement="bottom-end"
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <PrimaryAction
+                                    label={'All'}
+                                    size="small"
+                                    type="forth"
+                                    icon={'arrowRight'}
+                                    onClick={() => {
+                                        this.props.showSpacesTab(
+                                            this.props.fullPageUrl,
+                                        )
+                                    }}
+                                />
+                            </TooltipBox>
                             <TooltipBox
                                 tooltipText={
                                     <span>
@@ -168,33 +158,27 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                     padding={'0px 6px 0 0'}
                                 />
                             </TooltipBox>
-                            <PrimaryAction
-                                label={'All'}
-                                size="small"
-                                type="forth"
-                                icon={'arrowRight'}
-                                onClick={() => {
-                                    this.props.showSpacesTab()
-                                }}
-                            />
                         </SectionTopbar>
                     )}
-                    <SpaceLinks
-                        isPageLink
-                        analyticsBG={this.props.analyticsBG}
-                        inviteLinks={this.state.inviteLinks}
-                        loadState={this.state.inviteLinksLoadState}
-                        copyLink={(link) =>
-                            this.processEvent('copyInviteLink', { link })
-                        }
-                        getRootElement={this.props.getRootElement}
-                    />
-                    {this.state.pageLinkCreateState !== 'running' && (
+                    <BottomBox>
+                        <SpaceLinks
+                            isPageLink
+                            analyticsBG={this.props.analyticsBG}
+                            inviteLinks={this.state.inviteLinks}
+                            loadState={this.state.inviteLinksLoadState}
+                            copyLink={(link) =>
+                                this.processEvent('copyInviteLink', { link })
+                            }
+                            getRootElement={this.props.getRootElement}
+                        />
                         <SpaceEmailInvites
                             {...this.props}
                             listData={this.state.selectedPageLinkList}
+                            pageLinkLoadingState={
+                                this.state.pageLinkCreateState
+                            }
                         />
-                    )}
+                    </BottomBox>
                 </BottomSection>
             </ContextMenuContainer>
         )
@@ -204,6 +188,15 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
         return <MenuContainer>{this.renderMainContent()}</MenuContainer>
     }
 }
+
+const BottomBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 10px;
+    width: fill-available;
+    width: -moz-available;
+    padding: 0px 15px 15px 15px;
+`
 
 const LocalPDFWarning = styled.div`
     background: ${(props) => props.theme.colors.warning}80;
@@ -266,17 +259,17 @@ const BottomSection = styled.div`
     display: flex;
     flex-direction: column;
     grid-gap: 5px;
-    padding: 10px;
     width: fill-available;
     width: -moz-available;
 `
 
 const SectionTopbar = styled.div`
     display: flex;
+    flex-direction: row;
     justify-content: space-between;
+    padding: 0px 15px 0px 15px;
+    height: 30px;
     align-items: center;
-    width: 100%;
-    z-index: 11;
     grid-gap: 5px;
 `
 
@@ -301,12 +294,14 @@ const ContextMenuContainer = styled.div`
     grid-gap: 0px;
     flex-direction: column;
     width: fill-available;
-    min-height: 180px;
-    min-width: 340px;
-    height: fit-content;
-    width: fit-content;
+    color: ${(props) => props.theme.colors.greyScale5};
+    grid-gap: 10px;
+    min-height: 130px;
+    -width: 340px;
+    height: fill-available;
+    width: fill-available;
     justify-content: center;
-    align-items: flex-start;
+    align-items: center;
     /* width: 250px; */
 `
 
@@ -315,13 +310,14 @@ const SectionTitle = styled.div`
     color: ${(props) =>
         props.theme.variant === 'light'
             ? props.theme.colors.greyScale5
-            : props.theme.colors.greyScale5};
+            : props.theme.colors.greyScale4};
     font-weight: 400;
     width: 100%;
     display: flex;
     justify-content: flex-start;
-    letter-spacing: 0.6px;
     align-items: center;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
+    font-family: 'Satoshi', sans-serif;
 `
 
 const DeleteBox = styled.div`
@@ -358,7 +354,7 @@ const MenuContainer = styled.div`
     display: flex;
     flex-direction: column;
     border-radius: 12px;
-    min-height: 180px;
+    min-height: 130px;
 `
 
 const LinkAndRoleBox = styled.div<{
@@ -455,4 +451,44 @@ const ListItem = styled.div<{ zIndex }>`
     position: relative;
     z-index: ${(props) => props.zIndex};
     width: 100%;
+`
+
+const TitleSection = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+    width: fill-available;
+    width: -moz-available;
+    height: 90px;
+    justify-content: center;
+    align-items: center;
+    padding: 5px 35px 15px 35px;
+`
+const Title = styled.div`
+    font-size: 16px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-weight: 400;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+`
+const Subtitle = styled.div`
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-weight: 400;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+`
+const BigNewButtonBox = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fill-available;
+    width: -moz-available;
+    padding: 0 15px;
 `

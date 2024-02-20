@@ -245,7 +245,9 @@ export class AnnotationCreate extends React.Component<Props, State>
             if (this.props.comment.length) {
                 e.stopPropagation()
             }
-            this.setState({ onEditClick: false })
+            this.setState({ onEditClick: false }),
+                (e.target as HTMLElement).blur()
+
             this.props.onCancel()
             return
         }
