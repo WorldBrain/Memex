@@ -8,15 +8,11 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { StatefulUIElement } from 'src/util/ui-logic'
-import { getSinglePageShareUrl } from 'src/content-sharing/utils'
 import SpaceEmailInvites from '../space-email-invites'
-import type { TaskState } from 'ui-logic-core/lib/types'
 import SpaceLinks from '../space-links'
 import { helpIcon } from 'src/common-ui/components/design-library/icons'
 
 export interface Props extends Dependencies {
-    pageLinkCreateState?: TaskState
-    disableWriteOps?: boolean
     showSpacesTab: () => void
     getRootElement: () => HTMLElement
 }
@@ -26,9 +22,10 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
     State,
     Event
 > {
-    private previousPageListDataForCurrentPage
     static defaultProps: Pick<Props, 'copyToClipboard'> = {
-        copyToClipboard,
+        copyToClipboard: async (text) => {
+            await copyToClipboard(text)
+        },
     }
 
     constructor(props: Props) {
@@ -36,13 +33,9 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
     }
 
     componentDidUpdate(prevProps: Readonly<Props>): void {
-        if (
-            this.previousPageListDataForCurrentPage !==
-            this.props.pageListDataForCurrentPage
-        ) {
-            this.previousPageListDataForCurrentPage = this.props.pageListDataForCurrentPage
+        if (prevProps.listData !== this.props.listData) {
             this.processEvent('reloadInviteLinks', {
-                listData: this.props.pageListDataForCurrentPage,
+                listData: this.props.listData,
             })
         }
     }
@@ -58,9 +51,32 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
             )
         }
 
+        if (!this.state.selectedPageLinkList) {
+            return (
+                <ContextMenuContainer>
+                    No Page Link exists yet for this page
+                    <BottomSection>
+                        <PrimaryAction
+                            label={'New'}
+                            onClick={async (e) => {
+                                e.preventDefault()
+                                e.stopPropagation()
+                                await this.processEvent('createPageLink', null)
+                            }}
+                            size="small"
+                            type="forth"
+                            icon={'plus'}
+                            iconColor="prime1"
+                            padding={'0px 6px 0 0'}
+                        />
+                    </BottomSection>
+                </ContextMenuContainer>
+            )
+        }
+
         return (
             <ContextMenuContainer>
-                {this.props.pageLinkCreateState === 'running' ? (
+                {this.state.pageLinkCreateState === 'running' ? (
                     <LoadingStatusContainer>
                         <LoadingIndicator size={24} />
                         <LoadingStatusTextBox>
@@ -101,7 +117,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                     </LoadingStatusContainer>
                 )}
                 <BottomSection>
-                    {this.props.listData.remoteId != null && (
+                    {this.state.selectedPageLinkList.remoteId != null && (
                         <SectionTopbar>
                             <SectionTitle>
                                 Invite Links (Most Recent)
@@ -137,10 +153,13 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                             >
                                 <PrimaryAction
                                     label={'New'}
-                                    onClick={(e) => {
-                                        this.props.onSpaceShare()
+                                    onClick={async (e) => {
                                         e.preventDefault()
                                         e.stopPropagation()
+                                        await this.processEvent(
+                                            'createPageLink',
+                                            null,
+                                        )
                                     }}
                                     size="small"
                                     type="forth"
@@ -161,17 +180,20 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                         </SectionTopbar>
                     )}
                     <SpaceLinks
+                        isPageLink
                         analyticsBG={this.props.analyticsBG}
                         inviteLinks={this.state.inviteLinks}
                         loadState={this.state.inviteLinksLoadState}
                         copyLink={(link) =>
                             this.processEvent('copyInviteLink', { link })
                         }
-                        isPageLink={this.props.listData.type === 'page-link'}
                         getRootElement={this.props.getRootElement}
                     />
-                    {this.props.pageLinkCreateState !== 'running' && (
-                        <SpaceEmailInvites {...this.props} />
+                    {this.state.pageLinkCreateState !== 'running' && (
+                        <SpaceEmailInvites
+                            {...this.props}
+                            listData={this.state.selectedPageLinkList}
+                        />
                     )}
                 </BottomSection>
             </ContextMenuContainer>

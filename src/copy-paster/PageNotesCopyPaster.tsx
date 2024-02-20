@@ -14,11 +14,11 @@ export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
 export default class PageNotesCopyPaster extends React.PureComponent<Props> {
     static defaultProps: Partial<Props> = {
         annotationUrls: [],
-        copyPaster: runInBackground(),
+        copyPasterBG: runInBackground(),
     }
 
     private renderTemplate = (id: number) =>
-        this.props.copyPaster.renderTemplate({
+        this.props.copyPasterBG.renderTemplate({
             id,
             annotationUrls: this.props.annotationUrls,
             normalizedPageUrls: this.props.normalizedPageUrls,
@@ -29,7 +29,7 @@ export default class PageNotesCopyPaster extends React.PureComponent<Props> {
     ) => {
         let returnValue: string
         try {
-            returnValue = await this.props.copyPaster.renderPreview({
+            returnValue = await this.props.copyPasterBG.renderPreview({
                 template,
                 annotationUrls: this.props.annotationUrls,
                 normalizedPageUrls: this.props.normalizedPageUrls,

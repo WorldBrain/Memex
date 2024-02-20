@@ -119,7 +119,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     noteEditState: TaskState
     noteCreateState: TaskState
     noteColorUpdateState: TaskState
-    pageLinkCreateState: TaskState
     firstTimeSharingPageLink: boolean
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
@@ -267,7 +266,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     immediatelyShareNotes: boolean
     pageHasNetworkAnnotations: boolean
     hasFeedActivity?: boolean
-    selectedShareMenuPageLinkList: UnifiedList['unifiedId'] | null
+    showPageLinkShareMenu: boolean
     /**
      * In the case of a page being opened from the web UI for a page link, data
      * may need to be manually pulled as sync might not have finished by the time the
@@ -275,7 +274,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
      */
     hasListDataBeenManuallyPulled?: boolean
     annotationCreateEditorRef?: any
-    pageListDataForCurrentPage: UnifiedListForCache<'page-link'> | null
     videoDetails: null
     chapterList: {
         start: number
@@ -492,6 +490,7 @@ interface SidebarEvents {
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     openEditMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     closePageLinkShareMenu: null
+    openPageLinkShareMenu: null
     editListName: {
         unifiedListId: UnifiedList['unifiedId']
         localId: number
@@ -538,7 +537,6 @@ interface SidebarEvents {
     setAllNotesCopyPasterShown: { shown: boolean }
     setAllNotesShareMenuShown: { shown: boolean }
 
-    createPageLink: { forceCreate?: boolean }
     setRabbitHoleBetaFeatureAccess: {
         permission:
             | 'denied'

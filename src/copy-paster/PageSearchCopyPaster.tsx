@@ -11,10 +11,10 @@ export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
 }
 
 export default class PageSearchCopyPaster extends React.PureComponent<Props> {
-    static defaultProps: Partial<Props> = { copyPaster: runInBackground() }
+    static defaultProps: Partial<Props> = { copyPasterBG: runInBackground() }
 
     private renderTemplate = (id: number) =>
-        this.props.copyPaster.renderTemplateForPageSearch({
+        this.props.copyPasterBG.renderTemplateForPageSearch({
             id,
             searchParams: this.props.searchParams,
         })
@@ -23,7 +23,7 @@ export default class PageSearchCopyPaster extends React.PureComponent<Props> {
         template: Template,
         templateType: 'originalPage' | 'examplePage',
     ) =>
-        this.props.copyPaster.renderPreviewForPageSearch({
+        this.props.copyPasterBG.renderPreviewForPageSearch({
             template,
             searchParams: this.props.searchParams,
             templateType: templateType,

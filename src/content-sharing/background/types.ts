@@ -115,7 +115,7 @@ export interface RemoteContentSharingByTabsInterface<
         {
             fullPageUrl: string
             now?: number
-            customPageTitle: string
+            customPageTitle?: string
         },
         {
             listTitle: string

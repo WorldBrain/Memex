@@ -826,6 +826,10 @@ export class DashboardContainer extends StatefulUIElement<
                 getRootElement={this.props.getRootElement}
                 selectedItems={this.state.bulkSelectedUrls}
                 analyticsBG={this.props.analyticsBG}
+                authBG={this.props.authBG}
+                copyPasterBG={this.props.copyPasterBG}
+                contentSharingBG={this.props.contentShareBG}
+                contentSharingByTabsBG={this.props.contentShareByTabsBG}
                 clearInbox={() => this.processEvent('clearInbox', null)}
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
