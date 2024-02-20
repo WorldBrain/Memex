@@ -3,7 +3,10 @@ import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { InviteLink } from '@worldbrain/memex-common/lib/content-sharing/ui/list-share-modal/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
+import type {
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import type {
     PageAnnotationsCacheInterface,
     UnifiedList,
@@ -14,16 +17,22 @@ import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/t
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 
 export interface Dependencies {
     fullPageUrl: string
+    autoCreateLinkIfNone?: boolean
     authBG: AuthRemoteFunctionsInterface
     spacesBG: RemoteCollectionsInterface
     analyticsBG: AnalyticsCoreInterface
     contentSharingBG: ContentSharingInterface
+    contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     listData?: UnifiedList<'page-link'>
     annotationsCache: PageAnnotationsCacheInterface
-    onNewPageLinkCreate?: () => Promise<void>
+    onNewPageLinkCreate?: (
+        pageLinkListId: UnifiedList['unifiedId'],
+    ) => Promise<void>
     copyToClipboard: (text: string) => Promise<void>
 }
 
@@ -68,12 +77,20 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         selectedPageLinkList: null,
     })
 
+    private async ensureLoggedInUser(): Promise<AuthenticatedUser> {
+        const currentUser = await this.dependencies.authBG.getCurrentUser()
+        if (!currentUser) {
+            throw new Error('Cannot create page links - User not logged in')
+        }
+        return currentUser
+    }
+
     init: EventHandler<'init'> = async ({ previousState }) => {
         const {
-            fullPageUrl,
             listData: initListData,
+            autoCreateLinkIfNone,
             annotationsCache,
-            authBG,
+            fullPageUrl,
         } = this.dependencies
 
         let listData: UnifiedList<'page-link'>
@@ -88,11 +105,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
                 return
             }
 
-            const currentUser = await authBG.getCurrentUser()
-            if (!currentUser) {
-                throw new Error('Cannot create page links - User not logged in')
-            }
-
+            await this.ensureLoggedInUser()
             const sharedPageListIds = annotationsCache.getSharedPageListIds(
                 normalizeUrl(fullPageUrl),
             )
@@ -118,14 +131,70 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         if (listData != null) {
             await this.loadInviteLinks(listData)
         }
+        if (listData == null && autoCreateLinkIfNone) {
+            await this._createPageLink()
+        }
     }
 
-    createPageLink: EventHandler<'createPageLink'> = async ({
-        previousState,
-        event,
-    }) => {
-        // TODO: implement page link creation logic
-        await this.dependencies.onNewPageLinkCreate()
+    private async _createPageLink() {
+        await executeUITask(this, 'pageLinkCreateState', async () => {
+            // TODO: Refactor title to be passed down - not relevant here
+            let title: string
+            if (window.location.href.includes('web.telegram.org')) {
+                title = getTelegramUserDisplayName(
+                    document,
+                    window.location.href,
+                )
+            }
+            const currentUser = await this.ensureLoggedInUser()
+
+            const {
+                collabKey,
+                listTitle,
+                localListId,
+                remoteListId,
+                remoteListEntryId,
+            } = await this.dependencies.contentSharingByTabsBG.schedulePageLinkCreation(
+                {
+                    fullPageUrl: this.dependencies.fullPageUrl,
+                    customPageTitle: title,
+                },
+            )
+
+            const pageLinkList: UnifiedListForCache<'page-link'> = {
+                type: 'page-link',
+                name: listTitle,
+                creator: { type: 'user-reference', id: currentUser.id },
+                localId: localListId,
+                collabKey: collabKey.toString(),
+                remoteId: remoteListId.toString(),
+                sharedListEntryId: remoteListEntryId.toString(),
+                normalizedPageUrl: normalizeUrl(this.dependencies.fullPageUrl),
+                unifiedAnnotationIds: [],
+                hasRemoteAnnotationsToLoad: false,
+                parentLocalId: null,
+                isPrivate: false,
+            }
+            const { unifiedId } = this.dependencies.annotationsCache.addList(
+                pageLinkList,
+            )
+            this.emitMutation({
+                selectedPageLinkList: {
+                    $set: this.dependencies.annotationsCache.lists.byId[
+                        unifiedId
+                    ] as UnifiedList<'page-link'>,
+                },
+            })
+
+            await Promise.all([
+                this.dependencies.contentSharingBG.waitForPageLinkCreation(),
+                this.dependencies.onNewPageLinkCreate?.(unifiedId),
+            ])
+        })
+    }
+
+    createPageLink: EventHandler<'createPageLink'> = async ({}) => {
+        await this._createPageLink()
     }
 
     private async loadSpaceOwnership(previousState: State): Promise<State> {

@@ -4230,7 +4230,7 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private async setLocallyAvailableSelectedList(
+    async setLocallyAvailableSelectedList(
         state: SidebarContainerState,
         unifiedListId: UnifiedList['unifiedId'],
     ): Promise<SidebarContainerState> {

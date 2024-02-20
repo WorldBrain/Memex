@@ -1395,9 +1395,13 @@ export class AnnotationsSidebarContainer<
                             }}
                             renderPageLinkMenuForList={() => (
                                 <PageLinkMenu
+                                    autoCreateLinkIfNone
                                     analyticsBG={this.props.analyticsBG}
                                     contentSharingBG={
                                         this.props.contentSharingBG
+                                    }
+                                    contentSharingByTabsBG={
+                                        this.props.contentSharingByTabsBG
                                     }
                                     spacesBG={this.props.customListsBG}
                                     authBG={this.props.authBG}
@@ -1417,6 +1421,15 @@ export class AnnotationsSidebarContainer<
                                         this.processEvent('setSelectedList', {
                                             unifiedListId: null,
                                         })
+                                    }}
+                                    onNewPageLinkCreate={async (
+                                        pageLinkListId,
+                                    ) => {
+                                        await (this
+                                            .logic as SidebarContainerLogic).setLocallyAvailableSelectedList(
+                                            this.state,
+                                            pageLinkListId,
+                                        )
                                     }}
                                     getRootElement={this.props.getRootElement}
                                 />
