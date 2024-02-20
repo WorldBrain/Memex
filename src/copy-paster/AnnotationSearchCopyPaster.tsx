@@ -13,15 +13,15 @@ export interface Props extends Omit<CopyPasterProps, 'renderTemplate'> {
 export default class AnnotationSearchCopyPaster extends React.PureComponent<
     Props
 > {
-    static defaultProps: Partial<Props> = { copyPaster: runInBackground() }
+    static defaultProps: Partial<Props> = { copyPasterBG: runInBackground() }
 
     private renderTemplate = (id: number) =>
-        this.props.copyPaster.renderTemplateForAnnotationSearch({
+        this.props.copyPasterBG.renderTemplateForAnnotationSearch({
             id,
             searchParams: this.props.searchParams,
         })
     private renderPreview = (template: Template, templateType: string) =>
-        this.props.copyPaster.renderPreviewForAnnotationSearch({
+        this.props.copyPasterBG.renderPreviewForAnnotationSearch({
             template,
             searchParams: this.props.searchParams,
             templateType,

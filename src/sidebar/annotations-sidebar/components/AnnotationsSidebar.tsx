@@ -150,7 +150,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     ) => JSX.Element
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
     renderEditMenuForList: (listData: UnifiedList) => JSX.Element
-    renderPageLinkMenuForList: (listData: UnifiedList) => JSX.Element
+    renderPageLinkMenuForList: () => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
     setActiveAITab: (tab: SidebarAITab) => React.MouseEventHandler
@@ -535,7 +535,7 @@ export class AnnotationsSidebar extends React.Component<
                 getPortalRoot={this.props.getRootElement}
             >
                 <PageNotesCopyPaster
-                    copyPaster={this.props.copyPaster}
+                    copyPasterBG={this.props.copyPaster}
                     annotationUrls={localAnnotationIds}
                     normalizedPageUrls={this.props.normalizedPageUrls}
                     getRootElement={this.props.getRootElement}
@@ -1351,16 +1351,9 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderPageLinkMenu() {
-        if (this.props.selectedShareMenuPageLinkList == null) {
-            console.warn(
-                'Attempted to open page link share menu for unselected list',
-            )
-            return false
+        if (!this.props.showPageLinkShareMenu) {
+            return null
         }
-
-        const selectedList = this.props.annotationsCache.lists.byId[
-            this.props.selectedShareMenuPageLinkList
-        ]
 
         return (
             <PopoutBox
@@ -1372,13 +1365,7 @@ export class AnnotationsSidebar extends React.Component<
                 closeComponent={this.props.closePageLinkShareMenu}
                 getPortalRoot={this.props.getRootElement}
             >
-                {!this.props.selectedShareMenuPageLinkList || !selectedList ? (
-                    <LoadingIndicatorContainer height="180px" width="330px">
-                        <LoadingIndicatorStyled size={20} />
-                    </LoadingIndicatorContainer>
-                ) : (
-                    this.props.renderPageLinkMenuForList(selectedList)
-                )}
+                {this.props.renderPageLinkMenuForList()}
             </PopoutBox>
         )
     }
@@ -3842,20 +3829,9 @@ export class AnnotationsSidebar extends React.Component<
                         iconColor="prime1"
                         fontColor="white"
                         size="medium"
-                        active={
-                            this.props.selectedShareMenuPageLinkList != null
-                        }
+                        active={this.props.showPageLinkShareMenu}
                         innerRef={this.sharePageLinkButtonRef}
-                        icon={
-                            this.props.pageLinkCreateState === 'running' ? (
-                                <LoadingIndicator
-                                    margin={'0 5px 0 0'}
-                                    size={14}
-                                />
-                            ) : (
-                                'invite'
-                            )
-                        }
+                        icon="invite"
                         padding={'0px 12px 0 6px'}
                         height={'30px'}
                     />
@@ -3891,8 +3867,7 @@ export class AnnotationsSidebar extends React.Component<
                         }
                     /> */}
                 </TopBarTabsContainer>
-                {this.props.selectedShareMenuPageLinkList != null &&
-                    this.renderPageLinkMenu()}
+                {this.renderPageLinkMenu()}
             </TopBarContainer>
         )
     }

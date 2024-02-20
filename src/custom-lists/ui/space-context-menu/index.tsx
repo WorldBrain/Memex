@@ -22,7 +22,9 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     Event
 > {
     static defaultProps: Pick<Props, 'copyToClipboard'> = {
-        copyToClipboard,
+        copyToClipboard: async (text) => {
+            await copyToClipboard(text)
+        },
     }
 
     constructor(props: Props) {

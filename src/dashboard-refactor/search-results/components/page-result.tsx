@@ -15,9 +15,6 @@ import type {
 } from '../types'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import AllNotesShareMenu, {
-    Props as ShareMenuProps,
-} from 'src/overview/sharing/AllNotesShareMenu'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
@@ -28,7 +25,6 @@ import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import { browser } from 'webextension-polyfill-ts'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { Checkbox } from 'src/common-ui/components'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -50,10 +46,6 @@ export interface Props
     filteredbyListID?: number
     youtubeService: YoutubeService
     lists: number[]
-    shareMenuProps: Omit<
-        ShareMenuProps,
-        'annotationsBG' | 'contentSharingBG' | 'customListsBG'
-    >
     filterbyList: (listId: number) => void
     analyticsBG: AnalyticsCoreInterface
     index: number
@@ -68,6 +60,7 @@ export interface Props
     resultsRef?: React.RefObject<HTMLDivElement>
     searchQuery?: string
     onMatchingTextToggleClick: React.MouseEventHandler
+    renderPageCitations: () => JSX.Element
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -277,7 +270,7 @@ export default class PageResultView extends PureComponent<Props> {
         return this.props.onListPickerBarBtnClick
     }
 
-    private renderCopyPaster() {
+    private renderPageCitationsDropdown() {
         if (this.props.isCopyPasterShown) {
             return (
                 <PopoutBox
@@ -288,11 +281,7 @@ export default class PageResultView extends PureComponent<Props> {
                     closeComponent={this.props.onCopyPasterBtnClick}
                     getPortalRoot={this.props.getRootElement}
                 >
-                    <PageNotesCopyPaster
-                        normalizedPageUrls={[this.props.normalizedUrl]}
-                        onClickOutside={this.props.onCopyPasterBtnClick}
-                        getRootElement={this.props.getRootElement}
-                    />
+                    {this.props.renderPageCitations()}
                 </PopoutBox>
             )
         }
@@ -529,7 +518,7 @@ export default class PageResultView extends PureComponent<Props> {
                     if (event.shiftKey) {
                         this.props.onCopyPasterDefaultExecute(event)
                     } else {
-                        this.props.onCopyPasterBtnClick?.(event)
+                        this.props.onCopyPasterBtnClick(event)
                     }
                 },
                 buttonRef: this.copyPasteronPageButtonRef,
@@ -862,7 +851,7 @@ export default class PageResultView extends PureComponent<Props> {
                             />
                         </FooterBar>
                         {this.renderSpacePicker()}
-                        {this.renderCopyPaster()}
+                        {this.renderPageCitationsDropdown()}
                     </StyledPageResult>
                 )}
             </ItemBox>

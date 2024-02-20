@@ -29,6 +29,7 @@ import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -38,6 +39,7 @@ export interface PageAnnotationCacheDeps {
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
+    normalizedPageUrlsToPageLinkListIds: PageAnnotationsCacheInterface['normalizedPageUrlsToPageLinkListIds'] = new Map()
     pageListIds: PageAnnotationsCacheInterface['pageListIds'] = new Map()
     annotations: PageAnnotationsCacheInterface['annotations'] = initNormalizedState()
     lists: PageAnnotationsCacheInterface['lists'] = initNormalizedState()
@@ -62,7 +64,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         UnifiedAnnotation['unifiedId']
     >()
 
-    private highlightColorSettings
+    private highlightColorSettings: HighlightColor[]
 
     constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
@@ -292,6 +294,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         this.pageListIds.set(normalizedPageUrl, listIds)
     }
 
+    private trackPageLinkListForPage(list: UnifiedList<'page-link'>) {
+        const pageLinkListIds =
+            this.normalizedPageUrlsToPageLinkListIds.get(
+                list.normalizedPageUrl,
+            ) ?? new Set()
+        pageLinkListIds.add(list.unifiedId)
+        this.normalizedPageUrlsToPageLinkListIds.set(
+            list.normalizedPageUrl,
+            pageLinkListIds,
+        )
+    }
+
     setPageData: PageAnnotationsCacheInterface['setPageData'] = (
         normalizedPageUrl,
         nextPageLists,
@@ -464,6 +478,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                 .map((localId) => localToCacheId.get(localId))
                 .filter((id) => id != null)
 
+            if (list.type === 'page-link') {
+                this.trackPageLinkListForPage(list)
+            }
+
             if (list.type !== 'user-list') {
                 continue
             }
@@ -592,6 +610,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
 
         if (nextList.type === 'page-link') {
+            this.trackPageLinkListForPage(nextList)
             this.ensurePageListsSet(nextList.normalizedPageUrl, [
                 nextList.unifiedId,
             ])

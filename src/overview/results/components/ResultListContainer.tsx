@@ -250,7 +250,7 @@ class ResultListContainer extends PureComponent<Props, LocalState> {
                 <PageNotesCopyPaster
                     normalizedPageUrls={[doc.url]}
                     onClickOutside={this.props.resetActiveCopyPasterIndex}
-                    copyPaster={this.props.copyPaster}
+                    copyPasterBG={this.props.copyPaster}
                 />
             </HoverBox>
         )

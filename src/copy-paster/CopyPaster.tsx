@@ -12,7 +12,7 @@ import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
-import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 interface State {
     isLoading: boolean
@@ -35,7 +35,7 @@ export interface Props {
         template: Template,
         templateType: 'originalPage' | 'examplePage',
     ) => Promise<string>
-    copyPaster?: RemoteCopyPasterInterface
+    copyPasterBG: RemoteCopyPasterInterface
     preventClosingBcEditState?: (state) => void
     getRootElement: () => HTMLElement
     setLoadingState?: (loading: UITaskState) => void
@@ -52,13 +52,6 @@ export default class CopyPasterContainer extends React.PureComponent<
         order: 1,
         isFavourite: false,
         outputFormat: 'rich-text',
-    }
-
-    private copyPasterBG: RemoteCopyPasterInterface
-
-    constructor(props: Props) {
-        super(props)
-        this.copyPasterBG = props.copyPaster
     }
 
     state: State = {
@@ -80,7 +73,7 @@ export default class CopyPasterContainer extends React.PureComponent<
 
     private async syncTemplates() {
         this.setState({ isLoading: true })
-        const templates = await this.copyPasterBG.findAllTemplates()
+        const templates = await this.props.copyPasterBG.findAllTemplates()
         const sortedTemplates = templates.sort(defaultOrderableSorter)
         this.setState({ templates: sortedTemplates, isLoading: false })
     }
@@ -99,7 +92,7 @@ export default class CopyPasterContainer extends React.PureComponent<
     private handleTemplateDelete = async () => {
         // NOTE: delete btn only appears in edit view, hence `state.tmpTemplate.id`
         //  will be set to the template currently being edited
-        await this.copyPasterBG.deleteTemplate({
+        await this.props.copyPasterBG.deleteTemplate({
             id: this.state.tmpTemplate.id,
         })
         this.setState({ tmpTemplate: undefined })
@@ -251,7 +244,7 @@ export default class CopyPasterContainer extends React.PureComponent<
             ],
         })
 
-        await this.copyPasterBG.updateTemplate(templateToReorder)
+        await this.props.copyPasterBG.updateTemplate(templateToReorder)
     }
 
     private handleTemplateSave = async () => {
@@ -268,9 +261,9 @@ export default class CopyPasterContainer extends React.PureComponent<
                     ? pushOrderedItem(orderedItems, -1)
                     : insertOrderedItemBeforeIndex(orderedItems, -1, 0)
             tmpTemplate.order = changes.create.key
-            await this.copyPasterBG.createTemplate(tmpTemplate)
+            await this.props.copyPasterBG.createTemplate(tmpTemplate)
         } else {
-            await this.copyPasterBG.updateTemplate(tmpTemplate)
+            await this.props.copyPasterBG.updateTemplate(tmpTemplate)
         }
         this.setState({ tmpTemplate: undefined, isNew: undefined })
         await this.syncTemplates()

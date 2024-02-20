@@ -78,7 +78,7 @@ export class SearchTypeSwitch extends React.PureComponent<Props> {
         return (
             <HoverBox withRelativeContainer>
                 <CopyPaster
-                    copyPaster={this.props.copyPaster}
+                    copyPasterBG={this.props.copyPaster}
                     searchParams={this.props.searchParams}
                     onClickOutside={this.props.hideCopyPaster}
                 />
