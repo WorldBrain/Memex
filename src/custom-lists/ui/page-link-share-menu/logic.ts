@@ -9,44 +9,39 @@ import type {
     UnifiedList,
     UnifiedListForCache,
 } from 'src/annotations/cache/types'
-import {
-    getListShareUrl,
-    getSinglePageShareUrl,
-} from 'src/content-sharing/utils'
+import { getSinglePageShareUrl } from 'src/content-sharing/utils'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
-import { trackCopyInviteLink } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export interface Dependencies {
-    contentSharingBG: ContentSharingInterface
+    fullPageUrl: string
+    authBG: AuthRemoteFunctionsInterface
     spacesBG: RemoteCollectionsInterface
-    listData: UnifiedList
-    errorMessage?: string
-    loadOwnershipData?: boolean
-    onSpaceShare: () => Promise<void>
-    copyToClipboard: (text: string) => Promise<boolean>
     analyticsBG: AnalyticsCoreInterface
-    annotationsCache?: PageAnnotationsCacheInterface
-    pageListDataForCurrentPage: UnifiedListForCache<'page-link'> | null
+    contentSharingBG: ContentSharingInterface
+    listData?: UnifiedList<'page-link'>
+    annotationsCache: PageAnnotationsCacheInterface
+    onNewPageLinkCreate?: () => Promise<void>
+    copyToClipboard: (text: string) => Promise<void>
 }
 
 export type Event = UIEvent<{
+    createPageLink: null
     copyInviteLink: { link: string }
-    reloadInviteLinks: { listData: UnifiedListForCache<'page-link'> | null }
+    reloadInviteLinks: { listData: UnifiedList<'page-link'> }
 }>
 
 export interface State {
     loadState: TaskState
     ownershipLoadState: TaskState
     listShareLoadState: TaskState
+    pageLinkCreateState: TaskState
     inviteLinksLoadState: TaskState
     inviteLinks: InviteLink[]
-    showSuccessMsg: boolean
     mode: 'confirm-space-delete' | 'followed-space' | null
-    nameValue: string
-    showSaveButton: boolean
-    pageListDataForCurrentPage: UnifiedList | null
-    isLocalPDF: boolean
+    selectedPageLinkList: UnifiedList<'page-link'> | null
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -66,44 +61,71 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         loadState: 'pristine',
         ownershipLoadState: 'pristine',
         listShareLoadState: 'pristine',
+        pageLinkCreateState: 'pristine',
         inviteLinksLoadState: 'pristine',
         inviteLinks: [],
-        nameValue: this.dependencies.listData.name,
-        showSuccessMsg: false,
         mode: null,
-        showSaveButton: false,
-        pageListDataForCurrentPage: null,
-        isLocalPDF: false,
+        selectedPageLinkList: null,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        let state = previousState
+        const {
+            fullPageUrl,
+            listData: initListData,
+            annotationsCache,
+            authBG,
+        } = this.dependencies
 
-        if (window.location.href.includes('/pdfjs/viewer.html?file=blob')) {
-            this.emitMutation({
-                isLocalPDF: { $set: true },
-            })
-        }
-
+        let listData: UnifiedList<'page-link'>
         await loadInitial(this, async () => {
-            if (this.dependencies.listData) {
+            if (initListData != null) {
+                listData = initListData
                 this.emitMutation({
-                    pageListDataForCurrentPage: {
-                        $set: this.dependencies.listData,
+                    selectedPageLinkList: {
+                        $set: initListData,
                     },
                 })
+                return
+            }
 
-                await this.loadInviteLinks(
-                    this.dependencies.listData as UnifiedListForCache<
-                        'page-link'
-                    >,
-                )
+            const currentUser = await authBG.getCurrentUser()
+            if (!currentUser) {
+                throw new Error('Cannot create page links - User not logged in')
+            }
 
-                if (this.dependencies.loadOwnershipData) {
-                    state = await this.loadSpaceOwnership(previousState)
+            const sharedPageListIds = annotationsCache.getSharedPageListIds(
+                normalizeUrl(fullPageUrl),
+            )
+            let latestPageLinkList: UnifiedList<'page-link'> = null
+            for (const listId of sharedPageListIds) {
+                const listData = annotationsCache.lists.byId[listId]
+                if (
+                    listData?.type === 'page-link' &&
+                    (listData?.localId > latestPageLinkList?.localId ||
+                        latestPageLinkList == null)
+                ) {
+                    latestPageLinkList = listData
                 }
             }
+
+            if (latestPageLinkList != null) {
+                this.emitMutation({
+                    selectedPageLinkList: { $set: latestPageLinkList },
+                })
+                listData = latestPageLinkList
+            }
         })
+        if (listData != null) {
+            await this.loadInviteLinks(listData)
+        }
+    }
+
+    createPageLink: EventHandler<'createPageLink'> = async ({
+        previousState,
+        event,
+    }) => {
+        // TODO: implement page link creation logic
+        await this.dependencies.onNewPageLinkCreate()
     }
 
     private async loadSpaceOwnership(previousState: State): Promise<State> {
@@ -135,9 +157,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         return this.withMutation(previousState, mutation)
     }
 
-    private async loadInviteLinks(
-        listData?: UnifiedListForCache<'page-link'> | null,
-    ) {
+    private async loadInviteLinks(listData: UnifiedListForCache<'page-link'>) {
         const { contentSharingBG } = this.dependencies
 
         const createListLink = (collaborationKey?: string): string =>
@@ -203,6 +223,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
     reloadInviteLinks: EventHandler<'reloadInviteLinks'> = async ({
         event,
     }) => {
+        this.emitMutation({ selectedPageLinkList: { $set: event.listData } })
         await this.loadInviteLinks(event.listData)
     }
 

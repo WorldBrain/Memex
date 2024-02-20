@@ -1102,9 +1102,6 @@ export class AnnotationsSidebarContainer<
                                     { state },
                                 )
                             }
-                            selectedShareMenuPageLinkList={
-                                this.state.selectedShareMenuPageLinkList
-                            }
                             setShareMenuAnnotationInstance={(instanceId) =>
                                 this.processEvent(
                                     'setShareMenuAnnotationInstanceId',
@@ -1122,7 +1119,7 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('markFeedAsRead', null)
                             }
                             clickCreatePageLinkBtn={() =>
-                                this.processEvent('createPageLink', null)
+                                this.processEvent('openPageLinkShareMenu', null)
                             }
                             selectedListId={this.state.selectedListId}
                             currentUser={this.props.getCurrentUser()}
@@ -1167,7 +1164,6 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             closePageLinkShareMenu={() => {
-                                console.log('closePageLinkShareMenu')
                                 this.processEvent(
                                     'closePageLinkShareMenu',
                                     null,
@@ -1397,30 +1393,18 @@ export class AnnotationsSidebarContainer<
                                     />
                                 )
                             }}
-                            renderPageLinkMenuForList={(listData) => (
+                            renderPageLinkMenuForList={() => (
                                 <PageLinkMenu
+                                    analyticsBG={this.props.analyticsBG}
                                     contentSharingBG={
                                         this.props.contentSharingBG
                                     }
                                     spacesBG={this.props.customListsBG}
-                                    listData={listData}
-                                    disableWriteOps={
-                                        this.state.hasListDataBeenManuallyPulled
-                                    }
+                                    authBG={this.props.authBG}
                                     annotationsCache={
                                         this.props.annotationsCache
                                     }
-                                    pageListDataForCurrentPage={
-                                        this.state.pageListDataForCurrentPage
-                                    }
-                                    onSpaceShare={() =>
-                                        this.processEvent('createPageLink', {
-                                            forceCreate: true,
-                                        })
-                                    }
-                                    pageLinkCreateState={
-                                        this.state.pageLinkCreateState
-                                    }
+                                    fullPageUrl={this.state.fullPageUrl!}
                                     showSpacesTab={() => {
                                         this.processEvent(
                                             'closePageLinkShareMenu',
@@ -1434,7 +1418,6 @@ export class AnnotationsSidebarContainer<
                                             unifiedListId: null,
                                         })
                                     }}
-                                    analyticsBG={this.props.analyticsBG}
                                     getRootElement={this.props.getRootElement}
                                 />
                             )}

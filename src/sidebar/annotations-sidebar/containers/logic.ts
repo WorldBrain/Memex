@@ -272,7 +272,6 @@ export class SidebarContainerLogic extends UILogic<
             noteEditState: 'pristine',
             noteCreateState: 'pristine',
             noteColorUpdateState: 'pristine',
-            pageLinkCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
@@ -287,6 +286,7 @@ export class SidebarContainerLogic extends UILogic<
             videoDetails: null,
             summaryModeActiveTab: 'Answer',
 
+            showPageLinkShareMenu: false,
             isWidthLocked: false,
             isLocked: false,
             fullPageUrl: this.options.fullPageUrl,
@@ -356,11 +356,9 @@ export class SidebarContainerLogic extends UILogic<
             isTrial: false,
             signupDate: null,
             firstTimeSharingPageLink: false,
-            selectedShareMenuPageLinkList: null,
             renameListErrorMessage: null,
             sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
-            pageListDataForCurrentPage: null,
             youtubeTranscriptJSON: null,
             showChapters: false,
             chapterSummaries: [],
@@ -1499,11 +1497,16 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ activeListEditMenuId: { $set: nextActiveId } })
     }
 
-    closePageLinkShareMenu: EventHandler<'closePageLinkShareMenu'> = async ({
-        event,
-        previousState,
-    }) => {
-        this.emitMutation({ selectedShareMenuPageLinkList: { $set: null } })
+    openPageLinkShareMenu: EventHandler<
+        'openPageLinkShareMenu'
+    > = async ({}) => {
+        this.emitMutation({ showPageLinkShareMenu: { $set: true } })
+    }
+
+    closePageLinkShareMenu: EventHandler<
+        'closePageLinkShareMenu'
+    > = async ({}) => {
+        this.emitMutation({ showPageLinkShareMenu: { $set: false } })
     }
 
     processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({
@@ -4941,118 +4944,5 @@ export class SidebarContainerLogic extends UILogic<
             },
             { keepListsIfUnsharing: event.keepListsIfUnsharing },
         )
-    }
-
-    createPageLink: EventHandler<'createPageLink'> = async ({
-        previousState,
-        event,
-    }) => {
-        const fullPageUrl = previousState.fullPageUrl
-
-        if (!fullPageUrl) {
-            throw new Error(
-                'Cannot create page link - Page URL sidebar state not set',
-            )
-        }
-        const currentUser = this.options.getCurrentUser()
-        if (!currentUser) {
-            throw new Error('Cannot create page link - User not logged in')
-        }
-        const sharingTutorialP = this.showSharingTutorial()
-
-        let title: string
-
-        if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document, window.location.href)
-        }
-
-        const sharedPageListIds = this.options.annotationsCache.getSharedPageListIds(
-            normalizeUrl(fullPageUrl),
-        )
-
-        let chosenPageLinkList: UnifiedList<'page-link'> = null
-        for (const listId of sharedPageListIds) {
-            let listData = this.options.annotationsCache.lists.byId[listId]
-
-            // Get the latest page-link list
-            if (
-                listData?.type === 'page-link' &&
-                (listData?.localId > chosenPageLinkList?.localId ||
-                    chosenPageLinkList == null)
-            ) {
-                chosenPageLinkList = listData
-            }
-        }
-
-        if (chosenPageLinkList) {
-            this.emitMutation({
-                selectedShareMenuPageLinkList: {
-                    $set: chosenPageLinkList.unifiedId,
-                },
-            })
-            if (!event.forceCreate) {
-                await sharingTutorialP
-                return
-            }
-        }
-
-        await executeUITask(this, 'pageLinkCreateState', async () => {
-            const {
-                collabKey,
-                listTitle,
-                localListId,
-                remoteListId,
-                remoteListEntryId,
-            } = await this.options.contentSharingByTabsBG.schedulePageLinkCreation(
-                {
-                    fullPageUrl,
-                    customPageTitle: title,
-                },
-            )
-
-            const cacheListData: UnifiedListForCache<'page-link'> = {
-                type: 'page-link',
-                name: listTitle,
-                creator: currentUser,
-                localId: localListId,
-                collabKey: collabKey.toString(),
-                remoteId: remoteListId.toString(),
-                sharedListEntryId: remoteListEntryId.toString(),
-                normalizedPageUrl: normalizeUrl(fullPageUrl),
-                unifiedAnnotationIds: [],
-                hasRemoteAnnotationsToLoad: false,
-                parentLocalId: null,
-                isPrivate: false,
-            }
-            this.emitMutation({
-                pageListDataForCurrentPage: { $set: cacheListData },
-            })
-            const { unifiedId } = this.options.annotationsCache.addList(
-                cacheListData,
-            )
-
-            this.emitMutation({
-                selectedShareMenuPageLinkList: { $set: unifiedId },
-            })
-
-            await Promise.all([
-                this.options.contentSharingBG.waitForPageLinkCreation(),
-                this.setLocallyAvailableSelectedList(
-                    {
-                        ...previousState,
-                        lists: this.options.annotationsCache.lists,
-                        listInstances: {
-                            ...previousState.listInstances,
-                            [unifiedId]: initListInstance({
-                                ...cacheListData,
-                                unifiedId,
-                            }),
-                        },
-                    },
-                    unifiedId,
-                ),
-            ])
-        })
-        await sharingTutorialP
     }
 }
