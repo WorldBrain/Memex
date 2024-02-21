@@ -24,6 +24,8 @@ interface State {
     templateType: 'originalPage' | 'examplePage'
     isPreviewLoading: TaskState
     previewErrorMessage?: string | JSX.Element
+    renderedTextBuffered: string
+    errorCopyToClipboard: boolean
 }
 
 const md = new MarkdownIt()
@@ -64,6 +66,8 @@ export default class CopyPasterContainer extends React.PureComponent<
         templateType: 'originalPage',
         isPreviewLoading: 'pristine',
         previewErrorMessage: undefined,
+        renderedTextBuffered: '',
+        errorCopyToClipboard: false,
     }
 
     async componentDidMount() {
@@ -119,7 +123,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         selection.addRange(range)
 
         // Copy the selected content to the clipboard
-        document.execCommand('copy')
+        const copiedContent = document.execCommand('copy')
 
         // Remove the hidden div from the body
         document.body.removeChild(hiddenDiv)
@@ -130,25 +134,40 @@ export default class CopyPasterContainer extends React.PureComponent<
         await this.handleTemplateCopy(id)
     }
 
-    private handleTemplateCopy = async (id: number) => {
+    private copyExistingRenderedToClipboard = async (
+        rendered: string,
+        templateId: number,
+    ) => {
+        const item = this.state.templates?.find(
+            (item: Template) => item.id === templateId,
+        )
+        if (item.outputFormat === 'markdown' || item.outputFormat == null) {
+            await copyToClipboard(rendered)
+        }
+        if (item.outputFormat === 'rich-text') {
+            const htmlString = md.render(rendered)
+            await this.copyRichTextToClipboard(htmlString)
+        }
+        this.setState({ errorCopyToClipboard: false })
+    }
+
+    private handleTemplateCopy = async (templateId: number) => {
         this.setState({ isLoading: true })
         this.props.setLoadingState?.('running')
+        let rendered
 
         try {
-            const item = this.state.templates.find((item) => item.id === id)
-            const rendered = await this.props.renderTemplate(id)
-
-            if (item) {
-                if (
-                    item.outputFormat === 'markdown' ||
-                    item.outputFormat == null
-                ) {
-                    await copyToClipboard(rendered)
-                }
-                if (item.outputFormat === 'rich-text') {
-                    const htmlString = md.render(rendered)
-                    await this.copyRichTextToClipboard(htmlString)
-                }
+            try {
+                rendered = (await this.props.renderTemplate(templateId)) ?? null
+                this.setState({ renderedTextBuffered: rendered })
+            } catch (e) {
+                console.error(e)
+                this.props.setLoadingState?.('error')
+            }
+            try {
+                await this.copyExistingRenderedToClipboard(rendered, templateId)
+            } catch (e) {
+                this.setState({ errorCopyToClipboard: true })
             }
         } catch (err) {
             console.error('Something went really bad copying:', err.message)
@@ -282,6 +301,11 @@ export default class CopyPasterContainer extends React.PureComponent<
                 onClickSave={this.handleTemplateSave}
                 onReorder={this.handleTemplateReorder}
                 onClickDelete={this.handleTemplateDelete}
+                copyExistingRenderedToClipboard={
+                    this.copyExistingRenderedToClipboard
+                }
+                renderedTextBuffered={this.state.renderedTextBuffered}
+                errorCopyToClipboard={this.state.errorCopyToClipboard}
                 onClickOutside={this.props.onClickOutside}
                 previewString={this.state.previewString}
                 previewErrorMessage={this.state.previewErrorMessage}

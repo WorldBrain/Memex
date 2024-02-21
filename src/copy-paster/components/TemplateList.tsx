@@ -74,6 +74,7 @@ const Title = styled.div`
 const ContentBlock = styled.div`
     padding: 5px 10px 10px 10px;
     max-height: 300px;
+    max-width: 340px;
     overflow: scroll;
     display: flex;
     flex-direction: column;
@@ -123,6 +124,12 @@ interface TemplateListProps {
     getRootElement: () => HTMLElement
     onReorder: (id: number, oldIndex: number, newIndex: number) => void
     focusOnElement: (index: number) => void
+    copyExistingRenderedToClipboard: (
+        renderedText: string,
+        templateId: number,
+    ) => Promise<void>
+    errorCopyToClipboard: boolean
+    renderedTextBuffered: string
 }
 
 export default class TemplateList extends PureComponent<TemplateListProps> {
@@ -174,6 +181,39 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         }
     }
     render() {
+        if (this.props.errorCopyToClipboard) {
+            return (
+                <ContentBlock>
+                    <Center>
+                        <Icon
+                            filePath="checkRound"
+                            heightAndWidth="30px"
+                            hoverOff
+                        />
+                        <Title>Template Processed</Title>
+                        <InfoText>
+                            Window was out of focus so the text was generated
+                            but the copy process didn't happen. <br />
+                            Click this button to copy it to clipboard.
+                        </InfoText>
+                        <PrimaryAction
+                            icon={'copy'}
+                            label={'Copy to Clipboard'}
+                            onClick={(event) => {
+                                event.stopPropagation()
+                                this.props.copyExistingRenderedToClipboard(
+                                    this.props.renderedTextBuffered,
+                                    this.props.templates[this.props.focusIndex]
+                                        .id,
+                                )
+                            }}
+                            type="secondary"
+                            size="medium"
+                        />
+                    </Center>
+                </ContentBlock>
+            )
+        }
         if (this.props.copySuccess) {
             return (
                 <Center>

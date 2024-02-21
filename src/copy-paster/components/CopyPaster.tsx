@@ -43,6 +43,12 @@ interface CopyPasterProps {
     onClickOutside?: React.MouseEventHandler
     onReorder: (id: number, oldIndex: number, newIndex: number) => void
     previewErrorMessage?: string | JSX.Element
+    copyExistingRenderedToClipboard: (
+        renderedText: string,
+        templateId: number,
+    ) => Promise<void>
+    errorCopyToClipboard: boolean
+    renderedTextBuffered: string
 }
 
 class CopyPaster extends PureComponent<CopyPasterProps> {
@@ -146,6 +152,11 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         focusOnElement={(index) =>
                             this.setState({ focusIndex: index })
                         }
+                        renderedTextBuffered={this.props.renderedTextBuffered}
+                        copyExistingRenderedToClipboard={
+                            this.props.copyExistingRenderedToClipboard
+                        }
+                        errorCopyToClipboard={this.props.errorCopyToClipboard}
                     />
                 )}
             </CopyPasterWrapper>
