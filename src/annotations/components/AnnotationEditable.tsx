@@ -1140,7 +1140,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         return (
             <PopoutBox
                 targetElementRef={referenceElement.current}
-                placement={'left'}
+                placement={'bottom-start'}
                 strategy={'fixed'}
                 closeComponent={() => {
                     this.setState({

@@ -61,7 +61,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'Page Spaces (custom)',
-        insertedText: `{{#PageSpacesList}}{{{.}}}{{/PageSpacesList}} `,
+        insertedText: `{{#PageSpacesList}}{{{.}}} {{/PageSpacesList}} `,
         TooltipText: (
             <span>
                 The `{'{{{'}.{'}}}'}` represents a placeholder for every
@@ -76,7 +76,7 @@ const TemplateButtonOptions = [
         insertedText: `{{#Notes}}
 {{{NoteHighlight}}} 
 {{{NoteText}}}
-{{/Notes} `,
+{{/Notes}} `,
         TooltipText: (
             <span>
                 Needed to loop through notes. <br />
@@ -124,7 +124,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'Note Spaces (custom)',
-        insertedText: `{{#NoteSpacesList}}{{{.}}}{{/NoteSpacesList}} `,
+        insertedText: `{{#NoteSpacesList}}{{{.}}} {{/NoteSpacesList}} `,
         TooltipText: (
             <span>
                 The `{'{{{'}.{'}}}'}` represents a placeholder for every
@@ -145,7 +145,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'HAS variable X',
-        insertedText: `{{^ReplaceWithX}} {{/ReplaceWithX}} `,
+        insertedText: `{{#ReplaceWithX}} {{/ReplaceWithX}} `,
         TooltipText: (
             <span>
                 The text between between elements will be shown
@@ -155,7 +155,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'HAS NOT variable X',
-        insertedText: `{{#ReplaceWithX}} {{/ReplaceWithX}} `,
+        insertedText: `{{^ReplaceWithX}} {{/ReplaceWithX}} `,
         TooltipText: (
             <span>
                 The text between between elements will be shown
@@ -467,6 +467,9 @@ export default class TemplateEditor extends PureComponent<
                                             <PreviewInput
                                                 value={this.props.previewString}
                                                 readOnly
+                                                onKeyDown={(e) =>
+                                                    e.stopPropagation()
+                                                }
                                             />
                                         ) : (
                                             <PreviewRichText
@@ -475,6 +478,9 @@ export default class TemplateEditor extends PureComponent<
                                                         element.innerHTML = this.props.previewString
                                                     }
                                                 }}
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
                                             />
                                         )}
                                     </>

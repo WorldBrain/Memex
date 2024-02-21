@@ -27,69 +27,148 @@ export const URL_AND_TITLE: Template = {
 
 export const ROAM_MD_TEMPLATE: Template = {
     id: 3,
-    title: 'Roam Markdown',
+    title: 'Roam Template',
     isFavourite: false,
     order: 3000000000,
-    outputFormat: 'markdown',
+    outputFormat: 'rich-text',
     code: `[[{{{PageTitle}}}]]
-    {{#PageUrl}}
-      - url:: {{{PageUrl}}}
-    {{/PageUrl}}
-    {{#HasNotes}}
-      - Annotations
-    {{/HasNotes}}
-    {{#Notes}}
-    {{#NoteHighlight}}
-        - ^^{{{NoteHighlight}}}^^
-    {{#NoteText}}
-           - {{{NoteText}}}
-    {{/NoteText}}
-    {{#NoteSpaces}}
-          Spaces: {{{NoteSpaces}}}
-    {{/NoteSpaces}}
-    {{/NoteHighlight}}
-        {{^NoteHighlight}}
-          {{{NoteText}}}
-    {{/NoteHighlight}}
-    {{/Notes}}
+ - url:: {{{PageUrl}}} 
+{{#PageSpaces}}  
+ - Spaces:: {{{PageSpaces}}} 
+{{/PageSpaces}} 
+{{#HasNotes}}
+  - Annotations::
+{{#Notes}}
+{{#NoteHighlight}}
+    - "{{{NoteHighlight}}}"
+{{/NoteHighlight}} 
+{{#NoteText}}
+      - {{{NoteText}}}
+{{/NoteText}} 
+{{#NoteSpaces}}
+      - Spaces: {{{NoteSpaces}}} 
+{{/NoteSpaces}} 
+{{/Notes}} 
+{{/HasNotes}} 
 `,
 }
 
 export const TANA_PASTE_TEMPLATE: Template = {
     id: 4,
-    title: 'Notion Markdown',
+    title: 'Tana Paste Template',
     isFavourite: false,
     order: 4000000000,
     outputFormat: 'markdown',
-    code: `%tana%
-[{{{PageTitle}}}]({{{PageUrl}}})
+    code: `%%tana%% 
+- {{{PageTitle}}}
+{{#PageSpaces}}  
+    - Spaces: {{{PageSpaces}}} 
+{{/PageSpaces}} 
+    - url: {{{PageUrl}}}  - 
+{{#HasNotes}} 
+    - Annotations:
 {{#Notes}}
-* {{{NoteHighlight}}}
-  * {{{NoteText}}}
-    {{{NoteSpaces}}}
-{{/Notes}}
+{{#NoteHighlight}}  
+        - "{{{NoteHighlight}}}"
+    {{/NoteHighlight}} 
+{{#NoteText}}
+        - {{{NoteText}}}
+    {{/NoteText}} 
+{{#NoteSpaces}}  
+        - Spaces: {{{NoteSpaces}}} 
+{{/NoteSpaces}} 
+{{/Notes}} 
+{{/HasNotes}}
 `,
 }
 export const NOTION_MD_TEMPLATE: Template = {
-    id: 4,
-    title: 'Notion Markdown',
+    id: 5,
+    title: 'Notion Template',
     isFavourite: false,
     order: 5000000000,
     outputFormat: 'markdown',
-    code: `[{{{PageTitle}}}]({{{PageUrl}}})
+    code: ` 
+[{{{PageTitle}}}]({{{PageUrl}}})
+{{#PageSpaces}}  
+  - Spaces: {{{PageSpaces}}} 
+{{/PageSpaces}} 
+{{#HasNotes}} 
+  - Annotations:
 {{#Notes}}
-* {{{NoteHighlight}}}
-  * {{{NoteText}}}
-    {{{NoteSpaces}}}
-{{/Notes}}
+{{#NoteHighlight}}  
+    - "{{{NoteHighlight}}}"
+{{/NoteHighlight}} 
+{{#NoteText}}
+      - {{{NoteText}}}
+    {{/NoteText}} 
+{{#NoteSpaces}}  
+      - Spaces: {{{NoteSpaces}}} 
+{{/NoteSpaces}} 
+{{/Notes}} 
+{{/HasNotes}}
+`,
+}
+export const OBSIDIAN_MD_TEMPLATE: Template = {
+    id: 6,
+    title: 'Obsidian Template',
+    isFavourite: false,
+    order: 6000000000,
+    outputFormat: 'rich-text',
+    code: ` 
+- [[{{{PageTitle}}}]]
+    - url: {{{PageUrl}}} 
+{{#PageSpaces}}  
+    - Spaces: {{{PageSpaces}}} 
+{{/PageSpaces}} 
+{{#HasNotes}}
+    - Annotations:
+{{#Notes}}
+{{#NoteHighlight}}
+        - "{{{NoteHighlight}}}"
+{{/NoteHighlight}} 
+{{#NoteText}}
+            - {{{NoteText}}}
+{{/NoteText}} 
+{{#NoteSpaces}}
+            - Spaces: {{{NoteSpaces}}} 
+{{/NoteSpaces}} 
+{{/Notes}} 
+{{/HasNotes}} 
+`,
+}
+export const LOGSEQ_MD_TEMPLATE: Template = {
+    id: 7,
+    title: 'Logseq Template',
+    isFavourite: false,
+    order: 7000000000,
+    outputFormat: 'markdown',
+    code: `[[{{{PageTitle}}}]]
+ - url:: {{{PageUrl}}} 
+{{#PageSpaces}}  
+ - Spaces:: {{{PageSpaces}}} 
+{{/PageSpaces}} 
+{{#HasNotes}}
+  - Annotations::
+{{#Notes}}
+{{#NoteHighlight}}
+    - "{{{NoteHighlight}}}"
+{{/NoteHighlight}} 
+{{#NoteText}}
+      - {{{NoteText}}}
+{{/NoteText}} 
+{{#NoteSpaces}}
+      - Spaces: {{{NoteSpaces}}} 
+{{/NoteSpaces}} 
+{{/Notes}} 
+{{/HasNotes}} 
 `,
 }
 
 export const HTML_TEMPLATE: Template = {
-    id: 5,
+    id: 8,
     title: 'HTML',
     isFavourite: false,
-    order: 6000000000,
+    order: 8000000000,
     outputFormat: 'markdown',
     code: `<a target="_blank"  href="{{{PageUrl}}}">{{{PageTitle}}}</a>
 <ul>
@@ -110,7 +189,9 @@ export const HTML_TEMPLATE: Template = {
 const DEFAULT_TEMPLATES = [
     HTML_TEMPLATE,
     ROAM_MD_TEMPLATE,
+    LOGSEQ_MD_TEMPLATE,
     NOTION_MD_TEMPLATE,
+    OBSIDIAN_MD_TEMPLATE,
     TANA_PASTE_TEMPLATE,
     JUST_URL,
     URL_AND_TITLE,

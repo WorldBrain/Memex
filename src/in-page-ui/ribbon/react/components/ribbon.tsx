@@ -293,25 +293,48 @@ export default class Ribbon extends Component<Props, State> {
         const center = this.props.ribbonPosition === 'centerRight'
         const sidebarOpen = this.props.sidebar.isSidebarOpen
 
-        const condition1 = (topRight || bottomRight) && !sidebarOpen
-        const condition2 = center && !sidebarOpen
-        const condition3 = sidebarOpen
+        const condition1 = topRight && !sidebarOpen
+        const condition2 = bottomRight && !sidebarOpen
+        const condition3 = center && !sidebarOpen
+        const condition4 = sidebarOpen
 
         return (
             <PopoutBox
                 getPortalRoot={this.props.getRootElement}
                 targetElementRef={this.spacePickerRef.current}
                 placement={
-                    topRight
+                    condition1
                         ? 'bottom-end'
-                        : bottomRight
+                        : condition2
                         ? 'top-end'
-                        : 'left-start'
+                        : condition3
+                        ? 'left-start'
+                        : condition4
+                        ? 'left-start'
+                        : 'center'
                 }
                 offsetX={
-                    condition1 ? 10 : condition2 ? 10 : condition3 ? 10 : 0
+                    condition1
+                        ? 10
+                        : condition2
+                        ? 10
+                        : condition3
+                        ? 10
+                        : condition4
+                        ? 10
+                        : 0
                 }
-                offsetY={condition1 ? 20 : condition2 ? 0 : condition3 ? 0 : 0}
+                offsetY={
+                    condition1
+                        ? 10
+                        : condition2
+                        ? 10
+                        : condition3
+                        ? 10
+                        : condition4
+                        ? 0
+                        : 0
+                }
                 closeComponent={this.hideListPicker}
             >
                 <CollectionPicker
@@ -1258,7 +1281,7 @@ export default class Ribbon extends Component<Props, State> {
                         <PrimaryAction
                             size={'medium'}
                             type="tertiary"
-                            label={'Share'}
+                            label={'Cite'}
                             fontColor={'greyScale8'}
                             onClick={null}
                             icon={'invite'}

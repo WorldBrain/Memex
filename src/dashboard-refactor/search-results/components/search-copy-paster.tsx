@@ -49,7 +49,7 @@ class SearchCopyPaster extends React.Component<Props> {
         if (this.props.isCopyPasterShown) {
             return (
                 <PopoutBox
-                    placement={'bottom'}
+                    placement={'bottom-end'}
                     offsetX={10}
                     closeComponent={
                         !this.state.preventClosingBcEditState &&
@@ -73,6 +73,7 @@ class SearchCopyPaster extends React.Component<Props> {
                     tooltipText={'Copy Search Results'}
                     placement="bottom"
                     getPortalRoot={this.props.getRootElement}
+                    targetElementRef={this.copypasterButtonRef.current}
                 >
                     <Icon
                         filePath={icons.copy}

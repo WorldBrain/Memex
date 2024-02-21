@@ -185,10 +185,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
     renderTooltip = () => {
         return (
             <PopoutBox
-                placement="top-start"
+                placement="bottom-end"
                 targetElementRef={this.tooltipButtonRef.current}
                 closeComponent={() => this.setState({ showTooltip: false })}
-                offsetX={10}
+                offsetX={20}
                 strategy="fixed"
                 getPortalRoot={this.props.getRootElement}
             >
@@ -389,11 +389,14 @@ export class AICounterIndicator extends React.Component<Props, State> {
                     }
                     getPortalRoot={this.props.getRootElement}
                 >
-                    <Icon
+                    <PrimaryAction
+                        label="Add API Key"
+                        type="secondary"
+                        size="medium"
+                        fullWidth
                         icon="key"
-                        heightAndWidth="22px"
                         onClick={() => this.setState({ showTooltip: true })}
-                        containerRef={this.tooltipButtonRef}
+                        innerRef={this.tooltipButtonRef}
                     />
                 </TooltipBox>
             </>

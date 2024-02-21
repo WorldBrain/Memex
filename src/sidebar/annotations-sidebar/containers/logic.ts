@@ -2903,8 +2903,8 @@ export class SidebarContainerLogic extends UILogic<
 
         const isPagePDF =
             fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
-        const openAIKey = (await this.syncSettings.openAI.get('apiKey')).trim()
-        const hasAPIKey = openAIKey && openAIKey.trim().startsWith('sk-')
+        const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
+        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
         if (!hasAPIKey) {
             let canQueryAI = false

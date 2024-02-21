@@ -199,6 +199,7 @@ export default class PageResultView extends PureComponent<Props> {
                     break
                 case 'Enter':
                     if (event.shiftKey) {
+                        event.stopPropagation()
                         // Perform action for "shift+Enter" key
                         const itemData = {
                             url: this.props.normalizedUrl,
@@ -210,7 +211,6 @@ export default class PageResultView extends PureComponent<Props> {
                         } else {
                             this.props.selectItem(itemData, false)
                         }
-                        event.stopPropagation()
                     } else {
                         // Perform action for "Enter" key
                         event.stopPropagation()
@@ -1012,8 +1012,6 @@ const NoteCounter = styled.span`
     padding: 2px 10px;
     background: ${(props) => props.theme.colors.headerGradient};
     text-align: center;
-    position: absolute;
-    right: 0;
 `
 
 const SearchResultsHighlights = styled.div`

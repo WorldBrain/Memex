@@ -1635,8 +1635,13 @@ export class AnnotationsSidebar extends React.Component<
             contentType = 'page'
         }
 
-        let InstructionsTitlePlaceholder =
-            'Summarise or ask questions about this page'
+        let InstructionsTitlePlaceholder: Element | string = (
+            <span>
+                Summarise or ask questions about
+                <br />
+                this page or selected text
+            </span>
+        )
         let instructionsSubTitlePlaceholder =
             'Just type in a question or pick one of the templates'
 
@@ -2265,6 +2270,9 @@ export class AnnotationsSidebar extends React.Component<
                                         keepSelectedState
                                         getRootElement={
                                             this.props.getRootElement
+                                        }
+                                        renderAICounter={
+                                            this.props.renderAICounter
                                         }
                                     />
                                 </SummaryActionsButton>
@@ -3520,7 +3528,7 @@ export class AnnotationsSidebar extends React.Component<
                 {shareMenuAnnotationInstanceId != null && (
                     <PopoutBox
                         targetElementRef={instanceRefs.shareMenuBtn.current}
-                        placement="left"
+                        placement="bottom-start"
                         strategy="fixed"
                         closeComponent={() =>
                             this.props.setShareMenuAnnotationInstance(null)
@@ -5040,6 +5048,7 @@ const DropDown = styled.div`
     border-radius: 0 0 6px 6px;
     outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     min-width: 100px;
+    flex: 1;
 `
 
 const RemoveTemplateIconBox = styled.div`
@@ -5092,7 +5101,7 @@ const QueryContainer = styled.div<{
     AIDropDownShown: boolean
 }>`
     height: fit-content;
-    padding: 15px 15px 10px 15px;
+    padding: 5px 15px 10px 15px;
     display: flex;
     flex-direction: column;
     z-index: 102;
