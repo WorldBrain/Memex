@@ -61,7 +61,7 @@ export default class SpaceLinks extends React.PureComponent<Props> {
         return (
             <ShareSectionContainer>
                 {this.props.inviteLinks.map(({ link, roleID }, linkIdx) => (
-                    <ListItem zIndex={10 - linkIdx}>
+                    <ListItem zIndex={10 - linkIdx} key={link}>
                         <TooltipBox
                             placement={'bottom'}
                             tooltipText={

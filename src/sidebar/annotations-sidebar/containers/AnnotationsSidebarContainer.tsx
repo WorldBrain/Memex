@@ -59,7 +59,6 @@ import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/com
 import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
-import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
