@@ -64,6 +64,14 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
     }
 
     renderAuthForm() {
+        const showLoginButton =
+            this.state.passwordMatch &&
+            this.state.email.includes('@') &&
+            this.state.email.includes('.') &&
+            this.state.displayName.length >= 2 &&
+            this.state.password.length > 0 &&
+            this.state.passwordConfirm.length > 0
+
         if (this.state.mode === 'signup') {
             return (
                 <StyledAuthDialog>
@@ -231,37 +239,22 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                     </>
                                 )}
                                 <ConfirmContainer>
-                                    <PrimaryAction
-                                        onClick={() => {
-                                            this.processEvent(
-                                                'emailPasswordConfirm',
-                                                null,
-                                            )
-                                        }}
-                                        disabled={
-                                            !(
-                                                this.state.passwordMatch &&
-                                                this.state.email.includes(
-                                                    '@',
-                                                ) &&
-                                                this.state.email.includes(
-                                                    '.',
-                                                ) &&
-                                                this.state.displayName.length >=
-                                                    2 &&
-                                                this.state.password.length >
-                                                    0 &&
-                                                this.state.passwordConfirm
-                                                    .length > 0
-                                            )
-                                        }
-                                        label={'Sign Up'}
-                                        size={'large'}
-                                        type={'primary'}
-                                        fullWidth
-                                        iconPosition="right"
-                                        icon={'longArrowRight'}
-                                    />
+                                    {showLoginButton && (
+                                        <PrimaryAction
+                                            onClick={() => {
+                                                this.processEvent(
+                                                    'emailPasswordConfirm',
+                                                    null,
+                                                )
+                                            }}
+                                            label={'Sign Up'}
+                                            size={'large'}
+                                            type={'primary'}
+                                            fullWidth
+                                            iconPosition="right"
+                                            icon={'longArrowRight'}
+                                        />
+                                    )}
                                 </ConfirmContainer>
                                 {this.state.error && (
                                     <AuthErrorMessage>
@@ -725,8 +718,9 @@ const DisplayNameContainer = styled.div`
 
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 14px;
+    font-size: 18px;
     text-align: center;
+    margin-top: 10px;
 `
 
 const FeatureInfoBox = styled.div`
@@ -739,6 +733,11 @@ const FeatureInfoBox = styled.div`
 
 const ConfirmContainer = styled.div`
     margin-top: 15px;
+
+    & > * {
+        transition: opacity 0.3s ease-in-out;
+        opacity: 1;
+    }
 `
 const TextInputContainer = styled.div`
     display: flex;
@@ -746,7 +745,7 @@ const TextInputContainer = styled.div`
     grid-gap: 10px;
     align-items: center;
     justify-content: flex-start;
-    background: ${(props) => props.theme.colors.greyScale2};
+    background: ${(props) => props.theme.colors.greyScale1};
     height: 44px;
     border-radius: 8px;
     padding: 0 15px;

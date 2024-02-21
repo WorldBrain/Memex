@@ -494,29 +494,35 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <PageNotesBox bottom="10px" left="10px">
-                <AnnotationCreate
-                    autoFocus={false}
-                    comment={newNoteForm.inputValue}
-                    lists={lists}
-                    getListDetailsById={this.props.getListDetailsById}
-                    {...boundAnnotCreateProps}
-                    contextLocation={'dashboard'}
-                    renderSpacePicker={() => (
-                        <CollectionPicker
-                            showPageLinks
-                            annotationsCache={this.props.annotationsCache}
-                            initialSelectedListIds={() => lists}
-                            selectEntry={boundAnnotCreateProps.addPageToList}
-                            unselectEntry={
-                                boundAnnotCreateProps.removePageFromList
-                            }
-                            normalizedPageUrlToFilterPageLinksBy={normalizedUrl}
-                            analyticsBG={this.props.analyticsBG}
-                        />
-                    )}
-                    imageSupport={this.props.imageSupport}
-                    getRootElement={this.props.getRootElement}
-                />
+                <PageNotesContainer>
+                    <AnnotationCreate
+                        autoFocus={false}
+                        comment={newNoteForm.inputValue}
+                        lists={lists}
+                        getListDetailsById={this.props.getListDetailsById}
+                        {...boundAnnotCreateProps}
+                        contextLocation={'dashboard'}
+                        renderSpacePicker={() => (
+                            <CollectionPicker
+                                showPageLinks
+                                annotationsCache={this.props.annotationsCache}
+                                initialSelectedListIds={() => lists}
+                                selectEntry={
+                                    boundAnnotCreateProps.addPageToList
+                                }
+                                unselectEntry={
+                                    boundAnnotCreateProps.removePageFromList
+                                }
+                                normalizedPageUrlToFilterPageLinksBy={
+                                    normalizedUrl
+                                }
+                                analyticsBG={this.props.analyticsBG}
+                            />
+                        )}
+                        imageSupport={this.props.imageSupport}
+                        getRootElement={this.props.getRootElement}
+                    />
+                </PageNotesContainer>
                 <NoteResultContainer>
                     {/* {noteIds[notesType].length > 0 && (
                         <SortButtonContainer>
@@ -1191,7 +1197,9 @@ const NoteResultContainer = styled.div`
     justify-content: flex-start;
     align-items: flex-start;
     width: fill-available;
+    grid-gap: 10px;
 `
+
 const PaginationLoaderBox = styled.div`
     margin-top: -30px;
 `
@@ -1478,6 +1486,18 @@ const PageNotesBox = styled(Margin)`
     z-index: 4;
     position: relative;
     align-items: flex-start;
+`
+
+const PageNotesContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: fill-available;
+    /* padding: 10px; */
+    outline: 1px solid ${(props) => props.theme.colors.greyScale4}80;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    margin-top: 5px;
 `
 
 const Loader = styled.div`
