@@ -427,32 +427,46 @@ export default class PageResultView extends PureComponent<Props> {
         }
 
         return (
-            <BulkSelectButtonBox>
-                <CheckboxNotInput
-                    isChecked={this.props.isBulkSelected}
-                    onClick={(event: React.MouseEvent<HTMLInputElement>) => {
-                        if (event.nativeEvent.shiftKey) {
-                            this.props.shiftSelectItem()
-                            event.preventDefault()
-                            event.stopPropagation()
-                        } else {
-                            const itemData = {
-                                url: this.props.normalizedUrl,
-                                title: this.props.fullTitle,
-                                type: 'page',
-                            }
-                            if (this.props.isBulkSelected) {
-                                this.props.selectItem(itemData, true)
+            <TooltipBox
+                tooltipText={
+                    <span>
+                        Multi Select Items
+                        <br />
+                        <strong>Shift+Enter</strong>when item in focus
+                    </span>
+                }
+                placement="bottom"
+                getPortalRoot={this.props.getRootElement}
+            >
+                <BulkSelectButtonBox>
+                    <CheckboxNotInput
+                        isChecked={this.props.isBulkSelected}
+                        onClick={(
+                            event: React.MouseEvent<HTMLInputElement>,
+                        ) => {
+                            if (event.nativeEvent.shiftKey) {
+                                this.props.shiftSelectItem()
+                                event.preventDefault()
+                                event.stopPropagation()
                             } else {
-                                this.props.selectItem(itemData, false)
+                                const itemData = {
+                                    url: this.props.normalizedUrl,
+                                    title: this.props.fullTitle,
+                                    type: 'page',
+                                }
+                                if (this.props.isBulkSelected) {
+                                    this.props.selectItem(itemData, true)
+                                } else {
+                                    this.props.selectItem(itemData, false)
+                                }
+                                event.preventDefault()
+                                event.stopPropagation()
                             }
-                            event.preventDefault()
-                            event.stopPropagation()
-                        }
-                    }}
-                    size={16}
-                />
-            </BulkSelectButtonBox>
+                        }}
+                        size={16}
+                    />
+                </BulkSelectButtonBox>
+            </TooltipBox>
         )
     }
 
@@ -550,7 +564,7 @@ export default class PageResultView extends PureComponent<Props> {
             },
             {
                 key: 'ask-ai-on-page-btn',
-                image: 'feed',
+                image: 'stars',
                 onClick: (event) => {
                     this.props.onAIResultBtnClick(event)
                 },

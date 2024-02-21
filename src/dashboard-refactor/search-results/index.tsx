@@ -1169,9 +1169,9 @@ const ResultsScrollContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-items: center;
+    padding: 2px;
     padding-bottom: 100px;
     justify-content: flex-start;
-    padding-top: 2px;
 
     &::-webkit-scrollbar {
         display: none;

@@ -3714,7 +3714,7 @@ export class SidebarContainerLogic extends UILogic<
             const rendered = await this.options.copyPasterBG.renderTemplate({
                 id,
                 annotationUrls: annotationUrls,
-                normalizedPageUrls: normalizedPageUrls,
+                normalizedPageUrls: normalizedPageUrls ?? null,
             })
 
             if (item) {
@@ -3753,13 +3753,18 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
 
-        const annotationURL = await this.options.annotationsCache.annotations
-            .byId[event.noteId].localId
+        const annotationURL = this.options.annotationsCache.annotations.byId[
+            event.noteId
+        ]?.localId
+        const pageUrl = this.options.annotationsCache.annotations.byId[
+            event.noteId
+        ]?.normalizedPageUrl
 
         let templateCopyResult
+
         templateCopyResult = await this.handleDefaultTemplateCopy(
             [annotationURL],
-            null,
+            [pageUrl],
         )
 
         if (templateCopyResult) {

@@ -830,11 +830,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.setState({ showCopyPaster: true })
                     }
                 },
-                onMouseDown: (event) => {
-                    if (event.shiftKey && this.state.showCopyPaster) {
-                        this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
-                    }
-                },
                 tooltipText: (
                     <span>
                         <strong>Click</strong> to show copy templates. <br />

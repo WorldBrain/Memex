@@ -100,6 +100,7 @@ import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/compon
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import PageCitations from 'src/citations/PageCitations'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -316,6 +317,7 @@ interface AnnotationsSidebarState {
     feedSourcesTextAreaContent?: string
     fileDragOverFeedField?: boolean
     showSelectedAITextButtons?: boolean
+    pageLinkCreationLoading: TaskState
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -368,6 +370,7 @@ export class AnnotationsSidebar extends React.Component<
         feedSourcesTextAreaContent: '',
         fileDragOverFeedField: false,
         showSelectedAITextButtons: false,
+        pageLinkCreationLoading: 'pristine',
     }
 
     async addYoutubeTimestampToEditor(commentText) {
@@ -1397,7 +1400,10 @@ export class AnnotationsSidebar extends React.Component<
                         fullPageUrl: this.props.fullPageUrl,
                         getRootElement: this.props.getRootElement,
                         showSpacesTab: this.props.showSpacesTab,
-                        setLoadingState: this.props.setload,
+                        setLoadingState: (loadingState) =>
+                            this.setState({
+                                pageLinkCreationLoading: loadingState,
+                            }),
                     }}
                     getRootElement={this.props.getRootElement}
                 />
@@ -3788,32 +3794,119 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <TopBarContainer>
                 <TopBarTabsContainer>
-                    <PrimaryAction
-                        onClick={this.props.setActiveTab('annotations')}
-                        label={'Notes'}
-                        active={
-                            this.props.activeTab === 'annotations' ||
-                            this.props.activeTab === 'spaces'
-                        }
-                        type={'menuBar'}
+                    <TopBarButtonContainer>
+                        <PrimaryAction
+                            onClick={this.props.setActiveTab('annotations')}
+                            label={'Notes'}
+                            active={
+                                this.props.activeTab === 'annotations' ||
+                                this.props.activeTab === 'spaces'
+                            }
+                            type={'menuBar'}
+                            size={'medium'}
+                            padding={'3px 6px'}
+                            height={'30px'}
+                            icon={'commentAdd'}
+                        />{' '}
+                    </TopBarButtonContainer>
+
+                    <TopBarButtonContainer>
+                        <PrimaryAction
+                            onClick={this.props.setActiveTab('summary')}
+                            label={'Ask'}
+                            active={this.props.activeTab === 'summary'}
+                            type={'menuBar'}
+                            size={'medium'}
+                            iconPosition={'right'}
+                            padding={'3px 6px'}
+                            height={'30px'}
+                            icon={'stars'}
+                        />
+                    </TopBarButtonContainer>
+
+                    <TopBarButtonContainer>
+                        <PrimaryAction
+                            label={'Cite'}
+                            onClick={this.props.clickCreatePageLinkBtn}
+                            type="menuBar"
+                            iconColor="prime1"
+                            fontColor="white"
+                            size="medium"
+                            innerRef={this.sharePageLinkButtonRef}
+                            icon="copy"
+                            padding={'0px 12px 0 6px'}
+                            height={'30px'}
+                            hoverState={this.props.showPageLinkShareMenu}
+                        />
+                        {this.state.pageLinkCreationLoading === 'running' && (
+                            <LoadingBox2>
+                                <TooltipBox
+                                    tooltipText={
+                                        <span>
+                                            You can already copy & share the
+                                            links but the data is still
+                                            uploading
+                                        </span>
+                                    }
+                                    placement="bottom"
+                                    width="180px"
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <LoadingIndicator size={14} />
+                                </TooltipBox>
+                            </LoadingBox2>
+                        )}
+                    </TopBarButtonContainer>
+
+                    {/* <PrimaryAction
+                        onClick={(event) => {
+                            this.props.setActiveTab('feed')(event)
+                            this.props.clickFeedActivityIndicator()
+                        }}
+                        label={'Feed'}
+                        active={this.props.activeTab === 'feed'}
+                        type={'tertiary'}
                         size={'medium'}
+                        iconPosition={'right'}
                         padding={'3px 6px'}
                         height={'30px'}
-                        icon={'commentAdd'}
-                    />
+                        icon={
+                            this.props.hasFeedActivity ? (
+                                <TooltipBox
+                                    tooltipText={'Has new feed updates'}
+                                    placement={'bottom'}
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <LoadingBox hasToolTip>
+                                        <PageActivityIndicator active />
+                                    </LoadingBox>
+                                </TooltipBox>
+                            ) : (
+                                <LoadingBox>
+                                    <PageActivityIndicator active={false} />
+                                </LoadingBox>
+                            )
+                        }
+                    /> */}
                     {this.props.sidebarContext === 'in-page' &&
                         this.props.rabbitHoleBetaFeatureAccess ===
                             'onboarded' && (
-                            <PrimaryAction
-                                onClick={this.props.setActiveTab('rabbitHole')}
-                                label={'RabbitHole'}
-                                active={this.props.activeTab === 'rabbitHole'}
-                                type={'tertiary'}
-                                size={'medium'}
-                                iconPosition={'right'}
-                                padding={'3px 6px'}
-                                height={'30px'}
-                            />
+                            <TopBarButtonContainer>
+                                <PrimaryAction
+                                    onClick={this.props.setActiveTab(
+                                        'rabbitHole',
+                                    )}
+                                    label={'RabbitHole'}
+                                    active={
+                                        this.props.activeTab === 'rabbitHole'
+                                    }
+                                    type={'tertiary'}
+                                    size={'medium'}
+                                    iconPosition={'right'}
+                                    padding={'3px 6px'}
+                                    height={'30px'}
+                                />
+                            </TopBarButtonContainer>
                         )}
                     {/* <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
@@ -3834,62 +3927,6 @@ export class AnnotationsSidebar extends React.Component<
                                 <TooltipBox
                                     tooltipText={'Has annotations by others'}
                                     placement={'bottom'}
-                                >
-                                    <LoadingBox hasToolTip>
-                                        <PageActivityIndicator active />
-                                    </LoadingBox>
-                                </TooltipBox>
-                            ) : (
-                                <LoadingBox>
-                                    <PageActivityIndicator active={false} />
-                                </LoadingBox>
-                            )
-                        }
-                    /> */}
-                    <PrimaryAction
-                        onClick={this.props.setActiveTab('summary')}
-                        label={'Ask'}
-                        active={this.props.activeTab === 'summary'}
-                        type={'menuBar'}
-                        size={'medium'}
-                        iconPosition={'right'}
-                        padding={'3px 6px'}
-                        height={'30px'}
-                        icon={'stars'}
-                    />
-
-                    <PrimaryAction
-                        label={'Cite'}
-                        onClick={this.props.clickCreatePageLinkBtn}
-                        type="menuBar"
-                        iconColor="prime1"
-                        fontColor="white"
-                        size="medium"
-                        innerRef={this.sharePageLinkButtonRef}
-                        icon="copy"
-                        padding={'0px 12px 0 6px'}
-                        height={'30px'}
-                        hoverState={this.props.showPageLinkShareMenu}
-                    />
-
-                    {/* <PrimaryAction
-                        onClick={(event) => {
-                            this.props.setActiveTab('feed')(event)
-                            this.props.clickFeedActivityIndicator()
-                        }}
-                        label={'Feed'}
-                        active={this.props.activeTab === 'feed'}
-                        type={'tertiary'}
-                        size={'medium'}
-                        iconPosition={'right'}
-                        padding={'3px 6px'}
-                        height={'30px'}
-                        icon={
-                            this.props.hasFeedActivity ? (
-                                <TooltipBox
-                                    tooltipText={'Has new feed updates'}
-                                    placement={'bottom'}
-                                    getPortalRoot={this.props.getRootElement}
                                 >
                                     <LoadingBox hasToolTip>
                                         <PageActivityIndicator active />
@@ -6042,4 +6079,15 @@ const SummaryActionsButton = styled.div<{
                 background-color: none;
             }
         `}
+`
+const TopBarButtonContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fill-available;
+    width: -moz-available;
+`
+const LoadingBox2 = styled.div`
+    position: absolute;
+    right: 25px;
 `
