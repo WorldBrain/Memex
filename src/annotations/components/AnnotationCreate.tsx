@@ -97,9 +97,9 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     async componentDidMount() {
-        if (this.props.autoFocus) {
-            this.focus()
-        }
+        // if (this.props.autoFocus) {
+        //     this.focus()
+        // }
         await this.setYoutubeKeyboardShortcut()
 
         if (this.props.sidebarEvents) {

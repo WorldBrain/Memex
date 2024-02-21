@@ -481,7 +481,43 @@ export class AnnotationsSidebar extends React.Component<
         })
     }
     focusCreateForm = () => {
-        this.setState({ autoFocusCreateForm: true })
+        // Initial instructions context: We need to check if the sidebar container is already within the viewport.
+        // If it's not, we attempt to autofocus the create form up to 3 times every 100ms until it's within the viewport or we give up.
+        const attemptFocus = (attempt = 1) => {
+            console.log(`Attempt ${attempt} to autofocus create form.`)
+            // Get the document's width to compare with the sidebar's left boundary.
+            const docWidth = document.documentElement.clientWidth
+
+            const rootElement = this.props.getRootElement()
+
+
+            const sidebarContainer = rootElement.querySelector(
+                '#annotationSidebarContainer',
+            )
+
+            if (!sidebarContainer) {
+                console.error('Sidebar container not found')
+                return
+            }
+            const sidebarRect = sidebarContainer.getBoundingClientRect()
+            // Check if the sidebar's left boundary is within the viewport.
+            if (docWidth > sidebarRect.left) {
+                console.log(
+                    'Sidebar is within the viewport. Setting autofocus state.',
+                )
+                this.setState({ autoFocusCreateForm: true })
+            } else if (attempt < 3) {
+                console.log('Sidebar is not within the viewport. Retrying...')
+                // Retry after 100ms if we have attempts left.
+                setTimeout(() => attemptFocus(attempt + 1), 100)
+            } else {
+                console.error(
+                    'Failed to autofocus create form after 3 attempts.',
+                )
+            }
+        }
+        // Start the autofocus attempt process.
+        attemptFocus()
     }
     focusEditNoteForm = (annotationId: string) =>
         (this.annotationEditRefs[annotationId]?.current).focusEditForm()
@@ -3450,7 +3486,9 @@ export class AnnotationsSidebar extends React.Component<
                                 By Spaces{' '}
                             </SuggestionsSwitcherButton>
                         </SuggestionsListSwitcher>
-                        <AnnotationSectionScrollContainer>
+                        <AnnotationSectionScrollContainer
+                            id={'AnnotationSectionScrollContainer'}
+                        >
                             {this.props.activeTab === 'annotations' &&
                                 this.renderAnnotationsEditable(
                                     cacheUtils.getUserAnnotationsArray(
@@ -4418,6 +4456,8 @@ export class AnnotationsSidebar extends React.Component<
         if (!this.state.themeVariant) {
             return null
         }
+
+        console.log('sidebarContext', this.state.autoFocusCreateForm)
 
         return (
             <ResultBodyContainer
@@ -5470,6 +5510,7 @@ const TopAreaContainer = styled.div`
     width: fill-available;
     z-index: 1;
     padding: 5px 10px;
+            justify-content: flex-start;
 
     &::-webkit-scrollbar {
         display: none;
@@ -5657,17 +5698,18 @@ const AnnotationContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */
     padding: 0 10px;
     padding-bottom: 100px;
-    flex: 1;
     z-index: 10;
     position: relative;
     width: fill-available;
     width: -moz-available;
+    min-height: 1300%;
+    height: fit-content;
 
     scrollbar-width: none;
 
@@ -5910,6 +5952,7 @@ const AnnotationSectionScrollContainer = styled.div`
     overflow: scroll;
     width: fill-available;
     width: -moz-available;
+    height: 4000px;
 
     scrollbar-width: none;
 

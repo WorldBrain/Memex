@@ -8,7 +8,7 @@ const altKey = getKeyName({ key: 'alt' })
 export const KEYBOARDSHORTCUTS_DEFAULT_STATE: SyncSettingsByFeature['extension']['keyboardShortcuts'] = {
     shortcutsEnabled: true,
     openDashboardShortcut: altKey + '+f',
-    toggleSidebarShortcut: altKey + '+g',
+    toggleSidebarShortcut: altKey + '+d',
     toggleHighlightsShortcut: altKey + '+r',
     createAnnotationShortcut: altKey + '+a',
     copyHighlightLinkShortcut: altKey + '+l',

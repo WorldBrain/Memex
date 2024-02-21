@@ -845,6 +845,16 @@ export class SidebarContainerLogic extends UILogic<
             await this.setPageActivityState(this.fullPageUrl)
         })
 
+        // this is here bc the scrollheight of the sidebar for some reason goes down ever so slightly if there are a lot of annotations
+        // it'll make sure that the scroll container on load is on the top
+        const rootElement = this.options.getRootElement()
+        await sleepPromise(10)
+
+        rootElement.querySelector(
+            '#AnnotationSectionScrollContainer',
+        ).scrollTop = 0
+        ///
+
         if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
             const width = SIDEBAR_WIDTH_STORAGE_KEY
 

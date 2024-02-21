@@ -67,6 +67,13 @@ class AnnotationEdit extends React.Component<Props> {
 
     async componentDidMount() {
         await this.youtubeKeyboardShortcut()
+        this.editorRef?.setEditable(this.props?.isEditMode ?? false)
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.isEditMode !== this.props.isEditMode) {
+            this.editorRef?.setEditable(this.props?.isEditMode ?? false)
+        }
     }
 
     private editorRef: MemexEditorInstance
@@ -148,8 +155,6 @@ class AnnotationEdit extends React.Component<Props> {
     }
 
     render() {
-        this.editorRef?.setEditable(this.props?.isEditMode ?? false)
-
         return (
             <EditorContainer>
                 <MemexEditor
