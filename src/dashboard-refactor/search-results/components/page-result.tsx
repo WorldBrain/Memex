@@ -610,7 +610,7 @@ export default class PageResultView extends PureComponent<Props> {
                     </span>
                 ),
                 showKeyShortcut: this.props.isInFocus && 'D',
-                showNotesCounter: this.props.noteIds[this.props.notesType]
+                rightSideItem: this.props.noteIds[this.props.notesType]
                     ?.length > 0 && (
                     <NoteCounter>
                         {this.props.noteIds[

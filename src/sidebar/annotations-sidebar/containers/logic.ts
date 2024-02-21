@@ -2228,6 +2228,9 @@ export class SidebarContainerLogic extends UILogic<
             },
         } = previousState
 
+        if (!formData && event.shouldShare) {
+        }
+
         if (
             !formData ||
             annotationData?.creator?.id !== this.options.getCurrentUser()?.id ||

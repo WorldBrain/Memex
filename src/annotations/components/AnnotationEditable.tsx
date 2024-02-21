@@ -39,6 +39,8 @@ import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/compo
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { sleepPromise } from 'src/util/promises'
 import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
+import { Checkbox } from 'src/common-ui/components'
+import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -122,6 +124,8 @@ export interface AnnotationProps {
     highlightColorSettings?: string
     color?: RGBAColor
     getRootElement: () => HTMLElement
+    toggleAutoAdd: () => void
+    isAutoAddEnabled?: boolean
 }
 
 export interface AnnotationEditableEventProps {
@@ -150,6 +154,7 @@ interface State {
     showHighlightColorTooltip?: boolean
     currentHighlightColor?: RGBAColor
     defaultHighlightColor?: RGBAColor
+    showAutoAddMenu: boolean
 }
 
 export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
@@ -161,8 +166,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     private copyPasterButtonRef = React.createRef<HTMLDivElement>()
     private highlightsBarRef = React.createRef<HTMLDivElement>()
     private spacePickerBodyButtonRef = React.createRef<HTMLDivElement>()
+    private autoAddButtonRef = React.createRef<HTMLDivElement>()
 
     static MOD_KEY = getKeyName({ key: 'mod' })
+    static ALT_KEY = getKeyName({ key: 'alt' })
     static defaultProps: Pick<Props, 'hoverState' | 'tags' | 'lists'> = {
         tags: [],
         lists: [],
@@ -199,6 +206,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         showHighlightColorPicker: false,
         showHighlightColorTooltip: false,
         defaultHighlightColor: null,
+        showAutoAddMenu: false,
     }
 
     focusEditForm() {
@@ -261,34 +269,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         if (event.key === 'c' && (event.metaKey || event.ctrlKey)) {
             this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
             this.setState({ showCopyPaster: false })
-        }
-    }
-
-    private copyAnnotationToClipboard = () => {
-        const { body, comment } = this.props
-        const textToCopy = `Comment: ${comment || 'N/A'}\n\nBody: ${
-            body || 'N/A'
-        }`
-        navigator.clipboard.writeText(textToCopy).then(
-            () => {
-                console.log('Annotation copied to clipboard')
-            },
-            (err) => {
-                console.error('Could not copy annotation to clipboard: ', err)
-            },
-        )
-    }
-
-    private updateSpacePickerState(showState: ListPickerShowState) {
-        this.props.onSpacePickerToggle?.(showState)
-        if (this.state.showSpacePicker === 'hide') {
-            this.setState({
-                showSpacePicker: showState,
-            })
-        } else {
-            this.setState({
-                showSpacePicker: 'hide',
-            })
         }
     }
 
@@ -357,20 +337,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             hasHighlight: this.props.body?.length > 0,
             isEditing: this.props.isEditing,
             isActive: this.props.isActive,
-        }
-    }
-
-    private toggleTextTruncation() {
-        if (this.state.isTruncatedHighlight || this.state.isTruncatedNote) {
-            this.setState({
-                isTruncatedNote: false,
-                isTruncatedHighlight: false,
-            })
-        } else {
-            this.setState({
-                isTruncatedNote: true,
-                isTruncatedHighlight: true,
-            })
         }
     }
 
@@ -557,6 +523,146 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 </PopoutBox>
             )
         }
+    }
+
+    renderAutoAddDefaultSettings() {
+        if (this.state.showAutoAddMenu) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.autoAddButtonRef?.current}
+                    placement="bottom"
+                    width="320px"
+                    closeComponent={() =>
+                        this.setState({ showAutoAddMenu: false })
+                    }
+                    // offsetY={-100}
+                    // offsetX={-100}
+                    instaClose
+                    getPortalRoot={this.props.getRootElement}
+                >
+                    <AutoAddDefaultContainer>
+                        <DefaultCheckBoxContainer>
+                            <Checkbox
+                                key={33}
+                                id={'33'}
+                                width="fit-content"
+                                isChecked={this.props.isAutoAddEnabled === true}
+                                handleChange={() => this.props.toggleAutoAdd()}
+                                // isDisabled={!this.state.shortcutsEnabled}
+                                name={
+                                    this.props.isAutoAddEnabled
+                                        ? 'Is Default'
+                                        : 'Make Default'
+                                }
+                                label={
+                                    'Auto-adding default for new annotations'
+                                }
+                                fontSize={14}
+                                size={14}
+                                isLoading={this.props.isAutoAddEnabled == null}
+                            />
+                        </DefaultCheckBoxContainer>
+                        <TooltipTextBox>
+                            {this.props.isShared ? (
+                                <>
+                                    <strong>
+                                        <Icon
+                                            icon={'spread'}
+                                            color={'prime1'}
+                                            hoverOff
+                                            heightAndWidth="32px"
+                                        />
+                                        Added to all Spaces the document is in.
+                                    </strong>
+                                    For generally relevant annotations.
+                                    <KeyboardShortCutBox>
+                                        Do not add to all Spaces by using
+                                        <KeyboardShortcuts
+                                            keys={`shift+${AnnotationEditable.MOD_KEY}+enter`.split(
+                                                '+',
+                                            )}
+                                            size={'small'}
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
+                                        />
+                                    </KeyboardShortCutBox>
+                                </>
+                            ) : (
+                                <>
+                                    <strong>
+                                        Only added to Spaces
+                                        <br />
+                                        you manually put annotation in.
+                                    </strong>
+                                    <span>
+                                        For context specific annotations.
+                                        <br />
+                                        Setting auto-disables when you select
+                                        Spaces for indiviudal annotations.
+                                    </span>
+                                    <KeyboardShortCutBox>
+                                        Save & Auto-Add to all Spaces the page
+                                        is in
+                                        <KeyboardShortcuts
+                                            keys={`shift+${AnnotationEditable.MOD_KEY}+enter`.split(
+                                                '+',
+                                            )}
+                                            size={'small'}
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
+                                        />
+                                    </KeyboardShortCutBox>
+                                </>
+                            )}
+                        </TooltipTextBox>
+                    </AutoAddDefaultContainer>
+                </PopoutBox>
+            )
+        }
+    }
+
+    renderAutoAddedIndicator() {
+        return (
+            <AutoAddedIndicator ref={this.autoAddButtonRef}>
+                <TooltipBox
+                    tooltipText={
+                        this.props.isAutoAddEnabled ? (
+                            <span>
+                                Disable Auto-Add
+                                <br /> <strong>Shift+Click</strong>for options
+                            </span>
+                        ) : (
+                            <span>
+                                Enable Auto-Add
+                                <br /> <strong>Shift+Click</strong>for options
+                            </span>
+                        )
+                    }
+                    placement="bottom"
+                    getPortalRoot={this.props.getRootElement}
+                >
+                    <Icon
+                        heightAndWidth="24px"
+                        icon={'spread'}
+                        hoverOff
+                        color={this.props.isShared ? 'prime1' : 'greyScale3'}
+                        onClick={(event) => {
+                            event.stopPropagation()
+                            if (event.shiftKey) {
+                                this.setState({ showAutoAddMenu: true })
+                            } else {
+                                console.log('toggle auto add')
+                                this.props.annotationEditDependencies.onEditConfirm(
+                                    false,
+                                )(!this.props.isShared, !this.props.isShared)
+                            }
+                        }}
+                    />
+                </TooltipBox>
+            </AutoAddedIndicator>
+        )
     }
 
     renderDeleteScreen(footerDeps) {
@@ -783,33 +889,33 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 tooltipText: 'Add to Space(s)',
                 ButtonText: (
                     <NotesCounterContainer>
-                        <NoteCounter>
-                            <Icon
-                                heightAndWidth="24px"
-                                icon={'spread'}
-                                hoverOff
-                                color={
-                                    this.props.isShared
-                                        ? 'prime1'
-                                        : 'greyScale3'
-                                }
-                            />
-                        </NoteCounter>
-                        <NotesCounterTitle>
-                            <Icon
-                                heightAndWidth="16px"
-                                icon={'plus'}
-                                hoverOff
-                                color={this.props.isShared ? 'prime1' : null}
-                            />
-                            Add Space(s)
-                        </NotesCounterTitle>
+                        {this.displayLists?.length ? (
+                            <NotesCounterTitle>
+                                <NoteCounter>
+                                    {this.displayLists?.length}
+                                </NoteCounter>
+                                Spaces
+                            </NotesCounterTitle>
+                        ) : (
+                            <NotesCounterTitle>
+                                <Icon
+                                    heightAndWidth="16px"
+                                    icon={'plus'}
+                                    hoverOff
+                                    color={
+                                        this.props.isShared ? 'prime1' : null
+                                    }
+                                />
+                                Add Space(s)
+                            </NotesCounterTitle>
+                        )}
                     </NotesCounterContainer>
                 ),
                 active:
                     this.props.shareMenuAnnotationInstanceId ===
                     this.props.unifiedId,
                 buttonRef: this.shareMenuButtonRef,
+                leftSideItem: this.renderAutoAddedIndicator(),
             },
             {
                 key: 'copy-paste-note-btn',
@@ -1298,15 +1404,6 @@ const ShareMenuContainer = styled.div`
     display: flex;
 `
 
-const HighlightContent = styled.div`
-    position: relative;
-    width: fill-available;
-`
-
-const TooltipBoxContainer = styled(TooltipBox)`
-    width: 5px;
-`
-
 const Highlightbar = styled.div<{ barColor: string }>`
     background: ${(props) => props.theme.colors.prime1};
     margin-right: 10px;
@@ -1436,21 +1533,6 @@ const ActionBox = styled.div`
     top: 15px;
 `
 
-const HighlightTextBox = styled.div`
-    position: relative;
-`
-
-const HighlightText = styled.span`
-    /* box-decoration-break: clone;
-    overflow: hidden;
-    line-height: 25px;
-    font-style: normal;
-    border-radius: 3px;
-    background-color: ${(props) => props.theme.colors.highlightColorDefault};
-    color: ${(props) => props.theme.colors.black};
-    padding: 2px 5px; */
-`
-
 const HighlightStyled = styled.div<{ hasComment: boolean }>`
     font-weight: 400;
     font-size: 14px;
@@ -1552,16 +1634,6 @@ const ContentContainer = styled.div<{ isEditMode: boolean }>`
             /* margin-bottom: 10px; */
         `}
 `
-
-const DeleteConfirmStyled = styled.span`
-    box-sizing: border-box;
-    font-weight: 800;
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.white};
-    margin-right: 10px;
-    text-align: right;
-`
-
 const BtnContainerStyled = styled.div`
     display: flex;
     flex-direction: row;
@@ -1616,13 +1688,48 @@ const NotesCounterTitle = styled.span`
 `
 
 const NoteCounter = styled.span`
-    color: ${(props) => props.theme.colors.black};
+    color: ${(props) => props.theme.colors.prime1};
     font-weight: 400;
-    font-size: 12px;
-    margin-left: -15px;
-    border-radius: 5px;
-    padding: 2px 10px;
+    font-size: 14px;
     text-align: center;
-    position: absolute;
-    left: 0;
+`
+
+const AutoAddedIndicator = styled.div``
+const AutoAddDefaultContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    grid-gap: 15px;
+`
+
+const DefaultCheckBoxContainer = styled.div`
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+    height: 20px;
+    padding: 15px 15px 15px 15px;
+`
+
+const KeyboardShortCutBox = styled.div`
+    display: flex;
+    justify-content: center;
+    margin-top: 10px;
+    padding: 15px 5px;
+    align-items: center;
+    height: 30px;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    grid-gap: 15px;
+`
+const TooltipTextBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    grid-gap: 5px;
+    justify-content: center;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 14px;
+    text-align: center;
+    grid-gap: 10px;
+    padding: 15px 15px 8px 15px;
 `

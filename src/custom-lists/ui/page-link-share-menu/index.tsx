@@ -14,7 +14,7 @@ import { helpIcon } from 'src/common-ui/components/design-library/icons'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface Props extends Dependencies {
-    showSpacesTab: (pageUrl) => void
+    showSpacesTab?: (pageUrl) => void
     getRootElement: () => HTMLElement
 }
 

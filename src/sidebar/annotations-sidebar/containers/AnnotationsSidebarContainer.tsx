@@ -64,6 +64,7 @@ import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import PageCitations from 'src/citations/PageCitations'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -316,12 +317,15 @@ export class AnnotationsSidebarContainer<
             },
             onShareClick: (mouseEvent) =>
                 // TODO: work out if this is needed/how to unfiy with editAnnotation
-                this.processEvent('editAnnotation', {
-                    instanceLocation,
-                    unifiedAnnotationId,
-                    shouldShare: true,
-                    // mouseEvent,
-                }),
+                {
+                    console.log('Share clicked')
+                    this.processEvent('editAnnotation', {
+                        instanceLocation,
+                        unifiedAnnotationId,
+                        shouldShare: true,
+                        // mouseEvent,
+                    })
+                },
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
@@ -550,12 +554,37 @@ export class AnnotationsSidebarContainer<
             return
         }
         return (
-            <PageNotesCopyPaster
-                copyPasterBG={this.props.copyPaster}
-                annotationUrls={[annotation.localId]}
-                normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
-                getRootElement={this.props.getRootElement}
-            />
+            <>
+                <PageCitations
+                    annotationUrls={[annotation.localId]}
+                    copyPasterProps={{
+                        copyPasterBG: this.props.copyPaster,
+                        getRootElement: this.props.getRootElement,
+                    }}
+                    pageLinkProps={{
+                        authBG: this.props.authBG,
+                        analyticsBG: this.props.analyticsBG,
+                        annotationsCache: this.props.annotationsCache,
+                        contentSharingBG: this.props.contentSharingBG,
+                        contentSharingByTabsBG: this.props
+                            .contentSharingByTabsBG,
+                        copyToClipboard: this.props.copyToClipboard,
+                        fullPageUrl: this.props.fullPageUrl,
+                        getRootElement: this.props.getRootElement,
+                    }}
+                    annotationShareProps={{
+                        isForAnnotation: true,
+                    }}
+                    getRootElement={this.props.getRootElement}
+                    syncSettingsBG={this.props.syncSettingsBG}
+                />
+                {/* <PageNotesCopyPaster
+                    copyPasterBG={this.props.copyPaster}
+                    annotationUrls={[annotation.localId]}
+                    normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
+                    getRootElement={this.props.getRootElement}
+                /> */}
+            </>
         )
     }
 

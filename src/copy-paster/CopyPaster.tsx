@@ -29,7 +29,7 @@ interface State {
 const md = new MarkdownIt()
 export interface Props {
     initTemplates?: Template[]
-    onClickOutside: React.MouseEventHandler
+    onClickOutside?: React.MouseEventHandler
     renderTemplate: (id: number) => Promise<string>
     renderPreview: (
         template: Template,

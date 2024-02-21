@@ -8,16 +8,23 @@ import PageLinkShareMenuContainer, {
 } from 'src/custom-lists/ui/page-link-share-menu'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { Checkbox } from 'src/common-ui/components'
+import ShareAnnotationMenu from 'src/overview/sharing/components/ShareAnnotationMenu'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 export interface Props {
     copyPasterProps: Omit<CopyPasterProps, 'renderTemplate' | 'renderPreview'>
     pageLinkProps: PageLinkProps
+    annotationShareProps?: {
+        isForAnnotation?: boolean
+    }
     annotationUrls: string[]
     getRootElement: () => HTMLElement
+    syncSettingsBG?: RemoteSyncSettingsInterface
 }
 
 interface State {
@@ -122,6 +129,17 @@ export default class PageCitations extends React.PureComponent<Props, State> {
                         renderPreview={this.renderPreview}
                         renderTemplate={this.renderTemplate}
                     />
+                ) : this.props.annotationShareProps?.isForAnnotation ? (
+                    <>
+                        <ShareAnnotationMenu
+                            getRootElement={this.props.getRootElement}
+                            annotationUrl={this.props.annotationUrls[0]}
+                            contentSharingBG={
+                                this.props.pageLinkProps.contentSharingBG
+                            }
+                            syncSettingsBG={this.props.syncSettingsBG}
+                        />
+                    </>
                 ) : (
                     <PageLinkShareMenuContainer
                         setLoadingState={this.setLoadingState}
@@ -167,4 +185,38 @@ const ButtonContainer = styled.div`
 const LoadingBox = styled.div`
     position: absolute;
     right: 15px;
+`
+const TopArea = styled.div<{ context: string }>`
+    padding: 10px 15px 10px 15px;
+    height: fit-content;
+    margin-bottom: 20px;
+    grid-gap: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &:first-child {
+        padding: 0px 15px 0px 15px;
+    }
+
+    ${(props) =>
+        props.context === 'AllNotesShare' &&
+        css`
+            height: fit-content;
+
+            &:first-child {
+                padding: unset;
+                margin-bottom: 0px;
+            }
+        `};
+`
+
+const LinkCopierBox = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 5px 0;
+    background-color: ${(props) => props.theme.colors.greyScale1}70;
+    border-radius: 5px;
 `

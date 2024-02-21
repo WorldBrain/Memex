@@ -1,5 +1,5 @@
 import React from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 
 import { executeReactStateUITask } from 'src/util/ui-logic'
 import ShareAnnotationMenu from './components/ShareAnnotationMenu'
@@ -32,6 +32,10 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { Checkbox } from 'src/common-ui/components'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import SharePrivacyOption, {
+    Props as PrivacyOptionProps,
+} from './components/SharePrivacyOption'
+import Margin from '@worldbrain/memex-common/lib/common-ui/components/Margin'
 
 type SelectType = 'select' | 'unselect'
 
@@ -556,11 +560,45 @@ export default class SingleNoteShareMenu extends React.PureComponent<
         )
     }
 
+    privacyOptions = () => {
+        return [
+            {
+                icon: 'personFine',
+                title: 'Private',
+                hasProtectedOption: true,
+                onClick: this.handleSetPrivate,
+                isSelected: !this.props.isShared,
+                shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
+                description: (
+                    <>
+                        Private to you <br /> unless shared in specific Spaces
+                    </>
+                ),
+                getRootElement: this.props.getRootElement,
+            },
+            {
+                icon: 'globe',
+                title: 'Auto-Added',
+                hasProtectedOption: true,
+                onClick: this.handleSetShared,
+                isSelected: this.props.isShared,
+                shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
+                description: (
+                    <>
+                        For annotations relevant for many contexts Auto-shared
+                        to Spaces <br /> the page is added to{' '}
+                    </>
+                ),
+                getRootElement: this.props.getRootElement,
+            },
+        ]
+    }
+
     render() {
         return (
             <>
                 <>
-                    <ShareMenuContainer>
+                    {/* <ShareMenuContainer>
                         <ShareAnnotationMenu
                             link={this.state.link}
                             showLink={true}
@@ -578,48 +616,8 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             toggleAutoCreateLinkSetting={async () => {
                                 await this.toggleAutoCreateLinkSetting()
                             }}
-                            renderAutoAddDefaultSettings={this.renderAutoAddDefaultSettings()}
-                            showAutoAddMenu={(isShown) =>
-                                this.setState({
-                                    showAutoAddMenu: isShown,
-                                })
-                            }
-                            autoAddButtonRef={this.autoAddButtonRef}
                             autoShareState={this.state.autoShareState}
                             handleCreateLink={this.handleCreateLink}
-                            privacyOptions={[
-                                {
-                                    icon: 'personFine',
-                                    title: 'Private',
-                                    hasProtectedOption: true,
-                                    onClick: this.handleSetPrivate,
-                                    isSelected: !this.props.isShared,
-                                    shortcut: `${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description: (
-                                        <>
-                                            Private to you <br /> unless shared
-                                            in specific Spaces
-                                        </>
-                                    ),
-                                    getRootElement: this.props.getRootElement,
-                                },
-                                {
-                                    icon: 'globe',
-                                    title: 'Auto-Added',
-                                    hasProtectedOption: true,
-                                    onClick: this.handleSetShared,
-                                    isSelected: this.props.isShared,
-                                    shortcut: `shift+${SingleNoteShareMenu.MOD_KEY}+enter`,
-                                    description: (
-                                        <>
-                                            For annotations relevant for many
-                                            contexts Auto-shared to Spaces{' '}
-                                            <br /> the page is added to{' '}
-                                        </>
-                                    ),
-                                    getRootElement: this.props.getRootElement,
-                                },
-                            ]}
                             shortcutHandlerDict={{
                                 // 'mod+shift+enter': this.handleSetProtected,
                                 'mod+shift+enter': () =>
@@ -631,7 +629,64 @@ export default class SingleNoteShareMenu extends React.PureComponent<
                             }}
                             getRootElement={this.props.getRootElement}
                         />
-                    </ShareMenuContainer>
+                    </ShareMenuContainer> */}
+                    {/* <PrivacyContainer isLinkShown={this.props.showLink}>
+                        <SubtitleSection>
+                            <SectionTitle>Add to Spaces</SectionTitle>
+                            <AutoAddContainer
+                                onMouseEnter={() =>
+                                    this.setState({ showAutoAddMenu: true })
+                                }
+                                onMouseLeave={() => {
+                                    this.setState({ showAutoAddMenu: false })
+                                }}
+                                ref={this.autoAddButtonRef}
+                            >
+                                {this.renderAutoAddDefaultSettings}
+                                <Checkbox
+                                    key={13}
+                                    id={'13'}
+                                    isChecked={
+                                        this.privacyOptions()[1].isSelected
+                                    }
+                                    handleChange={() => {
+                                        this.privacyOptions()[1].isSelected
+                                            ? this.privacyOptions()[0].onClick()
+                                            : this.privacyOptions()[1].onClick()
+                                    }}
+                                    // isDisabled={!this.state.shortcutsEnabled}
+                                    name={'Boost'}
+                                    label={
+                                        <LabelContainer>
+                                            <Icon
+                                                icon={'spread'}
+                                                color={
+                                                    this.privacyOptions()[1]
+                                                        .isSelected
+                                                        ? 'prime1'
+                                                        : 'greyScale5'
+                                                }
+                                                hoverOff
+                                                heightAndWidth="22px"
+                                            />
+                                            Auto Add
+                                        </LabelContainer>
+                                    }
+                                    textPosition={'left'}
+                                    fontSize={14}
+                                    size={14}
+                                    isLoading={
+                                        this.state.autoShareState === 'running'
+                                    }
+                                />
+                            </AutoAddContainer>
+                        </SubtitleSection>
+                    </PrivacyContainer> */}
+                    <PrivacyOptionContainer>
+                        {/* {this.privacyOptions().map((props, i) => (
+                            <SharePrivacyOption key={i} {...props} />
+                        ))} */}
+                    </PrivacyOptionContainer>
                     <SpacepickerContainer>
                         <SpacePicker
                             {...this.props.spacePickerProps}
@@ -699,4 +754,104 @@ const KeyboardShortCutBox = styled.div`
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
     grid-gap: 15px;
+`
+
+const SubtitleSection = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 5px;
+    padding: 0 15px;
+`
+
+const AutoAddContainer = styled.div`
+    display: flex;
+    grid-gap: 2px;
+    align-items: center;
+    justify-content: flex-end;
+    flex-direction: row;
+`
+const LabelContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-direction: row;
+`
+
+const TopArea = styled.div<{ context: string }>`
+    padding: 10px 15px 10px 15px;
+    height: fit-content;
+    margin-bottom: 20px;
+    grid-gap: 5px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    &:first-child {
+        padding: 0px 15px 0px 15px;
+    }
+
+    ${(props) =>
+        props.context === 'AllNotesShare' &&
+        css`
+            height: fit-content;
+
+            &:first-child {
+                padding: unset;
+                margin-bottom: 0px;
+            }
+        `};
+`
+
+const LinkCopierBox = styled.div`
+    width: 100%;
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 5px 0;
+    background-color: ${(props) => props.theme.colors.greyScale1}70;
+    border-radius: 5px;
+`
+
+const LoadingBox = styled.div<{
+    height?: string
+    loaderPosition?: string
+    padding?: string
+}>`
+    width: 100%;
+    display: flex;
+    height: ${(props) => props.height || '100%'};
+    align-items: center;
+    justify-content: ${(props) => props.loaderPosition || 'center'};
+    padding: ${(props) => props.padding || 'unset'};
+`
+
+const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
+    width: 100%;
+`
+
+const SectionTitle = styled.div`
+    font-size: 14px;
+    font-weight: 700;
+    color: ${(props) => props.theme.colors.white};
+    white-space: nowrap;
+`
+
+const PrivacyTitle = styled.div`
+    font-size: 14px;
+    font-weight: 400;
+    margin-bottom: 10px;
+    color: ${(props) => props.theme.colors.greyScale4};
+    white-space: nowrap;
+    padding-left: 5px;
+`
+
+const PrivacyOptionContainer = styled(Margin)`
+    display: flex;
+    justify-content: space-between;
+    width: fill-available;
+    flex-direction: row;
+    align-items: center;
+    grid-gap: 4px;
 `
