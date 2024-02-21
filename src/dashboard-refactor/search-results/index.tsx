@@ -671,6 +671,7 @@ export default class SearchResultsContainer extends React.Component<
                                 showSpacesTab: this.props.showSpacesTab,
                                 fromDashboard: true,
                             }}
+                            getRootElement={this.props.getRootElement}
                         />
                     )}
                 />

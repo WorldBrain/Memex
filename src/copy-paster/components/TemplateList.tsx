@@ -97,11 +97,12 @@ const SectionCircle = styled.div`
     align-items: center;
 `
 
-const InfoText = styled.div`
+const InfoText = styled.div<{ margin?: string }>`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 300;
     text-align: center;
+    margin: ${(props) => props.margin};
 `
 const InfoTextTitle = styled.div`
     color: ${(props) => props.theme.colors.white};
@@ -186,12 +187,12 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                 <ContentBlock>
                     <Center>
                         <Icon
-                            filePath="checkRound"
+                            filePath="warning"
                             heightAndWidth="30px"
                             hoverOff
                         />
-                        <Title>Template Processed</Title>
-                        <InfoText>
+                        <Title>Template Processed, but...</Title>
+                        <InfoText margin={'0 0 10px 0'}>
                             Window was out of focus so the text was generated
                             but the copy process didn't happen. <br />
                             Click this button to copy it to clipboard.

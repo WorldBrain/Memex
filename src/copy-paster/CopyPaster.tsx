@@ -149,6 +149,12 @@ export default class CopyPasterContainer extends React.PureComponent<
             await this.copyRichTextToClipboard(htmlString)
         }
         this.setState({ errorCopyToClipboard: false })
+        this.setState({ isLoading: false, copySuccess: true })
+        this.props.setLoadingState?.('success')
+        setTimeout(() => {
+            this.setState({ copySuccess: false })
+            this.props.setLoadingState?.('pristine')
+        }, 3000)
     }
 
     private handleTemplateCopy = async (templateId: number) => {
