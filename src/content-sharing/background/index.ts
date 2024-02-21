@@ -944,7 +944,7 @@ export default class ContentSharingBackground {
         'provider'
     >['schedulePageLinkCreation'] = async (
         { tab },
-        { fullPageUrl, now = Date.now(), customPageTitle },
+        { fullPageUrl, now = Date.now(), customPageTitle, skipPageIndexing },
     ) => {
         if (this.pageLinkCreationResolvable) {
             throw new Error(
@@ -981,6 +981,7 @@ export default class ContentSharingBackground {
             remoteListEntryId,
             remoteListId,
             tabId: tab?.id,
+            skipPageIndexing,
             fullPageUrl,
             now,
             pageTitle,
@@ -1010,6 +1011,7 @@ export default class ContentSharingBackground {
         tabId,
         now,
         pageTitle: customPageTitle,
+        skipPageIndexing,
     }: Awaited<
         ReturnType<
             RemoteContentSharingByTabsInterface<
@@ -1019,23 +1021,26 @@ export default class ContentSharingBackground {
     > & {
         fullPageUrl: string
         creator: string
+        skipPageIndexing?: boolean
         tabId?: number
         now?: number
     }): Promise<void> {
         const bgModules = this.options.getBgModules()
 
         // Create all the local data needed for a page link
-        const indexedPage = await bgModules.pages.indexPage(
-            {
-                fullUrl: fullPageUrl,
-                visitTime: now,
-                tabId,
-                metaData: {
-                    pageTitle: customPageTitle,
+        if (!skipPageIndexing) {
+            await bgModules.pages.indexPage(
+                {
+                    fullUrl: fullPageUrl,
+                    visitTime: now,
+                    tabId,
+                    metaData: {
+                        pageTitle: customPageTitle,
+                    },
                 },
-            },
-            { addInboxEntryOnCreate: false },
-        )
+                { addInboxEntryOnCreate: false },
+            )
+        }
 
         let pageTitle: string
 
@@ -1043,7 +1048,7 @@ export default class ContentSharingBackground {
             pageTitle = customPageTitle
         } else {
             pageTitle = await bgModules.pages.lookupPageTitleForUrl({
-                fullPageUrl: indexedPage.fullUrl,
+                fullPageUrl,
             })
         }
         await bgModules.customLists.createCustomList({
@@ -1058,7 +1063,7 @@ export default class ContentSharingBackground {
         await this.waitForListShare({ localListId })
         await bgModules.customLists.insertPageToList({
             id: localListId,
-            url: indexedPage.fullUrl,
+            url: fullPageUrl,
             createdAt: new Date(now),
             skipPageIndexing: true,
             suppressInboxEntry: true,
@@ -1080,7 +1085,7 @@ export default class ContentSharingBackground {
         await bgModules.pageActivityIndicator.createFollowedListEntry(
             {
                 creator,
-                normalizedPageUrl: normalizeUrl(indexedPage.fullUrl),
+                normalizedPageUrl: normalizeUrl(fullPageUrl),
                 entryTitle: pageTitle,
                 followedList: remoteListId,
                 hasAnnotationsFromOthers: false,

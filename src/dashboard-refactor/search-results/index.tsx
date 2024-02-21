@@ -669,6 +669,7 @@ export default class SearchResultsContainer extends React.Component<
                                 fullPageUrl: page.fullUrl,
                                 getRootElement: this.props.getRootElement,
                                 showSpacesTab: this.props.showSpacesTab,
+                                fromDashboard: true,
                             }}
                         />
                     )}

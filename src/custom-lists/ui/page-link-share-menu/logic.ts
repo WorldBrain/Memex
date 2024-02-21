@@ -22,6 +22,7 @@ import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authenticat
 
 export interface Dependencies {
     fullPageUrl: string
+    fromDashboard?: boolean
     autoCreateLinkIfNone?: boolean
     authBG: AuthRemoteFunctionsInterface
     analyticsBG: AnalyticsCoreInterface
@@ -157,6 +158,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
                 {
                     fullPageUrl: this.dependencies.fullPageUrl,
                     customPageTitle: title,
+                    skipPageIndexing: this.dependencies.fromDashboard,
                 },
             )
 

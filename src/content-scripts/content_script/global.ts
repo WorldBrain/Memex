@@ -924,6 +924,7 @@ export async function main(
                 inPageUI,
                 getCurrentUser: () => currentUser,
                 annotationsCache,
+                inPageMode: true,
                 highlighter: highlightRenderer,
                 analyticsBG,
                 authBG,

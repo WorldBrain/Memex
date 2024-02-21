@@ -1404,6 +1404,7 @@ export class AnnotationsSidebar extends React.Component<
                             this.setState({
                                 pageLinkCreationLoading: loadingState,
                             }),
+                        fromDashboard: !this.props.inPageMode,
                     }}
                     getRootElement={this.props.getRootElement}
                 />
