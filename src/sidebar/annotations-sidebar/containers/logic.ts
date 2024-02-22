@@ -3111,7 +3111,7 @@ export class SidebarContainerLogic extends UILogic<
             isKeyValid: { $set: null },
         })
         const response = await this.options.summarizeBG.isApiKeyValid({
-            apiKey: event.apiKey,
+            apiKey: event.apiKey?.trim(),
         })
 
         if (response.isValid) {
@@ -3123,6 +3123,8 @@ export class SidebarContainerLogic extends UILogic<
                     $set: previousState.hasKey ? !previousState.hasKey : true,
                 },
             })
+
+            await this.syncSettings.openAI.set('apiKey', event.apiKey?.trim())
         } else if (!response.isValid) {
             this.emitMutation({
                 isKeyValid: { $set: false },

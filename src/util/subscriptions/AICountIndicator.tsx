@@ -316,10 +316,15 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                 }}
                                 onKeyDown={async (e) => {
                                     if (e.key === 'Enter') {
-                                        await this.syncSettings.openAI.set(
-                                            'apiKey',
+                                        this.setState({
+                                            checkKeyValidLoadState: 'running',
+                                        })
+                                        await this.props.checkIfKeyValid(
                                             this.state.openAIKey.trim(),
                                         )
+                                        this.setState({
+                                            keyChanged: false,
+                                        })
                                     }
                                     if (e.key === ' ') {
                                         e.preventDefault()
@@ -327,10 +332,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                 }}
                             />
 
-                            {((this.props.isKeyValid == null &&
-                                this.state.openAIKey.length > 0) ||
-                                (this.state.keyChanged &&
-                                    this.state.openAIKey.length > 0)) && (
+                            {this.state.keyChanged && (
                                 <PrimaryAction
                                     onClick={async () => {
                                         this.setState({
