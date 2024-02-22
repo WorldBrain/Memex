@@ -628,7 +628,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             <AutoAddedIndicator ref={this.autoAddButtonRef}>
                 <TooltipBox
                     tooltipText={
-                        this.props.isAutoAddEnabled ? (
+                        this.props.isShared ? (
                             <span>
                                 Disable Auto-Add
                                 <br /> <strong>Shift+Click</strong>for options
@@ -653,7 +653,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             if (event.shiftKey) {
                                 this.setState({ showAutoAddMenu: true })
                             } else {
-                                console.log('toggle auto add')
                                 this.props.annotationEditDependencies.onEditConfirm(
                                     false,
                                 )(!this.props.isShared, !this.props.isShared)

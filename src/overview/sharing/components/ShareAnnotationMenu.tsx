@@ -78,8 +78,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
         const linkExists = await this.setRemoteLinkIfExists()
 
-        console.log('linkExists', linkExists)
-
         // if (!linkExists && this.props.shareImmediately) {
         //     await executeReactStateUITask<State, 'loadState'>(
         //         this,
@@ -126,8 +124,6 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         const link = await contentSharingBG.getRemoteAnnotationLink({
             annotationUrl,
         })
-
-        console.log('link', link)
 
         // await this.props.copyLink(link)
 

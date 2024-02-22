@@ -16,7 +16,7 @@ export interface Props {
     dropReceivingState?: DropReceivingState
     onDragStart?: React.DragEventHandler
     onDragEnd?: React.DragEventHandler
-    onClick: React.MouseEventHandler
+    onClick?: React.MouseEventHandler
     renderLeftSideIcon?: () => JSX.Element
     renderRightSideIcon?: () => JSX.Element
     renderEditIcon?: () => JSX.Element
@@ -91,7 +91,6 @@ export default class ListsSidebarItem extends React.PureComponent<
                     isSelected={this.props.isSelected}
                     dropReceivingState={this.props.dropReceivingState}
                     name={this.props.name} // Add this line
-                    onClick={this.props.onClick} // A
                 >
                     <LeftSideIconContainer
                         alwaysShowRightSideIcon={

@@ -336,6 +336,7 @@ export class SidebarContainerLogic extends UILogic<
             totalResultCount: 0,
             isListFilterActive: false,
             searchResultSkip: 0,
+            isKeyValid: null,
 
             confirmPrivatizeNoteArgs: null,
             confirmSelectNoteSpaceArgs: null,
@@ -3094,6 +3095,41 @@ export class SidebarContainerLogic extends UILogic<
         this.AIpromptSuggestions = newSuggestions
     }
 
+    addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
+        this.emitMutation({
+            hasKey: {
+                $set: previousState.hasKey ? !previousState.hasKey : true,
+            },
+        })
+    }
+
+    checkIfKeyValid: EventHandler<'checkIfKeyValid'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            isKeyValid: { $set: null },
+        })
+        const response = await this.options.summarizeBG.isApiKeyValid({
+            apiKey: event.apiKey,
+        })
+
+        if (response.isValid) {
+            this.emitMutation({
+                isKeyValid: { $set: true },
+            })
+            this.emitMutation({
+                hasKey: {
+                    $set: previousState.hasKey ? !previousState.hasKey : true,
+                },
+            })
+        } else if (!response.isValid) {
+            this.emitMutation({
+                isKeyValid: { $set: false },
+            })
+        }
+    }
+
     saveAIPrompt: EventHandler<'saveAIPrompt'> = async ({
         event,
         previousState,
@@ -4229,13 +4265,6 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             spaceTitleEditValue: { $set: event.value },
-        })
-    }
-    addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
-        this.emitMutation({
-            hasKey: {
-                $set: previousState.hasKey ? !previousState.hasKey : true,
-            },
         })
     }
 

@@ -133,6 +133,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showAISuggestionsDropDown: boolean
     showAICounter: boolean
     hasKey: boolean
+    isKeyValid: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
     highlightColors: string
@@ -317,6 +318,7 @@ interface SidebarEvents {
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     adjustRighPositionBasedOnRibbonPosition: { position: number }
     setPopoutsActive: boolean
+    checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
     navigateFocusInList: { direction: 'up' | 'down' }

@@ -318,7 +318,6 @@ export class AnnotationsSidebarContainer<
             onShareClick: (mouseEvent) =>
                 // TODO: work out if this is needed/how to unfiy with editAnnotation
                 {
-                    console.log('Share clicked')
                     this.processEvent('editAnnotation', {
                         instanceLocation,
                         unifiedAnnotationId,
@@ -772,6 +771,10 @@ export class AnnotationsSidebarContainer<
             signupDate={this.state.signupDate}
             addedKey={() => this.processEvent('addedKey', null)}
             getRootElement={this.props.getRootElement}
+            checkIfKeyValid={(apiKey) =>
+                this.processEvent('checkIfKeyValid', { apiKey: apiKey })
+            }
+            isKeyValid={this.state.isKeyValid}
         />
     )
 
