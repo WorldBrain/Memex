@@ -1,6 +1,9 @@
 import type Storex from '@worldbrain/storex'
 
-import { getNoteShareUrl, getPageShareUrl } from 'src/content-sharing/utils'
+import {
+    getNoteShareUrl,
+    getSinglePageShareUrl,
+} from 'src/content-sharing/utils'
 import type ContentSharingBackground from 'src/content-sharing/background'
 import type { TemplateDataFetchers, UrlMappedData } from '../types'
 import fromPairs from 'lodash/fromPairs'
@@ -21,7 +24,10 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import TurndownService from 'turndown'
 import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import type { CustomList } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type { FollowedListEntry } from 'src/page-activity-indicator/background/types'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -196,17 +202,79 @@ export function getTemplateDataFetchers({
                 annotationUrls,
                 shareToParentPageLists: true,
             })
-            const pairs = await Promise.all(
-                Object.keys(notes).map(async (normalizedPageUrl) => [
-                    normalizedPageUrl,
-                    getPageShareUrl({
-                        remotePageInfoId: await contentSharing.ensureRemotePageId(
-                            normalizedPageUrl,
-                        ),
-                    }),
-                ]),
+            const normalizedPageUrls = Object.keys(notes)
+            const pageUrlToLinkParams = new Map<string, FollowedListEntry>()
+
+            const followedListEntries: FollowedListEntry[] = await storageManager
+                .collection('followedListEntry')
+                .findObjects(
+                    { normalizedPageUrl: { $in: normalizedPageUrls } },
+                    { order: [['createdWhen', 'asc']] },
+                )
+            const listMetadata: SharedListMetadata[] = await storageManager
+                .collection('sharedListMetadata')
+                .findObjects({
+                    remoteId: {
+                        $in: followedListEntries.map((e) => e.followedList),
+                    },
+                })
+            const pageLinkLists: CustomList[] = await storageManager
+                .collection('customLists')
+                .findObjects({
+                    id: { $in: listMetadata.map((l) => l.localId) },
+                    type: 'page-link',
+                })
+
+            const pageLinkListIds = new Set(pageLinkLists.map((l) => l.id))
+            const remotePageLinkListIds = new Set(
+                listMetadata
+                    .filter((m) => pageLinkListIds.has(m.localId))
+                    .map((m) => m.remoteId as AutoPk),
             )
-            return fromPairs(pairs)
+
+            for (const entry of followedListEntries) {
+                if (!remotePageLinkListIds.has(entry.followedList)) {
+                    continue // Skip entries for non-page-link lists
+                }
+                // Note that followedListEntries is sorted in ascending order so pageUrlToLinkParams
+                //  should always point to the latest entry
+                pageUrlToLinkParams.set(entry.normalizedPageUrl, entry)
+            }
+
+            const pagesWithoutLinks = new Set(
+                normalizedPageUrls
+                    .map((url) => (pageUrlToLinkParams.has(url) ? null : url))
+                    .filter((url) => url != null),
+            )
+
+            // Create links for pages without them
+            for (const normalizedPageUrl of pagesWithoutLinks) {
+                // TODO: properly implement
+                pageUrlToLinkParams.set(normalizedPageUrl, {
+                    followedList: 'dummy-list',
+                    sharedListEntry: 'dummy-entry',
+                } as any)
+            }
+
+            return fromPairs(
+                normalizedPageUrls.map((normalizedPageUrl) => {
+                    const linkParams = pageUrlToLinkParams.get(
+                        normalizedPageUrl,
+                    )
+                    if (!linkParams) {
+                        throw new Error(
+                            `Could not get page link for page: ${normalizedPageUrl}`,
+                        )
+                    }
+                    return [
+                        normalizedPageUrl,
+                        getSinglePageShareUrl({
+                            remoteListId: linkParams.followedList,
+                            remoteListEntryId: linkParams.sharedListEntry,
+                        }),
+                    ]
+                }),
+            )
         },
         getCreatedAtForPages: async (normalizedPageUrls) => {
             const visits: Visit[] = await storageManager
