@@ -143,6 +143,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     activeTab: SidebarTab
     activeAITab: SidebarAITab
     summaryModeActiveTab: 'Answer' | 'References'
+    isAutoAddEnabled: boolean
     activeSuggestionsTab: SuggestionsTab
     showChapters: boolean
     pillVisibility: string
@@ -324,6 +325,7 @@ interface SidebarEvents {
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null
+    toggleAutoAdd: null
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
         videoRangeTimestamps: {

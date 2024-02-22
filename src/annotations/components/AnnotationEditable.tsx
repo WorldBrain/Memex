@@ -646,7 +646,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     <Icon
                         heightAndWidth="24px"
                         icon={'spread'}
-                        hoverOff
                         color={this.props.isShared ? 'prime1' : 'greyScale3'}
                         onClick={(event) => {
                             event.stopPropagation()
@@ -658,6 +657,8 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 )(!this.props.isShared, !this.props.isShared)
                             }
                         }}
+                        padding={'1px'}
+                        background={'greyScale1'}
                     />
                 </TooltipBox>
             </AutoAddedIndicator>

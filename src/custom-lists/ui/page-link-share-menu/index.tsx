@@ -26,6 +26,7 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
     static defaultProps: Pick<Props, 'copyToClipboard'> = {
         copyToClipboard: async (text) => {
             await copyToClipboard(text)
+            return true
         },
     }
 

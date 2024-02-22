@@ -946,12 +946,13 @@ export class DashboardContainer extends StatefulUIElement<
                 onEventSearchSwitch={() => {
                     this.processEvent('setSearchType', { searchType: 'events' })
                 }}
-                onPageLinkCopy={(link) =>
+                onPageLinkCopy={async (link: string) => {
                     this.processEvent('copyShareLink', {
                         link,
                         analyticsAction: 'copyPageLink',
                     })
-                }
+                    return true
+                }}
                 onNoteLinkCopy={(link) =>
                     this.processEvent('copyShareLink', {
                         link,

@@ -16,7 +16,6 @@ import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface Props {
     syncSettingsBG: RemoteSyncSettingsInterface
-    position?: 'top' | 'bottom'
     isTrial: boolean
     signupDate: number
     addedKey: () => void

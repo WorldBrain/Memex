@@ -33,6 +33,7 @@ export interface Props {
     borderColor?: ColorThemeKeys
     width?: string
     textPosition?: 'left' | 'right'
+    fontColor?: ColorThemeKeys
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -92,7 +93,10 @@ class Checkbox extends React.PureComponent<Props> {
                     </CheckBoxContainer>
                     {this.props.label && (
                         <LabelContentBox>
-                            <LabelTitle fontSize={this.props.fontSize}>
+                            <LabelTitle
+                                color={this.props.fontColor}
+                                fontSize={this.props.fontSize}
+                            >
                                 {this.props.label}
                             </LabelTitle>
                             <SubLabel>{this.props.subLabel}</SubLabel>
@@ -173,7 +177,7 @@ const LabelText = styled.span<{ fontSize; textPosition }>`
     width: fill-available;
     height: fill-available;
     justify-content: center;
-    grid-gap: ${(props) => (props.fontSize < 14 ? '5px' : '15px')};
+    grid-gap: ${(props) => (props.fontSize < 14 ? '10px' : '15px')};
 
     &:hover {
         color: ${(props) => props.theme.colors.black};

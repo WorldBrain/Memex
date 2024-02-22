@@ -285,6 +285,7 @@ export class SidebarContainerLogic extends UILogic<
             pillVisibility: 'unhover',
             videoDetails: null,
             summaryModeActiveTab: 'Answer',
+            isAutoAddEnabled: null,
 
             showPageLinkShareMenu: false,
             isWidthLocked: false,
@@ -848,6 +849,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // this is here bc the scrollheight of the sidebar for some reason goes down ever so slightly if there are a lot of annotations
         // it'll make sure that the scroll container on load is on the top
+        console.log('slee')
         const rootElement = this.options.getRootElement()
         await sleepPromise(10)
 
@@ -893,6 +895,21 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             highlightColors: { $set: JSON.stringify(highlightColorJSON) },
         })
+
+        // Load the setting for the auto-adding of notes to spaces
+        const isAutoAddEnabled = await this.syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+        if (isAutoAddEnabled == null) {
+            this.emitMutation({
+                isAutoAddEnabled: { $set: true },
+            })
+            return this.syncSettings.extension.set('shouldAutoAddSpaces', true)
+        } else {
+            this.emitMutation({
+                isAutoAddEnabled: { $set: isAutoAddEnabled },
+            })
+        }
     }
 
     private checkRabbitHoleOnboardingStage = async () => {
@@ -3451,6 +3468,14 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.emitMutation({
             summaryModeActiveTab: { $set: event.tab },
+        })
+    }
+    toggleAutoAdd: EventHandler<'toggleAutoAdd'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            isAutoAddEnabled: { $set: !previousState.isAutoAddEnabled },
         })
     }
     setExistingSourcesOptions: EventHandler<

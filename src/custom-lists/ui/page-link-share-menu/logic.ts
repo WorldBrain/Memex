@@ -33,7 +33,7 @@ export interface Dependencies {
     onNewPageLinkCreate?: (
         pageLinkListId: UnifiedList['unifiedId'],
     ) => Promise<void>
-    copyToClipboard: (text: string) => Promise<void>
+    copyToClipboard: (text: string) => Promise<boolean>
     setLoadingState?: (loading: TaskState) => void
 }
 

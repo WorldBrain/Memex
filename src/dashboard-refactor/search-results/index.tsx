@@ -127,7 +127,7 @@ export type Props = RootState &
         ): (sorter: AnnotationsSorter) => void
         getListDetailsById: ListDetailsGetter
         paginateSearch(): Promise<void>
-        onPageLinkCopy(link: string): Promise<void>
+        onPageLinkCopy(link: string): Promise<boolean>
         onNoteLinkCopy(link: string): Promise<void>
         onListLinkCopy(link: string): Promise<void>
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
@@ -367,6 +367,7 @@ export default class SearchResultsContainer extends React.Component<
                         normalizedPageUrls={[pageId]}
                     />
                 )}
+                toggleAutoAdd={null}
                 copyPasterAnnotationInstanceId={null}
                 spacePickerAnnotationInstance={null}
                 shareMenuAnnotationInstanceId={null}
@@ -452,6 +453,7 @@ export default class SearchResultsContainer extends React.Component<
                     getRootElement: this.props.getRootElement,
                     onBodyChange: (content) =>
                         interactionProps.onBodyChange(content),
+                    setEditing: interactionProps.onEditBtnClick,
                 }}
                 annotationFooterDependencies={{
                     onCopyPasterDefaultExecute:

@@ -311,7 +311,7 @@ export default class Ribbon extends Component<Props, State> {
                         ? 'left-start'
                         : condition4
                         ? 'left-start'
-                        : 'center'
+                        : 'left-start'
                 }
                 offsetX={
                     condition1

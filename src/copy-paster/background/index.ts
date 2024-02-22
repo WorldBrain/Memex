@@ -30,7 +30,10 @@ export default class CopyPasterBackground {
             search: Pick<SearchBackground, 'searchPages' | 'searchAnnotations'>
             contentSharing: Pick<
                 ContentSharingBackground,
-                'shareAnnotations' | 'storage' | 'ensureRemotePageId'
+                | 'shareAnnotations'
+                | 'storage'
+                | 'ensureRemotePageId'
+                | 'scheduleManyPageLinkCreations'
             >
             imageSupport: ImageSupportInterface<'caller'>
         },

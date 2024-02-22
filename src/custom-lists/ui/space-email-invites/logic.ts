@@ -18,7 +18,7 @@ export interface Dependencies {
     listData: UnifiedList
     analyticsBG: AnalyticsCoreInterface
     contentSharingBG: ContentSharingInterface
-    copyToClipboard: (text: string) => Promise<void>
+    copyToClipboard: (text: string) => Promise<boolean>
 }
 
 export interface State {

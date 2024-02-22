@@ -144,7 +144,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
-    renderAICounter: (position) => JSX.Element
+    renderAICounter: () => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
@@ -288,8 +288,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     analyticsBG: AnalyticsCoreInterface
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
-    copyToClipboard: (text: string) => Promise<void>
+    copyToClipboard: (text: string) => Promise<boolean>
     showSpacesTab: () => void
+    isAutoAddEnabled: boolean
+    toggleAutoAdd: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -489,7 +491,6 @@ export class AnnotationsSidebar extends React.Component<
             const docWidth = document.documentElement.clientWidth
 
             const rootElement = this.props.getRootElement()
-
 
             const sidebarContainer = rootElement.querySelector(
                 '#annotationSidebarContainer',
@@ -872,6 +873,7 @@ export class AnnotationsSidebar extends React.Component<
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
+                            toggleAutoAdd={this.props.toggleAutoAdd}
                             isShared
                             getRootElement={this.props.getRootElement}
                             isBulkShareProtected
@@ -1671,7 +1673,7 @@ export class AnnotationsSidebar extends React.Component<
             contentType = 'page'
         }
 
-        let InstructionsTitlePlaceholder: Element | string = (
+        let InstructionsTitlePlaceholder: JSX.Element | string = (
             <span>
                 Summarise or ask questions about
                 <br />
@@ -2238,15 +2240,6 @@ export class AnnotationsSidebar extends React.Component<
                                     getPortalRoot={this.props.getRootElement}
                                 >
                                     <SummaryActionsButton
-                                        onClick={() => {
-                                            this.props.fetchLocalHTML
-                                                ? this.props.changeFetchLocalHTML(
-                                                      false,
-                                                  )
-                                                : this.props.changeFetchLocalHTML(
-                                                      true,
-                                                  )
-                                        }}
                                         disabled={this.props.fullPageUrl.includes(
                                             'youtube.com/watch',
                                         )}
@@ -2257,19 +2250,30 @@ export class AnnotationsSidebar extends React.Component<
                                             isChecked={
                                                 this.props.fetchLocalHTML
                                             }
+                                            handleChange={(event) => {
+                                                event.stopPropagation()
+                                                this.props.fetchLocalHTML
+                                                    ? this.props.changeFetchLocalHTML(
+                                                          false,
+                                                      )
+                                                    : this.props.changeFetchLocalHTML(
+                                                          true,
+                                                      )
+                                            }}
                                             // isDisabled={!this.state.shortcutsEnabled}
                                             name={'Local'}
                                             size={14}
-                                            fontSize={12}
+                                            label={'Local Content'}
+                                            fontSize={14}
                                             checkBoxColor="black"
                                             borderColor="greyScale3"
+                                            fontColor="greyScale5"
                                         />
-                                        Local Content
                                     </SummaryActionsButton>
                                 </TooltipBox>
                             </SummaryActionButtonBox>
                             <SummaryActionButtonBox>
-                                <SummaryActionsButton>
+                                <SummaryActionsButton padding={'0px'}>
                                     <DropdownMenuBtnSmall
                                         elementHeight="fit-content"
                                         hideDescriptionInPreview
@@ -3413,13 +3417,13 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderFeed()
         }
 
-        if (
-            (this.props.isDataLoading ||
-                this.props.foreignSelectedListLoadState === 'running') &&
-            this.props.activeTab !== 'summary'
-        ) {
-            return this.renderLoader()
-        }
+        // if (
+        //     (this.props.isDataLoading ||
+        //         this.props.foreignSelectedListLoadState === 'running') &&
+        //     this.props.activeTab !== 'summary'
+        // ) {
+        //     return this.renderLoader()
+        // }
 
         if (this.props.activeTab === 'rabbitHole') {
             if (this.props.rabbitHoleBetaFeatureAccess == null) {
@@ -3489,16 +3493,26 @@ export class AnnotationsSidebar extends React.Component<
                         <AnnotationSectionScrollContainer
                             id={'AnnotationSectionScrollContainer'}
                         >
-                            {this.props.activeTab === 'annotations' &&
-                                this.renderAnnotationsEditable(
-                                    cacheUtils.getUserAnnotationsArray(
-                                        { annotations: this.props.annotations },
-                                        this.props.currentUser?.id.toString(),
-                                    ),
-                                )}
-
-                            {this.props.activeTab === 'spaces' &&
-                                this.renderSharedNotesByList()}
+                            {this.props.isDataLoading ||
+                            this.props.foreignSelectedListLoadState ===
+                                'running' ? (
+                                this.renderLoader()
+                            ) : (
+                                <>
+                                    {this.props.activeTab === 'annotations' &&
+                                        this.renderAnnotationsEditable(
+                                            cacheUtils.getUserAnnotationsArray(
+                                                {
+                                                    annotations: this.props
+                                                        .annotations,
+                                                },
+                                                this.props.currentUser?.id.toString(),
+                                            ),
+                                        )}
+                                    {this.props.activeTab === 'spaces' &&
+                                        this.renderSharedNotesByList()}
+                                </>
+                            )}
                         </AnnotationSectionScrollContainer>
                     </AnnotationsSectionStyled>
                 )}
@@ -4333,7 +4347,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.sortDropDownButtonRef.current}
-                placement={'bottom'}
+                placement={'bottom-start'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -4383,7 +4397,7 @@ export class AnnotationsSidebar extends React.Component<
                             active={this.state.showSortDropDown}
                         />
                     </TooltipBox>
-                    <TooltipBox
+                    {/* <TooltipBox
                         tooltipText={'Copy & Paste Page with its notes'}
                         placement={'bottom'}
                         getPortalRoot={this.props.getRootElement}
@@ -4404,7 +4418,70 @@ export class AnnotationsSidebar extends React.Component<
                             }}
                             active={this.state.showAllNotesCopyPaster}
                         />
-                    </TooltipBox>
+                    </TooltipBox> */}
+
+                    <RightSideContainer>
+                        <TooltipBox
+                            tooltipText={
+                                this.props.isAutoAddEnabled ? (
+                                    <span>
+                                        New notes are added
+                                        <br /> to all Spaces you put the page
+                                        into
+                                    </span>
+                                ) : (
+                                    <span>
+                                        New notes only added to Spaces
+                                        <br /> you manually put them
+                                    </span>
+                                )
+                            }
+                            placement={'bottom'}
+                            getPortalRoot={this.props.getRootElement}
+                        >
+                            <AutoAddContainer
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    this.props.toggleAutoAdd()
+                                }}
+                            >
+                                <Icon
+                                    icon="spread"
+                                    heightAndWidth="20px"
+                                    hoverOff
+                                    color="prime1"
+                                />
+                                <Checkbox
+                                    key={33}
+                                    id={'33'}
+                                    width="fit-content"
+                                    isChecked={
+                                        this.props.isAutoAddEnabled === true
+                                    }
+                                    handleChange={(event) => {
+                                        event.stopPropagation()
+                                        this.props.toggleAutoAdd()
+                                    }}
+                                    // isDisabled={!this.state.shortcutsEnabled}
+                                    name={
+                                        this.props.isAutoAddEnabled
+                                            ? 'Is Default'
+                                            : 'Make Default'
+                                    }
+                                    label={'Auto Add'}
+                                    fontSize={12}
+                                    fontColor={'greyScale5'}
+                                    size={14}
+                                    textPosition="left"
+                                    isLoading={
+                                        this.props.isAutoAddEnabled == null
+                                    }
+                                    checkBoxColor="greyScale4"
+                                />
+                            </AutoAddContainer>
+                        </TooltipBox>
+                    </RightSideContainer>
+
                     {/* <TooltipBox
                         tooltipText={'Bulk Share Notes'}
                         placement={'bottom'}
@@ -4456,8 +4533,6 @@ export class AnnotationsSidebar extends React.Component<
         if (!this.state.themeVariant) {
             return null
         }
-
-        console.log('sidebarContext', this.state.autoFocusCreateForm)
 
         return (
             <ResultBodyContainer
@@ -5583,7 +5658,7 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
         `};
 `
 
-const TopBar = styled.div<{ sidebarContext: string; inPageMode: boolean }>`
+const TopBar = styled.div<{ sidebarContext: string }>`
     font-size: 14px;
     color: ${(props) => props.theme.colors.white};
     display: flex;
@@ -5600,12 +5675,6 @@ const TopBar = styled.div<{ sidebarContext: string; inPageMode: boolean }>`
             /* box-shadow: ${(props) =>
                 props.theme.borderStyles.boxShadowBottom}; */
         `};
-
-    ${(props) =>
-        props.inPageMode &&
-        css`
-            background-color: ${(props) => props.theme.colors.greyScale2};
-        `}
 `
 
 const IsolatedViewHeaderContainer = styled.div`
@@ -5690,8 +5759,8 @@ const FollowedListNotesContainer = styled(Margin)<{
 `
 
 const sidebarContentOpen = keyframes`
- 0% { margin-top: 20px}
- 100% { margin-top: 0px}
+ 0% { opacity: 0}
+ 100% { opacity: 1}
 `
 
 const AnnotationContainer = styled(Margin)`
@@ -5708,8 +5777,8 @@ const AnnotationContainer = styled(Margin)`
     position: relative;
     width: fill-available;
     width: -moz-available;
-    min-height: 1300%;
-    height: fit-content;
+    min-height: fit-content;
+    height: fill-available;
 
     scrollbar-width: none;
 
@@ -5740,7 +5809,7 @@ const AnnotationBox = styled.div<{
     animation-duration: 600ms;
     animation-delay: ${(props) => props.order * 20}ms;
     animation-timing-function: cubic-bezier(0.3, 0.35, 0.14, 0.8);
-    animation-fill-mode: both;
+    animation-fill-mode: forwards;
     position: relative;
     margin-bottom: 5px;
 `
@@ -5982,12 +6051,14 @@ const AnnotationsSectionStyled = styled.div`
 `
 
 const TopBarActionBtns = styled.div`
-    display: grid;
-    justify-content: space-between;
+    display: flex;
+    justify-content: flex-start;
     align-items: center;
     display: flex;
-    gap: 10px;
+    grid-gap: 10px;
     height: 24px;
+    width: fill-available;
+    width: -moz-available;
     z-index: 10000;
 `
 
@@ -6079,6 +6150,7 @@ const SummaryActionsButton = styled.div<{
     inPageMode?: boolean
     active?: boolean
     disabled?: boolean
+    padding?: string
 }>`
     height: fill-available;
     width: fill-available;
@@ -6091,11 +6163,17 @@ const SummaryActionsButton = styled.div<{
     height: -moz-available;
     grid-gap: 5px;
     border-radius: 5px;
-    padding: 5px;
     font-size: 14px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     white-space: nowrap;
     &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale0_5}70;
+        background: ${(props) =>
+            props.theme.variant === 'dark'
+                ? props.theme.colors.greyScale2 + '80'
+                : props.theme.colors.greyScale6 + '35'};
     }
     color: ${(props) =>
         props.color
@@ -6117,7 +6195,10 @@ const SummaryActionsButton = styled.div<{
                 ? props.theme.colors[props.color]
                 : props.theme.colors.greyScale5};
             &:hover {
-                background-color: ${(props) => props.theme.colors.greyScale3}58;
+                background: ${(props) =>
+                    props.theme.variant === 'dark'
+                        ? props.theme.colors.greyScale2 + '80'
+                        : props.theme.colors.greyScale6 + '35'};
                 backdrop-filter: unset;
             }
             & * {
@@ -6144,4 +6225,17 @@ const TopBarButtonContainer = styled.div`
 const LoadingBox2 = styled.div`
     position: absolute;
     right: 25px;
+`
+
+const RightSideContainer = styled.div`
+    justify-content: flex-end;
+    display: flex;
+    flex: 1;
+`
+
+const AutoAddContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 4px;
 `

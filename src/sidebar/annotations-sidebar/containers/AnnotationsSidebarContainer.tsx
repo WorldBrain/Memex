@@ -410,6 +410,13 @@ export class AnnotationsSidebarContainer<
                     },
                 )
             },
+            setEditing: () => {
+                this.processEvent('setAnnotationEditMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    isEditing: !annotationCardInstance.isCommentEditing,
+                })
+            },
             onEditCancel: () =>
                 this.processEvent('cancelAnnotationEdit', {
                     instanceLocation,
@@ -763,9 +770,8 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderAICounter = (position) => (
+    private renderAICounter = () => (
         <AICounterIndicator
-            position={position}
             syncSettingsBG={this.props.syncSettingsBG}
             isTrial={this.state.isTrial}
             signupDate={this.state.signupDate}
@@ -979,6 +985,8 @@ export class AnnotationsSidebarContainer<
                                     chapterIndex,
                                 )
                             }}
+                            analyticsBG={this.props.analyticsBG}
+                            copyToClipboard={this.props.copyToClipboard}
                             loadState={this.state.loadState}
                             setAIModel={(AImodel) => {
                                 this.processEvent('setAIModel', AImodel)
@@ -1354,9 +1362,7 @@ export class AnnotationsSidebarContainer<
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
-                            renderAICounter={(position) =>
-                                this.renderAICounter(position)
-                            }
+                            renderAICounter={() => this.renderAICounter()}
                             renderCopyPasterForAnnotation={
                                 this.renderCopyPasterManagerForAnnotation
                             }
@@ -1652,6 +1658,10 @@ export class AnnotationsSidebarContainer<
                             }}
                             getRootElement={this.props.getRootElement}
                             inPageMode={this.props.inPageMode}
+                            toggleAutoAdd={() =>
+                                this.processEvent('toggleAutoAdd', null)
+                            }
+                            isAutoAddEnabled={this.state.isAutoAddEnabled}
                         />
                     </Rnd>
                 </ContainerStyled>
@@ -1665,7 +1675,6 @@ const GlobalStyle = createGlobalStyle<{
     sidebarWidth: string
     sidebarContext: string
 }>`
-
     & * {
         font-family: 'Satoshi'
     }

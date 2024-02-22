@@ -17,7 +17,7 @@ export interface Dependencies {
     listData: UnifiedList
     isCreator: boolean
     errorMessage?: string
-    copyToClipboard: (text: string) => Promise<void>
+    copyToClipboard: (text: string) => Promise<boolean>
     onSpaceNameChange?: (newName: string) => void
     onConfirmSpaceNameEdit?: (name: string) => void
     onSetSpacePrivate: (isPrivate: boolean) => Promise<void>
