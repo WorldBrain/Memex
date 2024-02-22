@@ -385,7 +385,7 @@ async function hydrateCacheLists(
 
     const seenFollowedLists = new Set<AutoPk>()
 
-    const listsToCache = args.localListsData.map(async (list) => {
+    const listsToCache = args.localListsData.map((list) => {
         let creator = args.user
         let hasRemoteAnnotations = false
         const metadata = args.listMetadata[list.id]
@@ -394,14 +394,6 @@ async function hydrateCacheLists(
                 ? sharedListEntryMap.get(metadata?.remoteId) ?? undefined
                 : undefined
 
-        //TODO: remove again in a few weeks
-        if (metadata && metadata.remoteId && metadata.private == null) {
-            await args.bgModules.contentSharing.updateListPrivacy({
-                localListId: list.id,
-                isPrivate: false,
-            })
-            metadata.private = false
-        }
         if (
             metadata?.remoteId != null &&
             args.followedListsData[metadata.remoteId]
@@ -439,20 +431,17 @@ async function hydrateCacheLists(
                       undefined
                     : undefined
             listsToCache.push(
-                Promise.resolve(
-                    reshapeFollowedListForCache(list, {
-                        hasRemoteAnnotations: list.hasAnnotationsFromOthers,
-                        extraData: {
-                            normalizedPageUrl:
-                                sharedListEntryData?.normalizedUrl,
-                            sharedListEntryId: sharedListEntryData?.id,
-                        },
-                    }),
-                ),
+                reshapeFollowedListForCache(list, {
+                    hasRemoteAnnotations: list.hasAnnotationsFromOthers,
+                    extraData: {
+                        normalizedPageUrl: sharedListEntryData?.normalizedUrl,
+                        sharedListEntryId: sharedListEntryData?.id,
+                    },
+                }),
             )
         })
 
-    await Promise.all(listsToCache).then(args.cache.setLists)
+    args.cache.setLists(listsToCache)
 }
 
 export function deriveListOwnershipStatus(
