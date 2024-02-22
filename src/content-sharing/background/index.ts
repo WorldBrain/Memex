@@ -20,6 +20,7 @@ import type { ServerStorageModules } from 'src/storage/types'
 import type {
     AnnotationSharingStates,
     ContentSharingInterface,
+    CreatedPageLinkDetails,
     RemoteContentSharingByTabsInterface,
     __DeprecatedContentSharingInterface,
 } from './types'
@@ -940,6 +941,61 @@ export default class ContentSharingBackground {
         await this.pageLinkCreationResolvable
     }
 
+    scheduleManyPageLinkCreations = async (params: {
+        fullPageUrls: Set<string>
+        now?: number
+    }): Promise<{ [fullPageUrl: string]: CreatedPageLinkDetails }> => {
+        const now = params.now ?? Date.now()
+        const bgModules = this.options.getBgModules()
+        const currentUser = await bgModules.auth.authService.getCurrentUser()
+        if (!currentUser) {
+            throw new Error('Page links cannot be created when logged out')
+        }
+
+        const pageLinks: { [fullPageUrl: string]: CreatedPageLinkDetails } = {}
+        const creationPromises: Promise<void>[] = []
+
+        let localListIdCounter = now
+        for (const fullPageUrl of params.fullPageUrls) {
+            const localListId = localListIdCounter++
+            const listTitle = createPageLinkListTitle(new Date(now))
+            const remoteListId = this.options
+                .generateServerId('sharedList')
+                .toString()
+            const remoteListEntryId = this.options
+                .generateServerId('sharedListEntry')
+                .toString()
+            const collabKey = this.options
+                .generateServerId('sharedListKey')
+                .toString()
+
+            pageLinks[fullPageUrl] = {
+                collabKey,
+                listTitle,
+                localListId,
+                remoteListId,
+                remoteListEntryId,
+            }
+
+            // TODO: Do something with these Promises. Currently thrown into the wind of the JS event loop
+            creationPromises.push(
+                this.performPageLinkCreation({
+                    creator: currentUser.id,
+                    collabKey,
+                    listTitle,
+                    localListId,
+                    remoteListEntryId,
+                    remoteListId,
+                    skipPageIndexing: true,
+                    fullPageUrl,
+                    now,
+                }),
+            )
+        }
+
+        return pageLinks
+    }
+
     schedulePageLinkCreation: RemoteContentSharingByTabsInterface<
         'provider'
     >['schedulePageLinkCreation'] = async (
@@ -1103,7 +1159,7 @@ export default class ContentSharingBackground {
             keyString: collabKey.toString(),
         })
 
-        this.pageLinkCreationResolvable.resolve()
+        this.pageLinkCreationResolvable?.resolve()
         this.pageLinkCreationResolvable = null
 
         if (this.options.analyticsBG) {

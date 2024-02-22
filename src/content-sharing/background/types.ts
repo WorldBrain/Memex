@@ -107,6 +107,15 @@ export interface ContentSharingInterface
     }): Promise<number>
 }
 
+export interface CreatedPageLinkDetails {
+    listTitle: string
+    localListId: number
+    remoteListId: string
+    remoteListEntryId: string
+    collabKey: string
+    pageTitle?: string | null
+}
+
 export interface RemoteContentSharingByTabsInterface<
     Role extends RemoteFunctionRole
 > {
@@ -118,14 +127,7 @@ export interface RemoteContentSharingByTabsInterface<
             customPageTitle?: string
             skipPageIndexing?: boolean
         },
-        {
-            listTitle: string
-            localListId: number
-            remoteListId: string
-            remoteListEntryId: string
-            collabKey: string
-            pageTitle?: string | null
-        }
+        CreatedPageLinkDetails
     >
 }
 
