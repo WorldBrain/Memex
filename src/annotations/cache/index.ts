@@ -165,12 +165,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     private prepareListForCaching = (
         list: UnifiedListForCache,
+        opts?: { skipAssociatingAnnotations?: boolean },
     ): UnifiedList => {
         const unifiedId = this.generateListId()
         if (list.localId != null) {
             this.localListIdsToCacheIds.set(list.localId, unifiedId)
         }
-        if (list.remoteId != null) {
+        if (list.remoteId != null && !opts?.skipAssociatingAnnotations) {
             this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
 
             // Ensure each public annot gets a ref to this list
@@ -465,7 +466,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         const localToCacheId = new Map<number, string>()
         const seedData = [...lists].map((list) => {
-            const prepared = this.prepareListForCaching(list)
+            const prepared = this.prepareListForCaching(list, {
+                skipAssociatingAnnotations: true,
+            })
             if (list.localId) {
                 localToCacheId.set(list.localId, prepared.unifiedId)
             }
