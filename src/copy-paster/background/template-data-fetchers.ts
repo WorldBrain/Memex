@@ -37,7 +37,10 @@ export function getTemplateDataFetchers({
     storageManager: Storex
     contentSharing: Pick<
         ContentSharingBackground,
-        'shareAnnotations' | 'storage' | 'ensureRemotePageId'
+        | 'shareAnnotations'
+        | 'storage'
+        | 'ensureRemotePageId'
+        | 'scheduleManyPageLinkCreations'
     >
     imageSupport: ImageSupportInterface<'caller'>
 }): TemplateDataFetchers {
@@ -194,7 +197,7 @@ export function getTemplateDataFetchers({
             }
             return noteLinks
         },
-        getPageLinks: async (notes) => {
+        getPageLinks: async (notes, now) => {
             const annotationUrls = flatten(
                 Object.values(notes).map((note) => note.annotationUrls),
             )
@@ -203,8 +206,14 @@ export function getTemplateDataFetchers({
                 shareToParentPageLists: true,
             })
             const normalizedPageUrls = Object.keys(notes)
-            const pageUrlToLinkParams = new Map<string, FollowedListEntry>()
+            const pageUrlToLinkParams = new Map<
+                string,
+                Pick<FollowedListEntry, 'followedList' | 'sharedListEntry'>
+            >()
 
+            const pages: Page[] = await storageManager
+                .collection('pages')
+                .findObjects({ url: { $in: normalizedPageUrls } })
             const followedListEntries: FollowedListEntry[] = await storageManager
                 .collection('followedListEntry')
                 .findObjects(
@@ -241,19 +250,34 @@ export function getTemplateDataFetchers({
                 pageUrlToLinkParams.set(entry.normalizedPageUrl, entry)
             }
 
-            const pagesWithoutLinks = new Set(
+            // Create links for pages yet without them
+            const normalizedToFullUrls = fromPairs(
+                pages.map((p) => [p.url, p.fullUrl]),
+            )
+            const fullPageUrlsWithoutLinks = new Set(
                 normalizedPageUrls
-                    .map((url) => (pageUrlToLinkParams.has(url) ? null : url))
+                    .map((url) =>
+                        pageUrlToLinkParams.has(url)
+                            ? null
+                            : normalizedToFullUrls[url],
+                    )
                     .filter((url) => url != null),
             )
-
-            // Create links for pages without them
-            for (const normalizedPageUrl of pagesWithoutLinks) {
-                // TODO: properly implement
+            const pageLinks = await contentSharing.scheduleManyPageLinkCreations(
+                {
+                    fullPageUrls: fullPageUrlsWithoutLinks,
+                    now,
+                },
+            )
+            for (const { url: normalizedPageUrl, fullUrl } of pages) {
+                const pageLink = pageLinks[fullUrl]
+                if (!pageLink) {
+                    continue
+                }
                 pageUrlToLinkParams.set(normalizedPageUrl, {
-                    followedList: 'dummy-list',
-                    sharedListEntry: 'dummy-entry',
-                } as any)
+                    followedList: pageLink.remoteListId,
+                    sharedListEntry: pageLink.remoteListEntryId,
+                })
             }
 
             return fromPairs(
@@ -263,7 +287,7 @@ export function getTemplateDataFetchers({
                     )
                     if (!linkParams) {
                         throw new Error(
-                            `Could not get page link for page: ${normalizedPageUrl}`,
+                            `Could not get page link for page with normalized URL: ${normalizedPageUrl}`,
                         )
                     }
                     return [
