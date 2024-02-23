@@ -33,6 +33,7 @@ export function getTemplateDataFetchers({
     storageManager,
     contentSharing,
     imageSupport,
+    previewMode,
 }: {
     storageManager: Storex
     contentSharing: Pick<
@@ -163,7 +164,6 @@ export function getTemplateDataFetchers({
 
             return result
         },
-
         getNoteIdsForPages: async (normalizedPageUrls) => {
             const notes: Annotation[] = await storageManager
                 .collection('annotations')
@@ -200,6 +200,20 @@ export function getTemplateDataFetchers({
             return noteLinks
         },
         getPageLinks: async (notes, now) => {
+            const normalizedPageUrls = Object.keys(notes)
+            // Don't actually generate page links if just in preview mode
+            if (previewMode) {
+                return fromPairs(
+                    normalizedPageUrls.map((url) => [
+                        url,
+                        getSinglePageShareUrl({
+                            remoteListId: 'XX',
+                            remoteListEntryId: 'YY',
+                        }),
+                    ]),
+                )
+            }
+
             const annotationUrls = flatten(
                 Object.values(notes).map((note) => note.annotationUrls),
             )
@@ -208,7 +222,6 @@ export function getTemplateDataFetchers({
                 shareToParentPageLists: true,
                 skipAnalytics: true,
             })
-            const normalizedPageUrls = Object.keys(notes)
             const pageUrlToLinkParams = new Map<
                 string,
                 Pick<FollowedListEntry, 'followedList' | 'sharedListEntry'>
