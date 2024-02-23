@@ -574,7 +574,7 @@ export class AnnotationsSidebarContainer<
                         contentSharingByTabsBG: this.props
                             .contentSharingByTabsBG,
                         copyToClipboard: this.props.copyToClipboard,
-                        fullPageUrl: this.props.fullPageUrl,
+                        fullPageUrl: this.state.fullPageUrl,
                         getRootElement: this.props.getRootElement,
                     }}
                     annotationShareProps={{

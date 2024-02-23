@@ -1756,9 +1756,11 @@ export class DashboardContainer extends StatefulUIElement<
                             annotationsCache={this.props.annotationsCache}
                             youtubeService={this.youtubeService}
                             authBG={this.props.authBG}
+                            copyToClipboard={this.props.copyToClipboard}
                             refSidebar={this.notesSidebarRef}
                             copyPaster={this.props.copyPasterBG}
                             customListsBG={this.props.listsBG}
+                            analyticsBG={this.props.analyticsBG}
                             annotationsBG={this.props.annotationsBG}
                             contentSharingBG={this.props.contentShareBG}
                             contentSharingByTabsBG={
