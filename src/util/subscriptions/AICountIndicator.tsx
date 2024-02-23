@@ -314,6 +314,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                     })
                                 }}
                                 onKeyDown={async (e) => {
+                                    e.stopPropagation()
                                     if (e.key === 'Enter') {
                                         this.setState({
                                             checkKeyValidLoadState: 'running',

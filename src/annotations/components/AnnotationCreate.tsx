@@ -611,8 +611,6 @@ const TextBoxContainerStyled = styled.div<{
         props.hasLists
             ? css`
                   padding-bottom: 10px;
-                  border-bottom: 1px solid
-                      ${(props) => props.theme.colors.greyScale3};
               `
             : undefined}
 `

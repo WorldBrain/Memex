@@ -839,6 +839,7 @@ export class DashboardContainer extends StatefulUIElement<
                 clearInbox={() => this.processEvent('clearInbox', null)}
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
                 activePage={this.state.activePageID && true}
+                syncSettingsBG={this.props.syncSettingsBG}
                 listData={listsSidebar.lists}
                 saveHighlightColor={(
                     id,
@@ -1837,6 +1838,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 )
                             }
                             highlightColorSettings={this.state.highlightColors}
+                            getRootElement={this.props.getRootElement}
                         />
                     </MainFrame>
                     {this.renderModals()}

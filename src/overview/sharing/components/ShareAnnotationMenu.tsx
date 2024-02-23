@@ -14,13 +14,18 @@ import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components
 import { Checkbox } from 'src/common-ui/components'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import ContentSharingBackground from 'src/content-sharing/background'
-import { ContentSharingInterface } from 'src/content-sharing/background/types'
+import {
+    AnnotationSharingState,
+    ContentSharingInterface,
+} from 'src/content-sharing/background/types'
 import {
     SyncSettingsStore,
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
+import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
+import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 const COPY_TIMEOUT = 2000
 
@@ -33,6 +38,11 @@ export interface Props {
     annotationUrl: string
     contentSharingBG: ContentSharingInterface
     syncSettingsBG?: RemoteSyncSettingsInterface
+    annotationsCache: PageAnnotationsCacheInterface
+    postShareHook?: (
+        state: AnnotationSharingState,
+        opts?: { keepListsIfUnsharing?: boolean },
+    ) => void
 }
 
 interface State {
@@ -41,6 +51,7 @@ interface State {
     autoCreateLinkSetting: boolean | null
     autoCreateLinkState: TaskState
     link: string
+    linkLoadState: TaskState
 }
 
 class ShareAnnotationMenu extends PureComponent<Props, State> {
@@ -54,6 +65,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         autoCreateLinkSetting: null,
         autoCreateLinkState: 'pristine',
         link: null,
+        linkLoadState: 'pristine',
     }
     async componentDidMount() {
         this.syncSettings = createSyncSettingsStore({
@@ -63,6 +75,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         let existingSetting = await this.syncSettings.extension.get(
             'shouldAutoCreateNoteLink',
         )
+
         if (existingSetting == null) {
             await this.syncSettings.extension.set(
                 'shouldAutoCreateNoteLink',
@@ -78,15 +91,59 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
         const linkExists = await this.setRemoteLinkIfExists()
 
-        // if (!linkExists && this.props.shareImmediately) {
-        //     await executeReactStateUITask<State, 'loadState'>(
-        //         this,
-        //         'loadState',
-        //         async () => {
-        //             await this.shareAnnotation()
-        //         },
-        //     )
-        // }
+        if (!linkExists) {
+            await this.shareAnnotation()
+            await executeReactStateUITask<State, 'linkLoadState'>(
+                this,
+                'linkLoadState',
+                async () => {
+                    await this.shareAnnotation()
+                },
+            )
+        } else {
+            this.setState({ linkLoadState: 'success' })
+        }
+    }
+
+    private shareAnnotation = async (isBulkShareProtected?: boolean) => {
+        this.setState({ linkLoadState: 'running' })
+        const { annotationUrl, contentSharingBG, annotationsCache } = this.props
+
+        const currentSharingLevel = await contentSharingBG.getAnnotationSharingState(
+            {
+                annotationUrl,
+            },
+        )
+
+        let sharingState = await contentSharingBG.shareAnnotation({
+            annotationUrl,
+            shareToParentPageLists: currentSharingLevel?.privacyLevel === 200,
+            skipPrivacyLevelUpdate: true,
+        })
+
+        const annotData = annotationsCache.getAnnotationByLocalId(annotationUrl)
+        if (annotData) {
+            annotationsCache.updateAnnotation({
+                ...annotData,
+                remoteId: sharingState.remoteId!.toString(),
+            })
+        }
+
+        sharingState = await contentSharingBG.setAnnotationPrivacyLevel({
+            annotationUrl,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: true,
+                isBulkShareProtected,
+            }),
+        })
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
+
+        this.setState({ link })
+        this.setState({ linkLoadState: 'success' })
+
+        this.props.postShareHook?.(sharingState)
     }
 
     componentWillUnmount() {
@@ -99,10 +156,12 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         const link = await contentSharingBG.getRemoteAnnotationLink({
             annotationUrl,
         })
+
         if (!link) {
             return false
         }
         this.setState({ link })
+        this.setState({ linkLoadState: 'success' })
         return true
     }
 
@@ -212,7 +271,8 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
                             : this.handleCreateLinkClick()
                     }
                     label={
-                        copyState === 'running' ? (
+                        copyState === 'running' ||
+                        this.state.linkLoadState === 'running' ? (
                             <LoadingIndicator size={14} />
                         ) : copyState === 'success' ? (
                             'Copied'
@@ -238,29 +298,35 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
     private renderMain() {
         return (
             <Menu ref={this.menuRef}>
-                {this.state.link != null && (
+                {this.state.link != null &&
+                    this.state.linkLoadState === 'success' && (
+                        <TopArea>
+                            <LinkCopierBox>
+                                {this.renderLinkContent()}
+                            </LinkCopierBox>
+                            <Checkbox
+                                key={23}
+                                id={'23'}
+                                isChecked={
+                                    this.state.autoCreateLinkSetting === true
+                                }
+                                handleChange={() =>
+                                    this.toggleAutoCreateLinkSetting()
+                                }
+                                name={'Copy link when creating highlight'}
+                                label={'Copy link when creating highlight'}
+                                fontSize={14}
+                                width="fit-content"
+                                size={16}
+                                isLoading={
+                                    this.state.autoCreateLinkState === 'running'
+                                }
+                            />
+                        </TopArea>
+                    )}
+                {this.state.linkLoadState === 'running' && (
                     <TopArea>
-                        <LinkCopierBox>
-                            {this.renderLinkContent()}
-                        </LinkCopierBox>
-                        <Checkbox
-                            key={23}
-                            id={'23'}
-                            isChecked={
-                                this.state.autoCreateLinkSetting === true
-                            }
-                            handleChange={() =>
-                                this.toggleAutoCreateLinkSetting()
-                            }
-                            name={'Copy link when creating highlight'}
-                            label={'Copy link when creating highlight'}
-                            fontSize={14}
-                            width="fit-content"
-                            size={18}
-                            isLoading={
-                                this.state.autoCreateLinkState === 'running'
-                            }
-                        />
+                        <LoadingIndicator size={18} />
                     </TopArea>
                 )}
             </Menu>

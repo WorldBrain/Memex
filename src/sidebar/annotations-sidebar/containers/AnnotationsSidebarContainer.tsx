@@ -579,6 +579,13 @@ export class AnnotationsSidebarContainer<
                     }}
                     annotationShareProps={{
                         isForAnnotation: true,
+                        postShareHook: (state, opts) =>
+                            this.processEvent('updateAnnotationShareInfo', {
+                                privacyLevel: state.privacyLevel,
+                                unifiedAnnotationId: annotation.unifiedId,
+                                keepListsIfUnsharing: true,
+                            }),
+                        annotationsCache: this.props.annotationsCache,
                     }}
                     getRootElement={this.props.getRootElement}
                     syncSettingsBG={this.props.syncSettingsBG}

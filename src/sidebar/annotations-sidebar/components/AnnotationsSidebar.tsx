@@ -2150,17 +2150,34 @@ export class AnnotationsSidebar extends React.Component<
                                                 output
                                             </>
                                         ) : (
-                                            <>Nothing to save yet</>
+                                            <>
+                                                Create new note from output.
+                                                <br />
+                                                Though nothing to save yet.
+                                            </>
                                         )
                                     }
                                     placement="bottom-end"
                                     getPortalRoot={this.props.getRootElement}
                                 >
                                     <SummaryActionsButton
-                                        onClick={() => {
+                                        onMouseDown={() => {
+                                            let contentToUse = this.props
+                                                .pageSummary
+                                            const selectedText = window
+                                                .getSelection()
+                                                ?.toString()
+
+                                            console.log(
+                                                'selectedText',
+                                                selectedText,
+                                            )
+                                            if (selectedText) {
+                                                contentToUse = selectedText
+                                            }
                                             if (this.props.pageSummary) {
                                                 this.props.createNewNoteFromAISummary(
-                                                    this.props.pageSummary,
+                                                    contentToUse,
                                                 )
                                             }
                                         }}
@@ -5380,6 +5397,7 @@ const RemoteOrLocalSwitcherContainer = styled.div`
     justify-content: flex-start;
     grid-gap: 2px;
     margin-top: 10px;
+    padding-bottom: 10px;
 `
 
 const CopyBox = styled.div`

@@ -63,6 +63,7 @@ import PageCitations from 'src/citations/PageCitations'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -148,6 +149,7 @@ export type Props = RootState &
         //     changedTitle: string,
         // ) => void
         inPageMode?: boolean
+        syncSettingsBG?: RemoteSyncSettingsInterface
     }
 
 export interface State {
@@ -362,9 +364,34 @@ export default class SearchResultsContainer extends React.Component<
                 isEditingHighlight={noteData.isBodyEditing}
                 isDeleting={false}
                 renderCopyPasterForAnnotation={() => (
-                    <PageNotesCopyPaster
-                        annotationUrls={[noteId]}
-                        normalizedPageUrls={[pageId]}
+                    <PageCitations
+                        annotationUrls={[noteData.url]}
+                        copyPasterProps={{
+                            copyPasterBG: this.props.copyPasterBG,
+                            getRootElement: this.props.getRootElement,
+                            onClickOutside:
+                                interactionProps.onCopyPasterBtnClick,
+                        }}
+                        pageLinkProps={{
+                            authBG: this.props.authBG,
+                            analyticsBG: this.props.analyticsBG,
+                            annotationsCache: this.props.annotationsCache,
+                            contentSharingBG: this.props.contentSharingBG,
+                            contentSharingByTabsBG: this.props
+                                .contentSharingByTabsBG,
+                            copyToClipboard: this.props.onPageLinkCopy,
+                            fullPageUrl: pageData.fullUrl,
+                            getRootElement: this.props.getRootElement,
+                            showSpacesTab: this.props.showSpacesTab,
+                            fromDashboard: true,
+                        }}
+                        annotationShareProps={{
+                            isForAnnotation: true,
+                            postShareHook: interactionProps.updateShareInfo,
+                            annotationsCache: this.props.annotationsCache,
+                        }}
+                        getRootElement={this.props.getRootElement}
+                        syncSettingsBG={this.props.syncSettingsBG}
                     />
                 )}
                 toggleAutoAdd={null}

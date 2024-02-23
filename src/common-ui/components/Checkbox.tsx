@@ -71,7 +71,11 @@ class Checkbox extends React.PureComponent<Props> {
                     />
                     <CheckBoxContainer size={this.props.size + 4}>
                         {this.props.isLoading ? (
-                            <LoadingIndicator size={this.props.size - 2} />
+                            <LoadingIndicatorBox
+                                textPosition={this.props.textPosition}
+                            >
+                                <LoadingIndicator size={this.props.size - 2} />
+                            </LoadingIndicatorBox>
                         ) : (
                             <LabelCheck
                                 size={this.props.size}
@@ -177,7 +181,10 @@ const LabelText = styled.span<{ fontSize; textPosition }>`
     width: fill-available;
     height: fill-available;
     justify-content: center;
-    grid-gap: ${(props) => (props.fontSize < 14 ? '10px' : '15px')};
+    grid-gap: ${(props) =>
+        props.fontSize > 10
+            ? Math.floor((props.fontSize + 2) / 1.5) + 'px'
+            : '15px'};
 
     &:hover {
         color: ${(props) => props.theme.colors.black};
@@ -194,8 +201,10 @@ const CheckBoxContainer = styled.div<{ size: number }>`
     display: flex;
     align-items: center;
     align-items: center;
-    width: ${(props) => (props.size ? props.size + 'px' : '24px')};
-    height: ${(props) => (props.size ? props.size + 'px' : '24px')};
+    height: fit-content;
+    width: fit-content;
+    /* width: ${(props) => (props.size ? props.size + 2 + 'px' : '24px')};
+    height: ${(props) => (props.size ? props.size + 2 + 'px' : '24px')}; */
 `
 
 const LabelCheck = styled.span<{
@@ -258,6 +267,17 @@ const LabelCheck = styled.span<{
                 outline: 1px solid ${(props) => props.theme.colors.greyScale4};
             }
         `};
+`
+
+const LoadingIndicatorBox = styled.div<{ textPosition: string }>`
+    margin-right: 10px;
+
+    ${(props) =>
+        props.textPosition === 'left' &&
+        css`
+            margin-left: 10px;
+            margin-right: unset;
+        `}
 `
 
 export default Checkbox

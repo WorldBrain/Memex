@@ -12,15 +12,21 @@ import styled, { css } from 'styled-components'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { Checkbox } from 'src/common-ui/components'
 import ShareAnnotationMenu from 'src/overview/sharing/components/ShareAnnotationMenu'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { AnnotationSharingState } from 'src/content-sharing/background/types'
+import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 export interface Props {
     copyPasterProps: Omit<CopyPasterProps, 'renderTemplate' | 'renderPreview'>
     pageLinkProps: PageLinkProps
     annotationShareProps?: {
         isForAnnotation?: boolean
+        postShareHook?: (
+            state: AnnotationSharingState,
+            opts?: { keepListsIfUnsharing?: boolean },
+        ) => void
+        annotationsCache: PageAnnotationsCacheInterface
     }
     annotationUrls: string[]
     getRootElement: () => HTMLElement
@@ -138,6 +144,12 @@ export default class PageCitations extends React.PureComponent<Props, State> {
                                 this.props.pageLinkProps.contentSharingBG
                             }
                             syncSettingsBG={this.props.syncSettingsBG}
+                            postShareHook={
+                                this.props.annotationShareProps.postShareHook
+                            }
+                            annotationsCache={
+                                this.props.annotationShareProps.annotationsCache
+                            }
                         />
                     </>
                 ) : (

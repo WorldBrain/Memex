@@ -847,17 +847,6 @@ export class SidebarContainerLogic extends UILogic<
             await this.setPageActivityState(this.fullPageUrl)
         })
 
-        // this is here bc the scrollheight of the sidebar for some reason goes down ever so slightly if there are a lot of annotations
-        // it'll make sure that the scroll container on load is on the top
-        console.log('slee')
-        const rootElement = this.options.getRootElement()
-        await sleepPromise(10)
-
-        rootElement.querySelector(
-            '#AnnotationSectionScrollContainer',
-        ).scrollTop = 0
-        ///
-
         if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
             const width = SIDEBAR_WIDTH_STORAGE_KEY
 
@@ -873,8 +862,8 @@ export class SidebarContainerLogic extends UILogic<
             }, 1000)
         }
 
-        const openAIKey = await this.syncSettings.openAI.get('apiKey')
-        const hasAPIKey = openAIKey && openAIKey.trim().startsWith('sk-')
+        const openAIKey = await this.syncSettings.openAI?.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
         this.emitMutation({
             hasKey: { $set: hasAPIKey },
@@ -900,6 +889,7 @@ export class SidebarContainerLogic extends UILogic<
         const isAutoAddEnabled = await this.syncSettings.extension.get(
             'shouldAutoAddSpaces',
         )
+
         if (isAutoAddEnabled == null) {
             this.emitMutation({
                 isAutoAddEnabled: { $set: true },
@@ -3124,6 +3114,10 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (event.apiKey?.length === 0) {
+            await this.syncSettings.openAI.set('apiKey', event.apiKey?.trim())
+            return
+        }
         this.emitMutation({
             isKeyValid: { $set: null },
         })
@@ -3474,6 +3468,11 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        this.syncSettings.extension.set(
+            'shouldAutoAddSpaces',
+            !previousState.isAutoAddEnabled,
+        )
+
         this.emitMutation({
             isAutoAddEnabled: { $set: !previousState.isAutoAddEnabled },
         })

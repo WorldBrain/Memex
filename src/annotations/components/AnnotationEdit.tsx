@@ -108,7 +108,7 @@ class AnnotationEdit extends React.Component<Props> {
             if (e.key === 'Enter' && e.altKey) {
                 e.stopPropagation()
                 e.preventDefault()
-                return this.saveEdit(false, true)
+                return this.saveEdit(false, false)
             }
 
             if (e.key === 'Enter' && e.metaKey) {

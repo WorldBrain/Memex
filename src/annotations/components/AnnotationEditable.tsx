@@ -366,9 +366,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                               ?.onEditHighlightIconClick
                 }
             >
-                {this.creationInfo?.createdWhen && (
-                    <CreationInfo {...this.creationInfo} />
-                )}
                 <HighlightSection>
                     {this.renderHighlightsColorPicker(
                         this.props.unifiedId,
@@ -631,12 +628,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.props.isShared ? (
                             <span>
                                 Disable Auto-Add
-                                <br /> <strong>Shift+Click</strong>for options
+                                <br /> <strong>Shift+Click</strong> for options
                             </span>
                         ) : (
                             <span>
                                 Enable Auto-Add
-                                <br /> <strong>Shift+Click</strong>for options
+                                <br /> <strong>Shift+Click</strong> for options
                             </span>
                         )
                     }
@@ -1285,6 +1282,11 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     })
                                 }
                             >
+                                {this.creationInfo?.createdWhen && (
+                                    <CreationInfoBox>
+                                        <CreationInfo {...this.creationInfo} />
+                                    </CreationInfoBox>
+                                )}
                                 {this.renderHighlightBody()}
                                 {this.renderNote()}
                             </ContentContainer>
@@ -1406,9 +1408,9 @@ const ShareMenuContainer = styled.div`
 
 const Highlightbar = styled.div<{ barColor: string }>`
     background: ${(props) => props.theme.colors.prime1};
-    margin-right: 10px;
     border-radius: 2px;
     width: 5px;
+    margin: 10px 10px 10px 0px;
     cursor: pointer;
 
     &:hover {
@@ -1538,7 +1540,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     font-size: 14px;
     letter-spacing: 0.5px;
     margin: 0;
-    padding: 15px 10px 7px 15px;
+    padding: 0px 10px 7px 15px;
     line-height: 20px;
     text-align: left;
     grid-gap: 2px;
@@ -1549,7 +1551,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     ${(props) =>
         !props.hasComment &&
         css`
-            padding: 15px 10px 15px 15px;
+            padding: 0px 10px 10px 15px;
         `};
 `
 
@@ -1732,4 +1734,8 @@ const TooltipTextBox = styled.div`
     text-align: center;
     grid-gap: 10px;
     padding: 15px 15px 8px 15px;
+`
+
+const CreationInfoBox = styled.div`
+    padding: 15px 15px 0px 15px;
 `
