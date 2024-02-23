@@ -127,6 +127,12 @@ export function analyzeTemplate(
 
         const requirement = KEYS_TO_REQUIREMENTS[key]
         requirements[requirement] = true
+
+        // If page-related data is required, ensure we also require page
+        if (['pageLink', 'pageSpaces', 'pageCreatedAt'].includes(requirement)) {
+            requirements.page = true
+        }
+
         usesLegacyTags = usesLegacyTags || LEGACY_KEYS.has(key)
     }
     if (!expectedContext) {
