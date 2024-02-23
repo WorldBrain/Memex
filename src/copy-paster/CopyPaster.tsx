@@ -160,23 +160,15 @@ export default class CopyPasterContainer extends React.PureComponent<
     private handleTemplateCopy = async (templateId: number) => {
         this.setState({ isLoading: true })
         this.props.setLoadingState?.('running')
-        let rendered
 
         try {
-            try {
-                rendered = (await this.props.renderTemplate(templateId)) ?? null
-                this.setState({ renderedTextBuffered: rendered })
-            } catch (e) {
-                console.error(e)
-                this.props.setLoadingState?.('error')
-            }
-            try {
-                await this.copyExistingRenderedToClipboard(rendered, templateId)
-            } catch (e) {
-                this.setState({ errorCopyToClipboard: true })
-            }
+            const rendered = await this.props.renderTemplate(templateId)
+            this.setState({ renderedTextBuffered: rendered })
+            await this.copyExistingRenderedToClipboard(rendered, templateId)
         } catch (err) {
-            console.error('Something went really bad copying:', err.message)
+            this.setState({ errorCopyToClipboard: true })
+            this.props.setLoadingState?.('error')
+            console.error('Something went really bad copying:', err)
             Raven.captureException(err)
         } finally {
             analytics.trackEvent({
