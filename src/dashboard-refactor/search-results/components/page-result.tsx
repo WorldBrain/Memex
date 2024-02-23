@@ -13,7 +13,6 @@ import type {
     PageResult,
     PagePickerProps,
 } from '../types'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
@@ -290,25 +289,6 @@ export default class PageResultView extends PureComponent<Props> {
                 </PopoutBox>
             )
         }
-    }
-
-    private renderCiteMenu() {
-        return (
-            <PopoutBox
-                targetElementRef={this.citeMenuButtonRef.current}
-                placement={'bottom-end'}
-                offsetX={10}
-                strategy={'fixed'}
-                closeComponent={this.props.onCopyPasterBtnClick}
-                getPortalRoot={this.props.getRootElement}
-            >
-                <PageNotesCopyPaster
-                    normalizedPageUrls={[this.props.normalizedUrl]}
-                    onClickOutside={this.props.onCopyPasterBtnClick}
-                    getRootElement={this.props.getRootElement}
-                />
-            </PopoutBox>
-        )
     }
 
     private renderSpacePicker() {

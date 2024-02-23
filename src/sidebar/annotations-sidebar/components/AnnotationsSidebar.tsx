@@ -51,7 +51,6 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import type {
     AnnotationSharingStates,
     RemoteContentSharingByTabsInterface,
@@ -299,7 +298,6 @@ interface AnnotationsSidebarState {
     isolatedView?: string | null // if null show default view
     showIsolatedViewNotif: boolean // if null show default view
     isMarkdownHelpShown: boolean
-    showAllNotesCopyPaster: boolean
     showAllNotesShareMenu: boolean
     showPageSpacePicker: boolean
     showSortDropDown: boolean
@@ -355,7 +353,6 @@ export class AnnotationsSidebar extends React.Component<
         searchText: '',
         showIsolatedViewNotif: false,
         isMarkdownHelpShown: false,
-        showAllNotesCopyPaster: false,
         showAllNotesShareMenu: false,
         showPageSpacePicker: false,
         showSortDropDown: false,
@@ -525,7 +522,6 @@ export class AnnotationsSidebar extends React.Component<
 
     setPopoutsActive() {
         if (
-            this.state.showAllNotesCopyPaster ||
             this.state.isMarkdownHelpShown ||
             this.state.showAllNotesShareMenu ||
             this.state.showSortDropDown ||
@@ -565,42 +561,6 @@ export class AnnotationsSidebar extends React.Component<
                     : null,
             ),
     })
-
-    private renderCopyPasterManager(localAnnotationIds: string[]) {
-        if (!this.state.showAllNotesCopyPaster) {
-            return
-        }
-
-        return (
-            <PopoutBox
-                targetElementRef={this.copyButtonRef.current}
-                placement={'bottom'}
-                offsetX={5}
-                offsetY={5}
-                closeComponent={() => {
-                    this.setState({
-                        showAllNotesCopyPaster: false,
-                    })
-                }}
-                strategy={'fixed'}
-                width={'fit-content'}
-                getPortalRoot={this.props.getRootElement}
-            >
-                <PageNotesCopyPaster
-                    copyPasterBG={this.props.copyPaster}
-                    annotationUrls={localAnnotationIds}
-                    normalizedPageUrls={this.props.normalizedPageUrls}
-                    getRootElement={this.props.getRootElement}
-                />
-            </PopoutBox>
-        )
-    }
-
-    private renderAllNotesCopyPaster() {
-        const localAnnotationIds = this.props.getLocalAnnotationIds()
-
-        return this.renderCopyPasterManager(localAnnotationIds)
-    }
 
     private renderAllNotesShareMenu() {
         if (!this.state.showAllNotesShareMenu) {
@@ -4372,7 +4332,6 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <>
                 {this.renderSortingMenuDropDown()}
-                {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}
                 <TopBarActionBtns>
                     <TooltipBox
@@ -4397,29 +4356,6 @@ export class AnnotationsSidebar extends React.Component<
                             active={this.state.showSortDropDown}
                         />
                     </TooltipBox>
-                    {/* <TooltipBox
-                        tooltipText={'Copy & Paste Page with its notes'}
-                        placement={'bottom'}
-                        getPortalRoot={this.props.getRootElement}
-                    >
-                        <PrimaryAction
-                            icon={'copy'}
-                            size={'small'}
-                            iconSize="18px"
-                            padding={'0px 6px 0 0'}
-                            type={'tertiary'}
-                            label={'Copy'}
-                            innerRef={this.copyButtonRef}
-                            onClick={async () => {
-                                await this.setState({
-                                    showAllNotesCopyPaster: true,
-                                })
-                                this.setPopoutsActive()
-                            }}
-                            active={this.state.showAllNotesCopyPaster}
-                        />
-                    </TooltipBox> */}
-
                     <RightSideContainer>
                         <TooltipBox
                             tooltipText={
