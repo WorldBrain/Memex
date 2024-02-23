@@ -72,6 +72,7 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import {
     generateAnnotationCardInstanceId,
     getOrCreateAnnotationInstanceRefs,
+    initListInstance,
 } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
@@ -636,7 +637,9 @@ export class AnnotationsSidebar extends React.Component<
         selectedListMode: boolean = false,
     ) {
         const listData = this.props.lists.byId[unifiedListId]
-        const listInstance = this.props.listInstances[unifiedListId]
+        const listInstance =
+            this.props.listInstances[unifiedListId] ??
+            initListInstance(listData)
 
         // TODO: Simplify this confusing condition
         if (
@@ -1076,8 +1079,9 @@ export class AnnotationsSidebar extends React.Component<
 
     private renderSpacesItem(
         listData: UnifiedList,
-        listInstance: ListInstance,
+        listInstance?: ListInstance,
     ) {
+        listInstance = listInstance ?? initListInstance(listData)
         const title = listData.name
         let keepHovered = false
 
@@ -1092,7 +1096,7 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedListNotesContainer
-                bottom={listInstance.isOpen ? '0px' : '0px'}
+                bottom="0px"
                 key={parseFloat(listData.unifiedId)}
                 top="5px"
                 onMouseOver={() => {
@@ -1568,7 +1572,8 @@ export class AnnotationsSidebar extends React.Component<
             this.throwNoSelectedListError()
         }
         const listData = this.props.lists.byId[selectedListId]
-        const listInstance = listInstances[selectedListId]
+        const listInstance =
+            listInstances[selectedListId] ?? initListInstance(listData)
 
         if (
             listData.remoteId != null &&
