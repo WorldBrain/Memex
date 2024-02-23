@@ -43,6 +43,7 @@ export function getTemplateDataFetchers({
         | 'scheduleManyPageLinkCreations'
     >
     imageSupport: ImageSupportInterface<'caller'>
+    previewMode?: boolean
 }): TemplateDataFetchers {
     const getTagsForUrls = async (
         urls: string[],
@@ -180,6 +181,7 @@ export function getTemplateDataFetchers({
             await contentSharing.shareAnnotations({
                 annotationUrls,
                 shareToParentPageLists: true,
+                skipAnalytics: true,
             })
             const remoteIds = await contentSharing.storage.getRemoteAnnotationIds(
                 {
@@ -204,6 +206,7 @@ export function getTemplateDataFetchers({
             await contentSharing.shareAnnotations({
                 annotationUrls,
                 shareToParentPageLists: true,
+                skipAnalytics: true,
             })
             const normalizedPageUrls = Object.keys(notes)
             const pageUrlToLinkParams = new Map<

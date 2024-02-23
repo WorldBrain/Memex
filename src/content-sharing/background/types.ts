@@ -55,6 +55,7 @@ export interface ContentSharingInterface
         annotationUrls: string[]
         shareToParentPageLists?: boolean
         setBulkShareProtected?: boolean
+        skipAnalytics?: boolean
     }): Promise<{ sharingStates: AnnotationSharingStates }>
     unshareAnnotations(options: {
         annotationUrls: string[]

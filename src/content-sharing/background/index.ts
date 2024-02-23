@@ -549,7 +549,7 @@ export default class ContentSharingBackground {
             }),
         })
 
-        if (this.options.analyticsBG) {
+        if (this.options.analyticsBG && !options.skipAnalytics) {
             try {
                 await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'bulk',

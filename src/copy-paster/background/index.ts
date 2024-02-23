@@ -1,23 +1,19 @@
-import Storex from '@worldbrain/storex'
+import type Storex from '@worldbrain/storex'
 
 import { bindMethod } from 'src/util/functions'
 import CopyPasterStorage from './storage'
-import { RemoteCopyPasterInterface } from './types'
-import { Template } from '../types'
+import type { RemoteCopyPasterInterface } from './types'
+import type { Template } from '../types'
 import generateTemplateDocs from '../template-doc-generation'
-import {
-    joinTemplateDocs,
-    analyzeTemplate,
-    convertHTMlTemplateToMarkdown,
-} from '../utils'
-import ContentSharingBackground from 'src/content-sharing/background'
+import { joinTemplateDocs, analyzeTemplate } from '../utils'
+import type ContentSharingBackground from 'src/content-sharing/background'
 import { getTemplateDataFetchers } from './template-data-fetchers'
-import SearchBackground from 'src/search/background'
-import {
+import type SearchBackground from 'src/search/background'
+import type {
     AnnotsByPageUrl,
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
@@ -38,7 +34,6 @@ export default class CopyPasterBackground {
             imageSupport: ImageSupportInterface<'caller'>
         },
     ) {
-        // makes the custom copy paster table in indexed DB
         this.storage = new CopyPasterStorage({
             storageManager: options.storageManager,
         })
@@ -112,12 +107,16 @@ export default class CopyPasterBackground {
                 annotationUrls,
                 normalizedPageUrls,
                 templateAnalysis: analyzeTemplate(template),
-                dataFetchers: getTemplateDataFetchers(this.options),
+                dataFetchers: getTemplateDataFetchers({
+                    ...this.options,
+                    previewMode: true,
+                }),
             })
         }
 
         return joinTemplateDocs(templateDocs, template)
     }
+
     renderTemplate: RemoteCopyPasterInterface['renderTemplate'] = async ({
         id,
         annotationUrls,
@@ -155,6 +154,7 @@ export default class CopyPasterBackground {
         })
         return joinTemplateDocs(templateDocs, template)
     }
+
     renderPreviewForPageSearch: RemoteCopyPasterInterface['renderPreviewForPageSearch'] = async ({
         template,
         searchParams,
@@ -195,7 +195,10 @@ export default class CopyPasterBackground {
                 annotationUrls: [],
                 normalizedPageUrls,
                 templateAnalysis: analyzeTemplate(template),
-                dataFetchers: getTemplateDataFetchers(this.options),
+                dataFetchers: getTemplateDataFetchers({
+                    ...this.options,
+                    previewMode: true,
+                }),
             })
         }
         return joinTemplateDocs(templateDocs, template)
@@ -307,7 +310,10 @@ export default class CopyPasterBackground {
                 annotationUrls,
                 normalizedPageUrls,
                 templateAnalysis: analyzeTemplate(template),
-                dataFetchers: getTemplateDataFetchers(this.options),
+                dataFetchers: getTemplateDataFetchers({
+                    ...this.options,
+                    previewMode: true,
+                }),
             })
         }
 
