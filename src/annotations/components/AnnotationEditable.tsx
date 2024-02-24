@@ -661,7 +661,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             }
                         }}
                         padding={'1px'}
-                        background={'greyScale0_5'}
+                        background={'greyScale1'}
                     />
                 </TooltipBox>
             </AutoAddedIndicator>

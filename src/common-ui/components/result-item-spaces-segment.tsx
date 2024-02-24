@@ -193,7 +193,10 @@ const ListSpaceContainer = styled.div<{
     isLoading: boolean
     spaceId: number
 }>`
-    background-color: ${(props) => props.theme.colors.greyScale3};
+    background: ${(props) =>
+        props.theme.variant === 'light'
+            ? props.theme.colors.greyScale1
+            : props.theme.colors.greyScale3};
     color: ${(props) => props.theme.colors.greyScale6};
     padding: 2px 8px;
     border-radius: 4px;

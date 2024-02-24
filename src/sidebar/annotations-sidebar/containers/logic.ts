@@ -4345,6 +4345,7 @@ export class SidebarContainerLogic extends UILogic<
                 nextState,
                 [list],
             )
+
             nextState = await this.maybeLoadListRemoteAnnotations(
                 nextState,
                 unifiedListId,
