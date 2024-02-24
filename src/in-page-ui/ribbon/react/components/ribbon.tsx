@@ -1307,7 +1307,20 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <TooltipBox
-                tooltipText={this.getTooltipText('openDashboard')}
+                tooltipText={
+                    <span
+                        style={{
+                            gridGap: '5px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                        }}
+                    >
+                        {this.getTooltipText('openDashboard')}
+                        <span>
+                            <strong>+ shift </strong>to open in new tab
+                        </span>
+                    </span>
+                }
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -1327,12 +1340,28 @@ export default class Ribbon extends Component<Props, State> {
                         type="tertiary"
                         label={'Search'}
                         fontColor={'greyScale8'}
-                        onClick={() => this.props.toggleQuickSearch()}
+                        onClick={(e) => {
+                            if (e.shiftKey) {
+                                e.stopPropagation()
+                                this.props.bgScriptBG.openOverviewTab()
+                            } else {
+                                e.stopPropagation()
+                                this.props.toggleQuickSearch()
+                            }
+                        }}
                         icon={'searchIcon'}
                     />
                 ) : (
                     <Icon
-                        onClick={() => this.props.toggleQuickSearch()}
+                        onClick={(e) => {
+                            if (e.shiftKey) {
+                                e.stopPropagation()
+                                this.props.bgScriptBG.openOverviewTab()
+                            } else {
+                                e.stopPropagation()
+                                this.props.toggleQuickSearch()
+                            }
+                        }}
                         color={'greyScale6'}
                         heightAndWidth="20px"
                         filePath={icons.searchIcon}

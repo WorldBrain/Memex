@@ -102,6 +102,8 @@ function getShortcutHandlers({
         },
         createBookmark: () => inPageUI.showRibbon({ action: 'bookmark' }),
         openDashboard: () => inPageUI.showSearch(),
+        openDashboardInNewTab: () =>
+            runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),
         askAI: async () => {
             inPageUI.showSidebar({
