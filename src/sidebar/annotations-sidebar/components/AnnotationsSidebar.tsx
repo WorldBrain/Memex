@@ -4068,13 +4068,15 @@ export class AnnotationsSidebar extends React.Component<
                         </TooltipBox>
                         <TooltipBox
                             tooltipText={
-                                isPageLink ? 'Share Page' : 'Share Space'
+                                isPageLink
+                                    ? 'Share Annotated Page'
+                                    : 'Share Space'
                             }
                             placement="bottom"
                             getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
-                                icon="invite"
+                                icon="link"
                                 containerRef={this.shareInviteButtonRef}
                                 onClick={() =>
                                     this.props.openContextMenuForList(
@@ -4202,14 +4204,15 @@ export class AnnotationsSidebar extends React.Component<
         if (permissionStatus === 'Follower' && !selectedList.isForeignList) {
             return (
                 <CreatorActionButtons>
-                    <PrimaryAction
-                        label="Follower"
-                        type="forth"
-                        size="small"
-                        icon="check"
-                        onClick={null}
-                        fontColor={'greyScale6'}
-                    />
+                    <PermissionsDisplayBox>
+                        <Icon
+                            icon="peopleFine"
+                            heightAndWidth="18px"
+                            hoverOff
+                            color="greyScale6"
+                        />
+                        Following
+                    </PermissionsDisplayBox>
                 </CreatorActionButtons>
             )
         }
@@ -4229,22 +4232,15 @@ export class AnnotationsSidebar extends React.Component<
                         width={'200px'}
                         getPortalRoot={this.props.getRootElement}
                     >
-                        {/* <PrimaryAction
-                        type="tertiary"
-                        size="small"
-                        icon="link"
-                        label={'Share Space'}
-                        onClick={null}
-                        fontColor={'greyScale5'}
-                    /> */}
-                        <PrimaryAction
-                            type="forth"
-                            size="small"
-                            icon="personFine"
-                            label={'Creator'}
-                            onClick={null}
-                            fontColor={'greyScale6'}
-                        />
+                        <PermissionsDisplayBox>
+                            <Icon
+                                icon="personFine"
+                                heightAndWidth="18px"
+                                hoverOff
+                                color="greyScale6"
+                            />
+                            Creator
+                        </PermissionsDisplayBox>
                     </TooltipBox>
                 </CreatorActionButtons>
             )
@@ -4297,14 +4293,15 @@ export class AnnotationsSidebar extends React.Component<
                     width={'200px'}
                     getPortalRoot={this.props.getRootElement}
                 >
-                    <PrimaryAction
-                        label="Contributor"
-                        type="forth"
-                        size="small"
-                        icon="peopleFine"
-                        onClick={null}
-                        fontColor={'greyScale6'}
-                    />
+                    <PermissionsDisplayBox>
+                        <Icon
+                            icon="peopleFine"
+                            heightAndWidth="18px"
+                            hoverOff
+                            color="greyScale6"
+                        />
+                        Contributor
+                    </PermissionsDisplayBox>
                 </TooltipBox>
             )
         }
@@ -6191,4 +6188,18 @@ const AutoAddContainer = styled.div`
     align-items: center;
     justify-content: center;
     grid-gap: 4px;
+`
+
+const PermissionsDisplayBox = styled.div`
+    height: 30px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+    border-radius: 5px;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 14px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    cursor: default;
 `
