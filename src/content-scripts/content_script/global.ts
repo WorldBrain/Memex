@@ -602,7 +602,12 @@ export async function main(
 
             await inPageUI.hideTooltip()
 
-            if (preventHideTooltip && selection.toString().length > 0) {
+            console.log(
+                'preventHideTooltip',
+                preventHideTooltip,
+                selection.toString().length,
+            )
+            if (preventHideTooltip) {
                 const styleSheet = document.createElement('style')
                 styleSheet.type = 'text/css'
                 styleSheet.innerText = `
@@ -627,7 +632,7 @@ export async function main(
                 notification.style.borderRadius = '5px'
                 notification.style.zIndex = '1000'
                 notification.style.textAlign = 'center'
-                notification.style.animation = 'slideAndFade 2s ease-in-out'
+                notification.style.animation = 'slideAndFade 4s ease-in-out'
                 document.body.appendChild(notification)
                 setTimeout(() => {
                     document.body.removeChild(notification)
