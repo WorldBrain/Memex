@@ -483,7 +483,6 @@ export class AnnotationsSidebar extends React.Component<
         // Initial instructions context: We need to check if the sidebar container is already within the viewport.
         // If it's not, we attempt to autofocus the create form up to 3 times every 100ms until it's within the viewport or we give up.
         const attemptFocus = (attempt = 1) => {
-            console.log(`Attempt ${attempt} to autofocus create form.`)
             // Get the document's width to compare with the sidebar's left boundary.
             const docWidth = document.documentElement.clientWidth
 
@@ -500,12 +499,8 @@ export class AnnotationsSidebar extends React.Component<
             const sidebarRect = sidebarContainer.getBoundingClientRect()
             // Check if the sidebar's left boundary is within the viewport.
             if (docWidth > sidebarRect.left) {
-                console.log(
-                    'Sidebar is within the viewport. Setting autofocus state.',
-                )
                 this.setState({ autoFocusCreateForm: true })
             } else if (attempt < 3) {
-                console.log('Sidebar is not within the viewport. Retrying...')
                 // Retry after 100ms if we have attempts left.
                 setTimeout(() => attemptFocus(attempt + 1), 100)
             } else {
@@ -2170,10 +2165,6 @@ export class AnnotationsSidebar extends React.Component<
                                                 .getSelection()
                                                 ?.toString()
 
-                                            console.log(
-                                                'selectedText',
-                                                selectedText,
-                                            )
                                             if (selectedText) {
                                                 contentToUse = selectedText
                                             }

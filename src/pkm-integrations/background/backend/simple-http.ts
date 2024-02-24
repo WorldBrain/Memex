@@ -133,8 +133,6 @@ export class MemexLocalBackend {
         const syncKey = await getPkmSyncKey()
         let body
 
-        console.log('syncKey', syncKey)
-
         if (document.contentType === 'annotation') {
             body = {
                 sourceApplication: 'Memex',
@@ -198,8 +196,6 @@ export class MemexLocalBackend {
             syncKey: syncKey,
         }
 
-        console.log('body', body)
-
         try {
             const response = await fetch(`${this.url}/get_similar`, {
                 method: 'POST',
@@ -211,7 +207,6 @@ export class MemexLocalBackend {
 
             if (response.ok) {
                 const responseObj = await response.json()
-                console.log('responseObj', responseObj)
                 return responseObj
             }
 
@@ -236,14 +231,10 @@ export class MemexLocalBackend {
     ): Promise<any> {
         const syncKey = await getPkmSyncKey()
 
-        console.log('feedSources', feedSources, syncKey)
-
         const body = JSON.stringify({
             feedSources: feedSources,
             syncKey: syncKey,
         })
-
-        console.log('body', body)
 
         const response = await fetch(`${this.url}/add_feed_source`, {
             method: 'POST',
@@ -265,8 +256,6 @@ export class MemexLocalBackend {
     }
     async loadFeedSources(): Promise<any> {
         const syncKey = await getPkmSyncKey()
-
-        console.log('loaaaaa', syncKey)
 
         const body = JSON.stringify({
             syncKey: syncKey,

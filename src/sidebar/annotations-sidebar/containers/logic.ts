@@ -1652,7 +1652,7 @@ export class SidebarContainerLogic extends UILogic<
                 (result) => result != null && result.confirmState !== 'error',
             )
         } catch (e) {
-            console.log('e', e)
+            console.error('e', e)
         }
 
         // // Remove duplicates from updatedSources based on feedUrl
@@ -4069,7 +4069,7 @@ export class SidebarContainerLogic extends UILogic<
                                 }
                             }
                         } catch (e) {
-                            console.log('Error', e)
+                            console.error('Error', e)
                         }
                     }
                 }

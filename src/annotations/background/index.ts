@@ -442,8 +442,6 @@ export default class DirectLinkingBackground {
             url: url,
         })
 
-        console.log('edithappens', body)
-
         if (!existingAnnotation?.comment?.length) {
             if (this.options.analyticsBG) {
                 try {
