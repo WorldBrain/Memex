@@ -405,6 +405,7 @@ export class SidebarContainerLogic extends UILogic<
                 user: this.options.getCurrentUser(),
                 cache: this.options.annotationsCache,
                 skipListHydration: this.options.sidebarContext === 'dashboard',
+                keepExistingAnnotationData: true,
                 bgModules: {
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,

@@ -1231,9 +1231,6 @@ export class AnnotationsSidebarContainer<
                                     (annot) => annot.localId,
                                 )
                             }
-                            normalizedPageUrls={[
-                                normalizeUrl(this.state.fullPageUrl),
-                            ]}
                             normalizedPageUrl={normalizeUrl(
                                 this.state.fullPageUrl,
                             )}

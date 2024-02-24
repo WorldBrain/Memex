@@ -168,12 +168,14 @@ export const reshapeFollowedListForCache = (
 
 export const getUserAnnotationsArray = (
     cache: Pick<PageAnnotationsCacheInterface, 'annotations'>,
+    normalizedPageUrl: string,
     userId?: string,
 ): UnifiedAnnotation[] =>
     normalizedStateToArray(cache.annotations).filter(
         (annot) =>
-            annot.creator == null ||
-            (userId ? annot.creator.id === userId : false),
+            annot.normalizedPageUrl === normalizedPageUrl &&
+            (annot.creator == null ||
+                (userId ? annot.creator.id === userId : false)),
     )
 
 export const getHighlightAnnotationsArray = (
@@ -225,6 +227,7 @@ export async function hydrateCacheForPageAnnotations(
     > & {
         fullPageUrl: string
         skipListHydration?: boolean
+        keepExistingAnnotationData?: boolean
     },
 ): Promise<void> {
     if (!args.skipListHydration) {
@@ -296,6 +299,7 @@ export async function hydrateCacheForPageAnnotations(
                 },
             })
         }),
+        { keepExistingData: args.keepExistingAnnotationData },
     )
 
     args.cache.setPageData(

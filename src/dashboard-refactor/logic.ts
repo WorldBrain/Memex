@@ -2177,6 +2177,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             })
+            return
         }
 
         this.emitMutation({
@@ -2193,14 +2194,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                             },
                         },
                     },
-                },
-            },
-            activeDay: { $set: event.activeDay },
-            activePageID: { $set: event.activePageID },
-        })
-        this.emitMutation({
-            searchResults: {
-                results: {
                     [previousState.activeDay]: {
                         pages: {
                             byId: {
@@ -2214,6 +2207,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
+            activeDay: { $set: event.activeDay },
+            activePageID: { $set: event.activePageID },
         })
     }
 

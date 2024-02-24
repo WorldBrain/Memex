@@ -203,8 +203,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     onResetSpaceSelect: () => void
 
     copyPaster: any
-    normalizedPageUrls: string[]
-    normalizedPageUrl?: string
+    normalizedPageUrl: string
     getLocalAnnotationIds: () => string[]
     contentSharing: ContentSharingInterface
     annotationsShareAll: any
@@ -676,7 +675,10 @@ export class AnnotationsSidebar extends React.Component<
             .map(
                 (unifiedAnnotId) => this.props.annotations.byId[unifiedAnnotId],
             )
-            .filter((a) => !!a)
+            .filter(
+                (a) =>
+                    !!a && a.normalizedPageUrl === this.props.normalizedPageUrl,
+            )
 
         let othersCounter = annotationsData.filter((annotation) => {
             return annotation.creator?.id !== this.props.currentUser?.id
@@ -3488,6 +3490,7 @@ export class AnnotationsSidebar extends React.Component<
                                                     annotations: this.props
                                                         .annotations,
                                                 },
+                                                this.props.normalizedPageUrl,
                                                 this.props.currentUser?.id.toString(),
                                             ),
                                         )}
