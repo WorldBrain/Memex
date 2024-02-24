@@ -489,6 +489,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             <Container
                 onMouseOver={this.props.setSidebarPeekState(true)}
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
+                inPageMode={this.props.isInPageMode}
             >
                 <GlobalStyle />
                 <SidebarInnerContent>
@@ -630,7 +631,10 @@ const RightSideIconBox = styled.div`
     grid-gap: 5px;
 `
 
-const Container = styled.div<{ spaceSidebarWidth: string }>`
+const Container = styled.div<{
+    spaceSidebarWidth: string
+    inPageMode: boolean
+}>`
     position: sticky;
     z-index: 2147483645;
     width: ${(props) => props.spaceSidebarWidth};
@@ -644,6 +648,12 @@ const Container = styled.div<{ spaceSidebarWidth: string }>`
     }
 
     scrollbar-width: none;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            position: relative;
+        `}
 `
 
 const Separator = styled.div`

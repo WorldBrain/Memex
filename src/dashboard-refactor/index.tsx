@@ -1571,7 +1571,12 @@ export class DashboardContainer extends StatefulUIElement<
                 : listsSidebar.isSidebarPeeking
                 ? '90vh'
                 : '100vh',
-            position: listsSidebar.isSidebarPeeking ? 'fixed' : 'sticky',
+            position:
+                this.props.inPageMode && listsSidebar.isSidebarPeeking
+                    ? 'absolute'
+                    : listsSidebar.isSidebarPeeking
+                    ? 'fixed'
+                    : 'sticky',
         }
 
         return (
@@ -2241,6 +2246,7 @@ const MainFrame = styled.div<{
     min-height: 100vh;
     height: fill-available;
     overflow: hidden;
+    position: relative;
 
     width: fill-available;
     ${(props) =>
