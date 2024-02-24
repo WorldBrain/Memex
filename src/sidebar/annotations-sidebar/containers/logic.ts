@@ -2068,7 +2068,11 @@ export class SidebarContainerLogic extends UILogic<
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
                     isHighlightEditing: { $set: event.isEditing },
-                    isCommentEditing: { $set: event.isEditing },
+                    isCommentEditing: {
+                        $set:
+                            previousAnnotationComment.length === 0 &&
+                            event.isEditing,
+                    },
                 },
             },
         })

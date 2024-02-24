@@ -1861,7 +1861,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                     window.location.reload()
                 } catch (e) {
-                    console.log('eerorr', e)
+                    console.error('eerorr', e)
                 }
             },
         )

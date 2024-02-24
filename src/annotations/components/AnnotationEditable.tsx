@@ -361,12 +361,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             <HighlightStyled
                 onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
-                onDoubleClick={
-                    this.props.isEditingHighlight
-                        ? undefined
-                        : this.props.annotationFooterDependencies
-                              ?.onEditHighlightIconClick
-                }
+                // onDoubleClick={
+                //     this.props.isEditingHighlight
+                //         ? undefined
+                //         : this.props.annotationFooterDependencies
+                //               ?.onEditHighlightIconClick
+                // }
             >
                 <HighlightSection>
                     {this.renderHighlightsColorPicker(
@@ -424,6 +424,10 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 onEditCancel={
                                     this.props.annotationEditDependencies
                                         .onEditCancel
+                                }
+                                setEditing={
+                                    this.props.annotationFooterDependencies
+                                        .onEditHighlightIconClick
                                 }
                             />
                         </HighlightEditContainer>
@@ -657,7 +661,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             }
                         }}
                         padding={'1px'}
-                        background={'greyScale1'}
+                        background={'greyScale0_5'}
                     />
                 </TooltipBox>
             </AutoAddedIndicator>
@@ -953,7 +957,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 image: hasReplies ? 'commentFull' : 'commentAdd',
                 onClick: onReplyBtnClick,
                 isLoading: repliesLoadingState === 'running',
-                tooltipText: 'Ask AI',
                 ButtonText: 'Replies',
             },
         ]

@@ -366,12 +366,6 @@ export class AnnotationsSidebarContainer<
         return {
             body: annotationCardInstance?.body,
             comment: annotationCardInstance?.comment,
-            onListsBarPickerBtnClick: () =>
-                this.processEvent('setAnnotationCardMode', {
-                    instanceLocation,
-                    unifiedAnnotationId,
-                    mode: 'space-picker',
-                }),
             onCommentChange: (comment) =>
                 this.processEvent('setAnnotationEditCommentText', {
                     instanceLocation,
@@ -1088,14 +1082,30 @@ export class AnnotationsSidebarContainer<
                                             replyReference,
                                         },
                                     ),
-                                setAnnotationEditing: (isEditing) => (event) =>
+                                setAnnotationEditing: () => {
+                                    const isEditingState = !this.state
+                                        .replyEditStates[replyReference.id]
+                                        ?.isEditing
                                     this.processEvent(
                                         'setReplyToAnnotationEditing',
                                         {
-                                            isEditing,
+                                            isEditing: isEditingState,
                                             replyReference,
                                         },
-                                    ),
+                                    )
+                                },
+                                setEditing: () => {
+                                    const isEditingState = !this.state
+                                        .replyEditStates[replyReference.id]
+                                        ?.isEditing
+                                    this.processEvent(
+                                        'setReplyToAnnotationEditing',
+                                        {
+                                            isEditing: isEditingState,
+                                            replyReference,
+                                        },
+                                    )
+                                },
                                 setAnnotationHovering: (isHovering) => (
                                     event,
                                 ) => {

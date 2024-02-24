@@ -300,10 +300,8 @@ export const handleRenderSearchInjection = async (
         // const component = document.getElementById(
         //     constants.REACT_ROOTS.searchInjection,
         // )
-        // console.log('component', component)
         // if (component) {
         //     if (!sideBox) {
-        //         console.log('sidebooox')
         //         component.parentNode.removeChild(component)
 
         //         const sideBoxContainer = document.createElement('div')

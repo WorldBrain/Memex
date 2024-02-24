@@ -469,8 +469,6 @@ export default class SearchResultsContainer extends React.Component<
                     comment: noteData.editNoteForm.inputValue,
                     body: noteData.editNoteForm.bodyInputValue,
                     copyLoadingState: noteData.copyLoadingState,
-                    onListsBarPickerBtnClick:
-                        interactionProps.onListPickerBarBtnClick,
                     onCommentChange: (content) =>
                         interactionProps.onCommentChange(content),
                     onEditCancel: () =>

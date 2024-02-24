@@ -29,16 +29,15 @@ export interface AnnotationEditEventProps {
     ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
-    onBodyChange: (body: string) => void
-    onListsBarPickerBtnClick: React.MouseEventHandler
     imageSupport: ImageSupportInterface<'caller'>
     copyLoadingState: TaskState
     setEditing: React.MouseEventHandler
+    onBodyChange: (content: string) => void
 }
 
 export interface AnnotationEditGeneralProps {
     comment: string
-    body: string
+    body?: string
     editorHeight?: string
     isShared?: boolean
     isBulkShareProtected?: boolean
@@ -167,7 +166,6 @@ class AnnotationEdit extends React.Component<Props> {
                     placeholder={`Add Note. Click on ( ? ) for formatting help.`}
                     setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                     autoFocus
-                    youtubeShortcut={this.state.youtubeShortcut}
                     imageSupport={this.props.imageSupport}
                     getRootElement={this.props.getRootElement}
                     slimEditorActions={this.props.slimEditorActions}

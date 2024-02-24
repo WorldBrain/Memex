@@ -784,6 +784,8 @@ export class AnnotationsSidebar extends React.Component<
                     ownAnnotationProps.lastEdited = annotation.lastEdited
                     ownAnnotationProps.isEditing =
                         annotationCard?.isCommentEditing ?? undefined
+                    ownAnnotationProps.isEditingHighlight =
+                        annotationCard?.isHighlightEditing ?? undefined
                     ownAnnotationProps.isDeleting =
                         annotationCard?.cardMode === 'delete-confirm'
                     const editDeps = this.props.bindAnnotationEditProps(
@@ -867,6 +869,10 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             highlightColorSettings={
                                 this.props.highlightColorSettings
+                            }
+                            isEditing={annotationCard?.isCommentEditing}
+                            isEditingHighlight={
+                                annotationCard?.isHighlightEditing
                             }
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}

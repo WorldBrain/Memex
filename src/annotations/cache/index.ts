@@ -168,12 +168,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         opts?: { skipAssociatingAnnotations?: boolean },
     ): UnifiedList => {
         const unifiedId = this.generateListId()
+        if (list.remoteId != null) {
+            this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
+        }
         if (list.localId != null) {
             this.localListIdsToCacheIds.set(list.localId, unifiedId)
         }
         if (list.remoteId != null && !opts?.skipAssociatingAnnotations) {
-            this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
-
             // Ensure each public annot gets a ref to this list
             for (const annotation of normalizedStateToArray(this.annotations)) {
                 if (

@@ -392,7 +392,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                             }
                             placeholder={`Write a note...`}
                             isRibbonCommentBox={this.props.isRibbonCommentBox}
-                            youtubeShortcut={this.state.youtubeShortcut}
                             getYoutubePlayer={this.props.getYoutubePlayer}
                             sidebarEvents={this.props.sidebarEvents}
                             imageSupport={this.props.imageSupport}
