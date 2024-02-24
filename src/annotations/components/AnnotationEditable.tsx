@@ -630,12 +630,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.props.isShared ? (
                             <span>
                                 Disable Auto-Add
-                                <br /> <strong>Shift+Click</strong> for options
+                                <br /> Only added to Spaces you select
                             </span>
                         ) : (
                             <span>
                                 Enable Auto-Add
-                                <br /> <strong>Shift+Click</strong> for options
+                                <br /> Added to all Spaces the page is
                             </span>
                         )
                     }
