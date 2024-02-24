@@ -185,7 +185,9 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
             this.emitMutation({ selectedPageLinkList: { $set: cachedList } })
 
             await Promise.all([
-                this.dependencies.contentSharingBG.waitForPageLinkCreation(),
+                this.dependencies.contentSharingBG.waitForPageLinkCreation({
+                    fullPageUrl: this.dependencies.fullPageUrl,
+                }),
                 this.dependencies.onNewPageLinkCreate?.(unifiedId),
                 this.loadInviteLinks(cachedList),
             ])
