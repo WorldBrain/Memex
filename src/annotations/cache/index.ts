@@ -439,15 +439,33 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     setAnnotations: PageAnnotationsCacheInterface['setAnnotations'] = (
         annotations,
-        { now = Date.now() } = { now: Date.now() },
+        { now = Date.now(), keepExistingData } = { now: Date.now() },
     ) => {
-        this.annotationIdCounter = 0
-        this.localAnnotIdsToCacheIds.clear()
-        this.remoteAnnotIdsToCacheIds.clear()
+        if (!keepExistingData) {
+            this.annotationIdCounter = 0
+            this.localAnnotIdsToCacheIds.clear()
+            this.remoteAnnotIdsToCacheIds.clear()
+        }
 
         const seedData = [...annotations]
             .sort(this.deps.sortingFn)
+            .filter((annot) => {
+                if (!keepExistingData) {
+                    return true
+                }
+                // If we're keeping existing data, only add annotations that don't already exist in the cache
+                if (annot.localId != null) {
+                    return this.getAnnotationByLocalId(annot.localId) == null
+                } else if (annot.remoteId != null) {
+                    return this.getAnnotationByRemoteId(annot.remoteId) == null
+                }
+                return true
+            })
             .map((annot) => this.prepareAnnotationForCaching(annot, { now }))
+
+        if (keepExistingData) {
+            seedData.push(...normalizedStateToArray(this.annotations))
+        }
 
         this.annotations = initNormalizedState({
             seedData,
