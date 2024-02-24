@@ -42,10 +42,8 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import type { ListTree } from 'src/custom-lists/background/types'
 import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
-import type { OperationBatch } from '@worldbrain/storex'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 
 export interface LocalContentSharingSettings {
@@ -57,7 +55,17 @@ export interface LocalContentSharingSettings {
 export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
-    private pageLinkCreationResolvable: Resolvable<void> | null = null
+    /**
+     * Keeps track of progress for page link creation by URL. We only really want to allow 1 link per page to be
+     * created at any time, so if it's requested while already in progress we want to use the same optimistically
+     * generated IDs as the original request.
+     */
+    private pageLinkCreationProgress: {
+        [fullPageUrl: string]: {
+            resolvable: Resolvable<void>
+            details: CreatedPageLinkDetails
+        }
+    } = {}
     private listSharePromises: {
         [localListId: number]: Promise<void>
     } = {}
@@ -937,8 +945,10 @@ export default class ContentSharingBackground {
         },
     ) {}
 
-    waitForPageLinkCreation: ContentSharingInterface['waitForPageLinkCreation'] = async () => {
-        await this.pageLinkCreationResolvable
+    waitForPageLinkCreation: ContentSharingInterface['waitForPageLinkCreation'] = async ({
+        fullPageUrl,
+    }) => {
+        await this.pageLinkCreationProgress[fullPageUrl]?.resolvable
     }
 
     scheduleManyPageLinkCreations = async (params: {
@@ -953,10 +963,20 @@ export default class ContentSharingBackground {
         }
 
         const pageLinks: { [fullPageUrl: string]: CreatedPageLinkDetails } = {}
-        const creationPromises: Promise<void>[] = []
-
         let localListIdCounter = now
+
         for (const fullPageUrl of params.fullPageUrls) {
+            let progress = this.pageLinkCreationProgress[fullPageUrl]
+            if (progress) {
+                console.log(
+                    'already creating page link for:',
+                    fullPageUrl,
+                    progress.details,
+                )
+                pageLinks[fullPageUrl] = progress.details
+                continue
+            }
+
             const localListId = localListIdCounter++
             const listTitle = createPageLinkListTitle(new Date(now))
             const remoteListId = this.options
@@ -977,20 +997,29 @@ export default class ContentSharingBackground {
                 remoteListEntryId,
             }
 
-            // TODO: Do something with these Promises. Currently thrown into the wind of the JS event loop
-            creationPromises.push(
-                this.performPageLinkCreation({
-                    creator: currentUser.id,
-                    collabKey,
-                    listTitle,
-                    localListId,
-                    remoteListEntryId,
-                    remoteListId,
-                    skipPageIndexing: true,
-                    fullPageUrl,
-                    now,
-                }),
-            )
+            // Keep track of progress in-case page link creation gets called again for this URL before its finished
+            progress = {
+                details: pageLinks[fullPageUrl],
+                resolvable: resolvablePromise(),
+            }
+            this.pageLinkCreationProgress[fullPageUrl] = progress
+
+            // Don't wait - continue on with creating links for the other URLs
+            this.performPageLinkCreation({
+                creator: currentUser.id,
+                skipPageIndexing: true,
+                fullPageUrl,
+                now,
+                ...progress.details,
+            })
+                .then(() => {
+                    progress.resolvable.resolve()
+                    this.pageLinkCreationProgress[fullPageUrl] = null
+                })
+                .catch((err) => {
+                    progress.resolvable.reject(err)
+                    this.pageLinkCreationProgress[fullPageUrl] = null
+                })
         }
 
         return pageLinks
@@ -1002,12 +1031,10 @@ export default class ContentSharingBackground {
         { tab },
         { fullPageUrl, now = Date.now(), customPageTitle, skipPageIndexing },
     ) => {
-        if (this.pageLinkCreationResolvable) {
-            throw new Error(
-                `Page link already in process of being created - try calling "waitForPageLink" RPC method`,
-            )
+        let progress = this.pageLinkCreationProgress[fullPageUrl]
+        if (progress) {
+            return progress.details
         }
-        this.pageLinkCreationResolvable = resolvablePromise()
 
         const bgModules = this.options.getBgModules()
         const currentUser = await bgModules.auth.authService.getCurrentUser()
@@ -1028,23 +1055,36 @@ export default class ContentSharingBackground {
             .toString()
         const pageTitle = customPageTitle
 
+        progress = {
+            resolvable: resolvablePromise(),
+            details: {
+                pageTitle,
+                collabKey,
+                listTitle,
+                localListId,
+                remoteListId,
+                remoteListEntryId,
+            },
+        }
+        this.pageLinkCreationProgress[fullPageUrl] = progress
+
         // Start but don't wait for the storage logic
         this.performPageLinkCreation({
             creator: currentUser.id,
-            collabKey,
-            listTitle,
-            localListId,
-            remoteListEntryId,
-            remoteListId,
             tabId: tab?.id,
             skipPageIndexing,
             fullPageUrl,
             now,
-            pageTitle,
-        }).catch((err) => {
-            this.pageLinkCreationResolvable.reject(err)
-            this.pageLinkCreationResolvable = null
+            ...progress.details,
         })
+            .then(() => {
+                progress.resolvable.resolve()
+                this.pageLinkCreationProgress[fullPageUrl] = null
+            })
+            .catch((err) => {
+                progress.resolvable.reject(err)
+                this.pageLinkCreationProgress[fullPageUrl] = null
+            })
 
         return {
             remoteListId,
@@ -1158,9 +1198,6 @@ export default class ContentSharingBackground {
             listId: remoteListId,
             keyString: collabKey.toString(),
         })
-
-        this.pageLinkCreationResolvable?.resolve()
-        this.pageLinkCreationResolvable = null
 
         if (this.options.analyticsBG) {
             try {

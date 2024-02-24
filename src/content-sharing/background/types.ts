@@ -102,7 +102,7 @@ export interface ContentSharingInterface
         localListId: number
         isPrivate: boolean
     }): Promise<void>
-    waitForPageLinkCreation(): Promise<void>
+    waitForPageLinkCreation(args: { fullPageUrl: string }): Promise<void>
     fetchLocalListDataByRemoteId(args: {
         remoteListId: string
     }): Promise<number>
