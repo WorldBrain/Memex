@@ -41,6 +41,7 @@ import { sleepPromise } from 'src/util/promises'
 import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
 import { Checkbox } from 'src/common-ui/components'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -245,17 +246,18 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             prevProps.highlightColorSettings !=
             this.props.highlightColorSettings
         ) {
-            const highlightColorSettings = JSON.parse(
+            const highlightColorSettings: HighlightColor[] = JSON.parse(
                 this.props.highlightColorSettings,
             )
 
-            const defaultHighlightColor = highlightColorSettings.find(
+            const defaultHighlightSettings = highlightColorSettings.find(
                 (setting) => setting.id === 'default',
-            )['color']
-
-            this.setState({
-                defaultHighlightColor: defaultHighlightColor,
-            })
+            )
+            if (defaultHighlightSettings?.color) {
+                this.setState({
+                    defaultHighlightColor: defaultHighlightSettings.color,
+                })
+            }
         }
         if (!prevProps.isActive && this.props.isActive) {
             document.addEventListener('keydown', this.handleCmdCKeyPress)
