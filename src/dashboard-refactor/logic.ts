@@ -940,7 +940,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
     }) => {
         const previousResults =
-            previousState.searchResults.results[-1].pages.byId
+            previousState.searchResults.results[-1]?.pages.byId
 
         const focusedItemIndex = Object.keys(previousResults).findIndex(
             (key) => previousResults[key].isInFocus === true,
@@ -1677,7 +1677,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             $set: filterOutPage(
                                 previousState.searchResults.results[
                                     PAGE_SEARCH_DUMMY_DAY
-                                ].pages.allIds,
+                                ]?.pages.allIds,
                             ),
                         },
                     },
@@ -2009,7 +2009,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         let templateCopyResult
         if (
-            !previousState.searchResults.results[event.day].pages.byId[
+            !previousState.searchResults.results[event.day]?.pages.byId[
                 event.pageId
             ].isCopyPasterShown
         ) {
@@ -2236,7 +2236,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const { searchResults } = previousState
-        const page = searchResults.results[event.day].pages.byId[event.pageId]
+        const page = searchResults.results[event.day]?.pages.byId[event.pageId]
 
         const sortedNoteIds = page.noteIds[page.notesType].sort((a, b) =>
             event.sortingFn(
@@ -2286,10 +2286,10 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setPageHover: EventHandler<'setPageHover'> = ({ event, previousState }) => {
         if (
-            previousState.searchResults.results[event.day].pages.byId[
+            previousState.searchResults.results[event.day]?.pages.byId[
                 event.pageId
             ].isCopyPasterShown ||
-            previousState.searchResults.results[event.day].pages.byId[
+            previousState.searchResults.results[event.day]?.pages.byId[
                 event.pageId
             ].listPickerShowStatus !== 'hide'
         ) {

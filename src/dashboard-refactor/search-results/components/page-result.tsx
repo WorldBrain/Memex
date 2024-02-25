@@ -741,152 +741,144 @@ export default class PageResultView extends PureComponent<Props> {
                 hoverState={this.props.isInFocus}
                 onRef={this.itemBoxRef} // Passing the ref as a prop
             >
-                {this.props.uploadedPdfLinkLoadState === 'running' ? (
+                {this.props.uploadedPdfLinkLoadState === 'running' && (
                     <LoadingBox>
                         <LoadingIndicator size={30} />
+                        Loading PDF
                     </LoadingBox>
-                ) : (
-                    <StyledPageResult>
-                        <PageContentBox
-                            // onMouseOver={this.props.onMainContentHover}
-                            // onMouseLeave={
-                            //     this.props.listPickerShowStatus !== 'hide'
-                            //         ? this.listPickerBtnClickHandler
-                            //         : undefined
-                            // }
-                            tabIndex={-1}
-                            hasSpaces={this.displayLists.length > 0}
-                        >
-                            {this.props.hoverState != null ||
-                            this.props.isBulkSelected ? (
-                                <PageActionBox>
-                                    {this.props.hoverState != null && (
-                                        <ExtraButtonsActionBar>
-                                            {' '}
-                                            <Icon
-                                                heightAndWidth="20px"
-                                                filePath={icons.edit}
-                                                onClick={() => {
-                                                    this.props.onEditTitleChange(
+                )}
+                <StyledPageResult>
+                    <PageContentBox
+                        // onMouseOver={this.props.onMainContentHover}
+                        // onMouseLeave={
+                        //     this.props.listPickerShowStatus !== 'hide'
+                        //         ? this.listPickerBtnClickHandler
+                        //         : undefined
+                        // }
+                        tabIndex={-1}
+                        hasSpaces={this.displayLists.length > 0}
+                    >
+                        {this.props.hoverState != null ||
+                        this.props.isBulkSelected ? (
+                            <PageActionBox>
+                                {this.props.hoverState != null && (
+                                    <ExtraButtonsActionBar>
+                                        {' '}
+                                        <Icon
+                                            heightAndWidth="20px"
+                                            filePath={icons.edit}
+                                            onClick={() => {
+                                                this.props.onEditTitleChange(
+                                                    this.props.normalizedUrl,
+                                                    this.props.fullTitle ??
                                                         this.props
                                                             .normalizedUrl,
-                                                        this.props.fullTitle ??
-                                                            this.props
-                                                                .normalizedUrl,
-                                                    )
-                                                }}
-                                            />
-                                            <Icon
-                                                heightAndWidth="20px"
-                                                filePath={icons.trash}
-                                                onClick={
-                                                    this.props.onTrashBtnClick
-                                                }
-                                            />
-                                        </ExtraButtonsActionBar>
-                                    )}
-
-                                    {this.renderBulkSelectBtn()}
-                                </PageActionBox>
-                            ) : undefined}
-
-                            <BlockContent
-                                type={this.props.type}
-                                normalizedUrl={this.props.normalizedUrl}
-                                originalUrl={this.fullUrl}
-                                onClick={this.props.onClick}
-                                fullTitle={this.props.fullTitle}
-                                pdfUrl={this.props.fullPdfUrl}
-                                favIcon={this.props.favIconURI}
-                                inPageMode={this.props.inPageMode}
-                                youtubeService={this.props.youtubeService}
-                                removeFromList={this.renderRemoveFromListBtn()}
-                                mainContentHover={
-                                    this.props.hoverState != null
-                                        ? this.props.hoverState
-                                        : undefined
-                                }
-                                renderCreationInfo={() => {
-                                    return this.props.displayTime ? (
-                                        <CreationInfo
-                                            createdWhen={this.props.displayTime}
+                                                )
+                                            }}
                                         />
-                                    ) : null
-                                }}
-                                memexIcon={MemexIcon}
-                                getRootElement={this.props.getRootElement}
-                                onEditTitleChange={(changedTitle) => {
-                                    this.props.onEditTitleChange(
-                                        this.props.normalizedUrl,
-                                        changedTitle,
-                                    )
-                                }}
-                                onEditTitleSave={(changedTitle) => {
-                                    this.props.onEditTitleSave(
-                                        this.props.normalizedUrl,
-                                        changedTitle,
-                                    )
-                                }}
-                                editTitleState={this.props.editTitleState}
-                            />
-                        </PageContentBox>
-                        {this.displayLists.length > 0 && (
-                            <ListsSegment
-                                lists={this.displayLists}
-                                onListClick={(listId) => {
-                                    this.props.filterbyList(listId)
-                                }}
-                                onEditBtnClick={
-                                    this.props.onListPickerBarBtnClick
+                                        <Icon
+                                            heightAndWidth="20px"
+                                            filePath={icons.trash}
+                                            onClick={this.props.onTrashBtnClick}
+                                        />
+                                    </ExtraButtonsActionBar>
+                                )}
+
+                                {this.renderBulkSelectBtn()}
+                            </PageActionBox>
+                        ) : undefined}
+
+                        <BlockContent
+                            type={this.props.type}
+                            normalizedUrl={this.props.normalizedUrl}
+                            originalUrl={this.fullUrl}
+                            onClick={this.props.onClick}
+                            fullTitle={this.props.fullTitle}
+                            pdfUrl={this.props.fullPdfUrl}
+                            favIcon={this.props.favIconURI}
+                            inPageMode={this.props.inPageMode}
+                            youtubeService={this.props.youtubeService}
+                            removeFromList={this.renderRemoveFromListBtn()}
+                            mainContentHover={
+                                this.props.hoverState != null
+                                    ? this.props.hoverState
+                                    : undefined
+                            }
+                            renderCreationInfo={() => {
+                                return this.props.displayTime ? (
+                                    <CreationInfo
+                                        createdWhen={this.props.displayTime}
+                                    />
+                                ) : null
+                            }}
+                            memexIcon={MemexIcon}
+                            getRootElement={this.props.getRootElement}
+                            onEditTitleChange={(changedTitle) => {
+                                this.props.onEditTitleChange(
+                                    this.props.normalizedUrl,
+                                    changedTitle,
+                                )
+                            }}
+                            onEditTitleSave={(changedTitle) => {
+                                this.props.onEditTitleSave(
+                                    this.props.normalizedUrl,
+                                    changedTitle,
+                                )
+                            }}
+                            editTitleState={this.props.editTitleState}
+                        />
+                    </PageContentBox>
+                    {this.displayLists.length > 0 && (
+                        <ListsSegment
+                            lists={this.displayLists}
+                            onListClick={(listId) => {
+                                this.props.filterbyList(listId)
+                            }}
+                            onEditBtnClick={this.props.onListPickerBarBtnClick}
+                            renderSpacePicker={
+                                this.props.listPickerShowStatus === 'lists-bar'
+                                    ? this.renderSpacePicker
+                                    : null
+                            }
+                            filteredbyListID={this.props.filteredbyListID}
+                            padding={'0px 20px 0px 20px'}
+                            spacePickerButtonRef={this.spacePickerBarRef}
+                        />
+                    )}
+                    {this.props.searchQuery?.length > 0 &&
+                        this.props.text?.length > 0 && (
+                            <ResultsMatchingTextToggleContainer
+                                showAll={this.props.showAllResults}
+                                id={
+                                    'matching-text-container-' +
+                                    this.props.index
                                 }
-                                renderSpacePicker={
-                                    this.props.listPickerShowStatus ===
-                                    'lists-bar'
-                                        ? this.renderSpacePicker
-                                        : null
-                                }
-                                filteredbyListID={this.props.filteredbyListID}
-                                padding={'0px 20px 0px 20px'}
-                                spacePickerButtonRef={this.spacePickerBarRef}
-                            />
+                                maxHeight={this.maxMatchingTextContainerHeight}
+                            >
+                                <SearchResultsHighlights>
+                                    {this.processPageText(this.props.text)}
+                                </SearchResultsHighlights>
+                                {this.renderToggleMatchesButton()}
+                            </ResultsMatchingTextToggleContainer>
                         )}
-                        {this.props.searchQuery?.length > 0 &&
-                            this.props.text?.length > 0 && (
-                                <ResultsMatchingTextToggleContainer
-                                    showAll={this.props.showAllResults}
-                                    id={
-                                        'matching-text-container-' +
-                                        this.props.index
-                                    }
-                                    maxHeight={
-                                        this.maxMatchingTextContainerHeight
-                                    }
-                                >
-                                    <SearchResultsHighlights>
-                                        {this.processPageText(this.props.text)}
-                                    </SearchResultsHighlights>
-                                    {this.renderToggleMatchesButton()}
-                                </ResultsMatchingTextToggleContainer>
-                            )}
-                        <FooterBar inPageMode={this.props.inPageMode}>
-                            <ItemBoxBottom
-                                // firstDivProps={{
-                                //     onMouseEnter: this.props.onFooterHover,
-                                //     onMouseOver: this.props.onFooterHover,
-                                // }}
-                                creationInfo={{
-                                    createdWhen: this.props.displayTime,
-                                }}
-                                actions={this.calcFooterActions()}
-                                spacesButton={this.renderSpacesButton()}
-                                getRootElement={this.props.getRootElement}
-                                inPageMode={this.props.inPageMode}
-                            />
-                        </FooterBar>
-                        {this.renderSpacePicker()}
-                        {this.renderPageCitationsDropdown()}
-                    </StyledPageResult>
-                )}
+                    <FooterBar inPageMode={this.props.inPageMode}>
+                        <ItemBoxBottom
+                            // firstDivProps={{
+                            //     onMouseEnter: this.props.onFooterHover,
+                            //     onMouseOver: this.props.onFooterHover,
+                            // }}
+                            creationInfo={{
+                                createdWhen: this.props.displayTime,
+                            }}
+                            actions={this.calcFooterActions()}
+                            spacesButton={this.renderSpacesButton()}
+                            getRootElement={this.props.getRootElement}
+                            inPageMode={this.props.inPageMode}
+                        />
+                    </FooterBar>
+                    {this.renderSpacePicker()}
+                    {this.renderPageCitationsDropdown()}
+                </StyledPageResult>
             </ItemBox>
         )
     }
@@ -980,11 +972,23 @@ const PageContentBox = styled.div<{ hasSpaces: boolean }>`
 `
 
 const LoadingBox = styled.div`
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    height: 100%;
+    width: 100%;
+    border-radius: 10px;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80px;
-    width: 100%;
+    flex-direction: column;
+    grid-gap: 15px;
+    color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 16px;
+    font-weight: 300;
+    background: ${(props) => props.theme.colors.greyScale1}98;
+    backdrop-filter: blur(5px);
+    z-index: 10000000;
 `
 
 const PageActionBox = styled.div`
