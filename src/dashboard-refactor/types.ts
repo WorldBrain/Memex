@@ -7,6 +7,7 @@ import type {
     Events as SearchResultEvents,
     NoteDataEventArgs,
     PageEventArgs,
+    PageResult,
 } from './search-results/types'
 import type {
     RootState as ListsSidebarState,
@@ -16,7 +17,6 @@ import type {
     RootState as SyncModalState,
     Events as SyncModalEvents,
 } from './header/sync-status-menu/types'
-import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import type { SearchInterface } from 'src/search/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
@@ -27,7 +27,6 @@ import type {
 } from 'src/content-sharing/background/types'
 import type { Analytics } from 'src/analytics'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import type { BackupInterface } from 'src/backup-restore/background/types'
 import type { SearchFiltersState, SearchFilterEvents } from './header/types'
 import type { UIServices } from 'src/services/ui/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
@@ -42,12 +41,13 @@ import type {
     RGBAColor,
 } from 'src/annotations/cache/types'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import {
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -67,6 +67,10 @@ export interface RootState {
     bulkSelectedUrls: string[]
     bulkEditSpacesLoadingState?: TaskState
     highlightColors: string
+    isNoteSidebarShown: boolean
+    blurEffectReset: boolean
+    showFullScreen: boolean
+    focusLockUntilMouseStart: boolean
 }
 
 export type Events = UIEvent<
@@ -81,17 +85,16 @@ export type Events = UIEvent<
         }
 >
 
-export interface DashboardDependencies {
+export type DashboardDependencies = {
     document: Document
     location: Location
     history: History
-    analytics: Analytics
     theme: MemexTheme
+    analytics: Analytics
     analyticsBG: AnalyticsCoreInterface
-    tagsBG: RemoteTagsInterface
     authBG: AuthRemoteFunctionsInterface
-    backupBG: BackupInterface<'caller'>
     contentShareBG: ContentSharingInterface
+    copyPasterBG: RemoteCopyPasterInterface
     contentShareByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
@@ -109,14 +112,28 @@ export interface DashboardDependencies {
     localStorage: Browser['storage']['local']
     runtimeAPI: Browser['runtime']
     tabsAPI: Browser['tabs']
-    openCollectionPage: (remoteCollectionId: string) => void
+    openSpaceInWebUI: (remoteCollectionId: string) => void
     renderUpdateNotifBanner: () => JSX.Element
     services: Pick<
         UIServices,
         'logicRegistry' | 'overlay' | 'clipboard' | 'device'
     >
-    imageSupport: ImageSupportInterface<'caller'>
-}
+    imageSupportBG: ImageSupportInterface<'caller'>
+    closeInPageMode?: () => void
+} & (
+    | {
+          inPageMode: true
+          /**
+           * This provides the exported text for the page/annotation result that is selected for use
+           * in whatever context the dashboard search has been invoked from.
+           * TODO: Hook it up to buttons on page/annot results
+           */
+          onResultSelect: (exportedResultText: string) => void
+      }
+    | {
+          inPageMode?: never
+      }
+)
 
 export interface DropReceivingState {
     isDraggedOver?: boolean
@@ -166,9 +183,12 @@ export type DashboardModalsEvents = UIEvent<{
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
     setSpaceSidebarWidth: { width: string }
+    setDisableMouseLeave: { disable: boolean }
     selectAllCurrentItems: null
     clearBulkSelection: null
     setBulkEditSpace: { listId: number }
+    changeFocusItem: { direction?: string; pageId?: string }
+    setFocusLock: boolean
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']
     setSelectNoteSpaceConfirmArgs: DashboardModalsState['confirmSelectNoteSpaceArgs']

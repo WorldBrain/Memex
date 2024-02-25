@@ -15,8 +15,8 @@ export class EntrySelectedList extends React.PureComponent<Props> {
         return `data-${this.props.dataAttributeName}`
     }
 
-    handleSelectedTabPress = (event: ChangeEvent) =>
-        this.props.onPress(event.target.getAttribute(this.dataAttribute))
+    handleSelectedTabPress = (event: React.MouseEvent<HTMLDivElement>) =>
+        this.props.onPress(event.currentTarget.getAttribute(this.dataAttribute))
 
     render() {
         return (

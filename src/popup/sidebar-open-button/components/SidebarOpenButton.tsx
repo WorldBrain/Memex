@@ -56,7 +56,10 @@ class SidebarOpenButton extends PureComponent<Props, State> {
 
     render() {
         return (
-            <ButtonItem onClick={this.props.openSidebar}>
+            <ButtonItem
+                disabled={!this.props.isEnabled}
+                onClick={this.props.openSidebar}
+            >
                 <Icon
                     filePath={icons.sidebarIcon}
                     heightAndWidth="22px"

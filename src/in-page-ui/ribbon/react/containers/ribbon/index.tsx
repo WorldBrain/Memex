@@ -176,6 +176,9 @@ export default class RibbonContainer extends StatefulUIElement<
                 toggleRabbitHole={() => {
                     this.processEvent('toggleRabbitHole', null)
                 }}
+                toggleQuickSearch={() => {
+                    this.processEvent('toggleQuickSearch', null)
+                }}
                 toggleShowTutorial={() => {
                     this.processEvent('toggleShowTutorial', null)
                 }}

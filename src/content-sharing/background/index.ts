@@ -20,6 +20,7 @@ import type { ServerStorageModules } from 'src/storage/types'
 import type {
     AnnotationSharingStates,
     ContentSharingInterface,
+    CreatedPageLinkDetails,
     RemoteContentSharingByTabsInterface,
     __DeprecatedContentSharingInterface,
 } from './types'
@@ -41,10 +42,8 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import type { ListTree } from 'src/custom-lists/background/types'
 import { COLLECTION_NAMES as LIST_COLL_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
-import type { OperationBatch } from '@worldbrain/storex'
 import { Resolvable, resolvablePromise } from 'src/util/resolvable'
 
 export interface LocalContentSharingSettings {
@@ -56,7 +55,17 @@ export interface LocalContentSharingSettings {
 export default class ContentSharingBackground {
     static ONE_WEEK_MS = 604800000
 
-    private pageLinkCreationResolvable: Resolvable<void> | null = null
+    /**
+     * Keeps track of progress for page link creation by URL. We only really want to allow 1 link per page to be
+     * created at any time, so if it's requested while already in progress we want to use the same optimistically
+     * generated IDs as the original request.
+     */
+    private pageLinkCreationProgress: {
+        [fullPageUrl: string]: {
+            resolvable: Resolvable<void>
+            details: CreatedPageLinkDetails
+        }
+    } = {}
     private listSharePromises: {
         [localListId: number]: Promise<void>
     } = {}
@@ -548,7 +557,7 @@ export default class ContentSharingBackground {
             }),
         })
 
-        if (this.options.analyticsBG) {
+        if (this.options.analyticsBG && !options.skipAnalytics) {
             try {
                 await trackSharedAnnotation(this.options.analyticsBG, {
                     type: 'bulk',
@@ -936,22 +945,91 @@ export default class ContentSharingBackground {
         },
     ) {}
 
-    waitForPageLinkCreation: ContentSharingInterface['waitForPageLinkCreation'] = async () => {
-        await this.pageLinkCreationResolvable
+    waitForPageLinkCreation: ContentSharingInterface['waitForPageLinkCreation'] = async ({
+        fullPageUrl,
+    }) => {
+        await this.pageLinkCreationProgress[fullPageUrl]?.resolvable
+    }
+
+    scheduleManyPageLinkCreations = async (params: {
+        fullPageUrls: Set<string>
+        now?: number
+    }): Promise<{ [fullPageUrl: string]: CreatedPageLinkDetails }> => {
+        const now = params.now ?? Date.now()
+        const bgModules = this.options.getBgModules()
+        const currentUser = await bgModules.auth.authService.getCurrentUser()
+        if (!currentUser) {
+            throw new Error('Page links cannot be created when logged out')
+        }
+
+        const pageLinks: { [fullPageUrl: string]: CreatedPageLinkDetails } = {}
+        let localListIdCounter = now
+
+        for (const fullPageUrl of params.fullPageUrls) {
+            let progress = this.pageLinkCreationProgress[fullPageUrl]
+            if (progress) {
+                pageLinks[fullPageUrl] = progress.details
+                continue
+            }
+
+            const localListId = localListIdCounter++
+            const listTitle = createPageLinkListTitle(new Date(now))
+            const remoteListId = this.options
+                .generateServerId('sharedList')
+                .toString()
+            const remoteListEntryId = this.options
+                .generateServerId('sharedListEntry')
+                .toString()
+            const collabKey = this.options
+                .generateServerId('sharedListKey')
+                .toString()
+
+            pageLinks[fullPageUrl] = {
+                collabKey,
+                listTitle,
+                localListId,
+                remoteListId,
+                remoteListEntryId,
+            }
+
+            // Keep track of progress in-case page link creation gets called again for this URL before its finished
+            progress = {
+                details: pageLinks[fullPageUrl],
+                resolvable: resolvablePromise(),
+            }
+            this.pageLinkCreationProgress[fullPageUrl] = progress
+
+            // Don't wait - continue on with creating links for the other URLs
+            this.performPageLinkCreation({
+                creator: currentUser.id,
+                skipPageIndexing: true,
+                fullPageUrl,
+                now,
+                ...progress.details,
+            })
+                .then(() => {
+                    progress.resolvable.resolve()
+                    this.pageLinkCreationProgress[fullPageUrl] = null
+                })
+                .catch((err) => {
+                    progress.resolvable.reject(err)
+                    this.pageLinkCreationProgress[fullPageUrl] = null
+                })
+        }
+
+        return pageLinks
     }
 
     schedulePageLinkCreation: RemoteContentSharingByTabsInterface<
         'provider'
     >['schedulePageLinkCreation'] = async (
         { tab },
-        { fullPageUrl, now = Date.now(), customPageTitle },
+        { fullPageUrl, now = Date.now(), customPageTitle, skipPageIndexing },
     ) => {
-        if (this.pageLinkCreationResolvable) {
-            throw new Error(
-                `Page link already in process of being created - try calling "waitForPageLink" RPC method`,
-            )
+        let progress = this.pageLinkCreationProgress[fullPageUrl]
+        if (progress) {
+            return progress.details
         }
-        this.pageLinkCreationResolvable = resolvablePromise()
 
         const bgModules = this.options.getBgModules()
         const currentUser = await bgModules.auth.authService.getCurrentUser()
@@ -972,22 +1050,36 @@ export default class ContentSharingBackground {
             .toString()
         const pageTitle = customPageTitle
 
+        progress = {
+            resolvable: resolvablePromise(),
+            details: {
+                pageTitle,
+                collabKey,
+                listTitle,
+                localListId,
+                remoteListId,
+                remoteListEntryId,
+            },
+        }
+        this.pageLinkCreationProgress[fullPageUrl] = progress
+
         // Start but don't wait for the storage logic
         this.performPageLinkCreation({
             creator: currentUser.id,
-            collabKey,
-            listTitle,
-            localListId,
-            remoteListEntryId,
-            remoteListId,
             tabId: tab?.id,
+            skipPageIndexing,
             fullPageUrl,
             now,
-            pageTitle,
-        }).catch((err) => {
-            this.pageLinkCreationResolvable.reject(err)
-            this.pageLinkCreationResolvable = null
+            ...progress.details,
         })
+            .then(() => {
+                progress.resolvable.resolve()
+                this.pageLinkCreationProgress[fullPageUrl] = null
+            })
+            .catch((err) => {
+                progress.resolvable.reject(err)
+                this.pageLinkCreationProgress[fullPageUrl] = null
+            })
 
         return {
             remoteListId,
@@ -1010,6 +1102,7 @@ export default class ContentSharingBackground {
         tabId,
         now,
         pageTitle: customPageTitle,
+        skipPageIndexing,
     }: Awaited<
         ReturnType<
             RemoteContentSharingByTabsInterface<
@@ -1019,23 +1112,26 @@ export default class ContentSharingBackground {
     > & {
         fullPageUrl: string
         creator: string
+        skipPageIndexing?: boolean
         tabId?: number
         now?: number
     }): Promise<void> {
         const bgModules = this.options.getBgModules()
 
         // Create all the local data needed for a page link
-        const indexedPage = await bgModules.pages.indexPage(
-            {
-                fullUrl: fullPageUrl,
-                visitTime: now,
-                tabId,
-                metaData: {
-                    pageTitle: customPageTitle,
+        if (!skipPageIndexing) {
+            await bgModules.pages.indexPage(
+                {
+                    fullUrl: fullPageUrl,
+                    visitTime: now,
+                    tabId,
+                    metaData: {
+                        pageTitle: customPageTitle,
+                    },
                 },
-            },
-            { addInboxEntryOnCreate: false },
-        )
+                { addInboxEntryOnCreate: false },
+            )
+        }
 
         let pageTitle: string
 
@@ -1043,7 +1139,7 @@ export default class ContentSharingBackground {
             pageTitle = customPageTitle
         } else {
             pageTitle = await bgModules.pages.lookupPageTitleForUrl({
-                fullPageUrl: indexedPage.fullUrl,
+                fullPageUrl,
             })
         }
         await bgModules.customLists.createCustomList({
@@ -1058,7 +1154,7 @@ export default class ContentSharingBackground {
         await this.waitForListShare({ localListId })
         await bgModules.customLists.insertPageToList({
             id: localListId,
-            url: indexedPage.fullUrl,
+            url: fullPageUrl,
             createdAt: new Date(now),
             skipPageIndexing: true,
             suppressInboxEntry: true,
@@ -1080,7 +1176,7 @@ export default class ContentSharingBackground {
         await bgModules.pageActivityIndicator.createFollowedListEntry(
             {
                 creator,
-                normalizedPageUrl: normalizeUrl(indexedPage.fullUrl),
+                normalizedPageUrl: normalizeUrl(fullPageUrl),
                 entryTitle: pageTitle,
                 followedList: remoteListId,
                 hasAnnotationsFromOthers: false,
@@ -1097,9 +1193,6 @@ export default class ContentSharingBackground {
             listId: remoteListId,
             keyString: collabKey.toString(),
         })
-
-        this.pageLinkCreationResolvable.resolve()
-        this.pageLinkCreationResolvable = null
 
         if (this.options.analyticsBG) {
             try {

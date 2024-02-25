@@ -67,7 +67,7 @@ class BookmarkButton extends PureComponent<Props> {
 
         return (
             <ButtonItem
-                onClick={!isPageSaved && this.props.toggleBookmark}
+                onClick={() => !isPageSaved && this.props.toggleBookmark}
                 disabled={this.props.isDisabled || isPageSaved}
             >
                 <Icon

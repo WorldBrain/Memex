@@ -27,6 +27,7 @@ import {
 } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import {
+    defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
@@ -40,10 +41,7 @@ import {
     extractMaterializedPathIds,
 } from 'src/content-sharing/utils'
 import fromPairs from 'lodash/fromPairs'
-import {
-    ROOT_NODE_PARENT_ID,
-    defaultTreeNodeSorter,
-} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { OperationBatch } from '@worldbrain/storex'
 import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
@@ -571,7 +569,7 @@ export default class CustomListStorage extends StorageModule {
                 },
             )
             const items = siblingNodes
-                .sort(defaultTreeNodeSorter)
+                .sort(defaultOrderableSorter)
                 .map((node) => ({
                     id: node.id,
                     key: node.order,

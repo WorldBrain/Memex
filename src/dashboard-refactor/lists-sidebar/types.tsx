@@ -25,6 +25,7 @@ export type RootState = Pick<ListsSidebarSearchBarProps, 'searchQuery'> & {
     areJoinedListsExpanded: boolean
     isAddListInputShown: boolean
     spaceSidebarWidth: string
+    disableMouseLeave: boolean
 
     draggedListId: string | null
     someListIsDragging: boolean
@@ -67,7 +68,18 @@ export type Events = UIEvent<{
     setListPrivacy: { listId: string; isPrivate: boolean }
     confirmListEdit: { value: string; listId: string; skipDBOps?: boolean }
     cancelListEdit: null
-    updatePageTitle: { normalizedPageUrl: string; changedTitle: string }
+    updatePageTitle: {
+        normalizedPageUrl: string
+        changedTitle: string
+        day: number
+        pageId: string
+    }
+    updatePageTitleState: {
+        normalizedPageUrl: string
+        changedTitle: string
+        day: number
+        pageId: string
+    }
     setDragOverListId: { listId?: string }
     setEditingListId: { listId: string }
     setSelectedListId: { listId: string }
@@ -87,7 +99,7 @@ export type Events = UIEvent<{
     cancelListDelete: null
 
     updateSelectedListDescription: { description: string }
-    toggleTheme: { themeVariant: MemexThemeVariant }
+    toggleTheme: null
     switchToFeed: null
 }>
 

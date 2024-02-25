@@ -70,10 +70,8 @@ const PioneerPlanBanner = ({
     ...props
 }: Props) => (
     <DismissibleResultsMessage onDismiss={props.onHideClick}>
-        <PioneerPlanContentBox direction={props.direction}>
-            <PioneerPlanTitle direction={props.direction}>
-                Get a 60% early bird discount
-            </PioneerPlanTitle>
+        <PioneerPlanContentBox>
+            <PioneerPlanTitle>Get a 60% early bird discount</PioneerPlanTitle>
             <PioneerPlanDescription>
                 Memex is currently in beta and free to use.
                 <br />

@@ -119,16 +119,10 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
         return (
             <SubscriptionOptionsContainer>
                 <TimeButtonBox>
-                    <TimeButtonLeft
-                        active={this.state.term === 'monthly'}
-                        onClick={this.toggleMonthly}
-                    >
+                    <TimeButtonLeft onClick={this.toggleMonthly}>
                         Monthly
                     </TimeButtonLeft>
-                    <TimeButtonRight
-                        active={this.state.term === 'annual'}
-                        onClick={this.toggleAnnual}
-                    >
+                    <TimeButtonRight onClick={this.toggleAnnual}>
                         Yearly
                     </TimeButtonRight>
                 </TimeButtonBox>
@@ -143,12 +137,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     this.props.currentUser?.authorizedPlans?.includes(
                         'pro-yearly',
                     ) ? (
-                        <PricingGridPlanTitle
-                            active={this.state.plan === 'pro'}
-                        >
-                            {' '}
-                            Thinker{' '}
-                        </PricingGridPlanTitle>
+                        <PricingGridPlanTitle> Thinker </PricingGridPlanTitle>
                     ) : (
                         <PricingGridPlanTitle> Thinker </PricingGridPlanTitle>
                     )}
@@ -175,9 +164,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColExplorer>
                     <ColThinker>
                         {' '}
-                        <PricingGridCheck
-                            active={this.state.plan === 'pro'}
-                        />{' '}
+                        <PricingGridCheck />{' '}
                     </ColThinker>
                     {/*<ColPioneer>
                         {' '}
@@ -197,9 +184,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </ColExplorer>
                     <ColThinker>
                         {' '}
-                        <PricingGridCheck
-                            active={this.state.plan === 'pro'}
-                        />{' '}
+                        <PricingGridCheck />{' '}
                     </ColThinker>
                     {/*<ColPioneer>
                         {' '}
@@ -215,9 +200,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </PricingGridFeatureDescription>
                     <ColThinker>
                         {' '}
-                        <PricingGridCheck
-                            active={this.state.plan === 'pro'}
-                        />{' '}
+                        <PricingGridCheck />{' '}
                     </ColThinker>
                     {/*<ColPioneer>
                         {' '}
@@ -233,9 +216,7 @@ export class SubscriptionInnerOptions extends React.Component<Props, State> {
                     </PricingGridFeatureDescription>
                     <ColThinker>
                         {' '}
-                        <PricingGridCheck
-                            active={this.state.plan === 'pro'}
-                        />{' '}
+                        <PricingGridCheck />{' '}
                     </ColThinker>
                     {/*<ColPioneer>
                         {' '}

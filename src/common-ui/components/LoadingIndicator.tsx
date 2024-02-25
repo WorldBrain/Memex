@@ -15,7 +15,7 @@ class LoadingIndicator extends PureComponent<Props> {
     }
 }
 
-const load = (rotation: number) => {
+const load = () => {
     return keyframes`0% {
         transform: rotate(0deg);
     }

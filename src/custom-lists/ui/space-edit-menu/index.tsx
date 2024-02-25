@@ -49,7 +49,9 @@ export default class SpaceEditMenuContainer extends StatefulUIElement<
         super(props, new Logic(props))
     }
 
-    private handleNameChange: React.KeyboardEventHandler = async (event) => {
+    private handleNameChange: React.ChangeEventHandler<
+        HTMLInputElement
+    > = async (event) => {
         const name = (event.target as HTMLInputElement).value
         await this.processEvent('updateSpaceName', { name })
     }

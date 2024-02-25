@@ -31,6 +31,7 @@ interface State {
     toggleShowTutorial: boolean
     youtubeShortcut: string | null
     onEditClick?: boolean
+    isDeboucingEditor: boolean
 }
 
 export interface AnnotationCreateEventProps {
@@ -92,12 +93,13 @@ export class AnnotationCreate extends React.Component<Props, State>
         toggleShowTutorial: false,
         youtubeShortcut: null,
         onEditClick: false,
+        isDeboucingEditor: false,
     }
 
     async componentDidMount() {
-        if (this.props.autoFocus) {
-            this.focus()
-        }
+        // if (this.props.autoFocus) {
+        //     this.focus()
+        // }
         await this.setYoutubeKeyboardShortcut()
 
         if (this.props.sidebarEvents) {
@@ -155,6 +157,10 @@ export class AnnotationCreate extends React.Component<Props, State>
                 'triggerYoutubeTimestampSummary',
             )
         }
+    }
+
+    setDebouncingSaveBlock = (isDeboucingEditor: boolean) => {
+        this.setState({ isDeboucingEditor })
     }
 
     private get displayLists(): Array<{
@@ -222,6 +228,9 @@ export class AnnotationCreate extends React.Component<Props, State>
         shouldShare: boolean,
         isProtected?: boolean,
     ) => {
+        if (this.state.isDeboucingEditor) {
+            await sleepPromise(250)
+        }
         const saveP = this.props.onSave(shouldShare, isProtected)
         this.setState({ toggleShowTutorial: false, onEditClick: false })
 
@@ -236,7 +245,9 @@ export class AnnotationCreate extends React.Component<Props, State>
             if (this.props.comment.length) {
                 e.stopPropagation()
             }
-            this.setState({ onEditClick: false })
+            this.setState({ onEditClick: false }),
+                (e.target as HTMLElement).blur()
+
             this.props.onCancel()
             return
         }
@@ -359,70 +370,38 @@ export class AnnotationCreate extends React.Component<Props, State>
         return (
             <>
                 <TextBoxContainerStyled hasLists={this.displayLists.length > 0}>
-                    <EditorContainer>
-                        {this.state.onEditClick || this.props.autoFocus ? (
-                            <MemexEditor
-                                onKeyDown={this.handleInputKeyDown}
-                                onContentUpdate={(content) =>
-                                    this.props.onCommentChange(content)
-                                }
-                                markdownContent={this.props.comment}
-                                setEditorInstanceRef={(editor) =>
-                                    (this.editor = editor)
-                                }
-                                autoFocus={
-                                    this.props.autoFocus ||
-                                    this.state.onEditClick
-                                }
-                                placeholder={`Write a note...`}
-                                isRibbonCommentBox={
-                                    this.props.isRibbonCommentBox
-                                }
-                                youtubeShortcut={this.state.youtubeShortcut}
-                                getYoutubePlayer={this.props.getYoutubePlayer}
-                                sidebarEvents={this.props.sidebarEvents}
-                                imageSupport={this.props.imageSupport}
-                                getRootElement={this.props.getRootElement}
-                            />
-                        ) : (
-                            <EditorDummy
-                                onClick={() =>
-                                    this.setState({
-                                        onEditClick: true,
-                                    })
-                                }
-                                onDragOver={(event) => {
-                                    event.preventDefault() // Always call this for onDragOver when you want to allow a drop.
-
-                                    const isFile = event.dataTransfer.types.includes(
-                                        'Files',
-                                    )
-
-                                    if (isFile) {
-                                        this.setState({
-                                            onEditClick: true,
-                                        })
-                                        // Here you can initiate some action, like showing a UI hint that images can be dropped here.
-                                    }
-                                }}
-                                // onDrop={(event) => {
-                                //     event.preventDefault()
-
-                                //     if (
-                                //         event.dataTransfer.files.length > 0 &&
-                                //         event.dataTransfer.files[0].type.includes(
-                                //             'image',
-                                //         )
-                                //     ) {
-                                //         this.setState({
-                                //             onEditClick: true,
-                                //         })
-                                //     }
-                                // }}
-                            >
-                                Write a note...
-                            </EditorDummy>
-                        )}
+                    <EditorContainer
+                        onClick={() => {
+                            if (!this.state.onEditClick) {
+                                this.setState({ onEditClick: true })
+                            }
+                            this.editor?.focus()
+                        }}
+                    >
+                        <MemexEditor
+                            onKeyDown={this.handleInputKeyDown}
+                            onContentUpdate={(content) => {
+                                this.props.onCommentChange(content)
+                            }}
+                            markdownContent={this.props.comment}
+                            setEditorInstanceRef={(editor) =>
+                                (this.editor = editor)
+                            }
+                            autoFocus={
+                                this.props.autoFocus || this.state.onEditClick
+                            }
+                            placeholder={`Write a note...`}
+                            isRibbonCommentBox={this.props.isRibbonCommentBox}
+                            getYoutubePlayer={this.props.getYoutubePlayer}
+                            sidebarEvents={this.props.sidebarEvents}
+                            imageSupport={this.props.imageSupport}
+                            getRootElement={this.props.getRootElement}
+                            editable={true}
+                            setEditing={(editing: boolean) =>
+                                this.setState({ onEditClick: editing })
+                            }
+                            setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                        />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&
                         (this.state.onEditClick || this.props.autoFocus) && (
@@ -446,19 +425,22 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 {this.renderSpacePicker()}
                             </FooterContainer>
                         )}
-                    <ListsSegment
-                        newLineOrientation={true}
-                        lists={this.displayLists}
-                        onMouseEnter={this.props.onListsHover}
-                        onListClick={undefined}
-                        onEditBtnClick={() =>
-                            this.setState({
-                                isListPickerShown: true,
-                            })
-                        }
-                        spacePickerButtonRef={this.spacePickerButtonRef}
-                        renderSpacePicker={this.renderSpacePicker}
-                    />
+
+                    {this.displayLists?.length > 0 && (
+                        <ListsSegment
+                            newLineOrientation={true}
+                            lists={this.displayLists}
+                            onMouseEnter={this.props.onListsHover}
+                            onListClick={undefined}
+                            onEditBtnClick={() =>
+                                this.setState({
+                                    isListPickerShown: true,
+                                })
+                            }
+                            spacePickerButtonRef={this.spacePickerButtonRef}
+                            renderSpacePicker={this.renderSpacePicker}
+                        />
+                    )}
                 </TextBoxContainerStyled>
             </>
         )
@@ -472,14 +454,19 @@ const EditorContainer = styled(Margin)`
     border-radius: 8px;
     width: fill-available;
     width: -moz-available;
+    background-color: ${(props) => props.theme.colors.greyScale2};
 
     &:focus-within {
         background-color: ${(props) => props.theme.colors.greyScale2};
         outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     }
     &:hover {
-        background-color: ${(props) => props.theme.colors.greyScale2};
-        outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+        background-color: ${(props) => props.theme.colors.greyScale2}95;
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+
+        &:focus-within {
+            outline: 1px solid ${(props) => props.theme.colors.greyScale4};
+        }
     }
 
     ${(props) =>
@@ -614,7 +601,6 @@ const TextBoxContainerStyled = styled.div<{
     flex-direction: column;
     font-size: 14px;
     width: calc(100% - 1px);
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
 
     & * {
         font-family: ${(props) => props.theme.fonts.primary};

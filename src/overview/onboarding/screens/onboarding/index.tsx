@@ -173,7 +173,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                 <>
                     <MemexActionButtonIntro
                         onMouseEnter={() => {
-                            console.log('hovered')
                             this.processEvent('hoverOverOnboardingIcon', null)
                         }}
                         src={'img/memexActionButtonIntro.svg'}
@@ -796,49 +795,6 @@ const WelcomeContainer = styled.div`
     width: 100vw;
 `
 
-const openAnimation = keyframes`
- 0% { opacity: 0; margin-top: 100px;}
- 100% { opacity: 1; margin-top: 0px;}
-`
-
-const AnnotationBox = styled.div<{
-    isActive: boolean
-    zIndex: number
-    order: number
-}>`
-    width: 99%;
-    z-index: ${(props) => props.zIndex};
-
-    animation-name: ${openAnimation};
-    animation-duration: 600ms;
-    animation-delay: ${(props) => props.order * 40}ms;
-    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
-    animation-fill-mode: backwards;
-    position: relative;
-`
-
-const LeftSide = styled.div`
-    width: fill-available;
-    display: flex;
-    align-items: center;
-    z-index: 2;
-    flex-direction: row;
-    z-index: 2;
-    /* position: absolute; */
-    justify-content: flex-start;
-    margin-left: 20%;
-    animation-name: ${openAnimation};
-    animation-duration: 600ms;
-    animation-delay: ${(props) => props.order * 40}ms;
-    animation-timing-function: cubic-bezier(0.16, 0.67, 0.47, 0.97);
-    animation-fill-mode: backwards;
-    position: relative;
-
-    @media (max-width: 1000px) {
-        width: 100%;
-    }
-`
-
 const LogoImg = styled.img`
     height: 50px;
     width: auto;
@@ -858,14 +814,14 @@ const ContentBox = styled.div`
 
 const Title = styled.div`
     background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    background-clip: text;
     font-size: 60px;
     font-weight: 800;
     margin-bottom: 20px;
     margin-top: 30px;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
 `
 
 const DescriptionText = styled.div`

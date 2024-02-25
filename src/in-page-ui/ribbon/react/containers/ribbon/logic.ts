@@ -86,6 +86,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleReadingView: null
         toggleAskAI: null
         toggleRabbitHole: null
+        toggleQuickSearch: null
         toggleTheme: { themeVariant: MemexThemeVariant }
         openPDFinViewer: null
         hydrateStateFromDB: { url: string }
@@ -230,11 +231,6 @@ export class RibbonContainerLogic extends UILogic<
 
         const onboardingComplete = await browser.storage.local.get(
             'rabbitHoleBetaFeatureAccessOnboardingDone',
-        )
-
-        console.log(
-            'onboardingcomlete',
-            onboardingComplete['rabbitHoleBetaFeatureAccessOnboardingDone'],
         )
 
         if (onboardingComplete['rabbitHoleBetaFeatureAccessOnboardingDone']) {
@@ -387,6 +383,11 @@ export class RibbonContainerLogic extends UILogic<
         await this.dependencies.inPageUI.showSidebar({
             action: 'rabbit_hole_open',
         })
+    }
+    toggleQuickSearch: EventHandler<'toggleQuickSearch'> = async ({
+        previousState,
+    }) => {
+        await this.dependencies.inPageUI.showSearch()
     }
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
         await browser.storage.local.set({

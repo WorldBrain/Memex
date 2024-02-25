@@ -2,6 +2,7 @@ export interface Template {
     id: number
     title: string
     code: string
+    order: number
     isFavourite: boolean
     outputFormat?: 'markdown' | 'rich-text'
 }
@@ -87,6 +88,7 @@ export interface TemplateDataFetchers {
     ): Promise<UrlMappedData<Date>>
     getPageLinks(
         notes: UrlMappedData<{ annotationUrls: string[] }>,
+        now?: number,
     ): Promise<UrlMappedData<string>>
     getNoteLinks(annotationUrls: string[]): Promise<UrlMappedData<string>>
 }

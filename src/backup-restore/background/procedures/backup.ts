@@ -57,7 +57,6 @@ export default class BackupProcedure {
         this.storageManager = storageManager
         this.storage = storage
         this.backend = backend
-        console.log(LOCAL_SERVER_ROOT)
         this.pkmBackend = new MemexLocalBackend({
             url: LOCAL_SERVER_ROOT,
         })

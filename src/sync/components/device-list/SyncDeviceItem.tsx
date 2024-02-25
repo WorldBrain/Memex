@@ -57,7 +57,6 @@ const MiddleItem = styled.div`
 const RemoveButton = styled.div`
     cursor: pointer;
     padding: 5px 10px;
-    background: ${(props) => (props.disabled ? colorDisabled : colorError)};
     border-radius: 5px;
     cursor: pointer;
     display: inline-block;

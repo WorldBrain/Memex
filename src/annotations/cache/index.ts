@@ -19,16 +19,17 @@ import {
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { areArrayContentsEqual } from '@worldbrain/memex-common/lib/utils/array-comparison'
 import {
-    defaultTreeNodeSorter,
     forEachTreeTraverse,
     mapTreeTraverse,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import {
+    defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
@@ -38,6 +39,7 @@ export interface PageAnnotationCacheDeps {
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
+    normalizedPageUrlsToPageLinkListIds: PageAnnotationsCacheInterface['normalizedPageUrlsToPageLinkListIds'] = new Map()
     pageListIds: PageAnnotationsCacheInterface['pageListIds'] = new Map()
     annotations: PageAnnotationsCacheInterface['annotations'] = initNormalizedState()
     lists: PageAnnotationsCacheInterface['lists'] = initNormalizedState()
@@ -62,7 +64,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         UnifiedAnnotation['unifiedId']
     >()
 
-    private highlightColorSettings
+    private highlightColorSettings: HighlightColor[]
 
     constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
@@ -158,19 +160,21 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
                     list.parentUnifiedId === unifiedId &&
                     list.type === 'user-list',
             ),
-        ].sort(defaultTreeNodeSorter)
+        ].sort(defaultOrderableSorter)
     }
 
     private prepareListForCaching = (
         list: UnifiedListForCache,
+        opts?: { skipAssociatingAnnotations?: boolean },
     ): UnifiedList => {
         const unifiedId = this.generateListId()
+        if (list.remoteId != null) {
+            this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
+        }
         if (list.localId != null) {
             this.localListIdsToCacheIds.set(list.localId, unifiedId)
         }
-        if (list.remoteId != null) {
-            this.remoteListIdsToCacheIds.set(list.remoteId, unifiedId)
-
+        if (list.remoteId != null && !opts?.skipAssociatingAnnotations) {
             // Ensure each public annot gets a ref to this list
             for (const annotation of normalizedStateToArray(this.annotations)) {
                 if (
@@ -290,6 +294,18 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             listIds.add(listId)
         }
         this.pageListIds.set(normalizedPageUrl, listIds)
+    }
+
+    private trackPageLinkListForPage(list: UnifiedList<'page-link'>) {
+        const pageLinkListIds =
+            this.normalizedPageUrlsToPageLinkListIds.get(
+                list.normalizedPageUrl,
+            ) ?? new Set()
+        pageLinkListIds.add(list.unifiedId)
+        this.normalizedPageUrlsToPageLinkListIds.set(
+            list.normalizedPageUrl,
+            pageLinkListIds,
+        )
     }
 
     setPageData: PageAnnotationsCacheInterface['setPageData'] = (
@@ -424,15 +440,33 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     setAnnotations: PageAnnotationsCacheInterface['setAnnotations'] = (
         annotations,
-        { now = Date.now() } = { now: Date.now() },
+        { now = Date.now(), keepExistingData } = { now: Date.now() },
     ) => {
-        this.annotationIdCounter = 0
-        this.localAnnotIdsToCacheIds.clear()
-        this.remoteAnnotIdsToCacheIds.clear()
+        if (!keepExistingData) {
+            this.annotationIdCounter = 0
+            this.localAnnotIdsToCacheIds.clear()
+            this.remoteAnnotIdsToCacheIds.clear()
+        }
 
         const seedData = [...annotations]
             .sort(this.deps.sortingFn)
+            .filter((annot) => {
+                if (!keepExistingData) {
+                    return true
+                }
+                // If we're keeping existing data, only add annotations that don't already exist in the cache
+                if (annot.localId != null) {
+                    return this.getAnnotationByLocalId(annot.localId) == null
+                } else if (annot.remoteId != null) {
+                    return this.getAnnotationByRemoteId(annot.remoteId) == null
+                }
+                return true
+            })
             .map((annot) => this.prepareAnnotationForCaching(annot, { now }))
+
+        if (keepExistingData) {
+            seedData.push(...normalizedStateToArray(this.annotations))
+        }
 
         this.annotations = initNormalizedState({
             seedData,
@@ -451,7 +485,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         const localToCacheId = new Map<number, string>()
         const seedData = [...lists].map((list) => {
-            const prepared = this.prepareListForCaching(list)
+            const prepared = this.prepareListForCaching(list, {
+                skipAssociatingAnnotations: true,
+            })
             if (list.localId) {
                 localToCacheId.set(list.localId, prepared.unifiedId)
             }
@@ -463,6 +499,10 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             list.pathUnifiedIds = list.pathLocalIds
                 .map((localId) => localToCacheId.get(localId))
                 .filter((id) => id != null)
+
+            if (list.type === 'page-link') {
+                this.trackPageLinkListForPage(list)
+            }
 
             if (list.type !== 'user-list') {
                 continue
@@ -592,6 +632,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
 
         if (nextList.type === 'page-link') {
+            this.trackPageLinkListForPage(nextList)
             this.ensurePageListsSet(nextList.normalizedPageUrl, [
                 nextList.unifiedId,
             ])

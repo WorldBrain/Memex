@@ -113,7 +113,7 @@ export const OuterDiv = styled.div`
     align-items: center;
 `
 
-export const InnerDiv = styled.div`
+export const InnerDiv = styled.div<{ large: boolean }>`
     /* elements.css .toolTips */
     border-radius: 3px;
     overflow: hidden;

@@ -45,7 +45,7 @@ describe('Ribbon logic', () => {
         } as any
 
         const inPageUI = new SharedInPageUIState({
-            loadComponent: () => {},
+            loadComponent: async () => {},
             unloadComponent: () => {},
             getNormalizedPageUrl: () => currentTab.normalizedUrl,
         })

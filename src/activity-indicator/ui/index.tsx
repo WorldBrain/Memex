@@ -56,10 +56,7 @@ export class FeedActivityDot extends StatefulUIElement<Props, State, Events> {
                         ref={this.props.itemRef}
                         noRing={this.props.noRing}
                     >
-                        <Dot
-                            unread={this.state.hasFeedActivity ? 1 : 0}
-                            onClick={this.handleFeedIndicatorClick}
-                        />
+                        <Dot onClick={this.handleFeedIndicatorClick} />
                     </OuterRing>
                 )
             } else {
@@ -90,7 +87,7 @@ const OuterRing = styled.div<{
         `};
 `
 
-const Dot = styled.div<{ unread: boolean }>`
+const Dot = styled.div`
     border-radius: 10px;
     width: 10px;
     height: 10px;

@@ -34,6 +34,7 @@ export interface Props<T extends MenuItemProps = MenuItemProps> {
     elementHeight?: string
     hideDescriptionInPreview: boolean
     getRootElement: () => HTMLElement
+    renderAICounter?: () => JSX.Element
 }
 
 interface State {
@@ -121,12 +122,14 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                     >
                         <MenuItemName
                             isSelected={this.state.selected.id === item.id}
+                            isOpened={this.state.isOpened}
                         >
-                            <MenuItemBox>
+                            <MenuItemBox isOpened={this.state.isOpened}>
                                 <MenuItemName
                                     isSelected={
                                         this.state.selected.id === item.id
                                     }
+                                    isOpened={this.state.isOpened}
                                 >
                                     {item.name}
                                 </MenuItemName>
@@ -147,6 +150,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         </MenuItemName>
                     </MenuItem>
                 ))}
+                {this.props.renderAICounter()}
             </MenuItemContainerUnfolded>
         )
     }
@@ -157,8 +161,10 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                 <PopoutBox
                     targetElementRef={this.menuRef.current}
                     closeComponent={() => this.setState({ isOpened: false })}
-                    placement="bottom-start"
+                    placement="bottom-end"
+                    width={this.props.width ?? '250px'}
                     getPortalRoot={this.props.getRootElement}
+                    offsetX={15}
                 >
                     {this.props.children ?? this.renderMenuItems()}
                 </PopoutBox>
@@ -187,7 +193,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         e.stopPropagation
                     }}
                     width={this.props.width}
-                    leftPosition={this.theme.leftMenuOffset}
+                    isOpen={this.state.isOpened}
                 >
                     {' '}
                     <MenuItem
@@ -200,8 +206,12 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         backgroundColor={this.props.backgroundColor}
                         elementHeight={this.props.elementHeight}
                         isOpened={this.state.isOpened}
+                        isDisabled={selectedMenuItem.isDisabled}
                     >
-                        <MenuItemName isSelected={true}>
+                        <MenuItemButton
+                            isOpened={this.state.isOpened}
+                            isSelected={true}
+                        >
                             <MenuItemBox isOpened={false}>
                                 {selectedMenuItem.name}
                             </MenuItemBox>
@@ -210,8 +220,9 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                                 color="greyScale6"
                                 heightAndWidth="18px"
                                 hoverOff
+                                padding={'0px'}
                             />
-                        </MenuItemName>
+                        </MenuItemButton>
                     </MenuItem>
                     {this.renderPopoutMenu()}
                 </Menu>
@@ -241,8 +252,6 @@ const MenuItem = styled.div<{
 }>`
     background: ${(props) =>
         props.backgroundColor && props.theme.colors[props.backgroundColor]};
-    padding: ${(props) =>
-        props.isOpened ? '10px 10px 10px 15px' : '5px 10px 5px 15px'};
     line-height: 20px;
     width: fill-available;
     display: flex;
@@ -260,10 +269,6 @@ const MenuItem = styled.div<{
         css`
             cursor: pointer;
 
-            &:hover {
-                background: ${(props) => props.theme.colors.greyScale3};
-            }
-
             & * {
                 cursor: pointer;
             }
@@ -271,10 +276,6 @@ const MenuItem = styled.div<{
     ${(props) =>
         !props.isOpened &&
         css`
-            &:hover {
-                outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-            }
-
             & * {
                 cursor: pointer;
             }
@@ -298,17 +299,35 @@ const MenuTitle = styled.div`
     font-size: 14px;
 `
 
-const MenuItemName = styled.div<{ isSelected; isOpened }>`
+const MenuItemName = styled.div<{ isSelected: boolean; isOpened: boolean }>`
     color: ${(props) =>
         props.isOpened
-            ? props.theme.colors.greyScale5
-            : props.theme.colors.white};
-    font-size: 12px;
+            ? props.theme.colors.greyScale6
+            : props.theme.colors.greyScale5};
+    font-size: 14px;
     font-weight: 400;
     display: flex;
     align-items: center;
     grid-gap: 5px;
-    justify-content: space-between;
+    justify-content: 'space-between';
+    width: -webkit-fill-available;
+
+    ${(props) =>
+        props.isOpened &&
+        css`
+            font-size: 14px;
+        `}
+`
+const MenuItemButton = styled.div<{ isSelected: boolean; isOpened: boolean }>`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 12px;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    width: fill-available;
+    width: -moz-available;
+    grid-gap: 5px;
+    justify-content: center;
     width: -webkit-fill-available;
 `
 
@@ -316,7 +335,7 @@ const MenuItemInfo = styled.div<{
     isDisabled: boolean
 }>`
     font-weight: 300;
-    font-size: 12px;
+    font-size: 14px;
     color: ${(props) => props.theme.colors.greyScale5};
     ${(props) =>
         props.isDisabled &&
@@ -325,33 +344,36 @@ const MenuItemInfo = styled.div<{
         `}
 `
 
-const Menu = styled.div<{ isOpen: boolean; elementHeight: string }>`
+const Menu = styled.div<{
+    isOpen: boolean
+    elementHeight: string
+    width: string
+}>`
     list-style: none;
-    border-radius: 6px;
+    border-radius: 10px;
     width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
     z-index: 1000;
-    width: 100%;
     position: relative;
+    grid-gap: 5px;
     overflow: visible;
+    height: fill-available;
+    height: -moz-available;
+    width: fill-available;
+    width: -moz-available;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `
 
 const MenuItemContainerUnfolded = styled.div<{
     isOpen: boolean
-    backgroundColor: string
 }>`
     display: flex;
     flex-direction: column;
-    width: 100%;
-    border-radius: 6px;
-    background: ${(props) =>
-        props.backgroundColor
-            ? props.theme.colors[props.backgroundColor]
-            : props.theme.colors.greyScale2};
-
-    ${(props) =>
-        props.isOpen &&
-        css`
-            outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-        `}
+    border-radius: 10px;
+    background: ${(props) => props.theme.colors.greyScale2};
+    padding: 15px;
+    width: fill-available;
+    grid-gap: 10px;
 `

@@ -49,6 +49,8 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
                     ? 'createSharedHighlight'
                     : key === 'addToCollection'
                     ? 'createSharedAnnotationAndAddToCollection'
+                    : key === 'openDashboard'
+                    ? 'openDashboardInNewTab'
                     : undefined,
         }
     }

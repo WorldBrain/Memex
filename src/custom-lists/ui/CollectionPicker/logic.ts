@@ -415,7 +415,7 @@ export default class SpacePickerLogic extends UILogic<
             return
         }
         if (event.key === 'Escape') {
-            this.dependencies.closePicker()
+            this.dependencies.closePicker(event)
         }
         event.stopPropagation()
     }

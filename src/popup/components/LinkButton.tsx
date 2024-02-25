@@ -43,7 +43,7 @@ class LinkButton extends PureComponent<Props> {
 
     render() {
         return (
-            <ButtonItem onClick={this.props.goToDashboard}>
+            <ButtonItem disabled={false} onClick={this.props.goToDashboard}>
                 <Icon
                     filePath={icons.searchIcon}
                     heightAndWidth="22px"

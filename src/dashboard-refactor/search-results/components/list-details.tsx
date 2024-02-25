@@ -37,6 +37,7 @@ interface State {
     isEditingDescription: boolean
     showQuickTutorial: boolean
     spaceTitle: string
+    isDeboucingEditor: boolean
 }
 
 export default class ListDetails extends PureComponent<Props, State> {
@@ -48,6 +49,7 @@ export default class ListDetails extends PureComponent<Props, State> {
         isEditingDescription: false,
         showQuickTutorial: false,
         spaceTitle: this.props.listData.name,
+        isDeboucingEditor: false,
     }
 
     componentWillUpdate(nextProps: Props) {
@@ -62,17 +64,19 @@ export default class ListDetails extends PureComponent<Props, State> {
     }
 
     private finishEdit(args: { shouldSave?: boolean }) {
-        if (args.shouldSave) {
-            this.props.saveDescription(this.state.description)
-            this.props.saveTitle(
-                this.state.spaceTitle,
-                this.props.listData.unifiedId,
-            )
+        if (!this.state.isDeboucingEditor) {
+            if (args.shouldSave) {
+                this.props.saveDescription(this.state.description)
+                this.props.saveTitle(
+                    this.state.spaceTitle,
+                    this.props.listData.unifiedId,
+                )
+            }
+            this.setState({
+                isEditingDescription: false,
+                showQuickTutorial: false,
+            })
         }
-        this.setState({
-            isEditingDescription: false,
-            showQuickTutorial: false,
-        })
     }
 
     private handleDescriptionInputKeyDown: React.KeyboardEventHandler = (e) => {
@@ -94,6 +98,10 @@ export default class ListDetails extends PureComponent<Props, State> {
         }
     }
 
+    private setDebouncingSaveBlock = (isDeboucingEditor: boolean) => {
+        this.setState({ isDeboucingEditor })
+    }
+
     private renderDescription() {
         if (this.state.isEditingDescription) {
             return (
@@ -107,6 +115,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                         }
                         imageSupport={this.props.imageSupport}
                         getRootElement={this.props.getRootElement}
+                        setDebouncingSaveBlock={this.setDebouncingSaveBlock}
                     />
                 </DescriptionEditorContainer>
             )

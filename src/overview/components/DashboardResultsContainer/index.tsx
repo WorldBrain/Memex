@@ -105,7 +105,6 @@ export default class DashboardResultsContainer extends StatefulUIElement<
                                     }}
                                 />
                             )}
-                            analyticsBG={this.props.analyticsBG}
                         />
 
                         {this.state.readerShow && (

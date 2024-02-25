@@ -11,7 +11,6 @@ import {
 
 const StyledSecondaryAction = styled.div`
     padding: 8px 20px;
-    border: ${(props) => !props.borderOff && `1px solid ${colorMidPurple}`};
     box-sizing: border-box;
     border-radius: 5px;
     cursor: pointer;
@@ -21,10 +20,6 @@ const StyledSecondaryAction = styled.div`
     vertical-align: middle;
     align-items: center;
     justify-content: center;
-
-    &: hover {
-        background-color: ${colorMidPurple}30;
-    }
 `
 const StyledSecondaryActionLinkText = styled(TypographyActionText)`
     font-size: ${fontSizeSmall}px;
@@ -41,11 +36,7 @@ export const SecondaryAction = ({
     onClick: React.MouseEventHandler
     borderOff?: boolean
 }) => (
-    <StyledSecondaryAction
-        onClick={disabled === true ? undefined : onClick}
-        disabled={disabled}
-        borderOff={borderOff}
-    >
+    <StyledSecondaryAction onClick={disabled === true ? undefined : onClick}>
         <StyledSecondaryActionLinkText>{label}</StyledSecondaryActionLinkText>
     </StyledSecondaryAction>
 )

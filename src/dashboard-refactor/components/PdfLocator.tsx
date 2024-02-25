@@ -35,7 +35,6 @@ export default class PdfLocator extends React.PureComponent<Props, State> {
                 onDragEnter={this.setDragOver(true)}
                 onDragLeave={this.setDragOver(false)}
                 onDrop={this.setDragOver(false)}
-                isBeingDraggedOver={this.state.isBeingDraggedOver}
             >
                 <LocatorHeader>
                     The PDF could not be found in the expected location
@@ -49,7 +48,6 @@ export default class PdfLocator extends React.PureComponent<Props, State> {
                     onDragEnter={this.setDragOver(true)}
                     onDragLeave={this.setDragOver(false)}
                     onDrop={this.setDragOver(false)}
-                    isBeingDraggedOver={this.state.isBeingDraggedOver}
                 >
                     <DropImage src={dropImage} />
                     {this.state.isBeingDraggedOver ? (

@@ -51,8 +51,10 @@ import Margin from 'src/dashboard-refactor/components/Margin'
 import { SortingDropdownMenuBtn } from '../components/SortingDropdownMenu'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import AllNotesShareMenu from 'src/overview/sharing/AllNotesShareMenu'
-import { PageNotesCopyPaster } from 'src/copy-paster'
-import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type {
+    AnnotationSharingStates,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
@@ -70,13 +72,13 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import {
     generateAnnotationCardInstanceId,
     getOrCreateAnnotationInstanceRefs,
+    initListInstance,
 } from '../containers/utils'
 import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 import {
     getFeedUrl,
@@ -95,6 +97,10 @@ import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { sleepPromise } from 'src/util/promises'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import PageCitations from 'src/citations/PageCitations'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -138,7 +144,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         [instanceId: string]: AnnotationInstanceRefs
     }
     activeShareMenuNoteId: string
-    renderAICounter: (position) => JSX.Element
+    renderAICounter: () => JSX.Element
     renderShareMenuForAnnotation: (
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (id: string) => JSX.Element
@@ -151,7 +157,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     ) => JSX.Element
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
     renderEditMenuForList: (listData: UnifiedList) => JSX.Element
-    renderPageLinkMenuForList: (listData: UnifiedList) => JSX.Element
+    renderPageLinkMenuForList: () => JSX.Element
 
     setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
     setActiveAITab: (tab: SidebarAITab) => React.MouseEventHandler
@@ -197,8 +203,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     onResetSpaceSelect: () => void
 
     copyPaster: any
-    normalizedPageUrls: string[]
-    normalizedPageUrl?: string
+    normalizedPageUrl: string
     getLocalAnnotationIds: () => string[]
     contentSharing: ContentSharingInterface
     annotationsShareAll: any
@@ -277,6 +282,15 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         | 'logseq'
     getRootElement: () => HTMLElement
     setNoteWriteError: (error) => void
+    inPageMode?: boolean
+    authBG: AuthRemoteFunctionsInterface
+    analyticsBG: AnalyticsCoreInterface
+    contentSharingBG: ContentSharingInterface
+    contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
+    copyToClipboard: (text: string) => Promise<boolean>
+    showSpacesTab: () => void
+    isAutoAddEnabled: boolean
+    toggleAutoAdd: () => void
 }
 
 interface AnnotationsSidebarState {
@@ -284,7 +298,6 @@ interface AnnotationsSidebarState {
     isolatedView?: string | null // if null show default view
     showIsolatedViewNotif: boolean // if null show default view
     isMarkdownHelpShown: boolean
-    showAllNotesCopyPaster: boolean
     showAllNotesShareMenu: boolean
     showPageSpacePicker: boolean
     showSortDropDown: boolean
@@ -304,6 +317,7 @@ interface AnnotationsSidebarState {
     feedSourcesTextAreaContent?: string
     fileDragOverFeedField?: boolean
     showSelectedAITextButtons?: boolean
+    pageLinkCreationLoading: TaskState
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -339,7 +353,6 @@ export class AnnotationsSidebar extends React.Component<
         searchText: '',
         showIsolatedViewNotif: false,
         isMarkdownHelpShown: false,
-        showAllNotesCopyPaster: false,
         showAllNotesShareMenu: false,
         showPageSpacePicker: false,
         showSortDropDown: false,
@@ -356,6 +369,7 @@ export class AnnotationsSidebar extends React.Component<
         feedSourcesTextAreaContent: '',
         fileDragOverFeedField: false,
         showSelectedAITextButtons: false,
+        pageLinkCreationLoading: 'pristine',
     }
 
     async addYoutubeTimestampToEditor(commentText) {
@@ -466,14 +480,43 @@ export class AnnotationsSidebar extends React.Component<
         })
     }
     focusCreateForm = () => {
-        this.setState({ autoFocusCreateForm: true })
+        // Initial instructions context: We need to check if the sidebar container is already within the viewport.
+        // If it's not, we attempt to autofocus the create form up to 3 times every 100ms until it's within the viewport or we give up.
+        const attemptFocus = (attempt = 1) => {
+            // Get the document's width to compare with the sidebar's left boundary.
+            const docWidth = document.documentElement.clientWidth
+
+            const rootElement = this.props.getRootElement()
+
+            const sidebarContainer = rootElement.querySelector(
+                '#annotationSidebarContainer',
+            )
+
+            if (!sidebarContainer) {
+                console.error('Sidebar container not found')
+                return
+            }
+            const sidebarRect = sidebarContainer.getBoundingClientRect()
+            // Check if the sidebar's left boundary is within the viewport.
+            if (docWidth > sidebarRect.left) {
+                this.setState({ autoFocusCreateForm: true })
+            } else if (attempt < 3) {
+                // Retry after 100ms if we have attempts left.
+                setTimeout(() => attemptFocus(attempt + 1), 100)
+            } else {
+                console.error(
+                    'Failed to autofocus create form after 3 attempts.',
+                )
+            }
+        }
+        // Start the autofocus attempt process.
+        attemptFocus()
     }
     focusEditNoteForm = (annotationId: string) =>
         (this.annotationEditRefs[annotationId]?.current).focusEditForm()
 
     setPopoutsActive() {
         if (
-            this.state.showAllNotesCopyPaster ||
             this.state.isMarkdownHelpShown ||
             this.state.showAllNotesShareMenu ||
             this.state.showSortDropDown ||
@@ -513,41 +556,6 @@ export class AnnotationsSidebar extends React.Component<
                     : null,
             ),
     })
-
-    private renderCopyPasterManager(localAnnotationIds: string[]) {
-        if (!this.state.showAllNotesCopyPaster) {
-            return
-        }
-
-        return (
-            <PopoutBox
-                targetElementRef={this.copyButtonRef.current}
-                placement={'bottom'}
-                offsetX={5}
-                offsetY={5}
-                closeComponent={() => {
-                    this.setState({
-                        showAllNotesCopyPaster: false,
-                    })
-                }}
-                strategy={'fixed'}
-                width={'fit-content'}
-                getPortalRoot={this.props.getRootElement}
-            >
-                <PageNotesCopyPaster
-                    copyPaster={this.props.copyPaster}
-                    annotationUrls={localAnnotationIds}
-                    normalizedPageUrls={this.props.normalizedPageUrls}
-                />
-            </PopoutBox>
-        )
-    }
-
-    private renderAllNotesCopyPaster() {
-        const localAnnotationIds = this.props.getLocalAnnotationIds()
-
-        return this.renderCopyPasterManager(localAnnotationIds)
-    }
 
     private renderAllNotesShareMenu() {
         if (!this.state.showAllNotesShareMenu) {
@@ -623,7 +631,9 @@ export class AnnotationsSidebar extends React.Component<
         selectedListMode: boolean = false,
     ) {
         const listData = this.props.lists.byId[unifiedListId]
-        const listInstance = this.props.listInstances[unifiedListId]
+        const listInstance =
+            this.props.listInstances[unifiedListId] ??
+            initListInstance(listData)
 
         // TODO: Simplify this confusing condition
         if (
@@ -660,7 +670,10 @@ export class AnnotationsSidebar extends React.Component<
             .map(
                 (unifiedAnnotId) => this.props.annotations.byId[unifiedAnnotId],
             )
-            .filter((a) => !!a)
+            .filter(
+                (a) =>
+                    !!a && a.normalizedPageUrl === this.props.normalizedPageUrl,
+            )
 
         let othersCounter = annotationsData.filter((annotation) => {
             return annotation.creator?.id !== this.props.currentUser?.id
@@ -771,6 +784,8 @@ export class AnnotationsSidebar extends React.Component<
                     ownAnnotationProps.lastEdited = annotation.lastEdited
                     ownAnnotationProps.isEditing =
                         annotationCard?.isCommentEditing ?? undefined
+                    ownAnnotationProps.isEditingHighlight =
+                        annotationCard?.isHighlightEditing ?? undefined
                     ownAnnotationProps.isDeleting =
                         annotationCard?.cardMode === 'delete-confirm'
                     const editDeps = this.props.bindAnnotationEditProps(
@@ -820,6 +835,7 @@ export class AnnotationsSidebar extends React.Component<
                             creatorId={annotation.creator?.id}
                             currentUserId={this.props.currentUser?.id}
                             pageUrl={this.props.normalizedPageUrl}
+                            toggleAutoAdd={this.props.toggleAutoAdd}
                             isShared
                             getRootElement={this.props.getRootElement}
                             isBulkShareProtected
@@ -853,6 +869,10 @@ export class AnnotationsSidebar extends React.Component<
                             }
                             highlightColorSettings={
                                 this.props.highlightColorSettings
+                            }
+                            isEditing={annotationCard?.isCommentEditing}
+                            isEditingHighlight={
+                                annotationCard?.isHighlightEditing
                             }
                             unifiedId={annotation.unifiedId}
                             body={annotation.body}
@@ -953,7 +973,7 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <FollowedNotesContainer zIndex={listData.unifiedId}>
+            <FollowedNotesContainer zIndex={parseFloat(listData.unifiedId)}>
                 {(cacheUtils.deriveListOwnershipStatus(
                     listData,
                     this.props.currentUser,
@@ -1062,8 +1082,9 @@ export class AnnotationsSidebar extends React.Component<
 
     private renderSpacesItem(
         listData: UnifiedList,
-        listInstance: ListInstance,
+        listInstance?: ListInstance,
     ) {
+        listInstance = listInstance ?? initListInstance(listData)
         const title = listData.name
         let keepHovered = false
 
@@ -1078,8 +1099,8 @@ export class AnnotationsSidebar extends React.Component<
 
         return (
             <FollowedListNotesContainer
-                bottom={listInstance.isOpen ? '0px' : '0px'}
-                key={listData.unifiedId}
+                bottom="0px"
+                key={parseFloat(listData.unifiedId)}
                 top="5px"
                 onMouseOver={() => {
                     this.setState({
@@ -1100,10 +1121,12 @@ export class AnnotationsSidebar extends React.Component<
                     onClick={() =>
                         this.props.onUnifiedListSelect(listData.unifiedId)
                     }
-                    zIndex={listData.unifiedId}
+                    zIndex={parseFloat(listData.unifiedId)}
                     keepHovered={keepHovered}
                 >
-                    <FollowedListTitleContainer>
+                    <FollowedListTitleContainer
+                        context={this.props.sidebarContext}
+                    >
                         <TooltipBox
                             tooltipText={
                                 <span>
@@ -1133,7 +1156,11 @@ export class AnnotationsSidebar extends React.Component<
                             />
                         </TooltipBox>
                         <FollowedListTitleBox title={title}>
-                            <FollowedListTitle>{title}</FollowedListTitle>
+                            <FollowedListTitle
+                                context={this.props.sidebarContext}
+                            >
+                                {title}
+                            </FollowedListTitle>
                         </FollowedListTitleBox>
                     </FollowedListTitleContainer>
                     <ButtonContainer>
@@ -1344,16 +1371,11 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderPageLinkMenu() {
-        if (this.props.selectedShareMenuPageLinkList == null) {
-            console.warn(
-                'Attempted to open page link share menu for unselected list',
-            )
-            return false
+        if (!this.props.showPageLinkShareMenu) {
+            return null
         }
 
-        const selectedList = this.props.annotationsCache.lists.byId[
-            this.props.selectedShareMenuPageLinkList
-        ]
+        const localAnnotationIds = this.props.getLocalAnnotationIds()
 
         return (
             <PopoutBox
@@ -1365,13 +1387,34 @@ export class AnnotationsSidebar extends React.Component<
                 closeComponent={this.props.closePageLinkShareMenu}
                 getPortalRoot={this.props.getRootElement}
             >
-                {!this.props.selectedShareMenuPageLinkList || !selectedList ? (
-                    <LoadingIndicatorContainer height="180px" width="330px">
-                        <LoadingIndicatorStyled size={20} />
-                    </LoadingIndicatorContainer>
-                ) : (
-                    this.props.renderPageLinkMenuForList(selectedList)
-                )}
+                <PageCitations
+                    annotationUrls={localAnnotationIds}
+                    copyPasterProps={{
+                        copyPasterBG: this.props.copyPaster,
+                        getRootElement: this.props.getRootElement,
+                        onClickOutside: this.props.closePageLinkShareMenu,
+                    }}
+                    pageLinkProps={{
+                        authBG: this.props.authBG,
+                        analyticsBG: this.props.analyticsBG,
+                        annotationsCache: this.props.annotationsCache,
+                        contentSharingBG: this.props.contentSharingBG,
+                        contentSharingByTabsBG: this.props
+                            .contentSharingByTabsBG,
+                        copyToClipboard: this.props.copyToClipboard,
+                        fullPageUrl: this.props.fullPageUrl,
+                        getRootElement: this.props.getRootElement,
+                        showSpacesTab: this.props.showSpacesTab,
+                        setLoadingState: (loadingState) =>
+                            this.setState({
+                                pageLinkCreationLoading: loadingState,
+                            }),
+                        fromDashboard:
+                            this.props.sidebarContext === 'dashboard',
+                    }}
+                    getRootElement={this.props.getRootElement}
+                />
+                {this.props.renderPageLinkMenuForList()}
             </PopoutBox>
         )
     }
@@ -1532,7 +1575,8 @@ export class AnnotationsSidebar extends React.Component<
             this.throwNoSelectedListError()
         }
         const listData = this.props.lists.byId[selectedListId]
-        const listInstance = listInstances[selectedListId]
+        const listInstance =
+            listInstances[selectedListId] ?? initListInstance(listData)
 
         if (
             listData.remoteId != null &&
@@ -1597,8 +1641,13 @@ export class AnnotationsSidebar extends React.Component<
             contentType = 'page'
         }
 
-        let InstructionsTitlePlaceholder =
-            'Summarise or ask questions about this page'
+        let InstructionsTitlePlaceholder: JSX.Element | string = (
+            <span>
+                Summarise or ask questions about
+                <br />
+                this page or selected text
+            </span>
+        )
         let instructionsSubTitlePlaceholder =
             'Just type in a question or pick one of the templates'
 
@@ -1654,7 +1703,7 @@ export class AnnotationsSidebar extends React.Component<
                 {this.props.activeAITab !== 'ThisPage' && (
                     <SuggestionsListSwitcher>
                         <SuggestionsSwitcherButton
-                            onClick={this.props.setSummaryMode('Answer')}
+                            onClick={() => this.props.setSummaryMode('Answer')}
                             active={
                                 this.props.summaryModeActiveTab === 'Answer'
                             }
@@ -1662,7 +1711,9 @@ export class AnnotationsSidebar extends React.Component<
                             Answer
                         </SuggestionsSwitcherButton>
                         <SuggestionsSwitcherButton
-                            onClick={this.props.setSummaryMode('References')}
+                            onClick={() =>
+                                this.props.setSummaryMode('References')
+                            }
                             active={
                                 this.props.summaryModeActiveTab === 'References'
                             }
@@ -1681,12 +1732,7 @@ export class AnnotationsSidebar extends React.Component<
                     this.renderRabbitHoleList()}
                 {(this.props.summaryModeActiveTab === 'Answer' ||
                     this.props.activeAITab === 'ThisPage') && (
-                    <SummaryContainer
-                        isSummaryShown={
-                            this.props.activeTab === 'summary' ||
-                            this.props.pageSummary?.length > 0
-                        }
-                    >
+                    <SummaryContainer>
                         {this.props.showLengthError &&
                             this.props.queryMode === 'summarize' && (
                                 <ErrorContainer>
@@ -2077,11 +2123,11 @@ export class AnnotationsSidebar extends React.Component<
                                     <SuggestionsList {...this.props} />
                                 )}
                         </QueryContainer>
+
                         <OptionsContainer>
-                            <OptionsContainerLeft>
-                                {this.props.activeAITab === 'InFollowedFeeds' ||
-                                this.props.activeAITab ===
-                                    'ExistingKnowledge' ? (
+                            {this.props.activeAITab === 'InFollowedFeeds' ||
+                                (this.props.activeAITab ===
+                                    'ExistingKnowledge' && (
                                     <>
                                         <PrimaryAction
                                             type="tertiary"
@@ -2097,189 +2143,163 @@ export class AnnotationsSidebar extends React.Component<
                                             innerRef={this.addSourcesButtonRef}
                                         />
                                     </>
-                                ) : (
+                                ))}
+                            <SummaryActionButtonBox>
+                                <TooltipBox
+                                    tooltipText={
+                                        this.props.pageSummary ? (
+                                            <>
+                                                Create new note <br /> from
+                                                output
+                                            </>
+                                        ) : (
+                                            <>
+                                                Create new note from output.
+                                                <br />
+                                                Though nothing to save yet.
+                                            </>
+                                        )
+                                    }
+                                    placement="bottom-end"
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <SummaryActionsButton
+                                        onMouseDown={() => {
+                                            let contentToUse = this.props
+                                                .pageSummary
+                                            const selectedText = window
+                                                .getSelection()
+                                                ?.toString()
+
+                                            if (selectedText) {
+                                                contentToUse = selectedText
+                                            }
+                                            if (this.props.pageSummary) {
+                                                this.props.createNewNoteFromAISummary(
+                                                    contentToUse,
+                                                )
+                                            }
+                                        }}
+                                        disabled={!this.props.pageSummary}
+                                    >
+                                        <Icon
+                                            icon={'commentAdd'}
+                                            hoverOff
+                                            heightAndWidth={'16px'}
+                                            padding={'2px'}
+                                        />
+                                        New Note
+                                        {/* <KeyShortcut>N</KeyShortcut> */}
+                                    </SummaryActionsButton>
+                                </TooltipBox>
+                            </SummaryActionButtonBox>
+                            <SummaryActionButtonBox>
+                                <TooltipBox
+                                    tooltipText={
+                                        this.props.fullPageUrl.includes(
+                                            'youtube.com/watch',
+                                        ) ? (
+                                            <>
+                                                Fetches the locally visible
+                                                content instead of a faster
+                                                cloud fetch. <br />
+                                                Not available on YouTube videos.
+                                            </>
+                                        ) : (
+                                            <>
+                                                Fetches the locally visible
+                                                content instead of a faster
+                                                cloud fetch. <br />
+                                                Useful if you are behind a
+                                                paywall or members restricted
+                                                area.
+                                            </>
+                                        )
+                                    }
+                                    placement="bottom"
+                                    width="200px"
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <SummaryActionsButton
+                                        disabled={this.props.fullPageUrl.includes(
+                                            'youtube.com/watch',
+                                        )}
+                                    >
+                                        <Checkbox
+                                            key={34534453}
+                                            id={'Local'}
+                                            isChecked={
+                                                this.props.fetchLocalHTML
+                                            }
+                                            handleChange={(event) => {
+                                                event.stopPropagation()
+                                                this.props.fetchLocalHTML
+                                                    ? this.props.changeFetchLocalHTML(
+                                                          false,
+                                                      )
+                                                    : this.props.changeFetchLocalHTML(
+                                                          true,
+                                                      )
+                                            }}
+                                            // isDisabled={!this.state.shortcutsEnabled}
+                                            name={'Local'}
+                                            size={14}
+                                            label={'Local Content'}
+                                            fontSize={14}
+                                            checkBoxColor="black"
+                                            borderColor="greyScale3"
+                                            fontColor="greyScale5"
+                                        />
+                                    </SummaryActionsButton>
+                                </TooltipBox>
+                            </SummaryActionButtonBox>
+                            <SummaryActionButtonBox>
+                                <SummaryActionsButton padding={'0px'}>
                                     <DropdownMenuBtnSmall
                                         elementHeight="fit-content"
                                         hideDescriptionInPreview
                                         menuItems={[
                                             {
-                                                id: 'summarize',
-                                                name: 'Summarize',
-                                                info: 'Best for summarisations',
-                                            },
-                                            ...(this.props.fullPageUrl.includes(
-                                                'youtube.com',
-                                            )
-                                                ? [
-                                                      {
-                                                          id: 'chapters',
-                                                          name: 'Chapters',
-                                                          info:
-                                                              'Get chapter overview and summaries',
-                                                      },
-                                                  ]
-                                                : []),
-                                            {
-                                                id: 'question',
-                                                name: 'General Question',
+                                                id: 'gpt-3.5-turbo-1106',
+                                                name: 'GPT 3.5',
                                                 info:
-                                                    'Unrelated to the content',
+                                                    'Faster & good for summarization',
+                                            },
+                                            {
+                                                id: 'gpt-4-1106-preview',
+                                                name: 'GPT 4',
+                                                isDisabled: this.props.hasKey
+                                                    ? false
+                                                    : true,
+                                                info: (
+                                                    <span>
+                                                        Better at reasoning and
+                                                        with complexity
+                                                        <br />
+                                                        ONLY WITH OWN KEY
+                                                    </span>
+                                                ),
                                             },
                                         ]}
                                         onMenuItemClick={async (item) => {
-                                            this.props.setQueryMode(item.id)
-
-                                            if (item.id === 'summarize') {
-                                                await this.props.queryAIwithPrompt(
-                                                    this.props.prompt,
-                                                )
-                                            }
-                                            if (item.id === 'chapters') {
-                                                await this.props.getVideoChapters()
-                                            }
-                                            if (item.id === 'question') {
-                                                await this.props.queryAIwithPrompt(
-                                                    this.props.prompt,
-                                                    undefined,
-                                                    item.id,
-                                                )
-                                            }
+                                            this.props.setAIModel(item.id)
                                         }}
                                         initSelectedItem={
-                                            this.props.queryMode ===
-                                            'chapterSummary'
-                                                ? 'chapterSummary'
-                                                : null
-                                        }
-                                        selectedState={
-                                            this.props.queryMode ===
-                                            'chapterSummary'
-                                                ? 'chapterSummary'
-                                                : 'summarize'
+                                            this.props.AImodel ??
+                                            'gpt-3.5-turbo-1106'
                                         }
                                         keepSelectedState
                                         getRootElement={
                                             this.props.getRootElement
                                         }
+                                        renderAICounter={
+                                            this.props.renderAICounter
+                                        }
                                     />
-                                )}
-                                <DropdownMenuBtnSmall
-                                    elementHeight="fit-content"
-                                    hideDescriptionInPreview
-                                    menuItems={[
-                                        {
-                                            id: 'gpt-3.5-turbo-1106',
-                                            name: 'GPT 3.5',
-                                            info:
-                                                'Fast & good for summarization',
-                                        },
-                                        {
-                                            id: 'gpt-4-1106-preview',
-                                            name: 'GPT 4',
-                                            isDisabled: this.props.hasKey
-                                                ? false
-                                                : true,
-                                            info: (
-                                                <span>
-                                                    Better at generation of text
-                                                    <br />
-                                                    ONLY WITH OWN KEY
-                                                </span>
-                                            ),
-                                        },
-                                    ]}
-                                    onMenuItemClick={async (item) => {
-                                        this.props.setAIModel(item.id)
-                                    }}
-                                    initSelectedItem={
-                                        this.props.AImodel ??
-                                        'gpt-3.5-turbo-1106'
-                                    }
-                                    keepSelectedState
-                                    getRootElement={this.props.getRootElement}
-                                />
-
-                                {!this.props.fullPageUrl.includes(
-                                    'youtube.com/watch',
-                                ) &&
-                                    this.props.activeAITab === 'ThisPage' &&
-                                    (this.props.sidebarContext === 'in-page' ||
-                                        this.props.queryMode !==
-                                            'question') && (
-                                        <TooltipBox
-                                            tooltipText={
-                                                <>
-                                                    For performance we usually
-                                                    fetch the text via our
-                                                    servers but sometimes we
-                                                    can't reach it. E.g. if you
-                                                    are behind a paywall.
-                                                    <br /> Use this to extract
-                                                    the content from the page.
-                                                </>
-                                            }
-                                            placement="bottom"
-                                            width="150px"
-                                            getPortalRoot={
-                                                this.props.getRootElement
-                                            }
-                                        >
-                                            <Checkbox
-                                                key={1}
-                                                id={'1'}
-                                                isChecked={
-                                                    this.props.fetchLocalHTML
-                                                }
-                                                handleChange={() =>
-                                                    this.props.fetchLocalHTML
-                                                        ? this.props.changeFetchLocalHTML(
-                                                              false,
-                                                          )
-                                                        : this.props.changeFetchLocalHTML(
-                                                              true,
-                                                          )
-                                                }
-                                                // isDisabled={!this.state.shortcutsEnabled}
-                                                name={'Local Content'}
-                                                label={'Local Content'}
-                                                size={14}
-                                                fontSize={12}
-                                                checkBoxColor="black"
-                                                borderColor="greyScale3"
-                                            />
-                                        </TooltipBox>
-                                    )}
-                            </OptionsContainerLeft>
-
-                            <OptionsContainerRight>
-                                {this.props.pageSummary?.length > 0 && (
-                                    <TooltipBox
-                                        tooltipText={
-                                            <>
-                                                Create new note <br /> from
-                                                output
-                                            </>
-                                        }
-                                        placement="bottom-end"
-                                        getPortalRoot={
-                                            this.props.getRootElement
-                                        }
-                                    >
-                                        <Icon
-                                            icon={'commentAdd'}
-                                            onClick={() => {
-                                                this.props.createNewNoteFromAISummary(
-                                                    this.props.pageSummary,
-                                                )
-                                            }}
-                                            heightAndWidth="22px"
-                                            color="prime1"
-                                        />
-                                    </TooltipBox>
-                                )}
-                                {this.props.renderAICounter('top')}
-                            </OptionsContainerRight>
+                                </SummaryActionsButton>
+                            </SummaryActionButtonBox>
                         </OptionsContainer>
+
                         {this.props.loadState === 'running' ? (
                             <LoaderBoxInSummary>
                                 {this.renderLoader()}
@@ -3378,13 +3398,13 @@ export class AnnotationsSidebar extends React.Component<
             return this.renderFeed()
         }
 
-        if (
-            (this.props.isDataLoading ||
-                this.props.foreignSelectedListLoadState === 'running') &&
-            this.props.activeTab !== 'summary'
-        ) {
-            return this.renderLoader()
-        }
+        // if (
+        //     (this.props.isDataLoading ||
+        //         this.props.foreignSelectedListLoadState === 'running') &&
+        //     this.props.activeTab !== 'summary'
+        // ) {
+        //     return this.renderLoader()
+        // }
 
         if (this.props.activeTab === 'rabbitHole') {
             if (this.props.rabbitHoleBetaFeatureAccess == null) {
@@ -3442,7 +3462,7 @@ export class AnnotationsSidebar extends React.Component<
                                 onClick={this.props.setActiveTab('annotations')}
                                 active={this.props.activeTab === 'annotations'}
                             >
-                                All by Me{' '}
+                                All Notes{' '}
                             </SuggestionsSwitcherButton>
                             <SuggestionsSwitcherButton
                                 onClick={this.props.setActiveTab('spaces')}
@@ -3451,16 +3471,31 @@ export class AnnotationsSidebar extends React.Component<
                                 By Spaces{' '}
                             </SuggestionsSwitcherButton>
                         </SuggestionsListSwitcher>
-                        {this.props.activeTab === 'annotations' &&
-                            this.renderAnnotationsEditable(
-                                cacheUtils.getUserAnnotationsArray(
-                                    { annotations: this.props.annotations },
-                                    this.props.currentUser?.id.toString(),
-                                ),
+                        <AnnotationSectionScrollContainer
+                            id={'AnnotationSectionScrollContainer'}
+                        >
+                            {this.props.isDataLoading ||
+                            this.props.foreignSelectedListLoadState ===
+                                'running' ? (
+                                this.renderLoader()
+                            ) : (
+                                <>
+                                    {this.props.activeTab === 'annotations' &&
+                                        this.renderAnnotationsEditable(
+                                            cacheUtils.getUserAnnotationsArray(
+                                                {
+                                                    annotations: this.props
+                                                        .annotations,
+                                                },
+                                                this.props.normalizedPageUrl,
+                                                this.props.currentUser?.id.toString(),
+                                            ),
+                                        )}
+                                    {this.props.activeTab === 'spaces' &&
+                                        this.renderSharedNotesByList()}
+                                </>
                             )}
-
-                        {this.props.activeTab === 'spaces' &&
-                            this.renderSharedNotesByList()}
+                        </AnnotationSectionScrollContainer>
                     </AnnotationsSectionStyled>
                 )}
                 <UpdateNotifBanner
@@ -3527,7 +3562,7 @@ export class AnnotationsSidebar extends React.Component<
                 {shareMenuAnnotationInstanceId != null && (
                     <PopoutBox
                         targetElementRef={instanceRefs.shareMenuBtn.current}
-                        placement="left"
+                        placement="bottom-start"
                         strategy="fixed"
                         closeComponent={() =>
                             this.props.setShareMenuAnnotationInstance(null)
@@ -3766,12 +3801,12 @@ export class AnnotationsSidebar extends React.Component<
                             <NewAnnotationBoxMyAnnotations>
                                 {this.renderNewAnnotation()}
                             </NewAnnotationBoxMyAnnotations>
-                            {annots?.length > 1 && (
-                                <AnnotationActions>
-                                    {this.renderTopBarActionButtons()}
-                                </AnnotationActions>
-                            )}
                         </TopAreaContainer>
+                        {annots?.length > 1 && (
+                            <AnnotationActions>
+                                {this.renderTopBarActionButtons()}
+                            </AnnotationActions>
+                        )}
                         {this.props.noteCreateState === 'running' ||
                         annotations?.length > 0 ? (
                             <AnnotationContainer>
@@ -3803,31 +3838,119 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <TopBarContainer>
                 <TopBarTabsContainer>
-                    <PrimaryAction
-                        onClick={this.props.setActiveTab('annotations')}
-                        label={'Notes'}
-                        active={
-                            this.props.activeTab === 'annotations' ||
-                            this.props.activeTab === 'spaces'
-                        }
+                    <TopBarButtonContainer>
+                        <PrimaryAction
+                            onClick={this.props.setActiveTab('annotations')}
+                            label={'Notes'}
+                            active={
+                                this.props.activeTab === 'annotations' ||
+                                this.props.activeTab === 'spaces'
+                            }
+                            type={'menuBar'}
+                            size={'medium'}
+                            padding={'3px 6px'}
+                            height={'30px'}
+                            icon={'commentAdd'}
+                        />{' '}
+                    </TopBarButtonContainer>
+
+                    <TopBarButtonContainer>
+                        <PrimaryAction
+                            onClick={this.props.setActiveTab('summary')}
+                            label={'Ask'}
+                            active={this.props.activeTab === 'summary'}
+                            type={'menuBar'}
+                            size={'medium'}
+                            iconPosition={'right'}
+                            padding={'3px 6px'}
+                            height={'30px'}
+                            icon={'stars'}
+                        />
+                    </TopBarButtonContainer>
+
+                    <TopBarButtonContainer>
+                        <PrimaryAction
+                            label={'Cite'}
+                            onClick={this.props.clickCreatePageLinkBtn}
+                            type="menuBar"
+                            iconColor="prime1"
+                            fontColor="white"
+                            size="medium"
+                            innerRef={this.sharePageLinkButtonRef}
+                            icon="copy"
+                            padding={'0px 12px 0 6px'}
+                            height={'30px'}
+                            hoverState={this.props.showPageLinkShareMenu}
+                        />
+                        {this.state.pageLinkCreationLoading === 'running' && (
+                            <LoadingBox2>
+                                <TooltipBox
+                                    tooltipText={
+                                        <span>
+                                            You can already copy & share the
+                                            links but the data is still
+                                            uploading
+                                        </span>
+                                    }
+                                    placement="bottom"
+                                    width="180px"
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <LoadingIndicator size={14} />
+                                </TooltipBox>
+                            </LoadingBox2>
+                        )}
+                    </TopBarButtonContainer>
+
+                    {/* <PrimaryAction
+                        onClick={(event) => {
+                            this.props.setActiveTab('feed')(event)
+                            this.props.clickFeedActivityIndicator()
+                        }}
+                        label={'Feed'}
+                        active={this.props.activeTab === 'feed'}
                         type={'tertiary'}
                         size={'medium'}
+                        iconPosition={'right'}
                         padding={'3px 6px'}
                         height={'30px'}
-                    />
+                        icon={
+                            this.props.hasFeedActivity ? (
+                                <TooltipBox
+                                    tooltipText={'Has new feed updates'}
+                                    placement={'bottom'}
+                                    getPortalRoot={this.props.getRootElement}
+                                >
+                                    <LoadingBox hasToolTip>
+                                        <PageActivityIndicator active />
+                                    </LoadingBox>
+                                </TooltipBox>
+                            ) : (
+                                <LoadingBox>
+                                    <PageActivityIndicator active={false} />
+                                </LoadingBox>
+                            )
+                        }
+                    /> */}
                     {this.props.sidebarContext === 'in-page' &&
                         this.props.rabbitHoleBetaFeatureAccess ===
                             'onboarded' && (
-                            <PrimaryAction
-                                onClick={this.props.setActiveTab('rabbitHole')}
-                                label={'RabbitHole'}
-                                active={this.props.activeTab === 'rabbitHole'}
-                                type={'tertiary'}
-                                size={'medium'}
-                                iconPosition={'right'}
-                                padding={'3px 6px'}
-                                height={'30px'}
-                            />
+                            <TopBarButtonContainer>
+                                <PrimaryAction
+                                    onClick={this.props.setActiveTab(
+                                        'rabbitHole',
+                                    )}
+                                    label={'RabbitHole'}
+                                    active={
+                                        this.props.activeTab === 'rabbitHole'
+                                    }
+                                    type={'tertiary'}
+                                    size={'medium'}
+                                    iconPosition={'right'}
+                                    padding={'3px 6px'}
+                                    height={'30px'}
+                                />
+                            </TopBarButtonContainer>
                         )}
                     {/* <PrimaryAction
                         onClick={this.props.setActiveTab('spaces')}
@@ -3860,82 +3983,15 @@ export class AnnotationsSidebar extends React.Component<
                             )
                         }
                     /> */}
-                    <PrimaryAction
-                        onClick={this.props.setActiveTab('summary')}
-                        label={'Ask'}
-                        active={this.props.activeTab === 'summary'}
-                        type={'tertiary'}
-                        size={'medium'}
-                        iconPosition={'right'}
-                        padding={'3px 6px'}
-                        height={'30px'}
-                    />
-
-                    <PrimaryAction
-                        onClick={(event) => {
-                            this.props.setActiveTab('feed')(event)
-                            this.props.clickFeedActivityIndicator()
-                        }}
-                        label={'Feed'}
-                        active={this.props.activeTab === 'feed'}
-                        type={'tertiary'}
-                        size={'medium'}
-                        iconPosition={'right'}
-                        padding={'3px 6px'}
-                        height={'30px'}
-                        icon={
-                            this.props.hasFeedActivity ? (
-                                <TooltipBox
-                                    tooltipText={'Has new feed updates'}
-                                    placement={'bottom'}
-                                    getPortalRoot={this.props.getRootElement}
-                                >
-                                    <LoadingBox hasToolTip>
-                                        <PageActivityIndicator active />
-                                    </LoadingBox>
-                                </TooltipBox>
-                            ) : (
-                                <LoadingBox>
-                                    <PageActivityIndicator active={false} />
-                                </LoadingBox>
-                            )
-                        }
-                    />
                 </TopBarTabsContainer>
-                <TopBarBtnsContainer ref={this.sharePageLinkButtonRef}>
-                    <PrimaryAction
-                        label={'Share Page'}
-                        onClick={this.props.clickCreatePageLinkBtn}
-                        type="tertiary"
-                        iconColor="prime1"
-                        fontColor="white"
-                        size="medium"
-                        active={
-                            this.props.selectedShareMenuPageLinkList != null
-                        }
-                        icon={
-                            this.props.pageLinkCreateState === 'running' ? (
-                                <LoadingIndicator
-                                    margin={'0 5px 0 0'}
-                                    size={14}
-                                />
-                            ) : (
-                                'invite'
-                            )
-                        }
-                        padding={'0px 12px 0 6px'}
-                        height={'30px'}
-                    />
-                    {this.props.selectedShareMenuPageLinkList != null &&
-                        this.renderPageLinkMenu()}
-                </TopBarBtnsContainer>
+                {this.renderPageLinkMenu()}
             </TopBarContainer>
         )
     }
 
-    private handleNameEditInputKeyDown: React.KeyboardEventHandler = async (
-        event,
-    ) => {
+    private handleNameEditInputKeyDown: React.KeyboardEventHandler<
+        HTMLInputElement
+    > = async (event) => {
         const selectedList = this.props.annotationsCache.lists.byId[
             this.props.selectedListId
         ]
@@ -4018,13 +4074,15 @@ export class AnnotationsSidebar extends React.Component<
                         </TooltipBox>
                         <TooltipBox
                             tooltipText={
-                                isPageLink ? 'Share Page' : 'Share Space'
+                                isPageLink
+                                    ? 'Share Annotated Page'
+                                    : 'Share Space'
                             }
                             placement="bottom"
                             getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
-                                icon="invite"
+                                icon="link"
                                 containerRef={this.shareInviteButtonRef}
                                 onClick={() =>
                                     this.props.openContextMenuForList(
@@ -4152,14 +4210,15 @@ export class AnnotationsSidebar extends React.Component<
         if (permissionStatus === 'Follower' && !selectedList.isForeignList) {
             return (
                 <CreatorActionButtons>
-                    <PrimaryAction
-                        label="Follower"
-                        type="forth"
-                        size="small"
-                        icon="check"
-                        onClick={null}
-                        fontColor={'greyScale6'}
-                    />
+                    <PermissionsDisplayBox>
+                        <Icon
+                            icon="peopleFine"
+                            heightAndWidth="18px"
+                            hoverOff
+                            color="greyScale6"
+                        />
+                        Following
+                    </PermissionsDisplayBox>
                 </CreatorActionButtons>
             )
         }
@@ -4179,22 +4238,15 @@ export class AnnotationsSidebar extends React.Component<
                         width={'200px'}
                         getPortalRoot={this.props.getRootElement}
                     >
-                        {/* <PrimaryAction
-                        type="tertiary"
-                        size="small"
-                        icon="link"
-                        label={'Share Space'}
-                        onClick={null}
-                        fontColor={'greyScale5'}
-                    /> */}
-                        <PrimaryAction
-                            type="forth"
-                            size="small"
-                            icon="personFine"
-                            label={'Creator'}
-                            onClick={null}
-                            fontColor={'greyScale6'}
-                        />
+                        <PermissionsDisplayBox>
+                            <Icon
+                                icon="personFine"
+                                heightAndWidth="18px"
+                                hoverOff
+                                color="greyScale6"
+                            />
+                            Creator
+                        </PermissionsDisplayBox>
                     </TooltipBox>
                 </CreatorActionButtons>
             )
@@ -4247,14 +4299,15 @@ export class AnnotationsSidebar extends React.Component<
                     width={'200px'}
                     getPortalRoot={this.props.getRootElement}
                 >
-                    <PrimaryAction
-                        label="Contributor"
-                        type="forth"
-                        size="small"
-                        icon="peopleFine"
-                        onClick={null}
-                        fontColor={'greyScale6'}
-                    />
+                    <PermissionsDisplayBox>
+                        <Icon
+                            icon="peopleFine"
+                            heightAndWidth="18px"
+                            hoverOff
+                            color="greyScale6"
+                        />
+                        Contributor
+                    </PermissionsDisplayBox>
                 </TooltipBox>
             )
         }
@@ -4273,7 +4326,7 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PopoutBox
                 targetElementRef={this.sortDropDownButtonRef.current}
-                placement={'bottom'}
+                placement={'bottom-start'}
                 offsetX={5}
                 offsetY={5}
                 closeComponent={() =>
@@ -4298,7 +4351,6 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <>
                 {this.renderSortingMenuDropDown()}
-                {this.renderAllNotesCopyPaster()}
                 {this.renderAllNotesShareMenu()}
                 <TopBarActionBtns>
                     <TooltipBox
@@ -4323,28 +4375,68 @@ export class AnnotationsSidebar extends React.Component<
                             active={this.state.showSortDropDown}
                         />
                     </TooltipBox>
-                    <TooltipBox
-                        tooltipText={'Copy & Paste Page with its notes'}
-                        placement={'bottom'}
-                        getPortalRoot={this.props.getRootElement}
-                    >
-                        <PrimaryAction
-                            icon={'copy'}
-                            size={'small'}
-                            iconSize="18px"
-                            padding={'0px 6px 0 0'}
-                            type={'tertiary'}
-                            label={'Copy'}
-                            innerRef={this.copyButtonRef}
-                            onClick={async () => {
-                                await this.setState({
-                                    showAllNotesCopyPaster: true,
-                                })
-                                this.setPopoutsActive()
-                            }}
-                            active={this.state.showAllNotesCopyPaster}
-                        />
-                    </TooltipBox>
+                    <RightSideContainer>
+                        <TooltipBox
+                            tooltipText={
+                                this.props.isAutoAddEnabled ? (
+                                    <span>
+                                        New notes are added
+                                        <br /> to all Spaces you put the page
+                                        into
+                                    </span>
+                                ) : (
+                                    <span>
+                                        New notes only added to Spaces
+                                        <br /> you manually put them
+                                    </span>
+                                )
+                            }
+                            placement={'bottom'}
+                            getPortalRoot={this.props.getRootElement}
+                        >
+                            <AutoAddContainer
+                                onClick={(event) => {
+                                    event.stopPropagation()
+                                    this.props.toggleAutoAdd()
+                                }}
+                            >
+                                <Icon
+                                    icon="spread"
+                                    heightAndWidth="20px"
+                                    hoverOff
+                                    color="prime1"
+                                />
+                                <Checkbox
+                                    key={33}
+                                    id={'33'}
+                                    width="fit-content"
+                                    isChecked={
+                                        this.props.isAutoAddEnabled === true
+                                    }
+                                    handleChange={(event) => {
+                                        event.stopPropagation()
+                                        this.props.toggleAutoAdd()
+                                    }}
+                                    // isDisabled={!this.state.shortcutsEnabled}
+                                    name={
+                                        this.props.isAutoAddEnabled
+                                            ? 'Is Default'
+                                            : 'Make Default'
+                                    }
+                                    label={'Auto Add'}
+                                    fontSize={12}
+                                    fontColor={'greyScale5'}
+                                    size={14}
+                                    textPosition="left"
+                                    isLoading={
+                                        this.props.isAutoAddEnabled == null
+                                    }
+                                    checkBoxColor="greyScale4"
+                                />
+                            </AutoAddContainer>
+                        </TooltipBox>
+                    </RightSideContainer>
+
                     {/* <TooltipBox
                         tooltipText={'Bulk Share Notes'}
                         placement={'bottom'}
@@ -4398,7 +4490,10 @@ export class AnnotationsSidebar extends React.Component<
         }
 
         return (
-            <ResultBodyContainer sidebarContext={this.props.sidebarContext}>
+            <ResultBodyContainer
+                inPageMode={this.props.inPageMode}
+                sidebarContext={this.props.sidebarContext}
+            >
                 {this.props.noteWriteError && (
                     <ErrorNotification
                         closeComponent={() =>
@@ -4535,7 +4630,10 @@ const ExistingSourcesListItem = styled.div`
     }
 `
 
-const ExistingKnowledgeContainer = styled.div<{ padding: string; gap: string }>`
+const ExistingKnowledgeContainer = styled.div<{
+    padding?: string
+    gap?: string
+}>`
     display: flex;
     flex-direction: column;
     width: 100%;
@@ -4632,25 +4730,6 @@ const OnboardingSubtitle = styled.div`
     line-height: 24px;
 `
 
-const OnboardingVideo = styled.iframe`
-    width: fill-available;
-    width: -moz-available;
-    border: none;
-    border-radius: 8px;
-    background: ${(props) => props.theme.colors.greyScale2};
-`
-
-const ReferencesTitle = styled.div`
-    display: flex;
-    align-items: center;
-    font-size: 18px;
-    font-weight: 600;
-    color: ${(props) => props.theme.colors.greyScale7};
-    margin: 20px 0 0px 0;
-    padding: 0 0 10px 20px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
-`
-
 const SuggestionsListSwitcher = styled.div`
     display: flex;
     flex-direction: row;
@@ -4658,8 +4737,7 @@ const SuggestionsListSwitcher = styled.div`
     position: sticky;
     top: 0px;
     z-index: 1000;
-    background: ${(props) => props.theme.colors.greyScale1}60;
-    backdrop-filter: blur(10px);
+    background: ${(props) => props.theme.colors.greyScale1}5c;
 `
 
 const SuggestionsSwitcherButton = styled.div<{ active }>`
@@ -4721,11 +4799,10 @@ const NoteText = styled(Markdown)`
 `
 
 const AnnotationEditContainer = styled.div<{ hasHighlight: boolean }>`
-    margin-top: ${(props) => !props.hasHighlight && '10px'};
     padding: 0px 20px 20px 30px;
 `
 
-const HighlightStyled = styled.div<{ hasComment: boolean }>`
+const HighlightStyled = styled.div`
     font-weight: 400;
     font-size: 14px;
     letter-spacing: 0.5px;
@@ -4739,7 +4816,7 @@ const HighlightStyled = styled.div<{ hasComment: boolean }>`
     margin-bottom: 15px;
 `
 
-const StyledPageResult = styled.div<{ isAnnotation: boolean }>`
+const StyledPageResult = styled.div<{ isAnnotation: boolean; href: string }>`
     display: flex;
     flex-direction: column;
     position: relative;
@@ -4760,7 +4837,7 @@ const StyledPageResult = styled.div<{ isAnnotation: boolean }>`
         `};
 `
 
-const PageContentBox = styled.div<{ hasSpaces: boolean }>`
+const PageContentBox = styled.div`
     display: flex;
     flex-direction: column;
     cursor: pointer;
@@ -4847,7 +4924,7 @@ const ChapterSummaryText = styled(Markdown)`
     margin-bottom: 20px;
 `
 
-const Highlightbar = styled.div<{ barColor: string }>`
+const Highlightbar = styled.div`
     background: ${(props) => props.theme.colors.prime1};
     margin-right: 10px;
     border-radius: 2px;
@@ -4921,8 +4998,8 @@ const ChapterTimestamp = styled.a`
 const OptionsContainerRight = styled.div`
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    grid-gap: 10px;
+    position: absolute;
+    right: 5px;
 `
 
 const AIContainerNotif = styled.div`
@@ -4982,9 +5059,16 @@ const OptionsContainer = styled.div`
     align-items: center;
     justify-content: space-between;
     padding: 0px 15px 10px 15px;
+    width: fill-available;
+    grid-gap: 2px;
     z-index: 101;
     height: 24px;
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+
+    > div {
+        flex: 1;
+        display: flex;
+    }
 `
 const OptionsContainerLeft = styled.div`
     display: flex;
@@ -4994,24 +5078,6 @@ const OptionsContainerLeft = styled.div`
     font-size: 12px;
     grid-gap: 3px;
     z-index: 100;
-`
-
-const SelectionPill = styled.div<{ selected: boolean }>`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 5px 10px;
-    color: ${(props) => props.theme.colors.greyScale6};
-    border-radius: 20px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale2};
-    cursor: pointer;
-    font-size: 10px;
-
-    ${(props) =>
-        props.selected &&
-        css`
-            background: ${(props) => props.theme.colors.greyScale1};
-        `}
 `
 
 const SelectedHeaderButtonBox = styled.div`
@@ -5052,6 +5118,7 @@ const DropDown = styled.div`
     border-radius: 0 0 6px 6px;
     outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     min-width: 100px;
+    flex: 1;
 `
 
 const RemoveTemplateIconBox = styled.div`
@@ -5104,7 +5171,7 @@ const QueryContainer = styled.div<{
     AIDropDownShown: boolean
 }>`
     height: fit-content;
-    padding: 15px 15px 10px 15px;
+    padding: 5px 15px 10px 15px;
     display: flex;
     flex-direction: column;
     z-index: 102;
@@ -5189,43 +5256,6 @@ const SelectedAIText = styled.div<{ fullHeight: boolean }>`
         `};
 `
 
-const RightSideButtons = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    grid-gap: 10px;
-`
-
-const BetaButton = styled.div`
-    display: flex;
-    background: linear-gradient(
-        90deg,
-        #d9d9d9 0%,
-        #2e73f8 0.01%,
-        #0a4bca 78.86%,
-        #0041be 100%
-    );
-    border-radius: 50px;
-    height: 24px;
-    width: 50px;
-    align-items: center;
-    justify-content: center;
-`
-
-const BetaButtonInner = styled.div`
-    display: flex;
-    background: ${(props) => props.theme.colors.black};
-    color: #0a4bca;
-    font-weight: bold;
-    font-size: 12px;
-    letter-spacing: 1px;
-    height: 20px;
-    width: 46px;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50px;
-`
-
 const ErrorContainer = styled.div`
     display: flex;
     background: ${(props) => props.theme.colors.warning}40;
@@ -5268,33 +5298,6 @@ const ChapterContainer = styled.div`
     height: 100%;
     overflow: scroll;
     padding: 10px 10px 10px 10px;
-`
-
-const SummaryFooter = styled.div`
-    width: fill-available;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    grid-gap: 10px;
-    padding: 10px 20px 10px 20px;
-    margin-right: 1px;
-    background: ${(props) =>
-        props.theme.variant === 'dark'
-            ? props.theme.colors.greyScale2 + '90'
-            : props.theme.colors.greyScale1 + '50'};
-    backdrop-filter: blur(20px);
-    position: fixed;
-    bottom: -1px;
-`
-
-const PoweredBy = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    grid-gap: 5px;
-    color: ${(props) => props.theme.colors.greyScale4};
-    font-size: 12px;
-    height: 26px;
 `
 
 const SummarySection = styled.div`
@@ -5391,6 +5394,7 @@ const RemoteOrLocalSwitcherContainer = styled.div`
     justify-content: flex-start;
     grid-gap: 2px;
     margin-top: 10px;
+    padding-bottom: 10px;
 `
 
 const CopyBox = styled.div`
@@ -5420,7 +5424,6 @@ const SpaceTypeSection = styled.div`
     flex-direction: column;
     width: fill-available;
 
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale1};
     &:first-child {
         margin-top: -10px;
     }
@@ -5432,7 +5435,7 @@ const SpaceTypeSection = styled.div`
 
 const SpaceTypeSectionHeader = styled.div`
     display: flex;
-    color: ${(props) => props.theme.colors.greyScale4};
+    color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     font-size: 14px;
     padding: 30px 20px 30px 15px;
@@ -5446,18 +5449,12 @@ const SpacesCounter = styled.div`
     margin-left: 20px;
 `
 
-const SpaceTypeSectionContainer = styled.div<{ SpaceTypeSectionOpen: boolean }>`
+const SpaceTypeSectionContainer = styled.div`
     display: flex;
     flex-direction: column;
     width: fill-available;
     padding-bottom: 30px;
     margin-top: -20px;
-
-    ${(props) =>
-        props.SpaceTypeSectionOpen &&
-        css`
-            display: flex;
-        `};
 `
 
 const CreatorActionButtons = styled.div`
@@ -5473,7 +5470,6 @@ const NewAnnotationBoxMyAnnotations = styled.div`
     margin-bottom: 5px;
 `
 
-const OthersAnnotationCounter = styled.div``
 const TotalAnnotationsCounter = styled.div`
     font-size: 16px;
     color: ${(props) => props.theme.colors.greyScale5};
@@ -5482,35 +5478,6 @@ const TotalAnnotationsCounter = styled.div`
     align-items: center;
 `
 
-const PermissionInfoButton = styled.div`
-    display: flex;
-    align-items: center;
-    grid-gap: 5px;
-    font-size: 12px;
-    color: ${(props) => props.theme.colors.greyScale5};
-    border: 1px solid ${(props) => props.theme.colors.greyScale3};
-    border-radius: 5px;
-    padding: 2px 8px;
-`
-
-const SpaceTitle = styled.div`
-    font-size: 18px;
-    font-weight: 500;
-    width: fill-available;
-    color: ${(props) => props.theme.colors.white};
-    letter-spacing: 1px;
-    padding: 5px 3px 5px 5px;
-    margin: -5px -3px -5px -5px;
-    border-radius: 5px;
-    outline: 1px solid transparent;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on;
-    border: none;
-
-    &:hover {
-        cursor: pointer;
-        background: ${(props) => props.theme.colors.greyScale1};
-    }
-`
 const SpaceTitleEditField = styled.input<{
     isActivated: boolean
     isCreator: boolean
@@ -5574,12 +5541,14 @@ const TopAreaContainer = styled.div`
     width: fill-available;
     z-index: 1;
     padding: 5px 10px;
+            justify-content: flex-start;
 
     &::-webkit-scrollbar {
         display: none;
     }
 
     scrollbar-width: none;
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
     /* background: ${(props) => props.theme.colors.black}80;
     backdrop-filter: blur(8px); */
 
@@ -5593,9 +5562,8 @@ const AnnotationActions = styled.div`
     justify-content: flex-start;
     align-items: center;
     width: fill-available;
-    height: 20px;
-    padding-bottom: 5px;
-    padding-top: 5px;
+    min-height: 40px;
+    padding: 0px 15px 0px 15px;
 `
 
 const ActionButtons = styled.div`
@@ -5606,7 +5574,7 @@ const ActionButtons = styled.div`
     grid-gap: 10px;
 `
 
-const LoaderBox = styled.div<{ height: string }>`
+const LoaderBox = styled.div<{ height?: string }>`
     height: ${(props) => (props.height ? props.height : '100px')};
     width: 100%;
     align-items: center;
@@ -5620,7 +5588,7 @@ const Link = styled.span`
     cursor: pointer;
 `
 
-const LoadingBox = styled.div<{ hasToolTip }>`
+const LoadingBox = styled.div<{ hasToolTip? }>`
     display: flex;
     justify-content: center;
     position: absolute;
@@ -5646,26 +5614,22 @@ const PageActivityIndicator = styled(Margin)<{ active: boolean }>`
         `};
 `
 
-const TopBar = styled.div`
+const TopBar = styled.div<{ sidebarContext: string }>`
     font-size: 14px;
     color: ${(props) => props.theme.colors.white};
     display: flex;
     justify-content: space-between;
     align-items: center;
-    height: ${(props) =>
-        props.sidebarContext === 'dashboard' ? '40px' : '20px'};
+    min-height: ${(props) =>
+        props.sidebarContext === 'dashboard' ? '60px' : '50px'};
     z-index: 11300;
-    padding: 10px 10px 10px 10px;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
+    padding: 0 10px;
 
     ${(props) =>
         props.theme.variant === 'light' &&
         css`
             /* box-shadow: ${(props) =>
                 props.theme.borderStyles.boxShadowBottom}; */
-            border-bottom: 1px solid
-                ${(props) =>
-                    props.theme.borderStyles.borderLineColorBigElements};
         `};
 `
 
@@ -5704,7 +5668,10 @@ const TopBarContainer = styled.div`
 const TopBarTabsContainer = styled.div`
     display: flex;
     align-items: center;
-    grid-gap: 2px;
+    grid-gap: 5px;
+    width: fill-available;
+    width: -moz-available;
+    justify-content: space-between;
 `
 
 const TopBarBtnsContainer = styled.div``
@@ -5727,30 +5694,9 @@ const InfoText = styled.div`
     max-width: 80%;
 `
 
-const ButtonStyled = styled.button`
-    cursor: pointer;
-    z-index: 3000;
-    line-height: normal;
-    background: transparent;
-    border: none;
-    outline: none;
-`
-
-const SearchIcon = styled.span`
-    background-image: url('/img/searchIcon.svg');
-    background-size: 15px;
-    display: block;
-    background-repeat: no-repeat;
-    width: 29px;
-    height: 29px;
-    background-position: center;
-    border-radius: 50%;
-    background-color: transparent;
-`
-
 const FollowedListNotesContainer = styled(Margin)<{
-    key: number
-    isHovered: boolean
+    key?: number
+    isHovered?: boolean
 }>`
     display: flex;
     flex-direction: column;
@@ -5769,27 +5715,26 @@ const FollowedListNotesContainer = styled(Margin)<{
 `
 
 const sidebarContentOpen = keyframes`
- 0% { margin-top: 20px}
- 100% { margin-top: 0px}
+ 0% { opacity: 0}
+ 100% { opacity: 1}
 `
 
 const AnnotationContainer = styled(Margin)`
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
-    align-items: center;
+    align-items: flex-start;
     /* padding-bottom: 500px;
     overflow-y: scroll;
     overflow-x: visible; */
-    height: calc(100% + 30px);
-    overflow: scroll;
     padding: 0 10px;
     padding-bottom: 100px;
-    flex: 1;
     z-index: 10;
     position: relative;
     width: fill-available;
     width: -moz-available;
+    min-height: fit-content;
+    height: fill-available;
 
     scrollbar-width: none;
 
@@ -5820,7 +5765,7 @@ const AnnotationBox = styled.div<{
     animation-duration: 600ms;
     animation-delay: ${(props) => props.order * 20}ms;
     animation-timing-function: cubic-bezier(0.3, 0.35, 0.14, 0.8);
-    animation-fill-mode: both;
+    animation-fill-mode: forwards;
     position: relative;
     margin-bottom: 5px;
 `
@@ -5833,6 +5778,13 @@ const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     z-index: ${(props) => 999 - props.zIndex};
     width: fill-available;
     width: -moz-available;
+    overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const FollowedListsMsgContainer = styled.div`
@@ -5866,8 +5818,6 @@ const FollowedListsMsg = styled.span`
 `
 
 const FollowedListRow = styled(Margin)<{
-    key: number
-    context: string
     zIndex?: number
     keepHovered?: boolean
 }>`
@@ -5889,7 +5839,7 @@ const FollowedListRow = styled(Margin)<{
     }
 
     &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+        background: ${(props) => props.theme.colors.greyScale2}5c;
     }
 
     ${(props) =>
@@ -5912,45 +5862,8 @@ const ButtonContainer = styled.div`
     grid-gap: 10px;
 `
 
-const FollowedListSectionTitle = styled(Margin)<{ active: boolean }>`
-    font-size: 14px;
-    color: ${(props) => props.theme.colors.white};
-    justify-content: center;
-    width: max-content;
-    font-weight: 400;
-    flex-direction: row;
-    grid-gap: 2px;
-    align-items: center;
-    height: 36px;
-    padding: 0 10px;
-    border-radius: 5px;
-
-    ${(props) =>
-        props.active &&
-        css`
-            background: ${(props) => props.theme.colors.greyScale3};
-            cursor: default;
-
-            &:hover {
-                background: ${(props) => props.theme.colors.greyScale3};
-            }
-        `}
-
-    ${(props) =>
-        !props.active &&
-        css`
-            &:hover {
-                background: ${(props) => props.theme.colors.greyScale3};
-            }
-        `}
-
-    & * {
-        cursor: pointer;
-    }
-`
-
 // TODO: stop referring to these styled components as containers
-const FollowedListTitleContainer = styled(Margin)`
+const FollowedListTitleContainer = styled(Margin)<{ context: string }>`
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -5988,7 +5901,7 @@ const FollowedListTitle = styled.span<{ context: string }>`
     overflow: hidden;
     display: block;
 `
-const FollowedListTitleBox = styled.div<{ context: string }>`
+const FollowedListTitleBox = styled.div`
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -6003,46 +5916,6 @@ const FollowedListNoteCount = styled(Margin)<{ active: boolean }>`
     color: ${(props) => props.theme.colors.white};
     grid-gap: 4px;
     align-items: center;
-`
-
-const CloseIconStyled = styled.div<{ background: string }>`
-    mask-position: center;
-    mask-repeat: no-repeat;
-    mask-size: 100%;
-    background-color: ${(props) =>
-        props.background ? props.background : props.theme.colors.primary};
-    mask-image: url(${icons.removeX});
-    background-size: 12px;
-    display: block;
-    cursor: pointer;
-    background-repeat: no-repeat;
-    width: 100%;
-    height: 100%;
-    background-position: center;
-    border-radius: 3px;
-`
-
-const CloseButtonStyled = styled.button`
-    cursor: pointer;
-    z-index: 2147483647;
-    line-height: normal;
-    background: transparent;
-    border: none;
-    outline: none;
-`
-
-const TopBarStyled = styled.div`
-    position: static;
-    top: 0;
-    background: ${(props) => props.theme.colors.black};
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    z-index: 2147483647;
-    padding: 7px 8px 5px 3px;
-    height: 32px;
-    box-sizing: border-box;
-    width: 100%;
 `
 
 const LoadingIndicatorContainer = styled.div<{ height: string; width: string }>`
@@ -6097,6 +5970,28 @@ const SuggestionsSectionStyled = styled.div`
         display: none;
     }
 `
+const AnnotationSectionScrollContainer = styled.div`
+    font-family: 'Satoshi', sans-serif;
+    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
+        'liga' off;
+    color: ${(props) => props.theme.colors.white};
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    height: fill-available;
+    flex: 1;
+    overflow: scroll;
+    width: fill-available;
+    width: -moz-available;
+    height: fit-content;
+
+    scrollbar-width: none;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+`
 const AnnotationsSectionStyled = styled.div`
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
@@ -6109,7 +6004,7 @@ const AnnotationsSectionStyled = styled.div`
     height: fill-available;
     flex: 1;
     z-index: 19;
-    overflow: scroll;
+    overflow: hidden;
 
     scrollbar-width: none;
 
@@ -6118,32 +6013,22 @@ const AnnotationsSectionStyled = styled.div`
     }
 `
 
-const TopSectionStyled = styled.div`
-    position: sticky;
-    top: 0px;
-    z-index: 2600;
-    background: white;
-    overflow: hidden;
-    padding: 0 5px;
-`
-
 const TopBarActionBtns = styled.div`
-    display: grid;
-    justify-content: space-between;
+    display: flex;
+    justify-content: flex-start;
     align-items: center;
     display: flex;
-    gap: 10px;
+    grid-gap: 10px;
     height: 24px;
+    width: fill-available;
+    width: -moz-available;
     z-index: 10000;
 `
 
-const MyNotesClickableArea = styled.div`
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-`
-
-const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
+const ResultBodyContainer = styled.div<{
+    sidebarContext: string
+    inPageMode: boolean
+}>`
     height: fill-available;
     width: fill-available;
     display: flex;
@@ -6173,6 +6058,13 @@ const ResultBodyContainer = styled.div<{ sidebarContext: string }>`
                 ${(props) =>
                     props.theme.borderStyles.borderLineColorBigElements};
         `};
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            height: fill-available;
+            height: 100%;
+        `}
 `
 
 const FeedFrame = styled.iframe`
@@ -6180,4 +6072,147 @@ const FeedFrame = styled.iframe`
     height: fill-available;
     border: none;
     border-radius: 10px;
+`
+
+const SummaryActionsBar = styled.div``
+
+const slideIn = keyframes`
+  0% {
+    transform: translateX(-50%);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+`
+
+const slideOut = keyframes`
+  0% {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+`
+
+const SummaryActionButtonBox = styled.div`
+    display: flex;
+    flex: 1;
+    height: fill-available;
+    justify-content: center;
+    & > * {
+        width: fill-available;
+        width: -moz-available;
+    }
+`
+
+const SummaryActionsButton = styled.div<{
+    inPageMode?: boolean
+    active?: boolean
+    disabled?: boolean
+    padding?: string
+}>`
+    height: fill-available;
+    width: fill-available;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    flex: 1;
+    height: fill-available;
+    height: -moz-available;
+    grid-gap: 5px;
+    border-radius: 5px;
+    font-size: 14px;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+    &:hover {
+        background: ${(props) =>
+            props.theme.variant === 'dark'
+                ? props.theme.colors.greyScale2 + '80'
+                : props.theme.colors.greyScale6 + '35'};
+    }
+    color: ${(props) =>
+        props.color
+            ? props.theme.colors[props.color]
+            : props.theme.colors.greyScale5};
+
+    ${(
+        { active }, // Destructure width here
+    ) =>
+        active &&
+        css`
+            background-color: ${(props) => props.theme.colors.greyScale1};
+        `}
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            color: ${props.color
+                ? props.theme.colors[props.color]
+                : props.theme.colors.greyScale5};
+            &:hover {
+                background: ${(props) =>
+                    props.theme.variant === 'dark'
+                        ? props.theme.colors.greyScale2 + '80'
+                        : props.theme.colors.greyScale6 + '35'};
+                backdrop-filter: unset;
+            }
+            & * {
+                color: props.theme.colors.greyScale5;
+            }
+        `}
+    ${(props) =>
+        props.disabled &&
+        css`
+            opacity: 0.8;
+            cursor: not-allowed;
+            &:hover {
+                background-color: none;
+            }
+        `}
+`
+const TopBarButtonContainer = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: fill-available;
+    width: -moz-available;
+`
+const LoadingBox2 = styled.div`
+    position: absolute;
+    right: 25px;
+`
+
+const RightSideContainer = styled.div`
+    justify-content: flex-end;
+    display: flex;
+    flex: 1;
+`
+
+const AutoAddContainer = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 4px;
+`
+
+const PermissionsDisplayBox = styled.div`
+    height: 30px;
+    padding: 0 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+    border-radius: 5px;
+    color: ${(props) => props.theme.colors.white};
+    font-size: 14px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    cursor: default;
 `

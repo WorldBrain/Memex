@@ -119,6 +119,9 @@ export const getInitialPageResultState = (
     newNoteForm: getInitialFormState(),
     noteIds: { user: noteIds, followed: [], search: [] },
     hoverState: null,
+    copyLoadingState: 'pristine',
+    isInFocus: false,
+    editTitleState: null,
     ...extra,
 })
 
@@ -134,6 +137,7 @@ export const getInitialNoteResultState = (
     shareMenuShowStatus: 'hide',
     isCopyPasterShown: false,
     editNoteForm: getInitialFormState(inputValue, bodyInputValue),
+    copyLoadingState: 'pristine',
 })
 
 const pageResultToPageData = (
@@ -149,6 +153,7 @@ const pageResultToPageData = (
         tags: pageResult.tags,
         fullUrl: pageResult.fullUrl,
         fullTitle: pageResult.title,
+        text: pageResult.text,
         normalizedUrl: pageResult.url,
         favIconURI: pageResult.favIcon,
         displayTime: pageResult.displayTime,

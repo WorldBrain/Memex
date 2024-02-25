@@ -40,6 +40,7 @@ export type PageInteractionProps = Omit<
     // updatePageNotesShareInfo: (info: NoteShareInfo) => void
     onRemoveFromListBtnClick: React.MouseEventHandler
     onNotesBtnClick: React.MouseEventHandler
+    onCopyPasterDefaultExecute: React.MouseEventHandler
     onPageDrag: React.DragEventHandler
     onPageDrop: React.DragEventHandler
     onMainContentHover: React.MouseEventHandler
@@ -48,7 +49,10 @@ export type PageInteractionProps = Omit<
     onListsHover: React.MouseEventHandler
     onUnhover: React.MouseEventHandler
     onClick: React.MouseEventHandler
-    onEditPageBtnClick: (normalizedPageUrl, changedTitle) => void
+    onMatchingTextToggleClick: React.MouseEventHandler
+    onAIResultBtnClick: React.MouseEventHandler
+    onEditTitleChange: (normalizedPageUrl, changedTitle) => void
+    onEditTitleSave: (normalizedPageUrl, changedTitle) => void
 }
 
 // NOTE: Derived type - edit the original
@@ -86,6 +90,7 @@ export type NoteInteractionProps = Omit<
     onGoToHighlightClick: React.MouseEventHandler
     onCommentChange: (content: string) => void
     onBodyChange: (content: string) => void
+    onCopyPasterDefaultExecute: () => void
 }
 
 // NOTE: Derived type - edit the original
@@ -99,7 +104,6 @@ export type NoteInteractionAugdProps = {
 
 export interface PagePickerProps {
     onListPickerUpdate: PickerUpdateHandler<number>
-    onTagPickerUpdate: PickerUpdateHandler<string>
 }
 
 // NOTE: Derived type - edit the original
@@ -151,7 +155,7 @@ export interface NoteData {
 
 export type PageData = Pick<
     PipelineRes,
-    'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI'
+    'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI' | 'text'
 > & {
     normalizedUrl: string
     lists: string[]
@@ -161,6 +165,8 @@ export type PageData = Pick<
     isShared?: boolean
     fullPdfUrl?: string
     uploadedPdfLinkLoadState?: TaskState
+    editTitleState?: string
+    text?: string
 }
 
 export type NoResultsType =
@@ -188,6 +194,7 @@ export interface NoteResult {
     areRepliesShown: boolean
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
+    copyLoadingState: TaskState
     listPickerShowStatus: ListPickerShowState
     shareMenuShowStatus: 'show' | 'hide' | 'show-n-share'
     editNoteForm: NoteFormState
@@ -201,11 +208,15 @@ export interface PageResult {
     isShareMenuShown: boolean
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
+    copyLoadingState: TaskState
+    isInFocus: boolean
     listPickerShowStatus: ListPickerShowState
     loadNotesState: TaskState
     newNoteForm: NoteFormState
     noteIds: { [key in NotesType]: string[] }
     hoverState: ResultHoverState
+    editTitleState?: string
+    showAllResults?: boolean
 }
 
 export interface PageResultsByDay {
@@ -289,12 +300,6 @@ export type Events = UIEvent<{
     dismissSubscriptionBanner: null
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
-    setPageTags: {
-        id: string
-        fullPageUrl: string
-        added?: string
-        deleted?: string
-    }
     setPageLists: {
         id: string
         fullPageUrl: string
@@ -308,11 +313,20 @@ export type Events = UIEvent<{
     bulkDeleteItem: { pageId: string }
     // Page result state mutations (*specific to each* occurrence of the page in different days)
     clickPageResult: PageEventArgs & { synthEvent: React.MouseEvent }
-    setPageCopyPasterShown: PageEventArgs & { isShown: boolean }
+    setPageCopyPasterShown: PageEventArgs & {
+        isShown: boolean
+        event: React.MouseEvent
+    }
+    setCopyPasterDefaultExecute: PageEventArgs & {
+        isShown: boolean
+        event: React.MouseEvent
+    }
+    setCopyPasterDefaultNoteExecute: NoteEventArgs
     setPageListPickerShown: PageEventArgs & { show: ListPickerShowState }
     setPageTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageShareMenuShown: PageEventArgs & { isShown: boolean }
     setPageNotesShown: PageEventArgs & { areShown: boolean }
+    onMatchingTextToggleClick: PageEventArgs
     setActivePage: {
         activePage: boolean
         activeDay?: number
@@ -340,7 +354,6 @@ export type Events = UIEvent<{
     // New note form state mutations
     setPageNewNoteTagPickerShown: PageEventArgs & { isShown: boolean }
     setPageNewNoteCommentValue: PageEventArgs & { value: string }
-    setPageNewNoteTags: PageEventArgs & { tags: string[] }
     setPageNewNoteLists: PageEventArgs & { lists: string[] }
     cancelPageNewNote: PageEventArgs
     savePageNewNote: PageEventArgs & {
@@ -374,6 +387,8 @@ export type Events = UIEvent<{
     goToHighlightInNewTab: NoteEventArgs
     confirmNoteDelete: null
     cancelNoteDelete: null
+    toggleNoteSidebarOn: null
+    toggleNoteSidebarOff: null
 
     // Note edit form state mutations
     setNoteEditCommentValue: NoteEventArgs & { value: string }

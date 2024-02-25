@@ -20,7 +20,7 @@ import {
 const SubscriptionOptionsContainer = styled.div`
     display: flex;
     flex-direction: column;
-    align-items: center:
+    align-items: center;
 `
 
 const PricingTable = styled.div`
@@ -124,8 +124,6 @@ const PricingPrice = styled.div`
 
 const PricingButton = styled.div`
     flex-direction: column;
-    background: ${(props) =>
-        props.background ? props.background : 'rgb(64, 182, 154)'};
     color: white;
     cursor: pointer;
     -webkit-box-align: center;
@@ -178,7 +176,6 @@ const TimeButtonRight = styled(TypographyTextNormal)`
     padding: 5px 15px;
     cursor: pointer;
     border-left: 0.5px;
-    background-color: ${(props) => (props.active ? '#E0E0E0' : 'white')};
 `
 
 const TimeButtonLeft = styled(TypographyTextNormal)`
@@ -190,7 +187,6 @@ const TimeButtonLeft = styled(TypographyTextNormal)`
     padding: 5px 15px;
     border-right: 0.5px;
     cursor: pointer;
-    background-color: ${(props) => (props.active ? '#E0E0E0' : 'white')};
 `
 
 const ListItem = styled.div`
@@ -208,41 +204,39 @@ const ListItem = styled.div`
 `
 
 const SwitchWrapper = styled.div`
-  text-align: center;
-  .reusecore__switch {
-    .reusecore__field-label {
-      font-size: 16px;
-      font-weight: 400;
-      color: ${colorSecondary}
-      cursor: pointer;
-    }
-    input[type='checkbox'] {
-      &:checked {
-        + div {
-          width: 40px !important;
-          background-color: ${colorPrimary};
-          > div {
-            left: 17px !important;
-          }
+    text-align: center;
+    .reusecore__switch {
+        .reusecore__field-label {
+            font-size: 16px;
+            font-weight: 400;
         }
-      }
-      + div {
-        background-color: #f0f0f0;
-        background-color: #f0f0f0;
-        border: 0;
-        width: 40px;
-        height: 25px;
-        > div {
-          background-color: #fff;
-          box-shadow: 0px 2px 3px 0.24px rgba(31, 64, 104, 0.25);
-          width: 21px;
-          height: 21px;
-          top: 2px;
-          left: 2px;
+        input[type='checkbox'] {
+            &:checked {
+                + div {
+                    width: 40px !important;
+                    background-color: ${colorPrimary};
+                    > div {
+                        left: 17px !important;
+                    }
+                }
+            }
+            + div {
+                background-color: #f0f0f0;
+                background-color: #f0f0f0;
+                border: 0;
+                width: 40px;
+                height: 25px;
+                > div {
+                    background-color: #fff;
+                    box-shadow: 0px 2px 3px 0.24px rgba(31, 64, 104, 0.25);
+                    width: 21px;
+                    height: 21px;
+                    top: 2px;
+                    left: 2px;
+                }
+            }
         }
-      }
     }
-  }
 `
 
 const PricingButtonWrapper = styled.div`
@@ -335,10 +329,6 @@ const PricingGridPlanTitle = styled(TypographyHeadingPage)`
     display: flex;
     justify-content: center;
     align-items: center;
-    color: ${(props) =>
-        props.active
-            ? '${(props) => props.theme.colors.secondary}'
-            : '${(props) => props.theme.colors.primary}'};
     font-size: 18px;
 `
 
@@ -398,7 +388,6 @@ const ColThinker = styled.div`
     justify-content: center;
     align-items: center;
     flex-direction: column;
-    background-color: ${(props) => (props.active ? '#E0E0E0' : 'white')};
 `
 
 const ColPioneer = styled.div`
@@ -431,9 +420,7 @@ const PriceInputBox = styled.select`
 `
 
 const EditBox = styled.div`
-    height: 30px
-    background: red;
-    width: 100px;
+    height: 30px;
 `
 
 const TrialInfo = styled.div`

@@ -5,7 +5,6 @@ import { CHANGE_LOG_LINK } from './constants'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { NotifBanner, ThemeProps } from 'src/common-ui/components/NotifBanner'
-import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface Props extends Partial<LogicDeps> {
     theme?: ThemeProps

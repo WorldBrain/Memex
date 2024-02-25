@@ -81,7 +81,7 @@ export class HelpBtn extends React.PureComponent<Props, State> {
                                     showChat: true,
                                 })
                             }
-                            top={top}
+                            top={true}
                         >
                             <Icon
                                 filePath={icons.chatWithUs}
@@ -262,7 +262,7 @@ const openAnimation = keyframes`
  100% { padding-bottom: 0px; opacity: 1 }
 `
 
-const MenuItem = styled.div<{ order: number }>`
+const MenuItem = styled.div<{ top?: boolean }>`
     animation-name: ${openAnimation};
     animation-delay: 15ms;
     animation-duration: 0.1s;

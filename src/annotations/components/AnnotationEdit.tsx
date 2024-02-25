@@ -8,10 +8,13 @@ import MemexEditor, {
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 interface State {
     editorHeight: string
     youtubeShortcut: string | null
+    isDeboucingEditor: boolean
+    shouldShowEditor: boolean
 }
 
 export interface AnnotationEditEventProps {
@@ -27,14 +30,15 @@ export interface AnnotationEditEventProps {
     ) => void
     onEditCancel: () => void
     onCommentChange: (comment: string) => void
-    onBodyChange: (body: string) => void
-    onListsBarPickerBtnClick: React.MouseEventHandler
     imageSupport: ImageSupportInterface<'caller'>
+    copyLoadingState: TaskState
+    setEditing: React.MouseEventHandler
+    onBodyChange: (content: string) => void
 }
 
 export interface AnnotationEditGeneralProps {
     comment: string
-    body: string
+    body?: string
     editorHeight?: string
     isShared?: boolean
     isBulkShareProtected?: boolean
@@ -43,6 +47,7 @@ export interface AnnotationEditGeneralProps {
     selector?: string
     getRootElement: () => HTMLElement
     slimEditorActions?: boolean
+    isEditMode?: boolean
 }
 
 export interface Props
@@ -57,10 +62,35 @@ class AnnotationEdit extends React.Component<Props> {
     state: State = {
         editorHeight: '50px',
         youtubeShortcut: null,
+        isDeboucingEditor: false,
+        shouldShowEditor: true,
     }
 
     async componentDidMount() {
         await this.youtubeKeyboardShortcut()
+        this.editorRef?.setEditable(this.props?.isEditMode ?? false)
+
+        if (
+            this.editorRef?.getContentLength() === 0 &&
+            !this.props.isEditMode
+        ) {
+            this.setState({ shouldShowEditor: false })
+        }
+    }
+
+    componentDidUpdate(prevProps: Props) {
+        if (prevProps.isEditMode !== this.props.isEditMode) {
+            this.editorRef?.setEditable(this.props?.isEditMode ?? false)
+
+            if (
+                this.editorRef?.getContentLength() === 0 &&
+                !this.props.isEditMode
+            ) {
+                this.setState({ shouldShowEditor: false })
+            } else {
+                this.setState({ shouldShowEditor: true })
+            }
+        }
     }
 
     private editorRef: MemexEditorInstance
@@ -70,7 +100,9 @@ class AnnotationEdit extends React.Component<Props> {
     }
 
     private saveEdit(shouldShare, isProtected) {
-        this.props.onEditConfirm(true)(shouldShare, isProtected)
+        if (!this.state.isDeboucingEditor) {
+            this.props.onEditConfirm(true)(shouldShare, isProtected)
+        }
         //AnnotationEditable.removeMarkdownHelp()
     }
 
@@ -93,7 +125,7 @@ class AnnotationEdit extends React.Component<Props> {
             if (e.key === 'Enter' && e.altKey) {
                 e.stopPropagation()
                 e.preventDefault()
-                return this.saveEdit(false, true)
+                return this.saveEdit(false, false)
             }
 
             if (e.key === 'Enter' && e.metaKey) {
@@ -129,6 +161,10 @@ class AnnotationEdit extends React.Component<Props> {
         }
     }
 
+    setDebouncingSaveBlock = (isDeboucingEditor: boolean) => {
+        this.setState({ isDeboucingEditor })
+    }
+
     private youtubeKeyboardShortcut = async () => {
         const shortcuts = await getKeyboardShortcutsState()
         const youtubeShortcut = shortcuts.createAnnotation.shortcut
@@ -136,25 +172,31 @@ class AnnotationEdit extends React.Component<Props> {
     }
 
     render() {
-        return (
-            <EditorContainer editorHeight={this.props.editorHeight}>
-                <MemexEditor
-                    getYoutubePlayer={this.props.getYoutubePlayer}
-                    onContentUpdate={(content) =>
-                        this.props.onCommentChange(content)
-                    }
-                    markdownContent={this.props.comment}
-                    onKeyDown={this.handleInputKeyDown}
-                    placeholder={`Add Note. Click on ( ? ) for formatting help.`}
-                    setEditorInstanceRef={(ref) => (this.editorRef = ref)}
-                    autoFocus
-                    youtubeShortcut={this.state.youtubeShortcut}
-                    imageSupport={this.props.imageSupport}
-                    getRootElement={this.props.getRootElement}
-                    slimEditorActions={this.props.slimEditorActions}
-                />
-            </EditorContainer>
-        )
+        if (this.state.shouldShowEditor) {
+            return (
+                <EditorContainer>
+                    <MemexEditor
+                        getYoutubePlayer={this.props.getYoutubePlayer}
+                        onContentUpdate={(content) =>
+                            this.props.onCommentChange(content)
+                        }
+                        markdownContent={this.props.comment}
+                        onKeyDown={this.handleInputKeyDown}
+                        placeholder={`Add Note. Click on ( ? ) for formatting help.`}
+                        setEditorInstanceRef={(ref) => (this.editorRef = ref)}
+                        autoFocus
+                        imageSupport={this.props.imageSupport}
+                        getRootElement={this.props.getRootElement}
+                        slimEditorActions={this.props.slimEditorActions}
+                        editable={this.props.isEditMode}
+                        setEditing={this.props.setEditing}
+                        setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                    />
+                </EditorContainer>
+            )
+        } else {
+            return null
+        }
     }
 }
 
@@ -169,30 +211,4 @@ const EditorContainer = styled.div`
     &:first-child {
         border-top: none;
     }
-`
-
-const StyledTextArea = styled.textarea`
-    background-color: #fff;
-    box-sizing: border-box;
-    resize: vertical;
-    font-weight: 400;
-    font-size: 14px;
-    color: #222;
-    font-family: ${(props) => props.theme.fonts.primary};
-    border-radius: 3px;
-    border: none;
-    padding: 10px 7px;
-
-    &::placeholder {
-        color: ${(props) => props.theme.colors.primary};
-        opacity: 0.5;
-    }
-
-    &:focus {
-        outline: none;
-        box-shadow: none;
-        border: none;
-    }
-
-    min-height: 300px;
 `

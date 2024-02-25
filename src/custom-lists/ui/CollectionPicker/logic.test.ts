@@ -413,7 +413,7 @@ describe('SpacePickerLogic', () => {
         let i = 0
         for (const [key, focusedEntryId] of keyPresses) {
             await testLogic.processEvent('keyPress', {
-                event: { key } as KeyboardEvent,
+                event: { key } as React.KeyboardEvent<HTMLInputElement>,
             })
             expectStateToEqualWithFocus(focusedEntryId, i)
             i++
@@ -1003,13 +1003,19 @@ describe('SpacePickerLogic', () => {
         expect(entryPickerLogic['focusIndex']).toBe(0)
 
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as KeyboardEvent,
+            event: { key: 'ArrowDown' } as React.KeyboardEvent<
+                HTMLInputElement
+            >,
         })
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as KeyboardEvent,
+            event: { key: 'ArrowDown' } as React.KeyboardEvent<
+                HTMLInputElement
+            >,
         })
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as KeyboardEvent,
+            event: { key: 'ArrowDown' } as React.KeyboardEvent<
+                HTMLInputElement
+            >,
         })
         expect(entryPickerLogic['focusIndex']).toBe(3)
         expect(testLogic.state.focusedListId).toEqual(
@@ -1022,10 +1028,14 @@ describe('SpacePickerLogic', () => {
         expect(testLogic.state.focusedListId).toEqual(null)
 
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as KeyboardEvent,
+            event: { key: 'ArrowDown' } as React.KeyboardEvent<
+                HTMLInputElement
+            >,
         })
         await testLogic.processEvent('keyPress', {
-            event: { key: 'ArrowDown' } as KeyboardEvent,
+            event: { key: 'ArrowDown' } as React.KeyboardEvent<
+                HTMLInputElement
+            >,
         })
         expect(entryPickerLogic['focusIndex']).toBe(1)
         expect(testLogic.state.focusedListId).toEqual(

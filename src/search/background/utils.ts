@@ -49,6 +49,7 @@ export const reshapePageForDisplay = (page) => ({
     url: page.url,
     fullUrl: page.fullUrl,
     title: page.fullTitle,
+    text: page.text,
     hasBookmark: page.hasBookmark,
     screenshot: page.screenshot,
     favIcon: page.favIcon,

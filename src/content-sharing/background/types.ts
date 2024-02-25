@@ -55,6 +55,7 @@ export interface ContentSharingInterface
         annotationUrls: string[]
         shareToParentPageLists?: boolean
         setBulkShareProtected?: boolean
+        skipAnalytics?: boolean
     }): Promise<{ sharingStates: AnnotationSharingStates }>
     unshareAnnotations(options: {
         annotationUrls: string[]
@@ -101,10 +102,19 @@ export interface ContentSharingInterface
         localListId: number
         isPrivate: boolean
     }): Promise<void>
-    waitForPageLinkCreation(): Promise<void>
+    waitForPageLinkCreation(args: { fullPageUrl: string }): Promise<void>
     fetchLocalListDataByRemoteId(args: {
         remoteListId: string
     }): Promise<number>
+}
+
+export interface CreatedPageLinkDetails {
+    listTitle: string
+    localListId: number
+    remoteListId: string
+    remoteListEntryId: string
+    collabKey: string
+    pageTitle?: string | null
 }
 
 export interface RemoteContentSharingByTabsInterface<
@@ -115,16 +125,10 @@ export interface RemoteContentSharingByTabsInterface<
         {
             fullPageUrl: string
             now?: number
-            customPageTitle: string
+            customPageTitle?: string
+            skipPageIndexing?: boolean
         },
-        {
-            listTitle: string
-            localListId: number
-            remoteListId: string
-            remoteListEntryId: string
-            collabKey: string
-            pageTitle?: string | null
-        }
+        CreatedPageLinkDetails
     >
 }
 

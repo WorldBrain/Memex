@@ -179,7 +179,7 @@ class BackgroundScript {
                     await this.trackInstallTime()
                     break
                 case 'update':
-                    await this.runQuickAndDirtyMigrations()
+                    this.runQuickAndDirtyMigrations()
                     await this.checkForUpdates()
                     await this.handleUnifiedLogic()
                     await this.checkForSubscriptionStatus()
@@ -235,8 +235,8 @@ class BackgroundScript {
             })
     }
 
-    private async ___runTagsMigration() {
-        await migrations[MIGRATION_PREFIX + 'migrate-tags-to-spaces']({
+    private async ___runQnDMigration(name: string) {
+        await migrations[MIGRATION_PREFIX + name]({
             bgModules: this.deps.bgModules,
             storex: this.deps.storageManager,
             db: this.deps.storageManager.backend['dexieInstance'],

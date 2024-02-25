@@ -16,8 +16,6 @@ const backgroundHoverSelected = (props) => {
 export const TagResultItem = styled.div`
     display: flex;
     background: ${(props) => props.theme.colors.prime1};
-    border: 2px solid
-        ${(props) => (props.selected ? props.theme.tag.tag : 'transparent')};
     border-radius: 4px;
     color: white;
     padding: 2px 8px;

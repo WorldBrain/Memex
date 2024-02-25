@@ -2720,7 +2720,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         customPageTitle: null,
                                     },
                                 )
-                                await contentSharing.waitForPageLinkCreation()
+                                await contentSharing.waitForPageLinkCreation({
+                                    fullPageUrl,
+                                })
 
                                 // Local DB data should be created first
                                 // prettier-ignore
@@ -5492,7 +5494,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         customPageTitle: null,
                                     },
                                 )
-                                await contentSharing.waitForPageLinkCreation()
+                                await contentSharing.waitForPageLinkCreation({
+                                    fullPageUrl,
+                                })
 
                                 const localLocators: any[] = await setup.storageManager
                                     .collection('locators')
@@ -5986,7 +5990,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         customPageTitle: null,
                                     },
                                 )
-                                await contentSharing.waitForPageLinkCreation()
+                                await contentSharing.waitForPageLinkCreation({
+                                    fullPageUrl,
+                                })
 
                                 const localLocators: any[] = await setup.storageManager
                                     .collection('locators')

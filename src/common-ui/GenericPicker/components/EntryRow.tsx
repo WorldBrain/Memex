@@ -84,7 +84,7 @@ export const ActOnAllTabsButton = styled.div`
     pointer-events: auto !important;
 `
 
-const ButtonContainer = styled.div<{ selected }>`
+const ButtonContainer = styled.div<{ selected? }>`
     height: 20px;
     width: 20px;
     display: flex;

@@ -29,6 +29,7 @@ const pageDataToSearchRes = (
     displayTime: page.displayTime,
     lists: metadata?.lists ?? [],
     tags: metadata?.tags ?? [],
+    text: page?.text ?? '',
 })
 
 const noteDataToSearchRes = (

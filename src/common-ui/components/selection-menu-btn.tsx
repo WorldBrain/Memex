@@ -121,8 +121,6 @@ export class SelectionMenuBtn extends React.PureComponent<Props, State> {
                         e.preventDefault()
                         e.stopPropagation
                     }}
-                    width={this.props.width}
-                    leftPosition={this.theme.leftMenuOffset}
                 >
                     {this.props.menuTitle && (
                         <MenuTitle>{this.props.menuTitle}</MenuTitle>
@@ -195,11 +193,10 @@ const MenuItemInfo = styled.div`
     padding-top: 5px;
 `
 
-const Menu = styled.div<{ leftPosition: string }>`
+const Menu = styled.div`
     width: max-content;
     list-style: none;
     border-radius: 12px;
-    width: ${(props) => props.width ?? 'max-content'};
     flex-direction: column;
     z-index: 1000;
 `

@@ -18,6 +18,11 @@ export default class Viewer extends React.Component<Props, State> {
     state = { loading: true, readerHtml: null }
     private _readerContainerRef: React.RefObject<HTMLDivElement>
 
+    constructor(props: Props) {
+        super(props)
+        this._readerContainerRef = React.createRef<HTMLDivElement>()
+    }
+
     async componentDidMount() {
         const url = this.props.fullUrl
         const article = (await readable.readableExists(url))
@@ -78,7 +83,7 @@ export default class Viewer extends React.Component<Props, State> {
 
         return (
             <Content
-                ref={(ref) => (this._readerContainerRef = ref)}
+                ref={this._readerContainerRef}
                 dangerouslySetInnerHTML={this.state.readerHtml}
             />
         )

@@ -9,9 +9,10 @@ import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-c
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { MaybePromise } from 'src/util/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { SyncSettingsStore } from 'src/sync-settings/util'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { ErrorDisplayProps } from 'src/search-injection/error-display'
+import type { SearchDisplayProps } from 'src/search-injection/search-display'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -19,8 +20,11 @@ export interface ContentScriptRegistry {
     registerHighlightingScript(main: HighlightsScriptMain): Promise<void>
     registerTooltipScript(main: TooltipScriptMain): Promise<void>
     registerInPageUIInjectionScript(
-        main: SearchInjectionMain,
-        errorDisplayProps?: ErrorDisplayProps,
+        main: InPageUIInjectionsMain,
+        onDemandDisplay?: {
+            errorDisplayProps?: ErrorDisplayProps
+            searchDisplayProps?: SearchDisplayProps
+        },
     ): Promise<void>
 }
 
@@ -54,7 +58,7 @@ export interface HighlightDependencies {
     annotationsCache: PageAnnotationsCacheInterface
 }
 
-export interface SearchInjectionDependencies {
+export interface InPageUIInjectionsDependencies {
     requestSearcher: any
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<
@@ -66,7 +70,10 @@ export interface SearchInjectionDependencies {
         | 'dashboard'
     >
     annotationsFunctions: any
-    errorDisplayProps?: ErrorDisplayProps
+    onDemandDisplay?: {
+        errorDisplayProps?: ErrorDisplayProps
+        searchDisplayProps?: SearchDisplayProps
+    }
 }
 
 export type HighlightsScriptMain = (
@@ -77,12 +84,12 @@ export type TooltipScriptMain = (
     dependencies: TooltipDependencies,
 ) => Promise<void>
 
-export type SearchInjectionMain = (
-    dependencies: SearchInjectionDependencies,
+export type InPageUIInjectionsMain = (
+    dependencies: InPageUIInjectionsDependencies,
 ) => Promise<void>
 
 export type YoutubeInjectionMain = (
-    dependencies: SearchInjectionDependencies,
+    dependencies: InPageUIInjectionsDependencies,
 ) => Promise<void>
 
 export type GetContentFingerprints = () => Promise<ContentFingerprint[]>

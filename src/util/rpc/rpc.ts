@@ -357,7 +357,9 @@ export class PortBasedRPCManager {
             ret = await pendingRequest
         } catch (err) {
             if (err.fromBgScript) {
-                throw new RpcError('Error occured in bg script: ' + err.message)
+                throw new RpcError(
+                    'Error occurred in BG script: ' + err.message,
+                )
             } else {
                 throw new RpcError(err.message)
             }
@@ -454,14 +456,14 @@ export class PortBasedRPCManager {
             )
         }
         if (error) {
+            const deserializedError = deserializeError(serializedError)
+            deserializedError['fromBgScript'] = true
             console.error(
                 `Calling ${request.request.headers.name} errored, bg stack trace below`,
             )
-            console.error(deserializeError(serializedError))
+            console.error(deserializedError)
 
-            error = new Error('From bg script')
-            error.fromBgScript = true
-            request.promise.reject(error)
+            request.promise.reject(deserializedError)
         } else {
             request.promise.resolve(payload)
         }

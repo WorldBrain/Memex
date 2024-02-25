@@ -62,15 +62,12 @@ export interface SyncStatusMenuProps extends RootState {
     pendingLocalChangeCount: number
     pendingRemoteChangeCount: number
     onLoginClick: React.MouseEventHandler
-    onClickOutside: React.MouseEventHandler
     syncStatusIconState?: any
     getRootElement: () => HTMLElement
     onToggleDisplayState?: () => void
 }
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
-    handleClickOutside = this.props.onClickOutside
-
     private renderTitleText(): string {
         const { syncStatusIconState, lastSuccessfulSyncDate } = this.props
         if (syncStatusIconState === 'green' && lastSuccessfulSyncDate) {
@@ -362,8 +359,8 @@ const SectionCircle = styled.div`
 `
 
 const TextBlock = styled.div<{
-    bold: boolean
-    color: ColorThemeKeys
+    bold?: boolean
+    color?: ColorThemeKeys | 'orange'
 }>`
     font-size: 14px;
     line-height: 15px;
@@ -385,7 +382,7 @@ const InfoText = styled.div`
 `
 
 const HelpTextBlock = styled.span<{
-    bold: boolean
+    bold?: boolean
 }>`
     height: 18px;
     font-weight: 300;
@@ -399,7 +396,7 @@ const HelpTextBlock = styled.span<{
 `
 
 const HelpTextBlockLink = styled.a<{
-    bold: boolean
+    bold?: boolean
 }>`
     height: 18px;
     font-size: 12px;

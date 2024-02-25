@@ -149,43 +149,40 @@ class KeyboardShortcutsContainer extends React.PureComponent<Props, State> {
                                 name={name}
                                 label={text.toString()}
                                 zIndex={this.props.shortcutsData.length - i}
-                            >
-                                <RightBox>
-                                    <Title>
-                                        {subText && (
-                                            <SubText>{subText}</SubText>
-                                        )}
-                                    </Title>
-                                    <KeyBoardShortCutBehind>
-                                        <KeyboardShortcuts
-                                            keys={keysArray}
-                                            getRootElement={
-                                                this.props.getRootElement
-                                            }
-                                        />
-                                    </KeyBoardShortCutBehind>
-                                    <KeyboardInput
-                                        type="text"
-                                        value={this.state[name].shortcut}
-                                        onKeyDown={this.recordBinding}
-                                        onChange={(e) => {
-                                            e.preventDefault()
-                                        }}
-                                        disabled={!this.state.shortcutsEnabled}
-                                        onClick={(e) => {
-                                            e.preventDefault()
-                                            this.setState((state) => ({
-                                                ...state,
-                                                [name]: {
-                                                    ...state[name],
-                                                    shortcut: '',
-                                                },
-                                            }))
-                                        }}
-                                        name={name}
-                                    />{' '}
-                                </RightBox>
-                            </Checkbox>
+                            />
+                            <RightBox>
+                                <Title>
+                                    {subText && <SubText>{subText}</SubText>}
+                                </Title>
+                                <KeyBoardShortCutBehind>
+                                    <KeyboardShortcuts
+                                        keys={keysArray}
+                                        getRootElement={
+                                            this.props.getRootElement
+                                        }
+                                    />
+                                </KeyBoardShortCutBehind>
+                                <KeyboardInput
+                                    type="text"
+                                    value={this.state[name].shortcut}
+                                    onKeyDown={this.recordBinding}
+                                    onChange={(e) => {
+                                        e.preventDefault()
+                                    }}
+                                    disabled={!this.state.shortcutsEnabled}
+                                    onClick={(e) => {
+                                        e.preventDefault()
+                                        this.setState((state) => ({
+                                            ...state,
+                                            [name]: {
+                                                ...state[name],
+                                                shortcut: '',
+                                            },
+                                        }))
+                                    }}
+                                    name={name}
+                                />{' '}
+                            </RightBox>
                         </CheckBoxRow>
                     )
                 }
@@ -242,7 +239,10 @@ const KeyBoardShortCutBehind = styled.div`
     top: 0px;
     right: 0px;
     border-radius: 8px;
-    background: ${(props) => props.theme.colors.greyScale2};
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? props.theme.colors.greyScale2
+            : props.theme.colors.greyScale7};
 `
 
 const Title = styled.span`
@@ -258,26 +258,26 @@ const SubText = styled.span`
 
 const CheckBoxContainer = styled.div`
     margin-top: 30px;
-    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    border-top: 1px solid
+        ${(props) =>
+            props.theme.variant === 'dark'
+                ? props.theme.colors.greyScale2
+                : props.theme.colors.greyScale7};
     padding-top: 10px;
     cursor: pointer;
 `
 
-const CheckBoxRow = styled.div<{
-    zIndex: number
-}>`
+const CheckBoxRow = styled.div<{}>`
     height: 50px;
     margin-left: -10px;
     padding: 10px;
     border-radius: 8px;
     display: flex;
     align-items: center;
-    justify-content: flex-end;
-    z-index: ${(props) => props.zIndex};
+    justify-content: space-between;
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-        z-index: ${(props) => props.zIndex};
     }
 `
 

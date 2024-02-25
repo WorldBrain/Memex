@@ -12,14 +12,16 @@ import {
 import styled, { css } from 'styled-components'
 import browser, { Storage } from 'webextension-polyfill'
 import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
+import { TaskState } from 'ui-logic-core/lib/types'
 
 export interface Props {
     syncSettingsBG: RemoteSyncSettingsInterface
-    position?: 'top' | 'bottom'
     isTrial: boolean
     signupDate: number
     addedKey: () => void
     getRootElement: () => HTMLElement
+    checkIfKeyValid: (apiKey: string) => Promise<void>
+    isKeyValid: boolean
 }
 
 interface State {
@@ -29,6 +31,8 @@ interface State {
     showTooltip: boolean
     openAIKey: string
     showSaveButton: boolean
+    checkKeyValidLoadState: TaskState
+    keyChanged: boolean
 }
 
 export class AICounterIndicator extends React.Component<Props, State> {
@@ -42,6 +46,8 @@ export class AICounterIndicator extends React.Component<Props, State> {
         showTooltip: false,
         openAIKey: '',
         showSaveButton: false,
+        checkKeyValidLoadState: 'pristine',
+        keyChanged: false,
     }
 
     constructor(props: Props) {
@@ -93,20 +99,29 @@ export class AICounterIndicator extends React.Component<Props, State> {
         //     }
         // })
     }
+    async componentWillUnmount() {
+        if (this.state.shouldShow) {
+            browser.storage.onChanged.removeListener(
+                this.counterStorageListener,
+            )
+        }
+    }
+
+    componentDidUpdate(prevProps) {
+        if (this.props.isKeyValid !== prevProps.isKeyValid) {
+            if (this.props.isKeyValid === true) {
+                this.setState({ checkKeyValidLoadState: 'success' })
+            } else if (this.props.isKeyValid === false) {
+                this.setState({ checkKeyValidLoadState: 'error' })
+            }
+        }
+    }
 
     private whichCheckOutURL = () => {
         if (process.env.NODE_ENV === 'production') {
             return 'https://memex.garden/upgrade'
         } else {
             return 'https://memex.garden/upgradeStaging'
-        }
-    }
-
-    async componentWillUnmount() {
-        if (this.state.shouldShow) {
-            browser.storage.onChanged.removeListener(
-                this.counterStorageListener,
-            )
         }
     }
 
@@ -185,10 +200,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
     renderTooltip = () => {
         return (
             <PopoutBox
-                placement="top-start"
+                placement="bottom-end"
                 targetElementRef={this.tooltipButtonRef.current}
                 closeComponent={() => this.setState({ showTooltip: false })}
-                offsetX={10}
+                offsetX={20}
                 strategy="fixed"
                 getPortalRoot={this.props.getRootElement}
             >
@@ -295,17 +310,20 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                 onChange={(e) => {
                                     this.setState({
                                         openAIKey: (e.target as HTMLInputElement).value.trim(),
-                                        showSaveButton: true,
+                                        keyChanged: true,
                                     })
                                 }}
                                 onKeyDown={async (e) => {
+                                    e.stopPropagation()
                                     if (e.key === 'Enter') {
-                                        await this.syncSettings.openAI.set(
-                                            'apiKey',
+                                        this.setState({
+                                            checkKeyValidLoadState: 'running',
+                                        })
+                                        await this.props.checkIfKeyValid(
                                             this.state.openAIKey.trim(),
                                         )
                                         this.setState({
-                                            showSaveButton: false,
+                                            keyChanged: false,
                                         })
                                     }
                                     if (e.key === ' ') {
@@ -313,24 +331,48 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                     }
                                 }}
                             />
-                            {this.state.showSaveButton && (
+
+                            {this.state.keyChanged && (
                                 <PrimaryAction
                                     onClick={async () => {
-                                        await this.syncSettings.openAI.set(
-                                            'apiKey',
+                                        this.setState({
+                                            checkKeyValidLoadState: 'running',
+                                        })
+                                        await this.props.checkIfKeyValid(
                                             this.state.openAIKey.trim(),
                                         )
                                         this.setState({
-                                            showSaveButton: false,
+                                            keyChanged: false,
                                         })
-                                        this.props.addedKey()
                                     }}
-                                    label="Save"
+                                    label={
+                                        this.state.checkKeyValidLoadState ===
+                                        'running'
+                                            ? 'Checking'
+                                            : 'Check Key'
+                                    }
                                     type="secondary"
                                     size="medium"
                                 />
                             )}
+                            {this.props.isKeyValid == true && (
+                                <Icon
+                                    heightAndWidth="20px"
+                                    icon="checkRound"
+                                    color="prime1"
+                                    hoverOff
+                                />
+                            )}
                         </KeyBox>
+                        {this.state.checkKeyValidLoadState === 'error' && (
+                            <ErrorBox>
+                                <ErrorBoxTitle>Invalid API Key</ErrorBoxTitle>
+                                <ErrorBoxSubTitle>
+                                    Check if there are no typos or if the key is
+                                    expired
+                                </ErrorBoxSubTitle>
+                            </ErrorBox>
+                        )}
                         {/* <ModelSwitchBox>
                             <ModelSwitchTitle>
                                 Model to use for queries
@@ -389,11 +431,14 @@ export class AICounterIndicator extends React.Component<Props, State> {
                     }
                     getPortalRoot={this.props.getRootElement}
                 >
-                    <Icon
+                    <PrimaryAction
+                        label="Add API Key"
+                        type="secondary"
+                        size="medium"
+                        fullWidth
                         icon="key"
-                        heightAndWidth="22px"
                         onClick={() => this.setState({ showTooltip: true })}
-                        containerRef={this.tooltipButtonRef}
+                        innerRef={this.tooltipButtonRef}
                     />
                 </TooltipBox>
             </>
@@ -607,4 +652,29 @@ const InfoTooltipContentSubAreaBulletPoint = styled.div<{
             align-items: flex-start;
             margin-left: -4px;
         `}
+`
+const ErrorBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 15px 0 15px;
+    grid-gap: 10px;
+`
+const ErrorBoxTitle = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 16px;
+    font-weight: bold;
+    color: ${(props) => props.theme.colors.warning};
+`
+const ErrorBoxSubTitle = styled.div`
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    font-size: 14px;
+    color: ${(props) => props.theme.colors.greyScale5};
 `

@@ -127,6 +127,12 @@ export function analyzeTemplate(
 
         const requirement = KEYS_TO_REQUIREMENTS[key]
         requirements[requirement] = true
+
+        // If page-related data is required, ensure we also require page
+        if (['pageLink', 'pageSpaces', 'pageCreatedAt'].includes(requirement)) {
+            requirements.page = true
+        }
+
         usesLegacyTags = usesLegacyTags || LEGACY_KEYS.has(key)
     }
     if (!expectedContext) {
@@ -134,4 +140,11 @@ export function analyzeTemplate(
     }
 
     return { usesLegacyTags, expectedContext, requirements }
+}
+
+export function convertHTMlTemplateToMarkdown(htmlTemplate) {
+    const markdownTemplate = htmlTemplate
+        .replace(/<br\s*\/?>/g, '\n')
+        .replace(/<[^>]+>/g, '')
+    return markdownTemplate
 }

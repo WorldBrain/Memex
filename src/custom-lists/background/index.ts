@@ -25,10 +25,10 @@ import { extractMaterializedPathIds } from 'src/content-sharing/utils'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import {
     DEFAULT_KEY,
+    defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
-import { defaultTreeNodeSorter } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 import { browser } from 'webextension-polyfill-ts'
@@ -451,7 +451,7 @@ export default class CustomListBackground {
             localListIds: siblingListIds,
         })
         const orderedSiblingItems = Object.values(siblingListTrees)
-            .sort(defaultTreeNodeSorter)
+            .sort(defaultOrderableSorter)
             .map((tree) => ({
                 id: tree.id,
                 key: tree.order,

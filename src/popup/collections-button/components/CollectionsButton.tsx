@@ -55,7 +55,7 @@ class CollectionsButton extends PureComponent<Props> {
     render() {
         return (
             <ButtonItem
-                onClick={
+                onClick={() =>
                     !this.props.isDisabled && this.props.toggleCollectionsPopup
                 }
                 disabled={this.props.isDisabled}

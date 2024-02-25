@@ -78,6 +78,7 @@ class SpacePicker extends StatefulUIElement<
     private extraMenuBtnRef = React.createRef<HTMLDivElement>()
     private goToButtonRef = React.createRef<HTMLDivElement>()
     private openInTabGroupButtonRef = React.createRef<HTMLDivElement>()
+    private searchInputRef = React.createRef<HTMLInputElement>()
 
     constructor(props: Props) {
         super(props, new ListPickerLogic(props))
@@ -148,12 +149,12 @@ class SpacePicker extends StatefulUIElement<
             analyticsBG: this.props.analyticsBG,
         })
     }
-
-    private handleKeyPress = (event: KeyboardEvent) => {
+    // Adjust the event handler signatures
+    private handleKeyPress = (event: React.KeyboardEvent<HTMLInputElement>) => {
         this.processEvent('keyPress', { event })
     }
 
-    private handleKeyUp = (event: KeyboardEvent) => {
+    private handleKeyUp = (event: React.KeyboardEvent<HTMLInputElement>) => {
         this.processEvent('onKeyUp', { event })
     }
 
@@ -483,6 +484,7 @@ class SpacePicker extends StatefulUIElement<
             <PickerContainer>
                 <SearchContainer>
                     <PickerSearchInput
+                        searchInputRef={this.searchInputRef}
                         searchInputPlaceholder={
                             this.props.searchInputPlaceholder
                                 ? this.props.searchInputPlaceholder
@@ -493,7 +495,6 @@ class SpacePicker extends StatefulUIElement<
                         showPlaceholder={
                             this.state.selectedListIds.length === 0
                         }
-                        searchInputRef={this.handleSetSearchInputRef}
                         onChange={this.handleSearchInputChanged}
                         onKeyDown={this.handleKeyPress}
                         onKeyUp={this.handleKeyUp}
@@ -700,11 +701,15 @@ const LoadingBox = styled.div`
     width: 100%;
 `
 
-const OuterSearchBox = styled.div`
+const OuterSearchBox = styled.div<{
+    width?: string
+    context: string
+}>`
     border-radius: 12px;
     width: ${(props) => (props.width ? props.width : '300px')};
     padding: 0 5px;
     padding-top: 5px;
+    min-height: 300px;
 
     ${(props) =>
         props.context === 'popup' &&

@@ -186,7 +186,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                         e.stopPropagation
                     }}
                     width={this.props.width}
-                    leftPosition={this.theme.leftMenuOffset}
+                    isOpen={this.state.isOpened}
                 >
                     {this.props.children ?? this.renderMenuItems()}
                 </Menu>
@@ -271,7 +271,11 @@ const MenuItemInfo = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
 `
 
-const Menu = styled.div<{ isOpen: boolean; elementHeight: string }>`
+const Menu = styled.div<{
+    isOpen: boolean
+    elementHeight: string
+    width: string
+}>`
     list-style: none;
     border-radius: 6px;
     width: ${(props) => props.width ?? 'max-content'};
@@ -286,17 +290,13 @@ const Menu = styled.div<{ isOpen: boolean; elementHeight: string }>`
 
 const MenuItemContainerUnfolded = styled.div<{
     isOpen: boolean
-    backgroundColor: string
 }>`
     display: flex;
     position: absolute;
     flex-direction: column;
     width: 100%;
     border-radius: 6px;
-    background: ${(props) =>
-        props.backgroundColor
-            ? props.theme.colors[props.backgroundColor]
-            : props.theme.colors.greyScale2};
+    background: ${(props) => props.theme.colors.greyScale2};
 
     ${(props) =>
         props.isOpen &&

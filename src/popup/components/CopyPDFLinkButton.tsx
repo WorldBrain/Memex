@@ -41,7 +41,7 @@ class CopyPDFLinkButton extends PureComponent<Props, State> {
 
     render() {
         return (
-            <ButtonItem onClick={() => this.copyUrl()}>
+            <ButtonItem disabled={false} onClick={() => this.copyUrl()}>
                 <ButtonInnerContainer>
                     <Icon
                         filePath={icons.copy}

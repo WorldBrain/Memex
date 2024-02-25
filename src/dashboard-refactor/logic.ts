@@ -1,6 +1,6 @@
 import { UILogic, UIEventHandler, UIMutation } from 'ui-logic-core'
 import debounce from 'lodash/debounce'
-import { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
+import type { AnnotationPrivacyState } from '@worldbrain/memex-common/lib/annotations/types'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
@@ -8,11 +8,9 @@ import {
 } from 'src/dashboard-refactor/constants'
 import * as utils from './search-results/util'
 import { executeUITask, loadInitial } from 'src/util/ui-logic'
-import { RootState as State, DashboardDependencies, Events } from './types'
-import { setLocalStorage } from 'src/util/storage'
+import type { RootState as State, DashboardDependencies, Events } from './types'
 import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
 import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/constants'
-
 import { haveArraysChanged } from 'src/util/have-tags-changed'
 import {
     PAGE_SIZE,
@@ -28,7 +26,7 @@ import {
     getListData,
 } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import { NoResultsType } from './search-results/types'
+import type { NoResultsType } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import {
@@ -50,7 +48,7 @@ import {
 } from 'src/annotations/annotation-save-logic'
 import { setUserContext as setSentryUserContext } from 'src/util/raven'
 import { isDuringInstall } from 'src/overview/onboarding/utils'
-import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type { AnnotationSharingStates } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
@@ -66,7 +64,6 @@ import type {
 import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { browser } from 'webextension-polyfill-ts'
 import {
     clearBulkEditItems,
     getBulkEditItems,
@@ -74,15 +71,23 @@ import {
 } from 'src/bulk-edit/utils'
 import type { DragToListAction } from './lists-sidebar/types'
 import {
+    defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import MarkdownIt from 'markdown-it'
+
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import Raven from 'raven-js'
+import analytics from 'src/analytics'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
     Events,
     EventName
 >
+
+const md = new MarkdownIt()
 
 /**
  * Helper used to build a mutation to remove a page from all results days in which it occurs.
@@ -127,6 +132,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         | 'highlightColors'
     >
     currentSearchID = 0
+    observer: MutationObserver // This line explicitly declares the observer property for clarity.
 
     constructor(private options: DashboardDependencies) {
         super()
@@ -217,6 +223,9 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     // TODO: Update this to use the URLSearchParams API rather than string manipulation
     private updateQueryStringParameter(key: string, value: string) {
+        if (this.islikelyInPage) {
+            return
+        }
         // Get the current URL of the page
         if (value != null) {
             const url = this.options.location.href
@@ -394,6 +403,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 themeVariant: null,
                 draggedListId: null,
                 someListIsDragging: false,
+                disableMouseLeave: false,
             },
             syncMenu: {
                 isDisplayed: false,
@@ -402,6 +412,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                 lastSuccessfulSyncDate: null,
             },
             highlightColors: null,
+            isNoteSidebarShown: null,
+            showFullScreen: null,
+            blurEffectReset: false,
+            focusLockUntilMouseStart: false,
         }
     }
 
@@ -450,12 +464,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { annotationsCache, authBG } = this.options
         this.setupRemoteEventListeners()
-        const user = await authBG.getCurrentUser()
-        setSentryUserContext(user)
-        this.emitMutation({
-            currentUser: { $set: user },
-        })
-
         const searchParams = this.getURLSearchParams()
         const spacesQuery = searchParams.get('spaces')
         const selectedSpaceQuery = searchParams.get('selectedSpace')
@@ -488,6 +496,15 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
 
         await loadInitial(this, async () => {
+            if (this.options.inPageMode) {
+                this.observeBlurContainer()
+            }
+            await this.initThemeVariant()
+            const user = await authBG.getCurrentUser()
+            setSentryUserContext(user)
+            this.emitMutation({
+                currentUser: { $set: user },
+            })
             await executeUITask(
                 this,
                 (taskState) => ({
@@ -552,12 +569,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
 
-            const themeVariant = await this.initThemeVariant()
-
-            this.emitMutation({
-                themeVariant: { $set: themeVariant },
-            })
-
             let syncSettings: SyncSettingsStore<'highlightColors'>
 
             syncSettings = createSyncSettingsStore({
@@ -576,10 +587,96 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    componentWillUnmount() {
+        if (this.observer) {
+            this.observer.disconnect()
+        }
+    }
+
+    observeBlurContainer() {
+        const container = document.getElementById('BlurContainer')
+
+        if (!container) return
+        const config = { attributes: true, attributeFilter: ['style'] }
+        this.observer = new MutationObserver((mutationsList, observer) => {
+            mutationsList.forEach((mutation) => {
+                if ((mutation.target as HTMLElement).id === 'BlurContainer') {
+                    this.ensureBlurEffect(container)
+                }
+            })
+        })
+
+        this.observer.observe(container, config)
+        this.setupResizeListener()
+    }
+
+    setupResizeListener() {
+        window.addEventListener('resize', this.handleWindowResize)
+    }
+
+    handleWindowResize = () => {
+        const container = document.getElementById('BlurContainer')
+        if (container) {
+            this.ensureBlurEffect(container)
+        }
+    }
+
+    increment = 0
+
+    ensureBlurEffect(container: HTMLElement) {
+        this.increment++
+        if (
+            // @ts-ignore
+            !container.style.backdropFilter ||
+            // @ts-ignore
+            container.style.backdropFilter !== 'blur(10px)'
+        ) {
+            if (this.increment > 1) {
+                const blurContainer = document.getElementById('BlurContainer')
+                blurContainer.style.background = '#313239'
+            } else {
+                this.emitMutation({
+                    blurEffectReset: { $set: true },
+                })
+
+                setTimeout(() => {
+                    this.emitMutation({
+                        blurEffectReset: { $set: false },
+                    })
+                    setTimeout(() => {
+                        const blurContainer = document.getElementById(
+                            'BlurContainer',
+                        )
+                        blurContainer.style.background = '#313239'
+                        if (
+                            // @ts-ignore
+                            !blurContainer.style.backdropFilter ||
+                            // @ts-ignore
+                            blurContainer.style.backdropFilter !== 'blur(10px)'
+                        ) {
+                            // @ts-ignore
+                            blurContainer.style.backdropFilter = 'blur(10px)'
+                            blurContainer.style.background = '#313239'
+                        }
+                    }, 50)
+                }, 100)
+            }
+        }
+    }
+
+    cleanupBlurObserver() {
+        if (this.observer) {
+            this.observer.disconnect()
+        }
+        window.removeEventListener('resize', this.handleWindowResize)
+    }
+
     async initThemeVariant() {
-        const variantStorage = await browser.storage.local.get('themeVariant')
-        const variant = variantStorage['themeVariant']
-        return variant ?? 'dark'
+        const variantStorage = await this.options.localStorage.get(
+            'themeVariant',
+        )
+        const variant = variantStorage['themeVariant'] ?? 'dark'
+        this.emitMutation({ themeVariant: { $set: variant } })
     }
 
     cleanup: EventHandler<'cleanup'> = async ({}) => {
@@ -593,6 +690,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.cacheListsSubscription,
         )
     }
+
+    // TODO: Make better to check for in -page pro
+    islikelyInPage = this.options.location.href.startsWith('http')
 
     /* START - Misc helper methods */
     private async hydrateStateFromLocalStorage(
@@ -638,7 +738,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
             listsSidebar: {
-                isSidebarLocked: { $set: listsSidebarLocked ?? true },
+                isSidebarLocked: {
+                    $set: this.islikelyInPage
+                        ? false
+                        : listsSidebarLocked ?? true,
+                },
             },
             syncMenu: {
                 lastSuccessfulSyncDate: { $set: new Date(lastSyncTime) },
@@ -661,14 +765,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         } else {
             const activityStatus = await this.options.activityIndicatorBG.checkActivityStatus()
-            await setLocalStorage(
-                ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY,
-                activityStatus === 'has-unseen',
-            )
+            const hasFeedActivity = activityStatus === 'has-unseen'
+            await this.options.localStorage.set({
+                [ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY]: hasFeedActivity,
+            })
             this.emitMutation({
-                listsSidebar: {
-                    hasFeedActivity: { $set: activityStatus === 'has-unseen' },
-                },
+                listsSidebar: { hasFeedActivity: { $set: hasFeedActivity } },
             })
         }
     }
@@ -680,6 +782,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.emitMutation({
             listsSidebar: {
                 spaceSidebarWidth: { $set: event.width },
+            },
+        })
+    }
+    setDisableMouseLeave: EventHandler<'setDisableMouseLeave'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            listsSidebar: {
+                disableMouseLeave: { $set: event.disable },
             },
         })
     }
@@ -712,248 +824,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
-
-    // private async loadLocalListsData(previousState: State) {
-    //     const { listsBG, contentShareBG } = this.options
-
-    //     const remoteToLocalIdDict: { [remoteId: string]: number } = {}
-    //     const mutation: UIMutation<State> = {}
-
-    //     await executeUITask(
-    //         this,
-    //         (taskState) => ({
-    //             listsSidebar: {
-    //                 localLists: { loadingState: { $set: taskState } },
-    //             },
-    //         }),
-    //         async () => {
-    //             let allLists = await listsBG.fetchAllLists({
-    //                 limit: 1000,
-    //                 skipMobileList: true,
-    //                 includeDescriptions: true,
-    //             })
-
-    //             let joinedLists = await listsBG.fetchCollaborativeLists({
-    //                 limit: 1000,
-    //             })
-
-    //             // a list of all local lists that also have a remote list (could be joined or created)
-    //             let localToRemoteIdDict = await contentShareBG.getRemoteListIds(
-    //                 { localListIds: allLists.map((list) => list.id) },
-    //             )
-
-    //             // transform the localToRemoteIdDict into an array that can be filtered
-    //             let localToRemoteIdAsArray = [
-    //                 ...Object.entries(localToRemoteIdDict),
-    //             ].map(([localListId, remoteId]) => ({ localListId, remoteId }))
-
-    //             // check for all local entries that also have remoteentries, and cross check them with the joined lists, keep only the ones that are not in joined lists
-    //             const localListsWithoutJoinedStatusButMaybeShared = localToRemoteIdAsArray.filter(
-    //                 (item) => {
-    //                     return !joinedLists.some(
-    //                         (list) => list.remoteId === item.remoteId,
-    //                     )
-    //                 },
-    //             )
-
-    //             // get the locallists by filtering out all IDs that are in the filteredArray
-    //             let localListsNotJoinedButShared = allLists.filter((item) => {
-    //                 return localListsWithoutJoinedStatusButMaybeShared.some(
-    //                     (list) => parseInt(list.localListId) === item.id,
-    //                 )
-    //             })
-    //             let localListsNotShared = allLists.filter((item) => {
-    //                 return !localToRemoteIdAsArray.some(
-    //                     (list) => parseInt(list.localListId) === item.id,
-    //                 )
-    //             })
-
-    //             let localLists = [
-    //                 ...localListsNotShared,
-    //                 ...localListsNotJoinedButShared,
-    //             ]
-
-    //             const listIds: number[] = []
-    //             const listData: { [id: number]: ListData } = {}
-
-    //             localLists = localLists.sort((listDataA, listDataB) => {
-    //                 if (
-    //                     listDataA.name.toLowerCase() <
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return -1
-    //                 }
-    //                 if (
-    //                     listDataA.name.toLowerCase() >
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return 1
-    //                 }
-    //                 return 0
-    //             })
-
-    //             for (const list of allLists) {
-    //                 const remoteId = localToRemoteIdDict[list.id]
-    //                 if (remoteId) {
-    //                     remoteToLocalIdDict[remoteId] = list.id
-    //                 }
-    //             }
-
-    //             for (const list of localLists) {
-    //                 const remoteId = localToRemoteIdDict[list.id]
-    //                 listIds.push(list.id)
-    //                 listData[list.id] = {
-    //                     remoteId,
-    //                     id: list.id,
-    //                     name: list.name,
-    //                     isOwnedList: true,
-    //                     description: list.description,
-    //                 }
-    //             }
-
-    //             mutation.listsSidebar = {
-    //                 listData: { $merge: listData },
-    //                 localLists: {
-    //                     allListIds: { $set: listIds },
-    //                     filteredListIds: { $set: listIds },
-    //                 },
-    //             }
-    //             this.emitMutation(mutation)
-    //         },
-    //     )
-
-    //     return {
-    //         nextState: this.withMutation(previousState, mutation),
-    //         remoteToLocalIdDict,
-    //     }
-    // }
-    // private async loadJoinedListsData(previousState: State) {
-    //     const remoteToLocalIdDict: { [remoteId: string]: number } = {}
-    //     const mutation: UIMutation<State> = {}
-
-    //     await executeUITask(
-    //         this,
-    //         (taskState) => ({
-    //             listsSidebar: {
-    //                 joinedLists: { loadingState: { $set: taskState } },
-    //             },
-    //         }),
-    //         async () => {
-    //             let joinedLists = await this.options.listsBG.fetchCollaborativeLists(
-    //                 {
-    //                     skip: 0,
-    //                     limit: 120,
-    //                 },
-    //             )
-
-    //             // const localToRemoteIdDict = await contentShareBG.getRemoteListIds(
-    //             //     { localListIds: joinedLists.map((list) => list.id) },
-    //             // )
-
-    //             const listIds: number[] = []
-    //             const listData: { [id: number]: ListData } = {}
-
-    //             joinedLists = joinedLists.sort((listDataA, listDataB) => {
-    //                 if (
-    //                     listDataA.name.toLowerCase() <
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return -1
-    //                 }
-    //                 if (
-    //                     listDataA.name.toLowerCase() >
-    //                     listDataB.name.toLowerCase()
-    //                 ) {
-    //                     return 1
-    //                 }
-    //                 return 0
-    //             })
-
-    //             for (const list of joinedLists) {
-    //                 listIds.push(list.id)
-    //                 listData[list.id] = {
-    //                     remoteId: list.remoteId,
-    //                     id: list.id,
-    //                     name: list.name,
-    //                     isOwnedList: false,
-    //                     description: list.description,
-    //                 }
-    //             }
-
-    //             mutation.listsSidebar = {
-    //                 listData: { $merge: listData },
-    //                 joinedLists: {
-    //                     allListIds: { $set: listIds },
-    //                     filteredListIds: { $set: listIds },
-    //                 },
-    //             }
-    //             this.emitMutation(mutation)
-    //         },
-    //     )
-
-    //     return {
-    //         nextState: this.withMutation(previousState, mutation),
-    //         remoteToLocalIdDict,
-    //     }
-    // }
-
-    // private async loadRemoteListsData(
-    //     previousState: State,
-    //     remoteToLocalIdDict: {
-    //         [remoteId: string]: number
-    //     },
-    // ) {
-    //     const { listsBG } = this.options
-
-    //     await executeUITask(
-    //         this,
-    //         (taskState) => ({
-    //             listsSidebar: {
-    //                 followedLists: { loadingState: { $set: taskState } },
-    //             },
-    //         }),
-    //         async () => {
-    //             const followedLists = await listsBG.fetchAllFollowedLists({
-    //                 limit: 1000,
-    //             })
-
-    //             const followedListIds: number[] = []
-    //             const listData: { [id: number]: ListData } = {}
-
-    //             for (const list of followedLists) {
-    //                 const localId =
-    //                     remoteToLocalIdDict[list.remoteId] ?? list.id
-
-    //                 // Joined lists appear in "Local lists" section, so don't include them here
-    //                 if (remoteToLocalIdDict[list.remoteId] == null) {
-    //                     followedListIds.push(localId)
-    //                 }
-
-    //                 listData[localId] = {
-    //                     id: localId,
-    //                     name: list.name,
-    //                     remoteId: list.remoteId,
-    //                     description: list.description,
-    //                     isOwnedList: list.isOwned,
-    //                     // NOTE: this condition assumes that local lists are loaded in state already (joined lists have local data + are "followed")
-    //                     isJoinedList:
-    //                         previousState.listsSidebar.listData[localId] !=
-    //                         null,
-    //                 }
-    //             }
-
-    //             this.emitMutation({
-    //                 listsSidebar: {
-    //                     listData: { $merge: listData },
-    //                     followedLists: {
-    //                         allListIds: { $set: followedListIds },
-    //                         filteredListIds: { $set: followedListIds },
-    //                     },
-    //                 },
-    //             })
-    //         },
-    //     )
-    // }
 
     /**
      * Helper which emits a mutation followed by a search using the post-mutation state.
@@ -1045,10 +915,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         await setBulkEdit(dataArray, false)
-
-        // this.emitMutation({
-        //     multiSelectResults: { $set: selection },
-        // })
     }
 
     clearBulkSelection: EventHandler<'clearBulkSelection'> = async ({
@@ -1060,6 +926,89 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
         await clearBulkEditItems()
     }
+    setFocusLock: EventHandler<'setFocusLock'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            focusLockUntilMouseStart: { $set: event },
+        })
+    }
+
+    changeFocusItem: EventHandler<'changeFocusItem'> = async ({
+        previousState,
+        event,
+    }) => {
+        const previousResults =
+            previousState.searchResults.results[-1]?.pages.byId
+
+        const focusedItemIndex = Object.keys(previousResults).findIndex(
+            (key) => previousResults[key].isInFocus === true,
+        )
+
+        let previousItem = Object.values(previousResults)[focusedItemIndex]
+        let nextItem
+
+        nextItem = null
+
+        if (event.pageId) {
+            nextItem = { id: event.pageId }
+        }
+
+        if (event.direction === 'up') {
+            nextItem = Object.values(previousResults)[focusedItemIndex - 1]
+        }
+        if (event.direction === 'down') {
+            nextItem = Object.values(previousResults)[focusedItemIndex + 1]
+        }
+
+        if (nextItem) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [-1]: {
+                            pages: {
+                                byId: {
+                                    ...(previousItem
+                                        ? {
+                                              [previousItem.id]: {
+                                                  isInFocus: { $set: false },
+                                              },
+                                          }
+                                        : {}),
+                                    [nextItem.id]: {
+                                        isInFocus: { $set: true },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+        if (!nextItem && previousItem) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [-1]: {
+                            pages: {
+                                byId: {
+                                    ...(previousItem
+                                        ? {
+                                              [previousItem.id]: {
+                                                  isInFocus: { $set: false },
+                                              },
+                                          }
+                                        : {}),
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+        }
+    }
+
     setBulkEditSpace: EventHandler<'setBulkEditSpace'> = async ({
         previousState,
         event,
@@ -1246,6 +1195,34 @@ export class DashboardLogic extends UILogic<State, Events> {
                                   }),
                         },
                     })
+
+                    // const hasPreviousResults =
+                    //     Object.keys(previousState.searchResults.results)
+                    //         .length > 0
+
+                    // if (!hasPreviousResults) {
+                    //     const firstKey = Object.keys(
+                    //         results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
+                    //     )[0]
+
+                    //     this.emitMutation({
+                    //         searchResults: {
+                    //             results: {
+                    //                 [PAGE_SEARCH_DUMMY_DAY]: {
+                    //                     pages: {
+                    //                         byId: {
+                    //                             [firstKey]: {
+                    //                                 isInFocus: {
+                    //                                     $set: true,
+                    //                                 },
+                    //                             },
+                    //                         },
+                    //                     },
+                    //                 },
+                    //             },
+                    //         },
+                    //     })
+                    // }
                 }
             },
         )
@@ -1444,58 +1421,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         const newState = JSON.parse(event.newState)
         await this.syncSettings.highlightColors.set('highlightColors', newState)
 
-        // console.log('newStae', newState)
-
-        // const changedColors = newState
-        //     .map((newItem, index) => {
-        //         const oldItem = JSON.parse(previousState.highlightColors)[index]
-        //         if (
-        //             oldItem &&
-        //             newItem.id === oldItem.id &&
-        //             JSON.stringify(newItem.color) !==
-        //                 JSON.stringify(oldItem.color)
-        //         ) {
-        //             return {
-        //                 id: oldItem.id,
-        //                 oldColor: oldItem.color,
-        //                 newColor: newItem.color,
-        //             }
-        //         }
-        //     })
-        //     .filter((item) => item != null)
-
-        // console.log('changedColors', changedColors)
-
-        // for (let color of changedColors) {
-        //     const annotationLocalIds = await this.options.annotationsBG.listAnnotationIdsByColor(
-        //         color.id,
-        //     )
-
-        //     console.log('annotationLocalIds', annotationLocalIds)
-
-        //     const annotations = []
-
-        //     for (let annotationLocalId of annotationLocalIds) {
-        //         annotations.push(
-        //             await this.options.annotationsCache.getAnnotationByLocalId(
-        //                 annotationLocalId,
-        //             ),
-        //         )
-        //     }
-
-        //     console.log('annotations', annotations)
-
-        //     for (let annotation of annotations) {
-        //         this.options.annotationsCache.updateAnnotation({
-        //             comment: annotation.comment,
-        //             privacyLevel: annotation.privacyLevel,
-        //             unifiedListIds: annotation.unifiedListIds,
-        //             unifiedId: annotation,
-        //             color: color.newColor,
-        //         })
-        //     }
-        // }
-
         this.emitMutation({
             highlightColors: { $set: JSON.stringify(newState) },
         })
@@ -1585,26 +1510,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 pageData: { $set: state.pageData },
                 noteData: { $set: state.noteData },
             },
-        })
-    }
-
-    setPageTags: EventHandler<'setPageTags'> = async ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                pageData: {
-                    byId: {
-                        [event.id]: {
-                            tags: { $apply: updatePickerValues(event) },
-                        },
-                    },
-                },
-            },
-        })
-
-        await this.options.tagsBG.updateTagForPage({
-            url: event.fullPageUrl,
-            deleted: event.deleted,
-            added: event.added,
         })
     }
 
@@ -1772,7 +1677,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             $set: filterOutPage(
                                 previousState.searchResults.results[
                                     PAGE_SEARCH_DUMMY_DAY
-                                ].pages.allIds,
+                                ]?.pages.allIds,
                             ),
                         },
                     },
@@ -1956,7 +1861,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                     window.location.reload()
                 } catch (e) {
-                    console.log('eerorr', e)
+                    console.error('eerorr', e)
                 }
             },
         )
@@ -2012,8 +1917,151 @@ export class DashboardLogic extends UILogic<State, Events> {
     //     )
     // }
 
+    private handleDefaultTemplateCopy = async (
+        annotationUrls,
+        normalizedPageUrls,
+    ) => {
+        try {
+            const templates = await this.options.copyPasterBG.findAllTemplates()
+            const sortedTemplates = templates.sort(defaultOrderableSorter)
+            const id = sortedTemplates[0].id
+
+            const item = templates.find((item) => item.id === id)
+
+            const rendered = await this.options.copyPasterBG.renderTemplate({
+                id,
+                annotationUrls: annotationUrls,
+                normalizedPageUrls: normalizedPageUrls,
+            })
+
+            if (item) {
+                if (
+                    item.outputFormat === 'markdown' ||
+                    item.outputFormat == null
+                ) {
+                    await copyToClipboard(rendered)
+                }
+                if (item.outputFormat === 'rich-text') {
+                    const htmlString = md.render(rendered)
+                    await this.copyRichTextToClipboard(htmlString)
+                }
+            }
+        } catch (err) {
+            console.error('Something went really bad copying:', err.message)
+            Raven.captureException(err)
+            return false
+        } finally {
+            analytics.trackEvent({
+                category: 'TextExporter',
+                action: 'copyToClipboard',
+            })
+
+            return true
+        }
+    }
+
+    async copyRichTextToClipboard(html: string) {
+        // Create a hidden content-editable div
+        const hiddenDiv = document.createElement('div')
+
+        hiddenDiv.contentEditable = 'true'
+        hiddenDiv.style.position = 'absolute'
+        hiddenDiv.style.left = '-9999px'
+        hiddenDiv.innerHTML = html
+
+        // Append the hidden div to the body
+        document.body.appendChild(hiddenDiv)
+
+        // Select the content of the hidden div
+        const range = document.createRange()
+        range.selectNodeContents(hiddenDiv)
+        const selection = window.getSelection()
+        selection.removeAllRanges()
+        selection.addRange(range)
+
+        // Copy the selected content to the clipboard
+        document.execCommand('copy')
+
+        // Remove the hidden div from the body
+        document.body.removeChild(hiddenDiv)
+    }
+
+    setCopyPasterDefaultExecute: EventHandler<
+        'setCopyPasterDefaultExecute'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    copyLoadingState: {
+                                        $set: 'running',
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+
+        let templateCopyResult
+        if (
+            !previousState.searchResults.results[event.day]?.pages.byId[
+                event.pageId
+            ].isCopyPasterShown
+        ) {
+            templateCopyResult = await this.handleDefaultTemplateCopy(
+                [null],
+                [event.pageId],
+            )
+        }
+
+        if (templateCopyResult) {
+            this.emitMutation({
+                searchResults: {
+                    results: {
+                        [event.day]: {
+                            pages: {
+                                byId: {
+                                    [event.pageId]: {
+                                        copyLoadingState: {
+                                            $set: 'success',
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            })
+
+            setTimeout(() => {
+                this.emitMutation({
+                    searchResults: {
+                        results: {
+                            [event.day]: {
+                                pages: {
+                                    byId: {
+                                        [event.pageId]: {
+                                            copyLoadingState: {
+                                                $set: 'pristine',
+                                            },
+                                        },
+                                    },
+                                },
+                            },
+                        },
+                    },
+                })
+            }, 3000)
+        }
+    }
     setPageCopyPasterShown: EventHandler<'setPageCopyPasterShown'> = ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             searchResults: {
@@ -2129,6 +2177,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             })
+            return
         }
 
         this.emitMutation({
@@ -2145,14 +2194,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                             },
                         },
                     },
-                },
-            },
-            activeDay: { $set: event.activeDay },
-            activePageID: { $set: event.activePageID },
-        })
-        this.emitMutation({
-            searchResults: {
-                results: {
                     [previousState.activeDay]: {
                         pages: {
                             byId: {
@@ -2166,6 +2207,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
+            activeDay: { $set: event.activeDay },
+            activePageID: { $set: event.activePageID },
         })
     }
 
@@ -2193,7 +2236,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const { searchResults } = previousState
-        const page = searchResults.results[event.day].pages.byId[event.pageId]
+        const page = searchResults.results[event.day]?.pages.byId[event.pageId]
 
         const sortedNoteIds = page.noteIds[page.notesType].sort((a, b) =>
             event.sortingFn(
@@ -2243,10 +2286,10 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setPageHover: EventHandler<'setPageHover'> = ({ event, previousState }) => {
         if (
-            previousState.searchResults.results[event.day].pages.byId[
+            previousState.searchResults.results[event.day]?.pages.byId[
                 event.pageId
             ].isCopyPasterShown ||
-            previousState.searchResults.results[event.day].pages.byId[
+            previousState.searchResults.results[event.day]?.pages.byId[
                 event.pageId
             ].listPickerShowStatus !== 'hide'
         ) {
@@ -2285,24 +2328,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             $set: event.isShown,
                                         },
                                     },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        })
-    }
-
-    setPageNewNoteTags: EventHandler<'setPageNewNoteTags'> = ({ event }) => {
-        this.emitMutation({
-            searchResults: {
-                results: {
-                    [event.day]: {
-                        pages: {
-                            byId: {
-                                [event.pageId]: {
-                                    newNoteForm: { tags: { $set: event.tags } },
                                 },
                             },
                         },
@@ -2586,6 +2611,51 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    toggleNoteSidebarOn: EventHandler<'toggleNoteSidebarOn'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (previousState.showFullScreen == null) {
+            this.emitMutation({
+                showFullScreen: { $set: true },
+            })
+        }
+
+        this.emitMutation({
+            isNoteSidebarShown: { $set: true },
+        })
+    }
+    onMatchingTextToggleClick: EventHandler<
+        'onMatchingTextToggleClick'
+    > = async ({ event, previousState }) => {
+        const previousValue =
+            previousState.searchResults.results[-1].pages.byId[event.pageId]
+                ?.showAllResults
+        this.emitMutation({
+            searchResults: {
+                results: {
+                    [-1]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    showAllResults: { $set: !previousValue },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
+        })
+    }
+    toggleNoteSidebarOff: EventHandler<'toggleNoteSidebarOn'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            isNoteSidebarShown: { $set: false },
+        })
+    }
+
     confirmNoteDelete: EventHandler<'confirmNoteDelete'> = async ({
         previousState: { modals, searchResults },
     }) => {
@@ -2717,6 +2787,61 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
+    }
+
+    setCopyPasterDefaultNoteExecute: EventHandler<
+        'setCopyPasterDefaultNoteExecute'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            searchResults: {
+                noteData: {
+                    byId: {
+                        [event.noteId]: {
+                            copyLoadingState: { $set: 'running' },
+                        },
+                    },
+                },
+            },
+        })
+
+        let templateCopyResult
+        if (
+            !previousState.searchResults.noteData.byId[event.noteId]
+                .isCopyPasterShown
+        ) {
+            templateCopyResult = await this.handleDefaultTemplateCopy(
+                [event.noteId],
+                null,
+            )
+        }
+
+        if (templateCopyResult) {
+            this.emitMutation({
+                searchResults: {
+                    noteData: {
+                        byId: {
+                            [event.noteId]: {
+                                copyLoadingState: { $set: 'success' },
+                            },
+                        },
+                    },
+                },
+            })
+
+            setTimeout(() => {
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [event.noteId]: {
+                                    copyLoadingState: { $set: 'pristine' },
+                                },
+                            },
+                        },
+                    },
+                })
+            }, 3000)
+        }
     }
 
     setNoteRepliesShown: EventHandler<'setNoteRepliesShown'> = ({ event }) => {
@@ -3246,11 +3371,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        this.updateQueryStringParameter('query', event.query)
-
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: { searchQuery: { $set: event.query } },
         })
+        if (!event.isInPageMode) {
+            this.updateQueryStringParameter('query', event.query)
+        }
     }
 
     setSearchFiltersOpen: EventHandler<'setSearchFiltersOpen'> = async ({
@@ -3416,10 +3542,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             }
         }
 
-        this.updateQueryStringParameter(
-            'spaces',
-            Array.from(localListIds).toString(),
-        )
+        if (!this.islikelyInPage) {
+            this.updateQueryStringParameter(
+                'spaces',
+                Array.from(localListIds).toString(),
+            )
+        }
 
         await this.mutateAndTriggerSearch(previousState, {
             searchFilters: {
@@ -3444,7 +3572,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         const newListFilter = previousState.searchFilters.spacesIncluded.filter(
             (item) => item !== event.spaceId,
         )
-        this.updateQueryStringParameter('spaces', newListFilter.toString())
+
+        if (!this.islikelyInPage) {
+            this.updateQueryStringParameter('spaces', newListFilter.toString())
+        }
 
         if (newListFilter.length === 0) {
             this.removeQueryString('spaces')
@@ -3642,6 +3773,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (previousState.listsSidebar.isSidebarLocked) {
             return
         }
+
         this.emitMutation({
             listsSidebar: { isSidebarPeeking: { $set: event.isPeeking } },
         })
@@ -3854,11 +3986,56 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     },
                 },
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    editTitleState: {
+                                        $set: null,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
             },
         })
+
         this.options.pageIndexingBG.updatePageTitle({
             normaliedPageUrl: event.normalizedPageUrl,
             title: event.changedTitle,
+        })
+    }
+    updatePageTitleState: EventHandler<'updatePageTitle'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.emitMutation({
+            searchResults: {
+                pageData: {
+                    byId: {
+                        [event.normalizedPageUrl]: {
+                            editTitleState: {
+                                $set: event.changedTitle,
+                            },
+                        },
+                    },
+                },
+                results: {
+                    [event.day]: {
+                        pages: {
+                            byId: {
+                                [event.pageId]: {
+                                    editTitleState: {
+                                        $set: event.changedTitle,
+                                    },
+                                },
+                            },
+                        },
+                    },
+                },
+            },
         })
     }
 
@@ -3871,7 +4048,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dragList: EventHandler<'dragList'> = async ({ event, previousState }) => {
-        const crt = this.options.document.getElementById(DRAG_EL_ID)
+        const crt = this.options.document?.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 0, 0)
 
@@ -3880,7 +4057,9 @@ export class DashboardLogic extends UILogic<State, Events> {
             type: 'list',
             listId: list.unifiedId,
         }
+
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
+
         this.emitMutation({
             listsSidebar: {
                 draggedListId: { $set: event.listId },
@@ -4328,85 +4507,93 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        const pageData = previousState.searchResults.pageData.byId[event.pageId]
-        if (!pageData || pageData.fullPdfUrl == null) {
+        const pageData =
+            previousState?.searchResults?.pageData?.byId[event.pageId]
+
+        if (!pageData) {
             return
         }
 
-        // This event will be assigned to an anchor <a> el, so we need to override that for PDFs
-        event.synthEvent.preventDefault()
+        if (pageData?.fullPdfUrl) {
+            // This event will be assigned to an anchor <a> el, so we need to override that for PDFs
+            event.synthEvent.preventDefault()
 
-        const memexCloudUrl = new URL(pageData.fullPdfUrl!)
-        const uploadId = memexCloudUrl.searchParams.get('upload_id')
+            const memexCloudUrl = new URL(pageData?.fullPdfUrl!)
+            const uploadId = memexCloudUrl?.searchParams.get('upload_id')
 
-        // Uploaded PDFs need to have temporary access URLs fetched
-        if (uploadId != null) {
-            // Ignore multi-clicks while it's loading
-            // if (
-            //     previousState.searchResults.uploadedPdfLinkLoadState ===
-            //     'running'
-            // ) {
-            //     return
-            // }
+            // Uploaded PDFs need to have temporary access URLs fetched
+            if (uploadId != null) {
+                // Ignore multi-clicks while it's loading
+                // if (
+                //     previousState.searchResults.uploadedPdfLinkLoadState ===
+                //     'running'
+                // ) {
+                //     return
+                // }
 
-            await executeUITask(
-                this,
-                (taskState) => ({
-                    searchResults: {
-                        pageData: {
-                            byId: {
-                                [event.pageId]: {
-                                    uploadedPdfLinkLoadState: {
-                                        $set: taskState,
+                await executeUITask(
+                    this,
+                    (taskState) => ({
+                        searchResults: {
+                            pageData: {
+                                byId: {
+                                    [event.pageId]: {
+                                        uploadedPdfLinkLoadState: {
+                                            $set: taskState,
+                                        },
                                     },
                                 },
                             },
                         },
+                    }),
+                    async () => {
+                        const tempPdfAccessUrl = await this.options.pdfViewerBG.getTempPdfAccessUrl(
+                            uploadId,
+                        )
+                        await openPDFInViewer(tempPdfAccessUrl, {
+                            tabsAPI: this.options.tabsAPI,
+                            runtimeAPI: this.options.runtimeAPI,
+                        })
                     },
-                }),
-                async () => {
-                    const tempPdfAccessUrl = await this.options.pdfViewerBG.getTempPdfAccessUrl(
-                        uploadId,
-                    )
-                    await openPDFInViewer(tempPdfAccessUrl, {
+                )
+                return
+            }
+
+            if (memexCloudUrl?.protocol === 'blob:') {
+                // Show dropzone for local-only PDFs
+                const input = document.createElement('input')
+                input.type = 'file'
+                input.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files![0]
+                    const reader = new FileReader()
+                    reader.onload = (event) => {
+                        const pdfDataUrl = event.target!.result as string
+                        // this.emitMutation({ pdfDataUrl: { $set: pdfDataUrl } })
+                    }
+                    reader.readAsDataURL(file)
+
+                    // const file = firstItem.getAsFile()
+                    const pdfObjectUrl = URL.createObjectURL(file)
+
+                    await openPDFInViewer(pdfObjectUrl, {
                         tabsAPI: this.options.tabsAPI,
                         runtimeAPI: this.options.runtimeAPI,
                     })
-                },
-            )
-            return
-        }
-
-        if (memexCloudUrl.protocol === 'blob:') {
-            // Show dropzone for local-only PDFs
-            const input = document.createElement('input')
-            input.type = 'file'
-            input.onchange = async (e) => {
-                const file = (e.target as HTMLInputElement).files![0]
-                const reader = new FileReader()
-                reader.onload = (event) => {
-                    const pdfDataUrl = event.target!.result as string
-                    // this.emitMutation({ pdfDataUrl: { $set: pdfDataUrl } })
+                    this.emitMutation({ showDropArea: { $set: false } })
                 }
-                reader.readAsDataURL(file)
-
-                // const file = firstItem.getAsFile()
-                const pdfObjectUrl = URL.createObjectURL(file)
-
-                await openPDFInViewer(pdfObjectUrl, {
-                    tabsAPI: this.options.tabsAPI,
-                    runtimeAPI: this.options.runtimeAPI,
-                })
-                this.emitMutation({ showDropArea: { $set: false } })
+                input.click()
+                this.emitMutation({ showDropArea: { $set: true } })
             }
-            input.click()
-            this.emitMutation({ showDropArea: { $set: true } })
+
+            await openPDFInViewer(pageData.fullPdfUrl!, {
+                tabsAPI: this.options.tabsAPI,
+                runtimeAPI: this.options.runtimeAPI,
+            })
         }
 
-        await openPDFInViewer(pageData.fullPdfUrl!, {
-            tabsAPI: this.options.tabsAPI,
-            runtimeAPI: this.options.runtimeAPI,
-        })
+        if (pageData?.fullUrl && !pageData?.fullPdfUrl) {
+            window.open(pageData.fullUrl, '_blank')
+        }
     }
 
     dropPdfFile: EventHandler<'dropPdfFile'> = async ({ event }) => {
@@ -4573,15 +4760,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
-        await browser.storage.local.set({
-            themeVariant:
-                previousState.themeVariant === 'dark' ? 'light' : 'dark',
-        })
-        this.emitMutation({
-            themeVariant: {
-                $set: previousState.themeVariant === 'dark' ? 'light' : 'dark',
-            },
-        })
+        const nextTheme =
+            previousState.themeVariant === 'dark' ? 'light' : 'dark'
+        await this.options.localStorage.set({ themeVariant: nextTheme })
+        this.emitMutation({ themeVariant: { $set: nextTheme } })
     }
 
     updateSelectedListDescription: EventHandler<
@@ -4807,7 +4989,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                     hasFeedActivity: { $set: false },
                 },
             })
-            await setLocalStorage(ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY, false)
+            await this.options.localStorage.set({
+                [ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY]: false,
+            })
             await this.options.activityIndicatorBG.markActivitiesAsSeen()
         }
     }

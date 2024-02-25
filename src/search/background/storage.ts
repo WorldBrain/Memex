@@ -463,11 +463,15 @@ export default class SearchStorage extends StorageModule {
         const latestTimes =
             ids[0].length === 3 ? ids.map(([, , time]) => time) : undefined
 
-        return this.operation(PageUrlMapperPlugin.MAP_OP_ID, {
-            pageUrls: ids.map(([url]) => url),
-            upperTimeBound: params.endDate,
-            latestTimes,
-        })
+        const mappedResults = await this.operation(
+            PageUrlMapperPlugin.MAP_OP_ID,
+            {
+                pageUrls: ids.map(([url]) => url),
+                upperTimeBound: params.endDate,
+                latestTimes,
+            },
+        )
+        return mappedResults
     }
 
     async searchSocial(params: SocialSearchParams) {

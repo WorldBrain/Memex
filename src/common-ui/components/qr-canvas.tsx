@@ -1,6 +1,5 @@
 import React, { HTMLProps } from 'react'
 import QRCode from 'qrcode'
-import styled from 'styled-components'
 
 export interface Props extends HTMLProps<HTMLCanvasElement> {
     toEncode: string
@@ -12,29 +11,28 @@ export default class QRCanvas extends React.PureComponent<Props> {
         errorHandler: (e) => undefined,
     }
 
-    private canvasEl: HTMLCanvasElement
+    private canvasRef = React.createRef<HTMLCanvasElement>()
 
     async componentDidMount() {
         try {
-            await QRCode.toCanvas(this.canvasEl!, this.props.toEncode, {
-                color: {
-                    dark: '#FAFAFA',
-                    light: '#303139',
+            await QRCode.toCanvas(
+                this.canvasRef.current!,
+                this.props.toEncode,
+                {
+                    color: {
+                        dark: '#FAFAFA',
+                        light: '#303139',
+                    },
+                    width: 400,
                 },
-                width: 400,
-            })
+            )
         } catch (err) {
             this.props.errorHandler(err)
         }
     }
 
-    private setRef = (el: HTMLCanvasElement) => (this.canvasEl = el)
-
     render() {
         const { toEncode, errorHandler, ...canvasProps } = this.props
-
-        return <Canvas ref={this.setRef} {...canvasProps} />
+        return <canvas ref={this.canvasRef} {...canvasProps} />
     }
 }
-
-const Canvas = styled.canvas``

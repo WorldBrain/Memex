@@ -23,6 +23,8 @@ class DomainPicker extends StatefulUIElement<
     DomainPickerState,
     DomainPickerEvent
 > {
+    private searchInputRef = React.createRef<HTMLInputElement>()
+
     constructor(props: DomainPickerDependencies) {
         super(props, new DomainPickerLogic(props))
     }
@@ -86,9 +88,11 @@ class DomainPicker extends StatefulUIElement<
     private handleResultDomainFocus = (domain: DisplayEntry, index?: number) =>
         this.processEvent('resultEntryFocus', { entry: domain, index })
 
-    private handleKeyPress = (key: KeyEvent) =>
-        this.processEvent('keyPress', { key })
-
+    private handleKeyPress = (key: KeyEvent) => {
+        // Extract the key from the event and cast it to KeyEvent
+        // Pass the extracted key to processEvent
+        return this.processEvent('keyPress', { key })
+    }
     private renderDomainRow = (domain: DisplayEntry, index: number) => (
         <EntryRow
             onPress={this.handleResultDomainPress}
@@ -150,9 +154,9 @@ class DomainPicker extends StatefulUIElement<
                 <PickerSearchInput
                     searchInputPlaceholder={this.searchInputPlaceholder}
                     showPlaceholder={this.state?.selectedEntries.length === 0}
-                    searchInputRef={this.handleSetSearchInputRef}
+                    searchInputRef={this.searchInputRef}
                     onChange={this.handleSearchInputChanged}
-                    onKeyPress={this.handleKeyPress}
+                    onKeyPress={(key) => this.handleKeyPress(key)}
                     value={this.state?.query}
                     loading={this.state?.loadingQueryResults}
                     // before={
@@ -163,12 +167,14 @@ class DomainPicker extends StatefulUIElement<
                     //     />
                     // }
                 />
-                <EntryResultsList
-                    entries={this.state?.displayEntries}
-                    renderEntryRow={this.renderDomainRow}
-                    emptyView={this.renderEmptyDomain()}
-                    id="domainResults"
-                />
+                <ResultsScrollContainer>
+                    <EntryResultsList
+                        entries={this.state?.displayEntries}
+                        renderEntryRow={this.renderDomainRow}
+                        emptyView={this.renderEmptyDomain()}
+                        id="domainResults"
+                    />
+                </ResultsScrollContainer>
             </>
         )
     }
@@ -176,10 +182,7 @@ class DomainPicker extends StatefulUIElement<
     render() {
         return (
             <ThemeProvider theme={Colors.lightTheme}>
-                <OuterSearchBox
-                    onKeyPress={this.handleKeyPress}
-                    onClick={this.handleOuterSearchBoxClick}
-                >
+                <OuterSearchBox onClick={this.handleOuterSearchBoxClick}>
                     {this.renderMainContent()}
                     {this.props.children}
                 </OuterSearchBox>
@@ -187,6 +190,17 @@ class DomainPicker extends StatefulUIElement<
         )
     }
 }
+
+const ResultsScrollContainer = styled.div`
+    max-height: 300px;
+    overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
 
 const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.greyScale2};

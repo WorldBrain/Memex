@@ -10,13 +10,12 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export type Props = {
-    name: String
+    name: string
     icon: IconKeys
-    pathname: String
-    isActive: Boolean
-    isExternal: Boolean
+    pathname: string
+    isActive: boolean
+    isExternal: boolean
 }
-
 class NavLink extends PureComponent<Props> {
     static propTypes = {}
 
@@ -39,7 +38,10 @@ class NavLink extends PureComponent<Props> {
                                 hoverOff
                                 color={this.props.isActive ? 'prime1' : null}
                             />
-                            <RouteTitle isActive={this.props.isActive}>
+                            <RouteTitle
+                                name={this.props.name}
+                                isActive={this.props.isActive}
+                            >
                                 {this.props.name}
                             </RouteTitle>
                         </RouteItemContent>

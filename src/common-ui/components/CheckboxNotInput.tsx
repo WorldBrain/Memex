@@ -104,7 +104,7 @@ const LabelTitle = styled.div<{ fontSize: number }>`
     white-space: nowrap;
 `
 
-const SubLabel = styled.div`
+const SubLabel = styled.div<{ fontSize?: number }>`
     color: ${(props) => props.theme.colors.greyScale5};
     font-weight: 300;
     font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '14px')};
@@ -125,7 +125,7 @@ const ChildrenBox = styled.span<{ mode }>`
     }
 `
 
-const LabelContainer = styled.label<{ zIndex?: number; width: boolean }>`
+const LabelContainer = styled.label<{ zIndex?: number; width: string }>`
     display: flex;
     align-items: center;
     width: ${(props) => (props.width ? props.width : '100%')};
@@ -140,7 +140,7 @@ const InputContainer = styled.input`
     cursor: pointer;
 `
 
-const LabelText = styled.span<{ fontSize }>`
+const LabelText = styled.span<{ fontSize? }>`
     font-size: ${(props) => (props.fontSize ? props.fontSize + 'px' : '0.9em')};
     display: flex;
     align-items: center;
@@ -148,6 +148,7 @@ const LabelText = styled.span<{ fontSize }>`
     cursor: pointer;
     width: fill-available;
     height: fill-available;
+    justify-content: center;
 
     &:hover {
         color: ${(props) => props.theme.colors.black};

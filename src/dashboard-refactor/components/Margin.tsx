@@ -1,4 +1,4 @@
-import React, { PureComponent } from 'react'
+import React, { MouseEventHandler, PureComponent } from 'react'
 import styled, { css } from 'styled-components'
 
 interface MarginProps {
@@ -10,9 +10,13 @@ interface MarginProps {
     bottom?: string
     width?: string
     height?: string
+    onMouseOver?: (e: React.MouseEvent) => void
+    onMouseLeave?: (e: React.MouseEvent) => void
+    onMouseEnter?: (e: React.MouseEvent) => void
+    onClick?: () => void | MouseEventHandler<Element>
 }
 
-const MarginDiv = styled.div`
+const MarginDiv = styled.div<MarginProps>`
     ${(props) => {
         if (props.horizontal) {
             return `margin-left: ${props.horizontal}; margin-right: ${props.horizontal};`

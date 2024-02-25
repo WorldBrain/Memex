@@ -6,7 +6,7 @@ import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
 import type { Anchor } from 'src/highlighting/types'
 import type { Annotation } from '../types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type { Orderable } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import type { Orderable } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export interface PageAnnotationsCacheEvents {
     updatedPageData: (
@@ -33,7 +33,7 @@ export interface PageAnnotationsCacheInterface {
     getSharedPageListIds: (normalizedPageUrl: string) => string[]
     setAnnotations: (
         annotations: UnifiedAnnotationForCache[],
-        opts?: { now?: number },
+        opts?: { now?: number; keepExistingData?: boolean },
     ) => { unifiedIds: UnifiedAnnotation['unifiedId'][] }
     setLists: (
         lists: UnifiedListForCache[],
@@ -107,6 +107,13 @@ export interface PageAnnotationsCacheInterface {
      * A map of normalized page URLs to their Set of cached list IDs.
      */
     readonly pageListIds: Map<string, Set<UnifiedList['unifiedId']>>
+    /**
+     * Kept so pages can figure out which page link lists they have.
+     */
+    readonly normalizedPageUrlsToPageLinkListIds: Map<
+        string,
+        Set<UnifiedList<'page-link'>['unifiedId']>
+    >
 }
 
 export type UnifiedAnnotation = Pick<

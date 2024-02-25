@@ -69,7 +69,9 @@ export class MarkdownPreview extends React.Component<Props, State> {
         return { showPreview: this.state.showPreview }
     }
 
-    private handleSecretInputKeyDown: React.KeyboardEventHandler = (e) => {
+    private handleSecretInputKeyDown: React.KeyboardEventHandler<
+        HTMLInputElement
+    > = (e) => {
         if (this.state.showPreview) {
             this.handleToggleKBShortcut(e)
             return this.props.onKeyDown?.(e)

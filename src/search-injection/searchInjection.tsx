@@ -139,7 +139,7 @@ export const handleRenderSearchInjection = async (
         }
 
         const root = document.createElement('div')
-        root.setAttribute('id', constants.REACT_ROOTS.searchInjection)
+        root.setAttribute('id', constants.REACT_ROOTS.searchEngineInjection)
 
         const containerIdentifier = searchEngineObj.container[position]
 
@@ -300,10 +300,8 @@ export const handleRenderSearchInjection = async (
         // const component = document.getElementById(
         //     constants.REACT_ROOTS.searchInjection,
         // )
-        // console.log('component', component)
         // if (component) {
         //     if (!sideBox) {
-        //         console.log('sidebooox')
         //         component.parentNode.removeChild(component)
 
         //         const sideBoxContainer = document.createElement('div')

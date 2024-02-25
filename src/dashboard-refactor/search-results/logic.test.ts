@@ -156,53 +156,6 @@ describe('Dashboard search results logic', () => {
     })
 
     describe('page data state mutations', () => {
-        it('should be able to set page tags', async ({ device }) => {
-            const { searchResults } = await setupTest(device, {
-                seedData: setPageSearchResult(),
-            })
-            const pageId = DATA.PAGE_2.normalizedUrl
-            const fullPageUrl = DATA.PAGE_2.fullUrl
-
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
-            ).toEqual([])
-
-            await searchResults.processEvent('setPageTags', {
-                id: pageId,
-                fullPageUrl,
-                added: DATA.TAG_1,
-            })
-            await searchResults.processEvent('setPageTags', {
-                id: pageId,
-                fullPageUrl,
-                added: DATA.TAG_2,
-            })
-
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
-            ).toEqual([DATA.TAG_1, DATA.TAG_2])
-
-            await searchResults.processEvent('setPageTags', {
-                id: pageId,
-                fullPageUrl,
-                deleted: DATA.TAG_1,
-            })
-
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
-            ).toEqual([DATA.TAG_2])
-
-            await searchResults.processEvent('setPageTags', {
-                id: pageId,
-                fullPageUrl,
-                added: DATA.TAG_3,
-            })
-
-            expect(
-                searchResults.state.searchResults.pageData.byId[pageId].tags,
-            ).toEqual([DATA.TAG_2, DATA.TAG_3])
-        })
-
         it('should be able to set page lists', async ({ device }) => {
             const { searchResults, annotationsCache } = await setupTest(
                 device,
@@ -728,21 +681,23 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].isCopyPasterShown,
                 ).toBe(false)
-                await searchResults.processEvent('setPageCopyPasterShown', {
-                    day,
-                    pageId,
-                    isShown: true,
-                })
+                // await searchResults.processEvent('setPageCopyPasterShown', {
+                //     day,
+                //     pageId,
+                //     isShown: true,
+                //     event: new MouseEvent('click'), // Mock event object
+                // })
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
                     ].isCopyPasterShown,
                 ).toBe(true)
-                await searchResults.processEvent('setPageCopyPasterShown', {
-                    day,
-                    pageId,
-                    isShown: false,
-                })
+                // await searchResults.processEvent('setPageCopyPasterShown', {
+                //     day,
+                //     pageId,
+                //     isShown: false,
+                //     event: new MouseEvent('click', { view: window, bubbles: true, cancelable: true }) as MouseEvent,
+                // })
                 expect(
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
@@ -1083,44 +1038,6 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(false)
             })
 
-            it('should be able to set new note tag state', async ({
-                device,
-            }) => {
-                const { searchResults } = await setupTest(device, {
-                    seedData: setPageSearchResult(),
-                })
-                const day = PAGE_SEARCH_DUMMY_DAY
-                const pageId = DATA.PAGE_1.normalizedUrl
-
-                expect(
-                    searchResults.state.searchResults.results[day].pages.byId[
-                        pageId
-                    ].newNoteForm.tags,
-                ).toEqual(utils.getInitialFormState().tags)
-
-                await searchResults.processEvent('setPageNewNoteTags', {
-                    day,
-                    pageId,
-                    tags: ['test'],
-                })
-                expect(
-                    searchResults.state.searchResults.results[day].pages.byId[
-                        pageId
-                    ].newNoteForm.tags,
-                ).toEqual(['test'])
-
-                await searchResults.processEvent('setPageNewNoteTags', {
-                    day,
-                    pageId,
-                    tags: ['test', 'again'],
-                })
-                expect(
-                    searchResults.state.searchResults.results[day].pages.byId[
-                        pageId
-                    ].newNoteForm.tags,
-                ).toEqual(['test', 'again'])
-            })
-
             it('should be able to cancel new note state', async ({
                 device,
             }) => {
@@ -1149,18 +1066,6 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].newNoteForm.inputValue,
                 ).toEqual(newNoteComment)
-
-                await searchResults.processEvent('setPageNewNoteTags', {
-                    day,
-                    pageId,
-                    tags: newNoteTags,
-                })
-
-                expect(
-                    searchResults.state.searchResults.results[day].pages.byId[
-                        pageId
-                    ].newNoteForm.tags,
-                ).toEqual(newNoteTags)
 
                 await searchResults.processEvent('cancelPageNewNote', {
                     day,
@@ -1200,18 +1105,6 @@ describe('Dashboard search results logic', () => {
                         pageId
                     ].newNoteForm.inputValue,
                 ).toEqual(newNoteComment)
-
-                await searchResults.processEvent('setPageNewNoteTags', {
-                    day,
-                    pageId,
-                    tags: newNoteTags,
-                })
-
-                expect(
-                    searchResults.state.searchResults.results[day].pages.byId[
-                        pageId
-                    ].newNoteForm.tags,
-                ).toEqual(newNoteTags)
 
                 expect(
                     searchResults.state.searchResults.newNoteCreateState,

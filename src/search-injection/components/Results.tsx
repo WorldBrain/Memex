@@ -218,7 +218,11 @@ const SearchField = styled(TextField)``
 
 const SettingsButtonContainer = styled.div``
 
-const MemexContainer = styled.div`
+const MemexContainer = styled.div<{
+    position: string
+    hideResults: boolean
+    searchEngine?: string
+}>`
     display: flex;
     flex-direction: column;
     height: ${(props) => (props.hideResults ? 'fit-content' : '650px')};

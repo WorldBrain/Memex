@@ -36,7 +36,7 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
-import { main as InPageUIInjectionMain } from 'src/content-scripts/content_script/search-injection'
+import { main as InPageUIInjectionMain } from 'src/content-scripts/content_script/in-page-ui-injections'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
@@ -67,7 +67,7 @@ import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/util
 import type { SummarizationInterface } from 'src/summarization-llm/background'
 import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
@@ -96,10 +96,7 @@ import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { injectTelegramCustomUI } from './injectionUtils/telegram'
 import { renderSpacesBar } from './injectionUtils/utils'
-import {
-    getTimestampedNoteWithAIsummaryForYoutubeNotes,
-    loadYoutubeButtons,
-} from './injectionUtils/youtube'
+import { getTimestampedNoteWithAIsummaryForYoutubeNotes } from './injectionUtils/youtube'
 import {
     injectTwitterProfileUI,
     trackTwitterMessageList,
@@ -107,6 +104,14 @@ import {
 import { injectSubstackButtons } from './injectionUtils/substack'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
+import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
+import type { SearchDisplayProps } from 'src/search-injection/search-display'
+import { createUIServices } from 'src/services/ui'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
+import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
+import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -200,12 +205,7 @@ export async function main(
     // 1. Create a local object with promises to track each content script
     // initialisation and provide a function which can initialise a content script
     // or ignore if already loaded.
-    const components: {
-        ribbon?: Resolvable<void>
-        sidebar?: Resolvable<void>
-        tooltip?: Resolvable<void>
-        highlights?: Resolvable<void>
-    } = {}
+    const components: { [C in InPageUIComponent]?: Resolvable<void> } = {}
 
     // 2. Initialise dependencies required by content scripts
     const analyticsBG = runInBackground<AnalyticsCoreInterface>()
@@ -216,7 +216,11 @@ export async function main(
     const annotationsBG = runInBackground<AnnotationInterface<'caller'>>()
     const pageIndexingBG = runInBackground<PageIndexingInterface<'caller'>>()
     const contentSharingBG = runInBackground<ContentSharingInterface>()
-    const imageSupport = runInBackground()
+    const copyPasterBG = runInBackground<RemoteCopyPasterInterface>()
+    const imageSupportBG = runInBackground<ImageSupportInterface<'caller'>>()
+    const contentConversationsBG = runInBackground<
+        ContentConversationsInterface
+    >()
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
@@ -228,6 +232,7 @@ export async function main(
     const pageActivityIndicatorBG = runInBackground<
         RemotePageActivityIndicatorInterface
     >()
+    const activityIndicatorBG = runInBackground<ActivityIndicatorInterface>()
     const pdfBG = runInBackground<PDFRemoteInterface>()
     const annotationsManager = new AnnotationsManager()
 
@@ -378,7 +383,7 @@ export async function main(
                     data.body,
                     data.fullPageUrl,
                     localId,
-                    imageSupport,
+                    imageSupportBG,
                     false,
                 )
 
@@ -439,11 +444,21 @@ export async function main(
     // business logic of initialising and hide/showing components.
     const inPageUI = new SharedInPageUIState({
         getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
-        loadComponent: (component) => {
+        loadComponent: async (component) => {
             // Treat highlights differently as they're not a separate content script
             if (component === 'highlights') {
                 components.highlights = resolvablePromise<void>()
                 components.highlights.resolve()
+            }
+
+            if (component === 'search') {
+                await contentScriptRegistry.registerInPageUIInjectionScript(
+                    InPageUIInjectionMain,
+                    {
+                        searchDisplayProps,
+                    },
+                )
+                return
             }
 
             if (!components[component]) {
@@ -464,16 +479,18 @@ export async function main(
         screenshotAnchor?,
         screenshotImage?,
         imageSupport?,
-        highlightColor?: { color: RGBAColor; id: string; label: string },
+        highlightColor?: HighlightColor,
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
             await contentScriptRegistry.registerInPageUIInjectionScript(
                 InPageUIInjectionMain,
                 {
-                    errorMessage: err.message,
-                    title: 'Error saving note',
-                    blockedBackground: true,
+                    errorDisplayProps: {
+                        errorMessage: err.message,
+                        title: 'Error saving note',
+                        blockedBackground: true,
+                    },
                 },
             )
         }
@@ -522,11 +539,7 @@ export async function main(
             shouldShare: boolean,
             shouldCopyShareLink: boolean,
             drawRectangle?: boolean,
-            highlightColorSetting?: {
-                color: RGBAColor
-                id: string
-                label: string
-            },
+            highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
@@ -567,7 +580,7 @@ export async function main(
                     shouldCopyShareLink,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
-                    imageSupport,
+                    imageSupportBG,
                     highlightColor,
                 )
 
@@ -589,7 +602,7 @@ export async function main(
 
             await inPageUI.hideTooltip()
 
-            if (preventHideTooltip && selection.toString().length > 0) {
+            if (preventHideTooltip) {
                 const styleSheet = document.createElement('style')
                 styleSheet.type = 'text/css'
                 styleSheet.innerText = `
@@ -614,7 +627,7 @@ export async function main(
                 notification.style.borderRadius = '5px'
                 notification.style.zIndex = '1000'
                 notification.style.textAlign = 'center'
-                notification.style.animation = 'slideAndFade 2s ease-in-out'
+                notification.style.animation = 'slideAndFade 4s ease-in-out'
                 document.body.appendChild(notification)
                 setTimeout(() => {
                     document.body.removeChild(notification)
@@ -672,7 +685,7 @@ export async function main(
                     shouldCopyShareLink,
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
-                    imageSupport,
+                    imageSupportBG,
                 )
 
                 const annotationId = result.annotationId
@@ -867,7 +880,7 @@ export async function main(
                 bgScriptBG,
                 analyticsBG,
                 pageActivityIndicatorBG,
-                activityIndicatorBG: runInBackground(),
+                activityIndicatorBG,
                 contentSharing: contentSharingBG,
                 bookmarks,
                 syncSettingsBG: syncSettingsBG,
@@ -908,6 +921,7 @@ export async function main(
                 inPageUI,
                 getCurrentUser: () => currentUser,
                 annotationsCache,
+                // inPageMode: true,
                 highlighter: highlightRenderer,
                 analyticsBG,
                 authBG,
@@ -916,7 +930,9 @@ export async function main(
                 summarizeBG,
                 pageIndexingBG,
                 syncSettingsBG,
+                imageSupportBG,
                 contentSharingBG,
+                contentConversationsBG,
                 contentSharingByTabsBG,
                 pageActivityIndicatorBG,
                 customListsBG: collectionsBG,
@@ -926,7 +942,6 @@ export async function main(
                 getFullPageUrl: pageInfo.getFullPageUrl,
                 copyPaster,
                 subscription,
-                contentConversationsBG: runInBackground(),
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
                 pkmSyncBG: runInBackground(),
@@ -957,15 +972,46 @@ export async function main(
             })
             components.tooltip?.resolve()
         },
-        async registerInPageUIInjectionScript(execute, errorDisplayProps) {
+        async registerInPageUIInjectionScript(execute, onDemandDisplay) {
             await execute({
                 syncSettingsBG,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 requestSearcher: remoteFunction('search'),
                 annotationsFunctions,
-                errorDisplayProps,
+                onDemandDisplay,
             })
         },
+    }
+
+    const searchDisplayProps: SearchDisplayProps = {
+        activityIndicatorBG,
+        searchBG: runInBackground(),
+        pdfViewerBG: runInBackground(),
+        summarizeBG,
+        analyticsBG,
+        authBG,
+        annotationsBG,
+        pageIndexingBG,
+        contentShareBG: contentSharingBG,
+        contentShareByTabsBG: contentSharingByTabsBG,
+        pageActivityIndicatorBG,
+        listsBG: collectionsBG,
+        contentConversationsBG,
+        contentScriptsBG,
+        imageSupportBG,
+        copyPasterBG,
+        syncSettingsBG,
+        analytics,
+        document,
+        location,
+        history,
+        annotationsCache,
+        copyToClipboard,
+        tabsAPI: browser.tabs,
+        runtimeAPI: browser.runtime,
+        localStorage: browser.storage.local,
+        services: createUIServices(),
+        renderUpdateNotifBanner: () => null,
     }
 
     if (

@@ -5,8 +5,8 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { StatefulUIElement } from 'src/util/ui-logic'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { TaskState } from 'firebase/storage'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
+import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 
 export interface Props extends Dependencies {
     disableWriteOps?: boolean
@@ -284,7 +284,7 @@ export default class BulkEditWidget extends StatefulUIElement<
 }
 
 const BulkEditWidgetContainer = styled.div<{
-    bulkDeleteLoadingState: TaskState
+    bulkDeleteLoadingState: UITaskState
 }>`
     position: fixed;
     bottom: 0;

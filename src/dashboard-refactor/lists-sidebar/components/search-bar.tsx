@@ -56,7 +56,7 @@ const Input = styled.input`
     padding-left: 5px;
 `
 
-const TextSpan = styled.span<{ bold: boolean }>`
+const TextSpan = styled.span<{ bold?: boolean }>`
     word-break: break-word;
 
     ${(props) =>
@@ -69,7 +69,7 @@ const TextSpan = styled.span<{ bold: boolean }>`
         `};
 `
 
-const IconContainer = styled.div<{ hoverOff: boolean }>`
+const IconContainer = styled.div<{ hoverOff?: boolean }>`
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -158,7 +158,9 @@ export default class ListsSidebarSearchBar extends PureComponent<
         this.inputRef.current.focus()
     }
 
-    private handleKeyDown: React.KeyboardEventHandler = (e) => {
+    private handleKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (
+        e,
+    ) => {
         if (e.key === 'Escape') {
             this.handleClearSearch()
         }
@@ -174,7 +176,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
         return (
             <SearchArea>
                 <OuterContainer isSidebarLocked={isSidebarLocked}>
-                    <InnerContainer horizontal="15px">
+                    <InnerContainer>
                         {!!searchQuery ? (
                             <IconContainer>
                                 <Margin right="5px">
@@ -199,6 +201,7 @@ export default class ListsSidebarSearchBar extends PureComponent<
                         <Input
                             placeholder="Search Spaces"
                             ref={this.inputRef}
+                            id={'spaces-search-bar'}
                             onChange={this.handleInputChange}
                             value={searchQuery}
                             autoFocus

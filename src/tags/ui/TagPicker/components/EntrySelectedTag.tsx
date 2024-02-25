@@ -22,7 +22,6 @@ export class EntrySelectedTag extends React.PureComponent<Props> {
                 {this.props.entriesSelected?.map((entry) => (
                     <StyledActiveEntry
                         key={`ActiveTab-${entry}`}
-                        onClick={this.handleSelectedTabPress}
                         {...{ [this.dataAttribute]: entry }} // Need to set a dynamic prop here
                     >
                         {entry}

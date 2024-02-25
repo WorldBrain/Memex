@@ -24,16 +24,14 @@ import type { DropReceivingState } from '../types'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { SPECIAL_LIST_STRING_IDS } from './constants'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import {
-    defaultTreeNodeSorter,
-    mapTreeTraverse,
-} from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { mapTreeTraverse } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import {
     LIST_REORDER_POST_EL_POSTFIX,
     LIST_REORDER_PRE_EL_POSTFIX,
 } from '../constants'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 type ListGroup = Omit<SidebarGroupProps, 'listsCount'> & {
     listData: UnifiedList[]
@@ -79,6 +77,7 @@ export interface ListsSidebarProps extends ListsSidebarState {
     spaceSidebarWidth: string
     someListIsDragging: boolean
     getRootElement: () => HTMLElement
+    isInPageMode: boolean
 }
 
 export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
@@ -173,7 +172,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                 (list) =>
                     list.parentUnifiedId == null && list.type === 'user-list',
             )
-            .sort(defaultTreeNodeSorter)
+            .sort(defaultOrderableSorter)
 
         // Derived state used to hide nested lists if any of their ancestors are collapsed
         const listShowFlag = new Map<string, boolean>()
@@ -189,7 +188,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                                 (_list) =>
                                     _list.parentUnifiedId === list.unifiedId,
                             )
-                            .sort(defaultTreeNodeSorter)
+                            .sort(defaultOrderableSorter)
                             .reverse(),
                     cb: (list, index2) => {
                         const parentListTreeState = this.props.listTrees.byId[
@@ -490,6 +489,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
             <Container
                 onMouseOver={this.props.setSidebarPeekState(true)}
                 spaceSidebarWidth={this.props.spaceSidebarWidth}
+                inPageMode={this.props.isInPageMode}
             >
                 <GlobalStyle />
                 <SidebarInnerContent>
@@ -631,7 +631,10 @@ const RightSideIconBox = styled.div`
     grid-gap: 5px;
 `
 
-const Container = styled.div<{ spaceSidebarWidth: number }>`
+const Container = styled.div<{
+    spaceSidebarWidth: string
+    inPageMode: boolean
+}>`
     position: sticky;
     z-index: 2147483645;
     width: ${(props) => props.spaceSidebarWidth};
@@ -645,6 +648,12 @@ const Container = styled.div<{ spaceSidebarWidth: number }>`
     }
 
     scrollbar-width: none;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            position: relative;
+        `}
 `
 
 const Separator = styled.div`
@@ -775,7 +784,7 @@ const NewItemsCountInnerDiv = styled.div`
     padding: 2px 0px;
 `
 
-const NestedListInput = styled.div`
+const NestedListInput = styled.div<{ indentSteps: number }>`
     margin-left: ${(props) =>
         props.indentSteps > 0
             ? (props.indentSteps - 1) * 20

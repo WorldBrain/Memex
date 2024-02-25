@@ -25,7 +25,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
     static defaultProps: Partial<Props> = { initValue: '' }
     state: State = { value: this.props.initValue }
 
-    private handleChange: React.MouseEventHandler<HTMLInputElement> = (
+    private handleChange: React.ChangeEventHandler<HTMLInputElement> = (
         event,
     ) => {
         if (this.props.onChange) {
@@ -34,7 +34,9 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
         this.setState({ value: (event.target as HTMLInputElement).value })
     }
 
-    private handleInputKeyDown: React.KeyboardEventHandler = (e) => {
+    private handleInputKeyDown: React.KeyboardEventHandler<HTMLInputElement> = (
+        e,
+    ) => {
         // Allow escape keydown to bubble up to close the sidebar only if no input state
         if (e.key === 'Escape') {
             if (this.state.value.length) {
@@ -52,7 +54,7 @@ export default class ListsSidebarEditableItem extends React.PureComponent<
         e.stopPropagation()
     }
 
-    private handleConfirm: React.MouseEventHandler = () => {
+    private handleConfirm: React.MouseEventHandler<HTMLInputElement> = () => {
         this.props.onConfirmClick(this.state.value)
     }
 
@@ -140,7 +142,7 @@ const ErrMsg = styled.div`
     text-align: center;
 `
 
-const Container = styled.div<Props>`
+const Container = styled.div`
     min-width: fit-content;
     max-width: fill-available;
     max-width: -moz-available;
