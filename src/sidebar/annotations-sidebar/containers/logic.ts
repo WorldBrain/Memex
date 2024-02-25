@@ -4369,6 +4369,36 @@ export class SidebarContainerLogic extends UILogic<
         for (let i = 0; i < maxRetries; i++) {
             if (
                 this.options.events.emit(
+                    'addVideoSnapshotToEditor',
+                    {
+                        imageData: event.imageData,
+                    },
+                    (success) => {
+                        handledSuccessfully = success
+                    },
+                )
+            ) {
+                break
+            }
+            await sleepPromise(50) // wait for half a second before trying again
+        }
+    }
+    saveImageAsNewNote: EventHandler<'saveImageAsNewNote'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            loadState: { $set: 'success' },
+            activeTab: { $set: 'annotations' },
+        })
+        this.options.focusCreateForm()
+
+        const maxRetries = 50
+        let handledSuccessfully = false
+
+        for (let i = 0; i < maxRetries; i++) {
+            if (
+                this.options.events.emit(
                     'addImageToEditor',
                     {
                         imageData: event.imageData,

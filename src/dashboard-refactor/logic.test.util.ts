@@ -216,6 +216,7 @@ export async function setupTest(
         services: createUIServices(),
         analyticsBG: device.backgroundModules.analyticsBG,
         imageSupportBG: device.backgroundModules.imageSupport,
+        bgScriptBG: device.backgroundModules.bgScript,
     })
 
     if (args.overrideSearchTrigger) {

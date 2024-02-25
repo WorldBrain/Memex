@@ -70,10 +70,7 @@ class AnnotationEdit extends React.Component<Props> {
         await this.youtubeKeyboardShortcut()
         this.editorRef?.setEditable(this.props?.isEditMode ?? false)
 
-        if (
-            this.editorRef?.getContentLength() === 0 &&
-            !this.props.isEditMode
-        ) {
+        if (!this.editorRef?.checkIfHasContent() && !this.props.isEditMode) {
             this.setState({ shouldShowEditor: false })
         }
     }
@@ -83,7 +80,7 @@ class AnnotationEdit extends React.Component<Props> {
             this.editorRef?.setEditable(this.props?.isEditMode ?? false)
 
             if (
-                this.editorRef?.getContentLength() === 0 &&
+                !this.editorRef?.checkIfHasContent() &&
                 !this.props.isEditMode
             ) {
                 this.setState({ shouldShowEditor: false })

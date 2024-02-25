@@ -730,6 +730,7 @@ export function createBackgroundModules(options: {
         inPageUI: new InPageUIBackground({
             tabsAPI: options.browserAPIs.tabs,
             contextMenuAPI: options.browserAPIs.contextMenus,
+            browserAPIs: options.browserAPIs,
         }),
         copyPaster,
         activityStreams,
