@@ -672,7 +672,6 @@ export default class Ribbon extends Component<Props, State> {
                         : 10
                 }
                 offsetY={-15}
-                width={'630px'}
                 closeComponent={() => this.props.toggleFeed()}
                 getPortalRoot={this.props.getRootElement}
             >
@@ -1761,8 +1760,7 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.ribbonPosition
                                         }
                                     >
-                                        {!this.props.sidebar.isSidebarOpen &&
-                                            this.renderFeedButton()}
+                                        {this.renderFeedButton()}
                                         <BlockCounterIndicator
                                             ribbonPosition={
                                                 this.props.ribbonPosition
@@ -1898,8 +1896,6 @@ export default class Ribbon extends Component<Props, State> {
                                 ribbonPosition={this.props.ribbonPosition}
                                 isSidebarOpen={this.props.sidebar.isSidebarOpen}
                             >
-                                {!this.props.sidebar.isSidebarOpen &&
-                                    this.renderFeedButton()}
                                 <PageAction
                                     ribbonPosition={this.props.ribbonPosition}
                                     isSidebarOpen={
@@ -1947,6 +1943,7 @@ export default class Ribbon extends Component<Props, State> {
                                 sidebarOpen={this.props.sidebar.isSidebarOpen}
                                 ribbonPosition={this.props.ribbonPosition}
                             >
+                                {this.renderFeedButton()}
                                 {this.renderDarkLightModeToggle()}
                                 {this.renderTutorialButton()}
                                 <BlockCounterIndicator
@@ -2598,7 +2595,7 @@ const FeedbackContainer = styled.div`
 
 const FeedContainer = styled.div`
     display: flex;
-    width: fill-available;
+    width: 500px;
     height: 580px;
     justify-content: flex-start;
     align-items: flex-start;
@@ -2606,7 +2603,7 @@ const FeedContainer = styled.div`
     padding-top: 20px;
     max-width: 800px;
     background: ${(props) => props.theme.colors.black};
-    border-radius: 10px;
+    border-radius: 0 0 10px 10px;
 `
 
 const TitleContainer = styled.div`

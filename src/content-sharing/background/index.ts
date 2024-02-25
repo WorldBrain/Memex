@@ -968,11 +968,6 @@ export default class ContentSharingBackground {
         for (const fullPageUrl of params.fullPageUrls) {
             let progress = this.pageLinkCreationProgress[fullPageUrl]
             if (progress) {
-                console.log(
-                    'already creating page link for:',
-                    fullPageUrl,
-                    progress.details,
-                )
                 pageLinks[fullPageUrl] = progress.details
                 continue
             }

@@ -987,7 +987,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             footerDeps == null
         ) {
             return (
-                <DefaultFooterStyled>
+                <ActionFooterStyled>
                     <ItemBoxBottom
                         borderTop={false}
                         creationInfo={this.creationInfo}
@@ -999,7 +999,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.state.showSpacePicker,
                     )}
                     {this.renderShareMenu(this.shareMenuButtonRef)}
-                </DefaultFooterStyled>
+                </ActionFooterStyled>
             )
         }
 
@@ -1225,7 +1225,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             />
                         </TooltipBox>
                     )}
-                    {footerDeps?.onEditHighlightIconClick &&
+                    {footerDeps?.onEditIconClick &&
                     this.props.currentUserId === this.props.creatorId ? (
                         <TooltipBox
                             tooltipText={
@@ -1239,7 +1239,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             getPortalRoot={this.props.getRootElement}
                         >
                             <Icon
-                                onClick={footerDeps.onEditHighlightIconClick}
+                                onClick={footerDeps.onEditIconClick}
                                 filePath={'edit'}
                                 heightAndWidth={'20px'}
                                 borderColor={'transparent'}
@@ -1596,6 +1596,11 @@ const DefaultFooterStyled = styled.div`
     align-items: center;
     justify-content: space-between;
     padding-bottom: 5px;
+    padding: 0 10px 5px 10px;
+    height: 34px;
+`
+const ActionFooterStyled = styled(DefaultFooterStyled)`
+    padding: 0 0px 10px 0px;
 `
 
 const AnnotationStyled = styled.div`
@@ -1701,7 +1706,9 @@ const NoteCounter = styled.span`
     text-align: center;
 `
 
-const AutoAddedIndicator = styled.div``
+const AutoAddedIndicator = styled.div`
+    z-index: 1000;
+`
 const AutoAddDefaultContainer = styled.div`
     display: flex;
     align-items: center;

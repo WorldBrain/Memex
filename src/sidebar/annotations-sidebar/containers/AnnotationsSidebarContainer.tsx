@@ -1818,7 +1818,7 @@ const ContainerStyled = styled.div<{
                     : props.theme.colors.black + 'c9'};
             backdrop-filter: unset;
             position: relative;
-            height: fill-available;
+            height: 100%;
         `}
 `
 

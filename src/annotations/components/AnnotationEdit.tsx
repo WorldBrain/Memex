@@ -14,6 +14,7 @@ interface State {
     editorHeight: string
     youtubeShortcut: string | null
     isDeboucingEditor: boolean
+    shouldShowEditor: boolean
 }
 
 export interface AnnotationEditEventProps {
@@ -62,16 +63,33 @@ class AnnotationEdit extends React.Component<Props> {
         editorHeight: '50px',
         youtubeShortcut: null,
         isDeboucingEditor: false,
+        shouldShowEditor: true,
     }
 
     async componentDidMount() {
         await this.youtubeKeyboardShortcut()
         this.editorRef?.setEditable(this.props?.isEditMode ?? false)
+
+        if (
+            this.editorRef?.getContentLength() === 0 &&
+            !this.props.isEditMode
+        ) {
+            this.setState({ shouldShowEditor: false })
+        }
     }
 
     componentDidUpdate(prevProps: Props) {
         if (prevProps.isEditMode !== this.props.isEditMode) {
             this.editorRef?.setEditable(this.props?.isEditMode ?? false)
+
+            if (
+                this.editorRef?.getContentLength() === 0 &&
+                !this.props.isEditMode
+            ) {
+                this.setState({ shouldShowEditor: false })
+            } else {
+                this.setState({ shouldShowEditor: true })
+            }
         }
     }
 
@@ -154,27 +172,31 @@ class AnnotationEdit extends React.Component<Props> {
     }
 
     render() {
-        return (
-            <EditorContainer>
-                <MemexEditor
-                    getYoutubePlayer={this.props.getYoutubePlayer}
-                    onContentUpdate={(content) =>
-                        this.props.onCommentChange(content)
-                    }
-                    markdownContent={this.props.comment}
-                    onKeyDown={this.handleInputKeyDown}
-                    placeholder={`Add Note. Click on ( ? ) for formatting help.`}
-                    setEditorInstanceRef={(ref) => (this.editorRef = ref)}
-                    autoFocus
-                    imageSupport={this.props.imageSupport}
-                    getRootElement={this.props.getRootElement}
-                    slimEditorActions={this.props.slimEditorActions}
-                    editable={this.props.isEditMode}
-                    setEditing={this.props.setEditing}
-                    setDebouncingSaveBlock={this.setDebouncingSaveBlock}
-                />
-            </EditorContainer>
-        )
+        if (this.state.shouldShowEditor) {
+            return (
+                <EditorContainer>
+                    <MemexEditor
+                        getYoutubePlayer={this.props.getYoutubePlayer}
+                        onContentUpdate={(content) =>
+                            this.props.onCommentChange(content)
+                        }
+                        markdownContent={this.props.comment}
+                        onKeyDown={this.handleInputKeyDown}
+                        placeholder={`Add Note. Click on ( ? ) for formatting help.`}
+                        setEditorInstanceRef={(ref) => (this.editorRef = ref)}
+                        autoFocus
+                        imageSupport={this.props.imageSupport}
+                        getRootElement={this.props.getRootElement}
+                        slimEditorActions={this.props.slimEditorActions}
+                        editable={this.props.isEditMode}
+                        setEditing={this.props.setEditing}
+                        setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                    />
+                </EditorContainer>
+            )
+        } else {
+            return null
+        }
     }
 }
 
@@ -182,7 +204,7 @@ export default AnnotationEdit
 
 const EditorContainer = styled.div`
     height: fit-content;
-    padding: 0 5px 10px 5px;
+    padding: 0 10px 10px 10px;
     // transition: height 1s ease-in-out;
     // border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
 

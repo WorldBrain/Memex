@@ -20,6 +20,7 @@ export interface SearchBarProps {
     renderExpandButton: () => ReactElement
     getRootElement: () => HTMLElement
     inPageMode?: boolean
+    isNotesSidebarShown?: boolean
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -52,7 +53,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         } = this.props
         return (
             <Margin vertical="auto">
-                <SearchBarContainer isClosed={!isSidebarLocked}>
+                <SearchBarContainer
+                    isClosed={!isSidebarLocked}
+                    inPageMode={this.props.inPageMode}
+                >
                     <FullWidthMargin>
                         {!!searchQuery ? (
                             <IconContainer>
@@ -90,7 +94,11 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                         />
                     </FullWidthMargin>
                 </SearchBarContainer>
-                <ActionButtons>
+                <ActionButtons
+                    isClosed={!isSidebarLocked}
+                    inPageMode={this.props.inPageMode}
+                    isNotesSidebarShown={this.props.isNotesSidebarShown}
+                >
                     <FilterButton left="15px" onClick={onSearchFiltersOpen}>
                         {searchFiltersOpen ? (
                             <TooltipBox
@@ -142,7 +150,10 @@ const textStyles = `
     color: ${(props) => props.theme.colors.white};
 `
 
-const SearchBarContainer = styled.div<{ isClosed: boolean }>`
+const SearchBarContainer = styled.div<{
+    isClosed: boolean
+    inPageMode: boolean
+}>`
     height: 44px;
     max-width: 450px;
     width: 100%;
@@ -169,6 +180,13 @@ const SearchBarContainer = styled.div<{ isClosed: boolean }>`
                 outline: 1px solid ${(props) => props.theme.colors.prime1};
             }
         `};
+
+    ${(props) =>
+        props.inPageMode &&
+        props.isClosed &&
+        css`
+            margin-left: 60px;
+        `}
 `
 
 const Input = styled.input`
@@ -227,9 +245,19 @@ const StyledIcon = styled(Icon)`
     cursor: pointer;
 `
 
-const ActionButtons = styled.div`
+const ActionButtons = styled.div<{
+    isClosed?: boolean
+    inPageMode?: boolean
+    isNotesSidebarShown?: boolean
+}>`
     display: flex;
     align-items: center;
     justify-content: flex-start;
     grid-gap: 15px;
+    ${(props) =>
+        props.inPageMode &&
+        (props.isClosed || props.isNotesSidebarShown) &&
+        css`
+            padding-right: 30px;
+        `}
 `

@@ -68,15 +68,13 @@ export const TANA_PASTE_TEMPLATE: Template = {
 {{#HasNotes}} 
     - Annotations:
 {{#Notes}}
+        - Note {{#NoteSpaces}}for {{{NoteSpaces}}}{{/NoteSpaces}}
 {{#NoteHighlight}}  
-        - "{{{NoteHighlight}}}"
+            - "{{{NoteHighlight}}}"
     {{/NoteHighlight}} 
 {{#NoteText}}
-        - {{{NoteText}}}
+            - {{{NoteText}}}
     {{/NoteText}} 
-{{#NoteSpaces}}  
-        - Spaces: {{{NoteSpaces}}} 
-{{/NoteSpaces}} 
 {{/Notes}} 
 {{/HasNotes}}
 `,

@@ -281,7 +281,14 @@ export default class TemplateEditor extends PureComponent<
                         type="text"
                         placeholder="Title"
                         value={template?.title}
-                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.metaKey) {
+                                this.props.onClickSave()
+                            } else if (e.key === 'Escape') {
+                                this.props.onClickCancel()
+                            }
+                            e.stopPropagation()
+                        }}
                         onChange={(e) =>
                             this.props.onTitleChange(
                                 (e.target as HTMLInputElement).value,
@@ -408,6 +415,11 @@ export default class TemplateEditor extends PureComponent<
                                         setTimeout(() => {
                                             ;(e.target as HTMLTextAreaElement).selectionStart = (e.target as HTMLTextAreaElement).selectionEnd = newCursorPos
                                         }, 0)
+                                    }
+                                    if (e.key === 'Enter' && e.metaKey) {
+                                        this.props.onClickSave()
+                                    } else if (e.key === 'Escape') {
+                                        this.props.onClickCancel()
                                     }
                                     e.stopPropagation()
                                 }}
@@ -577,6 +589,7 @@ const PreviewEditorBox = styled.div`
     position: relative;
     flex: 1;
     min-height: 10%;
+    min-width: 10%;
 `
 
 const LoadingBox = styled.div`
@@ -873,4 +886,5 @@ const EditorBox = styled.div`
     grid-gap: 5px;
     min-height: 10%;
     flex: 1;
+    min-width: 10%;
 `

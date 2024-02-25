@@ -13,6 +13,7 @@ import {
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import { debounce } from 'lodash'
 
 interface State {
     isLoading: boolean
@@ -194,9 +195,6 @@ export default class CopyPasterContainer extends React.PureComponent<
             templateType = templateTypeInput
         }
 
-        if (templateType === 'originalPage') {
-            this.setState({ isPreviewLoading: 'running' })
-        }
         try {
             const rendered = await this.props.renderPreview(
                 template,
@@ -285,6 +283,16 @@ export default class CopyPasterContainer extends React.PureComponent<
         this.setState({ tmpTemplate: undefined, isNew: undefined })
         await this.syncTemplates()
     }
+    private debouncedPreviewUpdate = debounce(async (currentTemplate) => {
+        try {
+            const previewString = await this.handleTemplatePreview(
+                currentTemplate,
+            )
+            this.setState({ previewString: previewString })
+        } catch (err) {
+            this.setState({ previewString: err.message })
+        }
+    }, 500) // 300ms debounce time
 
     render() {
         return (
@@ -310,13 +318,20 @@ export default class CopyPasterContainer extends React.PureComponent<
                 copyPasterEditingTemplate={this.state.tmpTemplate}
                 onClickEdit={async (id) => {
                     const template = this.findTemplateForId(id)
+                    this.setState({
+                        tmpTemplate: template,
+                        isNew: false,
+                    })
+
+                    let templateType = this.state.templateType
+                    if (templateType === 'originalPage') {
+                        this.setState({ isPreviewLoading: 'running' })
+                    }
                     let previewString = await this.handleTemplatePreview(
                         template,
                     )
 
                     this.setState({
-                        tmpTemplate: template,
-                        isNew: false,
                         previewString: previewString,
                     })
                 }}
@@ -388,15 +403,13 @@ export default class CopyPasterContainer extends React.PureComponent<
 
                     currentTemplate.code = code
 
-                    try {
-                        const previewString = await this.handleTemplatePreview(
-                            currentTemplate,
-                        )
+                    let templateType = this.state.templateType
 
-                        this.setState({ previewString: previewString })
-                    } catch (err) {
-                        this.setState({ previewString: err.message })
+                    if (templateType === 'originalPage') {
+                        this.setState({ isPreviewLoading: 'running' })
                     }
+
+                    this.debouncedPreviewUpdate(this.state.tmpTemplate)
                 }}
                 changeTemplateType={async (
                     templateType: 'originalPage' | 'examplePage',

@@ -60,6 +60,8 @@ export interface Props
     searchQuery?: string
     onMatchingTextToggleClick: React.MouseEventHandler
     renderPageCitations: () => JSX.Element
+    isNotesSidebarShown?: boolean
+    isListsSidebarShown?: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -501,7 +503,11 @@ export default class PageResultView extends PureComponent<Props> {
                     this.props.onListPickerFooterBtnClick(event)
                 },
                 tooltipText: 'Add to Space(s)',
-                ButtonText: 'Spaces',
+                ButtonText:
+                    !(
+                        this.props.isNotesSidebarShown &&
+                        this.props.isListsSidebarShown
+                    ) && 'Spaces',
                 active: this.props.listPickerShowStatus === 'footer',
                 buttonRef: this.spacePickerButtonRef,
                 showKeyShortcut: this.props.isInFocus && 'S',
@@ -521,7 +527,11 @@ export default class PageResultView extends PureComponent<Props> {
                     }
                 },
                 buttonRef: this.copyPasteronPageButtonRef,
-                ButtonText: 'Cite',
+                ButtonText:
+                    !(
+                        this.props.isNotesSidebarShown &&
+                        this.props.isListsSidebarShown
+                    ) && 'Cite',
                 tooltipText: (
                     <span>
                         <strong>Click</strong>
@@ -549,13 +559,20 @@ export default class PageResultView extends PureComponent<Props> {
                     this.props.onAIResultBtnClick(event)
                 },
                 tooltipText: 'Ask AI & Summarise page',
-                ButtonText: 'Ask AI',
+                ButtonText:
+                    !(
+                        this.props.isNotesSidebarShown &&
+                        this.props.isListsSidebarShown
+                    ) && 'Ask AI',
                 buttonRef: null,
                 showKeyShortcut: this.props.isInFocus && 'Y',
             },
             {
                 key: 'expand-notes-btn',
-                ButtonText:
+                ButtonText: !(
+                    this.props.isNotesSidebarShown &&
+                    this.props.isListsSidebarShown
+                ) ? (
                     this.props.noteIds[this.props.notesType].length > 0 ? (
                         <NotesCounterTitle>
                             <Icon
@@ -576,7 +593,24 @@ export default class PageResultView extends PureComponent<Props> {
                             />
                             Add Notes
                         </NotesCounterTitle>
-                    ),
+                    )
+                ) : this.props.noteIds[this.props.notesType].length > 0 ? (
+                    <NotesCounterTitle>
+                        <Icon
+                            heightAndWidth="16px"
+                            icon={this.hasNotes ? 'commentFull' : 'commentAdd'}
+                            hoverOff
+                        />
+                    </NotesCounterTitle>
+                ) : (
+                    <NotesCounterTitle>
+                        <Icon
+                            heightAndWidth="16px"
+                            icon={'commentAdd'}
+                            hoverOff
+                        />
+                    </NotesCounterTitle>
+                ),
                 imageColor:
                     this.props.noteIds[this.props.notesType].length > 0
                         ? 'prime1'
@@ -882,13 +916,13 @@ const FooterBar = styled.div<{
     width: 100%;
     z-index: 999999;
     border-radius: 0 0 10px 10px;
-
+    padding: 2px 0px 5px 0px;
     ${(props) =>
         props.inPageMode &&
         css`
             backdrop-filter: unset;
             background: unset;
-        `}
+        `};
 `
 
 const ExtraButtonsActionBar = styled.div`

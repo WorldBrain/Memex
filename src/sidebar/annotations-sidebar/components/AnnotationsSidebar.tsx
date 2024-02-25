@@ -5778,6 +5778,13 @@ const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     z-index: ${(props) => 999 - props.zIndex};
     width: fill-available;
     width: -moz-available;
+    overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const FollowedListsMsgContainer = styled.div`
@@ -5977,7 +5984,7 @@ const AnnotationSectionScrollContainer = styled.div`
     overflow: scroll;
     width: fill-available;
     width: -moz-available;
-    height: 4000px;
+    height: fit-content;
 
     scrollbar-width: none;
 
@@ -6056,7 +6063,7 @@ const ResultBodyContainer = styled.div<{
         props.inPageMode &&
         css`
             height: fill-available;
-            height: -moz-available;
+            height: 100%;
         `}
 `
 

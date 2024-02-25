@@ -870,15 +870,13 @@ export class SidebarContainerLogic extends UILogic<
             hasKey: { $set: hasAPIKey },
         })
         const signupDate = new Date(
-            await (await this.options.authBG.getCurrentUser()).creationTime,
+            await (await this.options.authBG.getCurrentUser())?.creationTime,
         ).getTime()
 
         this.emitMutation({
             signupDate: { $set: signupDate },
             isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
         })
-
-        await this.checkRabbitHoleOnboardingStage()
 
         const highlightColorJSON = await this.fetchHighlightColors()
 
@@ -901,6 +899,7 @@ export class SidebarContainerLogic extends UILogic<
                 isAutoAddEnabled: { $set: isAutoAddEnabled },
             })
         }
+        await this.checkRabbitHoleOnboardingStage()
     }
 
     private checkRabbitHoleOnboardingStage = async () => {
@@ -2039,6 +2038,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
                     isCommentEditing: { $set: event.isEditing },
+                    isHighlightEditing: { $set: event.isEditing },
                 },
             },
         })

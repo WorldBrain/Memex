@@ -85,6 +85,7 @@ export type Props = RootState &
     > & {
         annotationsCache: PageAnnotationsCacheInterface // TODO: Ideally this doesn't need to be passed down here
         isSpacesSidebarLocked?: boolean
+        isNotesSidebarShown?: boolean
         searchFilters?: any
         activePage?: boolean
         searchResults?: any
@@ -653,6 +654,8 @@ export default class SearchResultsContainer extends React.Component<
                         this.props.listData.byId[this.props.selectedListId]
                             ?.localId
                     }
+                    isNotesSidebarShown={this.props.isNotesSidebarShown}
+                    isListsSidebarShown={this.props.isSpacesSidebarLocked}
                     showPopoutsForResultBox={(show) =>
                         this.setState({
                             showPopoutsForResultBox: show,

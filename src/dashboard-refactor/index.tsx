@@ -71,6 +71,8 @@ export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
 }
 
+const isFirefox = navigator.userAgent.toLowerCase().indexOf('firefox') > -1
+
 export class DashboardContainer extends StatefulUIElement<
     Props,
     RootState,
@@ -475,6 +477,7 @@ export class DashboardContainer extends StatefulUIElement<
                                     getRootElement={this.props.getRootElement}
                                 />
                             ),
+                            isNotesSidebarShown: this.state.isNoteSidebarShown,
                             searchQuery: searchFilters.searchQuery,
                             isSidebarLocked: listsSidebar.isSidebarLocked,
                             searchFiltersOpen: searchFilters.searchFiltersOpen,
@@ -838,6 +841,7 @@ export class DashboardContainer extends StatefulUIElement<
                 contentSharingByTabsBG={this.props.contentShareByTabsBG}
                 clearInbox={() => this.processEvent('clearInbox', null)}
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
+                isNotesSidebarShown={this.state.isNoteSidebarShown}
                 activePage={this.state.activePageID && true}
                 syncSettingsBG={this.props.syncSettingsBG}
                 listData={listsSidebar.lists}
@@ -1567,7 +1571,7 @@ export class DashboardContainer extends StatefulUIElement<
                     : 'flex',
             top: listsSidebar.isSidebarPeeking ? '20px' : '0',
             height: this.props.inPageMode
-                ? 'fill-available'
+                ? '100%'
                 : listsSidebar.isSidebarPeeking
                 ? '90vh'
                 : '100vh',
@@ -1636,6 +1640,11 @@ export class DashboardContainer extends StatefulUIElement<
                     </SidebarHeaderContainer>
                     <PeekTrigger
                         onMouseEnter={() => {
+                            this.processEvent('setSidebarPeeking', {
+                                isPeeking: true,
+                            })
+                        }}
+                        onMouseLeave={() => {
                             this.processEvent('setSidebarPeeking', {
                                 isPeeking: true,
                             })
@@ -1854,14 +1863,14 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         getRootElement={this.props.getRootElement}
                     />
-                    {this.state.listsSidebar.draggedListId != null ||
-                        (this.state.searchResults.draggedPageId != null && (
-                            <DragElement
-                                isHoveringOverListItem={
-                                    listsSidebar.dragOverListId != null
-                                }
-                            />
-                        ))}
+                    {/* {this.state.listsSidebar.draggedListId != null ||
+                        (this.state.searchResults.draggedPageId != null && ( */}
+                    <DragElement
+                        isHoveringOverListItem={
+                            listsSidebar.dragOverListId != null
+                        }
+                    />
+                    {/* ))} */}
                     {this.props.renderUpdateNotifBanner()}
                     <BulkEditWidget
                         deleteBulkSelection={(pageId) =>
@@ -2167,7 +2176,7 @@ const ListSidebarContent = styled(Rnd)<{
         props.inPageMode &&
         css`
             position: relative;
-            height: fill-available;
+            height: ${() => (isFirefox ? '90%' : 'fill-available')};
             left: unset;
         `}
 
@@ -2268,8 +2277,7 @@ const PeekTrigger = styled.div<{
     ${(props) =>
         props.inPageMode &&
         css`
-            height: fill-available;
-            height: -moz-available;
+            height: ${() => (isFirefox ? '90%' : 'fill-available')};
         `}
 `
 
@@ -2325,10 +2333,11 @@ const ActionWrapper = styled.div`
 
 const HeaderContainer = styled.div`
     height: ${sizeConstants.header.heightPx}px;
-    width: 100%;
+    width: fill-available;
+    width: -moz-available;
     position: sticky;
     top: 0;
-    left: 150px;
+    /* left: 150px; */
     display: flex;
     flex-direction: row;
     align-items: center;
