@@ -197,10 +197,17 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('changeFocusItem', {
                     direction: event.key === 'ArrowUp' ? 'up' : 'down',
                 })
-                event.stopPropagation()
-                event.preventDefault()
             }
+            event.stopPropagation()
+            event.preventDefault()
         }
+    }
+
+    componentWillUnmount(): Promise<void> {
+        super.componentWillUnmount()
+
+        document.removeEventListener('keydown', this.handleChangeFocusItem)
+        return
     }
 
     releaseLock = () => {

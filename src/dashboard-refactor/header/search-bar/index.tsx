@@ -89,6 +89,14 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             }
                             value={searchQuery}
                             id={'search-bar'}
+                            onKeyDown={(e) => {
+                                if (
+                                    e.key !== 'ArrowDown' &&
+                                    e.key !== 'ArrowUp'
+                                ) {
+                                    e.stopPropagation()
+                                }
+                            }}
                             onChange={this.handleChange}
                             autoComplete="off"
                         />
