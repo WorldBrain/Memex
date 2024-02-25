@@ -76,7 +76,11 @@ export const migrations: Migrations = {
      * You can fit ~2 million 2**32s in that entire number space.
      * The actual user-facing order should not change.
      */
-    [MIGRATION_PREFIX + 'reset-list-tree-order-01']: async ({ storex }) => {
+    [MIGRATION_PREFIX + 'reset-list-tree-order-01']: async ({
+        storex,
+        bgModules,
+    }) => {
+        await bgModules.personalCloud.waitForSync()
         const nodes: CustomListTree[] = await storex
             .collection('customListTrees')
             .findAllObjects({})
