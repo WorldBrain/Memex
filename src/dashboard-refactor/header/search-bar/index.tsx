@@ -92,7 +92,8 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             onKeyDown={(e) => {
                                 if (
                                     e.key !== 'ArrowDown' &&
-                                    e.key !== 'ArrowUp'
+                                    e.key !== 'ArrowUp' &&
+                                    e.key !== 'Escape'
                                 ) {
                                     e.stopPropagation()
                                 }

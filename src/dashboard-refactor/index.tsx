@@ -182,6 +182,8 @@ export class DashboardContainer extends StatefulUIElement<
                 this.props.inPageMode &&
                 !this.state.isNoteSidebarShown
             ) {
+                event.stopPropagation()
+                event.preventDefault()
                 this.props.closeInPageMode()
             }
 
@@ -197,9 +199,9 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('changeFocusItem', {
                     direction: event.key === 'ArrowUp' ? 'up' : 'down',
                 })
+                event.stopPropagation()
+                event.preventDefault()
             }
-            event.stopPropagation()
-            event.preventDefault()
         }
     }
 
@@ -1647,11 +1649,6 @@ export class DashboardContainer extends StatefulUIElement<
                     </SidebarHeaderContainer>
                     <PeekTrigger
                         onMouseEnter={() => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking: true,
-                            })
-                        }}
-                        onMouseLeave={() => {
                             this.processEvent('setSidebarPeeking', {
                                 isPeeking: true,
                             })
