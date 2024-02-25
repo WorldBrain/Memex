@@ -28,7 +28,13 @@ export type InPageUISidebarAction =
     | 'open_chapter_summary'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
-export type InPageUIComponent = 'ribbon' | 'sidebar' | 'tooltip' | 'highlights'
+export type InPageUIComponent =
+    | 'ribbon'
+    | 'sidebar'
+    | 'tooltip'
+    | 'highlights'
+    | 'search'
+
 export type InPageUIComponentShowState = {
     [Component in InPageUIComponent]: boolean
 }
@@ -113,4 +119,7 @@ export interface SharedInPageUIInterface {
     showHighlights(): Promise<void>
     hideHighlights(): Promise<void>
     toggleHighlights(): Promise<void>
+
+    // On-demand in-page UIs
+    showSearch(): Promise<void>
 }

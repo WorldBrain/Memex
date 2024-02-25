@@ -6,7 +6,6 @@ import * as imports from './imports'
 import * as blacklist from './blacklist'
 import * as pdfs from './PDF'
 import * as settings from './settings'
-import * as overviewPage from '../overview'
 import { reducer as onboarding } from '../overview/onboarding'
 import { reducer as deleteConfModal } from '../overview/delete-confirm-modal'
 import { reducer as results } from '../overview/results'
@@ -64,11 +63,7 @@ export default function configureStore({ ReduxDevTools = undefined } = {}) {
 
     initSentry({ reduxMiddlewares: middlewares, stateTransformer })
 
-    const enhancers = [
-        overviewPage.enhancer,
-        imports.enhancer,
-        applyMiddleware(...middlewares),
-    ]
+    const enhancers = [imports.enhancer, applyMiddleware(...middlewares)]
 
     if (ReduxDevTools) {
         enhancers.push(ReduxDevTools.instrument())

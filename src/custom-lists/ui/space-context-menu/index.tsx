@@ -22,7 +22,10 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
     Event
 > {
     static defaultProps: Pick<Props, 'copyToClipboard'> = {
-        copyToClipboard,
+        copyToClipboard: async (text) => {
+            await copyToClipboard(text)
+            return true
+        },
     }
 
     constructor(props: Props) {
@@ -105,7 +108,10 @@ export default class SpaceContextMenuContainer extends StatefulUIElement<
                     isPageLink={this.props.listData.type === 'page-link'}
                     getRootElement={this.props.getRootElement}
                 />
-                <SpaceEmailInvites {...this.props} />
+                <SpaceEmailInvites
+                    pageLinkLoadingState={this.state.inviteLinksLoadState}
+                    {...this.props}
+                />
             </ContextMenuContainer>
         )
     }

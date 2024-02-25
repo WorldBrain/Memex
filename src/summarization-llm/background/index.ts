@@ -23,6 +23,13 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             isContentSearch?: boolean
         }
     >
+    isApiKeyValid: RemoteFunction<
+        Role,
+        {
+            apiKey?: string
+        },
+        { isValid: boolean }
+    >
     getTextSummary: RemoteFunction<
         Role,
         {
@@ -55,6 +62,7 @@ export default class SummarizeBackground {
         this.remoteFunctions = {
             startPageSummaryStream: this.startPageSummaryStream,
             getTextSummary: this.getTextSummary,
+            isApiKeyValid: this.isApiKeyValid,
         }
     }
 
@@ -144,5 +152,13 @@ export default class SummarizeBackground {
         }
 
         return summary
+    }
+    isApiKeyValid: SummarizationInterface<'provider'>['isApiKeyValid'] = async (
+        { tab },
+        { apiKey },
+    ) => {
+        const isValid = await this.summarizationService.isApiKeyValid(apiKey)
+
+        return { isValid }
     }
 }

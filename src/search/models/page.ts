@@ -26,7 +26,7 @@ export interface PageConstructorOptions {
     hostname: string
 
     // Display data
-    text: string
+    text?: string
     fullUrl: string
     fullTitle: string
     screenshotURI?: string

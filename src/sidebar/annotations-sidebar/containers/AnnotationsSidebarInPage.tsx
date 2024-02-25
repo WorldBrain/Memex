@@ -379,7 +379,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         } else if (event.action === 'share_page') {
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
             await sleepPromise(500)
-            await this.processEvent('createPageLink', null)
+            await this.processEvent('openPageLinkShareMenu', null)
         } else if (event.action === 'check_sidebar_status') {
             return true
         } else if (event.action === 'set_focus_mode') {
@@ -408,7 +408,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         }
     }
 
-    hideSidebar() {
+    async hideSidebar() {
         super.hideSidebar()
         this.props.inPageUI.hideRibbon()
         this.props.inPageUI.hideSidebar()

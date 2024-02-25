@@ -25,11 +25,9 @@ import {
 } from 'src/annotations/components/AnnotationEdit'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import analytics from 'src/analytics'
-import { getListShareUrl } from 'src/content-sharing/utils'
 import { Rnd } from 'react-rnd'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { Props as SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker'
@@ -55,18 +53,17 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 import * as cacheUtils from 'src/annotations/cache/utils'
 import { generateAnnotationCardInstanceId } from './utils'
 import type { AnnotationCardInstanceLocation } from '../types'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { getBlockContentYoutubePlayerId } from '@worldbrain/memex-common/lib/common-ui/components/block-content'
-import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
+import type { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
-import PageLinkMenu from 'src/custom-lists/ui/page-link-share-menu'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
-import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import PageCitations from 'src/citations/PageCitations'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -83,6 +80,7 @@ export interface Props extends SidebarContainerOptions {
     highlightColorSettings?: string
     pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
+    inPageMode?: boolean
 }
 
 export class AnnotationsSidebarContainer<
@@ -105,6 +103,7 @@ export class AnnotationsSidebarContainer<
                 ...props,
                 analytics,
                 copyToClipboard,
+                copyPasterBG: props.copyPaster,
                 focusCreateForm: () => {
                     ;(this.sidebarRef
                         ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
@@ -116,7 +115,7 @@ export class AnnotationsSidebarContainer<
                         annotationId,
                     )
                 },
-                imageSupport: props.imageSupport,
+                imageSupportBG: props.imageSupport,
                 bgScriptBG: props.bgScriptBG,
                 storage: props.storageAPI,
                 pkmSyncBG: props.pkmSyncBG,
@@ -149,14 +148,58 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    async toggleSidebarShowForPageId(fullPageUrl: string) {
-        const isAlreadyOpenForOtherPage = fullPageUrl !== this.state.fullPageUrl
+    async toggleSidebarShowForPageId(fullPageUrl: string, spaceId?: string) {
+        const newURL = fullPageUrl
+        const previousURL = this.state?.fullPageUrl ?? null
 
-        if (this.state.showState === 'hidden' || isAlreadyOpenForOtherPage) {
+        if (this.state.showState === 'hidden') {
             this.showSidebar()
-            await this.processEvent('setPageUrl', { fullPageUrl })
-        } else if (this.state.showState === 'visible') {
+        }
+
+        if (
+            this.state.activeTab === 'annotations' &&
+            newURL === previousURL &&
+            this.state.showState === 'visible'
+        ) {
             this.hideSidebar()
+            return
+        }
+        await this.processEvent('setPageUrl', { fullPageUrl })
+        if (spaceId) {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'spaces',
+            })
+            if (spaceId !== 'all') {
+                await this.processEvent('setSelectedList', {
+                    unifiedListId: spaceId,
+                })
+            }
+        } else {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'annotations',
+            })
+        }
+    }
+    async toggleAIShowForPageId(fullPageUrl: string) {
+        const newURL = fullPageUrl
+        const previousURL = this.state?.fullPageUrl ?? null
+
+        if (this.state.showState === 'hidden') {
+            this.showSidebar()
+        }
+
+        if (newURL !== previousURL) {
+            await this.processEvent('setPageUrl', { fullPageUrl: newURL })
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('askAIviaInPageInteractions', null)
+        }
+        if (newURL === previousURL) {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('askAIviaInPageInteractions', null)
         }
     }
 
@@ -172,9 +215,8 @@ export class AnnotationsSidebarContainer<
         }
     }
 
-    hideSidebar() {
+    async hideSidebar() {
         this.processEvent('hide', null)
-
         if (this.props.sidebarContext === 'dashboard') {
             setTimeout(() => {
                 document.removeEventListener('keydown', this.listenToEsc)
@@ -184,7 +226,7 @@ export class AnnotationsSidebarContainer<
     }
 
     listenToEsc = (event) => {
-        if (event.key === 'Escape') {
+        if (event.key === 'Escape' && !this.state.deleteConfirmMode) {
             this.hideSidebar()
         }
     }
@@ -204,6 +246,27 @@ export class AnnotationsSidebarContainer<
                     : SIDEBAR_WIDTH_STORAGE_KEY,
                 isWidthLocked: true,
             })
+        }
+    }
+
+    private handleKeyPress = (
+        event: KeyboardEvent,
+        instanceLocation,
+        unifiedAnnotationId,
+    ) => {
+        return () => {
+            // Ensure a function is returned
+
+            event.stopPropagation()
+            if (event.key === 'Enter') {
+                this.processEvent('deleteAnnotation', { unifiedAnnotationId })
+            } else if (event.key === 'Escape') {
+                this.processEvent('setAnnotationCardMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    mode: 'none',
+                })
+            }
         }
     }
 
@@ -234,28 +297,33 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     isEditing: !annotationCardInstance.isHighlightEditing,
                 }),
-            onDeleteIconClick: () =>
+            onDeleteIconClick: (event) => {
                 this.processEvent('setAnnotationCardMode', {
                     instanceLocation,
                     unifiedAnnotationId,
                     mode: 'delete-confirm',
-                }),
-            onDeleteCancel: () =>
+                })
+            },
+            onDeleteCancel: (event) => {
                 this.processEvent('setAnnotationCardMode', {
                     instanceLocation,
                     unifiedAnnotationId,
                     mode: 'none',
-                }),
-            onDeleteConfirm: () =>
-                this.processEvent('deleteAnnotation', { unifiedAnnotationId }),
+                })
+            },
+            onDeleteConfirm: (event) => {
+                this.processEvent('deleteAnnotation', { unifiedAnnotationId })
+            },
             onShareClick: (mouseEvent) =>
                 // TODO: work out if this is needed/how to unfiy with editAnnotation
-                this.processEvent('editAnnotation', {
-                    instanceLocation,
-                    unifiedAnnotationId,
-                    shouldShare: true,
-                    // mouseEvent,
-                }),
+                {
+                    this.processEvent('editAnnotation', {
+                        instanceLocation,
+                        unifiedAnnotationId,
+                        shouldShare: true,
+                        // mouseEvent,
+                    })
+                },
             onGoToAnnotation:
                 this.props.showGoToAnnotationBtn && annotation.body?.length > 0
                     ? () =>
@@ -269,6 +337,13 @@ export class AnnotationsSidebarContainer<
                     unifiedAnnotationId,
                     mode: 'copy-paster',
                 }),
+            onCopyPasterDefaultExecute: () => {
+                this.processEvent('setCopyPasterDefaultNoteExecute', {
+                    instanceLocation: instanceLocation,
+                    unifiedAnnotationId: unifiedAnnotationId,
+                    noteId: unifiedAnnotationId,
+                })
+            },
         }
     }
 
@@ -291,12 +366,6 @@ export class AnnotationsSidebarContainer<
         return {
             body: annotationCardInstance?.body,
             comment: annotationCardInstance?.comment,
-            onListsBarPickerBtnClick: () =>
-                this.processEvent('setAnnotationCardMode', {
-                    instanceLocation,
-                    unifiedAnnotationId,
-                    mode: 'space-picker',
-                }),
             onCommentChange: (comment) =>
                 this.processEvent('setAnnotationEditCommentText', {
                     instanceLocation,
@@ -334,6 +403,13 @@ export class AnnotationsSidebarContainer<
                     },
                 )
             },
+            setEditing: () => {
+                this.processEvent('setAnnotationEditMode', {
+                    instanceLocation,
+                    unifiedAnnotationId,
+                    isEditing: !annotationCardInstance.isCommentEditing,
+                })
+            },
             onEditCancel: () =>
                 this.processEvent('cancelAnnotationEdit', {
                     instanceLocation,
@@ -342,6 +418,7 @@ export class AnnotationsSidebarContainer<
                 }),
             imageSupport: this.props.imageSupport,
             getRootElement: this.props.getRootElement,
+            copyLoadingState: annotationCardInstance?.copyLoadingState,
         }
     }
 
@@ -476,11 +553,44 @@ export class AnnotationsSidebarContainer<
             return
         }
         return (
-            <PageNotesCopyPaster
-                copyPaster={this.props.copyPaster}
-                annotationUrls={[annotation.localId]}
-                normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
-            />
+            <>
+                <PageCitations
+                    annotationUrls={[annotation.localId]}
+                    copyPasterProps={{
+                        copyPasterBG: this.props.copyPaster,
+                        getRootElement: this.props.getRootElement,
+                    }}
+                    pageLinkProps={{
+                        authBG: this.props.authBG,
+                        analyticsBG: this.props.analyticsBG,
+                        annotationsCache: this.props.annotationsCache,
+                        contentSharingBG: this.props.contentSharingBG,
+                        contentSharingByTabsBG: this.props
+                            .contentSharingByTabsBG,
+                        copyToClipboard: this.props.copyToClipboard,
+                        fullPageUrl: this.state.fullPageUrl,
+                        getRootElement: this.props.getRootElement,
+                    }}
+                    annotationShareProps={{
+                        isForAnnotation: true,
+                        postShareHook: (state, opts) =>
+                            this.processEvent('updateAnnotationShareInfo', {
+                                privacyLevel: state.privacyLevel,
+                                unifiedAnnotationId: annotation.unifiedId,
+                                keepListsIfUnsharing: true,
+                            }),
+                        annotationsCache: this.props.annotationsCache,
+                    }}
+                    getRootElement={this.props.getRootElement}
+                    syncSettingsBG={this.props.syncSettingsBG}
+                />
+                {/* <PageNotesCopyPaster
+                    copyPasterBG={this.props.copyPaster}
+                    annotationUrls={[annotation.localId]}
+                    normalizedPageUrls={[normalizeUrl(this.state.fullPageUrl)]}
+                    getRootElement={this.props.getRootElement}
+                /> */}
+            </>
         )
     }
 
@@ -660,14 +770,17 @@ export class AnnotationsSidebarContainer<
         )
     }
 
-    private renderAICounter = (position) => (
+    private renderAICounter = () => (
         <AICounterIndicator
-            position={position}
             syncSettingsBG={this.props.syncSettingsBG}
             isTrial={this.state.isTrial}
             signupDate={this.state.signupDate}
             addedKey={() => this.processEvent('addedKey', null)}
             getRootElement={this.props.getRootElement}
+            checkIfKeyValid={(apiKey) =>
+                this.processEvent('checkIfKeyValid', { apiKey: apiKey })
+            }
+            isKeyValid={this.state.isKeyValid}
         />
     )
 
@@ -824,6 +937,7 @@ export class AnnotationsSidebarContainer<
                         this.state.sidebarRightBorderPosition != null &&
                         this.state.sidebarRightBorderPosition
                     }
+                    inPageMode={this.props.inPageMode}
                 >
                     <Rnd
                         style={style}
@@ -871,6 +985,8 @@ export class AnnotationsSidebarContainer<
                                     chapterIndex,
                                 )
                             }}
+                            analyticsBG={this.props.analyticsBG}
+                            copyToClipboard={this.props.copyToClipboard}
                             loadState={this.state.loadState}
                             setAIModel={(AImodel) => {
                                 this.processEvent('setAIModel', AImodel)
@@ -966,14 +1082,30 @@ export class AnnotationsSidebarContainer<
                                             replyReference,
                                         },
                                     ),
-                                setAnnotationEditing: (isEditing) => (event) =>
+                                setAnnotationEditing: () => {
+                                    const isEditingState = !this.state
+                                        .replyEditStates[replyReference.id]
+                                        ?.isEditing
                                     this.processEvent(
                                         'setReplyToAnnotationEditing',
                                         {
-                                            isEditing,
+                                            isEditing: isEditingState,
                                             replyReference,
                                         },
-                                    ),
+                                    )
+                                },
+                                setEditing: () => {
+                                    const isEditingState = !this.state
+                                        .replyEditStates[replyReference.id]
+                                        ?.isEditing
+                                    this.processEvent(
+                                        'setReplyToAnnotationEditing',
+                                        {
+                                            isEditing: isEditingState,
+                                            replyReference,
+                                        },
+                                    )
+                                },
                                 setAnnotationHovering: (isHovering) => (
                                     event,
                                 ) => {
@@ -1027,9 +1159,6 @@ export class AnnotationsSidebarContainer<
                                     { state },
                                 )
                             }
-                            selectedShareMenuPageLinkList={
-                                this.state.selectedShareMenuPageLinkList
-                            }
                             setShareMenuAnnotationInstance={(instanceId) =>
                                 this.processEvent(
                                     'setShareMenuAnnotationInstanceId',
@@ -1047,7 +1176,7 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('markFeedAsRead', null)
                             }
                             clickCreatePageLinkBtn={() =>
-                                this.processEvent('createPageLink', null)
+                                this.processEvent('openPageLinkShareMenu', null)
                             }
                             selectedListId={this.state.selectedListId}
                             currentUser={this.props.getCurrentUser()}
@@ -1091,12 +1220,12 @@ export class AnnotationsSidebarContainer<
                                     unifiedListId,
                                 })
                             }
-                            closePageLinkShareMenu={() =>
+                            closePageLinkShareMenu={() => {
                                 this.processEvent(
                                     'closePageLinkShareMenu',
                                     null,
                                 )
-                            }
+                            }}
                             openWebUIPage={(unifiedListId) =>
                                 this.processEvent('openWebUIPageForSpace', {
                                     unifiedListId,
@@ -1112,9 +1241,6 @@ export class AnnotationsSidebarContainer<
                                     (annot) => annot.localId,
                                 )
                             }
-                            normalizedPageUrls={[
-                                normalizeUrl(this.state.fullPageUrl),
-                            ]}
                             normalizedPageUrl={normalizeUrl(
                                 this.state.fullPageUrl,
                             )}
@@ -1249,9 +1375,7 @@ export class AnnotationsSidebarContainer<
                                 this.state.cacheLoadState === 'running'
                             }
                             theme={this.props.theme}
-                            renderAICounter={(position) =>
-                                this.renderAICounter(position)
-                            }
+                            renderAICounter={() => this.renderAICounter()}
                             renderCopyPasterForAnnotation={
                                 this.renderCopyPasterManagerForAnnotation
                             }
@@ -1321,47 +1445,98 @@ export class AnnotationsSidebarContainer<
                                     />
                                 )
                             }}
-                            renderPageLinkMenuForList={(listData) => (
-                                <PageLinkMenu
-                                    contentSharingBG={
-                                        this.props.contentSharingBG
-                                    }
-                                    spacesBG={this.props.customListsBG}
-                                    listData={listData}
-                                    disableWriteOps={
-                                        this.state.hasListDataBeenManuallyPulled
-                                    }
-                                    annotationsCache={
-                                        this.props.annotationsCache
-                                    }
-                                    pageListDataForCurrentPage={
-                                        this.state.pageListDataForCurrentPage
-                                    }
-                                    onSpaceShare={() =>
-                                        this.processEvent('createPageLink', {
-                                            forceCreate: true,
-                                        })
-                                    }
-                                    pageLinkCreateState={
-                                        this.state.pageLinkCreateState
-                                    }
-                                    showSpacesTab={() => {
-                                        this.processEvent(
-                                            'closePageLinkShareMenu',
-                                            null,
-                                        )
-                                        this.processEvent(
-                                            'setActiveSidebarTab',
-                                            { tab: 'spaces' },
-                                        )
-                                        this.processEvent('setSelectedList', {
-                                            unifiedListId: null,
-                                        })
-                                    }}
-                                    analyticsBG={this.props.analyticsBG}
-                                    getRootElement={this.props.getRootElement}
-                                />
-                            )}
+                            renderPageLinkMenuForList={() => null}
+                            //     <>
+                            //         <PageCitations
+                            //             annotationUrls={page.noteIds['user']}
+                            //             copyPasterProps={{
+                            //                 copyPasterBG: this.props
+                            //                     .copyPasterBG,
+                            //                 getRootElement: this.props
+                            //                     .getRootElement,
+                            //                 onClickOutside:
+                            //                     interactionProps.onCopyPasterBtnClick,
+                            //             }}
+                            //             pageLinkProps={{
+                            //                 authBG: this.props.authBG,
+                            //                 analyticsBG: this.props.analyticsBG,
+                            //                 annotationsCache: this.props
+                            //                     .annotationsCache,
+                            //                 contentSharingBG: this.props
+                            //                     .contentSharingBG,
+                            //                 contentSharingByTabsBG: this.props
+                            //                     .contentSharingByTabsBG,
+                            //                 copyToClipboard: this.props
+                            //                     .onPageLinkCopy,
+                            //                 fullPageUrl: page.fullUrl,
+                            //                 getRootElement: this.props
+                            //                     .getRootElement,
+                            //                 showSpacesTab: this.props
+                            //                     .showSpacesTab,
+                            //             }}
+                            //         />
+                            //         <PageLinkMenu
+                            //             autoCreateLinkIfNone
+                            //             analyticsBG={this.props.analyticsBG}
+                            //             contentSharingBG={
+                            //                 this.props.contentSharingBG
+                            //             }
+                            //             contentSharingByTabsBG={
+                            //                 this.props.contentSharingByTabsBG
+                            //             }
+                            //             authBG={this.props.authBG}
+                            //             annotationsCache={
+                            //                 this.props.annotationsCache
+                            //             }
+                            //             fullPageUrl={this.state.fullPageUrl!}
+                            //             showSpacesTab={() => {
+                            //                 this.processEvent(
+                            //                     'closePageLinkShareMenu',
+                            //                     null,
+                            //                 )
+                            //                 this.processEvent(
+                            //                     'setActiveSidebarTab',
+                            //                     { tab: 'spaces' },
+                            //                 )
+                            //                 this.processEvent(
+                            //                     'setSelectedList',
+                            //                     {
+                            //                         unifiedListId: null,
+                            //                     },
+                            //                 )
+                            //             }}
+                            //             onNewPageLinkCreate={async (
+                            //                 pageLinkListId,
+                            //             ) => {
+                            //                 await (this
+                            //                     .logic as SidebarContainerLogic).setLocallyAvailableSelectedList(
+                            //                     this.state,
+                            //                     pageLinkListId,
+                            //                 )
+                            //             }}
+                            //             getRootElement={
+                            //                 this.props.getRootElement
+                            //             }
+                            //         />
+                            //     </>
+                            // )}
+                            authBG={this.props.authBG}
+                            contentSharingBG={this.props.contentSharingBG}
+                            contentSharingByTabsBG={
+                                this.props.contentSharingByTabsBG
+                            }
+                            showSpacesTab={() => {
+                                this.processEvent(
+                                    'closePageLinkShareMenu',
+                                    null,
+                                )
+                                this.processEvent('setActiveSidebarTab', {
+                                    tab: 'spaces',
+                                })
+                                this.processEvent('setSelectedList', {
+                                    unifiedListId: null,
+                                })
+                            }}
                             activeShareMenuNoteId={
                                 this.state.activeShareMenuNoteId
                             }
@@ -1495,6 +1670,11 @@ export class AnnotationsSidebarContainer<
                                 )
                             }}
                             getRootElement={this.props.getRootElement}
+                            inPageMode={this.props.inPageMode}
+                            toggleAutoAdd={() =>
+                                this.processEvent('toggleAutoAdd', null)
+                            }
+                            isAutoAddEnabled={this.state.isAutoAddEnabled}
                         />
                     </Rnd>
                 </ContainerStyled>
@@ -1508,7 +1688,6 @@ const GlobalStyle = createGlobalStyle<{
     sidebarWidth: string
     sidebarContext: string
 }>`
-
     & * {
         font-family: 'Satoshi'
     }
@@ -1519,7 +1698,7 @@ const GlobalStyle = createGlobalStyle<{
 
     .sidebarResizeHandle {
     width: 4px;
-    height: 100vh;
+    height: fill-available;
     position: absolute;
     top: ${(props) => (props.sidebarContext === 'dashboard' ? '40px' : '0px')};
 
@@ -1566,21 +1745,21 @@ const ContainerStyled = styled.div<{
     isShown: string
     theme
     rightPosition?: number
+    inPageMode?: boolean
 }>`
     height: 100vh;
     overflow-x: visible;
     position: ${(props) =>
-        props.sidebarContext === 'dashboard' ? 'sticky' : 'fixed'};
+        props.sidebarContext === 'dashboard' ? 'relative' : 'fixed'};
     top: 0px;
     z-index: ${(props) =>
         props.sidebarContext === 'dashboard'
             ? '3500'
             : '2147483645'}; /* This is to combat pages setting high values on certain elements under the sidebar */
-                    background: ${(props) =>
-                        props.theme.variant === 'dark'
-                            ? props.theme.colors.black + 'eb'
-                            : props.theme.colors.black + 'c9'};
-    backdrop-filter: blur(30px);
+    background: ${(props) =>
+        props.theme.variant === 'dark'
+            ? '#23242b'
+            : props.theme.colors.black + 'c9'};
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
@@ -1588,6 +1767,7 @@ const ContainerStyled = styled.div<{
     right: ${(props) =>
         props.rightPosition ? props.rightPosition + 'px' : TOOLTIP_WIDTH};
 
+    width: ${(props) => props.theme.sidebarWidth};
     &:: -webkit-scrollbar {
         display: none;
     }
@@ -1600,6 +1780,7 @@ const ContainerStyled = styled.div<{
             opacity: 0;
             position: fixed;
             z-index: -1;
+            width: 0px;
         `}
 
     ${(props) =>
@@ -1628,6 +1809,17 @@ const ContainerStyled = styled.div<{
 
 
     scrollbar-width: none;
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            background: ${(props) =>
+                props.theme.variant === 'dark'
+                    ? '#23242b'
+                    : props.theme.colors.black + 'c9'};
+            backdrop-filter: unset;
+            position: relative;
+            height: 100%;
+        `}
 `
 
 const TopBarActionBtns = styled.div<{ width: string; sidebarContext: string }>`

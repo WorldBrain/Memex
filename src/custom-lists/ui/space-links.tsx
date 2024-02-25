@@ -61,7 +61,7 @@ export default class SpaceLinks extends React.PureComponent<Props> {
         return (
             <ShareSectionContainer>
                 {this.props.inviteLinks.map(({ link, roleID }, linkIdx) => (
-                    <ListItem zIndex={10 - linkIdx}>
+                    <ListItem zIndex={10 - linkIdx} key={link}>
                         <TooltipBox
                             placement={'bottom'}
                             tooltipText={
@@ -160,7 +160,20 @@ export default class SpaceLinks extends React.PureComponent<Props> {
 }
 
 const IconContainer = styled.div`
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 5px;
     display: none;
+    position: absolute;
+    background-color: ${(props) => props.theme.colors.greyScale2}90;
+    backdrop-filter: blur(4px);
+    right: 0px;
+    height: 40px;
+    padding: 0 10px;
+    display: none;
+    border-radius: 0 6px 6px 0;
+    margin-right: -5px;
 `
 
 const ShareSectionContainer = styled.div`
@@ -184,8 +197,8 @@ const LinkAndRoleBox = styled.div<{
     grid-gap: 5px;
     // z-index: ${(props) => props['zIndex']};
     height: 40px;
-    margin: 0 -10px 5px -10px;
-    padding: 0px 5px;
+    margin: 0 -5px 5px -10px;
+    padding: 0px 0px 0 5px;
 
 
     ${(props) =>
@@ -199,14 +212,7 @@ const LinkAndRoleBox = styled.div<{
         `}
 
     &:hover ${IconContainer} {
-            height: fit-content;
-            width: fit-content;
             display: flex;
-            justify-content: center;
-            align-items: center;
-            grid-gap: 5px;
-            grid-auto-flow: row;
-            border-radius: 6px;
         }
 
 `
@@ -220,10 +226,11 @@ const LinkBox = styled.div`
     margin-left: 10spx;
     height: 40px;
     cursor: pointer;
-    color: ${(props) => props.theme.colors.white};
+    color: ${(props) => props.theme.colors.greyScale6};
     justify-content: space-between;
     padding-right: 10px;
     align-items: center;
+    border-radius: 5px;
 
     &:hover {
         outline: 1px solid ${(props) => props.theme.colors.greyScale3};

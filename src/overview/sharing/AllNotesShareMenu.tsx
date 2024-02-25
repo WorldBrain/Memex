@@ -99,42 +99,41 @@ export default class AllNotesShareMenu extends React.Component<Props, State> {
     }
 
     render() {
-        return (
-            <ShareAnnotationMenu
-                showLink
-                handleCreateLink={null}
-                autoShareState={null}
-                context={'AllNotesShare'}
-                link={this.state.link}
-                getRootElement={this.props.getRootElement}
-                onCopyLinkClick={this.handleLinkCopy}
-                linkTitleCopy="Link to page and its public annotations"
-                privacyOptionsTitleCopy="Set privacy for all notes on this page"
-                isLoading={false}
-                privacyOptions={[
-                    {
-                        title: 'Auto-Shared',
-                        shortcut: `shift+${AllNotesShareMenu.MOD_KEY}+enter`,
-                        description:
-                            'Auto-added to Spaces the page is shared to',
-                        icon: 'globe',
-                        onClick: this.handleSetShared,
-                        getRootElement: this.props.getRootElement,
-                    },
-                    {
-                        title: 'Private',
-                        shortcut: `${AllNotesShareMenu.MOD_KEY}+enter`,
-                        description: 'Private to you, until shared in Spaces',
-                        icon: 'personFine',
-                        onClick: this.handleSetPrivate,
-                        getRootElement: this.props.getRootElement,
-                    },
-                ]}
-                shortcutHandlerDict={{
-                    'mod+shift+enter': this.handleSetShared,
-                    'mod+enter': this.handleSetPrivate,
-                }}
-            />
-        )
+        return null
+        // <ShareAnnotationMenu
+        //     showLink={true}
+        //     handleCreateLink={null}
+        //     autoShareState={null}
+        //     context={'AllNotesShare'}
+        //     link={this.state.link}
+        //     getRootElement={this.props.getRootElement}
+        //     onCopyLinkClick={this.handleLinkCopy}
+        //     linkTitleCopy="Link to page and its public annotations"
+        //     privacyOptionsTitleCopy="Set privacy for all notes on this page"
+        //     isLoading={false}
+        //     privacyOptions={[
+        //         {
+        //             title: 'Auto-Shared',
+        //             shortcut: `shift+${AllNotesShareMenu.MOD_KEY}+enter`,
+        //             description:
+        //                 'Auto-added to Spaces the page is shared to',
+        //             icon: 'globe',
+        //             onClick: this.handleSetShared,
+        //             getRootElement: this.props.getRootElement,
+        //         },
+        //         {
+        //             title: 'Private',
+        //             shortcut: `${AllNotesShareMenu.MOD_KEY}+enter`,
+        //             description: 'Private to you, until shared in Spaces',
+        //             icon: 'personFine',
+        //             onClick: this.handleSetPrivate,
+        //             getRootElement: this.props.getRootElement,
+        //         },
+        //     ]}
+        //     shortcutHandlerDict={{
+        //         'mod+shift+enter': this.handleSetShared,
+        //         'mod+enter': this.handleSetPrivate,
+        //     }}
+        // />
     }
 }

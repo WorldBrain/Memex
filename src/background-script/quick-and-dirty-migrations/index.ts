@@ -27,11 +27,13 @@ import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharin
 import {
     DEFAULT_KEY,
     DEFAULT_SPACE_BETWEEN,
+    defaultOrderableSorter,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { HIGHLIGHT_COLOR_KEY } from 'src/highlighting/constants'
 import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 import type { SyncSettingsByFeature } from 'src/sync-settings/background/types'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
+import type { CustomListTree } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 
 export interface MigrationProps {
     db: Dexie
@@ -66,6 +68,57 @@ export const MIGRATION_PREFIX = '@QnDMigration-'
 // __IMPORTANT NOTE__
 
 export const migrations: Migrations = {
+    /*
+     * This exists as I messed up the order assignments for new lists, which get inserted at the beginning.
+     * Previously they got order set to half of whatever the prev first list's order was. Though things
+     * can only be halved for so long (not long). This recalculates the order value for all of them, assigning the middle key
+     * (between 0 and MAX_INT) to the middle list, then all others get offset from there by 2**32.
+     * You can fit ~2 million 2**32s in that entire number space.
+     * The actual user-facing order should not change.
+     */
+    [MIGRATION_PREFIX + 'reset-list-tree-order-01']: async ({
+        storex,
+        bgModules,
+    }) => {
+        await bgModules.personalCloud.waitForSync()
+        const nodes: CustomListTree[] = await storex
+            .collection('customListTrees')
+            .findAllObjects({})
+        const nodesByParent = new Map<number, CustomListTree[]>()
+
+        // Group tree nodes as siblings
+        for (const node of nodes) {
+            const siblingTrees = nodesByParent.get(node.parentListId) ?? []
+            siblingTrees.push(node)
+            nodesByParent.set(node.parentListId, siblingTrees)
+        }
+
+        const batch: OperationBatch = []
+
+        for (const nodes of nodesByParent.values()) {
+            nodes.sort(defaultOrderableSorter)
+            const middleIdx = Math.floor(nodes.length / 2)
+            for (let idx = 0; idx < nodes.length; idx++) {
+                const orderOffest = (idx - middleIdx) * DEFAULT_SPACE_BETWEEN
+                nodes[idx].order =
+                    idx === middleIdx ? DEFAULT_KEY : DEFAULT_KEY + orderOffest
+            }
+
+            batch.push(
+                ...nodes.map((node) => ({
+                    operation: 'updateObjects' as const,
+                    collection: 'customListTrees',
+                    placeholder: `tree-reorder-${node.id}`,
+                    where: { id: node.id },
+                    updates: { order: node.order },
+                })),
+            )
+        }
+
+        if (batch.length) {
+            await storex.operation('executeBatch', batch)
+        }
+    },
     /*
      * This exists as we added an `order` field to templates collection when
      * we realized the importance of being able to order your templates in the text

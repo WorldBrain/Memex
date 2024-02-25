@@ -12,6 +12,8 @@ import {
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
+import { debounce } from 'lodash'
 
 interface State {
     isLoading: boolean
@@ -22,20 +24,24 @@ interface State {
     previewString: string
     templateType: 'originalPage' | 'examplePage'
     isPreviewLoading: TaskState
+    previewErrorMessage?: string | JSX.Element
+    renderedTextBuffered: string
+    errorCopyToClipboard: boolean
 }
 
 const md = new MarkdownIt()
 export interface Props {
     initTemplates?: Template[]
-    onClickOutside: React.MouseEventHandler
+    onClickOutside?: React.MouseEventHandler
     renderTemplate: (id: number) => Promise<string>
     renderPreview: (
         template: Template,
         templateType: 'originalPage' | 'examplePage',
     ) => Promise<string>
-    copyPaster?: RemoteCopyPasterInterface
+    copyPasterBG: RemoteCopyPasterInterface
     preventClosingBcEditState?: (state) => void
     getRootElement: () => HTMLElement
+    setLoadingState?: (loading: UITaskState) => void
 }
 
 export default class CopyPasterContainer extends React.PureComponent<
@@ -51,13 +57,6 @@ export default class CopyPasterContainer extends React.PureComponent<
         outputFormat: 'rich-text',
     }
 
-    private copyPasterBG: RemoteCopyPasterInterface
-
-    constructor(props: Props) {
-        super(props)
-        this.copyPasterBG = props.copyPaster
-    }
-
     state: State = {
         isLoading: false,
         tmpTemplate: undefined,
@@ -67,6 +66,9 @@ export default class CopyPasterContainer extends React.PureComponent<
         previewString: '',
         templateType: 'originalPage',
         isPreviewLoading: 'pristine',
+        previewErrorMessage: undefined,
+        renderedTextBuffered: '',
+        errorCopyToClipboard: false,
     }
 
     async componentDidMount() {
@@ -76,7 +78,7 @@ export default class CopyPasterContainer extends React.PureComponent<
 
     private async syncTemplates() {
         this.setState({ isLoading: true })
-        const templates = await this.copyPasterBG.findAllTemplates()
+        const templates = await this.props.copyPasterBG.findAllTemplates()
         const sortedTemplates = templates.sort(defaultOrderableSorter)
         this.setState({ templates: sortedTemplates, isLoading: false })
     }
@@ -95,7 +97,7 @@ export default class CopyPasterContainer extends React.PureComponent<
     private handleTemplateDelete = async () => {
         // NOTE: delete btn only appears in edit view, hence `state.tmpTemplate.id`
         //  will be set to the template currently being edited
-        await this.copyPasterBG.deleteTemplate({
+        await this.props.copyPasterBG.deleteTemplate({
             id: this.state.tmpTemplate.id,
         })
         this.setState({ tmpTemplate: undefined })
@@ -122,33 +124,52 @@ export default class CopyPasterContainer extends React.PureComponent<
         selection.addRange(range)
 
         // Copy the selected content to the clipboard
-        document.execCommand('copy')
+        const copiedContent = document.execCommand('copy')
 
         // Remove the hidden div from the body
         document.body.removeChild(hiddenDiv)
     }
 
-    private handleTemplateCopy = async (id: number) => {
+    private handleDefaultTemplateCopy = async () => {
+        const id = this.state.templates[0].id
+        await this.handleTemplateCopy(id)
+    }
+
+    private copyExistingRenderedToClipboard = async (
+        rendered: string,
+        templateId: number,
+    ) => {
+        const item = this.state.templates?.find(
+            (item: Template) => item.id === templateId,
+        )
+        if (item.outputFormat === 'markdown' || item.outputFormat == null) {
+            await copyToClipboard(rendered)
+        }
+        if (item.outputFormat === 'rich-text') {
+            const htmlString = md.render(rendered)
+            await this.copyRichTextToClipboard(htmlString)
+        }
+        this.setState({ errorCopyToClipboard: false })
+        this.setState({ isLoading: false, copySuccess: true })
+        this.props.setLoadingState?.('success')
+        setTimeout(() => {
+            this.setState({ copySuccess: false })
+            this.props.setLoadingState?.('pristine')
+        }, 3000)
+    }
+
+    private handleTemplateCopy = async (templateId: number) => {
         this.setState({ isLoading: true })
+        this.props.setLoadingState?.('running')
 
         try {
-            const rendered = await this.props.renderTemplate(id)
-            const item = this.state.templates.find((item) => item.id === id)
-
-            if (item) {
-                if (
-                    item.outputFormat === 'markdown' ||
-                    item.outputFormat == null
-                ) {
-                    await copyToClipboard(rendered)
-                }
-                if (item.outputFormat === 'rich-text') {
-                    const htmlString = md.render(rendered)
-                    await this.copyRichTextToClipboard(htmlString)
-                }
-            }
+            const rendered = await this.props.renderTemplate(templateId)
+            this.setState({ renderedTextBuffered: rendered })
+            await this.copyExistingRenderedToClipboard(rendered, templateId)
         } catch (err) {
-            console.error('Something went really bad copying:', err.message)
+            this.setState({ errorCopyToClipboard: true })
+            this.props.setLoadingState?.('error')
+            console.error('Something went really bad copying:', err)
             Raven.captureException(err)
         } finally {
             analytics.trackEvent({
@@ -156,7 +177,11 @@ export default class CopyPasterContainer extends React.PureComponent<
                 action: 'copyToClipboard',
             })
             this.setState({ isLoading: false, copySuccess: true })
-            setTimeout(() => this.setState({ copySuccess: false }), 3000)
+            this.props.setLoadingState?.('success')
+            setTimeout(() => {
+                this.setState({ copySuccess: false })
+                this.props.setLoadingState?.('pristine')
+            }, 3000)
         }
     }
 
@@ -170,9 +195,6 @@ export default class CopyPasterContainer extends React.PureComponent<
             templateType = templateTypeInput
         }
 
-        if (templateType === 'originalPage') {
-            this.setState({ isPreviewLoading: 'running' })
-        }
         try {
             const rendered = await this.props.renderPreview(
                 template,
@@ -192,11 +214,15 @@ export default class CopyPasterContainer extends React.PureComponent<
                 return htmlString
             }
         } catch (err) {
-            console.error(
-                'Something did not work when updating the preview:',
-                err.message,
-            )
-            Raven.captureException(err)
+            this.setState({
+                previewErrorMessage: (
+                    <span>
+                        Syntax error in the template. <br /> Usually a missing
+                        bracket
+                    </span>
+                ),
+                isPreviewLoading: 'error',
+            })
         }
     }
 
@@ -233,8 +259,7 @@ export default class CopyPasterContainer extends React.PureComponent<
             ],
         })
 
-        await this.copyPasterBG.updateTemplate(templateToReorder)
-        this.props.preventClosingBcEditState(false)
+        await this.props.copyPasterBG.updateTemplate(templateToReorder)
     }
 
     private handleTemplateSave = async () => {
@@ -251,14 +276,23 @@ export default class CopyPasterContainer extends React.PureComponent<
                     ? pushOrderedItem(orderedItems, -1)
                     : insertOrderedItemBeforeIndex(orderedItems, -1, 0)
             tmpTemplate.order = changes.create.key
-            await this.copyPasterBG.createTemplate(tmpTemplate)
+            await this.props.copyPasterBG.createTemplate(tmpTemplate)
         } else {
-            await this.copyPasterBG.updateTemplate(tmpTemplate)
+            await this.props.copyPasterBG.updateTemplate(tmpTemplate)
         }
         this.setState({ tmpTemplate: undefined, isNew: undefined })
-        this.props.preventClosingBcEditState(false)
         await this.syncTemplates()
     }
+    private debouncedPreviewUpdate = debounce(async (currentTemplate) => {
+        try {
+            const previewString = await this.handleTemplatePreview(
+                currentTemplate,
+            )
+            this.setState({ previewString: previewString })
+        } catch (err) {
+            this.setState({ previewString: err.message })
+        }
+    }, 500) // 300ms debounce time
 
     render() {
         return (
@@ -273,35 +307,48 @@ export default class CopyPasterContainer extends React.PureComponent<
                 onClickSave={this.handleTemplateSave}
                 onReorder={this.handleTemplateReorder}
                 onClickDelete={this.handleTemplateDelete}
+                copyExistingRenderedToClipboard={
+                    this.copyExistingRenderedToClipboard
+                }
+                renderedTextBuffered={this.state.renderedTextBuffered}
+                errorCopyToClipboard={this.state.errorCopyToClipboard}
                 onClickOutside={this.props.onClickOutside}
                 previewString={this.state.previewString}
+                previewErrorMessage={this.state.previewErrorMessage}
                 copyPasterEditingTemplate={this.state.tmpTemplate}
                 onClickEdit={async (id) => {
                     const template = this.findTemplateForId(id)
+                    this.setState({
+                        tmpTemplate: template,
+                        isNew: false,
+                    })
+
+                    let templateType = this.state.templateType
+                    if (templateType === 'originalPage') {
+                        this.setState({ isPreviewLoading: 'running' })
+                    }
                     let previewString = await this.handleTemplatePreview(
                         template,
                     )
 
                     this.setState({
-                        tmpTemplate: template,
-                        isNew: false,
                         previewString: previewString,
                     })
-                    this.props.preventClosingBcEditState(true)
                 }}
                 onClickCancel={() => {
                     this.setState({
                         tmpTemplate: undefined,
                         isNew: undefined,
                     })
-                    this.props.preventClosingBcEditState(false)
                 }}
                 onClickNew={() => {
+                    this.setState({
+                        previewString: null,
+                    })
                     this.setState({
                         tmpTemplate: CopyPasterContainer.DEF_TEMPLATE,
                         isNew: true,
                     })
-                    this.props.preventClosingBcEditState(true)
                 }}
                 onClickHowto={() => {
                     window.open(
@@ -356,11 +403,13 @@ export default class CopyPasterContainer extends React.PureComponent<
 
                     currentTemplate.code = code
 
-                    const previewString = await this.handleTemplatePreview(
-                        currentTemplate,
-                    )
+                    let templateType = this.state.templateType
 
-                    this.setState({ previewString: previewString })
+                    if (templateType === 'originalPage') {
+                        this.setState({ isPreviewLoading: 'running' })
+                    }
+
+                    this.debouncedPreviewUpdate(this.state.tmpTemplate)
                 }}
                 changeTemplateType={async (
                     templateType: 'originalPage' | 'examplePage',

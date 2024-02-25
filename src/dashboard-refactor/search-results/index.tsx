@@ -34,7 +34,6 @@ import {
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { HoverBox } from 'src/common-ui/components/design-library/HoverBox'
 import { PageNotesCopyPaster } from 'src/copy-paster'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -45,18 +44,26 @@ import ListDetails, {
 } from './components/list-details'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import { AnnotationSharingStates } from 'src/content-sharing/background/types'
+import type {
+    AnnotationSharingStates,
+    ContentSharingInterface,
+    RemoteContentSharingByTabsInterface,
+} from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
+import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
+import PageCitations from 'src/citations/PageCitations'
+import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -78,6 +85,7 @@ export type Props = RootState &
     > & {
         annotationsCache: PageAnnotationsCacheInterface // TODO: Ideally this doesn't need to be passed down here
         isSpacesSidebarLocked?: boolean
+        isNotesSidebarShown?: boolean
         searchFilters?: any
         activePage?: boolean
         searchResults?: any
@@ -88,6 +96,10 @@ export type Props = RootState &
         selectedListId?: string
         areAllNotesShown: boolean
         analyticsBG: AnalyticsCoreInterface
+        authBG: AuthRemoteFunctionsInterface
+        copyPasterBG: RemoteCopyPasterInterface
+        contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
+        contentSharingBG: ContentSharingInterface
         toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
@@ -117,7 +129,7 @@ export type Props = RootState &
         ): (sorter: AnnotationsSorter) => void
         getListDetailsById: ListDetailsGetter
         paginateSearch(): Promise<void>
-        onPageLinkCopy(link: string): Promise<void>
+        onPageLinkCopy(link: string): Promise<boolean>
         onNoteLinkCopy(link: string): Promise<void>
         onListLinkCopy(link: string): Promise<void>
         // updateAllResultNotesShareInfo: (info: NoteShareInfo) => void
@@ -132,10 +144,13 @@ export type Props = RootState &
         getHighlightColorSettings?: () => void
         highlightColorSettings: string
         getRootElement: () => HTMLElement
+        showSpacesTab: (pageUrl) => void
         // onEditPageBtnClick: (
         //     normalizedPageUrl: string,
         //     changedTitle: string,
         // ) => void
+        inPageMode?: boolean
+        syncSettingsBG?: RemoteSyncSettingsInterface
     }
 
 export interface State {
@@ -149,6 +164,7 @@ export default class SearchResultsContainer extends React.Component<
     Props,
     State
 > {
+    private ResultsScrollContainerRef = React.createRef<HTMLDivElement>()
     private renderLoader = (props: { key?: string } = {}) => (
         <Loader {...props}>
             <LoadingIndicator />
@@ -160,7 +176,12 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     listenToContentSwitcherSizeChanges() {
-        let topBarElement = document.getElementById('SearchTypeSwitchContainer')
+        const topBarElement = document.getElementById(
+            'SearchTypeSwitchContainer',
+        )
+        if (!topBarElement) {
+            return
+        }
 
         if (topBarElement.clientWidth < topBarElement.scrollWidth) {
             this.setState({
@@ -344,11 +365,37 @@ export default class SearchResultsContainer extends React.Component<
                 isEditingHighlight={noteData.isBodyEditing}
                 isDeleting={false}
                 renderCopyPasterForAnnotation={() => (
-                    <PageNotesCopyPaster
-                        annotationUrls={[noteId]}
-                        normalizedPageUrls={[pageId]}
+                    <PageCitations
+                        annotationUrls={[noteData.url]}
+                        copyPasterProps={{
+                            copyPasterBG: this.props.copyPasterBG,
+                            getRootElement: this.props.getRootElement,
+                            onClickOutside:
+                                interactionProps.onCopyPasterBtnClick,
+                        }}
+                        pageLinkProps={{
+                            authBG: this.props.authBG,
+                            analyticsBG: this.props.analyticsBG,
+                            annotationsCache: this.props.annotationsCache,
+                            contentSharingBG: this.props.contentSharingBG,
+                            contentSharingByTabsBG: this.props
+                                .contentSharingByTabsBG,
+                            copyToClipboard: this.props.onPageLinkCopy,
+                            fullPageUrl: pageData.fullUrl,
+                            getRootElement: this.props.getRootElement,
+                            showSpacesTab: this.props.showSpacesTab,
+                            fromDashboard: true,
+                        }}
+                        annotationShareProps={{
+                            isForAnnotation: true,
+                            postShareHook: interactionProps.updateShareInfo,
+                            annotationsCache: this.props.annotationsCache,
+                        }}
+                        getRootElement={this.props.getRootElement}
+                        syncSettingsBG={this.props.syncSettingsBG}
                     />
                 )}
+                toggleAutoAdd={null}
                 copyPasterAnnotationInstanceId={null}
                 spacePickerAnnotationInstance={null}
                 shareMenuAnnotationInstanceId={null}
@@ -422,8 +469,7 @@ export default class SearchResultsContainer extends React.Component<
                 annotationEditDependencies={{
                     comment: noteData.editNoteForm.inputValue,
                     body: noteData.editNoteForm.bodyInputValue,
-                    onListsBarPickerBtnClick:
-                        interactionProps.onListPickerBarBtnClick,
+                    copyLoadingState: noteData.copyLoadingState,
                     onCommentChange: (content) =>
                         interactionProps.onCommentChange(content),
                     onEditCancel: () =>
@@ -433,8 +479,11 @@ export default class SearchResultsContainer extends React.Component<
                     getRootElement: this.props.getRootElement,
                     onBodyChange: (content) =>
                         interactionProps.onBodyChange(content),
+                    setEditing: interactionProps.onEditBtnClick,
                 }}
                 annotationFooterDependencies={{
+                    onCopyPasterDefaultExecute:
+                        interactionProps.onCopyPasterDefaultExecute,
                     onDeleteCancel: () => undefined,
                     onDeleteConfirm: () => undefined,
                     onDeleteIconClick: interactionProps.onTrashBtnClick,
@@ -473,29 +522,35 @@ export default class SearchResultsContainer extends React.Component<
 
         return (
             <PageNotesBox bottom="10px" left="10px">
-                <AnnotationCreate
-                    autoFocus={false}
-                    comment={newNoteForm.inputValue}
-                    lists={lists}
-                    getListDetailsById={this.props.getListDetailsById}
-                    {...boundAnnotCreateProps}
-                    contextLocation={'dashboard'}
-                    renderSpacePicker={() => (
-                        <CollectionPicker
-                            showPageLinks
-                            annotationsCache={this.props.annotationsCache}
-                            initialSelectedListIds={() => lists}
-                            selectEntry={boundAnnotCreateProps.addPageToList}
-                            unselectEntry={
-                                boundAnnotCreateProps.removePageFromList
-                            }
-                            normalizedPageUrlToFilterPageLinksBy={normalizedUrl}
-                            analyticsBG={this.props.analyticsBG}
-                        />
-                    )}
-                    imageSupport={this.props.imageSupport}
-                    getRootElement={this.props.getRootElement}
-                />
+                <PageNotesContainer>
+                    <AnnotationCreate
+                        autoFocus={false}
+                        comment={newNoteForm.inputValue}
+                        lists={lists}
+                        getListDetailsById={this.props.getListDetailsById}
+                        {...boundAnnotCreateProps}
+                        contextLocation={'dashboard'}
+                        renderSpacePicker={() => (
+                            <CollectionPicker
+                                showPageLinks
+                                annotationsCache={this.props.annotationsCache}
+                                initialSelectedListIds={() => lists}
+                                selectEntry={
+                                    boundAnnotCreateProps.addPageToList
+                                }
+                                unselectEntry={
+                                    boundAnnotCreateProps.removePageFromList
+                                }
+                                normalizedPageUrlToFilterPageLinksBy={
+                                    normalizedUrl
+                                }
+                                analyticsBG={this.props.analyticsBG}
+                            />
+                        )}
+                        imageSupport={this.props.imageSupport}
+                        getRootElement={this.props.getRootElement}
+                    />
+                </PageNotesContainer>
                 <NoteResultContainer>
                     {/* {noteIds[notesType].length > 0 && (
                         <SortButtonContainer>
@@ -589,6 +644,8 @@ export default class SearchResultsContainer extends React.Component<
                 order={order}
             >
                 <PageResult
+                    resultsRef={this.ResultsScrollContainerRef}
+                    inPageMode={this.props.inPageMode}
                     index={index}
                     activePage={this.props.activePage}
                     annotationsCache={this.props.annotationsCache}
@@ -597,10 +654,15 @@ export default class SearchResultsContainer extends React.Component<
                         this.props.listData.byId[this.props.selectedListId]
                             ?.localId
                     }
+                    isNotesSidebarShown={this.props.isNotesSidebarShown}
+                    isListsSidebarShown={this.props.isSpacesSidebarLocked}
                     showPopoutsForResultBox={(show) =>
                         this.setState({
                             showPopoutsForResultBox: show,
                         })
+                    }
+                    onMatchingTextToggleClick={
+                        interactionProps.onMatchingTextToggleClick
                     }
                     selectItem={this.props.onBulkSelect}
                     shiftSelectItem={() => this.shiftSelectItems(order)}
@@ -610,15 +672,6 @@ export default class SearchResultsContainer extends React.Component<
                     youtubeService={this.props.youtubeService}
                     getListDetailsById={this.props.getListDetailsById}
                     getRootElement={this.props.getRootElement}
-                    shareMenuProps={{
-                        normalizedPageUrl: page.normalizedUrl,
-                        copyLink: this.props.onPageLinkCopy,
-                        postBulkShareHook: (shareInfo) =>
-                            interactionProps.updatePageNotesShareInfo(
-                                shareInfo,
-                            ),
-                        getRootElement: this.props.getRootElement,
-                    }}
                     {...interactionProps}
                     {...pickerProps}
                     {...page}
@@ -631,6 +684,32 @@ export default class SearchResultsContainer extends React.Component<
                     filterbyList={this.props.filterByList}
                     analyticsBG={this.props.analyticsBG}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
+                    searchQuery={this.props.searchQuery}
+                    renderPageCitations={() => (
+                        <PageCitations
+                            annotationUrls={page.noteIds['user']}
+                            copyPasterProps={{
+                                copyPasterBG: this.props.copyPasterBG,
+                                getRootElement: this.props.getRootElement,
+                                onClickOutside:
+                                    interactionProps.onCopyPasterBtnClick,
+                            }}
+                            pageLinkProps={{
+                                authBG: this.props.authBG,
+                                analyticsBG: this.props.analyticsBG,
+                                annotationsCache: this.props.annotationsCache,
+                                contentSharingBG: this.props.contentSharingBG,
+                                contentSharingByTabsBG: this.props
+                                    .contentSharingByTabsBG,
+                                copyToClipboard: this.props.onPageLinkCopy,
+                                fullPageUrl: page.fullUrl,
+                                getRootElement: this.props.getRootElement,
+                                showSpacesTab: this.props.showSpacesTab,
+                                fromDashboard: true,
+                            }}
+                            getRootElement={this.props.getRootElement}
+                        />
+                    )}
                 />
                 {this.renderPageNotes(page, day, interactionProps)}
             </ResultBox>
@@ -1005,7 +1084,7 @@ export default class SearchResultsContainer extends React.Component<
 
     render() {
         return (
-            <ResultsContainer bottom="100px">
+            <ResultsContainer>
                 <ResultsBox>
                     {this.props.selectedListId != null && (
                         <ListDetails
@@ -1092,27 +1171,54 @@ export default class SearchResultsContainer extends React.Component<
                             rightSide={undefined}
                         />
                     </PageTopBarBox>
-                    {this.renderOnboardingTutorials()}
-                    {this.renderResultsByDay()}
-                    {this.props.areResultsExhausted &&
-                        this.props.searchState === 'success' &&
-                        this.props.clearInboxLoadState !== 'running' &&
-                        this.props.searchResults.allIds.length > 0 && (
-                            <ResultsExhaustedMessage>
-                                <Icon
-                                    filePath="checkRound"
-                                    heightAndWidth="22px"
-                                    hoverOff
-                                    color={'greyScale4'}
-                                />
-                                End of results
-                            </ResultsExhaustedMessage>
-                        )}
+                    <ResultsScrollContainer
+                        id="ResultsScrollContainer"
+                        ref={this.ResultsScrollContainerRef}
+                    >
+                        {this.renderOnboardingTutorials()}
+                        {this.renderResultsByDay()}
+                        {this.props.areResultsExhausted &&
+                            this.props.searchState === 'success' &&
+                            this.props.clearInboxLoadState !== 'running' &&
+                            this.props.searchResults.allIds.length > 0 && (
+                                <ResultsExhaustedMessage>
+                                    <Icon
+                                        filePath="checkRound"
+                                        heightAndWidth="22px"
+                                        hoverOff
+                                        color={'greyScale4'}
+                                    />
+                                    End of results
+                                </ResultsExhaustedMessage>
+                            )}
+                    </ResultsScrollContainer>
                 </ResultsBox>
             </ResultsContainer>
         )
     }
 }
+
+const ResultsScrollContainer = styled.div`
+    overflow-y: scroll;
+    overflow-x: hidden;
+    height: fill-available;
+    width: fill-available;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2px;
+    padding-bottom: 100px;
+    justify-content: flex-start;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+    min-height: 10%;
+    flex: 1;
+`
 
 const NoteResultContainer = styled.div`
     display: flex;
@@ -1121,13 +1227,7 @@ const NoteResultContainer = styled.div`
     justify-content: flex-start;
     align-items: flex-start;
     width: fill-available;
-`
-
-const SortButtonContainer = styled.div`
-    position: absolute;
-    top: 6px;
-    left: -23px;
-    z-index: 100;
+    grid-gap: 10px;
 `
 
 const PaginationLoaderBox = styled.div`
@@ -1344,21 +1444,16 @@ const ContentTypeSwitchContainer = styled.div`
     scrollbar-width: none; */
 `
 
-const ResultsMessage = styled.div`
-    padding-top: 30px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-direction: column;
-`
-
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.darkText};
     font-size: 14px;
     font-weight: 300;
 `
 
-const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
+const PageTopBarBox = styled.div<{
+    isDisplayed: boolean
+    inPageMode?: boolean
+}>`
     /* padding: 0px 15px; */
     height: fit-content;
     max-width: calc(${sizeConstants.searchResults.widthPx}px + 20px);
@@ -1366,10 +1461,14 @@ const PageTopBarBox = styled.div<{ isDisplayed: boolean }>`
     position: sticky;
     top: 0px;
     margin-top: -1px;
-    background: ${(props) => props.theme.colors.black}80;
-    backdrop-filter: blur(8px);
     width: fill-available;
     width: -moz-available;
+
+    ${(props) =>
+        props.inPageMode &&
+        css`
+            position: relative;
+        `}
 `
 
 const ReferencesContainer = styled.div`
@@ -1419,10 +1518,16 @@ const PageNotesBox = styled(Margin)`
     align-items: flex-start;
 `
 
-const Separator = styled.div`
-    width: 100%;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
-    margin-bottom: -2px;
+const PageNotesContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    width: fill-available;
+    /* padding: 10px; */
+    outline: 1px solid ${(props) => props.theme.colors.greyScale4}80;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    margin-top: 5px;
 `
 
 const Loader = styled.div`
@@ -1438,84 +1543,27 @@ const ResultsBox = styled.div`
     margin-top: 2px;
     flex-direction: column;
     width: fill-available;
-    height: 100vh;
+    height: fill-available;
     grid-gap: 1px;
-    overflow: scroll;
-    padding-bottom: 100px;
+    overflow: hidden;
     align-items: center;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-
-    scrollbar-width: none;
 `
 
-const ResultsContainer = styled(Margin)`
+const ResultsContainer = styled.div`
     display: flex;
     flex-direction: column;
     align-self: center;
     width: fill-available;
-    margin-bottom: ${sizeConstants.header.heightPx}px;
-    width: fill-available;
     padding: 0 24px;
     z-index: 27;
+    min-height: 60%;
+    flex: 1;
     height: fill-available;
-
-    width: fill-available;
+    height: -moz-available;
 
     &::-webkit-scrollbar {
         display: none;
     }
 
     scrollbar-width: none;
-`
-
-const TopBarRightSideWrapper = styled.div`
-    display: flex;
-    flex-direction: row;
-`
-
-const ShareBtn = styled.button`
-    border: none;
-    background: none;
-    cursor: pointer;
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    outline: none;
-    border-radius: 3px;
-
-    &:hover {
-        background-color: #e0e0e0;
-    }
-
-    &:focus {
-        background-color: #79797945;
-    }
-`
-
-const IconImg = styled.img`
-    height: 18px;
-    width: 18px;
-`
-const SectionCircle = styled.div`
-    background: ${(props) => props.theme.colors.greyScale2};
-    border: 1px solid ${(props) => props.theme.colors.greyScale6};
-    border-radius: 8px;
-    height: 60px;
-    width: 60px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-`
-
-const ImportInfo = styled.span`
-    color: ${(props) => props.theme.colors.prime1};
-    margin-bottom: 40px;
-    font-weight: 500;
-    cursor: pointer;
 `

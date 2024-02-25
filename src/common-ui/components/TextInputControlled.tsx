@@ -657,7 +657,6 @@ export class SelectionModifiers {
         const regexp = /([^\r^\n]*)(\r\n|\n|\r)?/gm
         // @ts-ignore
         const matches = matchAll(text, regexp)
-        // console.log("matches",Array.from(matches))
 
         const lines = Array.from(matches, (m: any) => ({
             start: m.index,

@@ -298,5 +298,6 @@ const RibbonHolderBox = styled.div<{
             height: fill-available;
             height: -moz-available;
             width: 44px;
+            height: 100%;
         `}
 `

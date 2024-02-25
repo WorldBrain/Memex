@@ -33,7 +33,7 @@ export interface PageAnnotationsCacheInterface {
     getSharedPageListIds: (normalizedPageUrl: string) => string[]
     setAnnotations: (
         annotations: UnifiedAnnotationForCache[],
-        opts?: { now?: number },
+        opts?: { now?: number; keepExistingData?: boolean },
     ) => { unifiedIds: UnifiedAnnotation['unifiedId'][] }
     setLists: (
         lists: UnifiedListForCache[],
@@ -107,6 +107,13 @@ export interface PageAnnotationsCacheInterface {
      * A map of normalized page URLs to their Set of cached list IDs.
      */
     readonly pageListIds: Map<string, Set<UnifiedList['unifiedId']>>
+    /**
+     * Kept so pages can figure out which page link lists they have.
+     */
+    readonly normalizedPageUrlsToPageLinkListIds: Map<
+        string,
+        Set<UnifiedList<'page-link'>['unifiedId']>
+    >
 }
 
 export type UnifiedAnnotation = Pick<

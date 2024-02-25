@@ -20,6 +20,7 @@ import {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import { PageAnnotationsCache } from 'src/annotations/cache'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
@@ -145,6 +146,7 @@ export async function setupTest(
         seedData?: DataSeeder
         overrideSearchTrigger?: boolean
         copyToClipboard?: (text: string) => Promise<boolean>
+        copyPaster?: RemoteCopyPasterInterface
         renderUpdateNotifBanner?: () => JSX.Element
     } = {
         copyToClipboard: defaultTestSetupDeps.copyToClipboard,
@@ -184,7 +186,6 @@ export async function setupTest(
         ) as any,
         localStorage: device.browserAPIs.storage.local,
         authBG: device.backgroundModules.auth.remoteFunctions,
-        tagsBG: device.backgroundModules.tags.remoteFunctions,
         syncSettingsBG: device.backgroundModules.syncSettings.remoteFunctions,
         pageIndexingBG: device.backgroundModules.pages.remoteFunctions as any,
         pageActivityIndicatorBG:
@@ -198,9 +199,6 @@ export async function setupTest(
                 ),
         },
         searchBG: device.backgroundModules.search.remoteFunctions.search,
-        backupBG: insertBackgroundFunctionTab(
-            device.backgroundModules.backupModule.remoteFunctions,
-        ) as any,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
         contentShareByTabsBG: insertBackgroundFunctionTab(
             device.backgroundModules.contentSharing.remoteFunctionsByTab,
@@ -210,13 +208,14 @@ export async function setupTest(
             device.backgroundModules.contentConversations.remoteFunctions,
         activityIndicatorBG:
             device.backgroundModules.activityIndicator.remoteFunctions,
+        copyPasterBG: device.backgroundModules.copyPaster.remoteFunctions,
         copyToClipboard:
             args.copyToClipboard ?? defaultTestSetupDeps.copyToClipboard,
-        openCollectionPage: () => {},
+        openSpaceInWebUI: () => {},
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),
         analyticsBG: device.backgroundModules.analyticsBG,
-        imageSupport: device.backgroundModules.imageSupport,
+        imageSupportBG: device.backgroundModules.imageSupport,
     })
 
     if (args.overrideSearchTrigger) {

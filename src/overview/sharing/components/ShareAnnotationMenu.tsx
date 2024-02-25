@@ -13,6 +13,19 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { Checkbox } from 'src/common-ui/components'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import ContentSharingBackground from 'src/content-sharing/background'
+import {
+    AnnotationSharingState,
+    ContentSharingInterface,
+} from 'src/content-sharing/background/types'
+import {
+    SyncSettingsStore,
+    createSyncSettingsStore,
+} from 'src/sync-settings/util'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import { shareOptsToPrivacyLvl } from 'src/annotations/utils'
+import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 
 const COPY_TIMEOUT = 2000
 
@@ -21,65 +34,206 @@ export interface ShorcutHandlerDict {
 }
 
 export interface Props {
-    onCopyLinkClick: () => Promise<void>
-    privacyOptionsTitleCopy: React.ReactNode
-    shortcutHandlerDict?: ShorcutHandlerDict
-    onClickOutside?: React.MouseEventHandler
-    onPlusBtnClick?: React.MouseEventHandler
-    privacyOptions: PrivacyOptionProps[]
-    linkTitleCopy: React.ReactNode
-    isLoading: boolean
-    showLink: boolean
-    link: string
-    context?: string
-    handleCreateLink?: () => Promise<void>
-    autoShareState?: TaskState
-    autoCreateLinkState?: TaskState
-    autoCreateLinkSetting?: boolean
-    toggleAutoCreateLinkSetting?: () => void
-    renderAutoAddDefaultSettings?: JSX.Element
-    autoAddButtonRef?: React.RefObject<HTMLDivElement>
-    showAutoAddMenu?: (isShown) => void
     getRootElement: () => HTMLElement
+    annotationUrl: string
+    contentSharingBG: ContentSharingInterface
+    syncSettingsBG?: RemoteSyncSettingsInterface
+    annotationsCache: PageAnnotationsCacheInterface
+    postShareHook?: (
+        state: AnnotationSharingState,
+        opts?: { keepListsIfUnsharing?: boolean },
+    ) => void
 }
 
 interface State {
     copyState: TaskState
+    shareState: TaskState
+    autoCreateLinkSetting: boolean | null
+    autoCreateLinkState: TaskState
+    link: string
+    linkLoadState: TaskState
 }
 
 class ShareAnnotationMenu extends PureComponent<Props, State> {
+    private syncSettings: SyncSettingsStore<'extension'>
+
     copyTimeout?: ReturnType<typeof setTimeout>
     menuRef: React.RefObject<HTMLDivElement>
     state: State = {
         copyState: 'pristine',
+        shareState: 'pristine',
+        autoCreateLinkSetting: null,
+        autoCreateLinkState: 'pristine',
+        link: null,
+        linkLoadState: 'pristine',
+    }
+    async componentDidMount() {
+        this.syncSettings = createSyncSettingsStore({
+            syncSettingsBG: this.props.syncSettingsBG,
+        })
+
+        let existingSetting = await this.syncSettings.extension.get(
+            'shouldAutoCreateNoteLink',
+        )
+
+        if (existingSetting == null) {
+            await this.syncSettings.extension.set(
+                'shouldAutoCreateNoteLink',
+                false,
+            )
+            existingSetting = false
+        }
+
+        this.setState({
+            autoCreateLinkState: 'success',
+            autoCreateLinkSetting: existingSetting,
+        })
+
+        const linkExists = await this.setRemoteLinkIfExists()
+
+        if (!linkExists) {
+            await this.shareAnnotation()
+            await executeReactStateUITask<State, 'linkLoadState'>(
+                this,
+                'linkLoadState',
+                async () => {
+                    await this.shareAnnotation()
+                },
+            )
+        } else {
+            this.setState({ linkLoadState: 'success' })
+        }
     }
 
-    async componentDidMount() {
-        if (this.props.shortcutHandlerDict) {
-            for (const [shortcut, handler] of Object.entries(
-                this.props.shortcutHandlerDict,
-            )) {
-                Mousetrap.bind(shortcut, handler)
-            }
+    private shareAnnotation = async (isBulkShareProtected?: boolean) => {
+        this.setState({ linkLoadState: 'running' })
+        const { annotationUrl, contentSharingBG, annotationsCache } = this.props
+
+        const currentSharingLevel = await contentSharingBG.getAnnotationSharingState(
+            {
+                annotationUrl,
+            },
+        )
+
+        let sharingState = await contentSharingBG.shareAnnotation({
+            annotationUrl,
+            shareToParentPageLists: currentSharingLevel?.privacyLevel === 200,
+            skipPrivacyLevelUpdate: true,
+        })
+
+        const annotData = annotationsCache.getAnnotationByLocalId(annotationUrl)
+        if (annotData) {
+            annotationsCache.updateAnnotation({
+                ...annotData,
+                remoteId: sharingState.remoteId!.toString(),
+            })
         }
+
+        sharingState = await contentSharingBG.setAnnotationPrivacyLevel({
+            annotationUrl,
+            privacyLevel: shareOptsToPrivacyLvl({
+                shouldShare: true,
+                isBulkShareProtected,
+            }),
+        })
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
+
+        this.setState({ link })
+        this.setState({ linkLoadState: 'success' })
+
+        this.props.postShareHook?.(sharingState)
     }
 
     componentWillUnmount() {
         if (this.copyTimeout) {
             clearTimeout(this.copyTimeout)
         }
+    }
+    private setRemoteLinkIfExists = async (): Promise<boolean> => {
+        const { annotationUrl, contentSharingBG } = this.props
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
 
-        if (this.props.shortcutHandlerDict) {
-            for (const shortcut of Object.keys(
-                this.props.shortcutHandlerDict,
-            )) {
-                Mousetrap.unbind(shortcut)
-            }
+        if (!link) {
+            return false
         }
+        this.setState({ link })
+        this.setState({ linkLoadState: 'success' })
+        return true
+    }
+
+    private createAnnotationLink = async (isBulkShareProtected?: boolean) => {
+        const { annotationUrl, contentSharingBG } = this.props
+        await contentSharingBG.shareAnnotation({
+            annotationUrl,
+            shareToParentPageLists: false,
+            skipPrivacyLevelUpdate: true,
+        })
+
+        // const sharingState = await contentSharingBG.setAnnotationPrivacyLevel({
+        //     annotationUrl,
+        //     privacyLevel: shareOptsToPrivacyLvl({
+        //         shouldShare: false,
+        //         isBulkShareProtected,
+        //     }),
+        // })
+        const link = await contentSharingBG.getRemoteAnnotationLink({
+            annotationUrl,
+        })
+
+        // await this.props.copyLink(link)
+
+        // this.props.postShareHook?.(sharingState)
+    }
+
+    private handleCreateLink = async (isBulkShareProtected?: boolean) => {
+        this.setState({
+            shareState: 'running',
+        })
+        const p = executeReactStateUITask<State, 'shareState'>(
+            this,
+            'shareState',
+            async () => {
+                await this.createAnnotationLink(isBulkShareProtected)
+            },
+        )
+
+        await p
+
+        // if (this.props.analyticsBG) {
+        //     try {
+        //         await trackSharedAnnotation(this.props.analyticsBG, {
+        //             type: 'single',
+        //         })
+        //     } catch (error) {
+        //         console.error(
+        //             `Error tracking single annotation link share event', ${error}`,
+        //         )
+        //     }
+        // }
+
+        // this.setState({
+        //     shareState: 'success',
+        // })
+    }
+
+    toggleAutoCreateLinkSetting = async () => {
+        const existingSetting = this.state.autoCreateLinkSetting
+
+        await this.syncSettings.extension.set(
+            'shouldAutoCreateNoteLink',
+            !existingSetting,
+        )
+        this.setState({
+            autoCreateLinkSetting: !existingSetting,
+        })
     }
 
     private handleLinkCopy = async () => {
-        await this.props.onCopyLinkClick()
+        await copyToClipboard(this.state.link)
         this.setState({ copyState: 'success' })
         this.copyTimeout = setTimeout(
             () => this.setState({ copyState: 'pristine' }),
@@ -87,11 +241,11 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
         )
     }
 
-    private handleCreateLink = async () => {
+    private handleCreateLinkClick = async () => {
         await executeReactStateUITask<State, 'copyState'>(
             this,
             'copyState',
-            () => this.props.handleCreateLink(),
+            () => this.handleCreateLink(),
         )
         this.copyTimeout = setTimeout(
             () => this.setState({ copyState: 'pristine' }),
@@ -112,12 +266,13 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
             >
                 <PrimaryAction
                     onClick={() =>
-                        this.props.link
+                        this.state.link
                             ? this.handleLinkCopy()
-                            : this.handleCreateLink()
+                            : this.handleCreateLinkClick()
                     }
                     label={
-                        copyState === 'running' ? (
+                        copyState === 'running' ||
+                        this.state.linkLoadState === 'running' ? (
                             <LoadingIndicator size={14} />
                         ) : copyState === 'success' ? (
                             'Copied'
@@ -142,155 +297,37 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
     private renderMain() {
         return (
-            <Menu ref={this.menuRef} context={this.props.context}>
-                {this.props.context === 'AllNotesShare' ? (
-                    this.props.isLoading ? (
-                        <LoadingBox height={'80px'}>
-                            <LoadingIndicator size={30} />
-                        </LoadingBox>
-                    ) : (
-                        <>
-                            <PrivacyContainer isLinkShown={this.props.showLink}>
-                                <TopArea context={this.props.context}>
-                                    {this.props.privacyOptionsTitleCopy ? (
-                                        <PrivacyTitle>
-                                            {this.props.privacyOptionsTitleCopy}
-                                        </PrivacyTitle>
-                                    ) : undefined}
-                                    <PrivacyOptionContainer>
-                                        {this.props.privacyOptions.map(
-                                            (props, i) => (
-                                                <SharePrivacyOption
-                                                    key={i}
-                                                    {...props}
-                                                />
-                                            ),
-                                        )}
-                                    </PrivacyOptionContainer>
-                                </TopArea>
-                            </PrivacyContainer>
-                        </>
-                    )
-                ) : (
-                    <>
-                        {this.props.showLink && (
-                            <TopArea context={this.props.context}>
-                                {/* <PrivacyTitle>
-                                        {this.props.linkTitleCopy}
-                                    </PrivacyTitle> */}
-                                <LinkCopierBox>
-                                    {this.renderLinkContent()}
-                                </LinkCopierBox>
-                                <Checkbox
-                                    key={23}
-                                    id={'23'}
-                                    isChecked={
-                                        this.props.autoCreateLinkSetting ===
-                                        true
-                                    }
-                                    handleChange={() =>
-                                        this.props.toggleAutoCreateLinkSetting()
-                                    }
-                                    // isDisabled={!this.state.shortcutsEnabled}
-                                    name={'Copy link when creating highlight'}
-                                    label={'Copy link when creating highlight'}
-                                    fontSize={12}
-                                    width="fit-content"
-                                    size={10}
-                                    isLoading={
-                                        this.props.autoCreateLinkState ===
-                                        'running'
-                                    }
-                                />
-                            </TopArea>
-                        )}
-                        <PrivacyContainer isLinkShown={this.props.showLink}>
-                            <SubtitleSection>
-                                <SectionTitle>Add to Spaces</SectionTitle>
-                                {/* {this.props.autoShareState === 'running' ? (
-                                    <LoadingBox
-                                        padding={'0 10px 0 0'}
-                                        loaderPosition={'flex-end'}
-                                    >
-                                        <LoadingIndicator size={16} />
-                                    </LoadingBox>
-                                ) : ( */}
-                                <AutoAddContainer
-                                    onMouseEnter={() =>
-                                        this.props.showAutoAddMenu(true)
-                                    }
-                                    onMouseLeave={() => {
-                                        this.props.showAutoAddMenu(false)
-                                    }}
-                                    ref={this.props.autoAddButtonRef}
-                                >
-                                    {this.props.renderAutoAddDefaultSettings}
-                                    <Checkbox
-                                        key={13}
-                                        id={'13'}
-                                        isChecked={
-                                            this.props.privacyOptions[1]
-                                                .isSelected
-                                        }
-                                        handleChange={() => {
-                                            console.log('clicked')
-                                            this.props.privacyOptions[1]
-                                                .isSelected
-                                                ? this.props.privacyOptions[0].onClick()
-                                                : this.props.privacyOptions[1].onClick()
-                                        }}
-                                        // isDisabled={!this.state.shortcutsEnabled}
-                                        name={'Boost'}
-                                        label={
-                                            <LabelContainer>
-                                                <Icon
-                                                    icon={'spread'}
-                                                    color={
-                                                        this.props
-                                                            .privacyOptions[1]
-                                                            .isSelected
-                                                            ? 'prime1'
-                                                            : 'greyScale5'
-                                                    }
-                                                    hoverOff
-                                                    heightAndWidth="22px"
-                                                />
-                                                Auto Add
-                                            </LabelContainer>
-                                        }
-                                        textPosition={'left'}
-                                        fontSize={14}
-                                        size={14}
-                                        isLoading={
-                                            this.props.autoShareState ===
-                                            'running'
-                                        }
-                                    />
-                                </AutoAddContainer>
-                                {/* )} */}
-                            </SubtitleSection>
-                            {/* <TopArea>
-                                    {this.props.privacyOptionsTitleCopy ? (
-                                        <PrivacyTitle>
-                                            {
-                                                this.props
-                                                    .privacyOptionsTitleCopy
-                                            }
-                                        </PrivacyTitle>
-                                    ) : undefined}
-                                    <PrivacyOptionContainer>
-                                        {this.props.privacyOptions.map(
-                                            (props, i) => (
-                                                <SharePrivacyOption
-                                                    key={i}
-                                                    {...props}
-                                                />
-                                            ),
-                                        )}
-                                    </PrivacyOptionContainer>
-                                </TopArea> */}
-                        </PrivacyContainer>
-                    </>
+            <Menu ref={this.menuRef}>
+                {this.state.link != null &&
+                    this.state.linkLoadState === 'success' && (
+                        <TopArea>
+                            <LinkCopierBox>
+                                {this.renderLinkContent()}
+                            </LinkCopierBox>
+                            <Checkbox
+                                key={23}
+                                id={'23'}
+                                isChecked={
+                                    this.state.autoCreateLinkSetting === true
+                                }
+                                handleChange={() =>
+                                    this.toggleAutoCreateLinkSetting()
+                                }
+                                name={'Copy link when creating highlight'}
+                                label={'Copy link when creating highlight'}
+                                fontSize={14}
+                                width="fit-content"
+                                size={16}
+                                isLoading={
+                                    this.state.autoCreateLinkState === 'running'
+                                }
+                            />
+                        </TopArea>
+                    )}
+                {this.state.linkLoadState === 'running' && (
+                    <TopArea>
+                        <LoadingIndicator size={18} />
+                    </TopArea>
                 )}
             </Menu>
         )
@@ -307,9 +344,7 @@ class ShareAnnotationMenu extends PureComponent<Props, State> {
 
 export default ShareAnnotationMenu
 
-const Menu = styled.div<{ context: string }>`
-    padding: 5px 0px;
-    width: 310px;
+const Menu = styled.div`
     z-index: 10;
     position: relative;
 
@@ -319,65 +354,15 @@ const Menu = styled.div<{ context: string }>`
     &:first-child {
         padding: 15px 0px 0px 0px;
     }
-
-    ${(props) =>
-        props.context === 'AllNotesShare' &&
-        css`
-            height: fit-content;
-            width: 350px;
-
-            &:first-child {
-                padding: 15px 15px 15px 15px;
-            }
-        `};
 `
 
-const SubtitleSection = styled.div`
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 5px;
-    padding: 0 15px;
-`
-
-const AutoAddContainer = styled.div`
-    display: flex;
-    grid-gap: 2px;
-    align-items: center;
-    justify-content: flex-end;
-    flex-direction: row;
-`
-const LabelContainer = styled.div`
-    display: flex;
-    align-items: center;
-    justify-content: flex-end;
-    flex-direction: row;
-`
-
-const TopArea = styled.div<{ context: string }>`
-    padding: 10px 15px 10px 15px;
+const TopArea = styled.div`
+    padding: 0 10px 15px 10px;
     height: fit-content;
-    margin-bottom: 20px;
     grid-gap: 5px;
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    &:first-child {
-        padding: 0px 15px 0px 15px;
-    }
-
-    ${(props) =>
-        props.context === 'AllNotesShare' &&
-        css`
-            height: fit-content;
-
-            &:first-child {
-                padding: unset;
-                margin-bottom: 0px;
-            }
-        `};
 `
 
 const LinkCopierBox = styled.div`
@@ -388,83 +373,4 @@ const LinkCopierBox = styled.div`
     margin: 5px 0;
     background-color: ${(props) => props.theme.colors.greyScale1}70;
     border-radius: 5px;
-`
-
-const LoadingBox = styled.div<{
-    height?: string
-    loaderPosition?: string
-    padding?: string
-}>`
-    width: 100%;
-    display: flex;
-    height: ${(props) => props.height || '100%'};
-    align-items: center;
-    justify-content: ${(props) => props.loaderPosition || 'center'};
-    padding: ${(props) => props.padding || 'unset'};
-`
-
-const LinkCopier = styled.button`
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    border: 0;
-    border-radius: 6px;
-    height: 40px;
-    background-color: ${(props) => props.theme.colors.greyScale2};
-    padding: 0 10px;
-    outline: none;
-    cursor: pointer;
-    overflow: hidden;
-
-    & > span {
-        overflow: hidden;
-        width: 90%;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-    }
-`
-
-const LinkBox = styled.div`
-    background: ${(props) => props.theme.colors.greyScale2};
-    display: flex;
-    width: 100%;
-    align-items: center;
-`
-
-const LinkContent = styled.div`
-    color: ${(props) => props.theme.colors.white};
-    font-size: 14px;
-    width: -webkit-fill-available;
-    text-overflow: ellipsis;
-    overflow: hidden;
-`
-
-const PrivacyContainer = styled.div<{ isLinkShown: boolean }>`
-    width: 100%;
-`
-
-const SectionTitle = styled.div`
-    font-size: 14px;
-    font-weight: 700;
-    color: ${(props) => props.theme.colors.white};
-    white-space: nowrap;
-`
-
-const PrivacyTitle = styled.div`
-    font-size: 14px;
-    font-weight: 400;
-    margin-bottom: 10px;
-    color: ${(props) => props.theme.colors.greyScale4};
-    white-space: nowrap;
-    padding-left: 5px;
-`
-
-const PrivacyOptionContainer = styled(Margin)`
-    display: flex;
-    justify-content: space-between;
-    width: fill-available;
-    flex-direction: row;
-    align-items: center;
-    grid-gap: 4px;
 `

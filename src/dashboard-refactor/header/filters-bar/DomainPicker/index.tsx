@@ -167,12 +167,14 @@ class DomainPicker extends StatefulUIElement<
                     //     />
                     // }
                 />
-                <EntryResultsList
-                    entries={this.state?.displayEntries}
-                    renderEntryRow={this.renderDomainRow}
-                    emptyView={this.renderEmptyDomain()}
-                    id="domainResults"
-                />
+                <ResultsScrollContainer>
+                    <EntryResultsList
+                        entries={this.state?.displayEntries}
+                        renderEntryRow={this.renderDomainRow}
+                        emptyView={this.renderEmptyDomain()}
+                        id="domainResults"
+                    />
+                </ResultsScrollContainer>
             </>
         )
     }
@@ -188,6 +190,17 @@ class DomainPicker extends StatefulUIElement<
         )
     }
 }
+
+const ResultsScrollContainer = styled.div`
+    max-height: 300px;
+    overflow: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
+`
 
 const SectionCircle = styled.div`
     background: ${(props) => props.theme.colors.greyScale2};

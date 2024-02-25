@@ -356,6 +356,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         const listMap = new Map<string, number[]>()
         const annotMap = new Map<string, Annotation[]>()
         const timeMap = new Map<string, number>()
+        const textMap = new Map<string, number>()
 
         // Run the first set of queries to get display data
         await Promise.all([
@@ -386,7 +387,6 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
         return pageUrls
             .map((url, i) => {
                 const page = pageMap.get(url)
-
                 // Data integrity issue; no matching page in the DB. Fail nicely
                 if (!page || !page.url) {
                     return null
@@ -397,6 +397,7 @@ export class PageUrlMapperPlugin extends StorageBackendPlugin<
                     favIcon: favIconMap.get(page.hostname),
                     tags: tagMap.get(url) ?? [],
                     lists: listMap.get(url) ?? [],
+                    text: pageMap.get(url).text ?? '',
                     annotations: annotMap.get(url) ?? [],
                     annotsCount: annotMap.get(url)?.length,
                     displayTime: latestTimes

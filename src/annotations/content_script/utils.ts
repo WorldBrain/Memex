@@ -1,6 +1,7 @@
 export const copyToClipboard = async (text: string) => {
     if (navigator.clipboard?.writeText) {
         await navigator.clipboard.writeText(text)
+        return true
     }
 
     // const dummy = document.createElement('textarea')

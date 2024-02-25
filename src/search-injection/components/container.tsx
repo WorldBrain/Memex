@@ -134,7 +134,7 @@ class Container extends React.Component<Props, State> {
         })
 
         const target = document.getElementById(
-            constants.REACT_ROOTS.searchInjection,
+            constants.REACT_ROOTS.searchEngineInjection,
         )
 
         if (isSticky) {
@@ -156,7 +156,7 @@ class Container extends React.Component<Props, State> {
         )
 
         const target = document.getElementById(
-            constants.REACT_ROOTS.searchInjection,
+            constants.REACT_ROOTS.searchEngineInjection,
         )
 
         if (isSticky) {

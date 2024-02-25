@@ -16,8 +16,8 @@ export const entry = {
     content_script: './src/content-scripts/content_script/global_webpage.ts',
     content_script_pdfjs:
         './src/content-scripts/content_script/global_pdfjs.ts',
-    content_script_search_injection:
-        './src/content-scripts/content_script/search-injection.ts',
+    content_script_in_page_ui_injections:
+        './src/content-scripts/content_script/in-page-ui-injections.ts',
     content_script_ribbon: './src/content-scripts/content_script/ribbon.ts',
     content_script_tooltip: './src/content-scripts/content_script/tooltip.ts',
     content_script_sidebar: './src/content-scripts/content_script/sidebar.ts',

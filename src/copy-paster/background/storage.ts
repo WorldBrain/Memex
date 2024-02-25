@@ -1,6 +1,7 @@
 import {
     StorageModule,
     StorageModuleConfig,
+    StorageModuleConstructorArgs,
 } from '@worldbrain/storex-pattern-modules'
 import {
     COLLECTION_DEFINITIONS,
@@ -9,6 +10,10 @@ import {
 import type { Template } from '../types'
 
 export default class CopyPasterStorage extends StorageModule {
+    constructor(private options: StorageModuleConstructorArgs) {
+        super(options)
+    }
+
     getConfig = (): StorageModuleConfig => ({
         collections: { ...COLLECTION_DEFINITIONS },
         operations: {
@@ -53,7 +58,11 @@ export default class CopyPasterStorage extends StorageModule {
     }
 
     async __createTemplateWithId(template: Template) {
-        const { object } = await this.operation('createTemplate', template)
+        const { object } = await this.options.storageManager.backend.operation(
+            'createObject',
+            COLLECTION_NAMES.templates,
+            template,
+        )
         return object.id
     }
 

@@ -15,6 +15,7 @@ interface TemplateEditorProps {
     isNew?: boolean
     templateType: 'originalPage' | 'examplePage'
     isPreviewLoading: TaskState
+    previewErrorMessage?: string | JSX.Element
 
     onClickSave: () => void
     onClickCancel: () => void
@@ -60,7 +61,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'Page Spaces (custom)',
-        insertedText: `{{#PageSpacesList}}{{{.}}}{{/PageSpacesList}} `,
+        insertedText: `{{#PageSpacesList}}{{{.}}} {{/PageSpacesList}} `,
         TooltipText: (
             <span>
                 The `{'{{{'}.{'}}}'}` represents a placeholder for every
@@ -75,7 +76,7 @@ const TemplateButtonOptions = [
         insertedText: `{{#Notes}}
 {{{NoteHighlight}}} 
 {{{NoteText}}}
-{{/Notes} `,
+{{/Notes}} `,
         TooltipText: (
             <span>
                 Needed to loop through notes. <br />
@@ -123,7 +124,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'Note Spaces (custom)',
-        insertedText: `{{#NoteSpacesList}}{{{.}}}{{/NoteSpacesList}} `,
+        insertedText: `{{#NoteSpacesList}}{{{.}}} {{/NoteSpacesList}} `,
         TooltipText: (
             <span>
                 The `{'{{{'}.{'}}}'}` represents a placeholder for every
@@ -144,7 +145,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'HAS variable X',
-        insertedText: `{{1ReplaceWithX}} {{/ReplaceWithX}} `,
+        insertedText: `{{#ReplaceWithX}} {{/ReplaceWithX}} `,
         TooltipText: (
             <span>
                 The text between between elements will be shown
@@ -154,7 +155,7 @@ const TemplateButtonOptions = [
     },
     {
         buttonText: 'HAS NOT variable X',
-        insertedText: `{{#ReplaceWithX}} {{/ReplaceWithX}} `,
+        insertedText: `{{^ReplaceWithX}} {{/ReplaceWithX}} `,
         TooltipText: (
             <span>
                 The text between between elements will be shown
@@ -173,7 +174,10 @@ export default class TemplateEditor extends PureComponent<
     State
 > {
     private get isSaveDisabled(): boolean {
-        return !this.props.template?.title.length
+        return (
+            !this.props.template?.title.length ||
+            !this.props.template?.code.length
+        )
     }
 
     state = {
@@ -214,7 +218,6 @@ export default class TemplateEditor extends PureComponent<
     render() {
         const { template } = this.props
 
-        console.log('this.props.previewString', this.props.previewString)
         return (
             <EditorContainer>
                 <Header>
@@ -237,7 +240,9 @@ export default class TemplateEditor extends PureComponent<
                                 icon={'trash'}
                             />
                         ) : (
-                            <ConfirmText>Sure?</ConfirmText>
+                            !this.props.isNew && (
+                                <ConfirmText>Sure?</ConfirmText>
+                            )
                         )}
                         <PrimaryAction
                             label={'Cancel'}
@@ -251,18 +256,23 @@ export default class TemplateEditor extends PureComponent<
                                     : this.props.onClickCancel
                             }
                         />
-                        <PrimaryAction
-                            label={this.state.confirmDelete ? 'Delete' : 'Save'}
-                            type={'primary'}
-                            size={'small'}
-                            icon={'check'}
-                            padding={'3px 10px 3px 5px'}
-                            onClick={
-                                this.state.confirmDelete
-                                    ? this.handleConfirmDelete
-                                    : this.props.onClickSave
-                            }
-                        />
+                        {!this.props.isNew && !this.isSaveDisabled && (
+                            <PrimaryAction
+                                label={
+                                    this.state.confirmDelete ? 'Delete' : 'Save'
+                                }
+                                type={'primary'}
+                                size={'small'}
+                                icon={'check'}
+                                disabled={this.isSaveDisabled}
+                                padding={'3px 10px 3px 5px'}
+                                onClick={
+                                    this.state.confirmDelete
+                                        ? this.handleConfirmDelete
+                                        : this.props.onClickSave
+                                }
+                            />
+                        )}
                     </ButtonBox>
                 </Header>
 
@@ -271,7 +281,14 @@ export default class TemplateEditor extends PureComponent<
                         type="text"
                         placeholder="Title"
                         value={template?.title}
-                        onKeyDown={(e) => e.stopPropagation()}
+                        onKeyDown={(e) => {
+                            if (e.key === 'Enter' && e.metaKey) {
+                                this.props.onClickSave()
+                            } else if (e.key === 'Escape') {
+                                this.props.onClickCancel()
+                            }
+                            e.stopPropagation()
+                        }}
                         onChange={(e) =>
                             this.props.onTitleChange(
                                 (e.target as HTMLInputElement).value,
@@ -279,6 +296,7 @@ export default class TemplateEditor extends PureComponent<
                         }
                         height="30px"
                         width="fill-available"
+                        background="greyScale3"
                     />
                     <EditorContainers>
                         <EditorBox>
@@ -341,7 +359,7 @@ export default class TemplateEditor extends PureComponent<
                                                     ?.outputFormat == null
                                             }
                                         >
-                                            Markdown
+                                            Plain Text
                                         </OutputSwitcher>
                                     </TooltipBox>
                                 </OutputSwitcherContainer>
@@ -398,13 +416,19 @@ export default class TemplateEditor extends PureComponent<
                                             ;(e.target as HTMLTextAreaElement).selectionStart = (e.target as HTMLTextAreaElement).selectionEnd = newCursorPos
                                         }, 0)
                                     }
+                                    if (e.key === 'Enter' && e.metaKey) {
+                                        this.props.onClickSave()
+                                    } else if (e.key === 'Escape') {
+                                        this.props.onClickCancel()
+                                    }
+                                    e.stopPropagation()
                                 }}
                             />
                         </EditorBox>
                         <EditorBox>
                             <HeaderBox>
                                 <LeftSidePreviewBar>
-                                    <Title>Preview</Title>
+                                    <Title>Preview from selected item(s)</Title>
                                     <TooltipBox
                                         tooltipText={
                                             <span>
@@ -427,28 +451,51 @@ export default class TemplateEditor extends PureComponent<
                                             hoverOff
                                         />
                                     </TooltipBox>
+                                    {this.props.isPreviewLoading ===
+                                        'running' && (
+                                        <LoadingBox>
+                                            <LoadingIndicator size={16} />
+                                        </LoadingBox>
+                                    )}
                                 </LeftSidePreviewBar>
                             </HeaderBox>
                             <PreviewEditorBox>
-                                {this.props.template?.outputFormat ===
-                                'markdown' ? (
-                                    <PreviewInput
-                                        value={this.props.previewString}
-                                        readOnly
-                                    />
+                                {this.props.isPreviewLoading === 'error' ? (
+                                    <ErrorContainer>
+                                        <Icon
+                                            icon={'warning'}
+                                            heightAndWidth="24px"
+                                            hoverOff
+                                            color={'warning'}
+                                        />
+                                        <ErrorText>
+                                            {this.props.previewErrorMessage}
+                                        </ErrorText>
+                                    </ErrorContainer>
                                 ) : (
-                                    <PreviewRichText
-                                        ref={(element) => {
-                                            if (element) {
-                                                element.innerHTML = this.props.previewString
-                                            }
-                                        }}
-                                    />
-                                )}
-                                {this.props.isPreviewLoading === 'running' && (
-                                    <LoadingBox>
-                                        <LoadingIndicator size={30} />
-                                    </LoadingBox>
+                                    <>
+                                        {this.props.template?.outputFormat ===
+                                        'markdown' ? (
+                                            <PreviewInput
+                                                value={this.props.previewString}
+                                                readOnly
+                                                onKeyDown={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            />
+                                        ) : (
+                                            <PreviewRichText
+                                                ref={(element) => {
+                                                    if (element) {
+                                                        element.innerHTML = this.props.previewString
+                                                    }
+                                                }}
+                                                onClick={(e) =>
+                                                    e.stopPropagation()
+                                                }
+                                            />
+                                        )}
+                                    </>
                                 )}
                             </PreviewEditorBox>
                         </EditorBox>
@@ -503,7 +550,6 @@ export default class TemplateEditor extends PureComponent<
                                         100,
                                     ) // Adjust these values as needed
 
-                                    console.log('dragging', value)
                                     e.dataTransfer.setData('text/plain', value)
                                     setTimeout(
                                         () =>
@@ -532,6 +578,9 @@ const LeftSidePreviewBar = styled.div`
     align-items: center;
     grid-gap: 5px;
     justify-content: flex-start;
+    position: relative;
+    width: fill-available;
+    width: -moz-available;
 `
 
 const PreviewEditorBox = styled.div`
@@ -540,6 +589,7 @@ const PreviewEditorBox = styled.div`
     position: relative;
     flex: 1;
     min-height: 10%;
+    min-width: 10%;
 `
 
 const LoadingBox = styled.div`
@@ -547,13 +597,7 @@ const LoadingBox = styled.div`
     justify-content: center;
     align-items: center;
     position: absolute;
-    top: 0;
-    left: 0;
-    height: fill-available;
-    width: 100%;
-    background: ${(props) => props.theme.colors.black}96;
-    backdrop-filter: blur(4px);
-    border-radius: 10px;
+    right: 10px;
 `
 
 const DragButtonsContainer = styled.div`
@@ -659,11 +703,12 @@ const OutputSwitcher = styled.div<{
     padding: 5px 10px;
     font-size: 12px;
     cursor: pointer;
+    border-radius: 5px;
 
     ${(props) =>
         props.outputFormatSelected &&
         css`
-            background: ${(props) => props.theme.colors.greyScale2};
+            background: ${(props) => props.theme.colors.greyScale3};
         `}
 
     ${(props) =>
@@ -689,10 +734,10 @@ const EditorContainer = styled.div`
     justify-self: center;
     flex-direction: column;
     background: ${(props) => props.theme.colors.black};
-    opacity: 0.97;
+
     padding: 20px;
     border-radius: 10px;
-    border: 1px solid ${(props) => props.theme.colors.greyScale2};
+    box-shadow: 0px 8px 26px 4px ${(props) => props.theme.colors.black2}c2;
     padding: 10px 15px;
 
     * {
@@ -737,15 +782,42 @@ const PreviewInput = styled.textarea`
     font-size: 14px;
     overflow: scroll;
     resize: none;
-    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     border-radius: 8px;
     flex: 1;
     min-height: 60%;
     text-overflow: nowrap;
 
-    &:focus {
-        background: none;
-    }
+    scrollbar-width: none;
+`
+
+const ErrorText = styled.div`
+    color: ${(props) => props.theme.colors.greyScale6};
+    text-align: center;
+    line-height: 21px;
+    font-size: 16px;
+`
+
+const ErrorContainer = styled.div`
+    height: fill-available;
+    height: -moz-available;
+    width: fill-available;
+    width: -moz-available;
+    border: none;
+    background: none;
+    padding: 10px;
+    width: fill-available;
+    resize: none;
+    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    border-radius: 8px;
+    min-height: 60%;
+    text-overflow: nowrap;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 10px;
 
     scrollbar-width: none;
 `
@@ -763,7 +835,7 @@ const PreviewRichText = styled.div`
     font-size: 14px;
     overflow: scroll;
     resize: none;
-    outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    outline: 1px solid ${(props) => props.theme.colors.greyScale4};
     border-radius: 8px;
     min-height: 60%;
     text-overflow: nowrap;
@@ -794,11 +866,11 @@ const TemplateInput = styled.textarea`
     outline: 1px solid ${(props) => props.theme.colors.greyScale2};
     border-radius: 8px;
     padding: 10px;
-    background: ${(props) => props.theme.colors.greyScale1};
+    background: ${(props) => props.theme.colors.greyScale1}50;
     line-height: 21px;
     font-size: 14px;
     &:focus {
-        background: ${(props) => props.theme.colors.greyScale2};
+        background: ${(props) => props.theme.colors.greyScale1}60;
     }
     overflow-x: scroll;
     resize: none;
@@ -814,4 +886,5 @@ const EditorBox = styled.div`
     grid-gap: 5px;
     min-height: 10%;
     flex: 1;
+    min-width: 10%;
 `

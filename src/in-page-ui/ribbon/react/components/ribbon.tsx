@@ -69,6 +69,7 @@ export interface Props extends RibbonSubcomponentProps {
     showFeed: boolean
     toggleAskAI: () => void
     toggleRabbitHole: () => void
+    toggleQuickSearch: () => void
     openPDFinViewer: () => void
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
@@ -292,25 +293,48 @@ export default class Ribbon extends Component<Props, State> {
         const center = this.props.ribbonPosition === 'centerRight'
         const sidebarOpen = this.props.sidebar.isSidebarOpen
 
-        const condition1 = (topRight || bottomRight) && !sidebarOpen
-        const condition2 = center && !sidebarOpen
-        const condition3 = sidebarOpen
+        const condition1 = topRight && !sidebarOpen
+        const condition2 = bottomRight && !sidebarOpen
+        const condition3 = center && !sidebarOpen
+        const condition4 = sidebarOpen
 
         return (
             <PopoutBox
                 getPortalRoot={this.props.getRootElement}
                 targetElementRef={this.spacePickerRef.current}
                 placement={
-                    topRight
+                    condition1
                         ? 'bottom-end'
-                        : bottomRight
+                        : condition2
                         ? 'top-end'
+                        : condition3
+                        ? 'left-start'
+                        : condition4
+                        ? 'left-start'
                         : 'left-start'
                 }
                 offsetX={
-                    condition1 ? 10 : condition2 ? 10 : condition3 ? 10 : 0
+                    condition1
+                        ? 10
+                        : condition2
+                        ? 10
+                        : condition3
+                        ? 10
+                        : condition4
+                        ? 10
+                        : 0
                 }
-                offsetY={condition1 ? 20 : condition2 ? 0 : condition3 ? 0 : 0}
+                offsetY={
+                    condition1
+                        ? 10
+                        : condition2
+                        ? 10
+                        : condition3
+                        ? 10
+                        : condition4
+                        ? 0
+                        : 0
+                }
                 closeComponent={this.hideListPicker}
             >
                 <CollectionPicker
@@ -648,7 +672,6 @@ export default class Ribbon extends Component<Props, State> {
                         : 10
                 }
                 offsetY={-15}
-                width={'630px'}
                 closeComponent={() => this.props.toggleFeed()}
                 getPortalRoot={this.props.getRootElement}
             >
@@ -1257,7 +1280,7 @@ export default class Ribbon extends Component<Props, State> {
                         <PrimaryAction
                             size={'medium'}
                             type="tertiary"
-                            label={'Share'}
+                            label={'Cite'}
                             fontColor={'greyScale8'}
                             onClick={null}
                             icon={'invite'}
@@ -1283,7 +1306,20 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <TooltipBox
-                tooltipText={this.getTooltipText('openDashboard')}
+                tooltipText={
+                    <span
+                        style={{
+                            gridGap: '5px',
+                            display: 'flex',
+                            flexDirection: 'column',
+                        }}
+                    >
+                        {this.getTooltipText('openDashboard')}
+                        <span>
+                            <strong>+ shift </strong>to open in new tab
+                        </span>
+                    </span>
+                }
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -1303,12 +1339,28 @@ export default class Ribbon extends Component<Props, State> {
                         type="tertiary"
                         label={'Search'}
                         fontColor={'greyScale8'}
-                        onClick={() => this.props.bgScriptBG.openOverviewTab()}
+                        onClick={(e) => {
+                            if (e.shiftKey) {
+                                e.stopPropagation()
+                                this.props.bgScriptBG.openOverviewTab()
+                            } else {
+                                e.stopPropagation()
+                                this.props.toggleQuickSearch()
+                            }
+                        }}
                         icon={'searchIcon'}
                     />
                 ) : (
                     <Icon
-                        onClick={() => this.props.bgScriptBG.openOverviewTab()}
+                        onClick={(e) => {
+                            if (e.shiftKey) {
+                                e.stopPropagation()
+                                this.props.bgScriptBG.openOverviewTab()
+                            } else {
+                                e.stopPropagation()
+                                this.props.toggleQuickSearch()
+                            }
+                        }}
                         color={'greyScale6'}
                         heightAndWidth="20px"
                         filePath={icons.searchIcon}
@@ -1683,7 +1735,6 @@ export default class Ribbon extends Component<Props, State> {
                 </IconContainer>
             )
         } else {
-            console.log('showRabbitHoleButton', this.props.showRabbitHoleButton)
             return (
                 <>
                     <InnerRibbon
@@ -1709,8 +1760,7 @@ export default class Ribbon extends Component<Props, State> {
                                             this.props.ribbonPosition
                                         }
                                     >
-                                        {!this.props.sidebar.isSidebarOpen &&
-                                            this.renderFeedButton()}
+                                        {this.renderFeedButton()}
                                         <BlockCounterIndicator
                                             ribbonPosition={
                                                 this.props.ribbonPosition
@@ -1846,8 +1896,6 @@ export default class Ribbon extends Component<Props, State> {
                                 ribbonPosition={this.props.ribbonPosition}
                                 isSidebarOpen={this.props.sidebar.isSidebarOpen}
                             >
-                                {!this.props.sidebar.isSidebarOpen &&
-                                    this.renderFeedButton()}
                                 <PageAction
                                     ribbonPosition={this.props.ribbonPosition}
                                     isSidebarOpen={
@@ -1895,6 +1943,7 @@ export default class Ribbon extends Component<Props, State> {
                                 sidebarOpen={this.props.sidebar.isSidebarOpen}
                                 ribbonPosition={this.props.ribbonPosition}
                             >
+                                {this.renderFeedButton()}
                                 {this.renderDarkLightModeToggle()}
                                 {this.renderTutorialButton()}
                                 <BlockCounterIndicator
@@ -2345,7 +2394,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
     display: none;
     background: ${(props) =>
         props.theme.variant === 'dark'
-            ? props.theme.colors.black + 'eb'
+            ? '#23242b'
             : props.theme.colors.black + 'c9'};
                     backdrop-filter: blur(30px);
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
@@ -2546,7 +2595,7 @@ const FeedbackContainer = styled.div`
 
 const FeedContainer = styled.div`
     display: flex;
-    width: fill-available;
+    width: 500px;
     height: 580px;
     justify-content: flex-start;
     align-items: flex-start;
@@ -2554,7 +2603,7 @@ const FeedContainer = styled.div`
     padding-top: 20px;
     max-width: 800px;
     background: ${(props) => props.theme.colors.black};
-    border-radius: 10px;
+    border-radius: 0 0 10px 10px;
 `
 
 const TitleContainer = styled.div`

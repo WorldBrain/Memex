@@ -42,6 +42,13 @@ interface CopyPasterProps {
     getRootElement: () => HTMLElement
     onClickOutside?: React.MouseEventHandler
     onReorder: (id: number, oldIndex: number, newIndex: number) => void
+    previewErrorMessage?: string | JSX.Element
+    copyExistingRenderedToClipboard: (
+        renderedText: string,
+        templateId: number,
+    ) => Promise<void>
+    errorCopyToClipboard: boolean
+    renderedTextBuffered: string
 }
 
 class CopyPaster extends PureComponent<CopyPasterProps> {
@@ -95,11 +102,13 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
         if (event.key === 'Enter') {
             this.props.onClickCopy(templates[focusIndex].id)
         }
+        if (event.key === 'Escape') {
+            this.handleClickOutside(event)
+        }
     }
 
     render() {
         const { copyPasterEditingTemplate, templates } = this.props
-
         return (
             <CopyPasterWrapper>
                 {copyPasterEditingTemplate ? (
@@ -125,6 +134,7 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                             previewString={this.props.previewString}
                             getRootElement={this.props.getRootElement}
                             changeTemplateType={this.props.changeTemplateType}
+                            previewErrorMessage={this.props.previewErrorMessage}
                         />
                     </OverlayModals>
                 ) : (
@@ -139,6 +149,14 @@ class CopyPaster extends PureComponent<CopyPasterProps> {
                         getRootElement={this.props.getRootElement}
                         onReorder={this.props.onReorder}
                         focusIndex={this.state.focusIndex}
+                        focusOnElement={(index) =>
+                            this.setState({ focusIndex: index })
+                        }
+                        renderedTextBuffered={this.props.renderedTextBuffered}
+                        copyExistingRenderedToClipboard={
+                            this.props.copyExistingRenderedToClipboard
+                        }
+                        errorCopyToClipboard={this.props.errorCopyToClipboard}
                     />
                 )}
             </CopyPasterWrapper>

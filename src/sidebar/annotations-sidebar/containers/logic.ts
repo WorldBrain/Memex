@@ -103,16 +103,22 @@ import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
-import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
+import type { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
-import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
-import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { copyToClipboard } from 'src/annotations/content_script/utils'
+import Raven from 'raven-js'
+import analytics from 'src/analytics'
+
+import MarkdownIt from 'markdown-it'
+const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
     events?: AnnotationsSidebarInPageEventEmitter
@@ -130,6 +136,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     spacesBG?: SpacePickerDependencies['spacesBG']
     pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
+    copyPasterBG: RemoteCopyPasterInterface
 }
 
 type EventHandler<
@@ -234,7 +241,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
-                    imageSupport: options.imageSupport,
+                    imageSupport: options.imageSupportBG,
                 },
             ),
         )
@@ -265,7 +272,6 @@ export class SidebarContainerLogic extends UILogic<
             noteEditState: 'pristine',
             noteCreateState: 'pristine',
             noteColorUpdateState: 'pristine',
-            pageLinkCreateState: 'pristine',
             secondarySearchState: 'pristine',
             remoteAnnotationsLoadState: 'pristine',
             foreignSelectedListLoadState: 'pristine',
@@ -279,7 +285,9 @@ export class SidebarContainerLogic extends UILogic<
             pillVisibility: 'unhover',
             videoDetails: null,
             summaryModeActiveTab: 'Answer',
+            isAutoAddEnabled: null,
 
+            showPageLinkShareMenu: false,
             isWidthLocked: false,
             isLocked: false,
             fullPageUrl: this.options.fullPageUrl,
@@ -312,6 +320,7 @@ export class SidebarContainerLogic extends UILogic<
             activeAnnotationId: null, // TODO: make unified ID
 
             showCommentBox: false,
+            deleteConfirmMode: false,
             showCongratsMessage: false,
             showClearFiltersBtn: false,
             showFiltersSidebar: false,
@@ -328,6 +337,7 @@ export class SidebarContainerLogic extends UILogic<
             totalResultCount: 0,
             isListFilterActive: false,
             searchResultSkip: 0,
+            isKeyValid: null,
 
             confirmPrivatizeNoteArgs: null,
             confirmSelectNoteSpaceArgs: null,
@@ -348,11 +358,9 @@ export class SidebarContainerLogic extends UILogic<
             isTrial: false,
             signupDate: null,
             firstTimeSharingPageLink: false,
-            selectedShareMenuPageLinkList: null,
             renameListErrorMessage: null,
             sidebarRightBorderPosition: null,
             youtubeTranscriptSummaryloadState: 'pristine',
-            pageListDataForCurrentPage: null,
             youtubeTranscriptJSON: null,
             showChapters: false,
             chapterSummaries: [],
@@ -397,6 +405,7 @@ export class SidebarContainerLogic extends UILogic<
                 user: this.options.getCurrentUser(),
                 cache: this.options.annotationsCache,
                 skipListHydration: this.options.sidebarContext === 'dashboard',
+                keepExistingAnnotationData: true,
                 bgModules: {
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,
@@ -854,14 +863,14 @@ export class SidebarContainerLogic extends UILogic<
             }, 1000)
         }
 
-        const openAIKey = await this.syncSettings.openAI.get('apiKey')
-        const hasAPIKey = openAIKey && openAIKey.trim().startsWith('sk-')
+        const openAIKey = await this.syncSettings.openAI?.get('apiKey')
+        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
         this.emitMutation({
             hasKey: { $set: hasAPIKey },
         })
         const signupDate = new Date(
-            await (await this.options.authBG.getCurrentUser()).creationTime,
+            await (await this.options.authBG.getCurrentUser())?.creationTime,
         ).getTime()
 
         this.emitMutation({
@@ -869,13 +878,28 @@ export class SidebarContainerLogic extends UILogic<
             isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
         })
 
-        await this.checkRabbitHoleOnboardingStage()
-
         const highlightColorJSON = await this.fetchHighlightColors()
 
         this.emitMutation({
             highlightColors: { $set: JSON.stringify(highlightColorJSON) },
         })
+
+        // Load the setting for the auto-adding of notes to spaces
+        const isAutoAddEnabled = await this.syncSettings.extension.get(
+            'shouldAutoAddSpaces',
+        )
+
+        if (isAutoAddEnabled == null) {
+            this.emitMutation({
+                isAutoAddEnabled: { $set: true },
+            })
+            return this.syncSettings.extension.set('shouldAutoAddSpaces', true)
+        } else {
+            this.emitMutation({
+                isAutoAddEnabled: { $set: isAutoAddEnabled },
+            })
+        }
+        await this.checkRabbitHoleOnboardingStage()
     }
 
     private checkRabbitHoleOnboardingStage = async () => {
@@ -1491,11 +1515,16 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ activeListEditMenuId: { $set: nextActiveId } })
     }
 
-    closePageLinkShareMenu: EventHandler<'closePageLinkShareMenu'> = async ({
-        event,
-        previousState,
-    }) => {
-        this.emitMutation({ selectedShareMenuPageLinkList: { $set: null } })
+    openPageLinkShareMenu: EventHandler<
+        'openPageLinkShareMenu'
+    > = async ({}) => {
+        this.emitMutation({ showPageLinkShareMenu: { $set: true } })
+    }
+
+    closePageLinkShareMenu: EventHandler<
+        'closePageLinkShareMenu'
+    > = async ({}) => {
+        this.emitMutation({ showPageLinkShareMenu: { $set: false } })
     }
 
     processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({
@@ -1622,7 +1651,7 @@ export class SidebarContainerLogic extends UILogic<
                 (result) => result != null && result.confirmState !== 'error',
             )
         } catch (e) {
-            console.log('e', e)
+            console.error('e', e)
         }
 
         // // Remove duplicates from updatedSources based on feedUrl
@@ -2009,6 +2038,7 @@ export class SidebarContainerLogic extends UILogic<
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
                     isCommentEditing: { $set: event.isEditing },
+                    isHighlightEditing: { $set: event.isEditing },
                 },
             },
         })
@@ -2038,7 +2068,11 @@ export class SidebarContainerLogic extends UILogic<
             annotationCardInstances: {
                 [getAnnotCardInstanceId(event)]: {
                     isHighlightEditing: { $set: event.isEditing },
-                    isCommentEditing: { $set: event.isEditing },
+                    isCommentEditing: {
+                        $set:
+                            previousAnnotationComment.length === 0 &&
+                            event.isEditing,
+                    },
                 },
             },
         })
@@ -2075,7 +2109,7 @@ export class SidebarContainerLogic extends UILogic<
                 event.comment,
                 annotation.normalizedPageUrl,
                 annotation.localId,
-                this.options.imageSupport,
+                this.options.imageSupportBG,
                 true,
             )
         ).toString()
@@ -2113,8 +2147,67 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    private handleKeyPress = (
+        event: KeyboardEvent,
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) => {
+        return () => {
+            // Ensure a function is returned
+
+            event.stopPropagation()
+            if (event.key === 'Enter') {
+                this.processUIEvent('deleteAnnotation', {
+                    event: { unifiedAnnotationId },
+                    previousState,
+                })
+            } else if (event.key === 'Escape') {
+                event.preventDefault()
+                this.processUIEvent('setAnnotationCardMode', {
+                    event: {
+                        instanceLocation: instanceLocation,
+                        unifiedAnnotationId: unifiedAnnotationId,
+                        mode: 'none',
+                    },
+                    previousState,
+                })
+            }
+        }
+    }
+
+    private setupNoteDeletionEventListener(
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) {
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.handleKeyPress(
+                event,
+                instanceLocation,
+                unifiedAnnotationId,
+                previousState,
+            )()
+        })
+    }
+    private tearDownNoteDeletionEventListener(
+        instanceLocation,
+        unifiedAnnotationId,
+        previousState,
+    ) {
+        document.addEventListener('keydown', (event: KeyboardEvent) => {
+            this.handleKeyPress(
+                event,
+                instanceLocation,
+                unifiedAnnotationId,
+                previousState,
+            )()
+        })
+    }
+
     setAnnotationCardMode: EventHandler<'setAnnotationCardMode'> = ({
         event,
+        previousState,
     }) => {
         this.emitMutation({
             annotationCardInstances: {
@@ -2123,6 +2216,27 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
+
+        if (event.mode === 'delete-confirm') {
+            this.setupNoteDeletionEventListener(
+                event.instanceLocation,
+                event.unifiedAnnotationId,
+                previousState,
+            )
+            this.emitMutation({
+                deleteConfirmMode: { $set: true },
+            })
+        }
+        if (event.mode === 'none') {
+            this.tearDownNoteDeletionEventListener(
+                event.instanceLocation,
+                event.unifiedAnnotationId,
+                previousState,
+            )
+            this.emitMutation({
+                deleteConfirmMode: { $set: false },
+            })
+        }
     }
 
     editAnnotation: EventHandler<'editAnnotation'> = async ({
@@ -2136,6 +2250,9 @@ export class SidebarContainerLogic extends UILogic<
                 byId: { [event.unifiedAnnotationId]: annotationData },
             },
         } = previousState
+
+        if (!formData && event.shouldShare) {
+        }
 
         if (
             !formData ||
@@ -2155,7 +2272,7 @@ export class SidebarContainerLogic extends UILogic<
                 comment,
                 annotationData.normalizedPageUrl,
                 annotationData.localId,
-                this.options.imageSupport,
+                this.options.imageSupportBG,
             )
 
             // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
@@ -2345,7 +2462,7 @@ export class SidebarContainerLogic extends UILogic<
             OriginalCommentForCache,
             normalizeUrl(fullPageUrl),
             annotationId,
-            this.options.imageSupport,
+            this.options.imageSupportBG,
         )
 
         this.emitMutation({
@@ -2994,6 +3111,47 @@ export class SidebarContainerLogic extends UILogic<
         this.AIpromptSuggestions = newSuggestions
     }
 
+    addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
+        this.emitMutation({
+            hasKey: {
+                $set: previousState.hasKey ? !previousState.hasKey : true,
+            },
+        })
+    }
+
+    checkIfKeyValid: EventHandler<'checkIfKeyValid'> = async ({
+        event,
+        previousState,
+    }) => {
+        if (event.apiKey?.length === 0) {
+            await this.syncSettings.openAI.set('apiKey', event.apiKey?.trim())
+            return
+        }
+        this.emitMutation({
+            isKeyValid: { $set: null },
+        })
+        const response = await this.options.summarizeBG.isApiKeyValid({
+            apiKey: event.apiKey?.trim(),
+        })
+
+        if (response.isValid) {
+            this.emitMutation({
+                isKeyValid: { $set: true },
+            })
+            this.emitMutation({
+                hasKey: {
+                    $set: previousState.hasKey ? !previousState.hasKey : true,
+                },
+            })
+
+            await this.syncSettings.openAI.set('apiKey', event.apiKey?.trim())
+        } else if (!response.isValid) {
+            this.emitMutation({
+                isKeyValid: { $set: false },
+            })
+        }
+    }
+
     saveAIPrompt: EventHandler<'saveAIPrompt'> = async ({
         event,
         previousState,
@@ -3315,6 +3473,19 @@ export class SidebarContainerLogic extends UILogic<
             summaryModeActiveTab: { $set: event.tab },
         })
     }
+    toggleAutoAdd: EventHandler<'toggleAutoAdd'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.syncSettings.extension.set(
+            'shouldAutoAddSpaces',
+            !previousState.isAutoAddEnabled,
+        )
+
+        this.emitMutation({
+            isAutoAddEnabled: { $set: !previousState.isAutoAddEnabled },
+        })
+    }
     setExistingSourcesOptions: EventHandler<
         'setExistingSourcesOptions'
     > = async ({ event, previousState }) => {
@@ -3587,6 +3758,120 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    async copyRichTextToClipboard(html: string) {
+        // Create a hidden content-editable div
+        const hiddenDiv = document.createElement('div')
+
+        hiddenDiv.contentEditable = 'true'
+        hiddenDiv.style.position = 'absolute'
+        hiddenDiv.style.left = '-9999px'
+        hiddenDiv.innerHTML = html
+
+        // Append the hidden div to the body
+        document.body.appendChild(hiddenDiv)
+
+        // Select the content of the hidden div
+        const range = document.createRange()
+        range.selectNodeContents(hiddenDiv)
+        const selection = window.getSelection()
+        selection.removeAllRanges()
+        selection.addRange(range)
+
+        // Copy the selected content to the clipboard
+        document.execCommand('copy')
+
+        // Remove the hidden div from the body
+        document.body.removeChild(hiddenDiv)
+    }
+
+    private handleDefaultTemplateCopy = async (
+        annotationUrls,
+        normalizedPageUrls,
+    ) => {
+        try {
+            const templates = await this.options.copyPasterBG.findAllTemplates()
+            const sortedTemplates = templates.sort(defaultOrderableSorter)
+            const id = sortedTemplates[0].id
+
+            const item = templates.find((item) => item.id === id)
+
+            const rendered = await this.options.copyPasterBG.renderTemplate({
+                id,
+                annotationUrls: annotationUrls,
+                normalizedPageUrls: normalizedPageUrls ?? null,
+            })
+
+            if (item) {
+                if (
+                    item.outputFormat === 'markdown' ||
+                    item.outputFormat == null
+                ) {
+                    await copyToClipboard(rendered)
+                }
+                if (item.outputFormat === 'rich-text') {
+                    const htmlString = md.render(rendered)
+                    await this.copyRichTextToClipboard(htmlString)
+                }
+            }
+            return true
+        } catch (err) {
+            console.error('Something went really bad copying:', err.message)
+            Raven.captureException(err)
+            return false
+        } finally {
+            analytics.trackEvent({
+                category: 'TextExporter',
+                action: 'copyToClipboard',
+            })
+        }
+    }
+
+    setCopyPasterDefaultNoteExecute: EventHandler<
+        'setCopyPasterDefaultNoteExecute'
+    > = async ({ event, previousState }) => {
+        this.emitMutation({
+            annotationCardInstances: {
+                [getAnnotCardInstanceId(event)]: {
+                    copyLoadingState: { $set: 'running' },
+                },
+            },
+        })
+
+        const annotationURL = this.options.annotationsCache.annotations.byId[
+            event.noteId
+        ]?.localId
+        const pageUrl = this.options.annotationsCache.annotations.byId[
+            event.noteId
+        ]?.normalizedPageUrl
+
+        let templateCopyResult
+
+        templateCopyResult = await this.handleDefaultTemplateCopy(
+            [annotationURL],
+            [pageUrl],
+        )
+
+        if (templateCopyResult) {
+            this.emitMutation({
+                annotationCardInstances: {
+                    [getAnnotCardInstanceId(event)]: {
+                        copyLoadingState: { $set: 'success' },
+                    },
+                },
+            })
+
+            setTimeout(() => {
+                this.emitMutation({
+                    annotationCardInstances: {
+                        [getAnnotCardInstanceId(event)]: {
+                            copyLoadingState: { $set: 'pristine' },
+                        },
+                    },
+                })
+            }, 3000)
+        }
+    }
+
     async updateSuggestionResults(results: SuggestionCard[]) {
         const resultsArray: SuggestionCard[] = []
         const user = await this.options.authBG.getCurrentUser()
@@ -3792,7 +4077,7 @@ export class SidebarContainerLogic extends UILogic<
                                 }
                             }
                         } catch (e) {
-                            console.log('Error', e)
+                            console.error('Error', e)
                         }
                     }
                 }
@@ -3976,7 +4261,7 @@ export class SidebarContainerLogic extends UILogic<
                                 sharedListReference,
                             },
                         ),
-                    imageSupport: this.options.imageSupport,
+                    imageSupport: this.options.imageSupportBG,
                 })
             },
         )
@@ -4017,13 +4302,6 @@ export class SidebarContainerLogic extends UILogic<
             spaceTitleEditValue: { $set: event.value },
         })
     }
-    addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
-        this.emitMutation({
-            hasKey: {
-                $set: previousState.hasKey ? !previousState.hasKey : true,
-            },
-        })
-    }
 
     markFeedAsRead: EventHandler<'markFeedAsRead'> = async () => {
         // const activityindicator = await this.options.activityIndicatorBG.markActivitiesAsSeen()
@@ -4034,7 +4312,7 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    private async setLocallyAvailableSelectedList(
+    async setLocallyAvailableSelectedList(
         state: SidebarContainerState,
         unifiedListId: UnifiedList['unifiedId'],
     ): Promise<SidebarContainerState> {
@@ -4071,6 +4349,7 @@ export class SidebarContainerLogic extends UILogic<
                 nextState,
                 [list],
             )
+
             nextState = await this.maybeLoadListRemoteAnnotations(
                 nextState,
                 unifiedListId,
@@ -4748,118 +5027,5 @@ export class SidebarContainerLogic extends UILogic<
             },
             { keepListsIfUnsharing: event.keepListsIfUnsharing },
         )
-    }
-
-    createPageLink: EventHandler<'createPageLink'> = async ({
-        previousState,
-        event,
-    }) => {
-        const fullPageUrl = previousState.fullPageUrl
-
-        if (!fullPageUrl) {
-            throw new Error(
-                'Cannot create page link - Page URL sidebar state not set',
-            )
-        }
-        const currentUser = this.options.getCurrentUser()
-        if (!currentUser) {
-            throw new Error('Cannot create page link - User not logged in')
-        }
-        const sharingTutorialP = this.showSharingTutorial()
-
-        let title: string
-
-        if (window.location.href.includes('web.telegram.org')) {
-            title = getTelegramUserDisplayName(document, window.location.href)
-        }
-
-        const sharedPageListIds = this.options.annotationsCache.getSharedPageListIds(
-            normalizeUrl(fullPageUrl),
-        )
-
-        let chosenPageLinkList: UnifiedList<'page-link'> = null
-        for (const listId of sharedPageListIds) {
-            let listData = this.options.annotationsCache.lists.byId[listId]
-
-            // Get the latest page-link list
-            if (
-                listData?.type === 'page-link' &&
-                (listData?.localId > chosenPageLinkList?.localId ||
-                    chosenPageLinkList == null)
-            ) {
-                chosenPageLinkList = listData
-            }
-        }
-
-        if (chosenPageLinkList) {
-            this.emitMutation({
-                selectedShareMenuPageLinkList: {
-                    $set: chosenPageLinkList.unifiedId,
-                },
-            })
-            if (!event.forceCreate) {
-                await sharingTutorialP
-                return
-            }
-        }
-
-        await executeUITask(this, 'pageLinkCreateState', async () => {
-            const {
-                collabKey,
-                listTitle,
-                localListId,
-                remoteListId,
-                remoteListEntryId,
-            } = await this.options.contentSharingByTabsBG.schedulePageLinkCreation(
-                {
-                    fullPageUrl,
-                    customPageTitle: title,
-                },
-            )
-
-            const cacheListData: UnifiedListForCache<'page-link'> = {
-                type: 'page-link',
-                name: listTitle,
-                creator: currentUser,
-                localId: localListId,
-                collabKey: collabKey.toString(),
-                remoteId: remoteListId.toString(),
-                sharedListEntryId: remoteListEntryId.toString(),
-                normalizedPageUrl: normalizeUrl(fullPageUrl),
-                unifiedAnnotationIds: [],
-                hasRemoteAnnotationsToLoad: false,
-                parentLocalId: null,
-                isPrivate: false,
-            }
-            this.emitMutation({
-                pageListDataForCurrentPage: { $set: cacheListData },
-            })
-            const { unifiedId } = this.options.annotationsCache.addList(
-                cacheListData,
-            )
-
-            this.emitMutation({
-                selectedShareMenuPageLinkList: { $set: unifiedId },
-            })
-
-            await Promise.all([
-                this.options.contentSharingBG.waitForPageLinkCreation(),
-                this.setLocallyAvailableSelectedList(
-                    {
-                        ...previousState,
-                        lists: this.options.annotationsCache.lists,
-                        listInstances: {
-                            ...previousState.listInstances,
-                            [unifiedId]: initListInstance({
-                                ...cacheListData,
-                                unifiedId,
-                            }),
-                        },
-                    },
-                    unifiedId,
-                ),
-            ])
-        })
-        await sharingTutorialP
     }
 }

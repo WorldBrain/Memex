@@ -14,7 +14,7 @@ export type CheckboxToggle = (
 
 export interface Props {
     id?: string
-    handleChange: CheckboxToggle
+    handleChange?: CheckboxToggle
     name?: string
     isChecked: boolean
     isDisabled?: boolean
@@ -33,6 +33,7 @@ export interface Props {
     borderColor?: ColorThemeKeys
     width?: string
     textPosition?: 'left' | 'right'
+    fontColor?: ColorThemeKeys
 }
 
 class Checkbox extends React.PureComponent<Props> {
@@ -70,7 +71,11 @@ class Checkbox extends React.PureComponent<Props> {
                     />
                     <CheckBoxContainer size={this.props.size + 4}>
                         {this.props.isLoading ? (
-                            <LoadingIndicator size={this.props.size - 2} />
+                            <LoadingIndicatorBox
+                                textPosition={this.props.textPosition}
+                            >
+                                <LoadingIndicator size={this.props.size - 2} />
+                            </LoadingIndicatorBox>
                         ) : (
                             <LabelCheck
                                 size={this.props.size}
@@ -92,7 +97,10 @@ class Checkbox extends React.PureComponent<Props> {
                     </CheckBoxContainer>
                     {this.props.label && (
                         <LabelContentBox>
-                            <LabelTitle fontSize={this.props.fontSize}>
+                            <LabelTitle
+                                color={this.props.fontColor}
+                                fontSize={this.props.fontSize}
+                            >
                                 {this.props.label}
                             </LabelTitle>
                             <SubLabel>{this.props.subLabel}</SubLabel>
@@ -152,7 +160,7 @@ const ChildrenBox = styled.span<{ mode }>`
 const LabelContainer = styled.label<{ zIndex?: number; width?: string }>`
     display: flex;
     align-items: center;
-    width: ${(props) => (props.width ? props.width : '100%')};
+    width: ${(props) => (props.width ? props.width : 'fit-content')};
     cursor: pointer;
     z-index: ${(props) => props.zIndex};
 `
@@ -172,7 +180,11 @@ const LabelText = styled.span<{ fontSize; textPosition }>`
     cursor: pointer;
     width: fill-available;
     height: fill-available;
-    grid-gap: ${(props) => (props.fontSize < 14 ? '5px' : '15px')};
+    justify-content: center;
+    grid-gap: ${(props) =>
+        props.fontSize > 10
+            ? Math.floor((props.fontSize + 2) / 1.5) + 'px'
+            : '15px'};
 
     &:hover {
         color: ${(props) => props.theme.colors.black};
@@ -189,8 +201,10 @@ const CheckBoxContainer = styled.div<{ size: number }>`
     display: flex;
     align-items: center;
     align-items: center;
-    width: ${(props) => (props.size ? props.size + 'px' : '24px')};
-    height: ${(props) => (props.size ? props.size + 'px' : '24px')};
+    height: fit-content;
+    width: fit-content;
+    /* width: ${(props) => (props.size ? props.size + 2 + 'px' : '24px')};
+    height: ${(props) => (props.size ? props.size + 2 + 'px' : '24px')}; */
 `
 
 const LabelCheck = styled.span<{
@@ -253,6 +267,17 @@ const LabelCheck = styled.span<{
                 outline: 1px solid ${(props) => props.theme.colors.greyScale4};
             }
         `};
+`
+
+const LoadingIndicatorBox = styled.div<{ textPosition: string }>`
+    margin-right: 10px;
+
+    ${(props) =>
+        props.textPosition === 'left' &&
+        css`
+            margin-left: 10px;
+            margin-right: unset;
+        `}
 `
 
 export default Checkbox

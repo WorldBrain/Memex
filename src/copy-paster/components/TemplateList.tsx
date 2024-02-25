@@ -13,12 +13,13 @@ import {
     Draggable,
     OnDragEndResponder,
 } from 'react-beautiful-dnd'
+import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 
 const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 10px 15px 0px 27px;
+    padding: 0px 15px 0px 15px;
     height: 30px;
     align-items: center;
 `
@@ -73,6 +74,7 @@ const Title = styled.div`
 const ContentBlock = styled.div`
     padding: 5px 10px 10px 10px;
     max-height: 300px;
+    max-width: 340px;
     overflow: scroll;
     display: flex;
     flex-direction: column;
@@ -95,11 +97,12 @@ const SectionCircle = styled.div`
     align-items: center;
 `
 
-const InfoText = styled.div`
+const InfoText = styled.div<{ margin?: string }>`
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     font-weight: 300;
     text-align: center;
+    margin: ${(props) => props.margin};
 `
 const InfoTextTitle = styled.div`
     color: ${(props) => props.theme.colors.white};
@@ -121,6 +124,13 @@ interface TemplateListProps {
     onClickHowto: () => void
     getRootElement: () => HTMLElement
     onReorder: (id: number, oldIndex: number, newIndex: number) => void
+    focusOnElement: (index: number) => void
+    copyExistingRenderedToClipboard: (
+        renderedText: string,
+        templateId: number,
+    ) => Promise<void>
+    errorCopyToClipboard: boolean
+    renderedTextBuffered: string
 }
 
 export default class TemplateList extends PureComponent<TemplateListProps> {
@@ -139,7 +149,72 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         )
     }
 
+    componentDidMount(): void {
+        this.handleKeyDown = this.handleKeyDown.bind(this)
+        window.addEventListener('keydown', this.handleKeyDown)
+    }
+
+    componentWillUnmount(): void {
+        window.removeEventListener('keydown', this.handleKeyDown)
+    }
+
+    handleKeyDown(event: KeyboardEvent): void {
+        // event has already been used for drag and drop
+        if (event.defaultPrevented) {
+            return
+        }
+
+        if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+            event.preventDefault()
+            event.stopPropagation()
+        }
+        if (event.key === 'Enter') {
+            event.stopPropagation()
+            event.stopImmediatePropagation()
+            event.preventDefault()
+            const currentTemplate = this.props.templates[this.props.focusIndex]
+
+            if (event.shiftKey) {
+                this.props.onClickEdit(currentTemplate.id)
+            } else {
+                this.props.onClickCopy(currentTemplate.id)
+            }
+        }
+    }
     render() {
+        if (this.props.errorCopyToClipboard) {
+            return (
+                <ContentBlock>
+                    <Center>
+                        <Icon
+                            filePath="warning"
+                            heightAndWidth="30px"
+                            hoverOff
+                        />
+                        <Title>Template Processed, but...</Title>
+                        <InfoText margin={'0 0 10px 0'}>
+                            Window was out of focus so the text was generated
+                            but the copy process didn't happen. <br />
+                            Click this button to copy it to clipboard.
+                        </InfoText>
+                        <PrimaryAction
+                            icon={'copy'}
+                            label={'Copy to Clipboard'}
+                            onClick={(event) => {
+                                event.stopPropagation()
+                                this.props.copyExistingRenderedToClipboard(
+                                    this.props.renderedTextBuffered,
+                                    this.props.templates[this.props.focusIndex]
+                                        .id,
+                                )
+                            }}
+                            type="secondary"
+                            size="medium"
+                        />
+                    </Center>
+                </ContentBlock>
+            )
+        }
         if (this.props.copySuccess) {
             return (
                 <Center>
@@ -166,7 +241,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
         return (
             <>
                 <Header>
-                    <SectionTitle>Copy/Paste Templates</SectionTitle>
+                    <SectionTitle>Templates</SectionTitle>
                     <ButtonBox>
                         <Icon
                             filePath={icons.helpIcon}
@@ -178,12 +253,15 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                 )
                             }
                         />
-                        <Icon
-                            filePath={icons.plus}
-                            color="prime1"
-                            padding={'5px'}
-                            heightAndWidth="16px"
+
+                        <PrimaryAction
+                            label={'New'}
                             onClick={this.props.onClickNew}
+                            size="small"
+                            type="forth"
+                            icon={'plus'}
+                            iconColor="prime1"
+                            padding={'0px 6px 0 0'}
                         />
                     </ButtonBox>
                 </Header>
@@ -250,7 +328,10 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                                                             template.id,
                                                                         )
                                                                     }}
-                                                                    // isDefault={index === 0}
+                                                                    isDefault={
+                                                                        index ===
+                                                                        0
+                                                                    }
                                                                     onClickEdit={() =>
                                                                         this.props.onClickEdit(
                                                                             template.id,
@@ -260,6 +341,14 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                                                         this
                                                                             .props
                                                                             .focusIndex ===
+                                                                        index
+                                                                    }
+                                                                    focusOnElement={
+                                                                        this
+                                                                            .props
+                                                                            .focusOnElement
+                                                                    }
+                                                                    itemIndex={
                                                                         index
                                                                     }
                                                                 />

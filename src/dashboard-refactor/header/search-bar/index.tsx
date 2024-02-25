@@ -19,6 +19,8 @@ export interface SearchBarProps {
     renderCopyPasterButton: () => ReactElement
     renderExpandButton: () => ReactElement
     getRootElement: () => HTMLElement
+    inPageMode?: boolean
+    isNotesSidebarShown?: boolean
 }
 
 export default class SearchBar extends PureComponent<SearchBarProps> {
@@ -28,8 +30,11 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         this.inputRef.current.focus()
     }
 
-    handleChange: React.ChangeEventHandler<HTMLInputElement> = (evt) => {
-        this.props.onSearchQueryChange(evt.target.value)
+    handleChange: React.ChangeEventHandler = (evt) => {
+        evt.stopPropagation()
+        // need to amend getFilterStrings function to pull through search terms as well, then
+        // bundle them in an object to send with the onSearchQueryChange func
+        this.props.onSearchQueryChange((evt.target as HTMLInputElement).value)
     }
 
     handleClearSearch() {
@@ -48,7 +53,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
         } = this.props
         return (
             <Margin vertical="auto">
-                <SearchBarContainer isClosed={!isSidebarLocked}>
+                <SearchBarContainer
+                    isClosed={!isSidebarLocked}
+                    inPageMode={this.props.inPageMode}
+                >
                     <FullWidthMargin>
                         {!!searchQuery ? (
                             <IconContainer>
@@ -80,12 +88,17 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                                 'Search your saved pages and notes'
                             }
                             value={searchQuery}
+                            id={'search-bar'}
                             onChange={this.handleChange}
                             autoComplete="off"
                         />
                     </FullWidthMargin>
                 </SearchBarContainer>
-                <ActionButtons>
+                <ActionButtons
+                    isClosed={!isSidebarLocked}
+                    inPageMode={this.props.inPageMode}
+                    isNotesSidebarShown={this.props.isNotesSidebarShown}
+                >
                     <FilterButton left="15px" onClick={onSearchFiltersOpen}>
                         {searchFiltersOpen ? (
                             <TooltipBox
@@ -116,7 +129,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                     {renderCopyPasterButton()}
                     {renderExpandButton()}
                 </ActionButtons>
-                <Placeholder />
+                {!this.props.inPageMode && <Placeholder />}
             </Margin>
         )
     }
@@ -137,7 +150,10 @@ const textStyles = `
     color: ${(props) => props.theme.colors.white};
 `
 
-const SearchBarContainer = styled.div<{ isClosed: boolean }>`
+const SearchBarContainer = styled.div<{
+    isClosed: boolean
+    inPageMode: boolean
+}>`
     height: 44px;
     max-width: 450px;
     width: 100%;
@@ -164,6 +180,13 @@ const SearchBarContainer = styled.div<{ isClosed: boolean }>`
                 outline: 1px solid ${(props) => props.theme.colors.prime1};
             }
         `};
+
+    ${(props) =>
+        props.inPageMode &&
+        props.isClosed &&
+        css`
+            margin-left: 60px;
+        `}
 `
 
 const Input = styled.input`
@@ -222,9 +245,19 @@ const StyledIcon = styled(Icon)`
     cursor: pointer;
 `
 
-const ActionButtons = styled.div`
+const ActionButtons = styled.div<{
+    isClosed?: boolean
+    inPageMode?: boolean
+    isNotesSidebarShown?: boolean
+}>`
     display: flex;
     align-items: center;
     justify-content: flex-start;
     grid-gap: 15px;
+    ${(props) =>
+        props.inPageMode &&
+        (props.isClosed || props.isNotesSidebarShown) &&
+        css`
+            padding-right: 30px;
+        `}
 `

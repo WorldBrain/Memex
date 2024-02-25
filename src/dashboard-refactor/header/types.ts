@@ -54,7 +54,7 @@ export interface SearchFiltersState {
 }
 
 export type SearchFilterEvents = UIEvent<{
-    setSearchQuery: { query: string }
+    setSearchQuery: { query: string; isInPageMode?: boolean }
 
     setSearchFiltersOpen: { isOpen: boolean }
     toggleShowTagPicker: { isActive: boolean }

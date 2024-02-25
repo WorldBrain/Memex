@@ -40,10 +40,7 @@ import type { Storage, Runtime } from 'webextension-polyfill'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
-import { Annotation } from 'src/annotations/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -71,7 +68,7 @@ export interface SidebarContainerDependencies {
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
-    imageSupport?: ImageSupportInterface<'caller'>
+    imageSupportBG: ImageSupportInterface<'caller'>
     syncSettingsBG: RemoteSyncSettingsInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -122,7 +119,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     noteEditState: TaskState
     noteCreateState: TaskState
     noteColorUpdateState: TaskState
-    pageLinkCreateState: TaskState
     firstTimeSharingPageLink: boolean
     secondarySearchState: TaskState
     remoteAnnotationsLoadState: TaskState
@@ -137,6 +133,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     showAISuggestionsDropDown: boolean
     showAICounter: boolean
     hasKey: boolean
+    isKeyValid: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
     highlightColors: string
@@ -146,6 +143,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     activeTab: SidebarTab
     activeAITab: SidebarAITab
     summaryModeActiveTab: 'Answer' | 'References'
+    isAutoAddEnabled: boolean
     activeSuggestionsTab: SuggestionsTab
     showChapters: boolean
     pillVisibility: string
@@ -207,6 +205,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
 
     listInstances: { [unifiedListId: UnifiedList['unifiedId']]: ListInstance }
     annotationCardInstances: { [instanceId: string]: AnnotationCardInstance }
+    deleteConfirmMode: boolean
 
     spacePickerAnnotationInstance: {
         instanceId: string
@@ -269,7 +268,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     immediatelyShareNotes: boolean
     pageHasNetworkAnnotations: boolean
     hasFeedActivity?: boolean
-    selectedShareMenuPageLinkList: UnifiedList['unifiedId'] | null
+    showPageLinkShareMenu: boolean
     /**
      * In the case of a page being opened from the web UI for a page link, data
      * may need to be manually pulled as sync might not have finished by the time the
@@ -277,7 +276,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
      */
     hasListDataBeenManuallyPulled?: boolean
     annotationCreateEditorRef?: any
-    pageListDataForCurrentPage: UnifiedListForCache<'page-link'> | null
     videoDetails: null
     chapterList: {
         start: number
@@ -321,11 +319,13 @@ interface SidebarEvents {
     adjustSidebarWidth: { newWidth: string; isWidthLocked?: boolean }
     adjustRighPositionBasedOnRibbonPosition: { position: number }
     setPopoutsActive: boolean
+    checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null
+    toggleAutoAdd: null
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
         videoRangeTimestamps: {
@@ -494,6 +494,7 @@ interface SidebarEvents {
     openContextMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     openEditMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     closePageLinkShareMenu: null
+    openPageLinkShareMenu: null
     editListName: {
         unifiedListId: UnifiedList['unifiedId']
         localId: number
@@ -540,7 +541,6 @@ interface SidebarEvents {
     setAllNotesCopyPasterShown: { shown: boolean }
     setAllNotesShareMenuShown: { shown: boolean }
 
-    createPageLink: { forceCreate?: boolean }
     setRabbitHoleBetaFeatureAccess: {
         permission:
             | 'denied'
@@ -559,6 +559,9 @@ interface SidebarEvents {
     addLocalFolder: null
     removeLocalFolder: { id: number }
     getLocalFolders: null
+    setCopyPasterDefaultNoteExecute: AnnotationCardInstanceEvent<{
+        noteId: string
+    }>
 }
 
 export type SidebarContainerEvents = UIEvent<
@@ -583,6 +586,7 @@ export interface AnnotationCardInstance {
     comment: string
     body: string
     color: string
+    copyLoadingState: TaskState
 }
 export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']

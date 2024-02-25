@@ -88,6 +88,7 @@ export interface TemplateDataFetchers {
     ): Promise<UrlMappedData<Date>>
     getPageLinks(
         notes: UrlMappedData<{ annotationUrls: string[] }>,
+        now?: number,
     ): Promise<UrlMappedData<string>>
     getNoteLinks(annotationUrls: string[]): Promise<UrlMappedData<string>>
 }

@@ -173,7 +173,6 @@ export default class OnboardingScreen extends StatefulUIElement<
                 <>
                     <MemexActionButtonIntro
                         onMouseEnter={() => {
-                            console.log('hovered')
                             this.processEvent('hoverOverOnboardingIcon', null)
                         }}
                         src={'img/memexActionButtonIntro.svg'}
@@ -815,14 +814,14 @@ const ContentBox = styled.div`
 
 const Title = styled.div`
     background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-align: center;
+    background-clip: text;
     font-size: 60px;
     font-weight: 800;
     margin-bottom: 20px;
     margin-top: 30px;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    text-align: center;
 `
 
 const DescriptionText = styled.div`

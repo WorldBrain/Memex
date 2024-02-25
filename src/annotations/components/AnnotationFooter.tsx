@@ -8,4 +8,5 @@ export interface AnnotationFooterEventProps {
     onEditHighlightIconClick: React.MouseEventHandler
     onShareClick: React.MouseEventHandler
     onCopyPasterBtnClick: React.MouseEventHandler
+    onCopyPasterDefaultExecute: () => void
 }
