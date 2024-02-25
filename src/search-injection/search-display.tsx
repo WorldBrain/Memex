@@ -28,6 +28,15 @@ class Root extends React.PureComponent<RootProps, RootState> {
         })
     }
 
+    removeRoot = (rootEl: HTMLElement) => {
+        const unmountResult = ReactDOM.unmountComponentAtNode(rootEl)
+        if (unmountResult) {
+            rootEl.remove()
+        } else {
+            console.error('DashboardContainer unmounting failed')
+        }
+    }
+
     render() {
         if (!this.state.themeVariant) {
             return null
@@ -39,7 +48,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
             <StyleSheetManager target={rootEl}>
                 <ThemeProvider theme={memexTheme}>
                     <InPageSearchModal
-                        closeComponent={() => rootEl.remove()}
+                        closeComponent={() => this.removeRoot(rootEl)}
                         getPortalRoot={() => rootEl}
                         positioning="centerCenter"
                         blockedBackground
@@ -50,7 +59,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
                             theme={memexTheme}
                             getRootElement={() => rootEl}
                             onResultSelect={(exportedResultText) => null}
-                            closeInPageMode={() => rootEl.remove()}
+                            closeInPageMode={() => this.removeRoot(rootEl)}
                         />
                     </InPageSearchModal>
                 </ThemeProvider>
