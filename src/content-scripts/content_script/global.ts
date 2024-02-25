@@ -979,6 +979,7 @@ export async function main(
                 requestSearcher: remoteFunction('search'),
                 annotationsFunctions,
                 onDemandDisplay,
+                bgScriptBG,
             })
         },
     }
@@ -1012,6 +1013,7 @@ export async function main(
         localStorage: browser.storage.local,
         services: createUIServices(),
         renderUpdateNotifBanner: () => null,
+        bgScriptBG,
     }
 
     if (

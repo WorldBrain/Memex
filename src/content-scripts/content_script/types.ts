@@ -13,6 +13,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type { SyncSettingsStore } from 'src/sync-settings/util'
 import type { ErrorDisplayProps } from 'src/search-injection/error-display'
 import type { SearchDisplayProps } from 'src/search-injection/search-display'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -74,6 +75,7 @@ export interface InPageUIInjectionsDependencies {
         errorDisplayProps?: ErrorDisplayProps
         searchDisplayProps?: SearchDisplayProps
     }
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 export type HighlightsScriptMain = (

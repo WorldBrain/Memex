@@ -509,8 +509,9 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                     />
                 </SearchSection>
-                {!this.props.inPageMode && (
-                    <RightHeader>
+
+                <RightHeader>
+                    {!this.props.inPageMode && (
                         <ActionWrapper>
                             <PrimaryAction
                                 onClick={() =>
@@ -532,21 +533,21 @@ export class DashboardContainer extends StatefulUIElement<
                                 innerRef={this.syncStatusButtonRef}
                             />
                         </ActionWrapper>
-                        {!this.props.inPageMode && (
-                            <>
-                                <Icon
-                                    onClick={() =>
-                                        window.open(SETTINGS_URL, '_self')
-                                    }
-                                    heightAndWidth="22px"
-                                    padding={'6px'}
-                                    filePath={icons.settings}
-                                />
-                                {this.renderStatusMenu(syncStatusIconState)}
-                            </>
-                        )}
-                    </RightHeader>
-                )}
+                    )}
+                    <>
+                        <Icon
+                            onClick={() =>
+                                this.props.inPageMode
+                                    ? this.props.openSettings()
+                                    : window.open(SETTINGS_URL, '_blank')
+                            }
+                            heightAndWidth="22px"
+                            padding={'6px'}
+                            filePath={icons.settings}
+                        />
+                        {this.renderStatusMenu(syncStatusIconState)}
+                    </>
+                </RightHeader>
             </HeaderContainer>
         )
     }

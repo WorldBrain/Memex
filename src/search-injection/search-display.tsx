@@ -10,9 +10,11 @@ import type { DashboardDependencies } from 'src/dashboard-refactor/types'
 import * as constants from './constants'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import { InPageSearchModal } from '@worldbrain/memex-common/lib/common-ui/components/inPage-search-modal'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 type RootProps = Omit<DashboardDependencies, 'theme' | 'openSpaceInWebUI'> & {
     rootEl: HTMLElement
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 interface RootState {
@@ -60,6 +62,9 @@ class Root extends React.PureComponent<RootProps, RootState> {
                             getRootElement={() => rootEl}
                             onResultSelect={(exportedResultText) => null}
                             closeInPageMode={() => this.removeRoot(rootEl)}
+                            openSettings={() => {
+                                this.props.bgScriptBG.openOptionsTab('settings')
+                            }}
                         />
                     </InPageSearchModal>
                 </ThemeProvider>
