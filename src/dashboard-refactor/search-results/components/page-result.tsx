@@ -734,8 +734,10 @@ export default class PageResultView extends PureComponent<Props> {
                 active={this.props.activePage}
                 firstDivProps={{
                     // onMouseLeave: this.props.onUnhover,
-                    onDragStart: this.props.onPageDrag,
-                    onDragEnd: this.props.onPageDrop,
+                    onDragStart:
+                        !this.props.isCopyPasterShown && this.props.onPageDrag,
+                    onDragEnd:
+                        !this.props.isCopyPasterShown && this.props.onPageDrop,
                 }}
                 hoverState={this.props.isInFocus}
                 onRef={this.itemBoxRef} // Passing the ref as a prop

@@ -4077,6 +4077,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
+        this.emitMutation({
+            listsSidebar: {
+                someListIsDragging: { $set: true },
+            },
+            searchResults: { draggedPageId: { $set: event.pageId } },
+        })
         const crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 0, 0)
@@ -4088,9 +4094,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             normalizedPageUrl: page.normalizedUrl,
         }
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
-        this.emitMutation({
-            searchResults: { draggedPageId: { $set: event.pageId } },
-        })
+
         this.emitMutation({
             listsSidebar: {
                 someListIsDragging: { $set: false },
