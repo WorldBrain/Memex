@@ -48,6 +48,8 @@ import type {
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
+import BackgroundScript from 'src/background-script'
 
 export interface RootState {
     loadState: TaskState
@@ -120,6 +122,8 @@ export type DashboardDependencies = {
     >
     imageSupportBG: ImageSupportInterface<'caller'>
     closeInPageMode?: () => void
+    openSettings?: () => void
+    bgScriptBG?: RemoteBGScriptInterface | BackgroundScript
 } & (
     | {
           inPageMode: true

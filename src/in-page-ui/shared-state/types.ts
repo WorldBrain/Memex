@@ -26,6 +26,7 @@ export type InPageUISidebarAction =
     | 'create_youtube_timestamp_with_AI_summary'
     | 'create_youtube_timestamp_with_screenshot'
     | 'open_chapter_summary'
+    | 'save_image_as_new_note'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent =

@@ -10,9 +10,11 @@ import type { DashboardDependencies } from 'src/dashboard-refactor/types'
 import * as constants from './constants'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import { InPageSearchModal } from '@worldbrain/memex-common/lib/common-ui/components/inPage-search-modal'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 type RootProps = Omit<DashboardDependencies, 'theme' | 'openSpaceInWebUI'> & {
     rootEl: HTMLElement
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 interface RootState {
@@ -28,6 +30,15 @@ class Root extends React.PureComponent<RootProps, RootState> {
         })
     }
 
+    removeRoot = (rootEl: HTMLElement) => {
+        const unmountResult = ReactDOM.unmountComponentAtNode(rootEl)
+        if (unmountResult) {
+            rootEl.remove()
+        } else {
+            console.error('DashboardContainer unmounting failed')
+        }
+    }
+
     render() {
         if (!this.state.themeVariant) {
             return null
@@ -39,7 +50,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
             <StyleSheetManager target={rootEl}>
                 <ThemeProvider theme={memexTheme}>
                     <InPageSearchModal
-                        closeComponent={() => rootEl.remove()}
+                        closeComponent={() => this.removeRoot(rootEl)}
                         getPortalRoot={() => rootEl}
                         positioning="centerCenter"
                         blockedBackground
@@ -50,7 +61,10 @@ class Root extends React.PureComponent<RootProps, RootState> {
                             theme={memexTheme}
                             getRootElement={() => rootEl}
                             onResultSelect={(exportedResultText) => null}
-                            closeInPageMode={() => rootEl.remove()}
+                            closeInPageMode={() => this.removeRoot(rootEl)}
+                            openSettings={() => {
+                                this.props.bgScriptBG.openOptionsTab('settings')
+                            }}
                         />
                     </InPageSearchModal>
                 </ThemeProvider>

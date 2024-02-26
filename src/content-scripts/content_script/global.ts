@@ -269,6 +269,24 @@ export async function main(
         },
     })
 
+    browser.runtime.onMessage.addListener((request: any, sender: any) => {
+        if (request.action === 'getImageData') {
+            const imageUrl = request.srcUrl // URL of the image to get data for
+            return fetch(imageUrl)
+                .then((response) => response.blob())
+                .then((blob) => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader()
+                        reader.onloadend = () =>
+                            resolve({ imageData: reader.result })
+                        reader.readAsDataURL(blob) // Convert the blob to a data URL
+                    })
+                })
+                .catch((error) => ({ error: error.toString() }))
+        }
+        return Promise.resolve() // Return a resolved promise for non-matching actions or to avoid unhandled promise rejections
+    })
+
     const highlightRenderer = new HighlightRenderer({
         getDocument: () => document,
         icons: (iconName) => theme({ variant: 'dark' }).icons[iconName],
@@ -820,6 +838,12 @@ export async function main(
 
             inPageUI.hideTooltip()
         },
+        saveImageAsNewNote: async (imageData: string) => {
+            inPageUI.showSidebar({
+                action: 'save_image_as_new_note',
+                imageData: imageData['imageData'],
+            })
+        },
     }
 
     async function captureScreenshotFromHTMLVideo(screenshotTarget) {
@@ -979,6 +1003,7 @@ export async function main(
                 requestSearcher: remoteFunction('search'),
                 annotationsFunctions,
                 onDemandDisplay,
+                bgScriptBG,
             })
         },
     }
@@ -1012,6 +1037,7 @@ export async function main(
         localStorage: browser.storage.local,
         services: createUIServices(),
         renderUpdateNotifBanner: () => null,
+        bgScriptBG,
     }
 
     if (
@@ -1083,6 +1109,8 @@ export async function main(
                 selector: unifiedAnnotation.selector,
             })
         },
+        saveImageAsNewNote: (imageData) =>
+            annotationsFunctions.saveImageAsNewNote(imageData),
         createHighlight: (shouldShare, shouldCopyLink) =>
             annotationsFunctions.createHighlight({
                 category: 'Highlights',

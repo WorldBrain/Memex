@@ -13,7 +13,7 @@ import {
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 
 interface State {
     isLoading: boolean
@@ -115,6 +115,7 @@ export default class CopyPasterContainer extends React.PureComponent<
 
         // Append the hidden div to the body
         document.body.appendChild(hiddenDiv)
+        hiddenDiv.focus()
 
         // Select the content of the hidden div
         const range = document.createRange()
@@ -123,8 +124,19 @@ export default class CopyPasterContainer extends React.PureComponent<
         selection.removeAllRanges()
         selection.addRange(range)
 
-        // Copy the selected content to the clipboard
-        const copiedContent = document.execCommand('copy')
+        // Create a new Blob object with the HTML content and the type 'text/html'
+        const blob = new Blob([hiddenDiv.innerHTML], { type: 'text/html' })
+        const data = [new ClipboardItem({ 'text/html': blob })]
+
+        // Use the Clipboard API to write the Blob to the clipboard
+        navigator.clipboard
+            .write(data)
+            .then(() => {
+                console.log('Content copied to clipboard successfully!')
+            })
+            .catch((err) => {
+                console.error('Failed to copy content to clipboard:', err)
+            })
 
         // Remove the hidden div from the body
         document.body.removeChild(hiddenDiv)

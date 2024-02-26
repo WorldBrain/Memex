@@ -23,10 +23,41 @@ export interface Props {
 
 interface State {
     showCopyMessageIdx: number | null
+    selectedLink: number
 }
 
 export default class SpaceLinks extends React.PureComponent<Props> {
-    state: State = { showCopyMessageIdx: null }
+    state: State = { showCopyMessageIdx: null, selectedLink: 0 }
+
+    componentDidMount() {
+        document.addEventListener('keydown', this.handleKeyDown, true)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyDown, true)
+    }
+
+    handleKeyDown = (event: KeyboardEvent) => {
+        const maxIndex = this.props.inviteLinks.length - 1
+        if (event.key === 'ArrowDown') {
+            event.preventDefault()
+            event.stopPropagation()
+            const nextIndex = this.state.selectedLink + 1
+            this.setState({
+                selectedLink: nextIndex > maxIndex ? maxIndex : nextIndex,
+            })
+        } else if (event.key === 'ArrowUp') {
+            event.preventDefault()
+            event.stopPropagation()
+            const prevIndex = this.state.selectedLink - 1
+            this.setState({ selectedLink: prevIndex < 0 ? 0 : prevIndex })
+        } else if (event.key === 'Enter') {
+            const { link } = this.props.inviteLinks[this.state.selectedLink]
+            this.showCopyMessage(this.state.selectedLink)
+            this.props.copyLink(link)
+            this.trackClick('reader')
+        }
+    }
 
     private showCopyMessage(idx: number) {
         this.setState({ showCopyMessageIdx: idx }, () =>
@@ -91,6 +122,19 @@ export default class SpaceLinks extends React.PureComponent<Props> {
                                             this.props.copyLink(link)
                                             await this.trackClick('reader')
                                         })}
+                                        selected={
+                                            this.state.selectedLink === linkIdx
+                                        }
+                                        onMouseEnter={() =>
+                                            this.setState({
+                                                selectedLink: linkIdx,
+                                            })
+                                        }
+                                        onMouseLeave={() =>
+                                            this.setState({
+                                                selectedLink: null,
+                                            })
+                                        }
                                     >
                                         <Link>
                                             {this.state.showCopyMessageIdx ===
@@ -217,7 +261,9 @@ const LinkAndRoleBox = styled.div<{
 
 `
 
-const LinkBox = styled.div`
+const LinkBox = styled.div<{
+    selected: boolean
+}>`
     width: fill-available;
     display: flex;
     font-size: 14px;
@@ -232,9 +278,11 @@ const LinkBox = styled.div`
     align-items: center;
     border-radius: 5px;
 
-    &:hover {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
-    }
+    ${(props) =>
+        props.selected &&
+        css`
+            background-color: ${(props) => props.theme.colors.greyScale2}90;
+        `}
 `
 
 const Link = styled.span`

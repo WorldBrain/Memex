@@ -256,7 +256,7 @@ export default class TemplateEditor extends PureComponent<
                                     : this.props.onClickCancel
                             }
                         />
-                        {!this.props.isNew && !this.isSaveDisabled && (
+                        {!this.isSaveDisabled && (
                             <PrimaryAction
                                 label={
                                     this.state.confirmDelete ? 'Delete' : 'Save'

@@ -33,6 +33,7 @@ export interface InPageUIContentScriptRemoteInterface {
         shouldShare: boolean,
         shouldCopyLink: boolean,
     ): Promise<void>
+    saveImageAsNewNote(imageData: string): Promise<void>
 
     teardownContentScripts(): Promise<void>
     handleHistoryStateUpdate(tabId: number): Promise<void>

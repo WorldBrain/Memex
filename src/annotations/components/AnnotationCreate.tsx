@@ -124,6 +124,23 @@ export class AnnotationCreate extends React.Component<Props, State>
                 },
             )
             youtubeSummariseEvents.on(
+                'addVideoSnapshotToEditor',
+                async ({ imageData }, callback) => {
+                    if (!this.editor) {
+                        callback(false) // signal that listener isn't ready
+                        return
+                    }
+
+                    if (imageData) {
+                        await sleepPromise(50)
+                        this.editor?.addVideoSnapshotToEditor(imageData)
+                        callback(true) // signal successful processing
+                    } else {
+                        callback(false) // signal failure or "not ready" due to missing data
+                    }
+                },
+            )
+            youtubeSummariseEvents.on(
                 'addImageToEditor',
                 async ({ imageData }, callback) => {
                     if (!this.editor) {

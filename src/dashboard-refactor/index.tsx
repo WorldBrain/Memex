@@ -65,7 +65,6 @@ import {
     ColorThemeKeys,
     IconKeys,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { debounce } from 'lodash'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -182,10 +181,14 @@ export class DashboardContainer extends StatefulUIElement<
                 this.props.inPageMode &&
                 !this.state.isNoteSidebarShown
             ) {
+                event.stopPropagation()
+                event.preventDefault()
                 this.props.closeInPageMode()
             }
 
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                event.stopPropagation()
+                event.preventDefault()
                 if (!this.state.focusLockUntilMouseStart) {
                     document.addEventListener('mousemove', this.releaseLock, {
                         once: true,
@@ -197,10 +200,15 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('changeFocusItem', {
                     direction: event.key === 'ArrowUp' ? 'up' : 'down',
                 })
-                event.stopPropagation()
-                event.preventDefault()
             }
         }
+    }
+
+    componentWillUnmount(): Promise<void> {
+        super.componentWillUnmount()
+
+        document.removeEventListener('keydown', this.handleChangeFocusItem)
+        return
     }
 
     releaseLock = () => {
@@ -500,8 +508,9 @@ export class DashboardContainer extends StatefulUIElement<
                         }}
                     />
                 </SearchSection>
-                {!this.props.inPageMode && (
-                    <RightHeader>
+
+                <RightHeader>
+                    {!this.props.inPageMode && (
                         <ActionWrapper>
                             <PrimaryAction
                                 onClick={() =>
@@ -523,21 +532,21 @@ export class DashboardContainer extends StatefulUIElement<
                                 innerRef={this.syncStatusButtonRef}
                             />
                         </ActionWrapper>
-                        {!this.props.inPageMode && (
-                            <>
-                                <Icon
-                                    onClick={() =>
-                                        window.open(SETTINGS_URL, '_self')
-                                    }
-                                    heightAndWidth="22px"
-                                    padding={'6px'}
-                                    filePath={icons.settings}
-                                />
-                                {this.renderStatusMenu(syncStatusIconState)}
-                            </>
-                        )}
-                    </RightHeader>
-                )}
+                    )}
+                    <>
+                        <Icon
+                            onClick={() =>
+                                this.props.inPageMode
+                                    ? this.props.openSettings()
+                                    : window.open(SETTINGS_URL, '_blank')
+                            }
+                            heightAndWidth="22px"
+                            padding={'6px'}
+                            filePath={icons.settings}
+                        />
+                        {this.renderStatusMenu(syncStatusIconState)}
+                    </>
+                </RightHeader>
             </HeaderContainer>
         )
     }
@@ -1640,11 +1649,6 @@ export class DashboardContainer extends StatefulUIElement<
                     </SidebarHeaderContainer>
                     <PeekTrigger
                         onMouseEnter={() => {
-                            this.processEvent('setSidebarPeeking', {
-                                isPeeking: true,
-                            })
-                        }}
-                        onMouseLeave={() => {
                             this.processEvent('setSidebarPeeking', {
                                 isPeeking: true,
                             })
