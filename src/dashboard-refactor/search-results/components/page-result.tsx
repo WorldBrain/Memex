@@ -99,7 +99,6 @@ export default class PageResultView extends PureComponent<Props> {
         if (this.props.isInFocus && !prevProps.isInFocus) {
             this.setupKeyListener()
             const itemBox = this.itemBoxRef.current
-            const resultBox = this.props.resultsRef.current
             if (itemBox && !this.props.hoverState) {
                 itemBox.scrollIntoView({ block: 'center' })
             }

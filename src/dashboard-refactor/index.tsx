@@ -176,6 +176,8 @@ export class DashboardContainer extends StatefulUIElement<
     handleChangeFocusItem = (event: KeyboardEvent) => {
         const getPopoutBoxes = document.getElementById('popout-boxes')
         if (!getPopoutBoxes) {
+            event.stopPropagation()
+            event.preventDefault()
             if (
                 event.key === 'Escape' &&
                 this.props.inPageMode &&
@@ -198,8 +200,6 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('changeFocusItem', {
                     direction: event.key === 'ArrowUp' ? 'up' : 'down',
                 })
-                event.stopPropagation()
-                event.preventDefault()
             }
         }
     }
