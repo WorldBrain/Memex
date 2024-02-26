@@ -176,8 +176,6 @@ export class DashboardContainer extends StatefulUIElement<
     handleChangeFocusItem = (event: KeyboardEvent) => {
         const getPopoutBoxes = document.getElementById('popout-boxes')
         if (!getPopoutBoxes) {
-            event.stopPropagation()
-            event.preventDefault()
             if (
                 event.key === 'Escape' &&
                 this.props.inPageMode &&
@@ -189,6 +187,8 @@ export class DashboardContainer extends StatefulUIElement<
             }
 
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                event.stopPropagation()
+                event.preventDefault()
                 if (!this.state.focusLockUntilMouseStart) {
                     document.addEventListener('mousemove', this.releaseLock, {
                         once: true,
