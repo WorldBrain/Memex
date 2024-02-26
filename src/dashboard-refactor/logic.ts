@@ -4048,6 +4048,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dragList: EventHandler<'dragList'> = async ({ event, previousState }) => {
+        this.emitMutation({
+            listsSidebar: {
+                draggedListId: { $set: event.listId },
+                someListIsDragging: { $set: true },
+            },
+        })
         const crt = this.options.document?.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 0, 0)
@@ -4059,13 +4065,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
-
-        this.emitMutation({
-            listsSidebar: {
-                draggedListId: { $set: event.listId },
-                someListIsDragging: { $set: true },
-            },
-        })
     }
 
     dropList: EventHandler<'dropList'> = async () => {
