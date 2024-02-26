@@ -1,4 +1,4 @@
-import React, { PureComponent, useState } from 'react'
+import React from 'react'
 import styled, { css, keyframes } from 'styled-components'
 import Waypoint from 'react-waypoint'
 import browser from 'webextension-polyfill'
@@ -34,7 +34,6 @@ import {
 import { sizeConstants } from '../constants'
 import AnnotationEditable from 'src/annotations/components/HoverControlledAnnotationEditable'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import { PageNotesCopyPaster } from 'src/copy-paster'
 import SingleNoteShareMenu from 'src/overview/sharing/SingleNoteShareMenu'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import MobileAppAd from 'src/sync/components/device-list/mobile-app-ad'
@@ -46,7 +45,6 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
 import type {
     AnnotationSharingStates,
-    ContentSharingInterface,
     RemoteContentSharingByTabsInterface,
 } from 'src/content-sharing/background/types'
 import type { ListDetailsGetter } from 'src/annotations/types'
@@ -57,11 +55,8 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import PageCitations from 'src/citations/PageCitations'
-import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 
@@ -95,11 +90,8 @@ export type Props = RootState &
         toggleListShareMenu: () => void
         selectedListId?: string
         areAllNotesShown: boolean
-        analyticsBG: AnalyticsCoreInterface
-        authBG: AuthRemoteFunctionsInterface
         copyPasterBG: RemoteCopyPasterInterface
         contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
-        contentSharingBG: ContentSharingInterface
         toggleSortMenuShown: () => void
         pageInteractionProps: PageInteractionAugdProps
         noteInteractionProps: NoteInteractionAugdProps
@@ -151,6 +143,15 @@ export type Props = RootState &
         // ) => void
         inPageMode?: boolean
         syncSettingsBG?: RemoteSyncSettingsInterface
+        spacePickerBGProps: Pick<
+            SpacePickerDependencies,
+            | 'authBG'
+            | 'spacesBG'
+            | 'bgScriptBG'
+            | 'analyticsBG'
+            | 'contentSharingBG'
+            | 'pageActivityIndicatorBG'
+        >
     }
 
 export interface State {
@@ -374,10 +375,8 @@ export default class SearchResultsContainer extends React.Component<
                                 interactionProps.onCopyPasterBtnClick,
                         }}
                         pageLinkProps={{
-                            authBG: this.props.authBG,
-                            analyticsBG: this.props.analyticsBG,
+                            ...this.props.spacePickerBGProps,
                             annotationsCache: this.props.annotationsCache,
-                            contentSharingBG: this.props.contentSharingBG,
                             contentSharingByTabsBG: this.props
                                 .contentSharingByTabsBG,
                             copyToClipboard: this.props.onPageLinkCopy,
@@ -401,6 +400,7 @@ export default class SearchResultsContainer extends React.Component<
                 shareMenuAnnotationInstanceId={null}
                 renderListsPickerForAnnotation={() => (
                     <CollectionPicker
+                        {...this.props.spacePickerBGProps}
                         showPageLinks
                         annotationsCache={this.props.annotationsCache}
                         initialSelectedListIds={() => localListIds}
@@ -425,7 +425,7 @@ export default class SearchResultsContainer extends React.Component<
                             })
                         }
                         normalizedPageUrlToFilterPageLinksBy={pageId}
-                        analyticsBG={this.props.analyticsBG}
+                        analyticsBG={this.props.spacePickerBGProps.analyticsBG}
                     />
                 )}
                 renderShareMenuForAnnotation={() => (
@@ -436,7 +436,7 @@ export default class SearchResultsContainer extends React.Component<
                         isShared={
                             noteData.isShared || noteData.lists.length > 0
                         }
-                        analyticsBG={this.props.analyticsBG}
+                        analyticsBG={this.props.spacePickerBGProps.analyticsBG}
                         annotationData={noteData}
                         shareImmediately={
                             noteData.shareMenuShowStatus === 'show-n-share'
@@ -445,6 +445,7 @@ export default class SearchResultsContainer extends React.Component<
                         copyLink={this.props.onNoteLinkCopy}
                         postShareHook={interactionProps.updateShareInfo}
                         spacePickerProps={{
+                            ...this.props.spacePickerBGProps,
                             normalizedPageUrlToFilterPageLinksBy: pageId,
                             annotationsCache: this.props.annotationsCache,
                             initialSelectedListIds: () => localListIds,
@@ -461,7 +462,6 @@ export default class SearchResultsContainer extends React.Component<
                                     deleted: listId,
                                     selected: [],
                                 }),
-                            analyticsBG: this.props.analyticsBG,
                         }}
                         getRootElement={this.props.getRootElement}
                     />
@@ -532,6 +532,7 @@ export default class SearchResultsContainer extends React.Component<
                         contextLocation={'dashboard'}
                         renderSpacePicker={() => (
                             <CollectionPicker
+                                {...this.props.spacePickerBGProps}
                                 showPageLinks
                                 annotationsCache={this.props.annotationsCache}
                                 initialSelectedListIds={() => lists}
@@ -544,7 +545,6 @@ export default class SearchResultsContainer extends React.Component<
                                 normalizedPageUrlToFilterPageLinksBy={
                                     normalizedUrl
                                 }
-                                analyticsBG={this.props.analyticsBG}
                             />
                         )}
                         imageSupport={this.props.imageSupport}
@@ -648,7 +648,6 @@ export default class SearchResultsContainer extends React.Component<
                     inPageMode={this.props.inPageMode}
                     index={index}
                     activePage={this.props.activePage}
-                    annotationsCache={this.props.annotationsCache}
                     isSearchFilteredByList={this.props.selectedListId != null}
                     filteredbyListID={
                         this.props.listData.byId[this.props.selectedListId]
@@ -682,9 +681,41 @@ export default class SearchResultsContainer extends React.Component<
                             : undefined
                     }
                     filterbyList={this.props.filterByList}
-                    analyticsBG={this.props.analyticsBG}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
                     searchQuery={this.props.searchQuery}
+                    renderSpacePicker={() => (
+                        <CollectionPicker
+                            {...this.props.spacePickerBGProps}
+                            annotationsCache={this.props.annotationsCache}
+                            selectEntry={(listId) =>
+                                pickerProps.onListPickerUpdate({
+                                    added: listId,
+                                    deleted: null,
+                                    selected: [],
+                                })
+                            }
+                            unselectEntry={(listId) =>
+                                pickerProps.onListPickerUpdate({
+                                    added: null,
+                                    deleted: listId,
+                                    selected: [],
+                                })
+                            }
+                            initialSelectedListIds={() =>
+                                this.getLocalListIdsForCacheIds(page.lists)
+                            }
+                            closePicker={(event) => {
+                                if (page.listPickerShowStatus === 'footer') {
+                                    return interactionProps.onListPickerFooterBtnClick(
+                                        event,
+                                    )
+                                }
+                                return interactionProps.onListPickerBarBtnClick(
+                                    event,
+                                )
+                            }}
+                        />
+                    )}
                     renderPageCitations={() => (
                         <PageCitations
                             annotationUrls={page.noteIds['user']}
@@ -695,10 +726,8 @@ export default class SearchResultsContainer extends React.Component<
                                     interactionProps.onCopyPasterBtnClick,
                             }}
                             pageLinkProps={{
-                                authBG: this.props.authBG,
-                                analyticsBG: this.props.analyticsBG,
+                                ...this.props.spacePickerBGProps,
                                 annotationsCache: this.props.annotationsCache,
-                                contentSharingBG: this.props.contentSharingBG,
                                 contentSharingByTabsBG: this.props
                                     .contentSharingByTabsBG,
                                 copyToClipboard: this.props.onPageLinkCopy,
