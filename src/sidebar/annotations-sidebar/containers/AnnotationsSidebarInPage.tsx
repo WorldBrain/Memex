@@ -284,6 +284,18 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 imageData: event.imageData,
             })
             return true
+        } else if (event.action === 'save_image_as_new_note') {
+            if (this.state.activeTab !== 'annotations') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'annotations',
+                })
+                await sleepPromise(100)
+            }
+
+            this.processEvent('saveImageAsNewNote', {
+                imageData: event.imageData,
+            })
+            return true
         } else if (event.action === 'youtube_timestamp') {
             if (this.state.activeTab !== 'annotations') {
                 await this.processEvent('setActiveSidebarTab', {

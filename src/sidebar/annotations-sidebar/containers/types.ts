@@ -357,6 +357,9 @@ interface SidebarEvents {
     loadFeedSources: null
     saveHighlightColorSettings: { newState: string }
     youtubeTranscriptJSON: null
+    saveImageAsNewNote: {
+        imageData: string
+    }
     createYoutubeTimestampWithScreenshot: {
         imageData: string
     }

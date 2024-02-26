@@ -54,6 +54,35 @@ export default class PageCitations extends React.PureComponent<Props, State> {
         })
     }
 
+    componentDidMount() {
+        document.addEventListener('keydown', this.handleKeyDown)
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('keydown', this.handleKeyDown)
+    }
+
+    handleKeyDown = (event: KeyboardEvent) => {
+        if (event.key === 'ArrowRight') {
+            event.preventDefault()
+            event.stopPropagation()
+            this.setState({ optionSelected: 'ShareViaLink' })
+        } else if (event.key === 'ArrowLeft') {
+            event.preventDefault()
+            event.stopPropagation()
+            this.setState({ optionSelected: 'CopyToClipboard' })
+        } else if (event.key === 'Tab') {
+            event.preventDefault()
+            event.stopPropagation()
+            this.setState((prevState) => ({
+                optionSelected:
+                    prevState.optionSelected === 'CopyToClipboard'
+                        ? 'ShareViaLink'
+                        : 'CopyToClipboard',
+            }))
+        }
+    }
+
     private renderPreview = async (
         template: Template,
         templateType: 'originalPage' | 'examplePage',

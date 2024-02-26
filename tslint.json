@@ -45,7 +45,6 @@
                 "@worldbrain/storex-pattern-modules",
                 "@worldbrain/storex-middleware-change-watcher",
                 "@worldbrain/storex-hub",
-                "@worldbrain/memex-url-utils",
                 "@worldbrain/memex-stemmer",
                 "@worldbrain/memex-storage",
                 "@worldbrain/memex-common",

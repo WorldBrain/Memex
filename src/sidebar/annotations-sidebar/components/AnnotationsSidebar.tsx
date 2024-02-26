@@ -2149,8 +2149,8 @@ export class AnnotationsSidebar extends React.Component<
                                     tooltipText={
                                         this.props.pageSummary ? (
                                             <>
-                                                Create new note <br /> from
-                                                output
+                                                Create new note from output
+                                                <br /> or selected parts of it
                                             </>
                                         ) : (
                                             <>

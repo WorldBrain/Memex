@@ -1,4 +1,4 @@
-import type { Tabs, ContextMenus } from 'webextension-polyfill'
+import type { Tabs, ContextMenus, Browser } from 'webextension-polyfill'
 import { bindMethod } from 'src/util/functions'
 import { makeRemotelyCallable, runInTab } from 'src/util/webextensionRPC'
 import { InPageUIInterface } from './types'
@@ -9,10 +9,12 @@ import { OVERVIEW_URL } from 'src/constants'
 export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
 export const CONTEXT_MENU_HIGHLIGHT_ID =
     CONTEXT_MENU_ID_PREFIX + 'createHighlight'
+export const CONTEXT_MENU_SAVE_IMAGE_ID = CONTEXT_MENU_ID_PREFIX + 'saveImage'
 
 export interface Props {
     tabsAPI: Tabs.Static
     contextMenuAPI: ContextMenus.Static
+    browserAPIs: Browser
 }
 
 export class InPageUIBackground {
@@ -67,6 +69,29 @@ export class InPageUIBackground {
                 }
             },
         )
+        this.options.contextMenuAPI.create({
+            id: CONTEXT_MENU_SAVE_IMAGE_ID,
+            title: 'Save with Memex',
+            contexts: ['image'],
+        })
+
+        this.options.contextMenuAPI.onClicked.addListener(
+            async ({ menuItemId, srcUrl }, tab) => {
+                if (menuItemId === CONTEXT_MENU_SAVE_IMAGE_ID && tab.id) {
+                    // Send a message to the content script to get the image data
+                    const imageData = await this.options.tabsAPI.sendMessage(
+                        tab.id,
+                        {
+                            action: 'getImageData',
+                            srcUrl: srcUrl,
+                        },
+                    )
+                    if (imageData) {
+                        this.saveImageAsNewNote(tab.id, imageData)
+                    }
+                }
+            },
+        )
     }
 
     async updateContextMenuEntries() {
@@ -96,4 +121,8 @@ export class InPageUIBackground {
             false,
             null,
         )
+    private saveImageAsNewNote = (tabId: number, imageData: string) =>
+        runInTab<InPageUIContentScriptRemoteInterface>(
+            tabId,
+        ).saveImageAsNewNote(imageData)
 }

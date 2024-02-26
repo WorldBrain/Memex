@@ -1,6 +1,6 @@
 import type Storex from '@worldbrain/storex'
 import type { Runtime, Storage, Tabs } from 'webextension-polyfill'
-import type { URLNormalizer } from '@worldbrain/memex-url-utils'
+import type { URLNormalizer } from '@worldbrain/memex-common/lib/url-utils/normalize/types'
 
 import * as utils from './utils'
 import { makeRemotelyCallable, runInTab } from '../util/webextensionRPC'
