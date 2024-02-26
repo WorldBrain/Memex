@@ -3,6 +3,7 @@ import { Storage } from 'webextension-polyfill'
 import { Template } from '../types'
 import CopyPasterBackground from '.'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { DEFAULT_SPACE_BETWEEN } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export const PERFORMED_STORAGE_FLAG = '@TextExport-default_templates_inserted_1'
 
@@ -10,7 +11,7 @@ export const JUST_URL: Template = {
     id: 1,
     title: 'Page URL',
     isFavourite: false,
-    order: 1000000000,
+    order: DEFAULT_SPACE_BETWEEN * 1,
     outputFormat: 'markdown',
     code: `{{{PageUrl}}}`,
 }
@@ -19,7 +20,7 @@ export const URL_AND_TITLE: Template = {
     id: 2,
     title: 'Page URL & Title',
     isFavourite: false,
-    order: 2000000000,
+    order: DEFAULT_SPACE_BETWEEN * 2,
     outputFormat: 'markdown',
     code: `{{{PageTitle}}}
 {{{PageUrl}}}`,
@@ -29,7 +30,7 @@ export const ROAM_MD_TEMPLATE: Template = {
     id: 3,
     title: 'Roam Template',
     isFavourite: false,
-    order: 3000000000,
+    order: DEFAULT_SPACE_BETWEEN * 3,
     outputFormat: 'rich-text',
     code: `[[{{{PageTitle}}}]]
  - url:: {{{PageUrl}}} 
@@ -57,7 +58,7 @@ export const TANA_PASTE_TEMPLATE: Template = {
     id: 4,
     title: 'Tana Paste Template',
     isFavourite: false,
-    order: 4000000000,
+    order: DEFAULT_SPACE_BETWEEN * 4,
     outputFormat: 'markdown',
     code: `%%tana%% 
 - {{{PageTitle}}}
@@ -83,7 +84,7 @@ export const NOTION_MD_TEMPLATE: Template = {
     id: 5,
     title: 'Notion Template',
     isFavourite: false,
-    order: 5000000000,
+    order: DEFAULT_SPACE_BETWEEN * 5,
     outputFormat: 'markdown',
     code: ` 
 [{{{PageTitle}}}]({{{PageUrl}}})
@@ -110,7 +111,7 @@ export const OBSIDIAN_MD_TEMPLATE: Template = {
     id: 6,
     title: 'Obsidian Template',
     isFavourite: false,
-    order: 6000000000,
+    order: DEFAULT_SPACE_BETWEEN * 6,
     outputFormat: 'rich-text',
     code: ` 
 - [[{{{PageTitle}}}]]
@@ -138,7 +139,7 @@ export const LOGSEQ_MD_TEMPLATE: Template = {
     id: 7,
     title: 'Logseq Template',
     isFavourite: false,
-    order: 7000000000,
+    order: DEFAULT_SPACE_BETWEEN * 7,
     outputFormat: 'markdown',
     code: `[[{{{PageTitle}}}]]
  - url:: {{{PageUrl}}} 
@@ -166,7 +167,7 @@ export const HTML_TEMPLATE: Template = {
     id: 8,
     title: 'HTML',
     isFavourite: false,
-    order: 8000000000,
+    order: DEFAULT_SPACE_BETWEEN * 8,
     outputFormat: 'markdown',
     code: `<a target="_blank"  href="{{{PageUrl}}}">{{{PageTitle}}}</a>
 <ul>
