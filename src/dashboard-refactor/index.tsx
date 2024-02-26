@@ -187,6 +187,8 @@ export class DashboardContainer extends StatefulUIElement<
             }
 
             if (event.key === 'ArrowUp' || event.key === 'ArrowDown') {
+                event.stopPropagation()
+                event.preventDefault()
                 if (!this.state.focusLockUntilMouseStart) {
                     document.addEventListener('mousemove', this.releaseLock, {
                         once: true,
@@ -198,8 +200,6 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('changeFocusItem', {
                     direction: event.key === 'ArrowUp' ? 'up' : 'down',
                 })
-                event.stopPropagation()
-                event.preventDefault()
             }
         }
     }
