@@ -1,11 +1,5 @@
-import { toInteger } from 'lodash'
 import browser from 'webextension-polyfill'
-import {
-    COUNTER_STORAGE_KEY,
-    DEFAULT_COUNTER_STORAGE_KEY,
-    FREE_PLAN_LIMIT,
-    AI_SUMMARY_URLS,
-} from './constants'
+import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
 import { trackHitPaywall } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'

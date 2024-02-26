@@ -13,7 +13,7 @@ import {
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import type { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
-import { debounce } from 'lodash'
+import debounce from 'lodash/debounce'
 
 interface State {
     isLoading: boolean

@@ -65,7 +65,6 @@ import {
     ColorThemeKeys,
     IconKeys,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { debounce } from 'lodash'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
