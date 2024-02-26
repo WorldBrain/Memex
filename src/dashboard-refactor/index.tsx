@@ -2003,6 +2003,7 @@ const Container = styled.div<{
     fullSizeInPage: boolean
 }>`
     display: flex;
+    position: relative;
     flex-direction: column;
     width: fill-available;
     background-color: ${(props) =>

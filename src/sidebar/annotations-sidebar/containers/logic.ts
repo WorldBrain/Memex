@@ -4655,7 +4655,7 @@ export class SidebarContainerLogic extends UILogic<
         let prompt = event.prompt ?? 'Summarise this concisely and briefly'
 
         await this.queryAI(
-            undefined,
+            this.fullPageUrl,
             combinedText,
             prompt,
             previousState,

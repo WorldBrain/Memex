@@ -671,10 +671,15 @@ export async function main(
             shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
             commentText?: string,
+            highlightColorSetting?: HighlightColor,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
+
+            const highlightColorSettingStorage = await getHighlightColorSettings()
+            const highlightColor =
+                highlightColorSetting ?? highlightColorSettingStorage[0]
 
             let screenshotGrabResult
             if (
@@ -704,6 +709,7 @@ export async function main(
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupportBG,
+                    highlightColor,
                 )
 
                 const annotationId = result.annotationId
@@ -729,6 +735,10 @@ export async function main(
                 const result = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,
+                    null,
+                    null,
+                    imageSupportBG,
+                    highlightColor,
                 )
 
                 const annotationId = result.annotationId
