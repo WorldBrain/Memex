@@ -36,7 +36,6 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
-import { main as InPageUIInjectionMain } from 'src/content-scripts/content_script/in-page-ui-injections'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
@@ -469,16 +468,6 @@ export async function main(
                 components.highlights.resolve()
             }
 
-            if (component === 'search') {
-                await contentScriptRegistry.registerInPageUIInjectionScript(
-                    InPageUIInjectionMain,
-                    {
-                        searchDisplayProps,
-                    },
-                )
-                return
-            }
-
             if (!components[component]) {
                 components[component] = resolvablePromise<void>()
                 loadContentScript(component)
@@ -501,16 +490,16 @@ export async function main(
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
-            await contentScriptRegistry.registerInPageUIInjectionScript(
-                InPageUIInjectionMain,
-                {
+            inPageUI.loadOnDemandInPageUI({
+                component: 'error-display',
+                options: {
                     errorDisplayProps: {
                         errorMessage: err.message,
                         title: 'Error saving note',
                         blockedBackground: true,
                     },
                 },
-            )
+            })
         }
 
         try {
@@ -996,15 +985,16 @@ export async function main(
             })
             components.tooltip?.resolve()
         },
-        async registerInPageUIInjectionScript(execute, onDemandDisplay) {
+        async registerInPageUIInjectionScript(execute) {
             await execute({
+                inPageUI,
                 syncSettingsBG,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 requestSearcher: remoteFunction('search'),
+                searchDisplayProps,
                 annotationsFunctions,
-                onDemandDisplay,
-                bgScriptBG,
             })
+            components.in_page_ui_injections?.resolve()
         },
     }
 
@@ -1047,9 +1037,9 @@ export async function main(
         ) ||
         window.location.href.includes('youtube.com')
     ) {
-        await contentScriptRegistry.registerInPageUIInjectionScript(
-            InPageUIInjectionMain,
-        )
+        inPageUI.loadOnDemandInPageUI({
+            component: 'search-engine-integration',
+        })
     }
 
     const pageHasBookark =
@@ -1137,9 +1127,9 @@ export async function main(
                 ) ||
                 window.location.href.includes('youtube.com')
             ) {
-                await contentScriptRegistry.registerInPageUIInjectionScript(
-                    InPageUIInjectionMain,
-                )
+                inPageUI.loadOnDemandInPageUI({
+                    component: 'youtube-integration',
+                })
             }
 
             await injectCustomUIperPage(
@@ -1226,10 +1216,11 @@ export async function main(
     // so it is included in this global content script where it adds less than 500kb.
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
+    await inPageUI.loadComponent('in_page_ui_injections')
     if (areHighlightsEnabled) {
         inPageUI.showHighlights()
         if (!annotationsCache.isEmpty) {
-            inPageUI.loadComponent('sidebar')
+            await inPageUI.loadComponent('sidebar')
         }
     }
 
@@ -1239,7 +1230,7 @@ export async function main(
             showPageActivityIndicator: hasActivity,
         })
         if (await tooltipUtils.getTooltipState()) {
-            await inPageUI.setupTooltip()
+            await inPageUI.loadComponent('tooltip')
         }
     } else {
         if (hasActivity) {
@@ -1248,7 +1239,7 @@ export async function main(
                 showPageActivityIndicator: hasActivity,
             })
             if (await tooltipUtils.getTooltipState()) {
-                await inPageUI.setupTooltip()
+                await inPageUI.loadComponent('tooltip')
             }
         }
     }

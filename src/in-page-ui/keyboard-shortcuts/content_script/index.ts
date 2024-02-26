@@ -101,7 +101,8 @@ function getShortcutHandlers({
             }
         },
         createBookmark: () => inPageUI.showRibbon({ action: 'bookmark' }),
-        openDashboard: () => inPageUI.showSearch(),
+        openDashboard: async () =>
+            inPageUI.loadOnDemandInPageUI({ component: 'dashboard' }),
         openDashboardInNewTab: () =>
             runInBackground<InPageUIInterface<'caller'>>().openDashboard(),
         toggleSidebar: () => inPageUI.toggleSidebar(),

@@ -1,3 +1,5 @@
+import type { ErrorDisplayProps } from './error-display'
+
 export type SearchEngineName = 'google' | 'duckduckgo' | 'brave' | 'bing'
 export interface SearchEngineInfo {
     regex: RegExp // Regular Expression to match the url
@@ -21,3 +23,13 @@ export interface ResultItemProps {
     tags: []
     onLinkClick: React.MouseEventHandler
 }
+
+export interface OnDemandInPageUIProps {
+    errorDisplayProps?: ErrorDisplayProps
+}
+
+export type OnDemandInPageUIComponents =
+    | 'youtube-integration'
+    | 'search-engine-integration'
+    | 'dashboard'
+    | 'error-display'

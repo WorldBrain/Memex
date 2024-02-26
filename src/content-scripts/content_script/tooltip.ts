@@ -1,5 +1,4 @@
 import type { ContentScriptRegistry, TooltipScriptMain } from './types'
-
 import { bodyLoader } from 'src/util/loader'
 import { runOnScriptShutdown } from 'src/in-page-ui/tooltip/utils'
 import {
@@ -15,7 +14,7 @@ import { createInPageUI, destroyInPageUI } from 'src/in-page-ui/utils'
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
 
 export const main: TooltipScriptMain = async (options) => {
-    const cssFile = browser.runtime.getURL(`/content_script.css`)
+    const cssFile = browser.runtime.getURL(`/content_script_tooltip.css`)
     let mount: InPageUIRootMount | null = null
     const createMount = () => {
         if (!mount) {
@@ -42,7 +41,7 @@ export const main: TooltipScriptMain = async (options) => {
     options.inPageUI.events.on('componentShouldDestroy', async (event) => {
         if (event.component === 'tooltip') {
             destroyInPageUI('tooltip')
-            await removeTooltip()
+            removeTooltip()
         }
     })
     options.inPageUI.events.on('stateChanged', async (event) => {
