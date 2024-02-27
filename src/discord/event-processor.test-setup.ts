@@ -2,7 +2,7 @@ import flatten from 'lodash/flatten'
 import expect from 'expect'
 import { createDiscordEventProcessor } from '@worldbrain/memex-common/lib/discord/event-processor'
 import { DiscordChannelManager } from '@worldbrain/memex-common/lib/discord/channel-manager'
-import { createMemoryServerStorage } from 'src/storage/server'
+import { createMemoryServerStorage } from 'src/storage/server.tests'
 import type { DiscordMessageCreateInfo } from '@worldbrain/memex-common/lib/discord/types'
 import { extractListShareUrlParts } from 'src/content-sharing/utils'
 
