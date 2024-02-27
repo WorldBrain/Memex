@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
-import { LoadingIndicator, Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
+import LoadingIndicator from 'src/common-ui/components/LoadingIndicator'
 import { IMPORT_TYPE as TYPE, IMPORT_SERVICES as SERVICES } from '../constants'
 import classNames from 'classnames'
 import localStyles from './Import.css'

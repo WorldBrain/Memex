@@ -1,6 +1,6 @@
 import React, { PureComponent } from 'react'
 import { StateProps, DispatchProps } from './content-type-container'
-import { Tooltip } from 'src/common-ui/components'
+import Tooltip from 'src/common-ui/components/tooltip'
 import ToggleSwitch from './toggle-switch'
 import cx from 'classnames'
 
@@ -38,16 +38,13 @@ class ContentTypes extends PureComponent<Props, State> {
     }
     render() {
         return (
-            <Tooltip 
+            <Tooltip
                 position={this.props.tooltipPosition}
                 itemClass={cx({
-                    [styles.typeTooltip]:
-                        this.props.env === 'overview',
+                    [styles.typeTooltip]: this.props.env === 'overview',
                 })}
             >
-                <div className={styles.typeBox}>
-                    {this.renderAnnotsTypes()}
-                </div>
+                <div className={styles.typeBox}>{this.renderAnnotsTypes()}</div>
             </Tooltip>
         )
     }

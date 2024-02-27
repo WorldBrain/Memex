@@ -12,7 +12,7 @@ import {
 import { TaskState } from 'ui-logic-core/lib/types'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
-import { Modal } from 'src/common-ui/components'
+import Modal from 'src/common-ui/components/Modal'
 
 const Text = styled.div`
     font-family: ${(props) => props.theme.fonts.primary};

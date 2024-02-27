@@ -3,7 +3,7 @@ import { connect, MapStateToProps } from 'react-redux'
 import { MapDispatchToProps } from 'src/util/types'
 import { RootState } from 'src/options/types'
 
-import { Tooltip } from 'src/common-ui/components'
+import Tooltip from 'src/common-ui/components/tooltip'
 import DateRangeSelection from 'src/overview/search-bar/components/DateRangeSelection'
 import FilterButton from './filter-button'
 import { actions, selectors } from 'src/search-filters'

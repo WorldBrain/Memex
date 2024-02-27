@@ -4,7 +4,8 @@ import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'styled-components'
 
-import { ErrorBoundary, RuntimeError } from 'src/common-ui/components'
+import ErrorBoundary from 'src/common-ui/components/ErrorBoundary'
+import RuntimeError from 'src/common-ui/components/RuntimeError'
 import {
     loadThemeVariant,
     theme,
@@ -15,7 +16,7 @@ import routes from './routes'
 import { ModalsContainer } from '../overview/modals/components/ModalsContainer'
 import { AuthContextProvider } from 'src/authentication/components/AuthContextProvider'
 import { OverlayContainer } from '@worldbrain/memex-common/lib/main-ui/containers/overlay'
-import { runInBackground, setupRpcConnection } from 'src/util/webextensionRPC'
+import { setupRpcConnection } from 'src/util/webextensionRPC'
 import { createUIServices } from 'src/services/ui'
 import { UIServices } from 'src/services/ui/types'
 import {

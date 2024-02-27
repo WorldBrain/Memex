@@ -1,10 +1,8 @@
 import React, { PureComponent } from 'react'
-import PropTypes from 'prop-types'
 import { Link } from 'react-router'
-import cx from 'classnames'
 import { css } from 'styled-components'
 
-import { OutLink } from 'src/common-ui/containers'
+import OutLink from 'src/common-ui/containers/OutLink'
 import styled from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'

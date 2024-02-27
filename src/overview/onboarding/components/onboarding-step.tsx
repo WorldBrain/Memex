@@ -1,6 +1,5 @@
 import React from 'react'
-
-import { ProgressStepContainer } from 'src/common-ui/components'
+import ProgressStepContainer from 'src/common-ui/components/progress-step-container'
 
 const styles = require('./onboarding-box.css')
 

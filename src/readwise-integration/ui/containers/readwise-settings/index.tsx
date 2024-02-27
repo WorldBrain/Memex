@@ -9,9 +9,8 @@ import {
     ReadwiseSettingsState,
 } from './types'
 import * as selectors from './selectors'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 
-import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { connect } from 'react-redux'
 import { show } from 'src/overview/modals/actions'

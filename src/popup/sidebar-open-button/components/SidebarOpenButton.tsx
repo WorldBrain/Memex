@@ -1,7 +1,5 @@
 import React, { PureComponent } from 'react'
 import { connect, MapStateToProps } from 'react-redux'
-
-import { ToggleSwitchButton } from '../../components/ToggleSwitchButton'
 import type { RootState } from '../../types'
 import * as selectors from '../selectors'
 import * as acts from '../actions'
@@ -9,7 +7,7 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { CheckboxToggle } from 'src/common-ui/components'
+import type { CheckboxToggle } from 'src/common-ui/components/Checkbox'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 
 export interface OwnProps {

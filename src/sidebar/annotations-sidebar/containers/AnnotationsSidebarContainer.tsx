@@ -15,7 +15,7 @@ import type {
     SidebarContainerEvents,
     AnnotationInstanceRefs,
 } from './types'
-import { ConfirmModal } from 'src/common-ui/components'
+import ConfirmModal from 'src/common-ui/components/ConfirmModal'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import type { ListDetailsGetter } from 'src/annotations/types'
