@@ -37,6 +37,7 @@ export default function ({
     runSentry = false,
     notifsEnabled = false,
     shouldPackage = false,
+    shouldAnalyze = false,
     packagePath = '../dist',
     extPackageName = 'extension.zip',
     sourcePackageName = 'source-code.zip',
@@ -44,7 +45,6 @@ export default function ({
     const { defaultEnv, envPath } = initEnv({ mode })
 
     const plugins = [
-        new BundleAnalyzerPlugin(),
         new EnvironmentPlugin(defaultEnv),
         new Dotenv({ path: envPath }),
         new CopyPlugin(staticFiles.copyPatterns),
@@ -80,6 +80,10 @@ export default function ({
         }),
         new IgnorePlugin(/^\.\/locale$/, /moment$/),
     ]
+
+    if (shouldAnalyze) {
+        plugins.unshift(new BundleAnalyzerPlugin())
+    }
 
     if (mode === 'development' && process.env.NO_CACHE !== 'true') {
         plugins.push(
