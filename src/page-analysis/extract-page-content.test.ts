@@ -2,10 +2,8 @@
 
 import { JSDOM } from 'jsdom'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
-import {
-    extractPageMetadataFromRawContent,
-    getPageFullText,
-} from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import { extractPageMetadataFromRawContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
 
 describe('Extract page content', () => {
     // beforeAll(() => {
@@ -50,7 +48,10 @@ describe('Extract page content', () => {
             'https://test.com',
         )
         const metadata = extractPageMetadataFromRawContent(rawContent)
-        const fullText = getPageFullText(rawContent, metadata)
+        const fullText =
+            rawContent.type === 'html'
+                ? transformPageHTML({ html: rawContent.body }).text
+                : metadata.fullText
         expect({ ...metadata, fullText }).toEqual({
             fullText: ' Hello world ',
             lang: 'en',
