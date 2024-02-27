@@ -484,6 +484,7 @@ export class DashboardContainer extends StatefulUIElement<
                                         )
                                     }
                                     getRootElement={this.props.getRootElement}
+                                    copyPasterBG={this.props.copyPasterBG}
                                 />
                             ),
                             isNotesSidebarShown: this.state.isNoteSidebarShown,

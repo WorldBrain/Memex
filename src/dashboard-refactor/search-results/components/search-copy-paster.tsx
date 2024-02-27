@@ -10,12 +10,14 @@ import { BackgroundSearchParams } from 'src/search/background/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 
 export interface Props {
     searchType?: SearchType
     isCopyPasterShown?: boolean
     isCopyPasterBtnShown?: boolean
     searchParams?: BackgroundSearchParams
+    copyPasterBG: RemoteCopyPasterInterface
     hideCopyPaster?: React.MouseEventHandler
     toggleCopyPaster?: React.MouseEventHandler
     getRootElement: () => HTMLElement
@@ -36,6 +38,8 @@ class SearchCopyPaster extends React.Component<Props> {
 
         return (
             <CopyPaster
+                getRootElement={this.props.getRootElement}
+                copyPasterBG={this.props.copyPasterBG}
                 searchParams={this.props.searchParams}
                 onClickOutside={this.props.hideCopyPaster}
                 preventClosingBcEditState={(state) =>
@@ -91,8 +95,6 @@ class SearchCopyPaster extends React.Component<Props> {
 }
 
 export default SearchCopyPaster
-
-// TODO: inheirits from .nakedSquareButton
 
 const CopyPasterBox = styled.div`
     padding-top: 10px;
