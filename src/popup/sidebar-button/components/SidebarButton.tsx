@@ -9,9 +9,6 @@ import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/con
 import styled from 'styled-components'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { CheckboxToggle } from 'src/common-ui/components'
-
-const buttonStyles = require('../../components/Button.css')
 
 export interface OwnProps {
     closePopup: () => void

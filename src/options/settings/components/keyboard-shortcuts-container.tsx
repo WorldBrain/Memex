@@ -1,6 +1,6 @@
 import * as React from 'react'
 
-import { Checkbox } from '../../../common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import {
     convertKeyboardEventToKeyString,
     setKeyboardShortcutsState,

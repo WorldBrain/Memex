@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { OutLink } from 'src/common-ui/containers'
+import OutLink from 'src/common-ui/containers/OutLink'
 import localStyles from './styles.css'
 
 const Privacy = () => (
@@ -19,13 +19,15 @@ const Privacy = () => (
                     href="mailto:info@worldbrain.io"
                 >
                     write us an email
-                </a>, or post them to{' '}
+                </a>
+                , or post them to{' '}
                 <OutLink
                     className={localStyles.link}
                     to="https://worldbrain.io/faq"
                 >
                     our FAQs
-                </OutLink>.
+                </OutLink>
+                .
             </p>
 
             <h3>General Metrics</h3>

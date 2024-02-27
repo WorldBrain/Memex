@@ -1,7 +1,6 @@
 import React from 'react'
 
-// import Checkbox from './Checkbox'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import * as utils from 'src/in-page-ui/tooltip/utils'
 import * as tooltipConstants from 'src/in-page-ui/tooltip/constants'
 import styled from 'styled-components'

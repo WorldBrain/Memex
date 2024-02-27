@@ -1,7 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { ConfirmModal, ConfirmModalBtn } from 'src/common-ui/components'
+import ConfirmModalBtn from 'src/common-ui/components/ConfirmModalBtn'
+import ConfirmModal from 'src/common-ui/components/ConfirmModal'
 
 const renderMsg = ({ isLoading, matchedCount }) =>
     isLoading

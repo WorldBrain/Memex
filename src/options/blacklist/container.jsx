@@ -4,7 +4,7 @@ import styled from 'styled-components'
 import PropTypes from 'prop-types'
 import { connect } from 'react-redux'
 
-import { OutLink } from 'src/common-ui/containers'
+import OutLink from 'src/common-ui/containers/OutLink'
 import BlacklistTable from './components/BlacklistTable'
 import BlacklistRow from './components/BlacklistRow'
 import BlacklistInputRow from './components/BlacklistInputRow'

@@ -1,4 +1,3 @@
-import 'core-js'
 import browser from 'webextension-polyfill'
 
 import initStorex from './search/memex-storex'

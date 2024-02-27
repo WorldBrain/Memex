@@ -29,12 +29,9 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import SharePrivacyOption, {
-    Props as PrivacyOptionProps,
-} from './components/SharePrivacyOption'
 import Margin from '@worldbrain/memex-common/lib/common-ui/components/Margin'
 
 type SelectType = 'select' | 'unselect'

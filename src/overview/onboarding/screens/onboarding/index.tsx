@@ -16,9 +16,7 @@ import { GUIDED_ONBOARDING_URL } from '../../constants'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
-import { Checkbox } from 'src/common-ui/components'
-
-const styles = require('../../components/onboarding-box.css')
+import Checkbox from 'src/common-ui/components/Checkbox'
 
 export interface Props extends Dependencies {}
 

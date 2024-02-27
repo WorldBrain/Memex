@@ -12,8 +12,6 @@ import { SharedSyncLogStorage } from '@worldbrain/storex-sync/lib/shared-sync-lo
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { ALLOWED_STORAGE_MODULE_OPERATIONS } from '@worldbrain/memex-common/lib/firebase-backend/app-layer/allowed-operations'
 import { createClientApplicationLayer } from '@worldbrain/memex-common/lib/firebase-backend/app-layer/client'
-import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 import { ContentSharingStorage } from 'src/content-sharing/background/storage'
 import type { ServerStorage } from './types'
 import ContentConversationStorage from '@worldbrain/memex-common/lib/content-conversations/storage'
@@ -142,22 +140,6 @@ export async function createServerStorage(
     await storageManager.finishInitialization()
 
     return serverStorage
-}
-
-export function createMemoryServerStorage(options?: {
-    setupMiddleware?(manager: StorageManager): StorageMiddleware[]
-}): Promise<ServerStorage> {
-    const backend = new DexieStorageBackend({
-        dbName: 'server',
-        idbImplementation: inMemory(),
-        legacyMemexCompatibility: true,
-    })
-    const storageManager = createStorageManager(backend, options)
-
-    return createServerStorage(storageManager, {
-        autoPkType: 'number',
-        skipApplicationLayer: true,
-    })
 }
 
 export function createStorageManager(

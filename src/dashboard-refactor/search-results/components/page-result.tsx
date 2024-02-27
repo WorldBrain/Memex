@@ -7,13 +7,7 @@ import ItemBoxBottom, {
 
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import type {
-    PageData,
-    PageInteractionProps,
-    PageResult,
-    PagePickerProps,
-} from '../types'
-import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
+import type { PageData, PageInteractionProps, PageResult } from '../types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
@@ -21,9 +15,7 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { YoutubeService } from '@worldbrain/memex-common/lib/services/youtube'
-import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
-import { browser } from 'webextension-polyfill-ts'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import browser from 'webextension-polyfill'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -37,16 +29,13 @@ const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 export interface Props
     extends Omit<PageData, 'lists'>,
         PageResult,
-        PageInteractionProps,
-        PagePickerProps {
-    annotationsCache: PageAnnotationsCacheInterface
+        PageInteractionProps {
     getListDetailsById: ListDetailsGetter
     isSearchFilteredByList: boolean
     filteredbyListID?: number
     youtubeService: YoutubeService
     lists: number[]
     filterbyList: (listId: number) => void
-    analyticsBG: AnalyticsCoreInterface
     index: number
     showPopoutsForResultBox: (index: number) => void
     selectItem: (itemData: any, remove: boolean) => void
@@ -60,6 +49,7 @@ export interface Props
     searchQuery?: string
     onMatchingTextToggleClick: React.MouseEventHandler
     renderPageCitations: () => JSX.Element
+    renderSpacePicker: () => JSX.Element
     isNotesSidebarShown?: boolean
     isListsSidebarShown?: boolean
 }
@@ -305,28 +295,7 @@ export default class PageResultView extends PureComponent<Props> {
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
                 >
-                    <CollectionPicker
-                        annotationsCache={this.props.annotationsCache}
-                        selectEntry={(listId) =>
-                            this.props.onListPickerUpdate({
-                                added: listId,
-                                deleted: null,
-                                selected: [],
-                            })
-                        }
-                        unselectEntry={(listId) =>
-                            this.props.onListPickerUpdate({
-                                added: null,
-                                deleted: listId,
-                                selected: [],
-                            })
-                        }
-                        initialSelectedListIds={() => this.props.lists}
-                        closePicker={() => {
-                            this.listPickerBtnClickHandler
-                        }}
-                        analyticsBG={this.props.analyticsBG}
-                    />
+                    {this.props.renderSpacePicker()}
                 </PopoutBox>
             )
         }
@@ -343,28 +312,7 @@ export default class PageResultView extends PureComponent<Props> {
                     strategy={'fixed'}
                     getPortalRoot={this.props.getRootElement}
                 >
-                    <CollectionPicker
-                        annotationsCache={this.props.annotationsCache}
-                        analyticsBG={this.props.analyticsBG}
-                        selectEntry={(listId) =>
-                            this.props.onListPickerUpdate({
-                                added: listId,
-                                deleted: null,
-                                selected: [],
-                            })
-                        }
-                        unselectEntry={(listId) =>
-                            this.props.onListPickerUpdate({
-                                added: null,
-                                deleted: listId,
-                                selected: [],
-                            })
-                        }
-                        initialSelectedListIds={() => this.props.lists}
-                        closePicker={(event) =>
-                            this.listPickerBtnClickHandler(event)
-                        }
-                    />
+                    {this.props.renderSpacePicker()}
                 </PopoutBox>
             )
         }
@@ -734,8 +682,10 @@ export default class PageResultView extends PureComponent<Props> {
                 active={this.props.activePage}
                 firstDivProps={{
                     // onMouseLeave: this.props.onUnhover,
-                    onDragStart: this.props.onPageDrag,
-                    onDragEnd: this.props.onPageDrop,
+                    onDragStart:
+                        !this.props.isCopyPasterShown && this.props.onPageDrag,
+                    onDragEnd:
+                        !this.props.isCopyPasterShown && this.props.onPageDrop,
                 }}
                 hoverState={this.props.isInFocus}
                 onRef={this.itemBoxRef} // Passing the ref as a prop

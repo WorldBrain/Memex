@@ -2,7 +2,7 @@ import React from 'react'
 
 import analytics from 'src/analytics'
 import SearchInjection from './SearchInjection'
-import { Checkbox } from '../../../common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import styled from 'styled-components'
 
 import { SEARCH_INJECTION_DEFAULT } from 'src/search-injection/constants'

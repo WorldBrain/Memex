@@ -286,7 +286,7 @@ export default class BulkEditWidget extends StatefulUIElement<
 const BulkEditWidgetContainer = styled.div<{
     bulkDeleteLoadingState: UITaskState
 }>`
-    position: fixed;
+    position: absolute;
     bottom: 0;
     height: 44px;
     background-color: ${(props) => props.theme.colors.black}80;

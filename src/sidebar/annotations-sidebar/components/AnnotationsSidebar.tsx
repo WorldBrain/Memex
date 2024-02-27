@@ -89,7 +89,7 @@ import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/s
 import { loadThemeVariant } from 'src/common-ui/components/design-library/theme'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
 import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/interceptVideoLinks'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'

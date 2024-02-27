@@ -1,13 +1,8 @@
 import React from 'react'
 
-import AdvSettings from './AdvSettingsContainer'
 import { IMPORT_TYPE } from '../constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import ReadwiseSettings from 'src/readwise-integration/ui/containers/readwise-settings'
-import { remoteFunctions } from 'src/util/remote-functions-background'
-import { runInBackground } from 'src/util/webextensionRPC'
-import { ReadwiseInterface } from 'src/readwise-integration/background/types/remote-interface'
-import * as icons from 'src/common-ui/components/design-library/icons'
 
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import styled from 'styled-components'
@@ -18,14 +13,12 @@ import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-fi
 import {
     getFolder,
     getPathsFromLocalStorage,
-    getPkmSyncKey,
 } from 'src/pkm-integrations/background/backend/utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 
-const settingsStyle = require('src/options/settings/components/settings.css')
 const localStyles = require('./Import.css')
 
 const customSyncTagDefault = 'Memex Sync'

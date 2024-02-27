@@ -1,3 +1,4 @@
+import moment from 'moment'
 import { StorageBackendPlugin } from '@worldbrain/storex'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
@@ -7,7 +8,6 @@ import AnnotsStorage from 'src/annotations/background/storage'
 import type { Annotation } from 'src/annotations/types'
 import type { AnnotationPrivacyLevel } from 'src/content-sharing/background/types'
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
-const moment = require('moment-timezone')
 
 export class AnnotationsListPlugin extends StorageBackendPlugin<
     DexieStorageBackend

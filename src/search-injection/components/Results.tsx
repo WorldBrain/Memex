@@ -90,6 +90,7 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                         </TotalCount>
                                     </ResultsBox>
                                 }
+                                background={'greyScale3'}
                             />
                         </SearchContainer>
 
@@ -230,7 +231,7 @@ const MemexContainer = styled.div<{
         props.position === 'above' ? 'fill-available' : '450px'};
     box-shadow: 0px 0px 3px rgba(0, 0, 0, 0.1);
     position: relative;
-    animation: fadeIn 1s ease-in;
+    animation: fadeIn 100ms ease-in;
     display: flex;
     flex-direction: column;
     margin-bottom: 20px;

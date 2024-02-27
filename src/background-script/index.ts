@@ -68,7 +68,7 @@ interface Dependencies {
 }
 
 class BackgroundScript {
-    private remoteFunctions: RemoteBGScriptInterface
+    remoteFunctions: RemoteBGScriptInterface
 
     constructor(public deps: Dependencies) {
         this.remoteFunctions = {

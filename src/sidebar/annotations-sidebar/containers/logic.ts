@@ -143,6 +143,7 @@ type EventHandler<
     EventName extends keyof SidebarContainerEvents
 > = UIEventHandler<SidebarContainerState, SidebarContainerEvents, EventName>
 
+// TODO trace
 export const INIT_FORM_STATE: EditForm = {
     isBookmarked: false,
     commentText: '',
@@ -4573,6 +4574,12 @@ export class SidebarContainerLogic extends UILogic<
         return formattedHrs + formattedMins + formattedSecs
     }
 
+    createHumanTimestamp(startTime) {
+        const minutes = Math.floor(startTime / 60)
+        const seconds = startTime % 60
+        return `${minutes}:${seconds.toString().padStart(2, '0')}`
+    }
+
     createYoutubeTimestampWithAISummary: EventHandler<
         'createYoutubeTimestampWithAISummary'
     > = async ({ previousState, event }) => {
@@ -4610,11 +4617,9 @@ export class SidebarContainerLogic extends UILogic<
         const maxRetries = 30
         let handledSuccessfully = false
 
-        const humanTimestamp = `${Math.floor(
-            event.videoRangeTimestamps.startTimeSecs / 60,
-        )}:${(event.videoRangeTimestamps.startTimeSecs % 60)
-            .toString()
-            .padStart(2, '0')}`
+        const humanTimestamp = this.createHumanTimestamp(
+            event.videoRangeTimestamps.startTimeSecs,
+        )
 
         const videoURLWithTime = constructVideoURLwithTimeStamp(
             window.location.href,
@@ -4640,13 +4645,18 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         const combinedText = filteredTranscript
-            .map((item) => item.text)
+            .map(({ start, text }) => ({
+                start: Math.floor(start),
+                timestamp: this.createHumanTimestamp(Math.floor(start)),
+                text,
+            }))
+            .map((item) => JSON.stringify(item))
             .join(' ')
 
         let prompt = event.prompt ?? 'Summarise this concisely and briefly'
 
         await this.queryAI(
-            undefined,
+            this.fullPageUrl,
             combinedText,
             prompt,
             previousState,

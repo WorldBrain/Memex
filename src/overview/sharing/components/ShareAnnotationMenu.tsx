@@ -1,19 +1,12 @@
 import React, { PureComponent } from 'react'
-import styled, { css } from 'styled-components'
-import Mousetrap from 'mousetrap'
+import styled from 'styled-components'
 import { TaskState } from 'ui-logic-core/lib/types'
 
 import { executeReactStateUITask } from 'src/util/ui-logic'
-import SharePrivacyOption, {
-    Props as PrivacyOptionProps,
-} from './SharePrivacyOption'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
-import Margin from 'src/dashboard-refactor/components/Margin'
-import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import ContentSharingBackground from 'src/content-sharing/background'
 import {
     AnnotationSharingState,
     ContentSharingInterface,

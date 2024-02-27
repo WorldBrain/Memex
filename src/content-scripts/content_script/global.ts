@@ -1,4 +1,3 @@
-import 'core-js'
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
 import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
@@ -36,7 +35,6 @@ import { PageAnnotationsCache } from 'src/annotations/cache'
 import type { AnalyticsEvent } from 'src/analytics/types'
 import analytics from 'src/analytics'
 import { main as highlightMain } from 'src/content-scripts/content_script/highlights'
-import { main as InPageUIInjectionMain } from 'src/content-scripts/content_script/in-page-ui-injections'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
@@ -105,7 +103,6 @@ import { injectSubstackButtons } from './injectionUtils/substack'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import type { SearchDisplayProps } from 'src/search-injection/search-display'
 import { createUIServices } from 'src/services/ui'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
@@ -460,6 +457,10 @@ export async function main(
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
+    const loadContentScript = createContentScriptLoader({
+        contentScriptsBG,
+        loadRemotely: params.loadRemotely,
+    })
     const inPageUI = new SharedInPageUIState({
         getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
         loadComponent: async (component) => {
@@ -467,16 +468,6 @@ export async function main(
             if (component === 'highlights') {
                 components.highlights = resolvablePromise<void>()
                 components.highlights.resolve()
-            }
-
-            if (component === 'search') {
-                await contentScriptRegistry.registerInPageUIInjectionScript(
-                    InPageUIInjectionMain,
-                    {
-                        searchDisplayProps,
-                    },
-                )
-                return
             }
 
             if (!components[component]) {
@@ -501,16 +492,17 @@ export async function main(
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
-            await contentScriptRegistry.registerInPageUIInjectionScript(
-                InPageUIInjectionMain,
-                {
+            await components.in_page_ui_injections
+            inPageUI.loadOnDemandInPageUI({
+                component: 'error-display',
+                options: {
                     errorDisplayProps: {
                         errorMessage: err.message,
                         title: 'Error saving note',
                         blockedBackground: true,
                     },
                 },
-            )
+            })
         }
 
         try {
@@ -671,10 +663,15 @@ export async function main(
             shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
             commentText?: string,
+            highlightColorSetting?: HighlightColor,
         ) => {
             if (!(await pageActionAllowed(analyticsBG))) {
                 return
             }
+
+            const highlightColorSettingStorage = await getHighlightColorSettings()
+            const highlightColor =
+                highlightColorSetting ?? highlightColorSettingStorage[0]
 
             let screenshotGrabResult
             if (
@@ -704,6 +701,7 @@ export async function main(
                     screenshotGrabResult.anchor,
                     screenshotGrabResult.screenshot,
                     imageSupportBG,
+                    highlightColor,
                 )
 
                 const annotationId = result.annotationId
@@ -729,6 +727,10 @@ export async function main(
                 const result = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,
+                    null,
+                    null,
+                    imageSupportBG,
+                    highlightColor,
                 )
 
                 const annotationId = result.annotationId
@@ -885,6 +887,24 @@ export async function main(
 
         return newState
     }
+    async function maybeLoadOnDemandInPageUI() {
+        if (
+            shouldIncludeSearchInjection(
+                window.location.hostname,
+                window.location.href,
+            )
+        ) {
+            await components.in_page_ui_injections
+            inPageUI.loadOnDemandInPageUI({
+                component: 'search-engine-integration',
+            })
+        } else if (window.location.href.includes('youtube.com')) {
+            await components.in_page_ui_injections
+            inPageUI.loadOnDemandInPageUI({
+                component: 'youtube-integration',
+            })
+        }
+    }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
     // component, that when run, initialise the respective component with its
@@ -996,61 +1016,52 @@ export async function main(
             })
             components.tooltip?.resolve()
         },
-        async registerInPageUIInjectionScript(execute, onDemandDisplay) {
+        async registerInPageUIInjectionScript(execute) {
             await execute({
+                inPageUI,
                 syncSettingsBG,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 requestSearcher: remoteFunction('search'),
+                searchDisplayProps: {
+                    activityIndicatorBG,
+                    searchBG: runInBackground(),
+                    pdfViewerBG: runInBackground(),
+                    summarizeBG,
+                    analyticsBG,
+                    authBG,
+                    annotationsBG,
+                    pageIndexingBG,
+                    contentShareBG: contentSharingBG,
+                    contentShareByTabsBG: contentSharingByTabsBG,
+                    pageActivityIndicatorBG,
+                    listsBG: collectionsBG,
+                    contentConversationsBG,
+                    contentScriptsBG,
+                    imageSupportBG,
+                    copyPasterBG,
+                    syncSettingsBG,
+                    analytics,
+                    document,
+                    location,
+                    history,
+                    annotationsCache,
+                    copyToClipboard,
+                    tabsAPI: browser.tabs,
+                    runtimeAPI: browser.runtime,
+                    localStorage: browser.storage.local,
+                    services: createUIServices(),
+                    renderUpdateNotifBanner: () => null,
+                    bgScriptBG,
+                },
                 annotationsFunctions,
-                onDemandDisplay,
-                bgScriptBG,
             })
+            components.in_page_ui_injections?.resolve()
         },
     }
+    globalThis['contentScriptRegistry'] = contentScriptRegistry
+    await inPageUI.loadComponent('in_page_ui_injections')
 
-    const searchDisplayProps: SearchDisplayProps = {
-        activityIndicatorBG,
-        searchBG: runInBackground(),
-        pdfViewerBG: runInBackground(),
-        summarizeBG,
-        analyticsBG,
-        authBG,
-        annotationsBG,
-        pageIndexingBG,
-        contentShareBG: contentSharingBG,
-        contentShareByTabsBG: contentSharingByTabsBG,
-        pageActivityIndicatorBG,
-        listsBG: collectionsBG,
-        contentConversationsBG,
-        contentScriptsBG,
-        imageSupportBG,
-        copyPasterBG,
-        syncSettingsBG,
-        analytics,
-        document,
-        location,
-        history,
-        annotationsCache,
-        copyToClipboard,
-        tabsAPI: browser.tabs,
-        runtimeAPI: browser.runtime,
-        localStorage: browser.storage.local,
-        services: createUIServices(),
-        renderUpdateNotifBanner: () => null,
-        bgScriptBG,
-    }
-
-    if (
-        shouldIncludeSearchInjection(
-            window.location.hostname,
-            window.location.href,
-        ) ||
-        window.location.href.includes('youtube.com')
-    ) {
-        await contentScriptRegistry.registerInPageUIInjectionScript(
-            InPageUIInjectionMain,
-        )
-    }
+    await maybeLoadOnDemandInPageUI()
 
     const pageHasBookark =
         (await bookmarks.pageHasBookmark(fullPageUrl)) ||
@@ -1129,19 +1140,7 @@ export async function main(
                 return
             }
             await inPageUI.hideRibbon()
-
-            if (
-                shouldIncludeSearchInjection(
-                    window.location.hostname,
-                    window.location.href,
-                ) ||
-                window.location.href.includes('youtube.com')
-            ) {
-                await contentScriptRegistry.registerInPageUIInjectionScript(
-                    InPageUIInjectionMain,
-                )
-            }
-
+            await maybeLoadOnDemandInPageUI()
             await injectCustomUIperPage(
                 annotationsFunctions,
                 pkmSyncBG,
@@ -1177,10 +1176,6 @@ export async function main(
 
     // 6. Setup other interactions with this page (things that always run)
     // setupScrollReporter()
-    const loadContentScript = createContentScriptLoader({
-        contentScriptsBG,
-        loadRemotely: params.loadRemotely,
-    })
 
     // 7. check if highlights are enabled
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
@@ -1215,7 +1210,6 @@ export async function main(
     // EXECUTE PROGRESSIVE LOADING SEQUENCES
     ////////////////////////////////////////////
 
-    globalThis['contentScriptRegistry'] = contentScriptRegistry
     window['__annotationsCache'] = annotationsCache
 
     await loadCacheDataPromise
@@ -1229,7 +1223,7 @@ export async function main(
     if (areHighlightsEnabled) {
         inPageUI.showHighlights()
         if (!annotationsCache.isEmpty) {
-            inPageUI.loadComponent('sidebar')
+            await inPageUI.loadComponent('sidebar')
         }
     }
 
@@ -1239,7 +1233,7 @@ export async function main(
             showPageActivityIndicator: hasActivity,
         })
         if (await tooltipUtils.getTooltipState()) {
-            await inPageUI.setupTooltip()
+            await inPageUI.loadComponent('tooltip')
         }
     } else {
         if (hasActivity) {
@@ -1248,7 +1242,7 @@ export async function main(
                 showPageActivityIndicator: hasActivity,
             })
             if (await tooltipUtils.getTooltipState()) {
-                await inPageUI.setupTooltip()
+                await inPageUI.loadComponent('tooltip')
             }
         }
     }
@@ -1667,6 +1661,7 @@ export function setupWebUIActions(args: {
     }
 }
 
+// TODO: Move this stuff to in-page-uis CS
 export async function injectCustomUIperPage(
     annotationsFunctions,
     pkmSyncBG,

@@ -9,7 +9,7 @@ import * as constants from '../constants'
 import Logic, { State, Event } from './logic'
 import analytics from '../analytics'
 import extractQueryFilters from '../util/nlp-time-filter'
-import { remoteFunction, runInBackground } from '../util/webextensionRPC'
+import { runInBackground } from '../util/webextensionRPC'
 import LinkButton from './components/LinkButton'
 import CopyPDFLinkButton from './components/CopyPDFLinkButton'
 import { TooltipButton } from './tooltip-button'
@@ -41,7 +41,6 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { UnifiedList } from 'src/annotations/cache/types'
 
 export interface OwnProps {
     analyticsBG: AnalyticsCoreInterface

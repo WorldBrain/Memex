@@ -1,7 +1,7 @@
 import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 
-import { OutLink } from 'src/common-ui/containers'
+import OutLink from 'src/common-ui/containers/OutLink'
 import localStyles from './styles.css'
 
 class Contributor extends Component {

@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { OutLink } from 'src/common-ui/containers'
+import OutLink from 'src/common-ui/containers/OutLink'
 import styles from './ShareButtons.css'
 
 const ShareButton = ({ imgSrc, children, href, ...anchorProps }) => (

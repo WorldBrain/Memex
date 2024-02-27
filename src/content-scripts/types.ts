@@ -3,4 +3,4 @@ export type ContentScriptComponent =
     | 'sidebar'
     | 'ribbon'
     | 'highlights'
-    | 'search_injection'
+    | 'in_page_ui_injections'
