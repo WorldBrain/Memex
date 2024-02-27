@@ -182,7 +182,7 @@ export type DashboardModalsEvents = UIEvent<{
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
     setDeletingListId: { listId: string }
-    setDeletingPageArgs: PageEventArgs
+    setDeletingPageArgs: PageEventArgs & { instaDelete: boolean }
     setDeletingNoteArgs: NoteDataEventArgs
     checkSharingAccess: null
     setSpaceSidebarWidth: { width: string }

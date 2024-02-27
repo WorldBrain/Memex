@@ -389,9 +389,21 @@ export default class PageResultView extends PureComponent<Props> {
         return (
             <TooltipBox
                 tooltipText={
-                    this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX
-                        ? 'Remove from Inbox'
-                        : 'Remove from Space'
+                    this.props.filteredbyListID === SPECIAL_LIST_IDS.INBOX ? (
+                        <span>
+                            Remove from Inbox
+                            <br />
+                            <strong>+ shift</strong> to remove without
+                            confirmation
+                        </span>
+                    ) : (
+                        <span>
+                            Remove from Space
+                            <br />
+                            <strong>+ shift</strong> to remove without
+                            confirmation
+                        </span>
+                    )
                 }
                 placement="bottom"
                 getPortalRoot={this.props.getRootElement}
@@ -400,7 +412,10 @@ export default class PageResultView extends PureComponent<Props> {
                     heightAndWidth="22px"
                     filePath={icons.removeX}
                     onClick={(event) => {
-                        {
+                        if (event.shiftKey) {
+                            this.props.onRemoveFromListBtnClick(event)
+                            this.setState({ confirmRemoveFromList: true })
+                        } else {
                             this.setState({ confirmRemoveFromList: true })
                             event.preventDefault()
                         }
@@ -730,6 +745,56 @@ export default class PageResultView extends PureComponent<Props> {
         ))
     }
 
+    private renderDeleteButton() {
+        return (
+            <TooltipBox
+                tooltipText={
+                    <span>
+                        Delete from Memex
+                        <br />
+                        <strong>+ shift</strong>to delete without confirmation
+                    </span>
+                }
+                placement="bottom"
+                getPortalRoot={this.props.getRootElement}
+            >
+                <Icon
+                    heightAndWidth="20px"
+                    filePath={icons.trash}
+                    onClick={(event) => {
+                        let instaDelete = false
+
+                        if (event.shiftKey) {
+                            instaDelete = true
+                        }
+                        this.props.onTrashBtnClick(instaDelete)
+                    }}
+                />
+            </TooltipBox>
+        )
+    }
+
+    private renderEditButton() {
+        return (
+            <TooltipBox
+                tooltipText={<span>Edit Title</span>}
+                placement="bottom"
+                getPortalRoot={this.props.getRootElement}
+            >
+                <Icon
+                    heightAndWidth="20px"
+                    filePath={icons.edit}
+                    onClick={() => {
+                        this.props.onEditTitleChange(
+                            this.props.normalizedUrl,
+                            this.props.fullTitle ?? this.props.normalizedUrl,
+                        )
+                    }}
+                />
+            </TooltipBox>
+        )
+    }
+
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
@@ -771,25 +836,9 @@ export default class PageResultView extends PureComponent<Props> {
                             <PageActionBox>
                                 {this.props.hoverState != null && (
                                     <ExtraButtonsActionBar>
-                                        {' '}
-                                        <Icon
-                                            heightAndWidth="20px"
-                                            filePath={icons.edit}
-                                            onClick={() => {
-                                                this.props.onEditTitleChange(
-                                                    this.props.normalizedUrl,
-                                                    this.props.fullTitle ??
-                                                        this.props
-                                                            .normalizedUrl,
-                                                )
-                                            }}
-                                        />
-                                        <Icon
-                                            heightAndWidth="20px"
-                                            filePath={icons.trash}
-                                            onClick={this.props.onTrashBtnClick}
-                                        />
+                                        {this.renderEditButton()}
                                         {this.renderVideoResizeButton()}
+                                        {this.renderDeleteButton()}
                                         {this.renderRemoveFromListBtn()}
                                     </ExtraButtonsActionBar>
                                 )}
