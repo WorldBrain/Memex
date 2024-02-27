@@ -99,6 +99,8 @@ export default class PageResultView extends PureComponent<Props> {
 
     state = {
         matchingTextContainerHeight: 100,
+        confirmRemoveFromList: false,
+        showVideoFullSize: false,
     }
 
     componentDidMount() {
@@ -318,12 +320,70 @@ export default class PageResultView extends PureComponent<Props> {
         }
     }
 
+    private renderVideoResizeButton() {
+        if (!this.props.fullUrl.includes('youtube.com')) {
+            return
+        }
+
+        return (
+            <TooltipBox
+                tooltipText={
+                    this.state.showVideoFullSize
+                        ? 'Minimize Video'
+                        : 'Maximize Video'
+                }
+                placement="bottom"
+                getPortalRoot={this.props.getRootElement}
+            >
+                <Icon
+                    heightAndWidth="22px"
+                    filePath={
+                        this.state.showVideoFullSize
+                            ? icons.compress
+                            : icons.expand
+                    }
+                    onClick={(event) => {
+                        {
+                            this.setState({
+                                showVideoFullSize: !this.state
+                                    .showVideoFullSize,
+                            })
+                            event.preventDefault()
+                        }
+                    }}
+                />
+            </TooltipBox>
+        )
+    }
+
     private renderRemoveFromListBtn(): JSX.Element {
         if (
             !this.props.isSearchFilteredByList ||
             this.props.hoverState == null
         ) {
             return undefined
+        }
+
+        if (this.state.confirmRemoveFromList) {
+            return (
+                <TooltipBox
+                    tooltipText={'Confirm'}
+                    placement="bottom"
+                    getPortalRoot={this.props.getRootElement}
+                >
+                    <Icon
+                        heightAndWidth="22px"
+                        filePath={icons.check}
+                        onClick={(event) => {
+                            {
+                                this.props.onRemoveFromListBtnClick(event)
+                                this.setState({ confirmRemoveFromList: true })
+                                event.preventDefault()
+                            }
+                        }}
+                    />
+                </TooltipBox>
+            )
         }
 
         return (
@@ -339,10 +399,9 @@ export default class PageResultView extends PureComponent<Props> {
                 <Icon
                     heightAndWidth="22px"
                     filePath={icons.removeX}
-                    darkBackground
                     onClick={(event) => {
                         {
-                            this.props.onRemoveFromListBtnClick(event)
+                            this.setState({ confirmRemoveFromList: true })
                             event.preventDefault()
                         }
                     }}
@@ -730,6 +789,8 @@ export default class PageResultView extends PureComponent<Props> {
                                             filePath={icons.trash}
                                             onClick={this.props.onTrashBtnClick}
                                         />
+                                        {this.renderVideoResizeButton()}
+                                        {this.renderRemoveFromListBtn()}
                                     </ExtraButtonsActionBar>
                                 )}
 
@@ -745,9 +806,9 @@ export default class PageResultView extends PureComponent<Props> {
                             fullTitle={this.props.fullTitle}
                             pdfUrl={this.props.fullPdfUrl}
                             favIcon={this.props.favIconURI}
+                            showVideoFullScreen={this.state.showVideoFullSize}
                             inPageMode={this.props.inPageMode}
                             youtubeService={this.props.youtubeService}
-                            removeFromList={this.renderRemoveFromListBtn()}
                             mainContentHover={
                                 this.props.hoverState != null
                                     ? this.props.hoverState
