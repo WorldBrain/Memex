@@ -12,6 +12,8 @@ import SentryPlugin from '@sentry/webpack-plugin'
 import ZipPlugin from 'zip-webpack-plugin'
 import ScriptExtHtmlWebpackPlugin from 'script-ext-html-webpack-plugin'
 import PostCompilePlugin from 'post-compile-webpack-plugin'
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer')
+    .BundleAnalyzerPlugin
 import initEnv from './env'
 import * as staticFiles from './static-files'
 import { output } from './config'
@@ -42,6 +44,7 @@ export default function ({
     const { defaultEnv, envPath } = initEnv({ mode })
 
     const plugins = [
+        new BundleAnalyzerPlugin(),
         new EnvironmentPlugin(defaultEnv),
         new Dotenv({ path: envPath }),
         new CopyPlugin(staticFiles.copyPatterns),
