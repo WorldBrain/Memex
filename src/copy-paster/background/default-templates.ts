@@ -3,7 +3,10 @@ import { Storage } from 'webextension-polyfill'
 import { Template } from '../types'
 import CopyPasterBackground from '.'
 import { ImageSupportInterface } from 'src/image-support/background/types'
-import { DEFAULT_SPACE_BETWEEN } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import {
+    DEFAULT_SPACE_BETWEEN,
+    DEFAULT_KEY,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export const PERFORMED_STORAGE_FLAG = '@TextExport-default_templates_inserted_1'
 
@@ -11,7 +14,7 @@ export const JUST_URL: Template = {
     id: 1,
     title: 'Page URL',
     isFavourite: false,
-    order: DEFAULT_SPACE_BETWEEN * 1,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 1,
     outputFormat: 'markdown',
     code: `{{{PageUrl}}}`,
 }
@@ -30,27 +33,27 @@ export const ROAM_MD_TEMPLATE: Template = {
     id: 3,
     title: 'Roam Template',
     isFavourite: false,
-    order: DEFAULT_SPACE_BETWEEN * 3,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 3,
     outputFormat: 'rich-text',
     code: `[[{{{PageTitle}}}]]
- - url:: {{{PageUrl}}} 
-{{#PageSpaces}}  
- - Spaces:: {{{PageSpaces}}} 
-{{/PageSpaces}} 
+ - url:: {{{PageUrl}}}
+{{#PageSpaces}}
+ - Spaces:: {{{PageSpaces}}}
+{{/PageSpaces}}
 {{#HasNotes}}
   - Annotations::
 {{#Notes}}
 {{#NoteHighlight}}
     - "{{{NoteHighlight}}}"
-{{/NoteHighlight}} 
+{{/NoteHighlight}}
 {{#NoteText}}
       - {{{NoteText}}}
-{{/NoteText}} 
+{{/NoteText}}
 {{#NoteSpaces}}
-      - Spaces: {{{NoteSpaces}}} 
-{{/NoteSpaces}} 
-{{/Notes}} 
-{{/HasNotes}} 
+      - Spaces: {{{NoteSpaces}}}
+{{/NoteSpaces}}
+{{/Notes}}
+{{/HasNotes}}
 `,
 }
 
@@ -58,25 +61,25 @@ export const TANA_PASTE_TEMPLATE: Template = {
     id: 4,
     title: 'Tana Paste Template',
     isFavourite: false,
-    order: DEFAULT_SPACE_BETWEEN * 4,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 4,
     outputFormat: 'markdown',
-    code: `%%tana%% 
+    code: `%%tana%%
 - {{{PageTitle}}}
-{{#PageSpaces}}  
-    - Spaces: {{{PageSpaces}}} 
-{{/PageSpaces}} 
-    - url: {{{PageUrl}}}  - 
-{{#HasNotes}} 
+{{#PageSpaces}}
+    - Spaces: {{{PageSpaces}}}
+{{/PageSpaces}}
+    - url: {{{PageUrl}}}  -
+{{#HasNotes}}
     - Annotations:
 {{#Notes}}
         - Note {{#NoteSpaces}}for {{{NoteSpaces}}}{{/NoteSpaces}}
-{{#NoteHighlight}}  
+{{#NoteHighlight}}
             - "{{{NoteHighlight}}}"
-    {{/NoteHighlight}} 
+    {{/NoteHighlight}}
 {{#NoteText}}
             - {{{NoteText}}}
-    {{/NoteText}} 
-{{/Notes}} 
+    {{/NoteText}}
+{{/Notes}}
 {{/HasNotes}}
 `,
 }
@@ -84,26 +87,26 @@ export const NOTION_MD_TEMPLATE: Template = {
     id: 5,
     title: 'Notion Template',
     isFavourite: false,
-    order: DEFAULT_SPACE_BETWEEN * 5,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 5,
     outputFormat: 'markdown',
-    code: ` 
+    code: `
 [{{{PageTitle}}}]({{{PageUrl}}})
-{{#PageSpaces}}  
-  - Spaces: {{{PageSpaces}}} 
-{{/PageSpaces}} 
-{{#HasNotes}} 
+{{#PageSpaces}}
+  - Spaces: {{{PageSpaces}}}
+{{/PageSpaces}}
+{{#HasNotes}}
   - Annotations:
 {{#Notes}}
-{{#NoteHighlight}}  
+{{#NoteHighlight}}
     - "{{{NoteHighlight}}}"
-{{/NoteHighlight}} 
+{{/NoteHighlight}}
 {{#NoteText}}
       - {{{NoteText}}}
-    {{/NoteText}} 
-{{#NoteSpaces}}  
-      - Spaces: {{{NoteSpaces}}} 
-{{/NoteSpaces}} 
-{{/Notes}} 
+    {{/NoteText}}
+{{#NoteSpaces}}
+      - Spaces: {{{NoteSpaces}}}
+{{/NoteSpaces}}
+{{/Notes}}
 {{/HasNotes}}
 `,
 }
@@ -111,55 +114,55 @@ export const OBSIDIAN_MD_TEMPLATE: Template = {
     id: 6,
     title: 'Obsidian Template',
     isFavourite: false,
-    order: DEFAULT_SPACE_BETWEEN * 6,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 6,
     outputFormat: 'rich-text',
-    code: ` 
+    code: `
 - [[{{{PageTitle}}}]]
-    - url: {{{PageUrl}}} 
-{{#PageSpaces}}  
-    - Spaces: {{{PageSpaces}}} 
-{{/PageSpaces}} 
+    - url: {{{PageUrl}}}
+{{#PageSpaces}}
+    - Spaces: {{{PageSpaces}}}
+{{/PageSpaces}}
 {{#HasNotes}}
     - Annotations:
 {{#Notes}}
 {{#NoteHighlight}}
         - "{{{NoteHighlight}}}"
-{{/NoteHighlight}} 
+{{/NoteHighlight}}
 {{#NoteText}}
             - {{{NoteText}}}
-{{/NoteText}} 
+{{/NoteText}}
 {{#NoteSpaces}}
-            - Spaces: {{{NoteSpaces}}} 
-{{/NoteSpaces}} 
-{{/Notes}} 
-{{/HasNotes}} 
+            - Spaces: {{{NoteSpaces}}}
+{{/NoteSpaces}}
+{{/Notes}}
+{{/HasNotes}}
 `,
 }
 export const LOGSEQ_MD_TEMPLATE: Template = {
     id: 7,
     title: 'Logseq Template',
     isFavourite: false,
-    order: DEFAULT_SPACE_BETWEEN * 7,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 7,
     outputFormat: 'markdown',
     code: `[[{{{PageTitle}}}]]
- - url:: {{{PageUrl}}} 
-{{#PageSpaces}}  
- - Spaces:: {{{PageSpaces}}} 
-{{/PageSpaces}} 
+ - url:: {{{PageUrl}}}
+{{#PageSpaces}}
+ - Spaces:: {{{PageSpaces}}}
+{{/PageSpaces}}
 {{#HasNotes}}
   - Annotations::
 {{#Notes}}
 {{#NoteHighlight}}
     - "{{{NoteHighlight}}}"
-{{/NoteHighlight}} 
+{{/NoteHighlight}}
 {{#NoteText}}
       - {{{NoteText}}}
-{{/NoteText}} 
+{{/NoteText}}
 {{#NoteSpaces}}
-      - Spaces: {{{NoteSpaces}}} 
-{{/NoteSpaces}} 
-{{/Notes}} 
-{{/HasNotes}} 
+      - Spaces: {{{NoteSpaces}}}
+{{/NoteSpaces}}
+{{/Notes}}
+{{/HasNotes}}
 `,
 }
 
@@ -167,7 +170,7 @@ export const HTML_TEMPLATE: Template = {
     id: 8,
     title: 'HTML',
     isFavourite: false,
-    order: DEFAULT_SPACE_BETWEEN * 8,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 8,
     outputFormat: 'markdown',
     code: `<a target="_blank"  href="{{{PageUrl}}}">{{{PageTitle}}}</a>
 <ul>
