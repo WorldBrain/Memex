@@ -103,7 +103,6 @@ import { injectSubstackButtons } from './injectionUtils/substack'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import { extractRawPDFContent } from 'src/page-analysis/content_script/extract-page-content'
 import type { ActivityIndicatorInterface } from 'src/activity-indicator/background'
-import type { SearchDisplayProps } from 'src/search-injection/search-display'
 import { createUIServices } from 'src/services/ui'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { ContentConversationsInterface } from 'src/content-conversations/background/types'
@@ -458,6 +457,10 @@ export async function main(
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
+    const loadContentScript = createContentScriptLoader({
+        contentScriptsBG,
+        loadRemotely: params.loadRemotely,
+    })
     const inPageUI = new SharedInPageUIState({
         getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
         loadComponent: async (component) => {
@@ -489,6 +492,7 @@ export async function main(
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
+            await components.in_page_ui_injections
             inPageUI.loadOnDemandInPageUI({
                 component: 'error-display',
                 options: {
@@ -883,6 +887,24 @@ export async function main(
 
         return newState
     }
+    async function maybeLoadOnDemandInPageUI() {
+        if (
+            shouldIncludeSearchInjection(
+                window.location.hostname,
+                window.location.href,
+            )
+        ) {
+            await components.in_page_ui_injections
+            inPageUI.loadOnDemandInPageUI({
+                component: 'search-engine-integration',
+            })
+        } else if (window.location.href.includes('youtube.com')) {
+            await components.in_page_ui_injections
+            inPageUI.loadOnDemandInPageUI({
+                component: 'youtube-integration',
+            })
+        }
+    }
 
     // 4. Create a contentScriptRegistry object with functions for each content script
     // component, that when run, initialise the respective component with its
@@ -1000,56 +1022,46 @@ export async function main(
                 syncSettingsBG,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
                 requestSearcher: remoteFunction('search'),
-                searchDisplayProps,
+                searchDisplayProps: {
+                    activityIndicatorBG,
+                    searchBG: runInBackground(),
+                    pdfViewerBG: runInBackground(),
+                    summarizeBG,
+                    analyticsBG,
+                    authBG,
+                    annotationsBG,
+                    pageIndexingBG,
+                    contentShareBG: contentSharingBG,
+                    contentShareByTabsBG: contentSharingByTabsBG,
+                    pageActivityIndicatorBG,
+                    listsBG: collectionsBG,
+                    contentConversationsBG,
+                    contentScriptsBG,
+                    imageSupportBG,
+                    copyPasterBG,
+                    syncSettingsBG,
+                    analytics,
+                    document,
+                    location,
+                    history,
+                    annotationsCache,
+                    copyToClipboard,
+                    tabsAPI: browser.tabs,
+                    runtimeAPI: browser.runtime,
+                    localStorage: browser.storage.local,
+                    services: createUIServices(),
+                    renderUpdateNotifBanner: () => null,
+                    bgScriptBG,
+                },
                 annotationsFunctions,
             })
             components.in_page_ui_injections?.resolve()
         },
     }
+    globalThis['contentScriptRegistry'] = contentScriptRegistry
+    await inPageUI.loadComponent('in_page_ui_injections')
 
-    const searchDisplayProps: SearchDisplayProps = {
-        activityIndicatorBG,
-        searchBG: runInBackground(),
-        pdfViewerBG: runInBackground(),
-        summarizeBG,
-        analyticsBG,
-        authBG,
-        annotationsBG,
-        pageIndexingBG,
-        contentShareBG: contentSharingBG,
-        contentShareByTabsBG: contentSharingByTabsBG,
-        pageActivityIndicatorBG,
-        listsBG: collectionsBG,
-        contentConversationsBG,
-        contentScriptsBG,
-        imageSupportBG,
-        copyPasterBG,
-        syncSettingsBG,
-        analytics,
-        document,
-        location,
-        history,
-        annotationsCache,
-        copyToClipboard,
-        tabsAPI: browser.tabs,
-        runtimeAPI: browser.runtime,
-        localStorage: browser.storage.local,
-        services: createUIServices(),
-        renderUpdateNotifBanner: () => null,
-        bgScriptBG,
-    }
-
-    if (
-        shouldIncludeSearchInjection(
-            window.location.hostname,
-            window.location.href,
-        ) ||
-        window.location.href.includes('youtube.com')
-    ) {
-        inPageUI.loadOnDemandInPageUI({
-            component: 'search-engine-integration',
-        })
-    }
+    await maybeLoadOnDemandInPageUI()
 
     const pageHasBookark =
         (await bookmarks.pageHasBookmark(fullPageUrl)) ||
@@ -1128,19 +1140,7 @@ export async function main(
                 return
             }
             await inPageUI.hideRibbon()
-
-            if (
-                shouldIncludeSearchInjection(
-                    window.location.hostname,
-                    window.location.href,
-                ) ||
-                window.location.href.includes('youtube.com')
-            ) {
-                inPageUI.loadOnDemandInPageUI({
-                    component: 'youtube-integration',
-                })
-            }
-
+            await maybeLoadOnDemandInPageUI()
             await injectCustomUIperPage(
                 annotationsFunctions,
                 pkmSyncBG,
@@ -1176,10 +1176,6 @@ export async function main(
 
     // 6. Setup other interactions with this page (things that always run)
     // setupScrollReporter()
-    const loadContentScript = createContentScriptLoader({
-        contentScriptsBG,
-        loadRemotely: params.loadRemotely,
-    })
 
     // 7. check if highlights are enabled
     const areHighlightsEnabled = await tooltipUtils.getHighlightsState()
@@ -1214,7 +1210,6 @@ export async function main(
     // EXECUTE PROGRESSIVE LOADING SEQUENCES
     ////////////////////////////////////////////
 
-    globalThis['contentScriptRegistry'] = contentScriptRegistry
     window['__annotationsCache'] = annotationsCache
 
     await loadCacheDataPromise
@@ -1225,7 +1220,6 @@ export async function main(
     // so it is included in this global content script where it adds less than 500kb.
     await contentScriptRegistry.registerHighlightingScript(highlightMain)
 
-    await inPageUI.loadComponent('in_page_ui_injections')
     if (areHighlightsEnabled) {
         inPageUI.showHighlights()
         if (!annotationsCache.isEmpty) {
@@ -1667,6 +1661,7 @@ export function setupWebUIActions(args: {
     }
 }
 
+// TODO: Move this stuff to in-page-uis CS
 export async function injectCustomUIperPage(
     annotationsFunctions,
     pkmSyncBG,
