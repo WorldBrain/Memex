@@ -46,6 +46,8 @@ import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -81,6 +83,8 @@ export interface Props extends RibbonSubcomponentProps {
     bgScriptBG: RemoteBGScriptInterface
     setWriteError: (error: string) => void
     showRabbitHoleButton: boolean
+    tutorialIdToOpen: string
+    setTutorialIdToOpen: (tutorialId: string) => void
 }
 
 interface State {
@@ -111,6 +115,10 @@ export default class Ribbon extends Component<Props, State> {
     private feedButtonRef = createRef<HTMLDivElement>()
     private sidebarButtonRef = createRef<HTMLDivElement>()
     private removeMenuButtonRef = createRef<HTMLDivElement>()
+
+    static ALT_KEY =
+        getKeyName({ key: 'alt' }).charAt(0).toUpperCase() +
+        getKeyName({ key: 'alt' }).slice(1)
 
     state: State = {
         shortcutsReady: false,
@@ -489,8 +497,8 @@ export default class Ribbon extends Component<Props, State> {
                                     </ExtraButtonRow>
                                     <ExtraButtonRow
                                         onClick={() =>
-                                            window.open(
-                                                'https://tutorials.memex.garden/tutorials',
+                                            this.props.setTutorialIdToOpen(
+                                                'all',
                                             )
                                         }
                                     >
@@ -1121,7 +1129,17 @@ export default class Ribbon extends Component<Props, State> {
 
         return (
             <TooltipBox
-                tooltipText={this.getTooltipText('addToCollection')}
+                tooltipText={
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            {this.getTooltipText('addToCollection')}
+                            <div>
+                                <strong>{Ribbon.ALT_KEY} + Click</strong>for
+                                tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
+                }
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -1137,22 +1155,22 @@ export default class Ribbon extends Component<Props, State> {
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
                     <IconBox
-                        onClick={() =>
-                            this.props.lists.setShowListsPicker(
-                                !this.props.lists.showListsPicker,
-                            )
-                        }
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('organiseSpaces')
+                            } else {
+                                this.props.lists.setShowListsPicker(
+                                    !this.props.lists.showListsPicker,
+                                )
+                            }
+                        }}
                     >
                         <PrimaryAction
                             size={'medium'}
                             type="tertiary"
                             label={'Spaces'}
                             fontColor={'greyScale8'}
-                            onClick={() =>
-                                this.props.lists.setShowListsPicker(
-                                    !this.props.lists.showListsPicker,
-                                )
-                            }
+                            onClick={null}
                             icon={'plus'}
                             innerRef={this.spacePickerRef}
                             active={this.props.lists.showListsPicker}
@@ -1204,14 +1222,32 @@ export default class Ribbon extends Component<Props, State> {
         return (
             <TooltipBox
                 targetElementRef={this.sidebarButtonRef.current}
-                tooltipText={this.getTooltipText('toggleSidebar')}
+                tooltipText={
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            {this.getTooltipText('toggleSidebar')}
+                            <div>
+                                <strong>{Ribbon.ALT_KEY} + Click</strong>for
+                                tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
+                }
                 placement={topRight ? 'top' : bottomRight ? 'bottom' : 'left'}
                 offsetX={10}
                 getPortalRoot={this.props.getRootElement}
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
-                    <IconBox onClick={(e) => this.handleCommentIconBtnClick(e)}>
+                    <IconBox
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('annotatePages')
+                            } else {
+                                this.handleCommentIconBtnClick(e)
+                            }
+                        }}
+                    >
                         <PrimaryAction
                             size={'medium'}
                             type="tertiary"
@@ -1235,7 +1271,15 @@ export default class Ribbon extends Component<Props, State> {
                         )}
                     </IconBox>
                 ) : (
-                    <IconBox onClick={(e) => this.handleCommentIconBtnClick(e)}>
+                    <IconBox
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('annotatePages')
+                            } else {
+                                this.handleCommentIconBtnClick(e)
+                            }
+                        }}
+                    >
                         <Icon
                             color={'greyScale6'}
                             heightAndWidth="20px"
@@ -1269,29 +1313,55 @@ export default class Ribbon extends Component<Props, State> {
         return (
             <TooltipBox
                 targetElementRef={this.sidebarButtonRef.current}
-                tooltipText={this.getTooltipText('sharePage')}
+                tooltipText={
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            {this.getTooltipText('sharePage')}
+                            <div>
+                                <strong>{Ribbon.ALT_KEY} + Click</strong>for
+                                tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
+                }
                 placement={topRight ? 'top' : bottomRight ? 'bottom' : 'left'}
                 offsetX={10}
                 getPortalRoot={this.props.getRootElement}
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
-                    <IconBox onClick={(e) => this.handleSharePageAction(e)}>
+                    <IconBox
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('citePages')
+                            } else {
+                                this.handleSharePageAction(e)
+                            }
+                        }}
+                    >
                         <PrimaryAction
                             size={'medium'}
                             type="tertiary"
                             label={'Cite'}
                             fontColor={'greyScale8'}
                             onClick={null}
-                            icon={'invite'}
+                            icon={'copy'}
                         />
                     </IconBox>
                 ) : (
-                    <IconBox onClick={(e) => this.handleSharePageAction(e)}>
+                    <IconBox
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('citePages')
+                            } else {
+                                this.handleSharePageAction(e)
+                            }
+                        }}
+                    >
                         <Icon
                             color={'greyScale6'}
                             heightAndWidth="20px"
-                            filePath={'peopleFine'}
+                            filePath={'copy'}
                             containerRef={this.sidebarButtonRef}
                         />
                     </IconBox>
@@ -1307,18 +1377,18 @@ export default class Ribbon extends Component<Props, State> {
         return (
             <TooltipBox
                 tooltipText={
-                    <span
-                        style={{
-                            gridGap: '5px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                        }}
-                    >
-                        {this.getTooltipText('openDashboard')}
-                        <span>
-                            <strong>+ shift </strong>to open in new tab
-                        </span>
-                    </span>
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            {this.getTooltipText('openDashboard')}
+                            <div>
+                                <strong>+ shift </strong>to open in new tab
+                            </div>
+                            <div>
+                                <strong>{Ribbon.ALT_KEY} + Click</strong>for
+                                tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
                 }
                 placement={
                     this.props.sidebar.isSidebarOpen
@@ -1343,6 +1413,9 @@ export default class Ribbon extends Component<Props, State> {
                             if (e.shiftKey) {
                                 e.stopPropagation()
                                 this.props.bgScriptBG.openOverviewTab()
+                            } else if (e.altKey) {
+                                e.stopPropagation()
+                                this.props.setTutorialIdToOpen('searchPages')
                             } else {
                                 e.stopPropagation()
                                 this.props.toggleQuickSearch()
@@ -1356,6 +1429,9 @@ export default class Ribbon extends Component<Props, State> {
                             if (e.shiftKey) {
                                 e.stopPropagation()
                                 this.props.bgScriptBG.openOverviewTab()
+                            } else if (e.altKey) {
+                                e.stopPropagation()
+                                this.props.setTutorialIdToOpen('searchPages')
                             } else {
                                 e.stopPropagation()
                                 this.props.toggleQuickSearch()
@@ -1375,7 +1451,17 @@ export default class Ribbon extends Component<Props, State> {
         const bottomRight = this.props.ribbonPosition === 'bottomRight'
         return (
             <TooltipBox
-                tooltipText={this.getTooltipText('askAI')}
+                tooltipText={
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            {this.getTooltipText('askAI')}
+                            <div>
+                                <strong>{Ribbon.ALT_KEY} + Click</strong>for
+                                tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
+                }
                 placement={
                     this.props.sidebar.isSidebarOpen
                         ? 'left'
@@ -1395,12 +1481,24 @@ export default class Ribbon extends Component<Props, State> {
                         type="tertiary"
                         label={'Ask'}
                         fontColor={'greyScale8'}
-                        onClick={() => this.props.toggleAskAI()}
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('askAI')
+                            } else {
+                                this.props.toggleAskAI()
+                            }
+                        }}
                         icon={'stars'}
                     />
                 ) : (
                     <Icon
-                        onClick={() => this.props.toggleAskAI()}
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('askAI')
+                            } else {
+                                this.props.toggleAskAI()
+                            }
+                        }}
                         color={'greyScale6'}
                         heightAndWidth="20px"
                         filePath={icons.stars}
@@ -1688,6 +1786,20 @@ export default class Ribbon extends Component<Props, State> {
         )
     }
 
+    renderTutorialBox() {
+        if (this.props.tutorialIdToOpen === null) {
+            return
+        }
+        return (
+            <TutorialBox
+                tutorialId={this.props.tutorialIdToOpen}
+                getRootElement={this.props.getRootElement}
+                onTutorialClose={() => this.props.setTutorialIdToOpen(null)}
+                isHeadless
+            />
+        )
+    }
+
     renderHorizontalRibbon() {
         if (!this.props.isExpanded) {
             return (
@@ -1846,6 +1958,7 @@ export default class Ribbon extends Component<Props, State> {
                             </>
                         )}
                     </InnerRibbon>
+                    {this.renderTutorialBox()}
                     {this.renderSpacePicker()}
                     {this.renderTutorial()}
                     {this.renderFeedInfo()}
@@ -1996,6 +2109,10 @@ const TooltipContentBox = styled.div`
     display: flex;
     flex-direction: column;
     grid-gap: 5px;
+
+    * strong {
+        margin-right: 5px;
+    }
 `
 const CloseTooltipInnerBox = styled.div`
     display: flex;

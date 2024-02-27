@@ -14,6 +14,7 @@ import {
     OnDragEndResponder,
 } from 'react-beautiful-dnd'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 const Header = styled.div`
     display: flex;
@@ -243,7 +244,11 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                 <Header>
                     <SectionTitle>Templates</SectionTitle>
                     <ButtonBox>
-                        <Icon
+                        <TutorialBox
+                            getPortalElement={this.props.getRootElement}
+                            tutorialId={'useTemplates'}
+                        />
+                        {/* <Icon
                             filePath={icons.helpIcon}
                             heightAndWidth="18px"
                             padding={'5px'}
@@ -252,7 +257,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                                     'https://links.memex.garden/tutorials/text-exporter',
                                 )
                             }
-                        />
+                        /> */}
 
                         <PrimaryAction
                             label={'New'}
