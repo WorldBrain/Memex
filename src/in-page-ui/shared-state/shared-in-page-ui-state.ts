@@ -33,25 +33,26 @@ export interface SharedInPageUIDependencies {
  *
  */
 export class SharedInPageUIState implements SharedInPageUIInterface {
-    contentSharingEvents: TypedRemoteEventEmitter<'contentSharing'>
-    summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
+    private contentSharingEvents: TypedRemoteEventEmitter<'contentSharing'>
+    private summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
+
     events = new EventEmitter() as TypedEventEmitter<SharedInPageUIEvents>
     componentsShown: InPageUIComponentShowState = {
         ribbon: false,
-        search: false,
         sidebar: false,
         tooltip: false,
         highlights: false,
+        in_page_ui_injections: false,
     }
-    componentsSetUp: InPageUIComponentShowState = {
+    private componentsSetUp: InPageUIComponentShowState = {
         ribbon: false,
-        search: false,
         sidebar: false,
         tooltip: false,
         highlights: false,
+        in_page_ui_injections: false,
     }
 
-    ribbonEnabled = null
+    private ribbonEnabled = null
 
     /**
      * Keep track of currently selected space for other UI elements to follow.
@@ -68,7 +69,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     selectedList: SharedInPageUIInterface['selectedList'] = null
     cacheLoadPromise: SharedInPageUIInterface['cacheLoadPromise'] = resolvablePromise()
 
-    _pendingEvents: {
+    private _pendingEvents: {
         sidebarAction?: {
             emittedWhen: number
         } & SidebarActionOptions
@@ -102,7 +103,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         })
     }
 
-    _handleNewListener = (
+    private _handleNewListener = (
         eventName: keyof SharedInPageUIEvents,
         listener: (...args: any[]) => void,
     ) => {
@@ -152,7 +153,14 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         maybeEmitAction()
     }
 
-    _emitAction(
+    loadOnDemandInPageUI: SharedInPageUIInterface['loadOnDemandInPageUI'] = ({
+        component,
+        options,
+    }) => {
+        this.events.emit('injectOnDemandInPageUI', { component, options })
+    }
+
+    private _emitAction(
         params:
             | ({
                   type: 'sidebarAction'
@@ -191,10 +199,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         await this.options.loadComponent(component)
         this._maybeEmitShouldSetUp(component, options)
         return
-    }
-
-    async showSearch() {
-        await this.options.loadComponent('search')
     }
 
     async showRibbon(options?: { action?: InPageUIRibbonAction }) {
@@ -247,10 +251,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
 
     updateRibbon() {
         this.events.emit('ribbonUpdate')
-    }
-
-    async setupTooltip() {
-        await this.loadComponent('tooltip')
     }
 
     async showTooltip() {

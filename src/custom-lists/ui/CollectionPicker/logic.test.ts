@@ -98,6 +98,7 @@ const setupLogicHelper = async ({
         unselectEntry: args.unselectEntry ?? (async (id) => {}),
         initialSelectedListIds: async () => initialSelectedListIds ?? [],
         actOnAllTabs: async (entry) => null,
+        bgScriptBG: device.backgroundModules.bgScript.remoteFunctions,
         contentSharingBG:
             device.backgroundModules.contentSharing.remoteFunctions,
         spacesBG: device.backgroundModules.customLists.remoteFunctions,

@@ -378,10 +378,11 @@ export class DashboardContainer extends StatefulUIElement<
                 spacePickerFilterProps={{
                     filterMode: true,
                     spacesBG: this.props.listsBG,
-                    onClickOutside: toggleSpacesFilter,
+                    bgScriptBG: this.props.bgScriptBG,
                     authBG: this.props.authBG,
                     contentSharingBG: this.props.contentShareBG,
                     analyticsBG: this.props.analyticsBG,
+                    onClickOutside: toggleSpacesFilter,
                     localStorageAPI: this.props.localStorage,
                     annotationsCache: this.props.annotationsCache,
                     pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
@@ -843,10 +844,15 @@ export class DashboardContainer extends StatefulUIElement<
                 }
                 getRootElement={this.props.getRootElement}
                 selectedItems={this.state.bulkSelectedUrls}
-                analyticsBG={this.props.analyticsBG}
-                authBG={this.props.authBG}
+                spacePickerBGProps={{
+                    authBG: this.props.authBG,
+                    spacesBG: this.props.listsBG,
+                    bgScriptBG: this.props.bgScriptBG,
+                    analyticsBG: this.props.analyticsBG,
+                    contentSharingBG: this.props.contentShareBG,
+                    pageActivityIndicatorBG: this.props.pageActivityIndicatorBG,
+                }}
                 copyPasterBG={this.props.copyPasterBG}
-                contentSharingBG={this.props.contentShareBG}
                 contentSharingByTabsBG={this.props.contentShareByTabsBG}
                 clearInbox={() => this.processEvent('clearInbox', null)}
                 isSpacesSidebarLocked={this.state.listsSidebar.isSidebarLocked}
@@ -1781,6 +1787,7 @@ export class DashboardContainer extends StatefulUIElement<
                             customListsBG={this.props.listsBG}
                             analyticsBG={this.props.analyticsBG}
                             annotationsBG={this.props.annotationsBG}
+                            imageSupportBG={this.props.imageSupportBG}
                             contentSharingBG={this.props.contentShareBG}
                             contentSharingByTabsBG={
                                 this.props.contentShareByTabsBG
@@ -1904,6 +1911,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 <SpacePicker
                                     authBG={this.props.authBG}
                                     spacesBG={this.props.listsBG}
+                                    bgScriptBG={this.props.bgScriptBG}
                                     localStorageAPI={this.props.localStorage}
                                     contentSharingBG={this.props.contentShareBG}
                                     analyticsBG={this.props.analyticsBG}
