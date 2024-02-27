@@ -260,6 +260,7 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('setDeletingPageArgs', {
                 pageId,
                 day: PAGE_SEARCH_DUMMY_DAY,
+                instaDelete: false,
             })
             expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
@@ -331,6 +332,7 @@ describe('Dashboard search results logic', () => {
             await searchResults.processEvent('setDeletingPageArgs', {
                 pageId,
                 day: PAGE_SEARCH_DUMMY_DAY,
+                instaDelete: true,
             })
             expect(searchResults.state.modals.deletingPageArgs).toEqual({
                 pageId,
@@ -1434,6 +1436,7 @@ describe('Dashboard search results logic', () => {
                     await searchResults.processEvent('setDeletingPageArgs', {
                         pageId,
                         day: DATA.DAY_1,
+                        instaDelete: false,
                     })
                     expect(searchResults.state.modals.deletingPageArgs).toEqual(
                         {
