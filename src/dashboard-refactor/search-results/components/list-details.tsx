@@ -307,9 +307,6 @@ export default class ListDetails extends PureComponent<Props, State> {
                                                 isEditingDescription: true,
                                             })
                                         }}
-                                        isEditing={
-                                            this.state.isEditingDescription
-                                        }
                                     >
                                         {this.props.listData.name}
                                     </SectionTitle>

@@ -108,7 +108,7 @@ export default class RibbonContainer extends StatefulUIElement<
     }
     private handlePageShare = () => {
         this.props.inPageUI.showSidebar({
-            action: 'share_page',
+            action: 'cite_page',
         })
     }
 

@@ -289,6 +289,7 @@ export class SidebarContainerLogic extends UILogic<
             isAutoAddEnabled: null,
 
             showPageLinkShareMenu: false,
+            showPageCitationMenu: false,
             isWidthLocked: false,
             isLocked: false,
             fullPageUrl: this.options.fullPageUrl,
