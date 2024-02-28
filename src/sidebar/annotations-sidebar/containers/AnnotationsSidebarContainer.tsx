@@ -1176,7 +1176,7 @@ export class AnnotationsSidebarContainer<
                                 this.processEvent('markFeedAsRead', null)
                             }
                             clickCreatePageLinkBtn={() =>
-                                this.processEvent('openPageLinkShareMenu', null)
+                                this.processEvent('openPageCitationMenu', null)
                             }
                             selectedListId={this.state.selectedListId}
                             currentUser={this.props.getCurrentUser()}
