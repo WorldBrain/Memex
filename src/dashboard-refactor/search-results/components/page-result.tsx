@@ -403,15 +403,17 @@ export default class PageResultView extends PureComponent<Props> {
                         <span>
                             Remove from Inbox
                             <br />
-                            <strong>+ shift</strong> to remove without
-                            confirmation
+                            <strong>+ shift Click</strong> or{' '}
+                            <strong>+ shift + Backspace</strong> to remove
+                            without confirmation
                         </span>
                     ) : (
                         <span>
                             Remove from Space
                             <br />
-                            <strong>+ shift</strong> to remove without
-                            confirmation
+                            <strong>+ shift Click</strong> or{' '}
+                            <strong>+ shift + Backspace</strong> to remove
+                            without confirmation
                         </span>
                     )
                 }
