@@ -765,9 +765,13 @@ export default class PageResultView extends PureComponent<Props> {
                         let instaDelete = false
 
                         if (event.shiftKey) {
+                            event.preventDefault()
+                            event.stopPropagation()
                             instaDelete = true
                         }
                         this.props.onTrashBtnClick(instaDelete)
+                        event.preventDefault()
+                        event.stopPropagation()
                     }}
                 />
             </TooltipBox>

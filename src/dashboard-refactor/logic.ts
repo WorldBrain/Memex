@@ -1576,6 +1576,21 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         if (event.instaDelete) {
+            const pageLists =
+                previousState.searchResults.pageData.byId[event.pageId].lists
+            const isPageInInbox = pageLists.some(
+                (listId) =>
+                    this.options.annotationsCache.lists.byId[listId].localId ===
+                    SPECIAL_LIST_IDS.INBOX,
+            )
+
+            if (isPageInInbox) {
+                this.emitMutation({
+                    listsSidebar: {
+                        inboxUnreadCount: { $apply: (count) => count - 1 },
+                    },
+                })
+            }
             await executeUITask(
                 this,
                 (taskState) => ({
@@ -1808,6 +1823,20 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const { pageId, day } = modals.deletingPageArgs
 
+        const pageLists = pageData.byId[pageId].lists
+        const isPageInInbox = pageLists.some(
+            (listId) =>
+                this.options.annotationsCache.lists.byId[listId].localId ===
+                SPECIAL_LIST_IDS.INBOX,
+        )
+
+        if (isPageInInbox) {
+            this.emitMutation({
+                listsSidebar: {
+                    inboxUnreadCount: { $apply: (count) => count - 1 },
+                },
+            })
+        }
         await executeUITask(
             this,
             (taskState) => ({
