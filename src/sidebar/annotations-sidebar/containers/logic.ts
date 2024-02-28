@@ -2633,12 +2633,14 @@ export class SidebarContainerLogic extends UILogic<
                 )
             }
 
+            // NOTE: We're no longer requiring parent pages to be members of all lists their annotations are
+            // TODO: Tidy all this up
             // Ensure any added shared list becomes part of the page lists
             if (cacheList.remoteId != null) {
                 const pageUrl = normalizeUrl(this.fullPageUrl)
                 const pageListsSet =
                     annotationsCache.pageListIds.get(pageUrl) ?? new Set()
-                pageListsSet.add(cacheList.unifiedId)
+                // pageListsSet.add(cacheList.unifiedId) // TODO: Maybe don't
                 annotationsCache.setPageData(pageUrl, Array.from(pageListsSet))
             }
 
