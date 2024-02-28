@@ -1,12 +1,14 @@
 import React, { PureComponent, useState } from 'react'
-import styled from 'styled-components'
+import styled, { css } from 'styled-components'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { fonts } from '../../styles'
 import Margin from 'src/dashboard-refactor/components/Margin'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import MemexEditor from '@worldbrain/memex-common/lib/editor'
+import MemexEditor, {
+    MemexEditorInstance,
+} from '@worldbrain/memex-common/lib/editor'
 import Markdown from '@worldbrain/memex-common/lib/common-ui/components/markdown'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
@@ -16,6 +18,7 @@ import { sizeConstants } from '../../constants'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import type { UnifiedList } from 'src/annotations/cache/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
+import { sleepPromise } from 'src/util/promises'
 
 export interface Props {
     remoteLink?: string
@@ -43,6 +46,7 @@ interface State {
 export default class ListDetails extends PureComponent<Props, State> {
     static MOD_KEY = getKeyName({ key: 'mod' })
     private formattingHelpBtn = React.createRef<HTMLDivElement>()
+    private editorRef: MemexEditorInstance
 
     state: State = {
         description: this.props.description ?? '',
@@ -52,7 +56,7 @@ export default class ListDetails extends PureComponent<Props, State> {
         isDeboucingEditor: false,
     }
 
-    componentWillUpdate(nextProps: Props) {
+    async componentWillUpdate(nextProps: Props, prevState: State) {
         if (this.props.listData.unifiedId !== nextProps.listData.unifiedId) {
             this.setState({
                 description: nextProps.description ?? '',
@@ -103,24 +107,6 @@ export default class ListDetails extends PureComponent<Props, State> {
     }
 
     private renderDescription() {
-        if (this.state.isEditingDescription) {
-            return (
-                <DescriptionEditorContainer>
-                    <MemexEditor
-                        markdownContent={this.state.description}
-                        onKeyDown={this.handleDescriptionInputKeyDown}
-                        placeholder="Write a description for this Space"
-                        onContentUpdate={(description) =>
-                            this.setState({ description })
-                        }
-                        imageSupport={this.props.imageSupport}
-                        getRootElement={this.props.getRootElement}
-                        setDebouncingSaveBlock={this.setDebouncingSaveBlock}
-                    />
-                </DescriptionEditorContainer>
-            )
-        }
-
         if (this.props.listData.localId === 20201015) {
             return (
                 <SubtitleText>
@@ -160,7 +146,33 @@ export default class ListDetails extends PureComponent<Props, State> {
             )
         }
 
-        return <DescriptionText>{this.props.description}</DescriptionText>
+        // if (
+        //     !this.state.isEditingDescription &&
+        //     !this.editorRef?.checkIfHasContent()
+        // ) {
+        //     return <></>
+        // }
+
+        return (
+            <MemexEditor
+                onContentUpdate={(description) =>
+                    this.setState({ description })
+                }
+                markdownContent={this.state.description}
+                onKeyDown={this.handleDescriptionInputKeyDown}
+                placeholder="Write a description for this Space"
+                setEditorInstanceRef={(ref) => (this.editorRef = ref)}
+                editable={this.state.isEditingDescription}
+                imageSupport={this.props.imageSupport}
+                getRootElement={this.props.getRootElement}
+                setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                setEditing={async () => {
+                    this.setState({
+                        isEditingDescription: true,
+                    })
+                }}
+            />
+        )
     }
 
     private renderEditButton() {
@@ -172,7 +184,13 @@ export default class ListDetails extends PureComponent<Props, State> {
         return (
             <TooltipBox
                 placement="bottom"
-                tooltipText={'Edit Space'}
+                tooltipText={
+                    <span>
+                        Edit Space
+                        <br />
+                        <strong>Double Click</strong> on title or description
+                    </span>
+                }
                 getPortalRoot={this.props.getRootElement}
             >
                 <Icon
@@ -199,33 +217,40 @@ export default class ListDetails extends PureComponent<Props, State> {
                     >
                         {this.state.isEditingDescription ? (
                             <TitleContainer>
-                                <TextField
-                                    value={this.state.spaceTitle}
-                                    onChange={(e) =>
-                                        this.setState({
-                                            spaceTitle: (e.target as HTMLInputElement)
-                                                .value,
-                                        })
-                                    }
-                                    autoFocus
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter') {
-                                            this.finishEdit({
-                                                shouldSave:
-                                                    this.props.description !==
-                                                        this.state
-                                                            .description ||
-                                                    this.props.listData.name !==
-                                                        this.state.spaceTitle,
+                                <TitleEditContainer
+                                    isEditing={this.state.isEditingDescription}
+                                >
+                                    <TextField
+                                        value={this.state.spaceTitle}
+                                        onChange={(e) =>
+                                            this.setState({
+                                                spaceTitle: (e.target as HTMLInputElement)
+                                                    .value,
                                             })
-                                        } else if (e.key === 'Escape') {
-                                            this.finishEdit({
-                                                shouldSave: false,
-                                            })
-                                            return
                                         }
-                                    }}
-                                />
+                                        onKeyDown={(e) => {
+                                            if (e.key === 'Enter') {
+                                                this.finishEdit({
+                                                    shouldSave:
+                                                        this.props
+                                                            .description !==
+                                                            this.state
+                                                                .description ||
+                                                        this.props.listData
+                                                            .name !==
+                                                            this.state
+                                                                .spaceTitle,
+                                                })
+                                            } else if (e.key === 'Escape') {
+                                                this.finishEdit({
+                                                    shouldSave: false,
+                                                })
+                                                return
+                                            }
+                                        }}
+                                        background="transparent"
+                                    />
+                                </TitleEditContainer>
                                 <BtnContainerStyled>
                                     <TooltipBox
                                         tooltipText="esc"
@@ -276,7 +301,16 @@ export default class ListDetails extends PureComponent<Props, State> {
                         ) : (
                             <TitleContainer>
                                 <DetailsContainer>
-                                    <SectionTitle>
+                                    <SectionTitle
+                                        onDoubleClick={() => {
+                                            this.setState({
+                                                isEditingDescription: true,
+                                            })
+                                        }}
+                                        isEditing={
+                                            this.state.isEditingDescription
+                                        }
+                                    >
                                         {this.props.listData.name}
                                     </SectionTitle>
                                     {/* <TitleEditContainer>
@@ -505,6 +539,7 @@ const TitleContainer = styled.div`
     align-items: center;
     width: 100%;
     grid-gap: 10px;
+    height: 40px;
 `
 
 const EditDescriptionButton = styled.div`
@@ -520,6 +555,7 @@ const DescriptionEditorContainer = styled.div`
     width: 100%;
     border-radius: 6px;
     margin-top: 5px;
+    border: 1px solid ${(props) => props.theme.colors.greyScale2};
 
     & > div:first-child {
         & > div {
@@ -566,12 +602,40 @@ const SectionTitle = styled.div`
     color: ${(props) => props.theme.colors.white};
     font-size: 24px;
     font-weight: bold;
+    padding: 0 12px;
+    height: fill-available;
+    border-radius: 5px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+
+    &:hover {
+        background-color: ${(props) => props.theme.colors.greyScale3}20;
+    }
 `
 
-const TitleEditContainer = styled.div`
-    display: none;
-    margin-left: 5px;
+const TitleEditContainer = styled.div<{
+    isEditing: boolean
+}>`
+    width: fill-available;
+    * {
+        color: ${(props) => props.theme.colors.white};
+        font-size: 24px;
+        font-weight: bold;
+    }
+    border-radius: 5px;
+
+    &:hover {
+        background-color: ${(props) => props.theme.colors.greyScale3}20;
+    }
+
+    ${(props) =>
+        props.isEditing &&
+        css`
+            background-color: ${(props) => props.theme.colors.greyScale3}30;
+        `}
 `
+
 const DescriptionEditContainer = styled.div`
     display: none;
 `
