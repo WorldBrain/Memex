@@ -30,9 +30,8 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    toggleBookmark: ClickHandler<HTMLButtonElement>
+    toggleBookmark: (element: HTMLElement) => void
 }
-
 export type Props = OwnProps & StateProps & DispatchProps
 
 class BookmarkButton extends PureComponent<Props> {
@@ -67,7 +66,11 @@ class BookmarkButton extends PureComponent<Props> {
 
         return (
             <ButtonItem
-                onClick={() => !isPageSaved && this.props.toggleBookmark}
+                onClick={(event) => {
+                    if (!isPageSaved) {
+                        this.props.toggleBookmark(event.currentTarget)
+                    }
+                }}
                 disabled={this.props.isDisabled || isPageSaved}
             >
                 <Icon
@@ -140,15 +143,11 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     dispatch,
     props,
 ) => ({
-    toggleBookmark: async (e) => {
-        {
-            const allowed = await pageActionAllowed(analyticsBG)
+    toggleBookmark: async (element: HTMLElement) => {
+        const allowed = await pageActionAllowed(analyticsBG)
 
-            if (allowed) {
-                e.preventDefault()
-
-                await dispatch(acts.toggleBookmark())
-            }
+        if (allowed) {
+            await dispatch(acts.toggleBookmark())
         }
     },
 })

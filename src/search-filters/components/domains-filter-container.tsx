@@ -4,8 +4,8 @@ import { RootState } from 'src/options/types'
 import { MapDispatchToProps } from 'src/util/types'
 import { actions, selectors } from 'src/search-filters'
 
-import { Tooltip } from 'src/common-ui/components'
-import { IndexDropdown } from 'src/common-ui/containers'
+import Tooltip from 'src/common-ui/components/tooltip'
+import IndexDropdown from 'src/common-ui/containers/IndexDropdown'
 import FilterButton from './filter-button'
 
 import cx from 'classnames'

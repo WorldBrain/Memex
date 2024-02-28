@@ -28,6 +28,7 @@ import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { CustomList } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { FollowedListEntry } from 'src/page-activity-indicator/background/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
+import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -117,7 +118,10 @@ export function getTemplateDataFetchers({
                     const pageLocators = allLocators.filter(
                         (l) => l.normalizedUrl === page.url,
                     )
-                    const mainLocator = pickBestLocator(pageLocators)
+                    const mainLocator = pickBestLocator(pageLocators, {
+                        ignoreUploadLocators: true,
+                        priority: ContentLocatorType.Remote,
+                    })
                     fullUrl = mainLocator?.originalLocation
                         ? encodeURI(mainLocator.originalLocation)
                         : page.fullUrl

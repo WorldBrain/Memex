@@ -2,8 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { remoteFunction } from 'src/util/webextensionRPC'
 const localStyles = require('./running-process.css')
-import { ProgressBar } from 'src/common-ui/components'
-import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
+import ProgressBar from 'src/common-ui/components/ProgressBar'
 import { FailedOverlay } from '../components/overlays'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { WhiteSpacer20 } from 'src/common-ui/components/design-library/typography'
@@ -12,9 +11,7 @@ import type { LocalBackupSettings } from 'src/backup-restore/background/types'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
-const overviewStyles = require('src/backup-restore/ui/styles.css')
 const settingsStyle = require('src/options/settings/components/settings.css')
-const STYLES = require('../../styles.css')
 
 interface Props {
     functionNames: {

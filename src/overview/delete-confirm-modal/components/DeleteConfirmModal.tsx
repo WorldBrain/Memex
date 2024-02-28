@@ -1,7 +1,9 @@
 import React, { PureComponent } from 'react'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import { ConfirmModal, ConfirmModalProps } from '../../../common-ui/components'
+import ConfirmModal, {
+    Props as ConfirmModalProps,
+} from 'src/common-ui/components/ConfirmModal'
 
 export interface Props extends ConfirmModalProps {
     deleteDocs: () => Promise<void>

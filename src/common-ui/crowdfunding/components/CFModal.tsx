@@ -1,7 +1,7 @@
 import React, { PureComponent, MouseEventHandler } from 'react'
 import browser, { Tabs } from 'webextension-polyfill'
 
-import { Overlay } from '../../components'
+import Overlay from '../../components/Overlay'
 import Message from './Message'
 
 const styles = require('./CFModal.css')

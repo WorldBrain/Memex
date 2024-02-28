@@ -247,7 +247,7 @@ const HelpIconPosition = styled.div`
     justify-content: space-between;
     height: fit-content;
     width: fit-content;
-    position: fixed;
+    position: absolute;
     bottom: 10px;
     right: 10px;
     z-index: 100;

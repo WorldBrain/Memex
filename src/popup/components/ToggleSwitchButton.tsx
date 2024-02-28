@@ -1,8 +1,6 @@
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import React from 'react'
-import { Checkbox, CheckboxToggle } from 'src/common-ui/components'
-
-const styles = require('./ToggleSwitchButton.css')
+import Checkbox, { CheckboxToggle } from 'src/common-ui/components/Checkbox'
 
 export interface Props {
     isEnabled: boolean

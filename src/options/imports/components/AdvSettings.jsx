@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import { IMPORT_TYPE as TYPE } from '../constants'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import styled from 'styled-components'
 
 import Concurrency from './Concurrency'

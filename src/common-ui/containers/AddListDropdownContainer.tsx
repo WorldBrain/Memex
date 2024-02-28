@@ -3,11 +3,9 @@ import debounce from 'lodash/fp/debounce'
 import noop from 'lodash/fp/noop'
 
 import { remoteFunction } from '../../util/webextensionRPC'
-import {
-    IndexDropdownNewRow,
-    IndexDropdown,
-    IndexDropdownRow,
-} from '../components'
+import IndexDropdown from '../components/IndexDropdown'
+import IndexDropdownNewRow from '../components/IndexDropdownNewRow'
+import IndexDropdownRow from '../components/IndexDropdownRow'
 import { PageList } from '../../custom-lists/background/types'
 import { ClickHandler } from '../../popup/types'
 import { handleDBQuotaErrors } from 'src/util/error-handler'

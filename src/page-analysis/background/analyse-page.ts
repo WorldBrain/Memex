@@ -1,9 +1,7 @@
-import {
-    extractPageMetadataFromRawContent,
-    getPageFullText,
-} from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
+import { extractPageMetadataFromRawContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import type { PageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
 import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
 import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
@@ -67,7 +65,10 @@ const analysePage: PageAnalyzer = async (options) => {
     }
 
     if (options.includeContent === 'metadata-with-full-text') {
-        content.fullText = getPageFullText(rawContent, content)
+        content.fullText =
+            rawContent.type === 'html'
+                ? transformPageHTML({ html: rawContent.body }).text
+                : content.fullText
     }
 
     if (videoId) {

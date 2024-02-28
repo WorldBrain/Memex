@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Checkbox, CheckboxToggle } from 'src/common-ui/components'
+import Checkbox, { CheckboxToggle } from 'src/common-ui/components/Checkbox'
 const styles = require('./settings.css')
 
 export interface Props {

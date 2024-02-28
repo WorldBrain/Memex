@@ -6,6 +6,11 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import type { Resolvable } from 'src/util/resolvable'
+import type {
+    OnDemandInPageUIComponents,
+    OnDemandInPageUIProps,
+} from 'src/search-injection/types'
+import type { ContentScriptComponent } from 'src/content-scripts/types'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -29,12 +34,7 @@ export type InPageUISidebarAction =
     | 'save_image_as_new_note'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
-export type InPageUIComponent =
-    | 'ribbon'
-    | 'sidebar'
-    | 'tooltip'
-    | 'highlights'
-    | 'search'
+export type InPageUIComponent = ContentScriptComponent
 
 export type InPageUIComponentShowState = {
     [Component in InPageUIComponent]: boolean
@@ -79,6 +79,10 @@ export interface SharedInPageUIEvents {
         options?: ShouldSetUpOptions
     }) => void
     componentShouldDestroy: (event: { component: InPageUIComponent }) => void
+    injectOnDemandInPageUI: (event: {
+        component: OnDemandInPageUIComponents
+        options?: OnDemandInPageUIProps
+    }) => void
 }
 
 export interface ShouldSetUpOptions {
@@ -112,7 +116,6 @@ export interface SharedInPageUIInterface {
     // Tooltip
     showTooltip(): Promise<void>
     hideTooltip(): Promise<void>
-    setupTooltip(): Promise<void>
     removeTooltip(): Promise<void>
     toggleTooltip(): Promise<void>
 
@@ -122,5 +125,8 @@ export interface SharedInPageUIInterface {
     toggleHighlights(): Promise<void>
 
     // On-demand in-page UIs
-    showSearch(): Promise<void>
+    loadOnDemandInPageUI(params: {
+        component: OnDemandInPageUIComponents
+        options?: OnDemandInPageUIProps
+    }): void
 }

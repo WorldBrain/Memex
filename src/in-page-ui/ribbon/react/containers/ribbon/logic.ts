@@ -384,11 +384,13 @@ export class RibbonContainerLogic extends UILogic<
             action: 'rabbit_hole_open',
         })
     }
-    toggleQuickSearch: EventHandler<'toggleQuickSearch'> = async ({
-        previousState,
-    }) => {
-        await this.dependencies.inPageUI.showSearch()
+
+    toggleQuickSearch: EventHandler<'toggleQuickSearch'> = async ({}) => {
+        this.dependencies.inPageUI.loadOnDemandInPageUI({
+            component: 'dashboard',
+        })
     }
+
     toggleTheme: EventHandler<'toggleTheme'> = async ({ previousState }) => {
         await browser.storage.local.set({
             themeVariant:

@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Checkbox, CheckboxToggle } from 'src/common-ui/components'
+import Checkbox, { CheckboxToggle } from 'src/common-ui/components/Checkbox'
 import { VISIT_DELAY_RANGE } from 'src/options/settings/constants'
 import { SecondaryAction } from 'src/common-ui/components/design-library/actions/SecondaryAction'
 

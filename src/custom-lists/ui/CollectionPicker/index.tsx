@@ -34,13 +34,12 @@ import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/u
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { getEntriesForCurrentPickerTab } from './utils'
 import type { UnifiedList } from 'src/annotations/cache/types'
-import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 export interface Props extends SpacePickerDependencies {
     showPageLinks?: boolean
     onListFocus?: (listId: UnifiedList['localId']) => void
-    bgScriptBG?: RemoteBGScriptInterface
     getRootElement?: () => HTMLElement
 }
 
@@ -53,6 +52,7 @@ class SpacePicker extends StatefulUIElement<
         Props,
         | 'authBG'
         | 'spacesBG'
+        | 'bgScriptBG'
         | 'contentSharingBG'
         | 'pageActivityIndicatorBG'
         | 'annotationsCache'
@@ -62,6 +62,7 @@ class SpacePicker extends StatefulUIElement<
         authBG: auth,
         spacesBG: collections,
         analyticsBG: analyticsBG,
+        bgScriptBG: runInBackground(),
         contentSharingBG: contentSharing,
         localStorageAPI: browser.storage.local,
         pageActivityIndicatorBG: pageActivityIndicator,

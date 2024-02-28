@@ -1573,10 +1573,76 @@ export class DashboardLogic extends UILogic<State, Events> {
 
     setDeletingPageArgs: EventHandler<'setDeletingPageArgs'> = async ({
         event,
+        previousState,
     }) => {
-        this.emitMutation({
-            modals: { deletingPageArgs: { $set: event } },
-        })
+        if (event.instaDelete) {
+            const pageLists =
+                previousState.searchResults.pageData.byId[event.pageId].lists
+            const isPageInInbox = pageLists.some(
+                (listId) =>
+                    this.options.annotationsCache.lists.byId[listId].localId ===
+                    SPECIAL_LIST_IDS.INBOX,
+            )
+
+            if (isPageInInbox) {
+                this.emitMutation({
+                    listsSidebar: {
+                        inboxUnreadCount: { $apply: (count) => count - 1 },
+                    },
+                })
+            }
+            await executeUITask(
+                this,
+                (taskState) => ({
+                    searchResults: { pageDeleteState: { $set: taskState } },
+                }),
+                async () => {
+                    const resultsMutation: UIMutation<
+                        State['searchResults']
+                    > = {
+                        pageData: {
+                            byId: { $unset: [event.pageId] },
+                            allIds: {
+                                $set: previousState.searchResults.pageData.allIds.filter(
+                                    (id) => id !== event.pageId,
+                                ),
+                            },
+                        },
+                    }
+
+                    if (event.day === PAGE_SEARCH_DUMMY_DAY) {
+                        resultsMutation.results = {
+                            [event.day]: {
+                                pages: {
+                                    byId: { $unset: [event.pageId] },
+                                    allIds: {
+                                        $set: previousState.searchResults.results[
+                                            event.day
+                                        ].pages.allIds.filter(
+                                            (id) => id !== event.pageId,
+                                        ),
+                                    },
+                                },
+                            },
+                        }
+                    } else {
+                        resultsMutation.results = removeAllResultOccurrencesOfPage(
+                            previousState.searchResults.results,
+                            event.pageId,
+                        )
+                    }
+
+                    this.emitMutation({
+                        searchResults: resultsMutation,
+                    })
+                    await this.options.searchBG.delPages([event.pageId])
+                },
+            )
+        } else {
+            this.emitMutation({
+                modals: { deletingPageArgs: { $set: event } },
+            })
+        }
     }
 
     setPrivatizeNoteConfirmArgs: EventHandler<
@@ -1757,6 +1823,20 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         const { pageId, day } = modals.deletingPageArgs
 
+        const pageLists = pageData.byId[pageId].lists
+        const isPageInInbox = pageLists.some(
+            (listId) =>
+                this.options.annotationsCache.lists.byId[listId].localId ===
+                SPECIAL_LIST_IDS.INBOX,
+        )
+
+        if (isPageInInbox) {
+            this.emitMutation({
+                listsSidebar: {
+                    inboxUnreadCount: { $apply: (count) => count - 1 },
+                },
+            })
+        }
         await executeUITask(
             this,
             (taskState) => ({
@@ -4048,6 +4128,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dragList: EventHandler<'dragList'> = async ({ event, previousState }) => {
+        this.emitMutation({
+            listsSidebar: {
+                draggedListId: { $set: event.listId },
+                someListIsDragging: { $set: true },
+            },
+        })
         const crt = this.options.document?.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 0, 0)
@@ -4059,13 +4145,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
-
-        this.emitMutation({
-            listsSidebar: {
-                draggedListId: { $set: event.listId },
-                someListIsDragging: { $set: true },
-            },
-        })
     }
 
     dropList: EventHandler<'dropList'> = async () => {
@@ -4078,6 +4157,12 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     dragPage: EventHandler<'dragPage'> = async ({ event, previousState }) => {
+        this.emitMutation({
+            listsSidebar: {
+                someListIsDragging: { $set: true },
+            },
+            searchResults: { draggedPageId: { $set: event.pageId } },
+        })
         const crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 0, 0)
@@ -4089,9 +4174,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             normalizedPageUrl: page.normalizedUrl,
         }
         event.dataTransfer.setData('text/plain', JSON.stringify(action))
-        this.emitMutation({
-            searchResults: { draggedPageId: { $set: event.pageId } },
-        })
+
         this.emitMutation({
             listsSidebar: {
                 someListIsDragging: { $set: false },

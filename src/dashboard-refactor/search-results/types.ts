@@ -28,7 +28,7 @@ export interface CommonInteractionProps {
     onListPickerFooterBtnClick: React.MouseEventHandler
 
     onShareBtnClick: React.MouseEventHandler
-    onTrashBtnClick: React.MouseEventHandler
+    onTrashBtnClick: (instaDelete: boolean) => void
 }
 
 export type PageInteractionProps = Omit<

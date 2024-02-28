@@ -1,6 +1,6 @@
 import React from 'react'
 
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import * as utils from '../../../sidebar-overlay/utils'
 import styled from 'styled-components'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'

@@ -4,11 +4,9 @@ import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'
 import { initializeTestEnvironment } from '@firebase/rules-unit-testing'
 import { documentId, Timestamp, serverTimestamp } from '@firebase/firestore'
 import type { ServerStorage } from './types'
-import {
-    createMemoryServerStorage,
-    createStorageManager,
-    createServerStorage,
-} from './server'
+import { createStorageManager, createServerStorage } from './server'
+import { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import inMemory from '@worldbrain/storex-backend-dexie/lib/in-memory'
 
 async function createFirestoreEmulatorStorageBackend(options: {
     firebaseProjectId?: string
@@ -80,4 +78,20 @@ export async function createTestServerStorage(options: {
     } else {
         return createMemoryServerStorage(options)
     }
+}
+
+export function createMemoryServerStorage(options?: {
+    setupMiddleware?(manager: StorageManager): StorageMiddleware[]
+}): Promise<ServerStorage> {
+    const backend = new DexieStorageBackend({
+        dbName: 'server',
+        idbImplementation: inMemory(),
+        legacyMemexCompatibility: true,
+    })
+    const storageManager = createStorageManager(backend, options)
+
+    return createServerStorage(storageManager, {
+        autoPkType: 'number',
+        skipApplicationLayer: true,
+    })
 }

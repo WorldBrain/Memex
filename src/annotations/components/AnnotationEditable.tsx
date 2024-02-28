@@ -39,7 +39,7 @@ import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/compo
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { sleepPromise } from 'src/util/promises'
 import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
-import { Checkbox } from 'src/common-ui/components'
+import Checkbox from 'src/common-ui/components/Checkbox'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 

@@ -24,7 +24,7 @@ import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscri
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
 import { setStorageMiddleware } from 'src/storage/middleware'
-import { createMemoryServerStorage } from 'src/storage/server'
+import { createMemoryServerStorage } from 'src/storage/server.tests'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill'
 import { createServices } from 'src/services'
