@@ -111,6 +111,11 @@ export const OuterDiv = styled.div`
     cursor: ${(props) => (props.onClick ? 'pointer' : 'default')};
     justify-content: center;
     align-items: center;
+
+    * {
+        font-family: 'Satoshi', sans-serif;
+        font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on;
+    }
 `
 
 export const InnerDiv = styled.div<{ large: boolean }>`

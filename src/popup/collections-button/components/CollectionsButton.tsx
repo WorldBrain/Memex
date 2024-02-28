@@ -20,8 +20,8 @@ interface StateProps {
 }
 
 interface DispatchProps {
-    toggleCollectionsPopup: ClickHandler<HTMLButtonElement>
-    toggleAllTabsPopup: ClickHandler<HTMLButtonElement>
+    toggleCollectionsPopup: ClickHandler<HTMLDivElement>
+    toggleAllTabsPopup: ClickHandler<HTMLDivElement>
 }
 
 export type Props = OwnProps & StateProps & DispatchProps
@@ -55,9 +55,11 @@ class CollectionsButton extends PureComponent<Props> {
     render() {
         return (
             <ButtonItem
-                onClick={() =>
-                    !this.props.isDisabled && this.props.toggleCollectionsPopup
-                }
+                onClick={(event) => {
+                    if (!this.props.isDisabled) {
+                        this.props.toggleCollectionsPopup(event)
+                    }
+                }}
                 disabled={this.props.isDisabled}
             >
                 <Icon

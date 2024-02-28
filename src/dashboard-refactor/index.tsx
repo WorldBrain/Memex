@@ -1073,10 +1073,11 @@ export class DashboardContainer extends StatefulUIElement<
                             ].isCopyPasterShown,
                             event: event,
                         }),
-                    onTrashBtnClick: (day, pageId) => () =>
+                    onTrashBtnClick: (day, pageId) => (instaDelete) =>
                         this.processEvent('setDeletingPageArgs', {
                             day,
                             pageId,
+                            instaDelete,
                         }),
                     onShareBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageShareMenuShown', {
@@ -1347,7 +1348,7 @@ export class DashboardContainer extends StatefulUIElement<
                             },
                         )
                     },
-                    onTrashBtnClick: (noteId, day, pageId) => () =>
+                    onTrashBtnClick: (noteId, day, pageId) => (instaDelete) =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,
                             pageId,
