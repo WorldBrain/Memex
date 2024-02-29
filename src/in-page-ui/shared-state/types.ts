@@ -25,13 +25,14 @@ export type InPageUISidebarAction =
     | 'show_page_summary'
     | 'rabbit_hole_open'
     | 'youtube_timestamp'
-    | 'share_page'
     | 'set_focus_mode'
     | 'show_transcript'
     | 'create_youtube_timestamp_with_AI_summary'
     | 'create_youtube_timestamp_with_screenshot'
     | 'open_chapter_summary'
     | 'save_image_as_new_note'
+    | 'cite_page'
+    | 'share_page_link'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = ContentScriptComponent

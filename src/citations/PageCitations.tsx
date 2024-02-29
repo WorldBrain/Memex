@@ -31,6 +31,7 @@ export interface Props {
     annotationUrls: string[]
     getRootElement: () => HTMLElement
     syncSettingsBG?: RemoteSyncSettingsInterface
+    defaultOpenTab?: 'CopyToClipboard' | 'ShareViaLink'
 }
 
 interface State {
@@ -55,6 +56,9 @@ export default class PageCitations extends React.PureComponent<Props, State> {
     }
 
     componentDidMount() {
+        if (this.props.defaultOpenTab) {
+            this.setState({ optionSelected: this.props.defaultOpenTab })
+        }
         document.addEventListener('keydown', this.handleKeyDown)
     }
 

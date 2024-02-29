@@ -190,30 +190,40 @@ export default class PageResultView extends PureComponent<Props> {
                     break
                     break
                 case 'Enter':
-                    if (event.shiftKey) {
-                        event.stopPropagation()
-                        // Perform action for "shift+Enter" key
-                        const itemData = {
-                            url: this.props.normalizedUrl,
-                            title: this.props.fullTitle,
-                            type: 'page',
-                        }
-                        if (this.props.isBulkSelected) {
-                            this.props.selectItem(itemData, true)
+                    if (this.props.editTitleState != null) {
+                        if (event.shiftKey) {
+                            event.stopPropagation()
+                            // Perform action for "shift+Enter" key
+                            const itemData = {
+                                url: this.props.normalizedUrl,
+                                title: this.props.fullTitle,
+                                type: 'page',
+                            }
+                            if (this.props.isBulkSelected) {
+                                this.props.selectItem(itemData, true)
+                            } else {
+                                this.props.selectItem(itemData, false)
+                            }
                         } else {
-                            this.props.selectItem(itemData, false)
+                            // Perform action for "Enter" key
+                            event.stopPropagation()
+                            this.props.onClick(event as any)
+                            break
                         }
-                    } else {
-                        // Perform action for "Enter" key
-                        event.stopPropagation()
-                        this.props.onClick(event as any)
-                        break
                     }
                     break
                 case 'Backspace':
+                    if (event.shiftKey) {
+                        event.stopPropagation()
+                        // Perform action for "shift+Enter" key
+                        this.props.onRemoveFromListBtnClick(event as any)
+                    } else {
+                        // Perform action for "Enter" key
+                        event.stopPropagation()
+                        this.props.onTrashBtnClick(event as any)
+                        break
+                    }
                     // Perform action for "Backspace" key
-                    this.props.onTrashBtnClick(event as any)
-                    break
                     break
                 default:
                     break
@@ -393,15 +403,17 @@ export default class PageResultView extends PureComponent<Props> {
                         <span>
                             Remove from Inbox
                             <br />
-                            <strong>+ shift</strong> to remove without
-                            confirmation
+                            <strong>+ shift Click</strong> or{' '}
+                            <strong>+ shift + Backspace</strong> to remove
+                            without confirmation
                         </span>
                     ) : (
                         <span>
                             Remove from Space
                             <br />
-                            <strong>+ shift</strong> to remove without
-                            confirmation
+                            <strong>+ shift Click</strong> or{' '}
+                            <strong>+ shift + Backspace</strong> to remove
+                            without confirmation
                         </span>
                     )
                 }
