@@ -3363,21 +3363,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
-                // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
-                //  to make a SAS annotation private protected upon save btn press
-                const lists = event.mainBtnPressed
-                    ? previousState.searchResults.noteData.byId[event.noteId]
-                          ?.lists ?? []
-                    : this.getAnnotListsAfterShareStateChange({
-                          previousState,
-                          noteId: event.noteId,
-                          keepListsIfUnsharing: event.keepListsIfUnsharing,
-                          incomingPrivacyState: {
-                              public: event.shouldShare,
-                              protected: !!event.isProtected,
-                          },
-                      })
+                const isAnnotBecomingAutoAdded =
+                    !existing.isShared && event.shouldShare && event.isProtected
+                const nextLists = isAnnotBecomingAutoAdded
+                    ? [
+                          ...(previousState.searchResults.pageData.byId[
+                              existing.pageUrl
+                          ]?.lists ?? []),
+                      ]
+                    : []
 
                 this.emitMutation({
                     searchResults: {
@@ -3403,7 +3397,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             event.isProtected ||
                                             !!event.keepListsIfUnsharing,
                                     },
-                                    lists: { $set: lists },
+                                    lists: { $set: nextLists },
                                     color: {
                                         $set: (event.color ??
                                             existing.color) as RGBAColor,
