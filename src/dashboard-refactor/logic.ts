@@ -2971,7 +2971,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState,
             { mustBeLocal: true, source: 'setNoteLists' },
         )
-        const isSharedList = listData?.remoteId != null
 
         let remoteFn: () => Promise<any>
 
@@ -2983,7 +2982,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 contentShareBG.shareAnnotationToSomeLists({
                     annotationUrl: event.noteId,
                     localListIds: [listData.localId],
-                    protectAnnotation: event.protectAnnotation,
+                    protectAnnotation: true,
                 })
             noteListIds.add(event.added)
             pageListIds.add(event.added)
@@ -2999,79 +2998,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        const isSharedListBeingRemovedFromSharedAnnot =
-            isSharedList && noteData.isShared && event.added == null
-
         const searchResultsMutation: UIMutation<State['searchResults']> = {
             noteData: {
                 byId: {
                     [event.noteId]: {
                         lists: {
-                            $set:
-                                event.protectAnnotation ||
-                                isSharedListBeingRemovedFromSharedAnnot
-                                    ? [
-                                          ...new Set([
-                                              ...pageListIds,
-                                              ...noteListIds,
-                                          ]),
-                                      ]
-                                    : [...noteListIds],
+                            $set: noteData.isShared
+                                ? [...new Set([...pageListIds, ...noteListIds])]
+                                : [...noteListIds],
                         },
-                        isShared: {
-                            $set:
-                                event.protectAnnotation ??
-                                isSharedListBeingRemovedFromSharedAnnot
-                                    ? false
-                                    : noteData.isShared,
-                        },
+                        isShared: { $set: false }, // All cases of direct list add/del to an annot results in it becoming selectively shared (losing auto-added state)
                         isBulkShareProtected: {
-                            $set:
-                                event.protectAnnotation ??
-                                ((!noteData.isShared && isSharedList) || // If annot not shared (but list is), it needs to be protected upon list add/remove
-                                isSharedListBeingRemovedFromSharedAnnot
-                                    ? true
-                                    : noteData.isBulkShareProtected),
+                            $set: true,
                         },
                     },
                 },
             },
-        }
-
-        if (isSharedList && event.deleted == null) {
-            const otherNoteIds = flattenNestedResults(previousState).byId[
-                noteData.pageUrl
-            ].noteIds.user
-            const publicNoteIds = otherNoteIds.filter(
-                (noteId) =>
-                    previousState.searchResults.noteData.byId[noteId]
-                        .isShared && noteId !== event.noteId,
-            )
-
-            for (const noteId of publicNoteIds) {
-                const listIds = new Set(
-                    previousState.searchResults.noteData.byId[noteId].lists,
-                )
-
-                if (event.added != null) {
-                    listIds.add(event.added)
-                } else if (event.deleted != null) {
-                    listIds.delete(event.deleted)
-                }
-
-                ;(searchResultsMutation.noteData as any).byId[noteId] = {
-                    ...(searchResultsMutation.noteData as any).byId[noteId],
-                    lists: { $set: [...listIds] },
-                }
-            }
-
-            searchResultsMutation.pageData = {
-                byId: {
-                    [noteData.pageUrl]: {
-                        lists: { $set: [...pageListIds] },
-                    },
-                },
-            }
         }
 
         if (remoteFn) {
