@@ -654,7 +654,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         let shouldUpdateSiblingAnnots = false
         let nextUnifiedListIds = [...previous.unifiedListIds]
-        let privacyLevel = updates.privacyLevel
 
         if (opts?.forceListUpdate) {
             nextUnifiedListIds = [...updates.unifiedListIds]
@@ -678,7 +677,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         ) {
             if (opts?.keepListsIfUnsharing) {
                 // Keep all lists, but need to change level to 'protected'
-                privacyLevel = AnnotationPrivacyLevels.PROTECTED
+                updates.privacyLevel = AnnotationPrivacyLevels.PROTECTED
             } else {
                 // Keep only private lists
                 nextUnifiedListIds = nextUnifiedListIds.filter(
@@ -689,12 +688,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             previous.privacyLevel <= AnnotationPrivacyLevels.PRIVATE &&
             updates.privacyLevel >= AnnotationPrivacyLevels.SHARED
         ) {
-            // Need to inherit parent page's shared lists if sharing
-            nextUnifiedListIds = Array.from(
-                new Set([
-                    ...nextUnifiedListIds,
-                    ...this.getSharedPageListIds(previous.normalizedPageUrl),
-                ]),
+            // This is selectively-shared -> auto-added case. Needs to replace all lists with the parent page's
+            nextUnifiedListIds = this.getSharedPageListIds(
+                previous.normalizedPageUrl,
             )
         }
 
@@ -715,7 +711,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         const next: UnifiedAnnotation = {
             ...previous,
-            privacyLevel,
+            privacyLevel: updates.privacyLevel,
             unifiedListIds: nextUnifiedListIds,
             comment: updates.comment ?? previous.comment,
             body: updates.body ?? previous.body,
