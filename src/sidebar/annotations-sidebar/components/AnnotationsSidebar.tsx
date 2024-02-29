@@ -101,6 +101,7 @@ import { AuthRemoteFunctionsInterface } from 'src/authentication/background/type
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import PageCitations from 'src/citations/PageCitations'
 import { TaskState } from 'ui-logic-core/lib/types'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -2130,6 +2131,12 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.AIsuggestions?.length > 0 && (
                                     <SuggestionsList {...this.props} />
                                 )}
+                            <TutorialButtonContainer>
+                                <TutorialBox
+                                    tutorialId={'askAI'}
+                                    getRootElement={this.props.getRootElement}
+                                />
+                            </TutorialButtonContainer>
                         </QueryContainer>
 
                         <OptionsContainer>
@@ -5186,6 +5193,7 @@ const QueryContainer = styled.div<{
     display: flex;
     flex-direction: column;
     z-index: 102;
+    position: relative;
 
     ${(props) =>
         props.AIDropDownShown &&
@@ -6227,4 +6235,10 @@ const PermissionsDisplayBox = styled.div`
     font-size: 14px;
     background: ${(props) => props.theme.colors.greyScale1};
     cursor: default;
+`
+
+const TutorialButtonContainer = styled.div`
+    position: absolute;
+    right: 20px;
+    bottom: 15px;
 `

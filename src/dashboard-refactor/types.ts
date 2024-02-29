@@ -123,6 +123,7 @@ export type DashboardDependencies = {
     closeInPageMode?: () => void
     openSettings?: () => void
     bgScriptBG?: RemoteBGScriptInterface
+    getPortalElement?: () => HTMLElement
 } & (
     | {
           inPageMode: true

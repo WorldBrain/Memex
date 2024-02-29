@@ -1056,11 +1056,30 @@ export default class Ribbon extends Component<Props, State> {
             <TooltipBox
                 tooltipText={
                     this.props.bookmark.isBookmarked ? (
-                        <span>
-                            First saved on <DateText>{bookmarkDate}</DateText>
-                        </span>
+                        <TooltipContent>
+                            <TooltipContentBox>
+                                <span>
+                                    First saved on{' '}
+                                    <DateText>{bookmarkDate}</DateText>
+                                </span>
+                                <div>
+                                    <strong>{Ribbon.ALT_KEY} + Click</strong>for
+                                    tutorials
+                                </div>
+                            </TooltipContentBox>
+                        </TooltipContent>
                     ) : (
-                        this.getTooltipText('createBookmark')
+                        <TooltipContent>
+                            <TooltipContentBox>
+                                <span>
+                                    {this.getTooltipText('createBookmark')}
+                                </span>
+                                <div>
+                                    <strong>{Ribbon.ALT_KEY} + Click</strong>for
+                                    tutorials
+                                </div>
+                            </TooltipContentBox>
+                        </TooltipContent>
                     )
                 }
                 getPortalRoot={this.props.getRootElement}
@@ -1091,7 +1110,13 @@ export default class Ribbon extends Component<Props, State> {
                             )
                         }
                         fontColor={'greyScale8'}
-                        onClick={() => this.props.bookmark.toggleBookmark()}
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('savePages')
+                            } else {
+                                this.props.bookmark.toggleBookmark()
+                            }
+                        }}
                         icon={
                             this.props.bookmark.isBookmarked
                                 ? 'heartFull'
@@ -1105,7 +1130,13 @@ export default class Ribbon extends Component<Props, State> {
                     />
                 ) : (
                     <Icon
-                        onClick={() => this.props.bookmark.toggleBookmark()}
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('savePages')
+                            } else {
+                                this.props.bookmark.toggleBookmark()
+                            }
+                        }}
                         color={
                             this.props.bookmark.isBookmarked
                                 ? 'prime1'
@@ -1190,11 +1221,17 @@ export default class Ribbon extends Component<Props, State> {
                         }
                     >
                         <Icon
-                            onClick={() =>
-                                this.props.lists.setShowListsPicker(
-                                    !this.props.lists.showListsPicker,
-                                )
-                            }
+                            onClick={(e) => {
+                                if (e.altKey) {
+                                    this.props.setTutorialIdToOpen(
+                                        'organiseSpaces',
+                                    )
+                                } else {
+                                    this.props.lists.setShowListsPicker(
+                                        !this.props.lists.showListsPicker,
+                                    )
+                                }
+                            }}
                             color={
                                 this.props.lists.pageListIds.length > 0
                                     ? 'prime1'
@@ -1787,6 +1824,7 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     renderTutorialBox() {
+        console.log('shol')
         if (this.props.tutorialIdToOpen === null) {
             return
         }
@@ -2073,6 +2111,7 @@ export default class Ribbon extends Component<Props, State> {
                         </>
                     )}
                 </InnerRibbon>
+                {this.renderTutorialBox()}
                 {this.renderSpacePicker()}
                 {this.renderTutorial()}
                 {this.renderFeedInfo()}

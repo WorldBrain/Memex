@@ -41,6 +41,7 @@ export type Event = UIEvent<{
     createPageLink: null
     copyInviteLink: { link: string }
     reloadInviteLinks: { listData: UnifiedList<'page-link'> }
+    showTutorial: boolean
 }>
 
 export interface State {
@@ -50,6 +51,7 @@ export interface State {
     inviteLinksLoadState: TaskState
     inviteLinks: InviteLink[]
     selectedPageLinkList: UnifiedList<'page-link'> | null
+    showTutorial: boolean
 }
 
 type EventHandler<EventName extends keyof Event> = UIEventHandler<
@@ -72,6 +74,7 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         inviteLinksLoadState: 'pristine',
         inviteLinks: [],
         selectedPageLinkList: null,
+        showTutorial: false,
     })
 
     private async ensureLoggedInUser(): Promise<AuthenticatedUser> {
@@ -195,6 +198,10 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
         })
     }
 
+    showTutorial: EventHandler<'showTutorial'> = async ({ event }) => {
+        console.log('showTutorial', event)
+        this.emitMutation({ showTutorial: { $set: event } })
+    }
     createPageLink: EventHandler<'createPageLink'> = async ({}) => {
         await this._createPageLink()
     }

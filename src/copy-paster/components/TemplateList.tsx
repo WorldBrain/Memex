@@ -245,7 +245,7 @@ export default class TemplateList extends PureComponent<TemplateListProps> {
                     <SectionTitle>Templates</SectionTitle>
                     <ButtonBox>
                         <TutorialBox
-                            getPortalElement={this.props.getRootElement}
+                            getRootElement={this.props.getRootElement}
                             tutorialId={'useTemplates'}
                         />
                         {/* <Icon

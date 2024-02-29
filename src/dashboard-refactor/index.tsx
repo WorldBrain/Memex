@@ -122,7 +122,6 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openSpaceInWebUI'
         | 'summarizeBG'
         | 'imageSupportBG'
-        | 'getRootElement'
     > = {
         analytics,
         copyToClipboard,
@@ -154,7 +153,6 @@ export class DashboardContainer extends StatefulUIElement<
         openSpaceInWebUI: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
         imageSupportBG: runInBackground(),
-        getRootElement: () => document.getElementById('body'),
     }
 
     private notesSidebarRef = React.createRef<NotesSidebarContainer>()

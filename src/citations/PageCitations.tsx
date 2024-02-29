@@ -16,6 +16,7 @@ import ShareAnnotationMenu from 'src/overview/sharing/components/ShareAnnotation
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import { AnnotationSharingState } from 'src/content-sharing/background/types'
 import { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 export interface Props {
     copyPasterProps: Omit<CopyPasterProps, 'renderTemplate' | 'renderPreview'>

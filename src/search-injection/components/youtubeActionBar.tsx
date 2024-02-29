@@ -247,9 +247,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                     })
                 }}
                 getPortalRoot={this.props.getRootElement}
-                placement="bottom"
+                placement="bottom-start"
                 strategy="fixed"
-                width="fit-content"
+                width="350px"
                 offsetX={10}
                 instaClose
             >
@@ -272,7 +272,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 actionFunction()
                             }
                         }}
-                        width="300px"
+                        width="350px"
                         autoFocus={true}
                     />
                     Use a custom prompt. Click again to apply.
