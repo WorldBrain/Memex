@@ -5097,7 +5097,7 @@ const SelectedHeaderButtonBox = styled.div`
     align-items: center;
     justify-content: space-between;
     color: ${(props) => props.theme.colors.greyScale7};
-    bottom: 5px;
+    bottom: 2px;
     right: 5px;
     grid-gap: 5px;
 `
@@ -5239,6 +5239,7 @@ const SelectedAIText = styled.div<{ fullHeight: boolean }>`
     line-height: 22px;
     flex-wrap: wrap;
     display: flex;
+    align-items: center;
 
     &::-webkit-scrollbar {
         display: none;
