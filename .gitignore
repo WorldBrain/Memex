@@ -21,3 +21,6 @@ OldVersions/
 extension.zip
 
 .yarn
+.yarnrc
+
+.npmrc
