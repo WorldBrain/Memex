@@ -69,8 +69,8 @@ async function checkIfAutoCreateLink(
     )
 
     if (existingSetting == null) {
-        await syncSettings.extension.set('shouldAutoCreateNoteLink', true)
-        existingSetting = true
+        await syncSettings.extension.set('shouldAutoCreateNoteLink', false)
+        existingSetting = false
     }
 
     return existingSetting

@@ -85,7 +85,7 @@ function getShortcutHandlers({
         },
         sharePage: () =>
             inPageUI.showSidebar({
-                action: 'share_page',
+                action: 'cite_page',
             }),
         createSharedAnnotationAndAddToCollection: async () => {
             if (userSelectedText()) {
@@ -137,14 +137,21 @@ function getShortcutHandlers({
                 false,
                 null,
             ),
-        copyHighlightLink: () =>
-            annotationFunctions.createHighlight(
-                window.getSelection(),
-                null,
-                true,
-                null,
-                undefined,
-                true,
-            ),
+        copyCurrentLink: () => {
+            if (userSelectedText()) {
+                return annotationFunctions.createHighlight(
+                    window.getSelection(),
+                    null,
+                    true,
+                    null,
+                    undefined,
+                    true,
+                )
+            } else {
+                return inPageUI.showSidebar({
+                    action: 'share_page_link',
+                })
+            }
+        },
     }
 }
