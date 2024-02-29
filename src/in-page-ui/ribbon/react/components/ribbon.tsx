@@ -1601,11 +1601,21 @@ export default class Ribbon extends Component<Props, State> {
                 return isNotReader ? (
                     <TooltipBox
                         tooltipText={
-                            <span>
-                                Open PDF Reader
-                                <br />
-                                to save, sort, annotate & summarize
-                            </span>
+                            <TooltipContent>
+                                <TooltipContentBox>
+                                    <span>
+                                        Open PDF Reader
+                                        <br />
+                                        to save, sort, annotate & summarize
+                                    </span>
+                                    <div>
+                                        <strong>
+                                            {Ribbon.ALT_KEY} + Click
+                                        </strong>
+                                        for tutorials
+                                    </div>
+                                </TooltipContentBox>
+                            </TooltipContent>
                         }
                         placement={
                             this.props.sidebar.isSidebarOpen
@@ -1624,14 +1634,38 @@ export default class Ribbon extends Component<Props, State> {
                             type="tertiary"
                             label={'Open PDF Reader'}
                             fontColor={'greyScale8'}
-                            onClick={() => this.props.openPDFinViewer()}
+                            onClick={(e) => {
+                                if (e.altKey) {
+                                    this.props.setTutorialIdToOpen(
+                                        'annotatePDFs',
+                                    )
+                                } else {
+                                    this.props.openPDFinViewer()
+                                }
+                            }}
                             icon={'filePDF'}
                             innerRef={this.spacePickerRef}
                         />
                     </TooltipBox>
                 ) : (
                     <TooltipBox
-                        tooltipText={'Close PDF Reader'}
+                        tooltipText={
+                            <TooltipContent>
+                                <TooltipContentBox>
+                                    <span>
+                                        Close PDF Reader
+                                        <br />
+                                        to save, sort, annotate & summarize
+                                    </span>
+                                    <div>
+                                        <strong>
+                                            {Ribbon.ALT_KEY} + Click
+                                        </strong>
+                                        for tutorials
+                                    </div>
+                                </TooltipContentBox>
+                            </TooltipContent>
+                        }
                         placement={
                             this.props.sidebar.isSidebarOpen
                                 ? 'left'
@@ -1663,7 +1697,23 @@ export default class Ribbon extends Component<Props, State> {
             ) {
                 return isNotReader ? (
                     <TooltipBox
-                        tooltipText={'Open PDF Reader'}
+                        tooltipText={
+                            <TooltipContent>
+                                <TooltipContentBox>
+                                    <span>
+                                        Open PDF Reader
+                                        <br />
+                                        to save, sort, annotate & summarize
+                                    </span>
+                                    <div>
+                                        <strong>
+                                            {Ribbon.ALT_KEY} + Click
+                                        </strong>
+                                        for tutorials
+                                    </div>
+                                </TooltipContentBox>
+                            </TooltipContent>
+                        }
                         placement={
                             this.props.sidebar.isSidebarOpen
                                 ? 'left'
@@ -1677,7 +1727,15 @@ export default class Ribbon extends Component<Props, State> {
                         getPortalRoot={this.props.getRootElement}
                     >
                         <Icon
-                            onClick={() => this.props.openPDFinViewer()}
+                            onClick={(e) => {
+                                if (e.altKey) {
+                                    this.props.setTutorialIdToOpen(
+                                        'annotatePDFs',
+                                    )
+                                } else {
+                                    this.props.openPDFinViewer()
+                                }
+                            }}
                             color={'greyScale6'}
                             heightAndWidth="20px"
                             filePath={icons.filePDF}
@@ -1685,7 +1743,23 @@ export default class Ribbon extends Component<Props, State> {
                     </TooltipBox>
                 ) : (
                     <TooltipBox
-                        tooltipText={'Close PDF Reader'}
+                        tooltipText={
+                            <TooltipContent>
+                                <TooltipContentBox>
+                                    <span>
+                                        Close PDF Reader
+                                        <br />
+                                        to save, sort, annotate & summarize
+                                    </span>
+                                    <div>
+                                        <strong>
+                                            {Ribbon.ALT_KEY} + Click
+                                        </strong>
+                                        for tutorials
+                                    </div>
+                                </TooltipContentBox>
+                            </TooltipContent>
+                        }
                         placement={
                             this.props.sidebar.isSidebarOpen
                                 ? 'left'
@@ -1699,7 +1773,15 @@ export default class Ribbon extends Component<Props, State> {
                         getPortalRoot={this.props.getRootElement}
                     >
                         <Icon
-                            onClick={() => this.props.openPDFinViewer()}
+                            onClick={(e) => {
+                                if (e.altKey) {
+                                    this.props.setTutorialIdToOpen(
+                                        'annotatePDFs',
+                                    )
+                                } else {
+                                    this.props.openPDFinViewer()
+                                }
+                            }}
                             color={'prime1'}
                             heightAndWidth="20px"
                             filePath={icons.filePDF}
@@ -1824,7 +1906,6 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     renderTutorialBox() {
-        console.log('shol')
         if (this.props.tutorialIdToOpen === null) {
             return
         }

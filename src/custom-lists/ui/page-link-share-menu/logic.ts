@@ -199,7 +199,6 @@ export default class PageLinkShareMenu extends UILogic<State, Event> {
     }
 
     showTutorial: EventHandler<'showTutorial'> = async ({ event }) => {
-        console.log('showTutorial', event)
         this.emitMutation({ showTutorial: { $set: event } })
     }
     createPageLink: EventHandler<'createPageLink'> = async ({}) => {

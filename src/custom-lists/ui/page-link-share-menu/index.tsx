@@ -47,7 +47,6 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
         if (this.state.showTutorial === false) {
             return
         }
-        console.log('shouldreteurn tutorial')
         return (
             <TutorialBox
                 tutorialId={'sharePages'}
