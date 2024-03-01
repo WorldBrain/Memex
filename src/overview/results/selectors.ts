@@ -5,7 +5,6 @@ import { RootState } from '../../options/types'
 import { selectors as deleteConfSelectors } from '../delete-confirm-modal'
 
 import { PAGE_SIZE } from '../search-bar/constants'
-import * as sidebarLeft from '../sidebar-left/selectors'
 import { query, isEmptyQuery } from '../search-bar/selectors'
 import { listFilterActive, listIdFilter } from 'src/search-filters/selectors'
 import * as constants from './constants'
@@ -190,11 +189,6 @@ export const showInitSearchMsg = createSelector(
     isLoading,
     (searchCount, results, isLoading) =>
         !results.length && !searchCount && !isLoading,
-)
-
-export const isScrollDisabled = createSelector(
-    sidebarLeft.mouseOverSidebar,
-    (mouseOverSidebar) => mouseOverSidebar,
 )
 
 export const searchType = createSelector(

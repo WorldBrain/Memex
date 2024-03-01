@@ -7,7 +7,6 @@ import { Link } from 'react-router'
 import cx from 'classnames'
 
 import { OVERVIEW_URL } from 'src/constants'
-import BackToSearch from 'src/overview/sidebar-left/components/BackToSearch'
 import SearchFilters from 'src/search-filters'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 
@@ -63,9 +62,7 @@ class Header extends PureComponent<Props> {
                         className={cx(styles.backtosearch, {
                             [styles.hideContainer]: !this.props.showInbox,
                         })}
-                    >
-                        {this.props.showInbox && <BackToSearch />}
-                    </div>
+                    ></div>
                     <div
                         className={cx(styles.container, {
                             [styles.hideContainer]: this.props.showInbox,

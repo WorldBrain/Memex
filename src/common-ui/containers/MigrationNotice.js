@@ -36,9 +36,7 @@ export default class extends React.PureComponent {
     }
 
     getBanner() {
-        return this.props.showBanner
-            ? browser.runtime.getURL('img/memex-logo.png')
-            : undefined
+        return this.props.showBanner ? null : undefined
     }
 
     handleBtnClick = (event) => {

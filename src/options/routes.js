@@ -1,7 +1,6 @@
 import ImportContainer from './imports'
 // import SettingsContainer from './containers/settings'
 import BackupSettingsContainer from '../backup-restore/ui/backup-pane'
-import Statistics from './statistics'
 import Settings from './settings'
 import UserScreen from 'src/authentication/components/UserScreen'
 import Blocklist from './blacklist'
@@ -9,12 +8,6 @@ import React from 'react'
 import DashboardResultsContainer from 'src/overview/components/DashboardResultsContainer'
 
 export default [
-    {
-        name: 'Usage Statistics',
-        pathname: '/statistics',
-        component: Statistics,
-        hideFromSidebar: true,
-    },
     {
         name: 'Back to Dashboard',
         pathname: '/overview',
@@ -52,18 +45,6 @@ export default [
         component: Blocklist,
         icon: 'block',
     },
-    // {
-    //     name: 'Privacy',
-    //     pathname: '/privacy',
-    //     component: Privacy,
-    //     icon: 'shield.svg',
-    // },
-    // {
-    //     name: 'Memex Team',
-    //     pathname: 'https://worldbrain.io/team',
-    //     icon: 'team',
-    //     isExternal: true,
-    // },
     {
         name: 'Feedback',
         pathname: 'https://feedback.memex.garden',
@@ -76,12 +57,6 @@ export default [
         isExternal: true,
         icon: 'info',
     },
-    // {
-    //     name: 'Get Early Bird Discount',
-    //     pathname: 'https://worldbrain.io/announcements/pioneer-plan',
-    //     isExternal: true,
-    //     icon: 'money.svg',
-    // },
     {
         name: 'User Account',
         pathname: '/account',
