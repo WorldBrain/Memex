@@ -27,18 +27,6 @@
     background-color: #3a2f45;
 }
 
-/* LOGOS */
-
-.logo {
-    composes: iconPosition;
-    background-image: url('/img/memex-logo.png');
-}
-
-.logoSquared {
-    composes: iconPosition;
-    background-image: url('/img/worldbrain-logo-narrow-bw-48.png');
-}
-
 /* OTHER */
 
 .removeIcon {

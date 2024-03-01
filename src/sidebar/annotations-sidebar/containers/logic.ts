@@ -289,6 +289,7 @@ export class SidebarContainerLogic extends UILogic<
             isAutoAddEnabled: null,
 
             showPageLinkShareMenu: false,
+            showPageCitationMenu: false,
             isWidthLocked: false,
             isLocked: false,
             fullPageUrl: this.options.fullPageUrl,
@@ -1521,11 +1522,15 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({}) => {
         this.emitMutation({ showPageLinkShareMenu: { $set: true } })
     }
+    openPageCitationMenu: EventHandler<'openPageCitationMenu'> = async ({}) => {
+        this.emitMutation({ showPageCitationMenu: { $set: true } })
+    }
 
     closePageLinkShareMenu: EventHandler<
         'closePageLinkShareMenu'
     > = async ({}) => {
         this.emitMutation({ showPageLinkShareMenu: { $set: false } })
+        this.emitMutation({ showPageCitationMenu: { $set: false } })
     }
 
     processFileImportFeeds: EventHandler<'processFileImportFeeds'> = async ({

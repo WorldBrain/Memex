@@ -1,6 +1,0 @@
-@value colors: 'src/common-ui/colors.css';
-@value color4, color6 from colors;
-
-.title {
-	composes: sectionTitle from 'src/options/base.css';
-}

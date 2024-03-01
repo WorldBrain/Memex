@@ -269,6 +269,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     pageHasNetworkAnnotations: boolean
     hasFeedActivity?: boolean
     showPageLinkShareMenu: boolean
+    showPageCitationMenu: boolean
     /**
      * In the case of a page being opened from the web UI for a page link, data
      * may need to be manually pulled as sync might not have finished by the time the
@@ -498,6 +499,7 @@ interface SidebarEvents {
     openEditMenuForList: { unifiedListId: UnifiedList['unifiedId'] }
     closePageLinkShareMenu: null
     openPageLinkShareMenu: null
+    openPageCitationMenu: null
     editListName: {
         unifiedListId: UnifiedList['unifiedId']
         localId: number

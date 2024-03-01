@@ -1371,7 +1371,10 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     private renderPageLinkMenu() {
-        if (!this.props.showPageLinkShareMenu) {
+        if (
+            !this.props.showPageLinkShareMenu &&
+            !this.props.showPageCitationMenu
+        ) {
             return null
         }
 
@@ -1413,6 +1416,11 @@ export class AnnotationsSidebar extends React.Component<
                             this.props.sidebarContext === 'dashboard',
                     }}
                     getRootElement={this.props.getRootElement}
+                    defaultOpenTab={
+                        this.props.showPageCitationMenu
+                            ? 'CopyToClipboard'
+                            : 'ShareViaLink'
+                    }
                 />
                 {this.props.renderPageLinkMenuForList()}
             </PopoutBox>
@@ -3893,7 +3901,10 @@ export class AnnotationsSidebar extends React.Component<
                             icon="copy"
                             padding={'0px 12px 0 6px'}
                             height={'30px'}
-                            hoverState={this.props.showPageLinkShareMenu}
+                            hoverState={
+                                this.props.showPageLinkShareMenu ||
+                                this.props.showPageCitationMenu
+                            }
                         />
                         {this.state.pageLinkCreationLoading === 'running' && (
                             <LoadingBox2>

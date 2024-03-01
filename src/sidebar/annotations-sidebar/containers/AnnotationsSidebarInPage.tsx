@@ -388,9 +388,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: this.state.selectedListId ? 'spaces' : 'annotations',
             })
-        } else if (event.action === 'share_page') {
+        } else if (event.action === 'cite_page') {
             await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
-            await sleepPromise(500)
+            await sleepPromise(300)
+            await this.processEvent('openPageCitationMenu', null)
+        } else if (event.action === 'share_page_link') {
+            await this.processEvent('setActiveSidebarTab', { tab: 'spaces' })
+            await sleepPromise(300)
             await this.processEvent('openPageLinkShareMenu', null)
         } else if (event.action === 'check_sidebar_status') {
             return true

@@ -142,7 +142,6 @@
 }
 
 .logo {
-    background-image: url('/img/memex-logo.png');
     width: 210px;
     height: 55px;
     display: flex;

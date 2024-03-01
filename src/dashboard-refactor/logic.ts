@@ -1715,6 +1715,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (previousState.listsSidebar.selectedListId == null) {
             throw new Error('No list is currently filtered to remove page from')
         }
+        this.processUIEvent('changeFocusItem', {
+            previousState,
+            event: { direction: 'down', pageId: event.pageId },
+        })
+
         const listData = getListData(
             previousState.listsSidebar.selectedListId,
             previousState,

@@ -1972,22 +1972,6 @@ export class DashboardContainer extends StatefulUIElement<
         )
     }
 }
-
-const GlobalStyle = createGlobalStyle`
-
-    * {
-        font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
-        letter-spacing: 0.8px;
-    }
-
-    body {
-        font-family: 'Satoshi', sans-serif;
-font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;
-        letter-spacing: 0.8px;
-    }
-`
-
 const MemexLogoContainer = styled.div<{
     location?: 'bottomLeft' | 'topLeft'
 }>`

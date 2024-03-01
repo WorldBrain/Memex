@@ -18,6 +18,7 @@ import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import Checkbox from 'src/common-ui/components/Checkbox'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
+import { downloadMemexDesktop } from 'src/util/subscriptions/storage'
 
 const localStyles = require('./Import.css')
 
@@ -288,6 +289,27 @@ class Import extends React.PureComponent<Props> {
             serverLoadingState: 'success',
             serverOnline: this.serverOnline,
         })
+    }
+
+    getSystemArchAndOS = async () => {
+        let os
+        let arch
+        await browser.runtime.getPlatformInfo().then(function (info) {
+            os = info.os
+            arch = info.arch
+        })
+
+        if (arch === 'aarch64' || arch === 'arm' || arch === 'arm64') {
+            arch = 'arm'
+        }
+        if (arch === 'x86-64') {
+            arch = 'x64'
+        }
+
+        return {
+            arch,
+            os,
+        }
     }
 
     private async getPathsFromLocalStorage() {
@@ -658,10 +680,11 @@ class Import extends React.PureComponent<Props> {
                                     <PrimaryAction
                                         label={'Download Sync Helper'}
                                         onClick={async (event) => {
-                                            window.open(
-                                                'https://github.com/WorldBrain/memex-local-sync/releases/latest',
-                                                '_blank',
+                                            const url = await downloadMemexDesktop(
+                                                await this.getSystemArchAndOS(),
                                             )
+
+                                            window.open(url, '_blank')
                                         }}
                                         icon={'inbox'}
                                         size={'medium'}
@@ -1004,10 +1027,11 @@ class Import extends React.PureComponent<Props> {
                                     <PrimaryAction
                                         label={'Download Sync Helper'}
                                         onClick={async (event) => {
-                                            window.open(
-                                                'https://github.com/WorldBrain/memex-local-sync/releases/latest',
-                                                '_blank',
+                                            const url = await downloadMemexDesktop(
+                                                await this.getSystemArchAndOS(),
                                             )
+
+                                            window.open(url, '_blank')
                                         }}
                                         icon={'inbox'}
                                         size={'medium'}
