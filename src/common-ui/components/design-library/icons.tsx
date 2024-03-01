@@ -72,9 +72,6 @@ export const logoHorizontal = browser.runtime.getURL(
     '/img/memexLogoHorizontal.png',
 )
 export const logoNoText = browser.runtime.getURL('/img/memexLogo.svg')
-export const logoSmall = browser.runtime.getURL(
-    '/img/worldbrain-logo-narrow-bw-48.png',
-)
 export const logout = browser.runtime.getURL('/img/logout.svg')
 export const longArrow = browser.runtime.getURL('/img/longArrowLeft.svg')
 export const longArrowRight = browser.runtime.getURL('/img/longArrowRight.svg')
