@@ -1,4 +1,3 @@
-import { slide as Slider, Styles as SliderStyles } from 'react-burger-menu'
 import * as React from 'react'
 
 interface Props {
@@ -17,25 +16,8 @@ export class SidebarSlider extends React.Component<SidebarSliderProps, State> {
         this.setState({ isOpen: false })
     }
 
-    private handleSidebarKeyDown = (e: React.KeyboardEvent) => {
-        if (e.key === 'Escape') {
-            this.closeSidebar()
-        }
-    }
-
     render() {
-        return (
-            <Slider
-                isOpen={this.state.isOpen}
-                width={450}
-                styles={menuStyles(this.state.isOpen)}
-                right
-                noOverlay
-                customOnKeyDown={this.handleSidebarKeyDown}
-            >
-                {this.props.children}
-            </Slider>
-        )
+        return null
     }
 }
 
@@ -77,19 +59,4 @@ const baseStyles = {
         width: '100%',
         overflow: 'hidden',
     },
-}
-
-const menuStyles = (isOpen): Partial<SliderStyles> => {
-    if (isOpen) {
-        ;((baseStyles.bmMenu.opacity as unknown) as string) = '1'
-        ;((baseStyles.bmMenu.background as unknown) as string) = '#fff'
-        ;((baseStyles.bmItem.display as unknown) as string) = 'block'
-        ;((baseStyles.bmMenuWrap.right as unknown) as string) = '35px'
-    } else {
-        ;((baseStyles.bmMenu.opacity as unknown) as string) = '0'
-        ;((baseStyles.bmMenu.background as unknown) as string) = 'transparent'
-        ;((baseStyles.bmItem.display as unknown) as string) = 'none'
-    }
-
-    return baseStyles
 }

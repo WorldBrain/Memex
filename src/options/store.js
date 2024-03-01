@@ -4,7 +4,6 @@ import thunk from 'redux-thunk'
 import initSentry from '../util/raven'
 import * as imports from './imports'
 import * as blacklist from './blacklist'
-import * as pdfs from './PDF'
 import * as settings from './settings'
 import { reducer as onboarding } from '../overview/onboarding'
 import { reducer as deleteConfModal } from '../overview/delete-confirm-modal'
@@ -15,7 +14,6 @@ import { reducer as customLists } from 'src/custom-lists'
 import { reducer as modals } from '../overview/modals/reducer'
 // Search filters in the sidebar
 import { reducer as searchFilters } from 'src/search-filters'
-import { reducer as sidebarLeft } from 'src/overview/sidebar-left'
 import { reducer as sidebar } from 'src/sidebar-overlay/sidebar'
 
 import * as notifications from '../notifications'
@@ -25,12 +23,10 @@ const rootReducer = combineReducers({
     auth: authReducer,
     blacklist: blacklist.reducer,
     imports: imports.reducer,
-    pdfs: pdfs.reducer,
     settings: settings.reducer,
     onboarding,
     customLists,
     searchFilters,
-    sidebarLeft,
     sidebar,
     notifications: notifications.reducer,
     deleteConfModal,
