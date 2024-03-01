@@ -606,7 +606,8 @@ export class DashboardContainer extends StatefulUIElement<
             (list) =>
                 list.type !== 'page-link' &&
                 cacheUtils.deriveListOwnershipStatus(list, userReference) ===
-                    'Creator',
+                    'Creator' &&
+                list.localId !== parseFloat(SPECIAL_LIST_STRING_IDS.INBOX),
         )
         const followedListsData = allLists.filter(
             (list) =>
