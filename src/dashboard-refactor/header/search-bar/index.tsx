@@ -213,11 +213,11 @@ const Input = styled.input`
     }
 
     &:focus {
-        outline: none;
+        outline: none !important;
     }
 
     &:focus ${SearchBarContainer} {
-        outline: 1px solid ${(props) => props.theme.colors.greyScale3};
+        outline: 1px solid ${(props) => props.theme.colors.greyScale3} !important;
     }
 `
 
@@ -231,6 +231,7 @@ const FilterButton = styled(Margin)`
 
 const FullWidthMargin = styled(Margin)`
     width: 100%;
+    height: fill-available;
 `
 
 const SearchIcon = styled.img`

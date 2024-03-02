@@ -50,6 +50,7 @@ export interface RibbonContainerState {
     fullPageUrl: string
     loadState: TaskState
     isRibbonEnabled: boolean | null
+    tutorialIdToOpen: string
     isWidthLocked: boolean | null
     areExtraButtonsShown: boolean
     areTutorialShown: boolean
@@ -81,6 +82,7 @@ export type RibbonContainerEvents = UIEvent<
         selectRibbonPositionOption: null
         toggleRemoveMenu: boolean | null
         setWriteError: { error: string }
+        setTutorialId: { tutorialIdToOpen: string }
         toggleShowTutorial: null
         toggleFeed: null
         toggleReadingView: null
@@ -156,6 +158,7 @@ export class RibbonContainerLogic extends UILogic<
             showFeed: false,
             isWidthLocked: false,
             isRibbonEnabled: null,
+            tutorialIdToOpen: null,
             showRemoveMenu: false,
             highlights: {
                 areHighlightsEnabled: false,
@@ -534,6 +537,17 @@ export class RibbonContainerLogic extends UILogic<
         this.emitMutation({
             bookmark: { writeError: { $set: event.error } },
         })
+    }
+    setTutorialId: EventHandler<'setTutorialId'> = async ({ event }) => {
+        this.emitMutation({
+            tutorialIdToOpen: { $set: event.tutorialIdToOpen },
+        })
+
+        if (event.tutorialIdToOpen != null) {
+            this.dependencies.setRibbonShouldAutoHide(false)
+        } else {
+            this.dependencies.setRibbonShouldAutoHide(true)
+        }
     }
 
     toggleShowExtraButtons: EventHandler<'toggleShowExtraButtons'> = ({
