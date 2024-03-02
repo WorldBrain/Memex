@@ -694,6 +694,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setLocalListsExpanded', {
                             isExpanded: !listsSidebar.areLocalListsExpanded,
                         }),
+                    getRootElement: this.props.getRootElement,
                 }}
                 followedListsGroup={{
                     isExpanded: listsSidebar.areFollowedListsExpanded,
@@ -706,6 +707,7 @@ export class DashboardContainer extends StatefulUIElement<
                         this.processEvent('setFollowedListsExpanded', {
                             isExpanded: !listsSidebar.areFollowedListsExpanded,
                         }),
+                    getRootElement: this.props.getRootElement,
                 }}
                 joinedListsGroup={{
                     isExpanded: listsSidebar.areJoinedListsExpanded,
@@ -719,6 +721,7 @@ export class DashboardContainer extends StatefulUIElement<
                         })
                     },
                     listData: joinedListsData,
+                    getRootElement: this.props.getRootElement,
                 }}
                 currentUser={this.state.currentUser}
                 initContextMenuBtnProps={(listId) => ({

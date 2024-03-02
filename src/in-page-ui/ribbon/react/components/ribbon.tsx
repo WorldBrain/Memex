@@ -1214,11 +1214,15 @@ export default class Ribbon extends Component<Props, State> {
                     </IconBox>
                 ) : (
                     <IconBox
-                        onClick={() =>
-                            this.props.lists.setShowListsPicker(
-                                !this.props.lists.showListsPicker,
-                            )
-                        }
+                        onClick={(e) => {
+                            if (e.altKey) {
+                                this.props.setTutorialIdToOpen('organiseSpaces')
+                            } else {
+                                this.props.lists.setShowListsPicker(
+                                    !this.props.lists.showListsPicker,
+                                )
+                            }
+                        }}
                     >
                         <Icon
                             onClick={(e) => {
