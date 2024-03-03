@@ -466,6 +466,7 @@ export class AnnotationsSidebarContainer<
                         this.processEvent('setSelectedList', { unifiedListId })
                     }}
                     getRootElement={this.props.getRootElement}
+                    autoFocus
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -620,6 +621,7 @@ export class AnnotationsSidebarContainer<
                     closePicker()
                 }}
                 getRootElement={this.props.getRootElement}
+                autoFocus
             />
         )
     }

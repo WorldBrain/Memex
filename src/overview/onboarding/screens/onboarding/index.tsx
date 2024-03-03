@@ -144,50 +144,49 @@ export default class OnboardingScreen extends StatefulUIElement<
     )
     private renderBasicIntro = () => (
         <WelcomeBox>
-            <Title>
-                The one thing you need <br />
-                to get started
-            </Title>
+            <Title>The absolute basics in 30 seconds</Title>
             <DescriptionText>
+                Highly recommended to not skip this
+            </DescriptionText>
+            <VideoBox>
+                <VideoIntro src="https://share.descript.com/embed/3YRS6Db30JN" />
+            </VideoBox>
+            {/* <DescriptionText>
                 Every website has a small Memex icon in the bottom right corner.{' '}
                 <br /> It's the jumping point for everything Memex.
-            </DescriptionText>
+            </DescriptionText> */}
 
-            {this.state.hoveredOverOnboardingIcon ? (
-                <ContinueButton>
-                    <PrimaryAction
-                        label={'Continue'}
-                        icon={'longArrowRight'}
-                        onClick={() =>
-                            this.processEvent('goToNextOnboardingStep', {
-                                step: 'ChooseOnboardingOption',
-                            })
-                        }
-                        type="primary"
-                        size={'large'}
-                    />
-                </ContinueButton>
-            ) : (
-                <>
-                    <MemexActionButtonIntro
-                        onMouseEnter={() => {
-                            this.processEvent('hoverOverOnboardingIcon', null)
-                        }}
-                        src={'img/memexActionButtonIntro.svg'}
-                    />
-                    <ContinueButtonNotif>
-                        Hover over the icon here to continue{' '}
-                        <ContinueIcon>
-                            <Icon
-                                icon={'longArrowRight'}
-                                hoverOff
-                                heightAndWidth="24px"
-                                color="prime1"
-                            />
-                        </ContinueIcon>
-                    </ContinueButtonNotif>
-                </>
-            )}
+            {/* {this.state.hoveredOverOnboardingIcon ? ( */}
+            <ContinueButton>
+                <PrimaryAction
+                    label={'Continue'}
+                    icon={'longArrowRight'}
+                    onClick={() => this.props.navToDashboard()}
+                    type="primary"
+                    size={'large'}
+                />
+            </ContinueButton>
+            {/* // ) : (
+            //     <>
+            //         <MemexActionButtonIntro
+            //             onMouseEnter={() => {
+            //                 this.processEvent('hoverOverOnboardingIcon', null)
+            //             }}
+            //             src={'img/memexActionButtonIntro.svg'}
+            //         />
+            //         <ContinueButtonNotif>
+            //             Hover over the icon here to continue{' '}
+            //             <ContinueIcon>
+            //                 <Icon
+            //                     icon={'longArrowRight'}
+            //                     hoverOff
+            //                     heightAndWidth="24px"
+            //                     color="prime1"
+            //                 />
+            //             </ContinueIcon>
+            //         </ContinueButtonNotif>
+            //     </>
+            // )} */}
         </WelcomeBox>
     )
     private renderOnboardingOptions = () => (
@@ -933,4 +932,18 @@ const GoToDashboard = styled.span`
     font-weight: bold;
     color: ${(props) => props.theme.colors.prime1};
     font-size: 15px;
+`
+
+const VideoBox = styled.div`
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+`
+
+const VideoIntro = styled.iframe`
+    border: 1px solid ${(props) => props.theme.colors.greyScale1};
+    border-radius: 10px;
+    width: 800px;
+    height: 450px;
 `
