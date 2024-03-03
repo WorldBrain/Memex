@@ -80,6 +80,7 @@ import MarkdownIt from 'markdown-it'
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import Raven from 'raven-js'
 import analytics from 'src/analytics'
+import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -4798,13 +4799,23 @@ export class DashboardLogic extends UILogic<State, Events> {
             source: 'updateSelectedListDescription',
         })
 
+        let processedDescription = (
+            await processCommentForImageUpload(
+                event.description,
+                null,
+                null,
+                this.options.imageSupportBG,
+                false,
+            )
+        ).toString()
+
         this.options.annotationsCache.updateList({
             unifiedId: selectedListId,
-            description: event.description,
+            description: processedDescription,
         })
 
         await this.options.listsBG.updateListDescription({
-            description: event.description,
+            description: processedDescription,
             listId: listData.localId!,
         })
     }
