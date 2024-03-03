@@ -1374,7 +1374,7 @@ export default class Ribbon extends Component<Props, State> {
                     <IconBox
                         onClick={(e) => {
                             if (e.altKey) {
-                                this.props.setTutorialIdToOpen('citePages')
+                                this.props.setTutorialIdToOpen('useTemplates')
                             } else {
                                 this.handleSharePageAction(e)
                             }
@@ -1393,7 +1393,7 @@ export default class Ribbon extends Component<Props, State> {
                     <IconBox
                         onClick={(e) => {
                             if (e.altKey) {
-                                this.props.setTutorialIdToOpen('citePages')
+                                this.props.setTutorialIdToOpen('useTemplates')
                             } else {
                                 this.handleSharePageAction(e)
                             }
