@@ -245,8 +245,11 @@ export class AnnotationCreate extends React.Component<Props, State>
         shouldShare: boolean,
         isProtected?: boolean,
     ) => {
-        if (this.state.isDeboucingEditor) {
-            await sleepPromise(250)
+        if (!this.editor?.checkIfHasContent()) {
+            return
+        }
+        while (this.state.isDeboucingEditor) {
+            await sleepPromise(50)
         }
         const saveP = this.props.onSave(shouldShare, isProtected)
         this.setState({ toggleShowTutorial: false, onEditClick: false })
@@ -407,7 +410,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             autoFocus={
                                 this.props.autoFocus || this.state.onEditClick
                             }
-                            placeholder={`Write a note...`}
+                            // placeholder={`Write a note...`}
                             isRibbonCommentBox={this.props.isRibbonCommentBox}
                             getYoutubePlayer={this.props.getYoutubePlayer}
                             sidebarEvents={this.props.sidebarEvents}

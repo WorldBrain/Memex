@@ -45,6 +45,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         onTooltipInit={props.onTooltipInit}
                         {...props.params}
                         context="extension"
+                        getRootElement={() => props.mount.rootElement}
                     />
                 </ThemeProvider>
             </StyleSheetManager>

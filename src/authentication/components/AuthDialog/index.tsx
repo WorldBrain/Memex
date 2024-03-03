@@ -133,6 +133,7 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                                                 null,
                                             )
                                         })}
+                                        autoFocus
                                     />
                                 </TextInputContainer>
                                 {this.state.email.length > 0 && (
@@ -718,7 +719,7 @@ const DisplayNameContainer = styled.div`
 
 const InfoText = styled.div`
     color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 18px;
+    font-size: 16px;
     text-align: center;
     margin-top: 10px;
 `
@@ -800,6 +801,7 @@ const ContentBox = styled.div`
     flex-direction: column;
     justify-content: flex-start;
     align-items: flex-start;
+    max-width: 380px;
 `
 
 const Title = styled.div`

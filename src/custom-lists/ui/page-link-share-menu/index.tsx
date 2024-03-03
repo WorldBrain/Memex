@@ -12,6 +12,7 @@ import SpaceEmailInvites from '../space-email-invites'
 import SpaceLinks from '../space-links'
 import { helpIcon } from 'src/common-ui/components/design-library/icons'
 import { TaskState } from 'ui-logic-core/lib/types'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 export interface Props extends Dependencies {
     showSpacesTab?: (pageUrl) => void
@@ -40,6 +41,20 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                 listData: this.props.listData,
             })
         }
+    }
+
+    renderTutorialBox() {
+        if (this.state.showTutorial === false) {
+            return
+        }
+        return (
+            <TutorialBox
+                tutorialId={'sharePages'}
+                getRootElement={this.props.getRootElement}
+                onTutorialClose={() => this.processEvent('showTutorial', false)}
+                isHeadless={true}
+            />
+        )
     }
 
     private renderMainContent() {
@@ -79,6 +94,15 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                             software.
                         </Subtitle>
                     </TitleSection>
+                    <TutorialButtonContainer>
+                        <TutorialBox
+                            tutorialId={'sharePages'}
+                            getRootElement={this.props.getRootElement}
+                            onTutorialClose={() =>
+                                this.processEvent('showTutorial', false)
+                            }
+                        />
+                    </TutorialButtonContainer>
                 </ContextMenuContainer>
             )
         }
@@ -106,7 +130,14 @@ export default class PageLinkShareMenuContainer extends StatefulUIElement<
                                         icon={helpIcon}
                                         heightAndWidth={'16px'}
                                         hoverOff
+                                        onClick={() => {
+                                            this.processEvent(
+                                                'showTutorial',
+                                                true,
+                                            )
+                                        }}
                                     />
+                                    {this.renderTutorialBox()}
                                 </TooltipBox>
                             </SectionTitle>
                             <TooltipBox
@@ -303,6 +334,7 @@ const ContextMenuContainer = styled.div`
     width: fill-available;
     justify-content: center;
     align-items: center;
+    position: relative;
     /* width: 250px; */
 `
 
@@ -492,4 +524,10 @@ const BigNewButtonBox = styled.div`
     width: fill-available;
     width: -moz-available;
     padding: 0 15px;
+`
+
+const TutorialButtonContainer = styled.div`
+    position: absolute;
+    right: 5px;
+    bottom: 5px;
 `

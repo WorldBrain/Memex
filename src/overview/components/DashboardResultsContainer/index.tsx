@@ -105,6 +105,9 @@ export default class DashboardResultsContainer extends StatefulUIElement<
                                     }}
                                 />
                             )}
+                            getRootElement={() =>
+                                document.getElementById('app')
+                            }
                         />
 
                         {this.state.readerShow && (

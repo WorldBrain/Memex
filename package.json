@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.14.1",
+    "version": "3.14.2",
     "homepage": "https://memex.garden",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {

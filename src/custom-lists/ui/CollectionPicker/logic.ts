@@ -154,41 +154,7 @@ export default class SpacePickerLogic extends UILogic<
 
     private cacheAnnotationUpdatedSubscription: PageAnnotationsCacheEvents['updatedAnnotation'] = (
         updatedAnnot,
-    ) => {
-        if (updatedAnnot.unifiedId !== this.dependencies.unifiedAnnotationId) {
-            return
-        }
-
-        const {
-            annotationsCache,
-            normalizedPageUrlToFilterPageLinksBy,
-        } = this.dependencies
-
-        // For Auto-Shared annots, ensure the parent page shared lists are set as selected
-        if (
-            normalizedPageUrlToFilterPageLinksBy != null &&
-            updatedAnnot.privacyLevel === AnnotationPrivacyLevels.SHARED
-        ) {
-            const pageListIdsSet =
-                annotationsCache.pageListIds.get(
-                    normalizedPageUrlToFilterPageLinksBy,
-                ) ?? new Set()
-
-            const localPageListIds: number[] = Array.from(pageListIdsSet)
-                .map(
-                    (unifiedListId) =>
-                        annotationsCache.lists.byId[unifiedListId]?.localId,
-                )
-                .filter((localId) => localId != null)
-
-            this.emitMutation({
-                selectedListIds: {
-                    $apply: (prev: number[]): number[] =>
-                        Array.from(new Set([...prev, ...localPageListIds])),
-                },
-            })
-        }
-    }
+    ) => {}
 
     private initCacheListsSubscription = (
         currentUser?: UserReference,

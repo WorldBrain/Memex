@@ -59,6 +59,7 @@ import type { ImageSupportInterface } from 'src/image-support/background/types'
 import PageCitations from 'src/citations/PageCitations'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -159,6 +160,7 @@ export interface State {
     showTutorialVideo: boolean
     showHorizontalScrollSwitch: string
     showPopoutsForResultBox: number
+    tutorialId: string
 }
 
 export default class SearchResultsContainer extends React.Component<
@@ -286,6 +288,7 @@ export default class SearchResultsContainer extends React.Component<
         tutorialState: undefined,
         showHorizontalScrollSwitch: 'none',
         showPopoutsForResultBox: null,
+        tutorialId: null,
     }
 
     private getLocalListIdsForCacheIds = (listIds: string[]): number[] =>
@@ -768,10 +771,23 @@ export default class SearchResultsContainer extends React.Component<
         })
     }
 
+    renderTutorialBox() {
+        if (this.state.tutorialId != null) {
+            return (
+                <TutorialBox
+                    tutorialId={this.state.tutorialId}
+                    onTutorialClose={() => this.setState({ tutorialId: null })}
+                    getRootElement={this.props.getRootElement}
+                    isHeadless={true}
+                />
+            )
+        }
+    }
+
     private renderOnboardingTutorials() {
         let title
         let videoURL
-        let readURL
+        let tutorialId
         let onDismiss
 
         if (
@@ -780,10 +796,10 @@ export default class SearchResultsContainer extends React.Component<
         ) {
             if (this.props.searchType === 'pages') {
                 title =
-                    'Learn the basics about saving and searching what you read online'
+                    'Learn the basics about saving, annotating & searching what you read online'
                 videoURL =
                     'https://share.descript.com/embed/QTnFzKBo7XM?autoplay=1'
-                readURL = 'https://links.memex.garden/memexbasics'
+                tutorialId = 'memexBasics'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'notes') {
@@ -791,31 +807,21 @@ export default class SearchResultsContainer extends React.Component<
                     'Learn the basics about adding highlights and notes to web content, PDFs and videos'
                 videoURL =
                     'https://share.descript.com/embed/0HGxOo3duKu?autoplay=1'
-                readURL = 'https://links.memex.garden/webhighlights'
+                tutorialId = 'annotatePages'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'videos') {
                 title =
                     'Learn the basics about adding highlights to videos on Youtube, Vimeo and HTML5 videos'
-                videoURL =
-                    'https://share.descript.com/embed/4yYXrC63L95?autoplay=1'
-                readURL = 'https://links.memex.garden/videoAnnotations'
-                onDismiss = () => this.dismissTutorials(this.props.searchType)
-            }
-            if (this.props.searchType === 'twitter') {
-                title =
-                    'Learn the basics about saving and annotating tweets on the web and on mobile'
-                videoURL =
-                    'https://share.descript.com/embed/TVgEKP80LqR?autoplay=1'
-                readURL = 'https://links.memex.garden/tweets'
+                videoURL = 'https://share.descript.com/embed/ex9smd7BmLt'
+                tutorialId = 'annotateVideos'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
             if (this.props.searchType === 'pdf') {
                 title =
                     'Learn the basics about annotating PDFs on the web and your hard drive'
-                videoURL =
-                    'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
-                readURL = 'https://links.memex.garden/PDFannotations'
+                videoURL = 'https://share.descript.com/embed/DikJKfzZqyo'
+                tutorialId = 'annotatePDFs'
                 onDismiss = () => this.dismissTutorials(this.props.searchType)
             }
         }
@@ -832,7 +838,7 @@ export default class SearchResultsContainer extends React.Component<
                 </MobileAdContainer>
             )
             videoURL = 'https://share.descript.com/embed/Vl7nXyy3sLb?autoplay=1'
-            readURL = 'https://links.memex.garden/mobileApp'
+            tutorialId = 'https://links.memex.garden/mobileApp'
             onDismiss = this.props.onDismissMobileAd
         }
 
@@ -852,7 +858,9 @@ export default class SearchResultsContainer extends React.Component<
                                 iconPosition="right"
                                 icon="longArrowRight"
                                 label="Read More"
-                                onClick={() => window.open(readURL, '_blank')}
+                                onClick={() =>
+                                    this.setState({ tutorialId: tutorialId })
+                                }
                             />
 
                             <PrimaryAction
@@ -1205,6 +1213,7 @@ export default class SearchResultsContainer extends React.Component<
                         ref={this.ResultsScrollContainerRef}
                     >
                         {this.renderOnboardingTutorials()}
+                        {this.renderTutorialBox()}
                         {this.renderResultsByDay()}
                         {this.props.areResultsExhausted &&
                             this.props.searchState === 'success' &&

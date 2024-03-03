@@ -180,6 +180,9 @@ export default class Logic extends UILogic<State, Event> {
 
     private async _onUserLogIn(newSignUp: boolean) {
         this.emitMutation({
+            welcomeStep: { $set: 'basicIntro' },
+        })
+        this.emitMutation({
             newSignUp: { $set: newSignUp },
             loadState: { $set: 'running' },
         })
@@ -278,8 +281,11 @@ export default class Logic extends UILogic<State, Event> {
 
     onUserLogIn: EventHandler<'onUserLogIn'> = async ({ event }) => {
         this.emitMutation({
-            loadState: { $set: 'running' },
+            welcomeStep: { $set: 'basicIntro' },
         })
+        // this.emitMutation({
+        //     loadState: { $set: 'running' },
+        // })
         await this.checkIfAutoOpenLinkAvailable()
         await this._onUserLogIn(!!event.newSignUp)
     }
