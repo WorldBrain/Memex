@@ -2506,7 +2506,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             syncSettingsBG: this.options.syncSettingsBG,
         })
 
-        const shouldShareSettings = await syncSettings.extension.get(
+        const shouldSetAsAutoAdded = await syncSettings.extension.get(
             'shouldAutoAddSpaces',
         )
 
@@ -2520,12 +2520,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                let shouldShare
-
-                if (shouldShareSettings) {
-                    shouldShare = 200
-                }
-
                 const { savePromise } = await createAnnotation({
                     annotationData: {
                         comment: formState.inputValue,
@@ -2533,7 +2527,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         localListIds: listsToAdd.map((list) => list.localId),
                     },
                     shareOpts: {
-                        shouldShare: shouldShare || event.shouldShare,
+                        shouldShare: shouldSetAsAutoAdded || event.shouldShare,
                         isBulkShareProtected: event.isProtected,
                         shouldCopyShareLink: event.shouldShare,
                     },
@@ -2559,7 +2553,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         tags: formState.tags,
                                         lists: formState.lists ?? [],
                                         pageUrl: event.pageId,
-                                        isShared: event.shouldShare,
+                                        isShared:
+                                            shouldSetAsAutoAdded ||
+                                            event.shouldShare,
                                         isBulkShareProtected: !!event.isProtected,
                                         ...utils.getInitialNoteResultState(
                                             formState.inputValue,
