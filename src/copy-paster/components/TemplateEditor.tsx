@@ -8,6 +8,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 interface TemplateEditorProps {
     previewString: string
@@ -227,6 +228,10 @@ export default class TemplateEditor extends PureComponent<
                             : 'Edit Template'}
                     </SectionTitle>
                     <ButtonBox>
+                        <TutorialBox
+                            tutorialId="useTemplates"
+                            getRootElement={this.props.getRootElement}
+                        />
                         {!this.props.isNew && !this.state.confirmDelete ? (
                             <PrimaryAction
                                 onClick={() =>

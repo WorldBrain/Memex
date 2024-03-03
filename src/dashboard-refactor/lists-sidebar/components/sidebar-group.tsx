@@ -5,6 +5,7 @@ import { fonts } from 'src/dashboard-refactor/styles'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { TaskState } from 'ui-logic-core/lib/types'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 export interface Props {
     title: string
@@ -14,6 +15,7 @@ export interface Props {
     onAddBtnClick?: React.MouseEventHandler
     onExpandBtnClick: React.MouseEventHandler
     spaceSidebarWidth: string
+    getRootElement: () => HTMLElement
 }
 
 export default class ListsSidebarGroup extends PureComponent<Props> {
@@ -65,13 +67,22 @@ export default class ListsSidebarGroup extends PureComponent<Props> {
                             {this.props.title}
                             <IconGroup>
                                 {this.props.onAddBtnClick && (
-                                    <Icon
-                                        icon="plus"
-                                        heightAndWidth="16px"
-                                        color={'prime1'}
-                                        padding={'4px'}
-                                        onClick={this.props.onAddBtnClick}
-                                    />
+                                    <>
+                                        <TutorialBox
+                                            getRootElement={
+                                                this.props.getRootElement
+                                            }
+                                            tutorialId="organiseSpaces"
+                                            iconSize="18px"
+                                        />
+                                        <Icon
+                                            icon="plus"
+                                            heightAndWidth="16px"
+                                            color={'prime1'}
+                                            padding={'4px'}
+                                            onClick={this.props.onAddBtnClick}
+                                        />
+                                    </>
                                 )}
                                 {this.props.loadingState === 'success' && (
                                     <Counter>{this.props.listsCount}</Counter>

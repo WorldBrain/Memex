@@ -23,6 +23,8 @@ import { UITaskState } from '@worldbrain/memex-common/lib/main-ui/types'
 import { keyframes } from 'styled-components'
 import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/creation-info'
 import { sleepPromise } from 'src/util/promises'
+import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 const MemexIcon = browser.runtime.getURL('img/memex-icon.svg')
 
@@ -60,6 +62,10 @@ export default class PageResultView extends PureComponent<Props> {
             ? this.props.fullPdfUrl!
             : this.props.fullUrl
     }
+
+    static ALT_KEY =
+        getKeyName({ key: 'alt' }).charAt(0).toUpperCase() +
+        getKeyName({ key: 'alt' }).slice(1)
 
     private maxMatchingTextContainerHeight = 200
     spacePickerButtonRef = React.createRef<HTMLDivElement>()
@@ -101,6 +107,7 @@ export default class PageResultView extends PureComponent<Props> {
         matchingTextContainerHeight: 100,
         confirmRemoveFromList: false,
         showVideoFullSize: false,
+        tutorialId: null,
     }
 
     componentDidMount() {
@@ -190,7 +197,7 @@ export default class PageResultView extends PureComponent<Props> {
                     break
                     break
                 case 'Enter':
-                    if (this.props.editTitleState != null) {
+                    if (this.props.editTitleState == null) {
                         if (event.shiftKey) {
                             event.stopPropagation()
                             // Perform action for "shift+Enter" key
@@ -503,6 +510,19 @@ export default class PageResultView extends PureComponent<Props> {
         ]
     }
 
+    renderTutorialBox = () => {
+        if (this.state.tutorialId !== null) {
+            return (
+                <TutorialBox
+                    tutorialId={this.state.tutorialId}
+                    getRootElement={this.props.getRootElement}
+                    isHeadless
+                    onTutorialClose={() => this.setState({ tutorialId: null })}
+                />
+            )
+        }
+    }
+
     private calcFooterActions(): ItemBoxBottomAction[] {
         // if (this.props.hoverState === null) {
         //     return [
@@ -531,11 +551,29 @@ export default class PageResultView extends PureComponent<Props> {
             {
                 key: 'add-spaces-to-note-btn',
                 image: 'plus',
-                onClick: (event) => {
-                    this.props.showPopoutsForResultBox(this.props.index)
-                    this.props.onListPickerFooterBtnClick(event)
+                onClick: (e) => {
+                    if (e.altKey) {
+                        this.setState({
+                            tutorialId: 'organiseSpaces',
+                        })
+                    } else {
+                        this.props.showPopoutsForResultBox(this.props.index)
+                        this.props.onListPickerFooterBtnClick(e)
+                    }
                 },
-                tooltipText: 'Add to Space(s)',
+                tooltipText: (
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            Add to Space(s)
+                            <div>
+                                <strong>
+                                    {PageResultView.ALT_KEY} + Click
+                                </strong>
+                                for tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
+                ),
                 ButtonText:
                     !(
                         this.props.isNotesSidebarShown &&
@@ -552,35 +590,40 @@ export default class PageResultView extends PureComponent<Props> {
                         ? 'check'
                         : 'copy',
                 isLoading: this.props.copyLoadingState === 'running',
-                onClick: (event) => {
-                    if (event.shiftKey) {
-                        this.props.onCopyPasterDefaultExecute(event)
-                    } else {
-                        this.props.onCopyPasterBtnClick(event)
-                    }
-                },
                 buttonRef: this.copyPasteronPageButtonRef,
                 ButtonText:
                     !(
                         this.props.isNotesSidebarShown &&
                         this.props.isListsSidebarShown
                     ) && 'Cite',
+
+                onClick: (e) => {
+                    if (e.altKey) {
+                        this.setState({
+                            tutorialId: 'useTemplates',
+                        })
+                    } else if (e.shiftKey) {
+                        this.props.onCopyPasterDefaultExecute(e)
+                    } else {
+                        this.props.onCopyPasterBtnClick(e)
+                    }
+                },
                 tooltipText: (
-                    <span>
-                        <strong>Click</strong>
-                        to select templates
-                        <br />{' '}
-                        <strong
-                            style={{
-                                color: 'white',
-                                marginRight: '3px',
-                            }}
-                        >
-                            Shift + Click
-                        </strong>
-                        to use default
-                        <br />
-                    </span>
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            Copy with Template or Share Link
+                            <span>
+                                <strong>Shift + Click</strong>
+                                to use default template
+                            </span>
+                            <div>
+                                <strong>
+                                    {PageResultView.ALT_KEY} + Click
+                                </strong>
+                                for tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
                 ),
                 active: this.props.isCopyPasterShown,
                 showKeyShortcut: this.props.isInFocus && 'C',
@@ -588,10 +631,28 @@ export default class PageResultView extends PureComponent<Props> {
             {
                 key: 'ask-ai-on-page-btn',
                 image: 'stars',
-                onClick: (event) => {
-                    this.props.onAIResultBtnClick(event)
+                onClick: (e) => {
+                    if (e.altKey) {
+                        this.setState({
+                            tutorialId: 'askAI',
+                        })
+                    } else {
+                        this.props.onAIResultBtnClick(e)
+                    }
                 },
-                tooltipText: 'Ask AI & Summarise page',
+                tooltipText: (
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            <span>'Ask AI & Summarise page'</span>
+                            <div>
+                                <strong>
+                                    {PageResultView.ALT_KEY} + Click
+                                </strong>
+                                for tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
+                ),
                 ButtonText:
                     !(
                         this.props.isNotesSidebarShown &&
@@ -648,13 +709,32 @@ export default class PageResultView extends PureComponent<Props> {
                     this.props.noteIds[this.props.notesType].length > 0
                         ? 'prime1'
                         : null,
-                onClick: this.props.onNotesBtnClick,
+
+                onClick: (e) => {
+                    if (e.altKey) {
+                        this.setState({
+                            tutorialId: 'annotatePages',
+                        })
+                    } else {
+                        this.props.onNotesBtnClick(e)
+                    }
+                },
                 tooltipText: (
-                    <span>
-                        <strong>Add/View Notes</strong>
-                        <br />
-                        shift+click to open inline
-                    </span>
+                    <TooltipContent>
+                        <TooltipContentBox>
+                            Add/View Notes
+                            <span>
+                                <strong>Shift + Click</strong>
+                                to open inline
+                            </span>
+                            <div>
+                                <strong>
+                                    {PageResultView.ALT_KEY} + Click
+                                </strong>
+                                for tutorials
+                            </div>
+                        </TooltipContentBox>
+                    </TooltipContent>
                 ),
                 showKeyShortcut: this.props.isInFocus && 'D',
                 rightSideItem: this.props.noteIds[this.props.notesType]
@@ -952,6 +1032,7 @@ export default class PageResultView extends PureComponent<Props> {
                         />
                     </FooterBar>
                     {this.renderSpacePicker()}
+                    {this.renderTutorialBox()}
                     {this.renderPageCitationsDropdown()}
                 </StyledPageResult>
             </ItemBox>
@@ -1205,4 +1286,21 @@ border-radius: 8px;
     &:hover ${MatchingTextViewToggle} {
         opacity: 1;
     }
+`
+
+const TooltipContentBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 5px;
+
+    * strong {
+        margin-right: 5px;
+    }
+`
+const TooltipContent = styled.div`
+    display: flex;
+    align-items: center;
+    grid-gap: 10px;
+    flex-direction: row;
+    justify-content: center;
 `

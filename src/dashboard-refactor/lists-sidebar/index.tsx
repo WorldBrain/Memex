@@ -566,6 +566,7 @@ export default class ListsSidebar extends PureComponent<ListsSidebarProps> {
                         {...this.props.ownListsGroup}
                         listsCount={this.props.ownListsGroup.listData.length}
                         spaceSidebarWidth={this.props.spaceSidebarWidth}
+                        getRootElement={this.props.getRootElement}
                     >
                         {this.props.isAddListInputShown && (
                             <SidebarItemInput

@@ -195,6 +195,10 @@ export default class RibbonContainer extends StatefulUIElement<
                     this.props.state === 'visible' ||
                     !!this.state.bookmark.writeError
                 }
+                setTutorialIdToOpen={(id) => {
+                    this.processEvent('setTutorialId', { tutorialIdToOpen: id })
+                }}
+                tutorialIdToOpen={this.state.tutorialIdToOpen}
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}
                 isRibbonEnabled={this.state.isRibbonEnabled}

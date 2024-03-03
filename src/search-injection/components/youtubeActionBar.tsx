@@ -3,6 +3,7 @@ import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/pop
 import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { getHTML5VideoTimestamp } from '@worldbrain/memex-common/lib/editor/utils'
 import React, { Component } from 'react'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
@@ -247,9 +248,9 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                     })
                 }}
                 getPortalRoot={this.props.getRootElement}
-                placement="bottom"
+                placement="bottom-start"
                 strategy="fixed"
-                width="fit-content"
+                width="350px"
                 offsetX={10}
                 instaClose
             >
@@ -272,7 +273,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 actionFunction()
                             }
                         }}
-                        width="300px"
+                        width="350px"
                         autoFocus={true}
                     />
                     Use a custom prompt. Click again to apply.
@@ -470,6 +471,12 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                             <YTPMenuItemLabel>Screenshot</YTPMenuItemLabel>
                         </YTPMenuItem>
                     </TooltipBox>
+                    <TutorialButtonContainer>
+                        <TutorialBox
+                            getRootElement={this.props.getRootElement}
+                            tutorialId="annotateVideos"
+                        />
+                    </TutorialButtonContainer>
                 </MemexButtonContainer>
             </ParentContainer>
         )
@@ -598,4 +605,11 @@ const TextFieldSmall = styled.input`
     text-align: right;
     position: absolute;
     border: none;
+`
+
+const TutorialButtonContainer = styled.div`
+    border-left: 1px solid ${(props) => props.theme.colors.greyScale3};
+    margin-left: 15px;
+    padding-left: 10px;
+    padding-right: 10px;
 `
