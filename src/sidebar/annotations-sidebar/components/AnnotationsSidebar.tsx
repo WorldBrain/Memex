@@ -1428,29 +1428,42 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
-    private renderSharedNotesByList() {
+    private deriveAllListsForPage(): UnifiedList[] {
         const {
             lists,
-            currentUser,
-            fullPageUrl,
+            annotations,
             pageListIds,
-            listInstances,
             pageActiveListIds,
+            normalizedPageUrl,
         } = this.props
-        const normalizedPageUrl = fullPageUrl
-            ? normalizeUrl(fullPageUrl)
-            : undefined
-        const allLists = normalizedStateToArray(lists).filter(
-            (listData) =>
-                pageListIds.has(listData.unifiedId) &&
-                (listData.unifiedAnnotationIds?.length > 0 ||
-                    listData.hasRemoteAnnotationsToLoad ||
-                    (listData.type === 'page-link' &&
-                        listData.normalizedPageUrl === normalizedPageUrl) ||
-                    pageActiveListIds.includes(listData.unifiedId)),
-        )
+        const allPageListIds = normalizedStateToArray(lists)
+            .filter(
+                (listData) =>
+                    pageListIds.has(listData.unifiedId) &&
+                    (listData.unifiedAnnotationIds?.length > 0 ||
+                        listData.hasRemoteAnnotationsToLoad ||
+                        (listData.type === 'page-link' &&
+                            listData.normalizedPageUrl === normalizedPageUrl) ||
+                        pageActiveListIds.includes(listData.unifiedId)),
+            )
+            .map((listData) => listData.unifiedId)
+        const allAnnotationListIds = normalizedStateToArray(annotations)
+            .filter(
+                (annotData) =>
+                    annotData.normalizedPageUrl === normalizedPageUrl,
+            )
+            .flatMap((annotData) => annotData.unifiedListIds)
+        const distinctListIds = new Set([
+            ...allAnnotationListIds,
+            ...allPageListIds,
+        ])
+        return [...distinctListIds].map((listId) => lists.byId[listId])
+    }
 
-        if (allLists?.length === 0) {
+    private renderSharedNotesByList() {
+        const { listInstances } = this.props
+        const allLists = this.deriveAllListsForPage()
+        if (allLists.length === 0) {
             return (
                 <EmptyMessageContainer>
                     <IconBox heightAndWidth="40px">
@@ -1474,7 +1487,7 @@ export class AnnotationsSidebar extends React.Component<
             pageLinkLists,
             joinedLists,
             myLists,
-        } = cacheUtils.siftListsIntoCategories(allLists, currentUser)
+        } = cacheUtils.siftListsIntoCategories(allLists, this.props.currentUser)
 
         return (
             <>

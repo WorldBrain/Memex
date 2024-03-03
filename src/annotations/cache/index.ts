@@ -652,33 +652,20 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             throw new Error('No existing cached annotation found to update')
         }
 
-        let shouldUpdateSiblingAnnots = false
         let nextUnifiedListIds = [...previous.unifiedListIds]
-        let privacyLevel = updates.privacyLevel
 
-        if (opts?.forceListUpdate) {
+        if (
+            opts?.forceListUpdate ||
+            previous.privacyLevel === updates.privacyLevel
+        ) {
             nextUnifiedListIds = [...updates.unifiedListIds]
-        } else if (previous.privacyLevel === updates.privacyLevel) {
-            nextUnifiedListIds = [...updates.unifiedListIds]
-
-            // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots
-            if (previous.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-                const sharedListIds = updates.unifiedListIds.filter(
-                    this.isListShared,
-                )
-                this.ensurePageListsSet(
-                    previous.normalizedPageUrl,
-                    sharedListIds,
-                )
-                shouldUpdateSiblingAnnots = true
-            }
         } else if (
             previous.privacyLevel !== AnnotationPrivacyLevels.PRIVATE &&
             updates.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
         ) {
             if (opts?.keepListsIfUnsharing) {
                 // Keep all lists, but need to change level to 'protected'
-                privacyLevel = AnnotationPrivacyLevels.PROTECTED
+                updates.privacyLevel = AnnotationPrivacyLevels.PROTECTED
             } else {
                 // Keep only private lists
                 nextUnifiedListIds = nextUnifiedListIds.filter(
@@ -689,12 +676,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             previous.privacyLevel <= AnnotationPrivacyLevels.PRIVATE &&
             updates.privacyLevel >= AnnotationPrivacyLevels.SHARED
         ) {
-            // Need to inherit parent page's shared lists if sharing
-            nextUnifiedListIds = Array.from(
-                new Set([
-                    ...nextUnifiedListIds,
-                    ...this.getSharedPageListIds(previous.normalizedPageUrl),
-                ]),
+            // This is selectively-shared -> auto-added case. Needs to replace all lists with the parent page's
+            nextUnifiedListIds = this.getSharedPageListIds(
+                previous.normalizedPageUrl,
             )
         }
 
@@ -715,7 +699,7 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         const next: UnifiedAnnotation = {
             ...previous,
-            privacyLevel,
+            privacyLevel: updates.privacyLevel,
             unifiedListIds: nextUnifiedListIds,
             comment: updates.comment ?? previous.comment,
             body: updates.body ?? previous.body,
@@ -737,10 +721,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         this.events.emit('updatedAnnotation', next)
         this.events.emit('newAnnotationsState', this.annotations)
-
-        if (shouldUpdateSiblingAnnots) {
-            this.updateSharedAnnotationsWithSharedPageLists()
-        }
     }
 
     updateList: PageAnnotationsCacheInterface['updateList'] = (updates) => {
@@ -824,6 +804,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         this.events.emit('updatedList', nextList)
         this.events.emit('newListsState', this.lists)
+
+        // NOTE: This stuff should no longer be relevant as all lists are shared by default now
 
         // If list was shared, reflect updates in any public annotations.
         //  Note this needs to be separate to the previous condition else things go silly due to some timing issue. TODO: Figure out why and document

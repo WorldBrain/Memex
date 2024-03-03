@@ -2257,9 +2257,6 @@ export class SidebarContainerLogic extends UILogic<
             },
         } = previousState
 
-        if (!formData && event.shouldShare) {
-        }
-
         if (
             !formData ||
             annotationData?.creator?.id !== this.options.getCurrentUser()?.id ||
@@ -2636,15 +2633,6 @@ export class SidebarContainerLogic extends UILogic<
                 throw new Error(
                     'Cannot find list to add to annotation in cache',
                 )
-            }
-
-            // Ensure any added shared list becomes part of the page lists
-            if (cacheList.remoteId != null) {
-                const pageUrl = normalizeUrl(this.fullPageUrl)
-                const pageListsSet =
-                    annotationsCache.pageListIds.get(pageUrl) ?? new Set()
-                pageListsSet.add(cacheList.unifiedId)
-                annotationsCache.setPageData(pageUrl, Array.from(pageListsSet))
             }
 
             unifiedListIds.add(cacheList.unifiedId)

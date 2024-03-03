@@ -2506,7 +2506,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             syncSettingsBG: this.options.syncSettingsBG,
         })
 
-        const shouldShareSettings = await syncSettings.extension.get(
+        const shouldSetAsAutoAdded = await syncSettings.extension.get(
             'shouldAutoAddSpaces',
         )
 
@@ -2520,12 +2520,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                let shouldShare
-
-                if (shouldShareSettings) {
-                    shouldShare = 200
-                }
-
                 const { savePromise } = await createAnnotation({
                     annotationData: {
                         comment: formState.inputValue,
@@ -2533,7 +2527,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         localListIds: listsToAdd.map((list) => list.localId),
                     },
                     shareOpts: {
-                        shouldShare: shouldShare || event.shouldShare,
+                        shouldShare: shouldSetAsAutoAdded || event.shouldShare,
                         isBulkShareProtected: event.isProtected,
                         shouldCopyShareLink: event.shouldShare,
                     },
@@ -2559,7 +2553,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         tags: formState.tags,
                                         lists: formState.lists ?? [],
                                         pageUrl: event.pageId,
-                                        isShared: event.shouldShare,
+                                        isShared:
+                                            shouldSetAsAutoAdded ||
+                                            event.shouldShare,
                                         isBulkShareProtected: !!event.isProtected,
                                         ...utils.getInitialNoteResultState(
                                             formState.inputValue,
@@ -2976,7 +2972,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState,
             { mustBeLocal: true, source: 'setNoteLists' },
         )
-        const isSharedList = listData?.remoteId != null
 
         let remoteFn: () => Promise<any>
 
@@ -2988,7 +2983,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 contentShareBG.shareAnnotationToSomeLists({
                     annotationUrl: event.noteId,
                     localListIds: [listData.localId],
-                    protectAnnotation: event.protectAnnotation,
+                    protectAnnotation: true,
                 })
             noteListIds.add(event.added)
             pageListIds.add(event.added)
@@ -3004,79 +2999,22 @@ export class DashboardLogic extends UILogic<State, Events> {
             return
         }
 
-        const isSharedListBeingRemovedFromSharedAnnot =
-            isSharedList && noteData.isShared && event.added == null
-
         const searchResultsMutation: UIMutation<State['searchResults']> = {
             noteData: {
                 byId: {
                     [event.noteId]: {
                         lists: {
-                            $set:
-                                event.protectAnnotation ||
-                                isSharedListBeingRemovedFromSharedAnnot
-                                    ? [
-                                          ...new Set([
-                                              ...pageListIds,
-                                              ...noteListIds,
-                                          ]),
-                                      ]
-                                    : [...noteListIds],
+                            $set: noteData.isShared
+                                ? [...new Set([...pageListIds, ...noteListIds])]
+                                : [...noteListIds],
                         },
-                        isShared: {
-                            $set:
-                                event.protectAnnotation ??
-                                isSharedListBeingRemovedFromSharedAnnot
-                                    ? false
-                                    : noteData.isShared,
-                        },
+                        isShared: { $set: false }, // All cases of direct list add/del to an annot results in it becoming selectively shared (losing auto-added state)
                         isBulkShareProtected: {
-                            $set:
-                                event.protectAnnotation ??
-                                ((!noteData.isShared && isSharedList) || // If annot not shared (but list is), it needs to be protected upon list add/remove
-                                isSharedListBeingRemovedFromSharedAnnot
-                                    ? true
-                                    : noteData.isBulkShareProtected),
+                            $set: true,
                         },
                     },
                 },
             },
-        }
-
-        if (isSharedList && event.deleted == null) {
-            const otherNoteIds = flattenNestedResults(previousState).byId[
-                noteData.pageUrl
-            ].noteIds.user
-            const publicNoteIds = otherNoteIds.filter(
-                (noteId) =>
-                    previousState.searchResults.noteData.byId[noteId]
-                        .isShared && noteId !== event.noteId,
-            )
-
-            for (const noteId of publicNoteIds) {
-                const listIds = new Set(
-                    previousState.searchResults.noteData.byId[noteId].lists,
-                )
-
-                if (event.added != null) {
-                    listIds.add(event.added)
-                } else if (event.deleted != null) {
-                    listIds.delete(event.deleted)
-                }
-
-                ;(searchResultsMutation.noteData as any).byId[noteId] = {
-                    ...(searchResultsMutation.noteData as any).byId[noteId],
-                    lists: { $set: [...listIds] },
-                }
-            }
-
-            searchResultsMutation.pageData = {
-                byId: {
-                    [noteData.pageUrl]: {
-                        lists: { $set: [...pageListIds] },
-                    },
-                },
-            }
         }
 
         if (remoteFn) {
@@ -3368,21 +3306,15 @@ export class DashboardLogic extends UILogic<State, Events> {
                     return
                 }
 
-                // If the main save button was pressed, then we're not changing any share state, thus keep the old lists
-                // NOTE: this distinction exists because of the SAS state being implicit and the logic otherwise thinking you want
-                //  to make a SAS annotation private protected upon save btn press
-                const lists = event.mainBtnPressed
-                    ? previousState.searchResults.noteData.byId[event.noteId]
-                          ?.lists ?? []
-                    : this.getAnnotListsAfterShareStateChange({
-                          previousState,
-                          noteId: event.noteId,
-                          keepListsIfUnsharing: event.keepListsIfUnsharing,
-                          incomingPrivacyState: {
-                              public: event.shouldShare,
-                              protected: !!event.isProtected,
-                          },
-                      })
+                const isAnnotBecomingAutoAdded =
+                    !existing.isShared && event.shouldShare && event.isProtected
+                const nextLists = isAnnotBecomingAutoAdded
+                    ? [
+                          ...(previousState.searchResults.pageData.byId[
+                              existing.pageUrl
+                          ]?.lists ?? []),
+                      ]
+                    : []
 
                 this.emitMutation({
                     searchResults: {
@@ -3408,7 +3340,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                             event.isProtected ||
                                             !!event.keepListsIfUnsharing,
                                     },
-                                    lists: { $set: lists },
+                                    lists: { $set: nextLists },
                                     color: {
                                         $set: (event.color ??
                                             existing.color) as RGBAColor,
