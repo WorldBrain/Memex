@@ -652,25 +652,13 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
             throw new Error('No existing cached annotation found to update')
         }
 
-        let shouldUpdateSiblingAnnots = false
         let nextUnifiedListIds = [...previous.unifiedListIds]
 
-        if (opts?.forceListUpdate) {
+        if (
+            opts?.forceListUpdate ||
+            previous.privacyLevel === updates.privacyLevel
+        ) {
             nextUnifiedListIds = [...updates.unifiedListIds]
-        } else if (previous.privacyLevel === updates.privacyLevel) {
-            nextUnifiedListIds = [...updates.unifiedListIds]
-
-            // If changing a public annot's lists, those shared list changes should cascade to other sibling shared annots
-            if (previous.privacyLevel === AnnotationPrivacyLevels.SHARED) {
-                const sharedListIds = updates.unifiedListIds.filter(
-                    this.isListShared,
-                )
-                this.ensurePageListsSet(
-                    previous.normalizedPageUrl,
-                    sharedListIds,
-                )
-                shouldUpdateSiblingAnnots = true
-            }
         } else if (
             previous.privacyLevel !== AnnotationPrivacyLevels.PRIVATE &&
             updates.privacyLevel <= AnnotationPrivacyLevels.PRIVATE
@@ -733,10 +721,6 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         }
         this.events.emit('updatedAnnotation', next)
         this.events.emit('newAnnotationsState', this.annotations)
-
-        if (shouldUpdateSiblingAnnots) {
-            this.updateSharedAnnotationsWithSharedPageLists()
-        }
     }
 
     updateList: PageAnnotationsCacheInterface['updateList'] = (updates) => {
@@ -820,6 +804,8 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
         this.events.emit('updatedList', nextList)
         this.events.emit('newListsState', this.lists)
+
+        // NOTE: This stuff should no longer be relevant as all lists are shared by default now
 
         // If list was shared, reflect updates in any public annotations.
         //  Note this needs to be separate to the previous condition else things go silly due to some timing issue. TODO: Figure out why and document
