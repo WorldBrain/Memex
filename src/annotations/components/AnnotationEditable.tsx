@@ -42,6 +42,7 @@ import CreationInfo from '@worldbrain/memex-common/lib/common-ui/components/crea
 import Checkbox from 'src/common-ui/components/Checkbox'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -53,6 +54,7 @@ export interface HighlightProps extends AnnotationProps {
 export interface NoteProps extends AnnotationProps {
     body?: string
     comment: string
+    isBulkSelected: boolean
 }
 
 export interface AnnotationProps {
@@ -127,6 +129,8 @@ export interface AnnotationProps {
     getRootElement: () => HTMLElement
     toggleAutoAdd: () => void
     isAutoAddEnabled?: boolean
+    bulkSelectAnnotation: () => void
+    isBulkSelected: boolean
 }
 
 export interface AnnotationEditableEventProps {
@@ -1184,71 +1188,110 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         )
     }
 
+    private renderBulkSelectBtn(): JSX.Element {
+        return (
+            <TooltipBox
+                tooltipText={
+                    <span>
+                        Multi Select Items
+                        <br />
+                        <strong>{AnnotationEditable.MOD_KEY}+A</strong>to select
+                        all
+                    </span>
+                }
+                placement="bottom"
+                getPortalRoot={this.props.getRootElement}
+            >
+                <BulkSelectButtonBox>
+                    <CheckboxNotInput
+                        isChecked={this.props.isBulkSelected}
+                        onClick={(
+                            event: React.MouseEvent<HTMLInputElement>,
+                        ) => {
+                            this.props.bulkSelectAnnotation()
+                            event.stopPropagation()
+                        }}
+                        size={16}
+                    />
+                </BulkSelectButtonBox>
+            </TooltipBox>
+        )
+    }
+
     render() {
         const { annotationFooterDependencies } = this.props
 
         const {
             annotationFooterDependencies: footerDeps,
             onGoToAnnotation,
+            bulkSelectAnnotation,
         } = this.props
 
-        const actionsBox =
-            !this.props.isEditingHighlight && this.state.hoverCard ? (
-                <HighlightActionsBox>
-                    {footerDeps.onDeleteIconClick && (
-                        <TooltipBox
-                            tooltipText="Delete Note"
-                            placement="bottom"
-                            getPortalRoot={this.props.getRootElement}
-                        >
-                            <Icon
-                                onClick={footerDeps.onDeleteIconClick}
-                                filePath={'trash'}
-                                heightAndWidth={'20px'}
-                                borderColor={'transparent'}
-                                hoverOff
-                            />
-                        </TooltipBox>
-                    )}
-                    {onGoToAnnotation && (
-                        <TooltipBox
-                            tooltipText="Open in Page"
-                            placement="bottom"
-                            getPortalRoot={this.props.getRootElement}
-                        >
-                            <Icon
-                                onClick={onGoToAnnotation}
-                                filePath={'goTo'}
-                                heightAndWidth={'20px'}
-                                borderColor={'transparent'}
-                                hoverOff
-                            />
-                        </TooltipBox>
-                    )}
-                    {footerDeps?.onEditIconClick &&
-                    this.props.currentUserId === this.props.creatorId ? (
-                        <TooltipBox
-                            tooltipText={
-                                <span>
-                                    <strong>Add/Edit Note</strong>
-                                    <br />
-                                    or double-click card
-                                </span>
-                            }
-                            placement="bottom"
-                            getPortalRoot={this.props.getRootElement}
-                        >
-                            <Icon
-                                onClick={footerDeps.onEditIconClick}
-                                filePath={'edit'}
-                                heightAndWidth={'20px'}
-                                borderColor={'transparent'}
-                                hoverOff
-                            />
-                        </TooltipBox>
-                    ) : undefined}
-                </HighlightActionsBox>
-            ) : null
+        const actionsBox = !this.props.isEditingHighlight ? (
+            <HighlightActionsBox>
+                {this.state.hoverCard && (
+                    <>
+                        {footerDeps.onDeleteIconClick && (
+                            <TooltipBox
+                                tooltipText="Delete Note"
+                                placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    onClick={footerDeps.onDeleteIconClick}
+                                    filePath={'trash'}
+                                    heightAndWidth={'20px'}
+                                    borderColor={'transparent'}
+                                    hoverOff
+                                />
+                            </TooltipBox>
+                        )}
+                        {onGoToAnnotation && (
+                            <TooltipBox
+                                tooltipText="Open in Page"
+                                placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    onClick={onGoToAnnotation}
+                                    filePath={'goTo'}
+                                    heightAndWidth={'20px'}
+                                    borderColor={'transparent'}
+                                    hoverOff
+                                />
+                            </TooltipBox>
+                        )}
+                        {footerDeps?.onEditIconClick &&
+                        this.props.currentUserId === this.props.creatorId ? (
+                            <TooltipBox
+                                tooltipText={
+                                    <span>
+                                        <strong>Add/Edit Note</strong>
+                                        <br />
+                                        or double-click card
+                                    </span>
+                                }
+                                placement="bottom"
+                                getPortalRoot={this.props.getRootElement}
+                            >
+                                <Icon
+                                    onClick={footerDeps.onEditIconClick}
+                                    filePath={'edit'}
+                                    heightAndWidth={'20px'}
+                                    borderColor={'transparent'}
+                                    hoverOff
+                                />
+                            </TooltipBox>
+                        ) : undefined}
+                    </>
+                )}
+                {bulkSelectAnnotation &&
+                    (this.props.isBulkSelected || this.state.hoverCard) &&
+                    this.props.currentUserId === this.props.creatorId &&
+                    bulkSelectAnnotation &&
+                    this.renderBulkSelectBtn()}
+            </HighlightActionsBox>
+        ) : null
 
         return (
             <ThemeProvider theme={this.theme}>
@@ -1750,4 +1793,12 @@ const TooltipTextBox = styled.div`
 
 const CreationInfoBox = styled.div`
     padding: 15px 15px 0px 15px;
+`
+
+const BulkSelectButtonBox = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
 `
