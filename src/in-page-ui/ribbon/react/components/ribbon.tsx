@@ -1456,7 +1456,7 @@ export default class Ribbon extends Component<Props, State> {
                                 this.props.bgScriptBG.openOverviewTab()
                             } else if (e.altKey) {
                                 e.stopPropagation()
-                                this.props.setTutorialIdToOpen('searchPages')
+                                this.props.setTutorialIdToOpen('savePages')
                             } else {
                                 e.stopPropagation()
                                 this.props.toggleQuickSearch()
@@ -1472,7 +1472,7 @@ export default class Ribbon extends Component<Props, State> {
                                 this.props.bgScriptBG.openOverviewTab()
                             } else if (e.altKey) {
                                 e.stopPropagation()
-                                this.props.setTutorialIdToOpen('searchPages')
+                                this.props.setTutorialIdToOpen('savePages')
                             } else {
                                 e.stopPropagation()
                                 this.props.toggleQuickSearch()
@@ -2635,7 +2635,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
     display: none;
     background: ${(props) =>
         props.theme.variant === 'dark'
-            ? '#23242b'
+            ? props.theme.colors.black0
             : props.theme.colors.black + 'c9'};
                     backdrop-filter: blur(30px);
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
