@@ -2635,7 +2635,7 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
     display: none;
     background: ${(props) =>
         props.theme.variant === 'dark'
-            ? '#23242b'
+            ? props.theme.colors.black0
             : props.theme.colors.black + 'c9'};
                     backdrop-filter: blur(30px);
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
