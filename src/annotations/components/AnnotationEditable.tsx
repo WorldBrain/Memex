@@ -129,8 +129,8 @@ export interface AnnotationProps {
     getRootElement: () => HTMLElement
     toggleAutoAdd: () => void
     isAutoAddEnabled?: boolean
-    bulkSelectAnnotation: () => void
-    isBulkSelected: boolean
+    bulkSelectAnnotation?: () => void
+    isBulkSelected?: boolean
 }
 
 export interface AnnotationEditableEventProps {

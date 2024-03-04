@@ -3317,6 +3317,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                       ]
                     : []
 
+                const bodyToSave = await processCommentForImageUpload(
+                    editNoteForm.bodyInputValue ?? existing.highlight,
+                )
+                const commentToSave = await processCommentForImageUpload(
+                    editNoteForm.inputValue ?? existing.comment,
+                )
+
                 this.emitMutation({
                     searchResults: {
                         noteData: {
@@ -3327,14 +3334,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     tags: { $set: editNoteForm.tags },
                                     isShared: { $set: event.shouldShare },
                                     comment: {
-                                        $set:
-                                            editNoteForm.inputValue ??
-                                            existing.comment,
+                                        $set: commentToSave,
                                     },
                                     highlight: {
-                                        $set:
-                                            editNoteForm.bodyInputValue ??
-                                            existing.highlight,
+                                        $set: bodyToSave,
                                     },
                                     isBulkShareProtected: {
                                         $set:
@@ -3358,9 +3361,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,
-                        comment: editNoteForm.inputValue ?? existing.comment,
+                        comment: commentToSave,
                         color: event.color ?? existing.color,
-                        body: editNoteForm.bodyInputValue ?? existing.highlight,
+                        body: bodyToSave,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,
