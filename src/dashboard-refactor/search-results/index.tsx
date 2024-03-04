@@ -1237,8 +1237,8 @@ export default class SearchResultsContainer extends React.Component<
 }
 
 const ResultsScrollContainer = styled.div`
-    overflow-y: hidden;
-    overflow-x: scroll;
+    overflow-y: scroll;
+    overflow-x: hidden;
     height: fill-available;
     width: fill-available;
     position: relative;
@@ -1598,7 +1598,6 @@ const ResultsContainer = styled.div`
     flex: 1;
     height: fill-available;
     height: -moz-available;
-    overflow: scroll;
 
     &::-webkit-scrollbar {
         display: none;
