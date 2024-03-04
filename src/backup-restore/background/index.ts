@@ -358,8 +358,6 @@ export class BackupBackgroundModule {
 
     async forgetAllChanges() {
         await this.storage.forgetAllChanges()
-        await this.localBackupSettings.remove('lastBackup')
-        await this.localBackupSettings.remove('lastBackupFinished')
         await this.localBackupSettings.remove('lastProblemNotifShown')
     }
 
