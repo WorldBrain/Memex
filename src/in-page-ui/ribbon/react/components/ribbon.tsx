@@ -1456,7 +1456,7 @@ export default class Ribbon extends Component<Props, State> {
                                 this.props.bgScriptBG.openOverviewTab()
                             } else if (e.altKey) {
                                 e.stopPropagation()
-                                this.props.setTutorialIdToOpen('searchPages')
+                                this.props.setTutorialIdToOpen('savePages')
                             } else {
                                 e.stopPropagation()
                                 this.props.toggleQuickSearch()
@@ -1472,7 +1472,7 @@ export default class Ribbon extends Component<Props, State> {
                                 this.props.bgScriptBG.openOverviewTab()
                             } else if (e.altKey) {
                                 e.stopPropagation()
-                                this.props.setTutorialIdToOpen('searchPages')
+                                this.props.setTutorialIdToOpen('savePages')
                             } else {
                                 e.stopPropagation()
                                 this.props.toggleQuickSearch()
