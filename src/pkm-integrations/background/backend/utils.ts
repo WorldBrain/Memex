@@ -34,8 +34,7 @@ export async function shareAnnotationWithPKM(
         if (annotationData.comment) {
             annotationData = await replaceImgSrcWithFunctionOutput(
                 annotationData.comment,
-                imageSupport,
-                true,
+                process.env.NODE_ENV,
             )
         }
 

@@ -420,7 +420,10 @@ export function getTemplateDataFetchers({
 }
 
 async function convertHTMLintoMarkdown(inputHtml, imageSupport) {
-    const html = await replaceImgSrcWithFunctionOutput(inputHtml, imageSupport)
+    const html = await replaceImgSrcWithFunctionOutput(
+        inputHtml,
+        process.env.NODE_ENV,
+    )
     if (html) {
         let turndownService = new TurndownService({
             headingStyle: 'atx',
