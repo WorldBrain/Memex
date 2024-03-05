@@ -553,6 +553,27 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
+    updateSpacesSearchSuggestions: EventHandler<
+        'updateSpacesSearchSuggestions'
+    > = async ({ event, previousState }) => {
+        const lists = this.options.annotationsCache.lists.allIds
+            .filter(
+                (listId) =>
+                    this.options.annotationsCache.lists.byId[listId].name
+                        .toLowerCase()
+                        .includes(event.searchQuery.toLowerCase()) &&
+                    this.options.annotationsCache.lists.byId[listId].type !==
+                        'page-link',
+            )
+            .map((listId) => ({
+                id: this.options.annotationsCache.lists.byId[listId].localId,
+                name: this.options.annotationsCache.lists.byId[listId].name,
+            }))
+
+        this.emitMutation({
+            spaceSearchSuggestions: { $set: lists },
+        })
+    }
     getHighlightColorSettings: EventHandler<
         'getHighlightColorSettings'
     > = async ({ event, previousState }) => {

@@ -137,6 +137,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
     highlightColors: string
+    spaceSearchSuggestions: any
     suggestionsResults: SuggestionCard[]
     suggestionsResultsLoadState: TaskState
 
@@ -345,6 +346,7 @@ interface SidebarEvents {
         | 'logseq'
     processFileImportFeeds: { fileString: string }
     getHighlightColorSettings: null
+    updateSpacesSearchSuggestions: { searchQuery: string }
     saveHighlightColor: {
         noteId: string
         color: RGBAColor

@@ -1116,6 +1116,24 @@ export class AnnotationsSidebarContainer<
                                     null,
                                 )
                             }
+                            updateSpacesSearchSuggestions={(query: string) => {
+                                console.log('query', query)
+                                this.processEvent(
+                                    'updateSpacesSearchSuggestions',
+                                    { searchQuery: query },
+                                )
+                            }}
+                            selectSpaceForEditorPicker={(spaceId) => {
+                                this.processEvent('setNewPageNoteLists', {
+                                    lists: [
+                                        ...this.state.commentBox.lists,
+                                        spaceId,
+                                    ],
+                                })
+                            }}
+                            spaceSearchSuggestions={
+                                this.state.spaceSearchSuggestions
+                            }
                             highlightColorSettings={this.state.highlightColors}
                             initGetReplyEditProps={(sharedListReference) => (
                                 replyReference,

@@ -60,6 +60,9 @@ export interface AnnotationCreateGeneralProps {
     sidebarEvents?: AnnotationsSidebarInPageEventEmitter
     imageSupport: ImageSupportInterface<'caller'>
     getRootElement: () => HTMLElement
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: any
+    selectSpaceForEditorPicker?: (spaceId: number) => void
 }
 
 export interface Props
@@ -421,6 +424,13 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.setState({ onEditClick: editing })
                             }
                             setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                            updateSpacesSearchSuggestions={
+                                this.props.updateSpacesSearchSuggestions
+                            }
+                            spaceSearchSuggestions={
+                                this.props.spaceSearchSuggestions
+                            }
+                            selectSpace={this.props.selectSpaceForEditorPicker}
                         />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&

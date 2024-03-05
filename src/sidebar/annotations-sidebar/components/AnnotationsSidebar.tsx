@@ -298,6 +298,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     toggleAutoAddBulk: (toggleState: boolean) => void
     bulkSelectAnnotations: (annotationIds: string[]) => void
     bulkSelectionState: string[]
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: any
+    selectSpaceForEditorPicker: (spaceId: number) => void
 }
 
 interface AnnotationsSidebarState {
@@ -696,6 +699,13 @@ export class AnnotationsSidebar extends React.Component<
                     autoFocus={this.state.autoFocusCreateForm}
                     sidebarEvents={this.props.events && this.props.events}
                     imageSupport={this.props.imageSupport}
+                    updateSpacesSearchSuggestions={
+                        this.props.updateSpacesSearchSuggestions
+                    }
+                    spaceSearchSuggestions={this.props.spaceSearchSuggestions}
+                    selectSpaceForEditorPicker={
+                        this.props.selectSpaceForEditorPicker
+                    }
                 />
             </NewAnnotationSection>
         )
