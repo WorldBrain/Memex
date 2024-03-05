@@ -602,6 +602,15 @@ describe('Personal cloud translation layer', () => {
                 .createObject(
                     LOCAL_TEST_DATA_V24.sharedAnnotationMetadata.first,
                 )
+            await setups[0].storageManager
+                .collection('customLists')
+                .createObject(LOCAL_TEST_DATA_V24.customLists.first)
+            await setups[0].storageManager
+                .collection('sharedListMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.sharedListMetadata.first)
+            await setups[0].storageManager
+                .collection('pageListEntries')
+                .createObject(LOCAL_TEST_DATA_V24.pageListEntries.first)
             const updatedTitle = 'Updated title'
 
             const localPage: PipelineRes = await setups[0].storageManager
@@ -640,6 +649,7 @@ describe('Personal cloud translation layer', () => {
 
             const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
             const testMetadata = remoteData.personalContentMetadata
+            const testListShares = remoteData.personalListShare
             const testLocators = remoteData.personalContentLocator
 
             // prettier-ignore
@@ -651,11 +661,12 @@ describe('Personal cloud translation layer', () => {
                     'personalContentMetadata',
                     'personalContentLocator',
                     'sharedPageInfo',
+                    'sharedListEntry',
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...personalDataChanges(remoteData, [
                     [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id],
-                ], { skipChanges: 7 }),
+                ], { skipChanges: 10 }),
                 personalBlockStats: [personalBlockStats({ usedBlocks: 3 })],
                 personalContentMetadata: [
                     {
@@ -674,6 +685,16 @@ describe('Personal cloud translation layer', () => {
                     updatedWhen: expect.anything(),
                     createdWhen: expect.anything(),
                 }],
+                sharedListEntry: [{
+                    id: expect.anything(),
+                    creator: TEST_USER.id,
+                    entryTitle: updatedTitle,
+                    sharedList: testListShares.first.remoteId,
+                    normalizedUrl: testLocators.first.location,
+                    originalUrl: testLocators.first.originalLocation,
+                    createdWhen: expect.anything(),
+                    updatedWhen: expect.anything(),
+                }],
             })
             // prettier-ignore
             await testDownload([
@@ -681,9 +702,9 @@ describe('Personal cloud translation layer', () => {
                     type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: {
                         ...LOCAL_TEST_DATA_V24.pages.first,
                         fullTitle: updatedTitle
-                    }
+                    },
                 },
-            ], { skip: 4 })
+            ], { skip: 7 })
             testSyncPushTrigger({ wasTriggered: true })
         })
 
