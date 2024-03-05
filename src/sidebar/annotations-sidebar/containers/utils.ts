@@ -27,6 +27,7 @@ export const initAnnotationCardInstance = (
     cardMode: 'none',
     color: null,
     copyLoadingState: 'pristine',
+    isBulkSelected: false,
 })
 
 export const initListInstance = (

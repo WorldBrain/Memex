@@ -402,8 +402,9 @@ export class BackupBackgroundModule {
         // const backupProblemThreshold = 1000 * 60
         const backupProblemThreshold = 1000 * 60 * 60 * 24
 
-        if (lastBackup.getTime() > 0) {
-            const timeSinceLastBackup = Date.now() - lastBackup.getTime()
+        if (new Date(lastBackup).getTime() > 0) {
+            const timeSinceLastBackup =
+                Date.now() - new Date(lastBackup).getTime()
             if (timeSinceLastBackup < backupProblemThreshold) {
                 return
             }
@@ -422,7 +423,7 @@ export class BackupBackgroundModule {
         }
 
         const alreadyStoredRecently =
-            !!lastNotifShown && lastNotifShown > lastBackup
+            !!lastNotifShown && new Date(lastNotifShown) > new Date(lastBackup)
         await this.showBackupProblemNotif(notifId, {
             storeNotif: !alreadyStoredRecently,
         })
