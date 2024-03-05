@@ -47,6 +47,14 @@ export default class PageStorage extends StorageModule {
                 operation: 'createObject',
                 collection: 'pages',
             },
+            createPageMetadata: {
+                operation: 'createObject',
+                collection: 'pageMetadata',
+            },
+            createPageEntity: {
+                operation: 'createObject',
+                collection: 'pageEntities',
+            },
             updatePage: {
                 operation: 'updateObject',
                 collection: 'pages',
