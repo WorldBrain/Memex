@@ -221,9 +221,25 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     componentDidMount() {
         this.setTextAreaHeight()
 
-        this.setState({
-            currentHighlightColor: this.props.color,
-        })
+        if (!this.props.color) {
+            const highlightColorSettings: HighlightColor[] = JSON.parse(
+                this.props.highlightColorSettings,
+            )
+
+            const defaultHighlightSettings = highlightColorSettings.find(
+                (setting) => setting.id === 'default',
+            )
+            if (defaultHighlightSettings?.color) {
+                this.setState({
+                    defaultHighlightColor: defaultHighlightSettings.color,
+                    currentHighlightColor: defaultHighlightSettings.color,
+                })
+            }
+        } else {
+            this.setState({
+                currentHighlightColor: this.props.color,
+            })
+        }
     }
 
     // This is a hack to ensure this state, which isn't available on init, only gets set once
