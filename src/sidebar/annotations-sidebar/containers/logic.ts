@@ -412,6 +412,7 @@ export class SidebarContainerLogic extends UILogic<
                 bgModules: {
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,
+                    syncSettings: this.options.syncSettingsBG,
                     contentSharing: this.options.contentSharingBG,
                     pageActivityIndicator: this.options.pageActivityIndicatorBG,
                 },
