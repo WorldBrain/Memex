@@ -43,6 +43,7 @@ import Checkbox from 'src/common-ui/components/Checkbox'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -131,6 +132,13 @@ export interface AnnotationProps {
     isAutoAddEnabled?: boolean
     bulkSelectAnnotation?: () => void
     isBulkSelected?: boolean
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
+    selectSpaceForEditorPicker?: (spaceId: number) => void
+    addNewSpaceViaWikiLinks?: (
+        spaceName: string,
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
+    ) => void
 }
 
 export interface AnnotationEditableEventProps {
@@ -448,6 +456,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                 setEditing={
                                     this.props.annotationFooterDependencies
                                         .onEditHighlightIconClick
+                                }
+                                updateSpacesSearchSuggestions={
+                                    this.props.updateSpacesSearchSuggestions
+                                }
+                                spaceSearchSuggestions={
+                                    this.props.spaceSearchSuggestions
+                                }
+                                selectSpaceForEditorPicker={
+                                    this.props.selectSpaceForEditorPicker
+                                }
+                                addNewSpaceViaWikiLinks={(spaceName) =>
+                                    this.props.addNewSpaceViaWikiLinks(
+                                        spaceName,
+                                        this.props.unifiedId,
+                                    )
                                 }
                             />
                         </HighlightEditContainer>
@@ -795,6 +818,21 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         }
                         onEditCancel={
                             this.props.annotationEditDependencies.onEditCancel
+                        }
+                        updateSpacesSearchSuggestions={
+                            this.props.updateSpacesSearchSuggestions
+                        }
+                        spaceSearchSuggestions={
+                            this.props.spaceSearchSuggestions
+                        }
+                        selectSpaceForEditorPicker={
+                            this.props.selectSpaceForEditorPicker
+                        }
+                        addNewSpaceViaWikiLinks={(spaceName) =>
+                            this.props.addNewSpaceViaWikiLinks(
+                                spaceName,
+                                this.props.unifiedId,
+                            )
                         }
                     />
                 </AnnotationEditContainer>

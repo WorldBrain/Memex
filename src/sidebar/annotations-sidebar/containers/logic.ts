@@ -2797,6 +2797,71 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    addNewSpaceViaWikiLinksEditNote: EventHandler<
+        'addNewSpaceViaWikiLinksEditNote'
+    > = async ({ event, previousState }) => {
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await this.options.customListsBG.createCustomList({
+            name: event.spaceName,
+        })
+
+        this.options.annotationsCache.addList({
+            name: event.spaceName,
+            collabKey,
+            localId: localListId,
+            remoteId: remoteListId,
+            hasRemoteAnnotationsToLoad: false,
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            creator: previousState.currentUserReference ?? undefined,
+            parentLocalId: null,
+            isPrivate: true,
+        })
+
+        this.processUIEvent('updateListsForAnnotation', {
+            event: {
+                added: localListId,
+                deleted: null,
+                unifiedAnnotationId: event.unifiedAnnotationId,
+            },
+            previousState,
+        })
+    }
+
+    addNewSpaceViaWikiLinksNewNote: EventHandler<
+        'addNewSpaceViaWikiLinksNewNote'
+    > = async ({ event, previousState }) => {
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await this.options.customListsBG.createCustomList({
+            name: event.spaceName,
+        })
+
+        this.options.annotationsCache.addList({
+            name: event.spaceName,
+            collabKey,
+            localId: localListId,
+            remoteId: remoteListId,
+            hasRemoteAnnotationsToLoad: false,
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            creator: previousState.currentUserReference ?? undefined,
+            parentLocalId: null,
+            isPrivate: true,
+        })
+
+        const listsToAdd = [...previousState.commentBox.lists, localListId]
+
+        this.emitMutation({
+            commentBox: { lists: { $set: listsToAdd } },
+        })
+    }
+
     setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({
         event,
         previousState,

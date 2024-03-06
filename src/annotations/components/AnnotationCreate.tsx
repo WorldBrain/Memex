@@ -6,6 +6,7 @@ import styled, { css } from 'styled-components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
+    SpaceSearchSuggestion,
 } from '@worldbrain/memex-common/lib/editor'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -61,8 +62,9 @@ export interface AnnotationCreateGeneralProps {
     imageSupport: ImageSupportInterface<'caller'>
     getRootElement: () => HTMLElement
     updateSpacesSearchSuggestions?: (query: string) => void
-    spaceSearchSuggestions?: any
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
     selectSpaceForEditorPicker?: (spaceId: number) => void
+    addNewSpaceViaWikiLinks?: (spaceName: string) => void
 }
 
 export interface Props
@@ -431,6 +433,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.props.spaceSearchSuggestions
                             }
                             selectSpace={this.props.selectSpaceForEditorPicker}
+                            addNewSpaceViaWikiLinks={
+                                this.props.addNewSpaceViaWikiLinks
+                            }
                         />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&

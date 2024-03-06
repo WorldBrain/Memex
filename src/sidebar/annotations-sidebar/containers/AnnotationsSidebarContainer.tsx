@@ -466,7 +466,7 @@ export class AnnotationsSidebarContainer<
                         this.processEvent('setSelectedList', { unifiedListId })
                     }}
                     getRootElement={this.props.getRootElement}
-                    autoFocus
+                    autoFocus={true}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -1117,18 +1117,59 @@ export class AnnotationsSidebarContainer<
                                 )
                             }
                             updateSpacesSearchSuggestions={(query: string) => {
-                                console.log('query', query)
                                 this.processEvent(
                                     'updateSpacesSearchSuggestions',
                                     { searchQuery: query },
                                 )
                             }}
-                            selectSpaceForEditorPicker={(spaceId) => {
-                                this.processEvent('setNewPageNoteLists', {
-                                    lists: [
-                                        ...this.state.commentBox.lists,
-                                        spaceId,
-                                    ],
+                            selectSpaceForEditorPicker={(params: {
+                                spaceId: number
+                                newNote?: boolean
+                                unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
+                            }) => {
+                                if (params.newNote) {
+                                    this.processEvent('setNewPageNoteLists', {
+                                        lists: [
+                                            ...this.state.commentBox.lists,
+                                            params.spaceId,
+                                        ],
+                                    })
+                                } else {
+                                    this.processEvent(
+                                        'updateListsForAnnotation',
+                                        {
+                                            added: params.spaceId,
+                                            deleted: null,
+                                            unifiedAnnotationId:
+                                                params.unifiedAnnotationId,
+                                        },
+                                    )
+                                }
+                            }}
+                            addNewSpaceViaWikiLinksNewNote={async (
+                                spaceName,
+                            ) => {
+                                this.processEvent(
+                                    'addNewSpaceViaWikiLinksNewNote',
+                                    {
+                                        spaceName: spaceName,
+                                    },
+                                )
+                            }}
+                            addNewSpaceViaWikiLinksEditNote={async (
+                                spaceName,
+                                unifiedAnnotationId,
+                            ) => {
+                                const {
+                                    localListId,
+                                } = await this.props.customListsBG.createCustomList(
+                                    { name: spaceName },
+                                )
+
+                                this.processEvent('updateListsForAnnotation', {
+                                    added: localListId,
+                                    deleted: null,
+                                    unifiedAnnotationId: unifiedAnnotationId,
                                 })
                             }}
                             spaceSearchSuggestions={

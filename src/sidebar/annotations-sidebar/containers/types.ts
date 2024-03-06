@@ -41,6 +41,7 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -137,7 +138,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
     highlightColors: string
-    spaceSearchSuggestions: any
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
     suggestionsResults: SuggestionCard[]
     suggestionsResultsLoadState: TaskState
 
@@ -470,6 +471,15 @@ interface SidebarEvents {
         keepListsIfUnsharing?: boolean
         now?: number
     }>
+
+    addNewSpaceViaWikiLinksEditNote: {
+        spaceName: string
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId']
+    }
+
+    addNewSpaceViaWikiLinksNewNote: {
+        spaceName: string
+    }
 
     // Annotation events
     deleteAnnotation: AnnotationEvent<{}>
