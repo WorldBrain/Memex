@@ -3209,7 +3209,6 @@ export class AnnotationsSidebar extends React.Component<
                                 <Highlightbar />
                                 <AnnotationSuggestionsBox>
                                     <Markdown
-                                        imageSupport={this.props.imageSupport}
                                         isHighlight
                                         pageUrl={item.fullUrl}
                                     >
@@ -3228,7 +3227,6 @@ export class AnnotationsSidebar extends React.Component<
                                     getYoutubePlayer={
                                         this.props.getYoutubePlayer
                                     }
-                                    imageSupport={this.props.imageSupport}
                                 >
                                     {item.comment}
                                 </NoteText>
@@ -4317,7 +4315,7 @@ export class AnnotationsSidebar extends React.Component<
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
                 {selectedList.description?.length > 0 && (
-                    <SpaceDescription imageSupport={this.props.imageSupport}>
+                    <SpaceDescription>
                         {selectedList.description}
                     </SpaceDescription>
                 )}

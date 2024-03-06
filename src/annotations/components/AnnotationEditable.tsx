@@ -226,7 +226,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 this.props.highlightColorSettings,
             )
 
-            const defaultHighlightSettings = highlightColorSettings.find(
+            const defaultHighlightSettings = highlightColorSettings?.find(
                 (setting) => setting.id === 'default',
             )
             if (defaultHighlightSettings?.color) {
@@ -452,11 +452,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             />
                         </HighlightEditContainer>
                     ) : (
-                        <Markdown
-                            imageSupport={this.props.imageSupport}
-                            isHighlight
-                            pageUrl={this.props.pageUrl}
-                        >
+                        <Markdown isHighlight pageUrl={this.props.pageUrl}>
                             {this.state.isTruncatedHighlight
                                 ? this.state.truncatedTextHighlight
                                 : this.props.body}
@@ -847,7 +843,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     <NoteText
                         contextLocation={this.props.contextLocation}
                         getYoutubePlayer={this.props.getYoutubePlayer}
-                        imageSupport={this.props.imageSupport}
                     >
                         {comment}
                         {/* {this.state.isTruncatedNote
