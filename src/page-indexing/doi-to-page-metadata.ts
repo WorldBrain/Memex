@@ -1,8 +1,15 @@
 import type fetch from 'node-fetch'
-import type { PageMetadata as _PageMetadata } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type {
+    PageEntity as _PageEntity,
+    PageMetadata as _PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
 
 const CROSS_REF_API_URL = 'https://api.crossref.org/works/'
-type PageMetadata = Omit<_PageMetadata, 'normalizedPageUrl' | 'accessDate'>
+
+type PageEntity = Omit<_PageEntity, 'id' | 'normalizedPageUrl' | 'order'>
+type PageMetadata = Omit<_PageMetadata, 'normalizedPageUrl' | 'accessDate'> & {
+    authors: PageEntity[]
+}
 
 interface CrossRefAPIAuthor {
     given: string
@@ -33,30 +40,56 @@ interface CrossRefAPIResponse {
     }
 }
 
-function crossRefDateToDate(date: CrossRefAPIDate): Date {
-    // TODO
-    return null
+function crossRefAuthorsToEntities(
+    authors: CrossRefAPIAuthor[] = [],
+): PageEntity[] {
+    return authors.map((author) => ({
+        isPrimary: author.sequence === 'first',
+        additionalName: author.given,
+        name: author.family,
+    }))
+}
+
+function crossRefDateToTimestamp(date: CrossRefAPIDate): number {
+    const error = new Error('Did not find a valid Crossref date-parts object')
+    if (!date?.['date-parts']?.[0]) {
+        throw error
+    }
+    const {
+        'date-parts': [[year, month, day]],
+    } = date
+    if (year == null || month == null || day == null) {
+        throw error
+    }
+    return Date.UTC(year, month - 1, day).valueOf()
 }
 
 export async function doiToPageMetadata(params: {
     doi: string
     fetch: typeof fetch
 }): Promise<PageMetadata | null> {
-    let metadata: PageMetadata = { doi: params.doi }
-    const error = new Error(
-        `Failed fetching data from Crossref API - DOI: ${params.doi}`,
-    )
-    try {
-        const response = await params.fetch(CROSS_REF_API_URL + params.doi)
-        if (!response.ok) {
-            throw error
-        }
-
-        const responseJson: CrossRefAPIResponse = await response.json()
-        // TODO: deal with this
-    } catch (err) {
-        throw error
+    const metadata: PageMetadata = { doi: params.doi, authors: [] }
+    const response = await params.fetch(CROSS_REF_API_URL + params.doi)
+    if (!response.ok) {
+        throw new Error(
+            `Failed fetching data from Crossref API - DOI: ${params.doi}`,
+        )
     }
 
+    const data: CrossRefAPIResponse = await response.json()
+    if (!data?.message) {
+        throw new Error(
+            `Received unexpected data from Crossref API - DOI: ${params.doi}`,
+        )
+    }
+
+    metadata.title = data.message.title?.[0]
+    metadata.journalPage = data.message.page
+    metadata.journalVolume = data.message.volume
+    metadata.sourceName = data.message.publisher
+    metadata.journalName = data.message['container-title']?.[0]
+    metadata.journalIssue = data.message['journal-issue']?.issue
+    metadata.releaseDate = crossRefDateToTimestamp(data.message.published)
+    metadata.authors = crossRefAuthorsToEntities(data.message.author)
     return metadata
 }
