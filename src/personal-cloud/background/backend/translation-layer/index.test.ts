@@ -56,6 +56,7 @@ import delay from 'src/util/delay'
 import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { PipelineRes } from 'src/search'
 import { extractTerms } from '@worldbrain/memex-common/lib/page-indexing/pipeline'
+import type { ExceptionCapturer } from '@worldbrain/memex-common/lib/firebase-backend/types'
 
 const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
 
@@ -318,6 +319,9 @@ async function setup(options?: {
     })
 
     const fakeFetch = new FakeFetch()
+    const captureException: ExceptionCapturer = async (err) => {
+        console.warn('Got error in content sharing backend', err.message)
+    }
     const deviceUsers = options?.deviceUsers ?? DEFAULT_DEVICE_USERS
     const deviceUsersSet = new Set(deviceUsers)
     if (!deviceUsers.length) {
@@ -380,7 +384,7 @@ async function setup(options?: {
                 },
             }),
             fetch: fakeFetch.fetch as any,
-            captureException: async (err) => undefined, // TODO: implement
+            captureException,
             serverStorageManager,
             getSqlStorageMananager,
             getCurrentUserReference: async () => ({
@@ -467,6 +471,9 @@ async function setup(options?: {
                 getNow,
                 startTime: 0,
                 clientSchemaVersion,
+                getConfig: () => ({}),
+                captureException,
+                fetch: fakeFetch.fetch as any,
                 userId: downloadOptions?.userId ?? TEST_USER.id,
                 storageManager: serverStorage.manager,
                 __queryResultLimit: downloadOptions?.queryResultLimit,

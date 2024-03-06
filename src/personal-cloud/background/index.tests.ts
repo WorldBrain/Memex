@@ -1,5 +1,6 @@
 import SQLite3 from 'better-sqlite3'
 import StorageManager from '@worldbrain/storex'
+import fetchMock from 'fetch-mock'
 import { createSQLiteStorageBackend } from '@worldbrain/storex-backend-sql/lib/sqlite'
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import type {
@@ -36,6 +37,7 @@ import { MockPushMessagingService } from 'src/tests/push-messaging'
 
 export const BASE_TIMESTAMP = 555
 
+fetchMock.restore()
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
 type SyncTestSequence = SyncTestStep[]
@@ -317,6 +319,7 @@ export async function setupSyncBackgroundTest(
 
     let now = BASE_TIMESTAMP
     const getNow = () => now++
+    const fetch = fetchMock.sandbox()
     const pushMessagingService = new MockPushMessagingService()
     const setups: BackgroundIntegrationTestSetup[] = []
 
@@ -388,6 +391,13 @@ export async function setupSyncBackgroundTest(
                 activityStreams: services.activityStreams,
                 pushMessaging: pushMessagingService,
             },
+            getConfig: () => ({}),
+            captureException: async (err) => {
+                console.warn(
+                    'Got error in content sharing backend',
+                    err.message,
+                )
+            },
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,
             getUserId,
@@ -398,6 +408,7 @@ export async function setupSyncBackgroundTest(
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
             clientDeviceType: PersonalDeviceType.DesktopBrowser,
+            fetch: fetch as any,
         })
         const personalCloudMediaBackend = new StorexPersonalCloudMediaBackend({
             getNow,
