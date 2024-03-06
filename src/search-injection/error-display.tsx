@@ -10,13 +10,14 @@ import {
     ErrorNotification,
     ErrorNotificationProps,
 } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
-import * as constants from './constants'
+import { createInPageUI } from 'src/in-page-ui/utils'
 
 type RootProps = Pick<
     ErrorNotificationProps,
     'blockedBackground' | 'width' | 'positioning' | 'title' | 'errorMessage'
 > & {
     rootEl: HTMLElement
+    shadowRoot: ShadowRoot
 }
 
 interface RootState {
@@ -40,20 +41,27 @@ class Root extends React.PureComponent<RootProps, RootState> {
         })
     }
 
+    private removeRoot = () => {
+        const unmountResult = ReactDOM.unmountComponentAtNode(this.props.rootEl)
+        if (unmountResult) {
+            this.props.rootEl.remove()
+        }
+    }
+
     render() {
         if (!this.state.themeVariant) {
             return null
         }
+        const { rootEl, shadowRoot, ...props } = this.props
+        const memexTheme = theme({ variant: this.state.themeVariant })
 
         return (
-            <StyleSheetManager target={this.props.rootEl}>
-                <ThemeProvider
-                    theme={theme({ variant: this.state.themeVariant })}
-                >
+            <StyleSheetManager target={shadowRoot as any}>
+                <ThemeProvider theme={memexTheme}>
                     <ErrorNotification
-                        closeComponent={() => this.props.rootEl.remove()}
-                        getPortalRoot={() => this.props.rootEl}
-                        {...this.props}
+                        closeComponent={this.removeRoot}
+                        getPortalRoot={() => rootEl}
+                        {...props}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -61,22 +69,12 @@ class Root extends React.PureComponent<RootProps, RootState> {
     }
 }
 
-export type ErrorDisplayProps = Omit<RootProps, 'rootEl'>
+export type ErrorDisplayProps = Omit<RootProps, 'rootEl' | 'shadowRoot'>
 
 export const renderErrorDisplay = (props: ErrorDisplayProps): void => {
-    const existingRoot = document.getElementById(
-        constants.REACT_ROOTS.errorDisplay,
+    const { rootElement, shadowRoot } = createInPageUI('error-display')
+    ReactDOM.render(
+        <Root rootEl={rootElement} shadowRoot={shadowRoot} {...props} />,
+        rootElement,
     )
-    if (existingRoot) {
-        existingRoot.remove()
-    }
-    const root = document.createElement('div')
-    root.setAttribute('id', constants.REACT_ROOTS.errorDisplay)
-
-    const renderComponent = () => {
-        document.body.appendChild(root)
-        ReactDOM.render(<Root rootEl={root} {...props} />, root)
-    }
-
-    renderComponent()
 }

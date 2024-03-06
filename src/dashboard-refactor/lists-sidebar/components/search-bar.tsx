@@ -42,6 +42,7 @@ const Input = styled.input`
     width: 100%;
     height: 100%;
     border: none;
+    margin: revert !important;
     color: ${(props) => props.theme.colors.white};
     background: inherit;
     &::placeholder {
@@ -54,6 +55,7 @@ const Input = styled.input`
 
     flex-direction: flex-start;
     padding-left: 5px;
+    font-size: 14px !important;
 `
 
 const TextSpan = styled.span<{ bold?: boolean }>`

@@ -1,8 +1,9 @@
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
+import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { RemoteFunctionRole } from 'src/util/webextensionRPC'
 
 export type GenerateServerID = (collectionName: string) => number | string
@@ -35,4 +36,5 @@ export interface BackgroundModuleRemoteInterfaces<
     customLists: RemoteCollectionsInterface
     pageActivityIndicator: RemotePageActivityIndicatorInterface
     imageSupport: ImageSupportInterface<Role>
+    syncSettings: RemoteSyncSettingsInterface
 }

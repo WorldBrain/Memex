@@ -1,5 +1,6 @@
 import type TypedEventEmitter from 'typed-emitter'
 import { EventEmitter } from 'events'
+import fromPairs from 'lodash/fromPairs'
 import type {
     UnifiedList,
     UnifiedAnnotation,
@@ -7,6 +8,7 @@ import type {
     PageAnnotationsCacheInterface,
     UnifiedAnnotationForCache,
     UnifiedListForCache,
+    RGBAColor,
 } from './types'
 import {
     AnnotationsSorter,
@@ -22,20 +24,17 @@ import {
     forEachTreeTraverse,
     mapTreeTraverse,
 } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
-import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { createSyncSettingsStore } from 'src/sync-settings/util'
 import {
     defaultOrderableSorter,
     insertOrderedItemBeforeIndex,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
-import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { DEFAULT_HIGHLIGHT_COLOR } from '@worldbrain/memex-common/lib/annotations/constants'
 
 export interface PageAnnotationCacheDeps {
     sortingFn?: AnnotationsSorter
     events?: TypedEventEmitter<PageAnnotationsCacheEvents>
     debug?: boolean
-    syncSettingsBG?: RemoteSyncSettingsInterface
 }
 
 export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
@@ -64,28 +63,11 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
         UnifiedAnnotation['unifiedId']
     >()
 
-    private highlightColorSettings: HighlightColor[]
+    private highlightColorDict: { [id: string]: RGBAColor } = {}
 
     constructor(private deps: PageAnnotationCacheDeps) {
         deps.sortingFn = deps.sortingFn ?? sortByPagePosition
         deps.events = deps.events ?? new EventEmitter()
-
-        this.initializeAsync() // TODO: Move this to async init logic in the cache utils
-    }
-
-    async initializeAsync() {
-        // Call your async function here
-        const syncSettingsBG = this.deps.syncSettingsBG
-        if (syncSettingsBG != null) {
-            const syncSettings = createSyncSettingsStore({
-                syncSettingsBG,
-            })
-            const highlightColorSettings = await syncSettings.highlightColors?.get(
-                'highlightColors',
-            )
-
-            this.highlightColorSettings = highlightColorSettings
-        }
     }
 
     private generateAnnotationId = (): string =>
@@ -107,6 +89,12 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
 
     private warn = (msg: string) =>
         this.deps.debug ? console.warn(msg) : undefined
+
+    setHighlightColorDictionary: PageAnnotationsCacheInterface['setHighlightColorDictionary'] = (
+        colors,
+    ) => {
+        this.highlightColorDict = fromPairs(colors.map((c) => [c.id, c.color]))
+    }
 
     getAnnotationsArray: PageAnnotationsCacheInterface['getAnnotationsArray'] = () =>
         normalizedStateToArray(this.annotations)
@@ -212,11 +200,9 @@ export class PageAnnotationsCache implements PageAnnotationsCacheInterface {
     ): UnifiedAnnotation => {
         const unifiedAnnotationId = this.generateAnnotationId()
         if (annotation.color != null) {
-            const annotColorObject = this.highlightColorSettings?.find(
-                (item) => item.id === annotation.color,
-            )?.color
-
-            annotation.color = annotColorObject
+            annotation.color =
+                this.highlightColorDict[annotation.color as string] ??
+                DEFAULT_HIGHLIGHT_COLOR
         }
 
         if (annotation.remoteId != null) {

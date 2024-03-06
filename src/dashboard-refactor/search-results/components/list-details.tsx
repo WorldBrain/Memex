@@ -687,6 +687,14 @@ const DescriptionContainer = styled.div`
     margin-top: 10px;
     display: flex;
     justify-content: flex-start;
+    overflow: scroll;
+    max-height: 70vh;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 
     &:hover ${DescriptionEditContainer} {
         display: flex;

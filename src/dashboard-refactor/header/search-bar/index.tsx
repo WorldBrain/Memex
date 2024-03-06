@@ -200,13 +200,14 @@ const SearchBarContainer = styled.div<{
 
 const Input = styled.input`
     width: inherit;
-    font-size: 14px;
+    font-size: 14px !important;
     line-height: 18px;
     border: none;
     background-color: transparent;
     height: 44px;
     color: ${(props) => props.theme.colors.white};
     font-weight: 400;
+    margin: revert !important;
 
     &::placeholder {
         color: ${(props) => props.theme.colors.greyScale5};

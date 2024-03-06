@@ -162,7 +162,7 @@ export class DropdownMenuBtn extends React.PureComponent<Props, State> {
                     targetElementRef={this.menuRef.current}
                     closeComponent={() => this.setState({ isOpened: false })}
                     placement="bottom-end"
-                    width={this.props.width ?? '250px'}
+                    width={this.props.width ?? '290px'}
                     getPortalRoot={this.props.getRootElement}
                     offsetX={15}
                 >

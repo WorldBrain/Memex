@@ -250,9 +250,7 @@ export async function main(
         ? { type: 'user-reference', id: _currentUser.id }
         : null
     const fullPageUrl = await pageInfo.getFullPageUrl()
-    const annotationsCache = new PageAnnotationsCache({
-        syncSettingsBG: syncSettingsBG,
-    })
+    const annotationsCache = new PageAnnotationsCache({})
 
     const loadCacheDataPromise = hydrateCacheForPageAnnotations({
         fullPageUrl,
@@ -261,6 +259,7 @@ export async function main(
         bgModules: {
             annotations: annotationsBG,
             customLists: collectionsBG,
+            syncSettings: syncSettingsBG,
             contentSharing: contentSharingBG,
             pageActivityIndicator: pageActivityIndicatorBG,
         },

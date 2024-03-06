@@ -43,7 +43,6 @@ class DateRangeSelection extends Component<DateRangeSelectionProps> {
     }
 
     componentDidMount() {
-        console.log('DateRangeSelection mounted', arrowDown)
         // Override clear button handlers
         this.startDatePicker.onClearClick = this.handleClearClick({
             isStartDate: true,
