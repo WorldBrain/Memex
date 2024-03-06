@@ -1304,24 +1304,12 @@ export class DashboardContainer extends StatefulUIElement<
                         isProtected,
                         opts,
                     ) => {
-                        const prev = this.state.searchResults.noteData.byId[
-                            noteId
-                        ]
-                        const toMakeNonPublic =
-                            showExternalConfirmations &&
-                            prev.isShared &&
-                            !shouldShare
-                        return this.processEvent(
-                            toMakeNonPublic
-                                ? 'setPrivatizeNoteConfirmArgs'
-                                : 'saveNoteEdit',
-                            {
-                                noteId,
-                                shouldShare,
-                                isProtected,
-                                ...opts,
-                            },
-                        )
+                        return this.processEvent('saveNoteEdit', {
+                            noteId,
+                            shouldShare,
+                            isProtected,
+                            ...opts,
+                        })
                     },
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),

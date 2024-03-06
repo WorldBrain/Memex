@@ -944,70 +944,76 @@ export class DashboardLogic extends UILogic<State, Events> {
         const previousResults =
             previousState.searchResults.results[-1]?.pages.byId
 
-        const focusedItemIndex = Object.keys(previousResults)?.findIndex(
-            (key) => previousResults[key].isInFocus === true,
-        )
+        if (previousResults) {
+            const focusedItemIndex = Object?.keys(previousResults)?.findIndex(
+                (key) => previousResults[key].isInFocus === true,
+            )
 
-        let previousItem = Object.values(previousResults)[focusedItemIndex]
-        let nextItem
+            let previousItem = Object.values(previousResults)[focusedItemIndex]
+            let nextItem
 
-        nextItem = null
+            nextItem = null
 
-        if (event.pageId) {
-            nextItem = { id: event.pageId }
-        }
+            if (event.pageId) {
+                nextItem = { id: event.pageId }
+            }
 
-        if (event.direction === 'up') {
-            nextItem = Object.values(previousResults)[focusedItemIndex - 1]
-        }
-        if (event.direction === 'down') {
-            nextItem = Object.values(previousResults)[focusedItemIndex + 1]
-        }
+            if (event.direction === 'up') {
+                nextItem = Object.values(previousResults)[focusedItemIndex - 1]
+            }
+            if (event.direction === 'down') {
+                nextItem = Object.values(previousResults)[focusedItemIndex + 1]
+            }
 
-        if (nextItem) {
-            this.emitMutation({
-                searchResults: {
-                    results: {
-                        [-1]: {
-                            pages: {
-                                byId: {
-                                    ...(previousItem
-                                        ? {
-                                              [previousItem.id]: {
-                                                  isInFocus: { $set: false },
-                                              },
-                                          }
-                                        : {}),
-                                    [nextItem.id]: {
-                                        isInFocus: { $set: true },
+            if (nextItem) {
+                this.emitMutation({
+                    searchResults: {
+                        results: {
+                            [-1]: {
+                                pages: {
+                                    byId: {
+                                        ...(previousItem
+                                            ? {
+                                                  [previousItem.id]: {
+                                                      isInFocus: {
+                                                          $set: false,
+                                                      },
+                                                  },
+                                              }
+                                            : {}),
+                                        [nextItem.id]: {
+                                            isInFocus: { $set: true },
+                                        },
                                     },
                                 },
                             },
                         },
                     },
-                },
-            })
-        }
-        if (!nextItem && previousItem) {
-            this.emitMutation({
-                searchResults: {
-                    results: {
-                        [-1]: {
-                            pages: {
-                                byId: {
-                                    ...(previousItem
-                                        ? {
-                                              [previousItem.id]: {
-                                                  isInFocus: { $set: false },
-                                              },
-                                          }
-                                        : {}),
+                })
+            }
+            if (!nextItem && previousItem) {
+                this.emitMutation({
+                    searchResults: {
+                        results: {
+                            [-1]: {
+                                pages: {
+                                    byId: {
+                                        ...(previousItem
+                                            ? {
+                                                  [previousItem.id]: {
+                                                      isInFocus: {
+                                                          $set: false,
+                                                      },
+                                                  },
+                                              }
+                                            : {}),
+                                    },
                                 },
                             },
                         },
                     },
-                },
-            })
+                })
+            }
         }
     }
 
@@ -3397,10 +3403,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                               existing.pageUrl
                           ]?.lists ?? []),
                       ]
-                    : []
+                    : [...existing.lists]
 
                 const bodyToSave = await processCommentForImageUpload(
-                    editNoteForm.bodyInputValue ?? existing.highlight,
+                    editNoteForm.bodyInputValue ?? existing.highlight ?? null,
                 )
                 const commentToSave = await processCommentForImageUpload(
                     editNoteForm.inputValue ?? existing.comment,
