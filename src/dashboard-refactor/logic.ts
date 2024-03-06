@@ -1084,7 +1084,9 @@ export class DashboardLogic extends UILogic<State, Events> {
     search: EventHandler<'search'> = async ({ previousState, event }) => {
         const searchID = ++this.currentSearchID
         const searchFilters: UIMutation<State['searchFilters']> = {
-            skip: event.paginate ? { $apply: (skip) => skip + 1 } : { $set: 0 },
+            skip: event.paginate
+                ? { $apply: (skip) => skip + 10 }
+                : { $set: 0 },
         }
 
         await executeUITask(
@@ -1274,10 +1276,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
+    firstLoad = true
     private searchNotes = async (state: State) => {
+        if (this.firstLoad) {
+            state.searchFilters.limit = 2
+        } else {
+            state.searchFilters.limit = PAGE_SIZE
+        }
         const result = await this.options.searchBG.searchAnnotations(
             stateToSearchParams(state, this.options.annotationsCache),
         )
+
+        if (result.resultsExhausted) {
+            this.firstLoad = true
+        } else if (!result.resultsExhausted) {
+            this.firstLoad = false
+        }
 
         return {
             ...utils.annotationSearchResultToState(
