@@ -96,8 +96,8 @@ export default class PageStorage extends StorageModule {
                         sourceName: '$sourceName:string',
                         journalName: '$journalName:string',
                         journalPage: '$journalPage:string',
+                        journalIssue: '$journalIssue:string',
                         journalVolume: '$journalVolume:string',
-                        journalReleaseDate: '$journalReleaseDate:number',
                         releaseDate: '$releaseDate:number',
                         accessDate: '$accessDate:number',
                     },
@@ -470,7 +470,7 @@ export default class PageStorage extends StorageModule {
             journalName: metadata.journalName?.trim(),
             journalPage: metadata.journalPage?.trim(),
             journalVolume: metadata.journalVolume?.trim(),
-            journalReleaseDate: metadata.journalReleaseDate,
+            journalIssue: metadata.journalIssue,
         }
 
         const existing = await this.getPageMetadata(normalizedPageUrl)
