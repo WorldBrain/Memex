@@ -147,9 +147,7 @@ export class DashboardContainer extends StatefulUIElement<
         searchBG: runInBackground(),
         listsBG: runInBackground(),
         authBG: runInBackground(),
-        annotationsCache: new PageAnnotationsCache({
-            syncSettingsBG: runInBackground(),
-        }),
+        annotationsCache: new PageAnnotationsCache({}),
         openSpaceInWebUI: (remoteListId) =>
             window.open(getListShareUrl({ remoteListId }), '_blank'),
         imageSupportBG: runInBackground(),

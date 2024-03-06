@@ -147,9 +147,15 @@ export default class BackupProcedure {
             const backupTime = new Date()
             await this._doIncrementalBackup(backupTime, this.events)
             if (process.env.STORE_BACKUP_TIME !== 'false') {
-                await this.localBackupSettings.set('lastBackup', backupTime)
+                await this.localBackupSettings.set(
+                    'lastBackup',
+                    backupTime.toString(),
+                )
             }
-            await this.localBackupSettings.set('lastBackupFinished', backupTime)
+            await this.localBackupSettings.set(
+                'lastBackupFinished',
+                backupTime.toString(),
+            )
         }
 
         setTimeout(async () => {

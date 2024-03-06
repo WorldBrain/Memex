@@ -81,6 +81,4 @@ export const SEARCH_INJECTION_DEFAULT = {
 export const REACT_ROOTS = {
     youtubeInterface: '__MEMEX-YOUTUBE-INTERFACE-ROOT',
     searchEngineInjection: '__MEMEX-SEARCH-INJECTION-ROOT',
-    searchDisplay: '__MEMEX-SEARCH-ROOT',
-    errorDisplay: '__MEMEX-ERROR-ROOT',
 }

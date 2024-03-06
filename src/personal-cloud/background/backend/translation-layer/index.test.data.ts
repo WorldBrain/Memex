@@ -11,6 +11,10 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { buildMaterializedPath } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import {
+    DEFAULT_KEY,
+    DEFAULT_SPACE_BETWEEN,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -537,6 +541,7 @@ export const LOCAL_TEST_DATA_V24 = {
             title: 'Roam Markdown',
             code: '[[{{{PageTitle}}}]]',
             outputFormat: 'markdown',
+            order: DEFAULT_KEY,
         },
         second: {
             id: 2,
@@ -544,6 +549,7 @@ export const LOCAL_TEST_DATA_V24 = {
             title: 'Other Markdown',
             code: '[[{{{PageUrl}}}]]',
             outputFormat: 'markdown',
+            order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN,
         },
     },
     settings: {
@@ -1441,6 +1447,7 @@ export const REMOTE_TEST_DATA_V24 = {
             title: LOCAL_TEST_DATA_V24.templates.first.title,
             localId: LOCAL_TEST_DATA_V24.templates.first.id,
             code: LOCAL_TEST_DATA_V24.templates.first.code,
+            order: LOCAL_TEST_DATA_V24.templates.first.order,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             outputFormat: 'markdown',
             user: TEST_USER.id,
@@ -1453,6 +1460,7 @@ export const REMOTE_TEST_DATA_V24 = {
             title: LOCAL_TEST_DATA_V24.templates.second.title,
             localId: LOCAL_TEST_DATA_V24.templates.second.id,
             code: LOCAL_TEST_DATA_V24.templates.second.code,
+            order: LOCAL_TEST_DATA_V24.templates.second.order,
             createdByDevice: REMOTE_DEVICES_V24.first.id,
             outputFormat: 'markdown',
             user: TEST_USER.id,

@@ -23,6 +23,7 @@ import type { SharedListEntry } from '@worldbrain/memex-common/lib/content-shari
 import type { BackgroundModuleRemoteInterfaces } from 'src/background-script/types'
 import type { SharedListMetadata } from 'src/content-sharing/background/types'
 import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { createSyncSettingsStore } from 'src/sync-settings/util'
 
 export const reshapeAnnotationForCache = (
     annot: Annotation & {
@@ -96,22 +97,6 @@ export const reshapeSharedAnnotationForCache = (
         ...(opts.extraData ?? {}),
     }
 }
-
-// export const reshapeCacheAnnotation = (
-//     annot: UnifiedAnnotation & Required<Pick<UnifiedAnnotation, 'localId'>>,
-// ): Annotation => ({
-//     url: annot.localId,
-//     pageUrl: annot.normalizedPageUrl,
-//     body: annot.body,
-//     comment: annot.comment,
-//     selector: annot.selector,
-//     isShared: annot.isShared,
-//     isBulkShareProtected: annot.isBulkShareProtected,
-//     lastEdited: new Date(annot.lastEdited),
-//     createdWhen: new Date(annot.createdWhen),
-//     lists: [],
-//     tags: [],
-// })
 
 export const reshapeLocalListForCache = (
     list: PageList,
@@ -220,9 +205,10 @@ interface CacheHydratorDeps<
 // NOTE: this is tested as part of the sidebar logic tests
 export async function hydrateCacheForPageAnnotations(
     args: CacheHydratorDeps<
-        | 'contentSharing'
         | 'customLists'
         | 'annotations'
+        | 'syncSettings'
+        | 'contentSharing'
         | 'pageActivityIndicator'
     > & {
         fullPageUrl: string
@@ -266,10 +252,16 @@ export async function hydrateCacheForPageAnnotations(
     const remoteIdsByAnnot = await args.bgModules.contentSharing.getRemoteAnnotationIds(
         { annotationUrls },
     )
-
     const pageLocalListIds = await args.bgModules.customLists.fetchPageLists({
         url: args.fullPageUrl,
     })
+    const syncSettingsStore = createSyncSettingsStore({
+        syncSettingsBG: args.bgModules.syncSettings,
+    })
+    const highlightColors = await syncSettingsStore.highlightColors.get(
+        'highlightColors',
+    )
+    args.cache.setHighlightColorDictionary(highlightColors)
 
     args.cache.setAnnotations(
         annotationsData.map((annot) => {

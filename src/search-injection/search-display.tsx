@@ -7,14 +7,13 @@ import {
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import type { DashboardDependencies } from 'src/dashboard-refactor/types'
-import * as constants from './constants'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import { InPageSearchModal } from '@worldbrain/memex-common/lib/common-ui/components/inPage-search-modal'
-import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { createInPageUI } from 'src/in-page-ui/utils'
 
 type RootProps = Omit<DashboardDependencies, 'theme' | 'openSpaceInWebUI'> & {
     rootEl: HTMLElement
-    bgScriptBG: RemoteBGScriptInterface
+    shadowRoot: ShadowRoot
 }
 
 interface RootState {
@@ -30,12 +29,10 @@ class Root extends React.PureComponent<RootProps, RootState> {
         })
     }
 
-    removeRoot = (rootEl: HTMLElement) => {
-        const unmountResult = ReactDOM.unmountComponentAtNode(rootEl)
+    private removeRoot = () => {
+        const unmountResult = ReactDOM.unmountComponentAtNode(this.props.rootEl)
         if (unmountResult) {
-            rootEl.remove()
-        } else {
-            console.error('DashboardContainer unmounting failed')
+            this.props.rootEl.remove()
         }
     }
 
@@ -43,14 +40,14 @@ class Root extends React.PureComponent<RootProps, RootState> {
         if (!this.state.themeVariant) {
             return null
         }
-        const { rootEl, ...props } = this.props
+        const { rootEl, shadowRoot, ...props } = this.props
         const memexTheme = theme({ variant: this.state.themeVariant })
 
         return (
-            <StyleSheetManager target={rootEl}>
+            <StyleSheetManager target={shadowRoot as any}>
                 <ThemeProvider theme={memexTheme}>
                     <InPageSearchModal
-                        closeComponent={() => this.removeRoot(rootEl)}
+                        closeComponent={this.removeRoot}
                         getPortalRoot={() => rootEl}
                         positioning="centerCenter"
                         blockedBackground
@@ -61,7 +58,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
                             theme={memexTheme}
                             getRootElement={() => rootEl}
                             onResultSelect={(exportedResultText) => null}
-                            closeInPageMode={() => this.removeRoot(rootEl)}
+                            closeInPageMode={this.removeRoot}
                             openSettings={() => {
                                 this.props.bgScriptBG.openOptionsTab('settings')
                             }}
@@ -73,22 +70,15 @@ class Root extends React.PureComponent<RootProps, RootState> {
     }
 }
 
-export type SearchDisplayProps = Omit<RootProps, 'rootEl' | 'inPageMode'>
+export type SearchDisplayProps = Omit<
+    RootProps,
+    'rootEl' | 'shadowRoot' | 'inPageMode'
+>
 
 export const renderSearchDisplay = (props: SearchDisplayProps): void => {
-    const existingRoot = document.getElementById(
-        constants.REACT_ROOTS.searchDisplay,
+    const { rootElement, shadowRoot } = createInPageUI('search-display')
+    ReactDOM.render(
+        <Root rootEl={rootElement} shadowRoot={shadowRoot} {...props} />,
+        rootElement,
     )
-    if (existingRoot) {
-        existingRoot.remove()
-    }
-    const root = document.createElement('div')
-    root.setAttribute('id', constants.REACT_ROOTS.searchDisplay)
-
-    const renderComponent = () => {
-        document.body.appendChild(root)
-        ReactDOM.render(<Root rootEl={root} {...props} />, root)
-    }
-
-    renderComponent()
 }

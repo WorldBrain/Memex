@@ -294,6 +294,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
     localFoldersList: LocalFolder[]
     showFeedSourcesMenu: boolean
+    bulkSelectionState: string[]
 }
 
 export interface LocalFolder {
@@ -430,6 +431,11 @@ interface SidebarEvents {
     // List instance events
     expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
     markFeedAsRead: null
+    bulkSelectAnnotations: {
+        annotationIds: UnifiedAnnotation['unifiedId'][]
+    }
+
+    toggleAutoAddBulk: { shouldAutoAdd: boolean }
 
     // Annotation card instance events
     setAnnotationEditCommentText: AnnotationCardInstanceEvent<{
@@ -474,6 +480,10 @@ interface SidebarEvents {
         deleted: number | null
         options?: { protectAnnotation?: boolean }
     }>
+    updateListsForAnnotationS: {
+        added: number | null
+        deleted: number | null
+    }
     updateAnnotationShareInfo: AnnotationEvent<{
         keepListsIfUnsharing?: boolean
         privacyLevel: AnnotationPrivacyLevels
@@ -592,6 +602,7 @@ export interface AnnotationCardInstance {
     body: string
     color: string
     copyLoadingState: TaskState
+    isBulkSelected: boolean
 }
 export interface SuggestionCard {
     fullUrl: UnifiedAnnotation['unifiedId']
