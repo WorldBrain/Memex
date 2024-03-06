@@ -30,6 +30,11 @@ import {
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import {
+    PageEntity,
+    PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import { PageMetadataUpdateArgs } from './types'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
@@ -46,14 +51,6 @@ export default class PageStorage extends StorageModule {
             createPage: {
                 operation: 'createObject',
                 collection: 'pages',
-            },
-            createPageMetadata: {
-                operation: 'createObject',
-                collection: 'pageMetadata',
-            },
-            createPageEntity: {
-                operation: 'createObject',
-                collection: 'pageEntities',
             },
             updatePage: {
                 operation: 'updateObject',
@@ -73,6 +70,81 @@ export default class PageStorage extends StorageModule {
                 args: {
                     url: '$url:string',
                 },
+            },
+            createPageMetadata: {
+                operation: 'createObject',
+                collection: 'pageMetadata',
+            },
+            findPageMetadata: {
+                operation: 'findObject',
+                collection: 'pageMetadata',
+                args: {
+                    normalizedPageUrl: '$normalizedPageUrl:string',
+                },
+            },
+            updatePageMetadata: {
+                operation: 'updateObject',
+                collection: 'pageMetadata',
+                args: [
+                    {
+                        normalizedPageUrl: '$normalizedPageUrl:string',
+                    },
+                    {
+                        doi: '$doi:string',
+                        title: '$title:string',
+                        annotation: '$annotation:string',
+                        sourceName: '$sourceName:string',
+                        journalName: '$journalName:string',
+                        journalPage: '$journalPage:string',
+                        journalVolume: '$journalVolume:string',
+                        journalReleaseDate: '$journalReleaseDate:number',
+                        releaseDate: '$releaseDate:number',
+                        accessDate: '$accessDate:number',
+                    },
+                ],
+            },
+            deletePageMetadata: {
+                operation: 'deleteObject',
+                collection: 'pageMetadata',
+                args: {
+                    normalizedPageUrl: '$normalizedPageUrl:string',
+                },
+            },
+            createPageEntity: {
+                operation: 'createObject',
+                collection: 'pageEntities',
+            },
+            findPageEntitiesByUrl: {
+                operation: 'findObjects',
+                collection: 'pageEntities',
+                args: {
+                    normalizedPageUrl: '$normalizedPageUrl:string',
+                },
+            },
+            updatePageEntity: {
+                operation: 'updateObject',
+                collection: 'pageEntities',
+                args: [
+                    {
+                        id: '$id:number',
+                    },
+                    {
+                        name: '$name:string',
+                        order: '$order:int',
+                        isPrimary: '$isPrimary:boolean',
+                        additionalName: '$additionalName:string',
+                    },
+                ],
+            },
+            deletePageEntitiesByUrl: {
+                operation: 'deleteObjects',
+                collection: 'pageEntities',
+                args: { normalizedPageUrl: '$normalizedPageUrl:string' },
+            },
+            deletePageEntity: {
+                operation: 'deleteObject',
+                collection: 'pageEntities',
+                args: { id: '$id:number' },
             },
             createVisit: {
                 operation: 'createObject',
@@ -158,17 +230,6 @@ export default class PageStorage extends StorageModule {
         },
     })
 
-    async createPageIfNotExistsOrIsStub(pageData: PipelineRes): Promise<void> {
-        const normalizedUrl = normalizeUrl(pageData.url, {})
-        const existingPage = await this.operation('findPageByUrl', {
-            url: normalizedUrl,
-        })
-
-        if (!existingPage || pageIsStub(existingPage)) {
-            return this.createPage(pageData)
-        }
-    }
-
     async createPageIfNotExists(pageData: PipelineRes): Promise<void> {
         const normalizedUrl = normalizeUrl(pageData.url, {})
         const exists = await this.pageExists(normalizedUrl)
@@ -183,7 +244,7 @@ export default class PageStorage extends StorageModule {
         pageContentInfo?: any,
         userId?: Promise<AuthenticatedUser> | string | null,
     ) {
-        const normalizedUrl = normalizeUrl(pageData.url, {})
+        const normalizedUrl = normalizeUrl(pageData.url)
 
         await this.operation('createPage', {
             ...pageData,
@@ -336,6 +397,89 @@ export default class PageStorage extends StorageModule {
             .collection('visits')
             .updateObjects({ time: visit.time, url: normalizedUrl }, data)
             .catch(initErrHandler())
+    }
+
+    private async updatePageEntities(
+        normalizedPageUrl: string,
+        incomingEntities: Omit<PageEntity, 'normalizedPageUrl'>[],
+    ): Promise<void> {
+        const existingEntities: PageEntity[] = await this.operation(
+            'findPageEntitiesByUrl',
+            { normalizedPageUrl },
+        )
+        const existingIds = new Set(existingEntities.map((e) => e.id))
+        const incomingIds = new Set(incomingEntities.map((e) => e.id))
+        const toAdd = incomingEntities.filter((e) => !existingIds.has(e.id))
+        const toUpdate = incomingEntities.filter((e) => existingIds.has(e.id))
+        const toDelete = existingEntities.filter((e) => !incomingIds.has(e.id))
+
+        for (const entity of toAdd) {
+            await this.operation('createPageEntity', entity)
+        }
+        for (const entity of toDelete) {
+            await this.operation('deletePageEntity', entity)
+        }
+        for (const incomingEntity of toUpdate) {
+            const existing = existingEntities.find(
+                (e) => e.id === incomingEntity.id,
+            )
+            // Skip update if nothing changed
+            if (
+                existing.name === incomingEntity.name.trim() &&
+                existing.additionalName ===
+                    incomingEntity.additionalName?.trim() &&
+                existing.isPrimary === incomingEntity.isPrimary &&
+                existing.order === incomingEntity.order
+            ) {
+                continue
+            }
+            await this.operation('updatePageEntity', {
+                id: incomingEntity.id,
+                name: incomingEntity.name.trim(),
+                order: incomingEntity.order,
+                isPrimary: incomingEntity.isPrimary,
+                additionalName: incomingEntity.additionalName?.trim(),
+            })
+        }
+    }
+
+    async getPageMetadata(
+        normalizedPageUrl: string,
+    ): Promise<PageMetadata | null> {
+        const existing: PageMetadata | null = await this.operation(
+            'findPageMetadata',
+            { normalizedPageUrl },
+        )
+        return existing
+    }
+
+    async updatePageMetadata({
+        normalizedPageUrl,
+        accessDate = Date.now(),
+        authors,
+        ...metadata
+    }: PageMetadataUpdateArgs): Promise<void> {
+        const nextMetadata: PageMetadata = {
+            accessDate,
+            normalizedPageUrl,
+            doi: metadata.doi?.trim(),
+            title: metadata.title?.trim(),
+            releaseDate: metadata.releaseDate,
+            annotation: metadata.annotation?.trim(),
+            sourceName: metadata.sourceName?.trim(),
+            journalName: metadata.journalName?.trim(),
+            journalPage: metadata.journalPage?.trim(),
+            journalVolume: metadata.journalVolume?.trim(),
+            journalReleaseDate: metadata.journalReleaseDate,
+        }
+
+        const existing = await this.getPageMetadata(normalizedPageUrl)
+        if (!existing) {
+            await this.operation('createPageMetadata', nextMetadata)
+        } else {
+            await this.operation('updatePageMetadata', nextMetadata)
+        }
+        await this.updatePageEntities(normalizedPageUrl, authors)
     }
 
     async createFavIconIfNeeded(hostname: string, favIcon: string | Blob) {

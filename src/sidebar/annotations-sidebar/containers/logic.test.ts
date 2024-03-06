@@ -127,6 +127,7 @@ const setupLogicHelper = async ({
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
         pageIndexingBG: {
+            updatePageMetadata: backgroundModules.pages.updatePageMetadata,
             updatePageTitle: backgroundModules.pages.updatePageTitle,
             lookupPageTitleForUrl:
                 backgroundModules.pages.lookupPageTitleForUrl,

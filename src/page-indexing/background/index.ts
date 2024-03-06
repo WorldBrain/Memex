@@ -122,6 +122,9 @@ export class PageIndexingBackground {
         })
 
         this.remoteFunctions = {
+            updatePageMetadata: remoteFunctionWithoutExtraArgs(
+                this.updatePageMetadata,
+            ),
             updatePageTitle: remoteFunctionWithExtraArgs((info, params) =>
                 this.updatePageTitle(params),
             ),
@@ -911,5 +914,17 @@ export class PageIndexingBackground {
             return
         }
         return time !== '$now' ? time : this.options.getNow()
+    }
+
+    updatePageMetadata: PageIndexingInterface<
+        'provider'
+    >['updatePageMetadata']['function'] = async ({
+        normalizedPageUrl,
+        ...metadata
+    }) => {
+        await this.storage.updatePageMetadata({
+            normalizedPageUrl,
+            ...metadata,
+        })
     }
 }

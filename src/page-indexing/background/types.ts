@@ -1,9 +1,13 @@
-import {
+import type {
     ContentLocator,
     ContentIdentifier,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
-import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import {
+import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import type {
+    PageEntity,
+    PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type {
     RemoteFunctionRole,
     RemoteFunctionWithExtraArgs,
     RemoteFunctionWithoutExtraArgs,
@@ -29,6 +33,15 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         Role,
         { normaliedPageUrl: string; title: string }
     >
+    updatePageMetadata: RemoteFunctionWithoutExtraArgs<
+        Role,
+        PageMetadataUpdateArgs
+    >
+}
+
+export type PageMetadataUpdateArgs = Omit<PageMetadata, 'accessDate'> & {
+    accessDate?: number
+    authors: Omit<PageEntity, 'normalizedPageUrl'>[]
 }
 
 export interface InitContentIdentifierParams {
