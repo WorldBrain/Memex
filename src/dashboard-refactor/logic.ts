@@ -328,6 +328,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 confirmPrivatizeNoteArgs: null,
                 confirmSelectNoteSpaceArgs: null,
             },
+            spaceSearchSuggestions: [],
             searchResults: {
                 results: {},
                 noResultsType: null,
@@ -943,7 +944,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const previousResults =
             previousState.searchResults.results[-1]?.pages.byId
 
-        const focusedItemIndex = Object.keys(previousResults).findIndex(
+        const focusedItemIndex = Object.keys(previousResults)?.findIndex(
             (key) => previousResults[key].isInFocus === true,
         )
 
@@ -1083,9 +1084,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     search: EventHandler<'search'> = async ({ previousState, event }) => {
         const searchID = ++this.currentSearchID
         const searchFilters: UIMutation<State['searchFilters']> = {
-            skip: event.paginate
-                ? { $apply: (skip) => skip + PAGE_SIZE }
-                : { $set: 0 },
+            skip: event.paginate ? { $apply: (skip) => skip + 1 } : { $set: 0 },
         }
 
         await executeUITask(
@@ -2482,6 +2481,75 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
+        })
+    }
+
+    addNewSpaceViaWikiLinksNewNote: EventHandler<
+        'addNewSpaceViaWikiLinksNewNote'
+    > = async ({ event, previousState }) => {
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await this.options.listsBG.createCustomList({
+            name: event.spaceName,
+        })
+
+        const { unifiedId } = this.options.annotationsCache.addList({
+            name: event.spaceName,
+            collabKey,
+            localId: localListId,
+            remoteId: remoteListId,
+            hasRemoteAnnotationsToLoad: false,
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            creator:
+                previousState.currentUser != null
+                    ? {
+                          type: 'user-reference',
+                          id: previousState.currentUser.id,
+                      }
+                    : undefined,
+            parentLocalId: null,
+            isPrivate: true,
+        })
+
+        const listsToAdd = [
+            ...previousState.searchResults.results[event.day].pages.byId[
+                event.pageId
+            ].newNoteForm.lists,
+            unifiedId,
+        ]
+
+        this.processUIEvent('setPageNewNoteLists', {
+            event: {
+                day: event.day,
+                pageId: event.pageId,
+                lists: listsToAdd,
+            },
+            previousState,
+        })
+    }
+
+    updateSpacesSearchSuggestions: EventHandler<
+        'updateSpacesSearchSuggestions'
+    > = async ({ event, previousState }) => {
+        const lists = this.options.annotationsCache.lists.allIds
+            .filter(
+                (listId) =>
+                    this.options.annotationsCache.lists.byId[listId].name
+                        .toLowerCase()
+                        .includes(event.searchQuery.toLowerCase()) &&
+                    this.options.annotationsCache.lists.byId[listId].type !==
+                        'page-link',
+            )
+            .map((listId) => ({
+                id: this.options.annotationsCache.lists.byId[listId].localId,
+                name: this.options.annotationsCache.lists.byId[listId].name,
+            }))
+
+        this.emitMutation({
+            spaceSearchSuggestions: { $set: lists },
         })
     }
 

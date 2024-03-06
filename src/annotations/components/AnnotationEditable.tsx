@@ -135,7 +135,7 @@ export interface AnnotationProps {
     updateSpacesSearchSuggestions?: (query: string) => void
     spaceSearchSuggestions?: SpaceSearchSuggestion[]
     selectSpaceForEditorPicker?: (spaceId: number) => void
-    addNewSpaceViaWikiLinks?: (
+    addNewSpaceViaWikiLinksEditNote?: (
         spaceName: string,
         unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
     ) => void
@@ -467,7 +467,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     this.props.selectSpaceForEditorPicker
                                 }
                                 addNewSpaceViaWikiLinks={(spaceName) =>
-                                    this.props.addNewSpaceViaWikiLinks(
+                                    this.props.addNewSpaceViaWikiLinksEditNote(
                                         spaceName,
                                         this.props.unifiedId,
                                     )
@@ -829,7 +829,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             this.props.selectSpaceForEditorPicker
                         }
                         addNewSpaceViaWikiLinks={(spaceName) =>
-                            this.props.addNewSpaceViaWikiLinks(
+                            this.props.addNewSpaceViaWikiLinksEditNote(
                                 spaceName,
                                 this.props.unifiedId,
                             )

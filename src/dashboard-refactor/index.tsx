@@ -55,7 +55,7 @@ import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/t
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import BulkEditWidget from 'src/bulk-edit'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
-import type { RGBAColor } from 'src/annotations/cache/types'
+import type { RGBAColor, UnifiedAnnotation } from 'src/annotations/cache/types'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import SyncStatusMenu from './header/sync-status-menu'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
@@ -986,6 +986,12 @@ export class DashboardContainer extends StatefulUIElement<
                         analyticsAction: 'copyListLink',
                     })
                 }
+                updateSpacesSearchSuggestions={(query: string) => {
+                    this.processEvent('updateSpacesSearchSuggestions', {
+                        searchQuery: query,
+                    })
+                }}
+                spaceSearchSuggestions={this.state.spaceSearchSuggestions}
                 pageInteractionProps={{
                     onClick: (day, pageId) => async (event) =>
                         this.processEvent('clickPageResult', {
@@ -1245,6 +1251,37 @@ export class DashboardContainer extends StatefulUIElement<
                             fullPageUrl:
                                 searchResults.pageData.byId[pageId].fullUrl,
                         }),
+                    addNewSpaceViaWikiLinksNewNote: (day, pageId) => (
+                        spaceName: string,
+                    ) => {
+                        this.processEvent('addNewSpaceViaWikiLinksNewNote', {
+                            spaceName: spaceName,
+                            day: day,
+                            pageId: pageId,
+                        })
+                    },
+
+                    selectSpaceForEditorPicker: (day, pageId) => (
+                        spaceId: number,
+                    ) => {
+                        const listData = this.props.annotationsCache.getListByLocalId(
+                            spaceId,
+                        )
+                        if (!listData) {
+                            throw new Error(
+                                'Specified list to add to page could not be found',
+                            )
+                        }
+                        this.processEvent('setPageNewNoteLists', {
+                            day,
+                            pageId,
+                            lists: [
+                                ...this.state.searchResults.results[day].pages
+                                    .byId[pageId].newNoteForm.lists,
+                                listData.unifiedId,
+                            ],
+                        })
+                    },
                 }}
                 noteInteractionProps={{
                     onEditBtnClick: (noteId) => () =>
@@ -1381,6 +1418,23 @@ export class DashboardContainer extends StatefulUIElement<
                             privacyLevel: state.privacyLevel,
                             keepListsIfUnsharing: opts?.keepListsIfUnsharing,
                         }),
+                    addNewSpaceViaWikiLinksEditNote: (noteId) => async (
+                        spaceName: string,
+                    ) => {
+                        const {
+                            localListId,
+                        } = await this.props.listsBG.createCustomList({
+                            name: spaceName,
+                        })
+
+                        return this.processEvent('setNoteLists', {
+                            ...this.localListPickerArgIdsToCached({
+                                added: localListId,
+                                deleted: null,
+                            }),
+                            noteId,
+                        })
+                    },
                 }}
             />
         )

@@ -720,7 +720,7 @@ export class AnnotationsSidebar extends React.Component<
                             unifiedAnnotationId: null,
                         })
                     }
-                    addNewSpaceViaWikiLinks={
+                    addNewSpaceViaWikiLinksNewNote={
                         this.props.addNewSpaceViaWikiLinksNewNote
                     }
                 />
@@ -1069,7 +1069,7 @@ export class AnnotationsSidebar extends React.Component<
                                     unifiedAnnotationId: annotation.unifiedId,
                                 })
                             }
-                            addNewSpaceViaWikiLinks={
+                            addNewSpaceViaWikiLinksEditNote={
                                 this.props.addNewSpaceViaWikiLinksEditNote
                             }
                         />
@@ -3946,7 +3946,7 @@ export class AnnotationsSidebar extends React.Component<
                                     unifiedAnnotationId: annot.unifiedId,
                                 })
                             }
-                            addNewSpaceViaWikiLinks={
+                            addNewSpaceViaWikiLinksEditNote={
                                 this.props.addNewSpaceViaWikiLinksEditNote
                             }
                         />

@@ -37,6 +37,8 @@ interface State {
 
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
+    addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
+    selectSpaceForEditorPicker: (spaceId: number) => void
     onCancel: () => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
@@ -63,8 +65,6 @@ export interface AnnotationCreateGeneralProps {
     getRootElement: () => HTMLElement
     updateSpacesSearchSuggestions?: (query: string) => void
     spaceSearchSuggestions?: SpaceSearchSuggestion[]
-    selectSpaceForEditorPicker?: (spaceId: number) => void
-    addNewSpaceViaWikiLinks?: (spaceName: string) => void
 }
 
 export interface Props
@@ -434,7 +434,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             }
                             selectSpace={this.props.selectSpaceForEditorPicker}
                             addNewSpaceViaWikiLinks={
-                                this.props.addNewSpaceViaWikiLinks
+                                this.props.addNewSpaceViaWikiLinksNewNote
                             }
                         />
                     </EditorContainer>

@@ -475,6 +475,28 @@ export class AnnotationsSidebarContainer<
             hoverState: null,
             imageSupport: this.props.imageSupport,
             getRootElement: this.props.getRootElement,
+            addNewSpaceViaWikiLinksNewNote: (spaceName) => {
+                this.processEvent('addNewSpaceViaWikiLinksNewNote', {
+                    spaceName: spaceName,
+                })
+            },
+            selectSpaceForEditorPicker: (
+                spaceId: number,
+                newNote?: boolean,
+                unifiedAnnotationId?: UnifiedAnnotation['unifiedId'],
+            ) => {
+                if (newNote) {
+                    this.processEvent('setNewPageNoteLists', {
+                        lists: [...this.state.commentBox.lists, spaceId],
+                    })
+                } else {
+                    this.processEvent('updateListsForAnnotation', {
+                        added: spaceId,
+                        deleted: null,
+                        unifiedAnnotationId: unifiedAnnotationId,
+                    })
+                }
+            },
         }
     }
 
@@ -1122,6 +1144,16 @@ export class AnnotationsSidebarContainer<
                                     { searchQuery: query },
                                 )
                             }}
+                            addNewSpaceViaWikiLinksNewNote={async (
+                                spaceName,
+                            ) => {
+                                this.processEvent(
+                                    'addNewSpaceViaWikiLinksNewNote',
+                                    {
+                                        spaceName: spaceName,
+                                    },
+                                )
+                            }}
                             selectSpaceForEditorPicker={(params: {
                                 spaceId: number
                                 newNote?: boolean
@@ -1145,16 +1177,6 @@ export class AnnotationsSidebarContainer<
                                         },
                                     )
                                 }
-                            }}
-                            addNewSpaceViaWikiLinksNewNote={async (
-                                spaceName,
-                            ) => {
-                                this.processEvent(
-                                    'addNewSpaceViaWikiLinksNewNote',
-                                    {
-                                        spaceName: spaceName,
-                                    },
-                                )
                             }}
                             addNewSpaceViaWikiLinksEditNote={async (
                                 spaceName,
