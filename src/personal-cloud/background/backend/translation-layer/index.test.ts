@@ -57,6 +57,8 @@ import { mergeTermFields } from '@worldbrain/memex-common/lib/page-indexing/util
 import type { PipelineRes } from 'src/search'
 import { extractTerms } from '@worldbrain/memex-common/lib/page-indexing/pipeline'
 import type { ExceptionCapturer } from '@worldbrain/memex-common/lib/firebase-backend/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { SHARED_LIST_TIMESTAMP_SET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
 
 const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
 
@@ -352,6 +354,7 @@ async function setup(options?: {
     } = await setupSyncBackgroundTest({
         deviceCount: deviceUsers.length,
         serverChangeWatchSettings,
+        fakeFetch,
     })
 
     for (let deviceIndex = 0; deviceIndex < deviceUsers.length; deviceIndex++) {
@@ -499,6 +502,8 @@ async function setup(options?: {
             }
             expect(batch.slice(downloadOptions?.skip ?? 0)).toEqual(expected)
         },
+        fakeFetch,
+        // TODO: Decouple this from readwise highlight reqs - maybe just use the above fakeFetch in assertions
         testFetches: (highlights: ReadwiseHighlight[]) =>
             expect(fakeFetch.capturedReqs).toEqual(
                 highlights.map((highlight) => [
@@ -596,6 +601,7 @@ describe('Personal cloud translation layer', () => {
                 getDatabaseContents,
                 testDownload,
                 testSyncPushTrigger,
+                fakeFetch,
             } = await setup()
 
             testSyncPushTrigger({ wasTriggered: false })
@@ -620,6 +626,7 @@ describe('Personal cloud translation layer', () => {
                 .createObject(LOCAL_TEST_DATA_V24.pageListEntries.first)
             const updatedTitle = 'Updated title'
 
+            expect(fakeFetch.capturedReqs).toEqual([])
             const localPage: PipelineRes = await setups[0].storageManager
                 .collection('pages')
                 .findOneObject({
@@ -659,6 +666,17 @@ describe('Personal cloud translation layer', () => {
             const testListShares = remoteData.personalListShare
             const testLocators = remoteData.personalContentLocator
 
+            expect(fakeFetch.capturedReqs).toEqual([
+                [
+                    CLOUDFLARE_WORKER_URLS.staging +
+                        SHARED_LIST_TIMESTAMP_SET_ROUTE,
+                    {
+                        method: 'POST',
+                        headers: expect.anything(),
+                        body: expect.any(String),
+                    },
+                ],
+            ])
             // prettier-ignore
             expect(
                 await getDatabaseContents([

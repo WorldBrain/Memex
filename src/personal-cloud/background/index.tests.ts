@@ -1,6 +1,5 @@
 import SQLite3 from 'better-sqlite3'
 import StorageManager from '@worldbrain/storex'
-import fetchMock from 'fetch-mock'
 import { createSQLiteStorageBackend } from '@worldbrain/storex-backend-sql/lib/sqlite'
 import { generateSyncPatterns } from 'src/util/tests/sync-patterns'
 import type {
@@ -34,10 +33,10 @@ import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from 'src/tests/push-messaging'
+import { FakeFetch } from 'src/util/tests/fake-fetch'
 
 export const BASE_TIMESTAMP = 555
 
-fetchMock.restore()
 const debug = (...args: any[]) => console['log'](...args, '\n\n\n')
 
 type SyncTestSequence = SyncTestStep[]
@@ -288,6 +287,7 @@ export async function setupSyncBackgroundTest(
         useDownloadTranslationLayer?: boolean
         testInstance?: BackgroundIntegrationTestInstance
         enableFailsafes?: boolean
+        fakeFetch?: FakeFetch
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
@@ -319,7 +319,7 @@ export async function setupSyncBackgroundTest(
 
     let now = BASE_TIMESTAMP
     const getNow = () => now++
-    const fetch = fetchMock.sandbox()
+    const fetch = options.fakeFetch ?? new FakeFetch()
     const pushMessagingService = new MockPushMessagingService()
     const setups: BackgroundIntegrationTestSetup[] = []
 
@@ -391,7 +391,12 @@ export async function setupSyncBackgroundTest(
                 activityStreams: services.activityStreams,
                 pushMessaging: pushMessagingService,
             },
-            getConfig: () => ({}),
+            getConfig: () => ({
+                content_sharing: {
+                    cloudflare_worker_credentials: 'test-creds',
+                },
+                deployment: { environment: 'staging' },
+            }),
             captureException: async (err) => {
                 console.warn(
                     'Got error in content sharing backend',
@@ -408,7 +413,7 @@ export async function setupSyncBackgroundTest(
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
             clientDeviceType: PersonalDeviceType.DesktopBrowser,
-            fetch: fetch as any,
+            fetch: fetch.fetch as any,
         })
         const personalCloudMediaBackend = new StorexPersonalCloudMediaBackend({
             getNow,
