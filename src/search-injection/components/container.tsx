@@ -106,9 +106,9 @@ class Container extends React.Component<Props, State> {
         if (isSticky == null) {
             await this.props.syncSettings.searchInjection.set(
                 'stickyContainerEnabled',
-                true,
+                false,
             )
-            isSticky = true
+            isSticky = false
         }
 
         let fetchNotif
