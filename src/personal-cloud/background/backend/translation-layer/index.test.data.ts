@@ -11,6 +11,7 @@ import {
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { buildMaterializedPath } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharing/tree-utils'
+import { DEFAULT_KEY } from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export async function insertTestPages(storageManager: StorageManager) {
     await storageManager
@@ -218,6 +219,38 @@ const LOCAL_SHARED_LIST_METADATA_V24 = {
 
 export const LOCAL_TEST_DATA_V24 = {
     pages: LOCAL_PAGES_V24,
+    pageMetadata: {
+        first: {
+            normalizedPageUrl: LOCAL_PAGES_V24.first.url,
+            doi: 'test-doi',
+            title: 'test title',
+            // annotation?: string
+            // sourceName?: string
+            // journalName?: string
+            // journalPage?: string
+            // journalIssue?: string
+            // journalVolume?: string
+            // releaseDate?: number
+            accessDate: 1709782039294,
+        },
+    },
+    pageEntities: {
+        first: {
+            id: 1,
+            normalizedPageUrl: LOCAL_PAGES_V24.first.url,
+            name: 'Smith',
+            isPrimary: true,
+            additionalName: 'John D.',
+            order: DEFAULT_KEY,
+        },
+        second: {
+            id: 2,
+            normalizedPageUrl: LOCAL_PAGES_V24.first.url,
+            name: 'Google',
+            isPrimary: false,
+            order: DEFAULT_KEY + 50,
+        },
+    },
     bookmarks: {
         first: {
             url: LOCAL_PAGES_V24.first.url,
@@ -574,6 +607,7 @@ const REMOTE_METADATA_V24 = {
         lang: LOCAL_TEST_DATA_V24.pages.first.lang,
         description: LOCAL_TEST_DATA_V24.pages.first.description,
     },
+
     second: {
         id: 2,
         createdWhen: 557,
@@ -628,6 +662,15 @@ const REMOTE_METADATA_V24 = {
         title: LOCAL_TEST_DATA_V24.pages.twitter_b.fullTitle,
         lang: LOCAL_TEST_DATA_V24.pages.twitter_b.lang ?? null,
         description: LOCAL_TEST_DATA_V24.pages.twitter_b.description ?? null,
+    },
+}
+
+// Contains fields that would appear in the first personalContentMetadata if local pageMetadata was also created
+export const REMOTE_METADATA_V24_AMENDED = {
+    first: {
+        doi: LOCAL_TEST_DATA_V24.pageMetadata.first.doi,
+        metadataTitle: LOCAL_TEST_DATA_V24.pageMetadata.first.title,
+        accessDate: LOCAL_TEST_DATA_V24.pageMetadata.first.accessDate,
     },
 }
 
@@ -1047,6 +1090,31 @@ export const REMOTE_TEST_DATA_V24 = {
             scrollEndPixel: LOCAL_TEST_DATA_V24.visits.second.scrollPx,
             // pageTotal: null,
             // pageProgress: null,
+        },
+    },
+    personalContentEntity: {
+        first: {
+            id: 1,
+            user: TEST_USER.id,
+            localId: LOCAL_TEST_DATA_V24.pageEntities.first.id,
+            personalContentMetadata: REMOTE_METADATA_V24.first.id,
+            order: LOCAL_TEST_DATA_V24.pageEntities.first.order,
+            name: LOCAL_TEST_DATA_V24.pageEntities.first.name,
+            isPrimary: LOCAL_TEST_DATA_V24.pageEntities.first.isPrimary,
+            additionalName:
+                LOCAL_TEST_DATA_V24.pageEntities.first.additionalName,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
+        },
+        second: {
+            id: 2,
+            user: TEST_USER.id,
+            localId: LOCAL_TEST_DATA_V24.pageEntities.second.id,
+            personalContentMetadata: REMOTE_METADATA_V24.first.id,
+            order: LOCAL_TEST_DATA_V24.pageEntities.second.order,
+            name: LOCAL_TEST_DATA_V24.pageEntities.second.name,
+            isPrimary: LOCAL_TEST_DATA_V24.pageEntities.second.isPrimary,
+            additionalName: null,
+            createdByDevice: REMOTE_DEVICES_V24.first.id,
         },
     },
     personalBookmark: {

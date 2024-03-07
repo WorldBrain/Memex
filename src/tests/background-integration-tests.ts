@@ -261,7 +261,7 @@ export async function setupBackgroundIntegrationTest(
                 },
                 storageManager: serverStorage.manager,
                 storageModules: serverStorage.modules,
-                clientSchemaVersion: STORAGE_VERSIONS[35].version,
+                clientSchemaVersion: STORAGE_VERSIONS[37].version,
                 view: personalCloudHub.getView(),
                 useDownloadTranslationLayer:
                     options?.useDownloadTranslationLayer ?? true,

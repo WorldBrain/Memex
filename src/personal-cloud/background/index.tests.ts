@@ -383,7 +383,7 @@ export async function setupSyncBackgroundTest(
             storageManager: serverStorage.manager,
             storageModules: serverStorage.modules,
             getSqlStorageMananager,
-            clientSchemaVersion: STORAGE_VERSIONS[35].version,
+            clientSchemaVersion: STORAGE_VERSIONS[37].version,
             services: {
                 activityStreams: services.activityStreams,
                 pushMessaging: pushMessagingService,
