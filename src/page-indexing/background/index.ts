@@ -144,6 +144,9 @@ export class PageIndexingBackground {
             lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
                 this.lookupPageTitleForUrl,
             ),
+            getPageMetadata: remoteFunctionWithoutExtraArgs(
+                this.getPageMetadata,
+            ),
         }
     }
 
@@ -156,6 +159,17 @@ export class PageIndexingBackground {
     >['lookupPageTitleForUrl']['function'] = async ({ fullPageUrl }) => {
         const pageData = await this.storage.getPage(fullPageUrl)
         return pageData?.fullTitle ?? null
+    }
+
+    getPageMetadata: PageIndexingInterface<
+        'provider'
+    >['getPageMetadata']['function'] = async ({ normalizedPageUrl }) => {
+        const metadata = await this.storage.getPageMetadata(normalizedPageUrl)
+        if (!metadata) {
+            return null
+        }
+        const entities = await this.storage.getPageEntities(normalizedPageUrl)
+        return { ...metadata, entities }
     }
 
     async initContentIdentifier(

@@ -128,6 +128,7 @@ const setupLogicHelper = async ({
         syncSettingsBG: backgroundModules.syncSettings,
         pageIndexingBG: {
             updatePageMetadata: backgroundModules.pages.updatePageMetadata,
+            getPageMetadata: backgroundModules.pages.getPageMetadata,
             updatePageTitle: backgroundModules.pages.updatePageTitle,
             lookupPageTitleForUrl:
                 backgroundModules.pages.lookupPageTitleForUrl,

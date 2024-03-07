@@ -402,10 +402,7 @@ export default class PageStorage extends StorageModule {
         normalizedPageUrl: string,
         incomingEntities: Omit<PageEntity, 'normalizedPageUrl'>[],
     ): Promise<void> {
-        const existingEntities: PageEntity[] = await this.operation(
-            'findPageEntitiesByUrl',
-            { normalizedPageUrl },
-        )
+        const existingEntities = await this.getPageEntities(normalizedPageUrl)
         const existingIds = new Set(existingEntities.map((e) => e.id))
         const incomingIds = new Set(incomingEntities.map((e) => e.id))
         const toAdd = incomingEntities.filter((e) => !existingIds.has(e.id))
@@ -450,6 +447,14 @@ export default class PageStorage extends StorageModule {
             { normalizedPageUrl },
         )
         return existing
+    }
+
+    async getPageEntities(normalizedPageUrl: string): Promise<PageEntity[]> {
+        const existingEntities: PageEntity[] = await this.operation(
+            'findPageEntitiesByUrl',
+            { normalizedPageUrl },
+        )
+        return existingEntities
     }
 
     async updatePageMetadata({
