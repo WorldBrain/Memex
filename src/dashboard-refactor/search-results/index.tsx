@@ -974,10 +974,10 @@ export default class SearchResultsContainer extends React.Component<
         }
     }
 
-    shiftSelectItems = (selectedIndex) => {
+    shiftSelectItems = async (selectedIndex) => {
         let currentIndex = selectedIndex
+
         const pages = Object.values(this.props.results)
-        let pagesArray = Object.values(this.props.results)
         let pageId = pages[0].pages.allIds[currentIndex]
         let pageData = this.props.pageData.byId[pageId]
 
@@ -992,15 +992,11 @@ export default class SearchResultsContainer extends React.Component<
                 type: 'pages',
             }
 
-            this.props.onBulkSelect(data, false)
+            await this.props.onBulkSelect(data, false)
             currentIndex = currentIndex - 1
             pageId = this.props.pageData.allIds[currentIndex]
             pageData = this.props.pageData.byId[pageId]
         }
-
-        // while () {
-        //     currentIndex = currentIndex - 1
-        // }
     }
 
     private renderResultsByDay() {

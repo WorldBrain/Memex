@@ -50,6 +50,10 @@ export const main: InPageUIInjectionsMain = async ({
                                 requestSearcher,
                                 matched,
                                 syncSettings,
+                                () =>
+                                    searchDisplayProps.bgScriptBG.openOptionsTab(
+                                        'settings',
+                                    ),
                             )
                         } catch (err) {
                             console.error(err)

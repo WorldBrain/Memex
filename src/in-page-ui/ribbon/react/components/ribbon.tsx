@@ -2162,6 +2162,7 @@ export default class Ribbon extends Component<Props, State> {
                                         this.renderSidebarToggle()}
                                     {this.renderSearchButton()}
                                     {!this.props.sidebar.isSidebarOpen &&
+                                        this.props.showRabbitHoleButton &&
                                         this.renderRabbitHoleTriggerButton()}
                                     {!this.props.sidebar.isSidebarOpen &&
                                         this.renderAItriggerButton()}
