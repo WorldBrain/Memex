@@ -10,6 +10,7 @@ import type {
     InPageUIRibbonAction,
     SidebarActionOptions,
     ShouldSetUpOptions,
+    ToolTipActionOptions,
 } from './types'
 import {
     getRemoteEventEmitter,
@@ -165,12 +166,15 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             | ({
                   type: 'sidebarAction'
               } & SidebarActionOptions)
-            | { type: 'ribbonAction'; action: InPageUIRibbonAction },
+            | { type: 'ribbonAction'; action: InPageUIRibbonAction }
+            | ({ type: 'tooltipAction' } & ToolTipActionOptions),
     ) {
         const handled =
             params.type === 'sidebarAction'
                 ? this.events.emit('sidebarAction', params)
-                : this.events.emit('ribbonAction', params)
+                : params.type === 'ribbonAction'
+                ? this.events.emit('ribbonAction', params)
+                : this.events.emit('tooltipAction', params)
 
         if (!handled) {
             this._pendingEvents[params.type] = {
@@ -253,8 +257,26 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.events.emit('ribbonUpdate')
     }
 
-    async showTooltip() {
+    async showTooltip(options?: ToolTipActionOptions) {
+        const maybeEmitAction = () => {
+            if (options) {
+                console.log('emitting tooltip action')
+                this._emitAction({
+                    type: 'tooltipAction',
+                    ...options,
+                })
+            }
+        }
+        console.log('showTooltip')
+
+        if (this.componentsShown.tooltip) {
+            console.log('is shown')
+            maybeEmitAction()
+            return
+        }
+
         await this._setState('tooltip', true)
+        maybeEmitAction()
     }
 
     async hideTooltip() {

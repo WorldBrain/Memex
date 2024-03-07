@@ -74,62 +74,89 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
     }
 
     target = params.mount.rootElement
-    showTooltip = await setupUIContainer(params.mount, {
-        getWindow: () => window,
-        createAnnotation: async (...args) => {
-            await params.createAnnotation(...args)
-            await conditionallyRemoveOnboardingSelectOption(
-                STAGES.annotation.annotationCreated,
-            )
-        },
-        createHighlight: async (...args) => {
-            await params.createHighlight(...args)
-        },
-        askAI: params.askAI,
-        getKBShortcuts: async () => {
-            const state = await getKeyboardShortcutsState()
-            const shortcutToKeyStrs = ({ shortcut }: Shortcut): string[] =>
-                shortcut.split('+')
-            return {
-                createAnnotation: shortcutToKeyStrs(state.createAnnotation),
-                createHighlight: shortcutToKeyStrs(state.createHighlight),
-                addToCollection: shortcutToKeyStrs(state.addToCollection),
-                copyCurrentLink: shortcutToKeyStrs(state.copyCurrentLink),
-                askAI: shortcutToKeyStrs(state.askAI),
-            }
-        },
-        onTooltipHide: () => params.inPageUI.hideTooltip(),
-        onTooltipClose: () => params.inPageUI.removeTooltip(),
-        onExternalDestroy: (destroyTooltip) => {
-            const handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (
-                event,
-            ) => {
-                if (!('tooltip' in event.changes)) {
-                    return
-                }
-
-                if (!event.newState.tooltip) {
-                    analytics.trackEvent({
-                        category: 'InPageTooltip',
-                        action: 'closeTooltip',
-                    })
-                    destroyTooltip()
-                }
-            }
-
-            params.inPageUI.events?.on('stateChanged', handleUIStateChange)
-            removeTooltipStateChangeListener = () =>
-                params.inPageUI.events?.removeListener(
-                    'stateChanged',
-                    handleUIStateChange,
+    showTooltip = await setupUIContainer(
+        params.mount,
+        {
+            getWindow: () => window,
+            createAnnotation: async (...args) => {
+                await params.createAnnotation(...args)
+                await conditionallyRemoveOnboardingSelectOption(
+                    STAGES.annotation.annotationCreated,
                 )
+            },
+            createHighlight: async (...args) => {
+                return await params.createHighlight(...args)
+            },
+            askAI: params.askAI,
+            getKBShortcuts: async () => {
+                const state = await getKeyboardShortcutsState()
+                const shortcutToKeyStrs = ({ shortcut }: Shortcut): string[] =>
+                    shortcut.split('+')
+                return {
+                    createAnnotation: shortcutToKeyStrs(state.createAnnotation),
+                    createHighlight: shortcutToKeyStrs(state.createHighlight),
+                    addToCollection: shortcutToKeyStrs(state.addToCollection),
+                    copyCurrentLink: shortcutToKeyStrs(state.copyCurrentLink),
+                    askAI: shortcutToKeyStrs(state.askAI),
+                }
+            },
+            onTooltipHide: () => params.inPageUI.hideTooltip(),
+            onTooltipClose: () => params.inPageUI.removeTooltip(),
+            onExternalDestroy: (destroyTooltip) => {
+                const handleUIStateChange: SharedInPageUIEvents['stateChanged'] = (
+                    event,
+                ) => {
+                    if (!('tooltip' in event.changes)) {
+                        return
+                    }
+
+                    if (!event.newState.tooltip) {
+                        analytics.trackEvent({
+                            category: 'InPageTooltip',
+                            action: 'closeTooltip',
+                        })
+                        destroyTooltip()
+                    }
+                }
+
+                params.inPageUI.events?.on('stateChanged', handleUIStateChange)
+                removeTooltipStateChangeListener = () =>
+                    params.inPageUI.events?.removeListener(
+                        'stateChanged',
+                        handleUIStateChange,
+                    )
+            },
+            getHighlightColorsSettings: () =>
+                params.getHighlightColorsSettings(),
+            saveHighlightColorsSettings: (newStateInput) =>
+                params.saveHighlightColorsSettings(newStateInput),
+            openPDFinViewer: (url) => params.openPDFinViewer(url),
+            getRootElement: () => target,
+            imageSupportBG: params.imageSupportBG,
+            setCurrentAnnotation: () => {}, // Placeholder function
+            saveAnnotation: async () => {}, // Placeholder async function
+            renderSpacePicker: () => null, // Placeholder function returning nullr empty object
+            analyticsBG: params.analyticsBG,
+            openAnnotationEdit: (openTooltipInAnnotationEditMode) => {
+                const handleExternalAction = (event) => {
+                    openTooltipInAnnotationEditMode(event.annotationCacheId)
+                }
+                params.inPageUI.events.on('tooltipAction', handleExternalAction)
+            },
         },
-        getHighlightColorsSettings: () => params.getHighlightColorsSettings(),
-        saveHighlightColorsSettings: (newStateInput) =>
-            params.saveHighlightColorsSettings(newStateInput),
-        openPDFinViewer: (url) => params.openPDFinViewer(url),
-        getRootElement: null,
-    })
+        {
+            annotationsBG: params.annotationsBG,
+            annotationsCache: params.annotationsCache,
+            analyticsBG: params.analyticsBG,
+            contentSharingBG: params.contentSharingBG,
+            authBG: params.authBG,
+            spacesBG: params.spacesBG,
+            bgScriptsBG: params.bgScriptsBG,
+            pageActivityIndicatorBG: params.pageActivityIndicatorBG,
+            localStorageAPI: params.localStorageAPI,
+            getRootElement: () => target,
+        },
+    )
 
     setupTooltipTrigger(() => {
         params.inPageUI.showTooltip()

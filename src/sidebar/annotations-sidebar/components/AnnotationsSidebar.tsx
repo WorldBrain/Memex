@@ -1167,6 +1167,7 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 {listAnnotations}
                 {this.renderAnnotationDropdowns()}
+                <Spacer />
             </FollowedNotesContainer>
         )
     }
@@ -1411,6 +1412,7 @@ export class AnnotationsSidebar extends React.Component<
                     listData,
                     this.spaceEditBtnRefs[listData.unifiedId],
                 )}
+                <Spacer />
             </FollowedListNotesContainer>
         )
     }
@@ -3611,6 +3613,7 @@ export class AnnotationsSidebar extends React.Component<
                                         this.renderSharedNotesByList()}
                                 </>
                             )}
+                            <Spacer />
                         </AnnotationSectionScrollContainer>
                     </AnnotationsSectionStyled>
                 )}
@@ -3938,6 +3941,7 @@ export class AnnotationsSidebar extends React.Component<
                             <AnnotationContainer>
                                 {this.renderAnnotationDropdowns()}
                                 {annots}
+                                <Spacer />
                             </AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
@@ -6462,7 +6466,7 @@ const BulkEditBarContainer = styled.div`
     display: flex;
     align-items: center;
     padding: 0 15px 0 15px;
-    height: 40px;
+    min-height: 40px;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     color: ${(props) => props.theme.colors.greyScale6};
@@ -6506,4 +6510,8 @@ const AutoAddBulkSelection = styled.div`
     }
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
+`
+const Spacer = styled.div`
+    min-height: 120px;
+    width: 120px;
 `

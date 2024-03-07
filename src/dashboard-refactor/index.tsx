@@ -1886,6 +1886,7 @@ export class DashboardContainer extends StatefulUIElement<
                     {/* ))} */}
                     {this.props.renderUpdateNotifBanner()}
                     <BulkEditWidget
+                        selectedItems={this.props.selectedItems}
                         deleteBulkSelection={(pageId) =>
                             this.processEvent('bulkDeleteItem', null)
                         }

@@ -563,6 +563,7 @@ export async function main(
                 })
             }
             let screenshotGrabResult: PdfScreenshot
+            let annotationId = null
             if (
                 isPdfViewerRunning &&
                 window.getSelection().toString().length === 0
@@ -592,7 +593,7 @@ export async function main(
                     imageSupportBG,
                     highlightColor,
                 )
-
+                annotationId = results.annotationId
                 await results.createPromise
             } else if (
                 selection &&
@@ -606,10 +607,11 @@ export async function main(
                     null,
                     highlightColor,
                 )
+                annotationId = results.annotationId
                 await results.createPromise
             }
 
-            await inPageUI.hideTooltip()
+            // await inPageUI.hideTooltip()
 
             if (preventHideTooltip) {
                 const styleSheet = document.createElement('style')
@@ -653,6 +655,8 @@ export async function main(
                     )
                 }
             }
+
+            return annotationId
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
@@ -781,7 +785,7 @@ export async function main(
             //     commentText: commentText,
             // })
 
-            await inPageUI.hideTooltip()
+            // await inPageUI.hideTooltip()
             if (analyticsBG) {
                 // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
                 try {
@@ -1012,6 +1016,16 @@ export async function main(
                         fullPageUrl: originalPageURL,
                     })
                 },
+                annotationsBG,
+                annotationsCache,
+                contentSharingBG,
+                imageSupportBG,
+                authBG,
+                spacesBG: collectionsBG,
+                bgScriptsBG: bgScriptBG,
+                analyticsBG,
+                pageActivityIndicatorBG,
+                localStorageAPI: browser.storage.local,
             })
             components.tooltip?.resolve()
         },

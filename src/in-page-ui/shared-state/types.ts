@@ -66,6 +66,9 @@ export interface SidebarActionOptions {
     imageData?: string
     prompt?: string
 }
+export interface ToolTipActionOptions {
+    annotationCacheId?: UnifiedAnnotation['unifiedId']
+}
 
 export interface SharedInPageUIEvents {
     stateChanged: (event: {
@@ -75,6 +78,7 @@ export interface SharedInPageUIEvents {
     ribbonAction: (event: { action: InPageUIRibbonAction }) => void
     ribbonUpdate: () => void
     sidebarAction: (event: SidebarActionOptions) => void
+    tooltipAction: (event: ToolTipActionOptions) => void
     componentShouldSetUp: (event: {
         component: InPageUIComponent
         options?: ShouldSetUpOptions
@@ -115,7 +119,7 @@ export interface SharedInPageUIInterface {
     toggleSidebar(): Promise<void>
 
     // Tooltip
-    showTooltip(): Promise<void>
+    showTooltip(options?: ToolTipActionOptions): Promise<void>
     hideTooltip(): Promise<void>
     removeTooltip(): Promise<void>
     toggleTooltip(): Promise<void>
