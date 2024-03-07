@@ -127,6 +127,13 @@ export const handleRenderSearchInjection = async (
             (await syncSettings.searchInjection.get('memexResultsPosition')) ??
             'side'
 
+        const existingElement = document.getElementById(
+            constants.REACT_ROOTS.searchEngineInjection,
+        )
+        if (existingElement) {
+            existingElement.parentNode.removeChild(existingElement)
+        }
+
         const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
         // if (!searchEngineObj) {
         //     return false
