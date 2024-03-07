@@ -129,6 +129,11 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                             !this.props.isSticky,
                                         )
                                     }
+                                    background={
+                                        this.props.isSticky
+                                            ? 'greyScale3'
+                                            : null
+                                    }
                                 />
                             </TooltipBox>
                             <TooltipBox
