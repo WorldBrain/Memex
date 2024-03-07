@@ -37,11 +37,19 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         Role,
         PageMetadataUpdateArgs
     >
+    getPageMetadata: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { normalizedPageUrl: string },
+        | (Omit<PageMetadata, 'normalizedPageUrl'> & {
+              entities: Omit<PageEntity, 'normalizedPageUrl'>[]
+          })
+        | null
+    >
 }
 
 export type PageMetadataUpdateArgs = Omit<PageMetadata, 'accessDate'> & {
     accessDate?: number
-    authors: Omit<PageEntity, 'normalizedPageUrl'>[]
+    entities: Omit<PageEntity, 'normalizedPageUrl'>[]
 }
 
 export interface InitContentIdentifierParams {

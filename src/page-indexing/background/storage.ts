@@ -19,7 +19,6 @@ import {
     ContentLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
 import decodeBlob from 'src/util/decode-blob'
-import { pageIsStub } from 'src/page-indexing/utils'
 import {
     ContentFingerprint,
     LocationSchemeType,
@@ -456,7 +455,7 @@ export default class PageStorage extends StorageModule {
     async updatePageMetadata({
         normalizedPageUrl,
         accessDate = Date.now(),
-        authors,
+        entities,
         ...metadata
     }: PageMetadataUpdateArgs): Promise<void> {
         const nextMetadata: PageMetadata = {
@@ -479,7 +478,7 @@ export default class PageStorage extends StorageModule {
         } else {
             await this.operation('updatePageMetadata', nextMetadata)
         }
-        await this.updatePageEntities(normalizedPageUrl, authors)
+        await this.updatePageEntities(normalizedPageUrl, entities)
     }
 
     async createFavIconIfNeeded(hostname: string, favIcon: string | Blob) {
