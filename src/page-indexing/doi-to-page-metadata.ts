@@ -50,18 +50,19 @@ function crossRefAuthorsToEntities(
     }))
 }
 
-function crossRefDateToTimestamp(date: CrossRefAPIDate): number {
-    const error = new Error('Did not find a valid Crossref date-parts object')
-    if (!date?.['date-parts']?.[0]) {
-        throw error
+function crossRefDateToTimestamp(date: CrossRefAPIDate): number | undefined {
+    // If year field isn't there, then we can't parse the date
+    if (!date?.['date-parts']?.[0]?.[0] == null) {
+        return undefined
     }
     const {
-        'date-parts': [[year, month, day]],
+        'date-parts': [yearMonthDay],
     } = date
-    if (year == null || month == null || day == null) {
-        throw error
+    // Date.UTC constructor expects a 0-indexed month, thus -1 if present
+    if (yearMonthDay[1] != null) {
+        yearMonthDay[1] -= 1
     }
-    return Date.UTC(year, month - 1, day).valueOf()
+    return Date.UTC(...yearMonthDay).valueOf()
 }
 
 export async function doiToPageMetadata(params: {
