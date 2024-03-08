@@ -275,29 +275,39 @@ export default class AuthDialog extends StatefulUIElement<Props, State, Event> {
                         <AuthenticationMethods>
                             <EmailPasswordLogin>
                                 {this.renderLoginTypeSwitcher()}
-                                <SocialLogins>
-                                    <SocialLogin
-                                        icon={'path to icon'}
-                                        provider="google"
-                                        onClick={() =>
-                                            this.processEvent('socialLogin', {
-                                                provider: 'google',
-                                            })
-                                        }
-                                        mode={this.state.mode}
-                                    />
-                                    <SocialLogin
-                                        icon={'path to icon'}
-                                        provider="twitter"
-                                        onClick={() =>
-                                            this.processEvent('socialLogin', {
-                                                provider: 'twitter',
-                                            })
-                                        }
-                                        mode={this.state.mode}
-                                    />
-                                </SocialLogins>
-                                <OrTitle>or</OrTitle>
+                                {this.checkBrowser() !== 'Firefox' && (
+                                    <>
+                                        <SocialLogins>
+                                            <SocialLogin
+                                                icon={'path to icon'}
+                                                provider="google"
+                                                onClick={() =>
+                                                    this.processEvent(
+                                                        'socialLogin',
+                                                        {
+                                                            provider: 'google',
+                                                        },
+                                                    )
+                                                }
+                                                mode={this.state.mode}
+                                            />
+                                            <SocialLogin
+                                                icon={'path to icon'}
+                                                provider="twitter"
+                                                onClick={() =>
+                                                    this.processEvent(
+                                                        'socialLogin',
+                                                        {
+                                                            provider: 'twitter',
+                                                        },
+                                                    )
+                                                }
+                                                mode={this.state.mode}
+                                            />
+                                        </SocialLogins>
+                                        <OrTitle>or</OrTitle>
+                                    </>
+                                )}
                                 <TextInputContainer>
                                     <Icon
                                         filePath={icons.mail}

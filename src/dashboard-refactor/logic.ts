@@ -1014,11 +1014,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
         event,
     }) => {
-        // const listData = getListData(event.listId, previousState, {
-        //     mustBeLocal: true,
-        //     source: 'setPageLists',
-        // })
-
         this.emitMutation({
             bulkEditSpacesLoadingState: { $set: 'running' },
         })
@@ -1275,10 +1270,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
+    firstLoad = true
     private searchNotes = async (state: State) => {
+        if (this.firstLoad) {
+            state.searchFilters.limit = 2
+        } else {
+            state.searchFilters.limit = PAGE_SIZE
+        }
         const result = await this.options.searchBG.searchAnnotations(
             stateToSearchParams(state, this.options.annotationsCache),
         )
+
+        if (result.resultsExhausted) {
+            this.firstLoad = true
+        } else if (!result.resultsExhausted) {
+            this.firstLoad = false
+        }
 
         return {
             ...utils.annotationSearchResultToState(
