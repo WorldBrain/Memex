@@ -279,7 +279,7 @@ const RibbonHolderBox = styled.div<{
             props.ribbonPosition === 'centerRight' &&
             css<{ isSidebarOpen }>`
                 right: 0px;
-                height: 300px;
+                height: calc(440px);
                 width: 10px;
             `}
         ${(props) =>

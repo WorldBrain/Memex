@@ -33,6 +33,7 @@ import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { StorageMiddleware } from '@worldbrain/storex/lib/types/middleware'
 import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from 'src/tests/push-messaging'
+import { FakeFetch } from 'src/util/tests/fake-fetch'
 
 export const BASE_TIMESTAMP = 555
 
@@ -286,6 +287,7 @@ export async function setupSyncBackgroundTest(
         useDownloadTranslationLayer?: boolean
         testInstance?: BackgroundIntegrationTestInstance
         enableFailsafes?: boolean
+        fakeFetch?: FakeFetch
     } & BackgroundIntegrationTestOptions &
         BackgroundIntegrationTestSetupOpts,
 ) {
@@ -317,6 +319,7 @@ export async function setupSyncBackgroundTest(
 
     let now = BASE_TIMESTAMP
     const getNow = () => now++
+    const fetch = options.fakeFetch ?? new FakeFetch()
     const pushMessagingService = new MockPushMessagingService()
     const setups: BackgroundIntegrationTestSetup[] = []
 
@@ -388,6 +391,18 @@ export async function setupSyncBackgroundTest(
                 activityStreams: services.activityStreams,
                 pushMessaging: pushMessagingService,
             },
+            getConfig: () => ({
+                content_sharing: {
+                    cloudflare_worker_credentials: 'test-creds',
+                },
+                deployment: { environment: 'staging' },
+            }),
+            captureException: async (err) => {
+                console.warn(
+                    'Got error in content sharing backend',
+                    err.message,
+                )
+            },
             view: cloudHub.getView(),
             disableFailsafes: !options.enableFailsafes,
             getUserId,
@@ -398,6 +413,7 @@ export async function setupSyncBackgroundTest(
                 (setup as BackgroundIntegrationTestSetup).backgroundModules
                     .personalCloud.deviceId,
             clientDeviceType: PersonalDeviceType.DesktopBrowser,
+            fetch: fetch.fetch as any,
         })
         const personalCloudMediaBackend = new StorexPersonalCloudMediaBackend({
             getNow,

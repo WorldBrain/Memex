@@ -1014,11 +1014,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
         event,
     }) => {
-        // const listData = getListData(event.listId, previousState, {
-        //     mustBeLocal: true,
-        //     source: 'setPageLists',
-        // })
-
         this.emitMutation({
             bulkEditSpacesLoadingState: { $set: 'running' },
         })
@@ -1275,10 +1270,22 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
+    firstLoad = true
     private searchNotes = async (state: State) => {
+        if (this.firstLoad) {
+            state.searchFilters.limit = 2
+        } else {
+            state.searchFilters.limit = PAGE_SIZE
+        }
         const result = await this.options.searchBG.searchAnnotations(
             stateToSearchParams(state, this.options.annotationsCache),
         )
+
+        if (result.resultsExhausted) {
+            this.firstLoad = true
+        } else if (!result.resultsExhausted) {
+            this.firstLoad = false
+        }
 
         return {
             ...utils.annotationSearchResultToState(
@@ -3317,6 +3324,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                       ]
                     : []
 
+                const bodyToSave = await processCommentForImageUpload(
+                    editNoteForm.bodyInputValue ?? existing.highlight,
+                )
+                const commentToSave = await processCommentForImageUpload(
+                    editNoteForm.inputValue ?? existing.comment,
+                )
+
                 this.emitMutation({
                     searchResults: {
                         noteData: {
@@ -3327,14 +3341,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                                     tags: { $set: editNoteForm.tags },
                                     isShared: { $set: event.shouldShare },
                                     comment: {
-                                        $set:
-                                            editNoteForm.inputValue ??
-                                            existing.comment,
+                                        $set: commentToSave,
                                     },
                                     highlight: {
-                                        $set:
-                                            editNoteForm.bodyInputValue ??
-                                            existing.highlight,
+                                        $set: bodyToSave,
                                     },
                                     isBulkShareProtected: {
                                         $set:
@@ -3358,9 +3368,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                 await updateAnnotation({
                     annotationData: {
                         localId: event.noteId,
-                        comment: editNoteForm.inputValue ?? existing.comment,
+                        comment: commentToSave,
                         color: event.color ?? existing.color,
-                        body: editNoteForm.bodyInputValue ?? existing.highlight,
+                        body: bodyToSave,
                     },
                     shareOpts: {
                         shouldShare: event.shouldShare,

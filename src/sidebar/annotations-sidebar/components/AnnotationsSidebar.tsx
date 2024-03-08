@@ -102,6 +102,8 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import PageCitations from 'src/citations/PageCitations'
 import { TaskState } from 'ui-logic-core/lib/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
+import debounce from 'lodash/debounce'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -156,6 +158,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         closePicker?: () => void,
         referenceElement?: React.RefObject<HTMLDivElement>,
     ) => JSX.Element
+    renderListPickerForBulkEdit: () => JSX.Element
     renderContextMenuForList: (listData: UnifiedList) => JSX.Element
     renderEditMenuForList: (listData: UnifiedList) => JSX.Element
     renderPageLinkMenuForList: () => JSX.Element
@@ -292,6 +295,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     showSpacesTab: () => void
     isAutoAddEnabled: boolean
     toggleAutoAdd: () => void
+    toggleAutoAddBulk: (toggleState: boolean) => void
+    bulkSelectAnnotations: (annotationIds: string[]) => void
+    bulkSelectionState: string[]
 }
 
 interface AnnotationsSidebarState {
@@ -319,6 +325,8 @@ interface AnnotationsSidebarState {
     fileDragOverFeedField?: boolean
     showSelectedAITextButtons?: boolean
     pageLinkCreationLoading: TaskState
+    showSpacePickerForBulkEdit: boolean
+    showAutoAddBulkSelection: boolean
 }
 
 export class AnnotationsSidebar extends React.Component<
@@ -332,7 +340,8 @@ export class AnnotationsSidebar extends React.Component<
     private sortDropDownButtonRef = React.createRef<HTMLDivElement>()
     private copyButtonRef = React.createRef<HTMLDivElement>()
     private pageSummaryText = React.createRef<HTMLDivElement>()
-    private pageShareButtonRef = React.createRef<HTMLDivElement>()
+    private autoAddBulkButtonRef = React.createRef<HTMLDivElement>()
+    private addSpaceBulkButtonRef = React.createRef<HTMLDivElement>()
     private bulkEditButtonRef = React.createRef<HTMLDivElement>()
     private editPageLinkButtonRef = React.createRef<HTMLDivElement>()
     private sharePageLinkButtonRef = React.createRef<HTMLDivElement>()
@@ -349,6 +358,7 @@ export class AnnotationsSidebar extends React.Component<
         [unifiedListId: string]: React.RefObject<HTMLDivElement>
     } = {}
     private editorPassedUp = false
+    lastClickInsideSidebar = null
 
     state: AnnotationsSidebarState = {
         searchText: '',
@@ -371,6 +381,8 @@ export class AnnotationsSidebar extends React.Component<
         fileDragOverFeedField: false,
         showSelectedAITextButtons: false,
         pageLinkCreationLoading: 'pristine',
+        showSpacePickerForBulkEdit: false,
+        showAutoAddBulkSelection: false,
     }
 
     async addYoutubeTimestampToEditor(commentText) {
@@ -444,6 +456,10 @@ export class AnnotationsSidebar extends React.Component<
         }
         this.setState({ themeVariant })
         this.props.getHighlightColorSettings()
+
+        document.addEventListener('keydown', this.handleSelectAll)
+        document.addEventListener('mousedown', this.handleLastClick)
+        document.addEventListener('mousemove', this.trackMouseOverSidebar)
     }
 
     async componentDidUpdate(
@@ -456,7 +472,71 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
-    componentWillUnmount() {}
+    componentWillUnmount(): void {
+        document.removeEventListener('keydown', this.handleSelectAll)
+        document.removeEventListener('mousedown', this.handleLastClick)
+        document.removeEventListener('mousemove', this.trackMouseOverSidebar)
+    }
+
+    handleLastClick = (e) => {
+        const rootElement = this.props.getRootElement()
+        const sidebarContainer = rootElement.querySelector(
+            '#annotationSidebarContainer',
+        )
+        if (sidebarContainer && e.composedPath().includes(sidebarContainer)) {
+            this.lastClickInsideSidebar = true
+        } else {
+            this.lastClickInsideSidebar = false
+        }
+    }
+
+    trackMouseOverSidebar = debounce((e: MouseEvent) => {
+        const rootElement = this.props.getRootElement()
+        const sidebarContainer = rootElement.querySelector(
+            '#annotationSidebarContainer',
+        )
+
+        if (!sidebarContainer) return
+
+        const {
+            left,
+            top,
+            width,
+            height,
+        } = sidebarContainer.getBoundingClientRect()
+        const isMouseOverSidebar =
+            e.clientX >= left &&
+            e.clientX <= left + width &&
+            e.clientY >= top &&
+            e.clientY <= top + height
+
+        if (isMouseOverSidebar) {
+            this.lastClickInsideSidebar = true
+        } else {
+            this.lastClickInsideSidebar = false
+        }
+    }, 100)
+
+    handleSelectAll = async (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+            e.preventDefault()
+
+            if (this.lastClickInsideSidebar) {
+                const annotations = cacheUtils.getUserAnnotationsArray(
+                    {
+                        annotations: this.props.annotations,
+                    },
+                    this.props.normalizedPageUrl,
+                    this.props.currentUser?.id.toString(),
+                )
+
+                const annotationIds = annotations.map((annotation) => {
+                    return annotation.unifiedId
+                })
+                this.props.bulkSelectAnnotations(annotationIds)
+            }
+        }
+    }
 
     handleClickOutside = (event) => {
         this.spaceTitleEditFieldRef.current.removeEventListener(
@@ -862,6 +942,14 @@ export class AnnotationsSidebar extends React.Component<
                                     color,
                                 )
                             }
+                            bulkSelectAnnotation={() =>
+                                this.props.bulkSelectAnnotations([
+                                    annotation.unifiedId,
+                                ])
+                            }
+                            isBulkSelected={this.props.bulkSelectionState.includes(
+                                annotation.unifiedId,
+                            )}
                             saveHighlightColorSettings={
                                 this.props.saveHighlightColorSettings
                             }
@@ -1073,6 +1161,8 @@ export class AnnotationsSidebar extends React.Component<
                                 }}
                             />
                         </RemoteOrLocalSwitcherContainer>
+                        {this.props.bulkSelectionState?.length > 0 &&
+                            this.renderBulkEditBar()}
                     </>
                 )}
                 {listAnnotations}
@@ -3109,7 +3199,6 @@ export class AnnotationsSidebar extends React.Component<
                                 <Highlightbar />
                                 <AnnotationSuggestionsBox>
                                     <Markdown
-                                        imageSupport={this.props.imageSupport}
                                         isHighlight
                                         pageUrl={item.fullUrl}
                                     >
@@ -3128,7 +3217,6 @@ export class AnnotationsSidebar extends React.Component<
                                     getYoutubePlayer={
                                         this.props.getYoutubePlayer
                                     }
-                                    imageSupport={this.props.imageSupport}
                                 >
                                     {item.comment}
                                 </NoteText>
@@ -3732,6 +3820,14 @@ export class AnnotationsSidebar extends React.Component<
                             isEditingHighlight={
                                 instanceState.isHighlightEditing
                             }
+                            bulkSelectAnnotation={() =>
+                                this.props.bulkSelectAnnotations([
+                                    annot.unifiedId,
+                                ])
+                            }
+                            isBulkSelected={this.props.bulkSelectionState.includes(
+                                annot.unifiedId,
+                            )}
                             isDeleting={
                                 instanceState.cardMode === 'delete-confirm'
                             }
@@ -3835,6 +3931,8 @@ export class AnnotationsSidebar extends React.Component<
                                 {this.renderTopBarActionButtons()}
                             </AnnotationActions>
                         )}
+                        {this.props.bulkSelectionState?.length > 0 &&
+                            this.renderBulkEditBar()}
                         {this.props.noteCreateState === 'running' ||
                         annotations?.length > 0 ? (
                             <AnnotationContainer>
@@ -4207,7 +4305,7 @@ export class AnnotationsSidebar extends React.Component<
                     onKeyDown={this.handleNameEditInputKeyDown}
                 />
                 {selectedList.description?.length > 0 && (
-                    <SpaceDescription imageSupport={this.props.imageSupport}>
+                    <SpaceDescription>
                         {selectedList.description}
                     </SpaceDescription>
                 )}
@@ -4500,7 +4598,6 @@ export class AnnotationsSidebar extends React.Component<
         }
         return (
             <PopoutBox
-                targetElementRef={this.pageShareButtonRef.current}
                 placement={'bottom-end'}
                 closeComponent={() =>
                     this.setState({
@@ -4512,6 +4609,112 @@ export class AnnotationsSidebar extends React.Component<
             >
                 TOOD: Space picker goes here!
             </PopoutBox>
+        )
+    }
+    renderBulkSpacePicker() {
+        if (!this.state.showSpacePickerForBulkEdit) {
+            return
+        }
+        return (
+            <PopoutBox
+                targetElementRef={this.addSpaceBulkButtonRef.current}
+                placement={'bottom-end'}
+                closeComponent={() =>
+                    this.setState({
+                        showSpacePickerForBulkEdit: false,
+                    })
+                }
+                offsetX={10}
+                getPortalRoot={this.props.getRootElement}
+            >
+                {this.props.renderListPickerForBulkEdit()}
+            </PopoutBox>
+        )
+    }
+    renderAutoAddBulkSelection() {
+        if (!this.state.showAutoAddBulkSelection) {
+            return
+        }
+        return (
+            <PopoutBox
+                targetElementRef={this.autoAddBulkButtonRef.current}
+                placement={'bottom-end'}
+                closeComponent={() =>
+                    this.setState({
+                        showAutoAddBulkSelection: false,
+                    })
+                }
+                offsetX={10}
+                getPortalRoot={this.props.getRootElement}
+            >
+                <AutoAddBulkSelectionContainer>
+                    <AutoAddBulkSelection
+                        onClick={() => {
+                            this.setState({
+                                showAutoAddBulkSelection: false,
+                            })
+                            this.props.toggleAutoAddBulk(true)
+                        }}
+                    >
+                        Enable Auto Added
+                    </AutoAddBulkSelection>
+
+                    <AutoAddBulkSelection
+                        onClick={() => {
+                            this.setState({
+                                showAutoAddBulkSelection: false,
+                            })
+                            this.props.toggleAutoAddBulk(false)
+                        }}
+                    >
+                        Disable Auto Added
+                    </AutoAddBulkSelection>
+                </AutoAddBulkSelectionContainer>
+            </PopoutBox>
+        )
+    }
+
+    renderBulkEditBar() {
+        return (
+            <BulkEditBarContainer>
+                <PrimaryAction
+                    onClick={() => this.props.bulkSelectAnnotations([])}
+                    label={this.props.bulkSelectionState?.length + ' Selected'}
+                    type={'tertiary'}
+                    size={'small'}
+                    height={'30px'}
+                    icon={'removeX'}
+                    fontColor="greyScale7"
+                    iconPosition="right"
+                />
+
+                <BulkEditBarActionBar>
+                    <PrimaryAction
+                        onClick={() =>
+                            this.setState({ showSpacePickerForBulkEdit: true })
+                        }
+                        label={'Spaces'}
+                        type={'tertiary'}
+                        size={'small'}
+                        height={'30px'}
+                        icon={'plus'}
+                        innerRef={this.addSpaceBulkButtonRef}
+                    />
+                    <PrimaryAction
+                        onClick={() =>
+                            this.setState({ showAutoAddBulkSelection: true })
+                        }
+                        label={'Change Status'}
+                        type={'tertiary'}
+                        size={'small'}
+                        height={'30px'}
+                        icon={'spread'}
+                        innerRef={this.autoAddBulkButtonRef}
+                    />
+                </BulkEditBarActionBar>
+                {this.renderAutoAddBulkSelection()}
+                {this.renderBulkSpacePicker()}
+            </BulkEditBarContainer>
         )
     }
 
@@ -6254,4 +6457,53 @@ const TutorialButtonContainer = styled.div`
     position: absolute;
     right: 20px;
     bottom: 15px;
+`
+const BulkEditBarContainer = styled.div`
+    display: flex;
+    align-items: center;
+    padding: 0 15px 0 15px;
+    height: 40px;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
+    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
+    margin-bottom: 10px;
+    width: 100%;
+    width: fill-available;
+    justify-content: space-between;
+    grid-gap: 10px;
+`
+
+const BulkEditBarActionBar = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    grid-gap: 10px;
+`
+
+const AutoAddBulkSelectionContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    grid-gap: 5px;
+    padding: 10px;
+    width: fit-content;
+`
+
+const AutoAddBulkSelection = styled.div`
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    grid-gap: 5px;
+    padding: 0 15px;
+    height: 40px;
+    width: fit-conten;
+    border-radius: 5px;
+    &:hover {
+        cursor: pointer;
+        background: ${(props) => props.theme.colors.greyScale2};
+    }
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 14px;
 `

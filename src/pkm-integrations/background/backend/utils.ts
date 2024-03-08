@@ -1,4 +1,4 @@
-import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddress'
+import replaceImgSrcWithFunctionOutputBrowser from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
@@ -32,10 +32,9 @@ export async function shareAnnotationWithPKM(
             .replace(/\n/g, ' ')
 
         if (annotationData.comment) {
-            annotationData = await replaceImgSrcWithFunctionOutput(
+            annotationData = await replaceImgSrcWithFunctionOutputBrowser(
                 annotationData.comment,
-                imageSupport,
-                true,
+                process.env.NODE_ENV,
             )
         }
 

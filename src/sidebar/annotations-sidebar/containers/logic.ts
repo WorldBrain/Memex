@@ -376,6 +376,7 @@ export class SidebarContainerLogic extends UILogic<
             showFeedSourcesMenu: false,
             existingSourcesOption: 'pristine',
             localFoldersList: [],
+            bulkSelectionState: [],
         }
     }
 
@@ -411,6 +412,7 @@ export class SidebarContainerLogic extends UILogic<
                 bgModules: {
                     customLists: this.options.customListsBG,
                     annotations: this.options.annotationsBG,
+                    syncSettings: this.options.syncSettingsBG,
                     contentSharing: this.options.contentSharingBG,
                     pageActivityIndicator: this.options.pageActivityIndicatorBG,
                 },
@@ -2103,6 +2105,80 @@ export class SidebarContainerLogic extends UILogic<
                 },
             },
         })
+    }
+
+    updateListsForAnnotationS: EventHandler<
+        'updateListsForAnnotationS'
+    > = async ({ event, previousState }) => {
+        const annotationIds = previousState.bulkSelectionState
+
+        for (let annotationId of annotationIds) {
+            this.processUIEvent('updateListsForAnnotation', {
+                event: {
+                    added: event.added,
+                    deleted: event.deleted,
+                    unifiedAnnotationId: annotationId,
+                },
+                previousState,
+            })
+        }
+    }
+
+    toggleAutoAddBulk: EventHandler<'toggleAutoAddBulk'> = async ({
+        event,
+        previousState,
+    }) => {
+        const annotationIds = previousState.bulkSelectionState
+        const shouldAutoAdd = event.shouldAutoAdd
+
+        for (let annotationId of annotationIds) {
+            this.processUIEvent('editAnnotation', {
+                event: {
+                    unifiedAnnotationId: annotationId,
+                    instanceLocation: 'annotations-tab',
+                    shouldShare: shouldAutoAdd,
+                    isProtected: !shouldAutoAdd,
+                    mainBtnPressed: null,
+                    keepListsIfUnsharing: true,
+                    now: Date.now(),
+                },
+                previousState,
+            })
+        }
+    }
+
+    bulkSelectAnnotations: EventHandler<'bulkSelectAnnotations'> = async ({
+        event,
+        previousState,
+    }) => {
+        const annotationIds = event.annotationIds
+
+        if (annotationIds.length === 0) {
+            this.emitMutation({
+                bulkSelectionState: { $set: [] },
+            })
+            return
+        }
+
+        let bulkSelectionArray = previousState.bulkSelectionState ?? []
+
+        for (let annotationId of annotationIds) {
+            const index = bulkSelectionArray.indexOf(annotationId)
+            if (index !== -1) {
+                bulkSelectionArray.splice(index, 1)
+                this.emitMutation({
+                    bulkSelectionState: { $set: bulkSelectionArray },
+                })
+            } else {
+                bulkSelectionArray.push(annotationId)
+                this.emitMutation({
+                    bulkSelectionState: { $set: bulkSelectionArray },
+                })
+            }
+            this.emitMutation({
+                bulkSelectionState: { $set: bulkSelectionArray },
+            })
+        }
     }
 
     setAnnotationEditCommentText: EventHandler<

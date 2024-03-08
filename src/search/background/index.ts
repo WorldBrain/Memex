@@ -202,6 +202,7 @@ export default class SearchBackground {
 
         try {
             searchParams = this.processSearchParams(params)
+            console.log('searchAnnotations params', params)
         } catch (e) {
             return SearchBackground.handleSearchError(e)
         }

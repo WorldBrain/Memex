@@ -7,6 +7,7 @@ import type { Anchor } from 'src/highlighting/types'
 import type { Annotation } from '../types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import type { Orderable } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface PageAnnotationsCacheEvents {
     updatedPageData: (
@@ -26,6 +27,7 @@ export interface PageAnnotationsCacheEvents {
 }
 
 export interface PageAnnotationsCacheInterface {
+    setHighlightColorDictionary: (colors: HighlightColor[]) => void
     setPageData: (
         normalizedPageUrl: string,
         unifiedListIds: UnifiedList['unifiedId'][],

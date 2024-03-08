@@ -19,7 +19,6 @@ import { StorageChangeDetector } from './storage-change-detector'
 import StorageOperationLogger from './storage-operation-logger'
 import { setStorex } from 'src/search/get-db'
 import { registerSyncBackgroundIntegrationTests } from 'src/personal-cloud/background/index.tests'
-import { AuthBackground } from 'src/authentication/background'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
 import { FakeAnalytics } from 'src/analytics/mock'
 import AnalyticsManager from 'src/analytics/analytics'
@@ -45,12 +44,15 @@ import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { clearRemotelyCallableFunctions } from 'src/util/webextensionRPC'
 import { AuthServices, Services } from 'src/services/types'
 import { PersonalDeviceType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { createAuthServices } from 'src/services/local-services'
 import { MockPushMessagingService } from './push-messaging'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
 import type { ExtractedPDFData } from 'src/search'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
+import type {
+    ExceptionCapturer,
+    FunctionsConfigGetter,
+} from '@worldbrain/memex-common/lib/firebase-backend/types'
 
 export const DEF_PAGE = {
     url: 'test.com',
@@ -169,22 +171,6 @@ export async function setupBackgroundIntegrationTest(
         },
     } as any) as Browser
 
-    const jobScheduler = new JobScheduler({
-        alarmsAPI: browserAPIs.alarms,
-        storageAPI: browserAPIs.storage,
-    })
-
-    const auth: AuthBackground = new AuthBackground({
-        jobScheduler,
-        authServices,
-        runtimeAPI: browserAPIs.runtime,
-        remoteEmitter: { emit: async () => {}, emitToTab: async () => {} },
-        localStorageArea: browserLocalStorage,
-        backendFunctions: {
-            registerBetaUser: async () => {},
-        },
-        userManagement: serverStorage.modules.users,
-    })
     const analyticsManager = new AnalyticsManager({
         backend: new FakeAnalytics(),
         shouldTrack: async () => true,
@@ -218,6 +204,14 @@ export async function setupBackgroundIntegrationTest(
                 title: DEF_PAGE.fullTitle,
             },
         }))
+
+    const getConfig: FunctionsConfigGetter = () => ({
+        content_sharing: { opengraph_app_id: 'test-og-app-id' },
+        deployment: { environment: 'staging' },
+    })
+    const captureException: ExceptionCapturer = async (err) => {
+        console.warn('Got error in content sharing backend', err.message)
+    }
 
     const pushMessagingService =
         options?.pushMessagingService ?? new MockPushMessagingService()
@@ -253,7 +247,9 @@ export async function setupBackgroundIntegrationTest(
         personalCloudBackend:
             options?.personalCloudBackend ??
             new StorexPersonalCloudBackend({
+                fetch: fetch as any,
                 getNow,
+                getConfig,
                 getUserId,
                 services: {
                     activityStreams: services.activityStreams,
@@ -270,6 +266,7 @@ export async function setupBackgroundIntegrationTest(
                         'deviceId',
                     ),
                 clientDeviceType: PersonalDeviceType.DesktopBrowser,
+                captureException,
             }),
         contentSharingBackend: new ContentSharingBackend({
             fetch: fetch as any,
@@ -285,18 +282,10 @@ export async function setupBackgroundIntegrationTest(
                 getUser: async () => null,
                 getUsers: async () => ({ users: [], notFound: [] }),
             }),
-            getConfig: () => ({
-                content_sharing: { opengraph_app_id: 'test-og-app-id' },
-                deployment: { environment: 'staging' },
-            }),
+            getConfig,
+            captureException,
             getCurrentUserId: getUserId,
             services: { pushMessaging: pushMessagingService },
-            captureException: async (err) => {
-                console.warn(
-                    'Got error in content sharing backend',
-                    err.message,
-                )
-            },
         }),
         generateServerId: () => nextServerId++,
         fetchPageData,

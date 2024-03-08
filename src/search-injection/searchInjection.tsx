@@ -32,6 +32,7 @@ interface RootProps {
         | 'dashboard'
     >
     position: 'side' | 'above'
+    openSettings: () => void
 }
 
 interface RootState {
@@ -92,6 +93,7 @@ class Root extends React.Component<RootProps, RootState> {
                         searchResDocs={this.state.searchResDocsProcessed}
                         updateQuery={this.updateQuery}
                         query={props.query}
+                        openSettings={props.openSettings}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -113,6 +115,7 @@ export const handleRenderSearchInjection = async (
         | 'searchInjection'
         | 'dashboard'
     >,
+    openSettings,
 ) => {
     // docs: (array of objects) returned by the search
     // totalCount: (int) number of results found
@@ -126,6 +129,13 @@ export const handleRenderSearchInjection = async (
         const position =
             (await syncSettings.searchInjection.get('memexResultsPosition')) ??
             'side'
+
+        const existingElement = document.getElementById(
+            constants.REACT_ROOTS.searchEngineInjection,
+        )
+        if (existingElement) {
+            existingElement.parentNode.removeChild(existingElement)
+        }
 
         const searchEngineObj = constants.SEARCH_ENGINES[searchEngine]
         // if (!searchEngineObj) {
@@ -321,6 +331,7 @@ export const handleRenderSearchInjection = async (
                 searchEngine={searchEngine}
                 renderComponent={renderComponent}
                 requestSearcher={requestSearcher}
+                openSettings={openSettings}
             />,
             root,
         )

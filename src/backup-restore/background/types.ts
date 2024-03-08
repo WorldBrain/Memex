@@ -16,9 +16,9 @@ export interface BackupInterface<Role extends RemoteFunctionRole> {
 
 export interface LocalBackupSettings {
     saveBlobs: any
-    lastBackup: Date
+    lastBackup: string
     accessTokenExpiry: Date
-    lastBackupFinished: Date
+    lastBackupFinished: string
     lastProblemNotifShown: Date
     backupStatus: 'success' | 'fail' | 'no_backup'
     backupStatusId:

@@ -106,11 +106,7 @@ export class MarkdownPreview extends React.Component<Props, State> {
 
     private renderEditor() {
         if (this.state.showPreview) {
-            return (
-                <Markdown imageSupport={this.props.imageSupport}>
-                    {this.props.value}
-                </Markdown>
-            )
+            return <Markdown>{this.props.value}</Markdown>
         }
 
         return this.props.renderInput({

@@ -544,6 +544,44 @@ export class AnnotationsSidebarContainer<
         }
     }
 
+    getSpacePickerPropsForBulkEdit = () => {
+        const {
+            authBG,
+            customListsBG,
+            contentSharingBG,
+            annotationsCache,
+            pageActivityIndicatorBG,
+        } = this.props
+        // This is to show confirmation modal if the annotation is public and the user is trying to add it to a shared space
+
+        return {
+            authBG,
+            annotationsCache,
+            contentSharingBG,
+            analyticsBG: this.props.analyticsBG,
+            pageActivityIndicatorBG,
+            spacesBG: customListsBG,
+            showPageLinks: true,
+            bgScriptBG: this.props.bgScriptBG,
+            localStorageAPI: this.props.storageAPI.local,
+            initialSelectedListIds: () => null,
+            selectEntry: async (listId, options) => {
+                this.processEvent('updateListsForAnnotationS', {
+                    added: listId,
+                    deleted: null,
+                })
+            },
+            unselectEntry: async (listId) =>
+                this.processEvent('updateListsForAnnotationS', {
+                    added: null,
+                    deleted: listId,
+                }),
+            normalizedPageUrlToFilterPageLinksBy: normalizeUrl(
+                this.state.fullPageUrl,
+            ),
+        }
+    }
+
     private renderCopyPasterManagerForAnnotation = (
         instanceLocation: AnnotationCardInstanceLocation,
     ) => (unifiedId: UnifiedAnnotation['unifiedId']) => {
@@ -619,6 +657,42 @@ export class AnnotationsSidebarContainer<
 
                     this.processEvent('setSelectedList', { unifiedListId })
                     closePicker()
+                }}
+                getRootElement={this.props.getRootElement}
+                autoFocus
+            />
+        )
+    }
+    private renderListPickerForBulkEdit = () => {
+        return (
+            <CollectionPicker
+                authBG={this.props.authBG}
+                annotationsCache={this.props.annotationsCache}
+                contentSharingBG={this.props.contentSharingBG}
+                analyticsBG={this.props.analyticsBG}
+                pageActivityIndicatorBG={this.props.pageActivityIndicatorBG}
+                spacesBG={this.props.customListsBG}
+                showPageLinks
+                bgScriptBG={this.props.bgScriptBG}
+                localStorageAPI={this.props.storageAPI.local}
+                selectEntry={async (listId) => {
+                    this.processEvent('updateListsForAnnotationS', {
+                        added: listId,
+                        deleted: null,
+                    })
+                }}
+                unselectEntry={async (listId) =>
+                    this.processEvent('updateListsForAnnotationS', {
+                        added: null,
+                        deleted: listId,
+                    })
+                }
+                onListFocus={(listId: UnifiedList['localId']) => {
+                    const unifiedListId: UnifiedList['unifiedId'] = this.props.annotationsCache.getListByLocalId(
+                        listId,
+                    ).unifiedId
+
+                    this.processEvent('setSelectedList', { unifiedListId })
                 }}
                 getRootElement={this.props.getRootElement}
                 autoFocus
@@ -1546,6 +1620,9 @@ export class AnnotationsSidebarContainer<
                             renderListsPickerForAnnotation={
                                 this.renderListPickerForAnnotation
                             }
+                            renderListPickerForBulkEdit={
+                                this.renderListPickerForBulkEdit
+                            }
                             setActiveTab={(tab) => (event) => {
                                 this.processEvent('setActiveSidebarTab', {
                                     tab,
@@ -1676,7 +1753,19 @@ export class AnnotationsSidebarContainer<
                             toggleAutoAdd={() =>
                                 this.processEvent('toggleAutoAdd', null)
                             }
+                            toggleAutoAddBulk={(toggleState) => {
+                                this.processEvent('toggleAutoAddBulk', {
+                                    shouldAutoAdd: toggleState,
+                                })
+                            }}
                             isAutoAddEnabled={this.state.isAutoAddEnabled}
+                            bulkSelectAnnotations={(
+                                annotationIds: UnifiedAnnotation['unifiedId'][],
+                            ) => {
+                                this.processEvent('bulkSelectAnnotations', {
+                                    annotationIds: annotationIds,
+                                })
+                            }}
                         />
                     </Rnd>
                 </ContainerStyled>
@@ -1760,7 +1849,7 @@ const ContainerStyled = styled.div<{
             : '2147483645'}; /* This is to combat pages setting high values on certain elements under the sidebar */
     background: ${(props) =>
         props.theme.variant === 'dark'
-            ? '#23242b'
+            ? props.theme.colors.black0
             : props.theme.colors.black + 'c9'};
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
@@ -1816,7 +1905,7 @@ const ContainerStyled = styled.div<{
         css`
             background: ${(props) =>
                 props.theme.variant === 'dark'
-                    ? '#23242b'
+                    ? props.theme.colors.black0
                     : props.theme.colors.black + 'c9'};
             backdrop-filter: unset;
             position: relative;
