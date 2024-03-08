@@ -260,17 +260,14 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
     async showTooltip(options?: ToolTipActionOptions) {
         const maybeEmitAction = () => {
             if (options) {
-                console.log('emitting tooltip action')
                 this._emitAction({
                     type: 'tooltipAction',
                     ...options,
                 })
             }
         }
-        console.log('showTooltip')
 
         if (this.componentsShown.tooltip) {
-            console.log('is shown')
             maybeEmitAction()
             return
         }

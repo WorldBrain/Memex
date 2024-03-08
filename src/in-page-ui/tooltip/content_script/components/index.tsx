@@ -139,21 +139,34 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         })
     }
     removeSpaceForAnnotation = async (listId: number) => {
+        console.log('listsid', listId)
         const { currentAnnotation } = this.state
         if (!currentAnnotation) {
             return
         }
-        const existingListsState = [...this.state.currentAnnotationLists]
+
+        const listToRemove = this.props.annotationsCache.getListByLocalId(
+            listId,
+        )
+
+        let existingListsState = [...this.state.currentAnnotationLists]
+
+        console.log('existingListsState', existingListsState)
+
         const index = existingListsState.findIndex(
             (list) => list.localId === listId,
         )
+
         if (index > -1) {
-            existingListsState.splice(index, 1)
+            existingListsState.splice(index, 1) // This modifies existingListsState in place
         }
 
-        const UnifiedIdToRemove = this.props.annotationsCache.getListByLocalId(
-            listId,
-        )?.unifiedId
+        console.log('newState', existingListsState)
+        this.setState({
+            currentAnnotationLists: existingListsState,
+        })
+
+        const UnifiedIdToRemove = listToRemove?.unifiedId
 
         const existing = this.props.annotationsCache.annotations.byId[
             currentAnnotation.unifiedId
@@ -294,6 +307,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         currentAnnotation={this.state.currentAnnotation}
                         getAnnotationLists={this.getAnnotationLists}
                         toggleSpacePicker={this.toggleSpacePicker}
+                        removeSpaceForAnnotation={this.removeSpaceForAnnotation}
                     />
                 </ThemeProvider>
             </StyleSheetManager>

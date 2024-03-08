@@ -139,7 +139,11 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             analyticsBG: params.analyticsBG,
             openAnnotationEdit: (openTooltipInAnnotationEditMode) => {
                 const handleExternalAction = (event) => {
-                    openTooltipInAnnotationEditMode(event.annotationCacheId)
+                    openTooltipInAnnotationEditMode(
+                        event.annotationCacheId,
+                        event.selection,
+                        event.openForSpaces,
+                    )
                 }
                 params.inPageUI.events.on('tooltipAction', handleExternalAction)
             },

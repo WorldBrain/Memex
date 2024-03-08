@@ -68,6 +68,8 @@ export interface SidebarActionOptions {
 }
 export interface ToolTipActionOptions {
     annotationCacheId?: UnifiedAnnotation['unifiedId']
+    selection?: Selection
+    openForSpaces?: boolean
 }
 
 export interface SharedInPageUIEvents {

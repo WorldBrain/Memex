@@ -507,13 +507,20 @@ export async function main(
         try {
             const result = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
-                onClick: ({ annotationId, openInEdit }) =>
-                    inPageUI.showSidebar({
-                        annotationCacheId: annotationId.toString(),
-                        action: openInEdit
-                            ? 'edit_annotation'
-                            : 'show_annotation',
-                    }),
+                onClick: ({ annotationId, openInEdit }) => {
+                    console.log('shiftopen', openInEdit)
+                    if (openInEdit || inPageUI.componentsShown.sidebar) {
+                        inPageUI.showSidebar({
+                            annotationCacheId: annotationId.toString(),
+                            action: 'edit_annotation',
+                        })
+                    } else {
+                        console.log('annotationId', annotationId)
+                        inPageUI.events.emit('tooltipAction', {
+                            annotationCacheId: annotationId.toString(),
+                        })
+                    }
+                },
                 getSelection: () => document.getSelection(),
                 getFullPageUrl: async () => pageInfo.getFullPageUrl(),
                 isPdf: pageInfo.isPdf,

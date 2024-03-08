@@ -70,19 +70,6 @@ function getShortcutHandlers({
     return {
         addComment: () => inPageUI.showRibbon({ action: 'comment' }),
         addTag: () => inPageUI.showRibbon({ action: 'tag' }),
-        addToCollection: async () => {
-            if (userSelectedText()) {
-                await annotationFunctions.createAnnotation(
-                    window.getSelection(),
-                    false,
-                    true,
-                    true,
-                    null,
-                )
-            } else {
-                await inPageUI.showRibbon({ action: 'list' })
-            }
-        },
         sharePage: () =>
             inPageUI.showSidebar({
                 action: 'cite_page',
@@ -113,9 +100,6 @@ function getShortcutHandlers({
             })
             inPageUI.hideTooltip()
         },
-        // window.getSelection().toString().length === 0
-        //     ?
-        //     : inPageUI.showTooltip('AImode'),
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createSharedAnnotation: () =>
             annotationFunctions.createAnnotation(
@@ -127,16 +111,30 @@ function getShortcutHandlers({
             ),
         createSharedHighlight: () =>
             annotationFunctions.createHighlight(window.getSelection(), true),
-        createHighlight: () =>
-            annotationFunctions.createHighlight(window.getSelection(), false),
-        createAnnotation: () =>
-            annotationFunctions.createAnnotation(
+        createHighlight: async () => {
+            await annotationFunctions.createHighlight(
                 window.getSelection(),
                 false,
-                false,
-                false,
-                null,
             ),
+                inPageUI.hideTooltip()
+        },
+        createAnnotation: () =>
+            inPageUI.events.emit('tooltipAction', {
+                annotationCacheId: null,
+                selection: window.getSelection(),
+                openForSpaces: false,
+            }),
+        addToCollection: async () => {
+            if (userSelectedText()) {
+                inPageUI.events.emit('tooltipAction', {
+                    annotationCacheId: null,
+                    selection: window.getSelection(),
+                    openForSpaces: true,
+                })
+            } else {
+                await inPageUI.showRibbon({ action: 'list' })
+            }
+        },
         copyCurrentLink: () => {
             if (userSelectedText()) {
                 return annotationFunctions.createHighlight(

@@ -192,7 +192,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         selector: h.selector,
                         color: h.color,
                     })),
-                    ({ annotationId, openInEdit }) => inPageUI.showTooltip(),
+                    ({ annotationId, openInEdit }) => null,
                     // inPageUI.showSidebar({
                     //     annotationCacheId: annotationId.toString(),
                     //     action: openInEdit
