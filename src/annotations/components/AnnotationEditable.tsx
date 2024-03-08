@@ -393,9 +393,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         this.props.unifiedId,
                         this.props.color,
                     )}
-
                     {this.renderHighlightsColorTooltip()}
-
                     {!isScreenshotAnnotation && (
                         <Highlightbar
                             onMouseEnter={() =>
@@ -418,46 +416,37 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             barColor={barColor}
                         />
                     )}
-                    {/* This is the highlight Editing section, not the annotationEditSection */}
-                    {true || this.props.isEditingHighlight ? (
-                        <HighlightEditContainer
-                            hasHighlight={this.theme.hasHighlight}
-                        >
-                            <AnnotationEdit
-                                ref={this.annotEditRef}
-                                {...this.props.annotationEditDependencies}
-                                rows={2}
-                                editorHeight={this.state.editorHeight}
-                                isShared={this.props.isShared}
-                                isBulkShareProtected={
-                                    this.props.isBulkShareProtected
-                                }
-                                getYoutubePlayer={this.props.getYoutubePlayer}
-                                imageSupport={this.props.imageSupport}
-                                comment={this.props.body}
-                                onCommentChange={
-                                    this.props.annotationEditDependencies
-                                        .onBodyChange
-                                }
-                                slimEditorActions={true}
-                                isEditMode={this.props.isEditingHighlight}
-                                onEditCancel={
-                                    this.props.annotationEditDependencies
-                                        .onEditCancel
-                                }
-                                setEditing={
-                                    this.props.annotationFooterDependencies
-                                        .onEditHighlightIconClick
-                                }
-                            />
-                        </HighlightEditContainer>
-                    ) : (
-                        <Markdown isHighlight pageUrl={this.props.pageUrl}>
-                            {this.state.isTruncatedHighlight
-                                ? this.state.truncatedTextHighlight
-                                : this.props.body}
-                        </Markdown>
-                    )}
+                    <HighlightEditContainer
+                        hasHighlight={this.theme.hasHighlight}
+                    >
+                        <AnnotationEdit
+                            ref={this.annotEditRef}
+                            {...this.props.annotationEditDependencies}
+                            rows={2}
+                            editorHeight={this.state.editorHeight}
+                            isShared={this.props.isShared}
+                            isBulkShareProtected={
+                                this.props.isBulkShareProtected
+                            }
+                            getYoutubePlayer={this.props.getYoutubePlayer}
+                            imageSupport={this.props.imageSupport}
+                            comment={this.props.body}
+                            onCommentChange={
+                                this.props.annotationEditDependencies
+                                    .onBodyChange
+                            }
+                            slimEditorActions={true}
+                            isEditMode={this.props.isEditingHighlight}
+                            onEditCancel={
+                                this.props.annotationEditDependencies
+                                    .onEditCancel
+                            }
+                            setEditing={
+                                this.props.annotationFooterDependencies
+                                    .onEditHighlightIconClick
+                            }
+                        />
+                    </HighlightEditContainer>
                 </HighlightSection>
             </HighlightStyled>
         )
@@ -771,86 +760,80 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         if (!comment?.length && !isEditing) {
             return
         }
-
-        if (true) {
-            return (
-                <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
-                    <AnnotationEdit
-                        ref={this.annotEditRef}
-                        {...annotationEditDependencies}
-                        rows={2}
-                        editorHeight={this.state.editorHeight}
-                        isShared={this.props.isShared}
-                        isBulkShareProtected={this.props.isBulkShareProtected}
-                        getYoutubePlayer={this.props.getYoutubePlayer}
-                        imageSupport={this.props.imageSupport}
-                        isEditMode={this.props.isEditing}
-                        setEditing={
-                            annotationFooterDependencies.onEditIconClick
-                        }
-                        comment={comment}
-                        onCommentChange={
-                            this.props.annotationEditDependencies
-                                .onCommentChange
-                        }
-                        onEditCancel={
-                            this.props.annotationEditDependencies.onEditCancel
-                        }
-                    />
-                </AnnotationEditContainer>
-            )
-        }
-
         return (
-            <CommentBox
-                onDoubleClick={
-                    this.props.isEditing
-                        ? undefined
-                        : this.props.annotationFooterDependencies
-                              ?.onEditIconClick
-                }
-            >
-                {/* <ActionBox>{actionsBox}</ActionBox> */}
+            <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
+                <AnnotationEdit
+                    ref={this.annotEditRef}
+                    {...annotationEditDependencies}
+                    rows={2}
+                    editorHeight={this.state.editorHeight}
+                    isShared={this.props.isShared}
+                    isBulkShareProtected={this.props.isBulkShareProtected}
+                    getYoutubePlayer={this.props.getYoutubePlayer}
+                    imageSupport={this.props.imageSupport}
+                    isEditMode={this.props.isEditing}
+                    setEditing={annotationFooterDependencies.onEditIconClick}
+                    comment={comment}
+                    onCommentChange={
+                        this.props.annotationEditDependencies.onCommentChange
+                    }
+                    onEditCancel={
+                        this.props.annotationEditDependencies.onEditCancel
+                    }
+                />
+            </AnnotationEditContainer>
+            //     )
 
-                {/* {!this.theme.hasHighlight &&
-                    this.state.hoverCard &&
-                    this.props.currentUserId === this.props.creatorId && (
-                        <ActionBox>
-                            <TooltipBox
-                                tooltipText={
-                                    <span>
-                                        Edit Note <br />
-                                        <strong>Pro Tip:</strong> Double Click
-                                        Card
-                                    </span>
-                                }
-                                placement="bottom-end"
-                                getPortalRoot={this.props.getRootElement}
-                            >
-                                <Icon
-                                    onClick={
-                                        annotationFooterDependencies?.onEditIconClick
-                                    }
-                                    icon={'edit'}
-                                    heightAndWidth={'18px'}
-                                    borderColor={'greyScale3'}
-                                    background={'greyScale1'}
-                                />
-                            </TooltipBox>
-                        </ActionBox>
-                    )} */}
-                <NoteTextBox hasHighlight={this.theme.hasHighlight}>
-                    <NoteText
-                        contextLocation={this.props.contextLocation}
-                        getYoutubePlayer={this.props.getYoutubePlayer}
-                    >
-                        {comment}
-                        {/* {this.state.isTruncatedNote
-                            ? this.state.truncatedTextComment
-                            : comment} */}
-                    </NoteText>
-                </NoteTextBox>
-            </CommentBox>
+            // return (
+            //     <CommentBox
+            //         onDoubleClick={
+            //             this.props.isEditing
+            //                 ? undefined
+            //                 : this.props.annotationFooterDependencies
+            //                       ?.onEditIconClick
+            //         }
+            //     >
+            //         {/* <ActionBox>{actionsBox}</ActionBox> */}
+
+            //         {/* {!this.theme.hasHighlight &&
+            //             this.state.hoverCard &&
+            //             this.props.currentUserId === this.props.creatorId && (
+            //                 <ActionBox>
+            //                     <TooltipBox
+            //                         tooltipText={
+            //                             <span>
+            //                                 Edit Note <br />
+            //                                 <strong>Pro Tip:</strong> Double Click
+            //                                 Card
+            //                             </span>
+            //                         }
+            //                         placement="bottom-end"
+            //                         getPortalRoot={this.props.getRootElement}
+            //                     >
+            //                         <Icon
+            //                             onClick={
+            //                                 annotationFooterDependencies?.onEditIconClick
+            //                             }
+            //                             icon={'edit'}
+            //                             heightAndWidth={'18px'}
+            //                             borderColor={'greyScale3'}
+            //                             background={'greyScale1'}
+            //                         />
+            //                     </TooltipBox>
+            //                 </ActionBox>
+            //             )} */}
+            //         <NoteTextBox hasHighlight={this.theme.hasHighlight}>
+            //             <NoteText
+            //                 contextLocation={this.props.contextLocation}
+            //                 getYoutubePlayer={this.props.getYoutubePlayer}
+            //             >
+            //                 {comment}
+            //                 {/* {this.state.isTruncatedNote
+            //                     ? this.state.truncatedTextComment
+            //                     : comment} */}
+            //             </NoteText>
+            //         </NoteTextBox>
+            //     </CommentBox>
         )
     }
 

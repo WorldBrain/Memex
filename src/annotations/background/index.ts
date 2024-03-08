@@ -459,9 +459,9 @@ export default class DirectLinkingBackground {
 
         return this.annotationStorage.editAnnotation(
             url,
-            comment ?? existingAnnotation.comment,
-            color,
-            body,
+            comment != null ? comment : existingAnnotation.comment,
+            color != null ? color : existingAnnotation.color,
+            body != null ? body : existingAnnotation.body,
         )
     }
 

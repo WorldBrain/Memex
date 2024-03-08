@@ -174,13 +174,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('renderHighlight', ({ highlight }) =>
             highlighter.renderHighlight(
                 { id: highlight.unifiedId, selector: highlight.selector },
-                ({ annotationId, openInEdit }) =>
-                    inPageUI.showSidebar({
-                        annotationCacheId: annotationId.toString(),
-                        action: openInEdit
-                            ? 'edit_annotation'
-                            : 'show_annotation',
-                    }),
+                ({ annotationId, openInEdit }) => inPageUI.showTooltip(),
+                // {
+                //     annotationCacheId: annotationId.toString(),
+                //     // action: openInEdit
+                //     //     ? 'edit_annotation'
+                //     //     : 'show_annotation',
+                // }),
             ),
         )
         sidebarEvents.on(
@@ -192,13 +192,13 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                         selector: h.selector,
                         color: h.color,
                     })),
-                    ({ annotationId, openInEdit }) =>
-                        inPageUI.showSidebar({
-                            annotationCacheId: annotationId.toString(),
-                            action: openInEdit
-                                ? 'edit_annotation'
-                                : 'show_annotation',
-                        }),
+                    ({ annotationId, openInEdit }) => null,
+                    // inPageUI.showSidebar({
+                    //     annotationCacheId: annotationId.toString(),
+                    //     action: openInEdit
+                    //         ? 'edit_annotation'
+                    //         : 'show_annotation',
+                    // }),
                     { removeExisting: removeExisting },
                 )
             },

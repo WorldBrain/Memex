@@ -366,6 +366,7 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         if (event.key === 'ArrowUp') {
+            event.preventDefault()
             this.emitMutation({ keyboardNavActive: { $set: true } })
             this.setFocusedEntryIndex(this.focusIndex - 1, previousState)
             await sleepPromise(50)
@@ -374,6 +375,7 @@ export default class SpacePickerLogic extends UILogic<
         }
 
         if (event.key === 'ArrowDown') {
+            event.preventDefault()
             this.emitMutation({ keyboardNavActive: { $set: true } })
             this.setFocusedEntryIndex(this.focusIndex + 1, previousState)
             await sleepPromise(50)
