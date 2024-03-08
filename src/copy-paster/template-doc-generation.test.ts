@@ -1339,7 +1339,7 @@ describe('Content template doc generation', () => {
 
         expect(
             await generate(
-                '{{{PageTitle}}} {{#Notes}} {{{NoteHighlight}}} {{/Notes}}',
+                '{{{PageTitle}}} {{#Notes}} {{{NoteHighlight}}} {{/Notes}} {{PageAnnotation}} {{PageSourceName}} {{{PageDOI}}}',
             ),
         ).toEqual([
             {
@@ -1368,6 +1368,13 @@ describe('Content template doc generation', () => {
             {
                 PageTitle: DATA.testPageB.fullTitle,
                 PageUrl: DATA.testPageBUrl,
+
+                PageAnnotation: DATA.testPageBMetadata.annotation,
+                PageSourceName: DATA.testPageBMetadata.sourceName,
+                PageAccessDate: serializeDate(
+                    DATA.testPageBMetadata.accessDate,
+                ),
+
                 title: DATA.testPageB.fullTitle,
                 url: DATA.testPageBUrl,
                 HasNotes: true,
@@ -1375,6 +1382,13 @@ describe('Content template doc generation', () => {
                     {
                         PageTitle: DATA.testPageB.fullTitle,
                         PageUrl: DATA.testPageBUrl,
+
+                        PageAnnotation: DATA.testPageBMetadata.annotation,
+                        PageSourceName: DATA.testPageBMetadata.sourceName,
+                        PageAccessDate: serializeDate(
+                            DATA.testPageBMetadata.accessDate,
+                        ),
+
                         title: DATA.testPageB.fullTitle,
                         url: DATA.testPageBUrl,
                         NoteHighlight: DATA.testAnnotationCHighlight,

@@ -250,6 +250,7 @@ const generateForNotes = async ({
 
     let pages: UrlMappedData<PageTemplateData> = {}
     let pageTags: UrlMappedData<string[]> = {}
+    let pageMetadata: UrlMappedData<PageMetadata> = {}
     let pageSpaces: UrlMappedData<string[]> = {}
     let pageLinks: UrlMappedData<string> = {}
     let pageCreatedAt: UrlMappedData<Date> = {}
@@ -264,6 +265,12 @@ const generateForNotes = async ({
 
     if (templateAnalysis.requirements.pageSpaces) {
         pageSpaces = await dataFetchers.getSpacesForPages(
+            params.normalizedPageUrls,
+        )
+    }
+
+    if (templateAnalysis.requirements.pageMetadata) {
+        pageMetadata = await dataFetchers.getMetadataForPages(
             params.normalizedPageUrls,
         )
     }
@@ -323,6 +330,21 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
+                PageDOI: pageMetadata[pageUrl]?.doi,
+                PageMetaTitle: pageMetadata[pageUrl]?.title,
+                PageAnnotation: pageMetadata[pageUrl]?.annotation,
+                PageSourceName: pageMetadata[pageUrl]?.sourceName,
+                PageJournalName: pageMetadata[pageUrl]?.journalName,
+                PageJournalPage: pageMetadata[pageUrl]?.journalPage,
+                PageJournalIssue: pageMetadata[pageUrl]?.journalIssue,
+                PageJournalVolume: pageMetadata[pageUrl]?.journalVolume,
+                PageReleaseDate: serializeDate(
+                    pageMetadata[pageUrl]?.releaseDate,
+                ),
+                PageAccessDate: serializeDate(
+                    pageMetadata[pageUrl]?.accessDate,
+                ),
+
                 title: fullTitle,
                 tags: pageTags[pageUrl],
                 url: fullUrl,
@@ -363,6 +385,21 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
+                PageDOI: pageMetadata[pageUrl]?.doi,
+                PageMetaTitle: pageMetadata[pageUrl]?.title,
+                PageAnnotation: pageMetadata[pageUrl]?.annotation,
+                PageSourceName: pageMetadata[pageUrl]?.sourceName,
+                PageJournalName: pageMetadata[pageUrl]?.journalName,
+                PageJournalPage: pageMetadata[pageUrl]?.journalPage,
+                PageJournalIssue: pageMetadata[pageUrl]?.journalIssue,
+                PageJournalVolume: pageMetadata[pageUrl]?.journalVolume,
+                PageReleaseDate: serializeDate(
+                    pageMetadata[pageUrl]?.releaseDate,
+                ),
+                PageAccessDate: serializeDate(
+                    pageMetadata[pageUrl]?.accessDate,
+                ),
+
                 title: pageData.fullTitle,
                 url: pageData.fullUrl,
                 tags: pageTags[pageUrl],
@@ -377,9 +414,10 @@ const generateForNotes = async ({
     // If page is not required, we simply need to set the array of Notes
     if (!templateAnalysis.requirements.page) {
         const templateDocs: TemplateDoc[] = []
-        for (const [noteUrl, { body, comment, createdAt }] of Object.entries(
-            notes,
-        )) {
+        for (const [
+            noteUrl,
+            { body, comment, createdAt, pageUrl },
+        ] of Object.entries(notes)) {
             templateDocs.push({
                 NoteText: comment,
                 NoteHighlight: body,
@@ -391,6 +429,21 @@ const generateForNotes = async ({
                 NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
                     ? serializeDate(createdAt)
                     : undefined,
+
+                PageDOI: pageMetadata[pageUrl]?.doi,
+                PageMetaTitle: pageMetadata[pageUrl]?.title,
+                PageAnnotation: pageMetadata[pageUrl]?.annotation,
+                PageSourceName: pageMetadata[pageUrl]?.sourceName,
+                PageJournalName: pageMetadata[pageUrl]?.journalName,
+                PageJournalPage: pageMetadata[pageUrl]?.journalPage,
+                PageJournalIssue: pageMetadata[pageUrl]?.journalIssue,
+                PageJournalVolume: pageMetadata[pageUrl]?.journalVolume,
+                PageReleaseDate: serializeDate(
+                    pageMetadata[pageUrl]?.releaseDate,
+                ),
+                PageAccessDate: serializeDate(
+                    pageMetadata[pageUrl]?.accessDate,
+                ),
             })
         }
 
@@ -411,6 +464,17 @@ const generateForNotes = async ({
             PageLink: pageLinks[pageUrl],
             PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
             HasNotes: notesByPageUrl[pageUrl].length > 0,
+
+            PageDOI: pageMetadata[pageUrl]?.doi,
+            PageMetaTitle: pageMetadata[pageUrl]?.title,
+            PageAnnotation: pageMetadata[pageUrl]?.annotation,
+            PageSourceName: pageMetadata[pageUrl]?.sourceName,
+            PageJournalName: pageMetadata[pageUrl]?.journalName,
+            PageJournalPage: pageMetadata[pageUrl]?.journalPage,
+            PageJournalIssue: pageMetadata[pageUrl]?.journalIssue,
+            PageJournalVolume: pageMetadata[pageUrl]?.journalVolume,
+            PageReleaseDate: serializeDate(pageMetadata[pageUrl]?.releaseDate),
+            PageAccessDate: serializeDate(pageMetadata[pageUrl]?.accessDate),
 
             title: fullTitle,
             url: fullUrl,
@@ -437,6 +501,21 @@ const generateForNotes = async ({
                     PageSpacesList: pageSpaces[pageUrl],
                     PageLink: pageLinks[pageUrl],
                     PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
+
+                    PageDOI: pageMetadata[pageUrl]?.doi,
+                    PageMetaTitle: pageMetadata[pageUrl]?.title,
+                    PageAnnotation: pageMetadata[pageUrl]?.annotation,
+                    PageSourceName: pageMetadata[pageUrl]?.sourceName,
+                    PageJournalName: pageMetadata[pageUrl]?.journalName,
+                    PageJournalPage: pageMetadata[pageUrl]?.journalPage,
+                    PageJournalIssue: pageMetadata[pageUrl]?.journalIssue,
+                    PageJournalVolume: pageMetadata[pageUrl]?.journalVolume,
+                    PageReleaseDate: serializeDate(
+                        pageMetadata[pageUrl]?.releaseDate,
+                    ),
+                    PageAccessDate: serializeDate(
+                        pageMetadata[pageUrl]?.accessDate,
+                    ),
 
                     title: fullTitle,
                     url: fullUrl,
