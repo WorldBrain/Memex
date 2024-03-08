@@ -37,6 +37,7 @@ export interface Props {
     searchResDocs: ResultItemProps[]
     updateQuery: (query: string) => Promise<void>
     query: string
+    openSettings: () => void
 }
 
 interface State {
@@ -106,9 +107,9 @@ class Container extends React.Component<Props, State> {
         if (isSticky == null) {
             await this.props.syncSettings.searchInjection.set(
                 'stickyContainerEnabled',
-                true,
+                false,
             )
-            isSticky = true
+            isSticky = false
         }
 
         let fetchNotif
@@ -415,6 +416,7 @@ class Container extends React.Component<Props, State> {
                     toggleStickyContainer={this.toggleStickyContainer}
                     updateQuery={this.props.updateQuery}
                     query={this.props.query}
+                    openSettings={this.props.openSettings}
                 />
             </>
         )

@@ -28,6 +28,7 @@ interface ResultsProps {
     toggleStickyContainer: (isSticky: boolean) => Promise<void>
     updateQuery: (query: string) => Promise<void>
     query: string
+    openSettings: () => void
 }
 
 interface ResultsState {
@@ -36,6 +37,8 @@ interface ResultsState {
 
 class Results extends React.Component<ResultsProps, ResultsState> {
     state: ResultsState = {}
+
+    settingsMenuRef = React.createRef<HTMLDivElement>()
 
     async componentDidMount() {
         let loaded: MemexThemeVariant = 'dark'
@@ -126,6 +129,11 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                             !this.props.isSticky,
                                         )
                                     }
+                                    background={
+                                        this.props.isSticky
+                                            ? 'greyScale3'
+                                            : null
+                                    }
                                 />
                             </TooltipBox>
                             <TooltipBox
@@ -162,6 +170,7 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                         heightAndWidth="18px"
                                         padding="5px"
                                         onClick={props.toggleDropdown}
+                                        containerRef={this.settingsMenuRef}
                                     />
                                 </TooltipBox>
                                 {props.dropdown && (
@@ -169,6 +178,9 @@ class Results extends React.Component<ResultsProps, ResultsState> {
                                         remove={props.removeResults}
                                         rerender={props.changePosition}
                                         closeDropdown={props.closeDropdown}
+                                        getRootElement={props.getRootElement}
+                                        settingsMenuRef={this.settingsMenuRef}
+                                        openSettings={props.openSettings}
                                     />
                                 )}
                             </SettingsButtonContainer>

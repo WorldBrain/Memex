@@ -173,6 +173,7 @@ export const key = browser.runtime.getURL('/img/key.svg')
 export const spread = browser.runtime.getURL('/img/spread.svg')
 export const dragList = browser.runtime.getURL('/img/dragList.svg')
 export const memexIconOnly = browser.runtime.getURL('/img/memexIconOnly.svg')
+export const move = browser.runtime.getURL('/img/move.svg')
 export const browserIcon = browser.runtime.getURL(
     '/img/browserIcons/logo-48.png',
 )

@@ -1021,11 +1021,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
         event,
     }) => {
-        // const listData = getListData(event.listId, previousState, {
-        //     mustBeLocal: true,
-        //     source: 'setPageLists',
-        // })
-
         this.emitMutation({
             bulkEditSpacesLoadingState: { $set: 'running' },
         })
