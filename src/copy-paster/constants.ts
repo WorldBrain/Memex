@@ -27,6 +27,9 @@ export const KEYS_TO_REQUIREMENTS: {
     PageReleaseDate: 'pageMetadata',
     PageAccessDate: 'pageMetadata',
 
+    EntityName: 'pageEntities',
+    EntityAdditionalName: 'pageEntities',
+
     HasNotes: 'hasNotes',
     NoteHighlight: 'note',
     NoteText: 'note',

@@ -32,6 +32,19 @@ export const testPageBMetadata = {
     accessDate: 1641443857993,
 }
 export const testPageBCreatedAt = new Date('2022-05-06T00:35')
+export const testPageBEntityA = {
+    normalizedPageUrl: testPageB.url,
+    name: 'test entity 1 page b',
+    isPrimary: true,
+    order: 200,
+}
+export const testPageBEntityB = {
+    normalizedPageUrl: testPageB.url,
+    name: 'test entity 2 page b',
+    additionalName: 'extra name',
+    isPrimary: false,
+    order: 300,
+}
 
 export const testPageCUrl = 'https://memex.cloud/ct/test-fingerprint-a.pdf'
 export const testPageCTags = ['ttt']
@@ -71,16 +84,9 @@ export const testPageCMetadata = {
 }
 export const testPageCEntityA = {
     normalizedPageUrl: testPageC.url,
-    name: 'test entity 1',
+    name: 'test entity 1 page c',
     isPrimary: true,
     order: 200,
-}
-export const testPageCEntityB = {
-    normalizedPageUrl: testPageC.url,
-    name: 'test entity 2',
-    additionalName: 'extra name',
-    isPrimary: false,
-    order: 300,
 }
 
 // Children of page A

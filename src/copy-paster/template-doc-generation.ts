@@ -1,4 +1,7 @@
-import type { PageMetadata } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type {
+    PageEntity,
+    PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type {
     TemplateDataFetchers,
     PageTemplateData,
@@ -52,16 +55,15 @@ export const serializeDate = (
     return date.toLocaleString(locale)
 }
 
-const groupNotesByPages = (
-    notes: UrlMappedData<NoteTemplateData>,
-): UrlMappedData<NoteTemplateData[]> => {
-    const grouped: UrlMappedData<NoteTemplateData[]> = {}
+const groupDataByPages = <T>(
+    data: UrlMappedData<T>,
+    getPageUrl: (datum: T) => string,
+): UrlMappedData<T[]> => {
+    const grouped: UrlMappedData<T[]> = {}
 
-    for (const { pageUrl, ...noteData } of Object.values(notes)) {
-        grouped[pageUrl] = [
-            ...(grouped[pageUrl] ?? []),
-            { pageUrl, ...noteData },
-        ]
+    for (const datum of Object.values(data)) {
+        const pageUrl = getPageUrl(datum)
+        grouped[pageUrl] = [...(grouped[pageUrl] ?? []), datum]
     }
 
     return grouped
@@ -72,17 +74,17 @@ const omitEmptyFields = (docs: TemplateDoc[]): TemplateDoc[] =>
         if (doc.Notes) {
             doc.Notes = doc.Notes.map(omitEmpty)
         }
+        if (doc.PageEntities) {
+            doc.PageEntities = doc.PageEntities.map(omitEmpty)
+        }
         if (doc.Pages) {
-            doc.Pages = doc.Pages.map(({ Notes, ...pageTemplateDoc }) => {
-                if (!Notes?.length) {
-                    return omitEmpty(pageTemplateDoc)
-                }
-
-                return {
+            doc.Pages = doc.Pages.map(
+                ({ Notes, PageEntities, ...pageTemplateDoc }) => ({
                     ...omitEmpty(pageTemplateDoc),
-                    Notes: Notes.map(omitEmpty),
-                }
-            })
+                    Notes: Notes?.map(omitEmpty) ?? [],
+                    PageEntities: PageEntities?.map(omitEmpty) ?? [],
+                }),
+            )
         }
         return omitEmpty(doc)
     })
@@ -107,6 +109,7 @@ const generateForPages = async ({
 
     let pageTags: UrlMappedData<string[]> = {}
     let pageMetadata: UrlMappedData<PageMetadata> = {}
+    let pageEntities: UrlMappedData<PageEntity[]> = {}
     let pageSpaces: UrlMappedData<string[]> = {}
     let pageCreatedAt: UrlMappedData<Date> = {}
     let noteTags: UrlMappedData<string[]> = {}
@@ -127,6 +130,12 @@ const generateForPages = async ({
 
     if (templateAnalysis.requirements.pageMetadata) {
         pageMetadata = await dataFetchers.getMetadataForPages(
+            params.normalizedPageUrls,
+        )
+    }
+
+    if (templateAnalysis.requirements.pageEntities) {
+        pageEntities = await dataFetchers.getEntitiesForPages(
             params.normalizedPageUrls,
         )
     }
@@ -211,6 +220,11 @@ const generateForPages = async ({
                 pageMetadata[normalizedPageUrl]?.accessDate,
             ),
 
+            PageEntities: pageEntities[normalizedPageUrl]?.map((entity) => ({
+                EntityName: entity.name,
+                EntityAdditionalName: entity.additionalName,
+            })),
+
             HasNotes: noteUrls.length > 0,
             Notes: noteUrls.map((url) => ({
                 NoteText: notes[url]?.comment,
@@ -243,13 +257,14 @@ const generateForNotes = async ({
     ...params
 }: GeneratorInput): Promise<TemplateDoc[]> => {
     const notes = await dataFetchers.getNotes(params.annotationUrls)
-    const notesByPageUrl = groupNotesByPages(notes)
+    const notesByPageUrl = groupDataByPages(notes, (note) => note.pageUrl)
     let noteTags: UrlMappedData<string[]> = {}
     let noteSpaces: UrlMappedData<string[]> = {}
     let noteLinks: UrlMappedData<string> = {}
 
     let pages: UrlMappedData<PageTemplateData> = {}
     let pageTags: UrlMappedData<string[]> = {}
+    let pageEntities: UrlMappedData<PageEntity[]> = {}
     let pageMetadata: UrlMappedData<PageMetadata> = {}
     let pageSpaces: UrlMappedData<string[]> = {}
     let pageLinks: UrlMappedData<string> = {}
@@ -271,6 +286,12 @@ const generateForNotes = async ({
 
     if (templateAnalysis.requirements.pageMetadata) {
         pageMetadata = await dataFetchers.getMetadataForPages(
+            params.normalizedPageUrls,
+        )
+    }
+
+    if (templateAnalysis.requirements.pageEntities) {
+        pageEntities = await dataFetchers.getEntitiesForPages(
             params.normalizedPageUrls,
         )
     }
@@ -330,6 +351,11 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
+                PageEntities: pageEntities[pageUrl]?.map((entity) => ({
+                    EntityName: entity.name,
+                    EntityAdditionalName: entity.additionalName,
+                })),
+
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
                 PageAnnotation: pageMetadata[pageUrl]?.annotation,
@@ -385,6 +411,11 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
+                PageEntities: pageEntities[pageUrl]?.map((entity) => ({
+                    EntityName: entity.name,
+                    EntityAdditionalName: entity.additionalName,
+                })),
+
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
                 PageAnnotation: pageMetadata[pageUrl]?.annotation,
@@ -429,6 +460,11 @@ const generateForNotes = async ({
                 NoteCreatedAt: templateAnalysis.requirements.noteCreatedAt
                     ? serializeDate(createdAt)
                     : undefined,
+
+                PageEntities: pageEntities[pageUrl]?.map((entity) => ({
+                    EntityName: entity.name,
+                    EntityAdditionalName: entity.additionalName,
+                })),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -479,6 +515,11 @@ const generateForNotes = async ({
             title: fullTitle,
             url: fullUrl,
             tags: pageTags[pageUrl],
+
+            PageEntities: pageEntities[pageUrl]?.map((entity) => ({
+                EntityName: entity.name,
+                EntityAdditionalName: entity.additionalName,
+            })),
 
             Notes: notesByPageUrl[pageUrl].map(
                 ({ url: noteUrl, body, comment, createdAt }) => ({

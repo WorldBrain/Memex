@@ -1,4 +1,7 @@
-import type { PageMetadata } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type {
+    PageEntity,
+    PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
 
 export interface Template {
     id: number
@@ -10,13 +13,17 @@ export interface Template {
 }
 
 export type TemplateDoc = {
-    Notes?: Array<TemplateDocNote>
     Pages?: Array<TemplateDocPage>
 } & TemplateDocPage &
-    TemplateDocNote
+    TemplateDocNote &
+    TemplateDocPageEntity
 
-export type TemplateDocKey = keyof (Omit<TemplateDocPage, 'Notes'> &
-    TemplateDocNote)
+export type TemplateDocKey = keyof (Omit<
+    TemplateDocPage,
+    'Notes' | 'PageEntities'
+> &
+    TemplateDocNote &
+    TemplateDocPageEntity)
 
 export interface TemplateDocPage {
     PageUrl?: string
@@ -37,6 +44,7 @@ export interface TemplateDocPage {
     PageJournalVolume?: string
     PageReleaseDate?: string
     PageAccessDate?: string
+    PageEntities?: TemplateDocPageEntity[]
 
     HasNotes?: boolean
     PageLink?: string
@@ -57,6 +65,11 @@ export interface TemplateDocNote {
     NoteSpacesList?: string[]
     NoteCreatedAt?: string
     NoteLink?: string
+}
+
+export interface TemplateDocPageEntity {
+    EntityName?: string
+    EntityAdditionalName?: string
 }
 
 export interface TemplateAnalysis {
@@ -102,6 +115,9 @@ export interface TemplateDataFetchers {
     getMetadataForPages(
         normalizedPageUrls: string[],
     ): Promise<UrlMappedData<PageMetadata>>
+    getEntitiesForPages(
+        normalizedPageUrls: string[],
+    ): Promise<UrlMappedData<PageEntity[]>>
     getCreatedAtForPages(
         normalizedPageUrls: string[],
     ): Promise<UrlMappedData<Date>>

@@ -93,11 +93,16 @@ export function joinTemplateDocs(
 export function analyzeTemplate(
     template: Pick<Template, 'code'>,
 ): TemplateAnalysis {
-    const templateDoc: TemplateDoc = { Pages: [{}], Notes: [{}] }
+    const templateDoc: TemplateDoc = {
+        Pages: [{}],
+        Notes: [{}],
+        PageEntities: [{}],
+    }
     for (const key of Object.keys(KEYS_TO_REQUIREMENTS)) {
         templateDoc[key] = `@key%${key}.note@endkey%`
         templateDoc.Pages[0][key] = `@key%${key}.page-list@endkey%`
         templateDoc.Notes[0][key] = `@key%${key}.page@endkey%`
+        templateDoc.PageEntities[0][key] = `@key%${key}.entities@endkey%`
     }
     const rendered = renderTemplate(template, templateDoc)
 
