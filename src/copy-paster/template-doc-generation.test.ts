@@ -11,7 +11,7 @@ import { analyzeTemplate } from './utils'
 import * as DATA from './template-doc-generation.test.data'
 import { getTemplateDataFetchers } from './background/template-data-fetchers'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
-import { isShareUrl } from 'src/content-sharing/utils'
+import { createPageLinkListTitle, isShareUrl } from 'src/content-sharing/utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 async function insertTestData(storageManager: Storex) {
@@ -228,6 +228,7 @@ describe('Content template doc generation', () => {
             }),
         ).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageC.fullTitle,
                 PageUrl: DATA.testLocatorC.originalLocation,
                 PageTags: joinTags(DATA.testPageCTags),
@@ -256,6 +257,7 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testLocatorC.originalLocation,
                 title: DATA.testPageC.fullTitle,
                 url: DATA.testLocatorC.originalLocation,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteHighlight: DATA.testAnnotationDHighlight,
@@ -281,6 +283,7 @@ describe('Content template doc generation', () => {
             }),
         ).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
@@ -299,6 +302,7 @@ describe('Content template doc generation', () => {
             }),
         ).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
                 PageTags: joinTags(DATA.testPageATags),
@@ -331,6 +335,7 @@ describe('Content template doc generation', () => {
         })
         expect(templateDocs).toEqual([
             {
+                HasNotes: false,
                 PageLink: expect.any(String), // TODO: properly set once implemented
                 PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
@@ -351,6 +356,7 @@ describe('Content template doc generation', () => {
             }),
         ).toEqual([
             {
+                HasNotes: false,
                 PageLink: expect.any(String), // TODO: properly set once implemented
                 PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
@@ -374,6 +380,7 @@ describe('Content template doc generation', () => {
             }),
         ).toEqual([
             {
+                HasNotes: false,
                 PageLink: expect.any(String), // TODO: properly set once implemented
                 PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
@@ -408,6 +415,7 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -435,6 +443,7 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -464,6 +473,7 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -489,6 +499,7 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -524,6 +535,7 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -546,24 +558,28 @@ describe('Content template doc generation', () => {
     it('should correctly generate template docs for multiple pages', async () => {
         const { dataFetchers } = await setupTest()
 
+        const currentDate = new Date()
         const generate = (template: string) =>
             generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({ code: template }),
                 normalizedPageUrls: [DATA.testPageA.url, DATA.testPageB.url],
                 annotationUrls: [],
                 dataFetchers,
+                now: currentDate.valueOf(),
             })
 
         expect(await generate('{{#Pages}}{{{PageTitle}}}{{/Pages}}')).toEqual([
             {
                 Pages: [
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageA.fullTitle,
                         PageUrl: DATA.testPageAUrl,
                         title: DATA.testPageA.fullTitle,
                         url: DATA.testPageAUrl,
                     },
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageB.fullTitle,
                         PageUrl: DATA.testPageBUrl,
                         title: DATA.testPageB.fullTitle,
@@ -581,6 +597,7 @@ describe('Content template doc generation', () => {
             {
                 Pages: [
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageA.fullTitle,
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
@@ -588,6 +605,7 @@ describe('Content template doc generation', () => {
                         url: DATA.testPageAUrl,
                     },
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageB.fullTitle,
                         PageUrl: DATA.testPageBUrl,
                         PageLink: expect.any(String),
@@ -606,6 +624,7 @@ describe('Content template doc generation', () => {
             {
                 Pages: [
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageA.fullTitle,
                         PageTags: joinTags(DATA.testPageATags),
                         PageTagList: DATA.testPageATags,
@@ -615,6 +634,7 @@ describe('Content template doc generation', () => {
                         url: DATA.testPageAUrl,
                     },
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageB.fullTitle,
                         PageTags: joinTags(DATA.testPageBTags),
                         PageTagList: DATA.testPageBTags,
@@ -635,6 +655,7 @@ describe('Content template doc generation', () => {
             {
                 Pages: [
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageA.fullTitle,
                         PageSpaces: joinSpaces([
                             ...DATA.testPageASpaces,
@@ -649,6 +670,7 @@ describe('Content template doc generation', () => {
                         url: DATA.testPageAUrl,
                     },
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageB.fullTitle,
                         PageSpaces: joinSpaces(DATA.testPageBSpaces),
                         PageSpacesList: DATA.testPageBSpaces,
@@ -668,6 +690,7 @@ describe('Content template doc generation', () => {
             {
                 Pages: [
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageA.fullTitle,
                         PageTags: joinTags(DATA.testPageATags),
                         PageTagList: DATA.testPageATags,
@@ -679,6 +702,7 @@ describe('Content template doc generation', () => {
                         url: DATA.testPageAUrl,
                     },
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageB.fullTitle,
                         PageTags: joinTags(DATA.testPageBTags),
                         PageTagList: DATA.testPageBTags,
@@ -693,6 +717,7 @@ describe('Content template doc generation', () => {
             },
         ])
 
+        const pageLinkName = createPageLinkListTitle(currentDate)
         expect(
             await generate(
                 '{{#Pages}} {{{PageTitle}}} {{{PageSpaces}}} {{{PageLink}}} {{/Pages}}',
@@ -701,14 +726,17 @@ describe('Content template doc generation', () => {
             {
                 Pages: [
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageA.fullTitle,
                         PageSpaces: joinSpaces([
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
+                            pageLinkName,
                         ]),
                         PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
+                            pageLinkName,
                         ],
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
@@ -716,9 +744,13 @@ describe('Content template doc generation', () => {
                         url: DATA.testPageAUrl,
                     },
                     {
+                        HasNotes: false,
                         PageTitle: DATA.testPageB.fullTitle,
-                        PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                        PageSpacesList: DATA.testPageBSpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageBSpaces,
+                            pageLinkName,
+                        ]),
+                        PageSpacesList: [...DATA.testPageBSpaces, pageLinkName],
                         PageUrl: DATA.testPageBUrl,
                         PageLink: expect.any(String),
                         title: DATA.testPageB.fullTitle,
@@ -742,12 +774,14 @@ describe('Content template doc generation', () => {
 
         expect(await generate('{{{PageTitle}}}')).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
             },
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageB.fullTitle,
                 PageUrl: DATA.testPageBUrl,
                 title: DATA.testPageB.fullTitle,
@@ -757,6 +791,7 @@ describe('Content template doc generation', () => {
 
         expect(await generate('{{{PageTitle}}} {{{PageTags}}}')).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
@@ -766,6 +801,7 @@ describe('Content template doc generation', () => {
                 url: DATA.testPageAUrl,
             },
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageB.fullTitle,
                 PageTags: joinTags(DATA.testPageBTags),
                 PageTagList: DATA.testPageBTags,
@@ -778,6 +814,7 @@ describe('Content template doc generation', () => {
 
         expect(await generate('{{{PageTitle}}} {{{PageSpaces}}}')).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageSpaces: joinSpaces([
                     ...DATA.testPageASpaces,
@@ -792,6 +829,7 @@ describe('Content template doc generation', () => {
                 url: DATA.testPageAUrl,
             },
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageB.fullTitle,
                 PageSpaces: joinSpaces(DATA.testPageBSpaces),
                 PageSpacesList: DATA.testPageBSpaces,
@@ -803,6 +841,7 @@ describe('Content template doc generation', () => {
 
         expect(await generate('{{{PageTitle}}} {{{PageLink}}}')).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageUrl: DATA.testPageAUrl,
                 PageLink: expect.any(String),
@@ -810,6 +849,7 @@ describe('Content template doc generation', () => {
                 url: DATA.testPageAUrl,
             },
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageB.fullTitle,
                 PageUrl: DATA.testPageBUrl,
                 PageLink: expect.any(String),
@@ -824,6 +864,7 @@ describe('Content template doc generation', () => {
             ),
         ).toEqual([
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageA.fullTitle,
                 PageTags: joinTags(DATA.testPageATags),
                 PageTagList: DATA.testPageATags,
@@ -835,6 +876,7 @@ describe('Content template doc generation', () => {
                 url: DATA.testPageAUrl,
             },
             {
+                HasNotes: false,
                 PageTitle: DATA.testPageB.fullTitle,
                 PageTags: joinTags(DATA.testPageBTags),
                 PageTagList: DATA.testPageBTags,
@@ -888,6 +930,7 @@ describe('Content template doc generation', () => {
                         title: DATA.testPageA.fullTitle,
                         tags: DATA.testPageATags,
                         url: DATA.testPageAUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteText: DATA.testAnnotationAText,
@@ -966,6 +1009,7 @@ describe('Content template doc generation', () => {
                         title: DATA.testPageB.fullTitle,
                         tags: DATA.testPageBTags,
                         url: DATA.testPageBUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteHighlight: DATA.testAnnotationCHighlight,
@@ -1015,6 +1059,7 @@ describe('Content template doc generation', () => {
                         title: DATA.testPageA.fullTitle,
                         tags: DATA.testPageATags,
                         url: DATA.testPageAUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteText: DATA.testAnnotationAText,
@@ -1050,6 +1095,7 @@ describe('Content template doc generation', () => {
                         title: DATA.testPageB.fullTitle,
                         tags: DATA.testPageBTags,
                         url: DATA.testPageBUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteHighlight: DATA.testAnnotationCHighlight,
@@ -1084,6 +1130,7 @@ describe('Content template doc generation', () => {
                         title: DATA.testPageA.fullTitle,
                         tags: DATA.testPageATags,
                         url: DATA.testPageAUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteText: DATA.testAnnotationAText,
@@ -1118,6 +1165,7 @@ describe('Content template doc generation', () => {
                         title: DATA.testPageB.fullTitle,
                         tags: DATA.testPageBTags,
                         url: DATA.testPageBUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteHighlight: DATA.testAnnotationCHighlight,
@@ -1149,6 +1197,7 @@ describe('Content template doc generation', () => {
                         PageLink: expect.any(String),
                         title: DATA.testPageA.fullTitle,
                         url: DATA.testPageAUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteText: DATA.testAnnotationAText,
@@ -1174,6 +1223,7 @@ describe('Content template doc generation', () => {
                         PageLink: expect.any(String),
                         title: DATA.testPageB.fullTitle,
                         url: DATA.testPageBUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteHighlight: DATA.testAnnotationCHighlight,
@@ -1201,6 +1251,7 @@ describe('Content template doc generation', () => {
                         PageUrl: DATA.testPageAUrl,
                         title: DATA.testPageA.fullTitle,
                         url: DATA.testPageAUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteText: DATA.testAnnotationAText,
@@ -1223,6 +1274,7 @@ describe('Content template doc generation', () => {
                         PageUrl: DATA.testPageBUrl,
                         title: DATA.testPageB.fullTitle,
                         url: DATA.testPageBUrl,
+                        HasNotes: true,
                         Notes: [
                             {
                                 NoteHighlight: DATA.testAnnotationCHighlight,
@@ -1241,6 +1293,7 @@ describe('Content template doc generation', () => {
     it('should correctly generate template docs for multiple pages, with note references but only referencing top-level page vars', async () => {
         const { dataFetchers } = await setupTest()
 
+        const currentDate = new Date()
         const generate = (template: string) =>
             generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({ code: template }),
@@ -1251,6 +1304,7 @@ describe('Content template doc generation', () => {
                     DATA.testAnnotationCUrl,
                 ],
                 dataFetchers,
+                now: currentDate.valueOf(),
             })
 
         expect(
@@ -1263,6 +1317,7 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -1285,6 +1340,7 @@ describe('Content template doc generation', () => {
                 PageUrl: DATA.testPageBUrl,
                 title: DATA.testPageB.fullTitle,
                 url: DATA.testPageBUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageB.fullTitle,
@@ -1308,6 +1364,7 @@ describe('Content template doc generation', () => {
                 PageLink: expect.any(String),
                 title: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageA.fullTitle,
@@ -1333,6 +1390,7 @@ describe('Content template doc generation', () => {
                 PageLink: expect.any(String),
                 title: DATA.testPageB.fullTitle,
                 url: DATA.testPageBUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageB.fullTitle,
@@ -1360,6 +1418,7 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageA.fullTitle,
@@ -1394,6 +1453,7 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageB.fullTitle,
                 tags: DATA.testPageBTags,
                 url: DATA.testPageBUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageB.fullTitle,
@@ -1425,6 +1485,7 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageA.fullTitle,
@@ -1469,6 +1530,7 @@ describe('Content template doc generation', () => {
                 title: DATA.testPageB.fullTitle,
                 tags: DATA.testPageBTags,
                 url: DATA.testPageBUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageB.fullTitle,
@@ -1489,6 +1551,7 @@ describe('Content template doc generation', () => {
             },
         ])
 
+        const pageLinkName = createPageLinkListTitle(currentDate)
         expect(
             await generate(
                 '{{{PageTitle}}} {{{PageTags}}} {{{PageSpaces}}} {{{PageLink}}} {{#Notes}} {{{NoteHighlight}}} {{{NoteTags}}} {{{NoteSpaces}}} {{{NoteLink}}} {{/Notes}}',
@@ -1501,16 +1564,19 @@ describe('Content template doc generation', () => {
                 PageSpaces: joinSpaces([
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
+                    pageLinkName,
                 ]),
                 PageSpacesList: [
                     ...DATA.testPageASpaces,
                     ...DATA.testPageAPrivateSpaces,
+                    pageLinkName,
                 ],
                 PageUrl: DATA.testPageAUrl,
                 PageLink: expect.any(String),
                 title: DATA.testPageA.fullTitle,
                 tags: DATA.testPageATags,
                 url: DATA.testPageAUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageA.fullTitle,
@@ -1519,10 +1585,12 @@ describe('Content template doc generation', () => {
                         PageSpaces: joinSpaces([
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
+                            pageLinkName,
                         ]),
                         PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
+                            pageLinkName,
                         ],
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
@@ -1532,8 +1600,14 @@ describe('Content template doc generation', () => {
                         NoteText: DATA.testAnnotationAText,
                         NoteTags: joinTags(DATA.testAnnotationATags),
                         NoteTagList: DATA.testAnnotationATags,
-                        NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpacesList: DATA.testAnnotationASpaces,
+                        NoteSpaces: joinSpaces([
+                            ...DATA.testAnnotationASpaces,
+                            pageLinkName,
+                        ]),
+                        NoteSpacesList: [
+                            ...DATA.testAnnotationASpaces,
+                            pageLinkName,
+                        ],
                         NoteLink: expect.any(String),
                     },
                     {
@@ -1543,10 +1617,12 @@ describe('Content template doc generation', () => {
                         PageSpaces: joinSpaces([
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
+                            pageLinkName,
                         ]),
                         PageSpacesList: [
                             ...DATA.testPageASpaces,
                             ...DATA.testPageAPrivateSpaces,
+                            pageLinkName,
                         ],
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
@@ -1556,8 +1632,8 @@ describe('Content template doc generation', () => {
                         NoteHighlight: DATA.testAnnotationBHighlight,
                         NoteTags: joinTags(DATA.testAnnotationBTags),
                         NoteTagList: DATA.testAnnotationBTags,
-                        NoteSpaces: joinSpaces(DATA.testAnnotationBSpaces),
-                        NoteSpacesList: DATA.testAnnotationBSpaces,
+                        NoteSpaces: joinSpaces([...DATA.testAnnotationBSpaces]),
+                        NoteSpacesList: [...DATA.testAnnotationBSpaces],
                     },
                 ],
             },
@@ -1565,20 +1641,24 @@ describe('Content template doc generation', () => {
                 PageTitle: DATA.testPageB.fullTitle,
                 PageTags: joinTags(DATA.testPageBTags),
                 PageTagList: DATA.testPageBTags,
-                PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                PageSpacesList: DATA.testPageBSpaces,
+                PageSpaces: joinSpaces([...DATA.testPageBSpaces, pageLinkName]),
+                PageSpacesList: [...DATA.testPageBSpaces, pageLinkName],
                 PageUrl: DATA.testPageBUrl,
                 PageLink: expect.any(String),
                 title: DATA.testPageB.fullTitle,
                 tags: DATA.testPageBTags,
                 url: DATA.testPageBUrl,
+                HasNotes: true,
                 Notes: [
                     {
                         PageTitle: DATA.testPageB.fullTitle,
                         PageTags: joinTags(DATA.testPageBTags),
                         PageTagList: DATA.testPageBTags,
-                        PageSpaces: joinSpaces(DATA.testPageBSpaces),
-                        PageSpacesList: DATA.testPageBSpaces,
+                        PageSpaces: joinSpaces([
+                            ...DATA.testPageBSpaces,
+                            pageLinkName,
+                        ]),
+                        PageSpacesList: [...DATA.testPageBSpaces, pageLinkName],
                         PageUrl: DATA.testPageBUrl,
                         PageLink: expect.any(String),
                         title: DATA.testPageB.fullTitle,
@@ -2246,6 +2326,7 @@ describe('Content template doc generation', () => {
                 PageTitle: DATA.testPageA.fullTitle,
                 url: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -2291,6 +2372,7 @@ describe('Content template doc generation', () => {
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
                 title: DATA.testPageA.fullTitle,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -2370,6 +2452,7 @@ describe('Content template doc generation', () => {
                 url: DATA.testPageAUrl,
                 tags: DATA.testPageATags,
                 title: DATA.testPageA.fullTitle,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -2431,6 +2514,7 @@ describe('Content template doc generation', () => {
     it('should correctly generate template docs for multiple annotations, with links', async () => {
         const { dataFetchers } = await setupTest()
 
+        const currentDate = new Date()
         const generate = (template: string) =>
             generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({ code: template }),
@@ -2440,6 +2524,7 @@ describe('Content template doc generation', () => {
                     DATA.testAnnotationBUrl,
                 ],
                 dataFetchers,
+                now: currentDate.valueOf(),
             })
 
         expect(
@@ -2479,6 +2564,7 @@ describe('Content template doc generation', () => {
                 PageLink: expect.any(String), // TODO: properly set once implemented
                 url: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
@@ -2501,6 +2587,7 @@ describe('Content template doc generation', () => {
             },
         ])
 
+        const pageLinkName = createPageLinkListTitle(currentDate)
         expect(
             await generate(
                 '{{#Notes}}{{{NoteText}}} {{{NoteLink}}} {{{NoteTags}}} {{{NoteCreatedAt}}} {{{NoteSpaces}}}{{/Notes}} {{{PageLink}}} {{{PageTitle}}} {{{PageCreatedAt}}}',
@@ -2513,14 +2600,21 @@ describe('Content template doc generation', () => {
                 PageCreatedAt: serializeDate(DATA.testPageACreatedAt),
                 url: DATA.testPageAUrl,
                 title: DATA.testPageA.fullTitle,
+                HasNotes: true,
                 Notes: [
                     {
                         NoteText: DATA.testAnnotationAText,
                         NoteLink: expect.any(String), // TODO: properly set once implemented
                         NoteTags: joinTags(DATA.testAnnotationATags),
                         NoteTagList: DATA.testAnnotationATags,
-                        NoteSpaces: joinSpaces(DATA.testAnnotationASpaces),
-                        NoteSpacesList: DATA.testAnnotationASpaces,
+                        NoteSpaces: joinSpaces([
+                            ...DATA.testAnnotationASpaces,
+                            pageLinkName,
+                        ]),
+                        NoteSpacesList: [
+                            ...DATA.testAnnotationASpaces,
+                            pageLinkName,
+                        ],
                         NoteCreatedAt: serializeDate(
                             DATA.testAnnotationACreatedAt,
                         ),

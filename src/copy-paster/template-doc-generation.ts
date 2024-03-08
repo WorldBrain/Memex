@@ -13,6 +13,7 @@ interface GeneratorInput {
     dataFetchers: TemplateDataFetchers
     normalizedPageUrls: string[]
     annotationUrls: string[]
+    now?: number
 }
 
 export const joinTags = (tags?: string[]): string | undefined =>
@@ -162,9 +163,12 @@ const generateForPages = async ({
         const pageLink =
             templateAnalysis.requirements.pageLink &&
             (
-                await dataFetchers.getPageLinks({
-                    [normalizedPageUrl]: { annotationUrls: noteUrls },
-                })
+                await dataFetchers.getPageLinks(
+                    {
+                        [normalizedPageUrl]: { annotationUrls: noteUrls },
+                    },
+                    params.now,
+                )
             )[normalizedPageUrl]
 
         templateDocs.push({
