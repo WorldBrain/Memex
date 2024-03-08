@@ -519,9 +519,8 @@ export class AnnotationsSidebar extends React.Component<
 
     handleSelectAll = async (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-            e.preventDefault()
-
             if (this.lastClickInsideSidebar) {
+                e.preventDefault()
                 const annotations = cacheUtils.getUserAnnotationsArray(
                     {
                         annotations: this.props.annotations,

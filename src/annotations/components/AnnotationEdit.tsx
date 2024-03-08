@@ -90,6 +90,12 @@ class AnnotationEdit extends React.Component<Props> {
                 this.setState({ shouldShowEditor: true })
             }
         }
+        if (
+            prevProps.comment !== this.props.comment &&
+            !this.props.isEditMode
+        ) {
+            this.editorRef?.updateContentExternally(this.props.comment)
+        }
     }
 
     private editorRef: MemexEditorInstance

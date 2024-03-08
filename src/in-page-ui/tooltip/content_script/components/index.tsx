@@ -183,21 +183,26 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         ]
         const comment = commentState
 
-        this.props.annotationsCache.updateAnnotation({
-            unifiedId: existingHighlight.unifiedId,
-            remoteId: existingHighlight.remoteId,
-            comment: comment,
-            body: existingHighlight.body,
-            privacyLevel: existingHighlight.privacyLevel,
-            color: null,
-            unifiedListIds: existingHighlight.unifiedListIds,
-        })
+        this.props.annotationsCache.updateAnnotation(
+            {
+                unifiedId: existingHighlight.unifiedId,
+                remoteId: existingHighlight.remoteId,
+                comment: comment,
+                body: existingHighlight.body,
+                privacyLevel: existingHighlight.privacyLevel,
+                color: null,
+                unifiedListIds: existingHighlight.unifiedListIds,
+            },
+            {
+                updateLastEditedTimestamp: true,
+            },
+        )
 
         try {
             await this.props.annotationsBG.editAnnotation(
                 existingHighlight.localId,
                 comment,
-                existingHighlight.color,
+                null,
                 existingHighlight.body,
             )
             // shareOpts: {
@@ -213,7 +218,6 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
     }
 
     renderSpacePicker = (buttonRef?) => {
-        console.log('this.props.mount.rootElement', buttonRef)
         if (this.state.showSpacePicker) {
             const CollectionsPickerElement = (
                 <CollectionPicker
@@ -232,7 +236,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                     unselectEntry={(listId: number) =>
                         this.removeSpaceForAnnotation(listId)
                     }
-                    autoFocus={false}
+                    autoFocus={true}
                     onSpaceCreate={() => null}
                     initialSelectedListIds={() =>
                         cacheUtils.getLocalListIdsForCacheIds(
@@ -240,6 +244,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                             this.state.currentAnnotation.unifiedListIds,
                         )
                     }
+                    closePicker={() => this.toggleSpacePicker(false)}
                     // normalizedPageUrlToFilterPageLinksBy={normalizeUrl(
                     //     'this.state.fullPageUrl',
                     // )}
