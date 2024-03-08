@@ -147,6 +147,21 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
                 }
                 params.inPageUI.events.on('tooltipAction', handleExternalAction)
             },
+            currentAnnotation: null, // Adjust based on your needs
+            getAnnotationData: async (annotationId: string) => {
+                // Placeholder function, replace with actual implementation
+                return {}
+            },
+            getAnnotationLists: async () => {
+                // Placeholder function, replace with actual implementation
+                return []
+            },
+            toggleSpacePicker: (spaceId: string) => {
+                return
+            },
+            removeSpaceForAnnotation: (listId: number) => {
+                return // Placeholder function, replace with actual implementation
+            },
         },
         {
             annotationsBG: params.annotationsBG,

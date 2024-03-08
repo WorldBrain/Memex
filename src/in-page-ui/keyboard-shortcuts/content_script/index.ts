@@ -109,8 +109,10 @@ function getShortcutHandlers({
                 false,
                 null,
             ),
-        createSharedHighlight: () =>
-            annotationFunctions.createHighlight(window.getSelection(), true),
+        createSharedHighlight: async () => {
+            annotationFunctions.createHighlight(window.getSelection(), true)
+            return
+        },
         createHighlight: async () => {
             await annotationFunctions.createHighlight(
                 window.getSelection(),
@@ -118,12 +120,14 @@ function getShortcutHandlers({
             ),
                 inPageUI.hideTooltip()
         },
-        createAnnotation: () =>
+        createAnnotation: async () => {
             inPageUI.events.emit('tooltipAction', {
                 annotationCacheId: null,
                 selection: window.getSelection(),
                 openForSpaces: false,
-            }),
+            })
+            return // This ensures the function returns Promise<void>
+        },
         addToCollection: async () => {
             if (userSelectedText()) {
                 inPageUI.events.emit('tooltipAction', {
@@ -135,9 +139,9 @@ function getShortcutHandlers({
                 await inPageUI.showRibbon({ action: 'list' })
             }
         },
-        copyCurrentLink: () => {
+        copyCurrentLink: async () => {
             if (userSelectedText()) {
-                return annotationFunctions.createHighlight(
+                await annotationFunctions.createHighlight(
                     window.getSelection(),
                     null,
                     true,
@@ -145,6 +149,8 @@ function getShortcutHandlers({
                     undefined,
                     true,
                 )
+                // Explicitly return void
+                return
             } else {
                 return inPageUI.showSidebar({
                     action: 'share_page_link',

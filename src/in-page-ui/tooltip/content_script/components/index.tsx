@@ -139,7 +139,6 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         })
     }
     removeSpaceForAnnotation = async (listId: number) => {
-        console.log('listsid', listId)
         const { currentAnnotation } = this.state
         if (!currentAnnotation) {
             return
@@ -151,8 +150,6 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
 
         let existingListsState = [...this.state.currentAnnotationLists]
 
-        console.log('existingListsState', existingListsState)
-
         const index = existingListsState.findIndex(
             (list) => list.localId === listId,
         )
@@ -161,7 +158,6 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
             existingListsState.splice(index, 1) // This modifies existingListsState in place
         }
 
-        console.log('newState', existingListsState)
         this.setState({
             currentAnnotationLists: existingListsState,
         })

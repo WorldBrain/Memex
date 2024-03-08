@@ -283,8 +283,37 @@ export async function main(
         return Promise.resolve() // Return a resolved promise for non-matching actions or to avoid unhandled promise rejections
     })
 
+    // 3. Creates an instance of the InPageUI manager class to encapsulate
+    // business logic of initialising and hide/showing components.
+    const loadContentScript = createContentScriptLoader({
+        contentScriptsBG,
+        loadRemotely: params.loadRemotely,
+    })
+    const inPageUI = new SharedInPageUIState({
+        getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
+        loadComponent: async (component) => {
+            // Treat highlights differently as they're not a separate content script
+            if (component === 'highlights') {
+                components.highlights = resolvablePromise<void>()
+                components.highlights.resolve()
+            }
+
+            if (!components[component]) {
+                components[component] = resolvablePromise<void>()
+                loadContentScript(component)
+            }
+            return components[component]!
+        },
+        unloadComponent: (component) => {
+            delete components[component]
+        },
+    })
+
     const highlightRenderer = new HighlightRenderer({
         getDocument: () => document,
+        isToolTipShown: () => {
+            return inPageUI.componentsShown.tooltip
+        },
         icons: (iconName) => theme({ variant: 'dark' }).icons[iconName],
         captureException,
         getUndoHistory: async () => {
@@ -454,32 +483,6 @@ export async function main(
         (await sidebarUtils.getSidebarState()) &&
         (pageInfo.isPdf ? isPdfViewerRunning : true)
 
-    // 3. Creates an instance of the InPageUI manager class to encapsulate
-    // business logic of initialising and hide/showing components.
-    const loadContentScript = createContentScriptLoader({
-        contentScriptsBG,
-        loadRemotely: params.loadRemotely,
-    })
-    const inPageUI = new SharedInPageUIState({
-        getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
-        loadComponent: async (component) => {
-            // Treat highlights differently as they're not a separate content script
-            if (component === 'highlights') {
-                components.highlights = resolvablePromise<void>()
-                components.highlights.resolve()
-            }
-
-            if (!components[component]) {
-                components[component] = resolvablePromise<void>()
-                loadContentScript(component)
-            }
-            return components[component]!
-        },
-        unloadComponent: (component) => {
-            delete components[component]
-        },
-    })
-
     // TODO: Type this
     async function saveHighlight(
         shouldShare: boolean,
@@ -508,14 +511,12 @@ export async function main(
             const result = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
                 onClick: ({ annotationId, openInEdit }) => {
-                    console.log('shiftopen', openInEdit)
                     if (openInEdit || inPageUI.componentsShown.sidebar) {
-                        inPageUI.showSidebar({
+                        return inPageUI.showSidebar({
                             annotationCacheId: annotationId.toString(),
                             action: 'edit_annotation',
                         })
                     } else {
-                        console.log('annotationId', annotationId)
                         inPageUI.events.emit('tooltipAction', {
                             annotationCacheId: annotationId.toString(),
                         })

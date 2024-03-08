@@ -38,7 +38,7 @@ const showHighlights = async (options: HighlightDependencies) => {
         })),
         ({ annotationId, openInEdit }) => {
             if (openInEdit || options.inPageUI.componentsShown.sidebar) {
-                options.inPageUI.showSidebar({
+                return options.inPageUI.showSidebar({
                     action: openInEdit ? 'edit_annotation' : 'show_annotation',
                     annotationCacheId: annotationId.toString(),
                 })
