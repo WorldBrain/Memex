@@ -20,11 +20,16 @@ async function insertTestData(storageManager: Storex) {
         url: DATA.testPageA.url,
         time: DATA.testPageACreatedAt.getTime(),
     })
+
     await storageManager.collection('pages').createObject(DATA.testPageB)
+    await storageManager
+        .collection('pageMetadata')
+        .createObject(DATA.testPageBMetadata)
     await storageManager.collection('bookmarks').createObject({
         url: DATA.testPageB.url,
         time: DATA.testPageBCreatedAt.getTime(),
     })
+
     await storageManager.collection('pages').createObject(DATA.testPageC)
     await storageManager.collection('visits').createObject({
         url: DATA.testPageC.url,
@@ -34,6 +39,15 @@ async function insertTestData(storageManager: Storex) {
         url: DATA.testPageC.url,
         time: DATA.testPageCCreatedAt.getTime() + 1000,
     })
+    await storageManager
+        .collection('pageMetadata')
+        .createObject(DATA.testPageCMetadata)
+    await storageManager
+        .collection('pageEntities')
+        .createObject(DATA.testPageCEntityA)
+    await storageManager
+        .collection('pageEntities')
+        .createObject(DATA.testPageCEntityB)
 
     const publicSpaceNames = new Set<string>([
         ...[...DATA.testPageASpaces, ...DATA.testPageAPrivateSpaces],
@@ -213,14 +227,14 @@ async function setupTest() {
 }
 
 describe('Content template doc generation', () => {
-    it('should correctly generate template docs for a single PDF page + notes + page tags + note tags + page spaces + note spaces', async () => {
+    it('should correctly generate template docs for a single PDF page + notes + page tags + note tags + page spaces + note spaces + metadata + entities', async () => {
         const { dataFetchers } = await setupTest()
 
         expect(
             await generateTemplateDocs({
                 templateAnalysis: analyzeTemplate({
                     code:
-                        '{{{PageTitle}}} {{{PageUrl}}} {{{PageTags}}} {{{PageSpaces}}}',
+                        '{{{PageTitle}}} {{{PageUrl}}} {{{PageTags}}} {{{PageSpaces}}} {{{PageDOI}}} {{{PageMetaTitle}}} {{{PageAnnotation}}} {{{PageSourceName}}} {{{PageJournalName}}} {{{PageJournalPage}}} {{{PageJournalIssue}}} {{{PageJournalVolume}}} {{{PageReleaseDate}}} {{{PageAccessDate}}}',
                 }),
                 normalizedPageUrls: [DATA.testPageC.url],
                 annotationUrls: [],
@@ -235,6 +249,22 @@ describe('Content template doc generation', () => {
                 PageTagList: DATA.testPageCTags,
                 PageSpaces: joinSpaces(DATA.testPageCSpaces),
                 PageSpacesList: DATA.testPageCSpaces,
+
+                PageDOI: DATA.testPageCMetadata.doi,
+                PageMetaTitle: DATA.testPageCMetadata.title,
+                PageAnnotation: DATA.testPageCMetadata.annotation,
+                PageSourceName: DATA.testPageCMetadata.sourceName,
+                PageJournalName: DATA.testPageCMetadata.journalName,
+                PageJournalPage: DATA.testPageCMetadata.journalPage,
+                PageJournalIssue: DATA.testPageCMetadata.journalIssue,
+                PageJournalVolume: DATA.testPageCMetadata.journalVolume,
+                PageReleaseDate: serializeDate(
+                    DATA.testPageCMetadata.releaseDate,
+                ),
+                PageAccessDate: serializeDate(
+                    DATA.testPageCMetadata.accessDate,
+                ),
+
                 title: DATA.testPageC.fullTitle,
                 url: DATA.testLocatorC.originalLocation,
                 tags: DATA.testPageCTags,

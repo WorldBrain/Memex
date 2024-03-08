@@ -1,3 +1,5 @@
+import type { PageMetadata } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+
 export interface Template {
     id: number
     title: string
@@ -24,6 +26,18 @@ export interface TemplateDocPage {
     PageSpaces?: string
     PageSpacesList?: string[]
     PageCreatedAt?: string
+
+    PageDOI?: string
+    PageMetaTitle?: string
+    PageAnnotation?: string
+    PageSourceName?: string
+    PageJournalName?: string
+    PageJournalPage?: string
+    PageJournalIssue?: string
+    PageJournalVolume?: string
+    PageReleaseDate?: string
+    PageAccessDate?: string
+
     HasNotes?: boolean
     PageLink?: string
     Notes?: TemplateDocNote[]
@@ -55,6 +69,8 @@ export interface TemplateRequirements {
     page?: boolean
     pageTags?: boolean
     pageSpaces?: boolean
+    pageMetadata?: boolean
+    pageEntities?: boolean
     pageCreatedAt?: boolean
     hasNotes?: boolean
     pageLink?: boolean
@@ -83,6 +99,9 @@ export interface TemplateDataFetchers {
     getSpacesForPages(
         normalizedPageUrls: string[],
     ): Promise<UrlMappedData<string[]>>
+    getMetadataForPages(
+        normalizedPageUrls: string[],
+    ): Promise<UrlMappedData<PageMetadata>>
     getCreatedAtForPages(
         normalizedPageUrls: string[],
     ): Promise<UrlMappedData<Date>>

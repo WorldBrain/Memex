@@ -24,7 +24,10 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import TurndownService from 'turndown'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
-import type { CustomList } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type {
+    CustomList,
+    PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { FollowedListEntry } from 'src/page-activity-indicator/background/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
@@ -356,6 +359,14 @@ export function getTemplateDataFetchers({
         },
         getTagsForPages: getTagsForUrls,
         getTagsForNotes: getTagsForUrls,
+        getMetadataForPages: async (normalizedPageUrls) => {
+            const metadata: PageMetadata[] = await storageManager
+                .collection('pageMetadata')
+                .findObjects({
+                    normalizedPageUrl: { $in: normalizedPageUrls },
+                })
+            return fromPairs(metadata.map((m) => [m.normalizedPageUrl, m]))
+        },
         getSpacesForPages: getSpacesForUrls(async (urls) => {
             const entries: PageListEntry[] = await storageManager
                 .collection('pageListEntries')

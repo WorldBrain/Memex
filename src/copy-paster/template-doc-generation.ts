@@ -1,3 +1,4 @@
+import type { PageMetadata } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type {
     TemplateDataFetchers,
     PageTemplateData,
@@ -39,10 +40,17 @@ export const joinSpaces = (spaceNames?: string[]): string | undefined =>
           )
 
 export const serializeDate = (
-    date?: Date,
+    date?: Date | number,
     locale = globalThis.navigator.language,
-): string | undefined =>
-    date == null ? undefined : date.toLocaleString(locale)
+): string | undefined => {
+    if (date == null) {
+        return undefined
+    }
+    if (typeof date === 'number') {
+        date = new Date(date)
+    }
+    return date.toLocaleString(locale)
+}
 
 const groupNotesByPages = (
     notes: UrlMappedData<NoteTemplateData>,
@@ -98,6 +106,7 @@ const generateForPages = async ({
     const pageData = await dataFetchers.getPages(params.normalizedPageUrls)
 
     let pageTags: UrlMappedData<string[]> = {}
+    let pageMetadata: UrlMappedData<PageMetadata> = {}
     let pageSpaces: UrlMappedData<string[]> = {}
     let pageCreatedAt: UrlMappedData<Date> = {}
     let noteTags: UrlMappedData<string[]> = {}
@@ -112,6 +121,12 @@ const generateForPages = async ({
 
     if (templateAnalysis.requirements.pageSpaces) {
         pageSpaces = await dataFetchers.getSpacesForPages(
+            params.normalizedPageUrls,
+        )
+    }
+
+    if (templateAnalysis.requirements.pageMetadata) {
+        pageMetadata = await dataFetchers.getMetadataForPages(
             params.normalizedPageUrls,
         )
     }
@@ -180,8 +195,23 @@ const generateForPages = async ({
             PageUrl: fullUrl,
             PageLink: pageLink,
             PageCreatedAt: serializeDate(pageCreatedAt[normalizedPageUrl]),
-            HasNotes: noteUrls.length > 0,
 
+            PageDOI: pageMetadata[normalizedPageUrl]?.doi,
+            PageMetaTitle: pageMetadata[normalizedPageUrl]?.title,
+            PageAnnotation: pageMetadata[normalizedPageUrl]?.annotation,
+            PageSourceName: pageMetadata[normalizedPageUrl]?.sourceName,
+            PageJournalName: pageMetadata[normalizedPageUrl]?.journalName,
+            PageJournalPage: pageMetadata[normalizedPageUrl]?.journalPage,
+            PageJournalIssue: pageMetadata[normalizedPageUrl]?.journalIssue,
+            PageJournalVolume: pageMetadata[normalizedPageUrl]?.journalVolume,
+            PageReleaseDate: serializeDate(
+                pageMetadata[normalizedPageUrl]?.releaseDate,
+            ),
+            PageAccessDate: serializeDate(
+                pageMetadata[normalizedPageUrl]?.accessDate,
+            ),
+
+            HasNotes: noteUrls.length > 0,
             Notes: noteUrls.map((url) => ({
                 NoteText: notes[url]?.comment,
                 NoteHighlight: notes[url]?.body,

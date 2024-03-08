@@ -25,6 +25,12 @@ export const testPageB = {
     fullUrl: testPageBUrl,
     fullTitle: 'test page B title',
 }
+export const testPageBMetadata = {
+    normalizedPageUrl: normalizeUrl(testPageBUrl),
+    annotation: 'this is a good page',
+    sourceName: 'Test Website',
+    accessDate: 1641443857993,
+}
 export const testPageBCreatedAt = new Date('2022-05-06T00:35')
 
 export const testPageCUrl = 'https://memex.cloud/ct/test-fingerprint-a.pdf'
@@ -49,6 +55,32 @@ export const testLocatorC = {
     primary: true,
     valid: true,
     version: 0,
+}
+export const testPageCMetadata = {
+    normalizedPageUrl: testPageC.url,
+    doi: 'test-doi',
+    title: 'Really cool research',
+    annotation: 'trust me bro this is really good research',
+    sourceName: 'School of hard knocks',
+    journalName: 'Secret Journal',
+    journalPage: 'p123123',
+    journalIssue: 'Latest issue',
+    journalVolume: 'Secret volume',
+    releaseDate: 1641223847993,
+    accessDate: 1641443847993,
+}
+export const testPageCEntityA = {
+    normalizedPageUrl: testPageC.url,
+    name: 'test entity 1',
+    isPrimary: true,
+    order: 200,
+}
+export const testPageCEntityB = {
+    normalizedPageUrl: testPageC.url,
+    name: 'test entity 2',
+    additionalName: 'extra name',
+    isPrimary: false,
+    order: 300,
 }
 
 // Children of page A

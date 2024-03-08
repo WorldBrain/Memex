@@ -15,6 +15,18 @@ export const KEYS_TO_REQUIREMENTS: {
     PageSpacesList: 'pageSpaces',
     PageCreatedAt: 'pageCreatedAt',
     PageLink: 'pageLink',
+
+    PageDOI: 'pageMetadata',
+    PageMetaTitle: 'pageMetadata',
+    PageAnnotation: 'pageMetadata',
+    PageSourceName: 'pageMetadata',
+    PageJournalName: 'pageMetadata',
+    PageJournalPage: 'pageMetadata',
+    PageJournalIssue: 'pageMetadata',
+    PageJournalVolume: 'pageMetadata',
+    PageReleaseDate: 'pageMetadata',
+    PageAccessDate: 'pageMetadata',
+
     HasNotes: 'hasNotes',
     NoteHighlight: 'note',
     NoteText: 'note',
