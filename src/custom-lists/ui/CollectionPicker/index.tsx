@@ -120,6 +120,21 @@ class SpacePicker extends StatefulUIElement<
             }))
     }
 
+    componentDidUpdate(
+        prevProps: Readonly<Props>,
+        prevState: Readonly<SpacePickerState>,
+        snapshot?: any,
+    ): void {
+        if (
+            prevProps.headlessQuery !== this.props.headlessQuery &&
+            this.props.isHeadLess
+        ) {
+            this.processEvent('searchInputChanged', {
+                query: this.props.headlessQuery,
+            })
+        }
+    }
+
     handleSetSearchInputRef = (ref: HTMLInputElement) =>
         this.processEvent('setSearchInputRef', { ref })
     handleOuterSearchBoxClick = () => this.processEvent('focusInput', {})
@@ -483,27 +498,28 @@ class SpacePicker extends StatefulUIElement<
 
         return (
             <PickerContainer>
-                <SearchContainer>
-                    <PickerSearchInput
-                        searchInputRef={this.searchInputRef}
-                        searchInputPlaceholder={
-                            this.props.searchInputPlaceholder
-                                ? this.props.searchInputPlaceholder
-                                : this.props.filterMode
-                                ? 'Search for Spaces to filter'
-                                : 'Search & Add Spaces'
-                        }
-                        showPlaceholder={
-                            this.state.selectedListIds.length === 0
-                        }
-                        onChange={this.handleSearchInputChanged}
-                        onKeyDown={this.handleKeyPress}
-                        onKeyUp={this.handleKeyUp}
-                        value={this.state.query}
-                        autoFocus={this.props.autoFocus}
-                    />
-                </SearchContainer>
-
+                {!this.props.isHeadLess && (
+                    <SearchContainer>
+                        <PickerSearchInput
+                            searchInputRef={this.searchInputRef}
+                            searchInputPlaceholder={
+                                this.props.searchInputPlaceholder
+                                    ? this.props.searchInputPlaceholder
+                                    : this.props.filterMode
+                                    ? 'Search for Spaces to filter'
+                                    : 'Search & Add Spaces'
+                            }
+                            showPlaceholder={
+                                this.state.selectedListIds.length === 0
+                            }
+                            onChange={this.handleSearchInputChanged}
+                            onKeyDown={this.handleKeyPress}
+                            onKeyUp={this.handleKeyUp}
+                            value={this.state.query}
+                            autoFocus={this.props.autoFocus}
+                        />
+                    </SearchContainer>
+                )}
                 <EntryList
                     shouldScroll={this.state.listEntries.allIds.length < 5}
                     ref={this.displayListRef}

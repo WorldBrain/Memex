@@ -54,12 +54,16 @@ import type { YoutubeService } from '@worldbrain/memex-common/lib/services/youtu
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { SPECIAL_LIST_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { SpacePickerDependencies } from 'src/custom-lists/ui/CollectionPicker/types'
-import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
+import type {
+    PageAnnotationsCacheInterface,
+    UnifiedAnnotation,
+} from 'src/annotations/cache/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import PageCitations from 'src/citations/PageCitations'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -67,6 +71,8 @@ const timestampToString = (timestamp: number) =>
 type NewNoteInteractionProps = AnnotationCreateEventProps & {
     addPageToList: SpacePickerDependencies['selectEntry']
     removePageFromList: SpacePickerDependencies['unselectEntry']
+    addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
+    selectSpaceForEditorPicker: (spaceId: number) => void
 }
 
 export type Props = RootState &
@@ -153,6 +159,8 @@ export type Props = RootState &
             | 'contentSharingBG'
             | 'pageActivityIndicatorBG'
         >
+        updateSpacesSearchSuggestions?: (query: string) => void
+        spaceSearchSuggestions?: SpaceSearchSuggestion[]
     }
 
 export interface State {
@@ -496,6 +504,20 @@ export default class SearchResultsContainer extends React.Component<
                     onEditHighlightIconClick:
                         interactionProps.onEditHighlightBtnClick,
                 }}
+                updateSpacesSearchSuggestions={
+                    this.props.updateSpacesSearchSuggestions
+                }
+                spaceSearchSuggestions={this.props.spaceSearchSuggestions}
+                selectSpaceForEditorPicker={(listId) =>
+                    interactionProps.updateLists({
+                        added: listId,
+                        deleted: null,
+                        selected: [],
+                    })
+                }
+                addNewSpaceViaWikiLinksEditNote={
+                    interactionProps.addNewSpaceViaWikiLinksEditNote
+                }
             />
         )
     }
@@ -552,6 +574,18 @@ export default class SearchResultsContainer extends React.Component<
                         )}
                         imageSupport={this.props.imageSupport}
                         getRootElement={this.props.getRootElement}
+                        updateSpacesSearchSuggestions={
+                            this.props.updateSpacesSearchSuggestions
+                        }
+                        spaceSearchSuggestions={
+                            this.props.spaceSearchSuggestions
+                        }
+                        selectSpaceForEditorPicker={
+                            boundAnnotCreateProps.selectSpaceForEditorPicker
+                        }
+                        addNewSpaceViaWikiLinksNewNote={
+                            boundAnnotCreateProps.addNewSpaceViaWikiLinksNewNote
+                        }
                     />
                 </PageNotesContainer>
                 <NoteResultContainer>
@@ -575,14 +609,20 @@ export default class SearchResultsContainer extends React.Component<
                             {this.renderSortingMenuDropDown(normalizedUrl, day)}
                         </SortButtonContainer>
                     )} */}
-                    {noteIds[notesType].map((noteId, index) => {
-                        const zIndex = noteIds[notesType].length - index
-                        return this.renderNoteResult(
-                            day,
-                            normalizedUrl,
-                            zIndex,
-                        )(noteId)
-                    })}
+                    {noteIds[notesType]
+                        .sort((a, b) => {
+                            const noteA = this.props.noteData.byId[a]
+                            const noteB = this.props.noteData.byId[b]
+                            return noteB.displayTime - noteA.displayTime
+                        })
+                        .map((noteId, index) => {
+                            const zIndex = noteIds[notesType].length - index
+                            return this.renderNoteResult(
+                                day,
+                                normalizedUrl,
+                                zIndex,
+                            )(noteId)
+                        })}
                 </NoteResultContainer>
             </PageNotesBox>
         )

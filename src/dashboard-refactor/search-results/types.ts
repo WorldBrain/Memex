@@ -26,7 +26,6 @@ export interface CommonInteractionProps {
     onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBarBtnClick: React.MouseEventHandler
     onListPickerFooterBtnClick: React.MouseEventHandler
-
     onShareBtnClick: React.MouseEventHandler
     onTrashBtnClick: (instaDelete: boolean) => void
 }
@@ -73,6 +72,7 @@ export type NoteInteractionProps = Omit<
     ) => void
     updateTags: PickerUpdateHandler<string>
     updateLists: PickerUpdateHandler<number>
+    addNewSpaceViaWikiLinksEditNote: (spaceName: string) => void
     onEditCancel: React.MouseEventHandler
     onEditConfirm: (
         showExternalConfirmations?: boolean,
@@ -360,6 +360,15 @@ export type Events = UIEvent<{
         fullPageUrl: string
         shouldShare: boolean
         isProtected?: boolean
+    }
+
+    updateSpacesSearchSuggestions: {
+        searchQuery: string
+    }
+    addNewSpaceViaWikiLinksNewNote: {
+        spaceName: string
+        day: number
+        pageId: string
     }
 
     // Note result state mutations

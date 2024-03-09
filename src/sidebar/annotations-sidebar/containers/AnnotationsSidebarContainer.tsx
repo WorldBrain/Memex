@@ -466,7 +466,7 @@ export class AnnotationsSidebarContainer<
                         this.processEvent('setSelectedList', { unifiedListId })
                     }}
                     getRootElement={this.props.getRootElement}
-                    autoFocus
+                    autoFocus={true}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -475,6 +475,28 @@ export class AnnotationsSidebarContainer<
             hoverState: null,
             imageSupport: this.props.imageSupport,
             getRootElement: this.props.getRootElement,
+            addNewSpaceViaWikiLinksNewNote: (spaceName) => {
+                this.processEvent('addNewSpaceViaWikiLinksNewNote', {
+                    spaceName: spaceName,
+                })
+            },
+            selectSpaceForEditorPicker: (
+                spaceId: number,
+                newNote?: boolean,
+                unifiedAnnotationId?: UnifiedAnnotation['unifiedId'],
+            ) => {
+                if (newNote) {
+                    this.processEvent('setNewPageNoteLists', {
+                        lists: [...this.state.commentBox.lists, spaceId],
+                    })
+                } else {
+                    this.processEvent('updateListsForAnnotation', {
+                        added: spaceId,
+                        deleted: null,
+                        unifiedAnnotationId: unifiedAnnotationId,
+                    })
+                }
+            },
         }
     }
 
@@ -1115,6 +1137,65 @@ export class AnnotationsSidebarContainer<
                                     'getHighlightColorSettings',
                                     null,
                                 )
+                            }
+                            updateSpacesSearchSuggestions={(query: string) => {
+                                this.processEvent(
+                                    'updateSpacesSearchSuggestions',
+                                    { searchQuery: query },
+                                )
+                            }}
+                            addNewSpaceViaWikiLinksNewNote={async (
+                                spaceName,
+                            ) => {
+                                this.processEvent(
+                                    'addNewSpaceViaWikiLinksNewNote',
+                                    {
+                                        spaceName: spaceName,
+                                    },
+                                )
+                            }}
+                            selectSpaceForEditorPicker={(params: {
+                                spaceId: number
+                                newNote?: boolean
+                                unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
+                            }) => {
+                                if (params.newNote) {
+                                    this.processEvent('setNewPageNoteLists', {
+                                        lists: [
+                                            ...this.state.commentBox.lists,
+                                            params.spaceId,
+                                        ],
+                                    })
+                                } else {
+                                    this.processEvent(
+                                        'updateListsForAnnotation',
+                                        {
+                                            added: params.spaceId,
+                                            deleted: null,
+                                            unifiedAnnotationId:
+                                                params.unifiedAnnotationId,
+                                        },
+                                    )
+                                }
+                            }}
+                            addNewSpaceViaWikiLinksEditNote={async (
+                                spaceName,
+                                unifiedAnnotationId,
+                            ) => {
+                                const {
+                                    localListId,
+                                } = await this.props.customListsBG.createCustomList(
+                                    { name: spaceName },
+                                )
+
+                                this.processEvent('updateListsForAnnotation', {
+                                    added: localListId,
+                                    deleted: null,
+                                    unifiedAnnotationId: unifiedAnnotationId,
+                                })
+                            }}
+                            spaceSearchSuggestions={
+                                this.state.spaceSearchSuggestions
                             }
                             highlightColorSettings={this.state.highlightColors}
                             initGetReplyEditProps={(sharedListReference) => (

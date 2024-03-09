@@ -328,6 +328,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 confirmPrivatizeNoteArgs: null,
                 confirmSelectNoteSpaceArgs: null,
             },
+            spaceSearchSuggestions: [],
             searchResults: {
                 results: {},
                 noResultsType: null,
@@ -943,70 +944,76 @@ export class DashboardLogic extends UILogic<State, Events> {
         const previousResults =
             previousState.searchResults.results[-1]?.pages.byId
 
-        const focusedItemIndex = Object.keys(previousResults).findIndex(
-            (key) => previousResults[key].isInFocus === true,
-        )
+        if (previousResults) {
+            const focusedItemIndex = Object?.keys(previousResults)?.findIndex(
+                (key) => previousResults[key].isInFocus === true,
+            )
 
-        let previousItem = Object.values(previousResults)[focusedItemIndex]
-        let nextItem
+            let previousItem = Object.values(previousResults)[focusedItemIndex]
+            let nextItem
 
-        nextItem = null
+            nextItem = null
 
-        if (event.pageId) {
-            nextItem = { id: event.pageId }
-        }
+            if (event.pageId) {
+                nextItem = { id: event.pageId }
+            }
 
-        if (event.direction === 'up') {
-            nextItem = Object.values(previousResults)[focusedItemIndex - 1]
-        }
-        if (event.direction === 'down') {
-            nextItem = Object.values(previousResults)[focusedItemIndex + 1]
-        }
+            if (event.direction === 'up') {
+                nextItem = Object.values(previousResults)[focusedItemIndex - 1]
+            }
+            if (event.direction === 'down') {
+                nextItem = Object.values(previousResults)[focusedItemIndex + 1]
+            }
 
-        if (nextItem) {
-            this.emitMutation({
-                searchResults: {
-                    results: {
-                        [-1]: {
-                            pages: {
-                                byId: {
-                                    ...(previousItem
-                                        ? {
-                                              [previousItem.id]: {
-                                                  isInFocus: { $set: false },
-                                              },
-                                          }
-                                        : {}),
-                                    [nextItem.id]: {
-                                        isInFocus: { $set: true },
+            if (nextItem) {
+                this.emitMutation({
+                    searchResults: {
+                        results: {
+                            [-1]: {
+                                pages: {
+                                    byId: {
+                                        ...(previousItem
+                                            ? {
+                                                  [previousItem.id]: {
+                                                      isInFocus: {
+                                                          $set: false,
+                                                      },
+                                                  },
+                                              }
+                                            : {}),
+                                        [nextItem.id]: {
+                                            isInFocus: { $set: true },
+                                        },
                                     },
                                 },
                             },
                         },
                     },
-                },
-            })
-        }
-        if (!nextItem && previousItem) {
-            this.emitMutation({
-                searchResults: {
-                    results: {
-                        [-1]: {
-                            pages: {
-                                byId: {
-                                    ...(previousItem
-                                        ? {
-                                              [previousItem.id]: {
-                                                  isInFocus: { $set: false },
-                                              },
-                                          }
-                                        : {}),
+                })
+            }
+            if (!nextItem && previousItem) {
+                this.emitMutation({
+                    searchResults: {
+                        results: {
+                            [-1]: {
+                                pages: {
+                                    byId: {
+                                        ...(previousItem
+                                            ? {
+                                                  [previousItem.id]: {
+                                                      isInFocus: {
+                                                          $set: false,
+                                                      },
+                                                  },
+                                              }
+                                            : {}),
+                                    },
                                 },
                             },
                         },
                     },
-                },
-            })
+                })
+            }
         }
     }
 
@@ -1079,7 +1086,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const searchID = ++this.currentSearchID
         const searchFilters: UIMutation<State['searchFilters']> = {
             skip: event.paginate
-                ? { $apply: (skip) => skip + PAGE_SIZE }
+                ? { $apply: (skip) => skip + 10 }
                 : { $set: 0 },
         }
 
@@ -2492,6 +2499,75 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
+    addNewSpaceViaWikiLinksNewNote: EventHandler<
+        'addNewSpaceViaWikiLinksNewNote'
+    > = async ({ event, previousState }) => {
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await this.options.listsBG.createCustomList({
+            name: event.spaceName,
+        })
+
+        const { unifiedId } = this.options.annotationsCache.addList({
+            name: event.spaceName,
+            collabKey,
+            localId: localListId,
+            remoteId: remoteListId,
+            hasRemoteAnnotationsToLoad: false,
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            creator:
+                previousState.currentUser != null
+                    ? {
+                          type: 'user-reference',
+                          id: previousState.currentUser.id,
+                      }
+                    : undefined,
+            parentLocalId: null,
+            isPrivate: true,
+        })
+
+        const listsToAdd = [
+            ...previousState.searchResults.results[event.day].pages.byId[
+                event.pageId
+            ].newNoteForm.lists,
+            unifiedId,
+        ]
+
+        this.processUIEvent('setPageNewNoteLists', {
+            event: {
+                day: event.day,
+                pageId: event.pageId,
+                lists: listsToAdd,
+            },
+            previousState,
+        })
+    }
+
+    updateSpacesSearchSuggestions: EventHandler<
+        'updateSpacesSearchSuggestions'
+    > = async ({ event, previousState }) => {
+        const lists = this.options.annotationsCache.lists.allIds
+            .filter(
+                (listId) =>
+                    this.options.annotationsCache.lists.byId[listId].name
+                        .toLowerCase()
+                        .includes(event.searchQuery.toLowerCase()) &&
+                    this.options.annotationsCache.lists.byId[listId].type !==
+                        'page-link',
+            )
+            .map((listId) => ({
+                id: this.options.annotationsCache.lists.byId[listId].localId,
+                name: this.options.annotationsCache.lists.byId[listId].name,
+            }))
+
+        this.emitMutation({
+            spaceSearchSuggestions: { $set: lists },
+        })
+    }
+
     savePageNewNote: EventHandler<'savePageNewNote'> = async ({
         event,
         previousState,
@@ -3322,10 +3398,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                               existing.pageUrl
                           ]?.lists ?? []),
                       ]
-                    : []
+                    : [...existing.lists]
 
                 const bodyToSave = await processCommentForImageUpload(
-                    editNoteForm.bodyInputValue ?? existing.highlight,
+                    editNoteForm.bodyInputValue ?? existing.highlight ?? null,
                 )
                 const commentToSave = await processCommentForImageUpload(
                     editNoteForm.inputValue ?? existing.comment,

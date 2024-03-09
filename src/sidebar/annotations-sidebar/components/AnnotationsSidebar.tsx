@@ -104,6 +104,7 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import debounce from 'lodash/debounce'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -298,6 +299,18 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     toggleAutoAddBulk: (toggleState: boolean) => void
     bulkSelectAnnotations: (annotationIds: string[]) => void
     bulkSelectionState: string[]
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
+    selectSpaceForEditorPicker: (params: {
+        spaceId: number
+        newNote?: boolean
+        unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
+    }) => void
+    addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
+    addNewSpaceViaWikiLinksEditNote: (
+        spaceName: string,
+        unifiedAnnotationId: string,
+    ) => void
 }
 
 interface AnnotationsSidebarState {
@@ -695,6 +708,20 @@ export class AnnotationsSidebar extends React.Component<
                     autoFocus={this.state.autoFocusCreateForm}
                     sidebarEvents={this.props.events && this.props.events}
                     imageSupport={this.props.imageSupport}
+                    updateSpacesSearchSuggestions={
+                        this.props.updateSpacesSearchSuggestions
+                    }
+                    spaceSearchSuggestions={this.props.spaceSearchSuggestions}
+                    selectSpaceForEditorPicker={(spaceId: number) =>
+                        this.props.selectSpaceForEditorPicker({
+                            spaceId,
+                            newNote: true,
+                            unifiedAnnotationId: null,
+                        })
+                    }
+                    addNewSpaceViaWikiLinksNewNote={
+                        this.props.addNewSpaceViaWikiLinksNewNote
+                    }
                 />
             </NewAnnotationSection>
         )
@@ -1027,6 +1054,22 @@ export class AnnotationsSidebar extends React.Component<
                             shareMenuAnnotationInstanceId={
                                 this.props.shareMenuAnnotationInstanceId ===
                                     instanceId && annotation.unifiedId
+                            }
+                            updateSpacesSearchSuggestions={
+                                this.props.updateSpacesSearchSuggestions
+                            }
+                            spaceSearchSuggestions={
+                                this.props.spaceSearchSuggestions
+                            }
+                            selectSpaceForEditorPicker={(spaceId: number) =>
+                                this.props.selectSpaceForEditorPicker({
+                                    spaceId,
+                                    newNote: false,
+                                    unifiedAnnotationId: annotation.unifiedId,
+                                })
+                            }
+                            addNewSpaceViaWikiLinksEditNote={
+                                this.props.addNewSpaceViaWikiLinksEditNote
                             }
                         />
                         {listData.remoteId != null &&
@@ -3891,6 +3934,22 @@ export class AnnotationsSidebar extends React.Component<
                             shareMenuAnnotationInstanceId={
                                 this.props.shareMenuAnnotationInstanceId ===
                                     instanceId && annot.unifiedId
+                            }
+                            updateSpacesSearchSuggestions={
+                                this.props.updateSpacesSearchSuggestions
+                            }
+                            spaceSearchSuggestions={
+                                this.props.spaceSearchSuggestions
+                            }
+                            selectSpaceForEditorPicker={(spaceId: number) =>
+                                this.props.selectSpaceForEditorPicker({
+                                    spaceId,
+                                    newNote: false,
+                                    unifiedAnnotationId: annot.unifiedId,
+                                })
+                            }
+                            addNewSpaceViaWikiLinksEditNote={
+                                this.props.addNewSpaceViaWikiLinksEditNote
                             }
                         />
                     </AnnotationBox>

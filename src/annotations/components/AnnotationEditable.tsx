@@ -43,6 +43,7 @@ import Checkbox from 'src/common-ui/components/Checkbox'
 import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components/keyboard-shortcuts'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -131,6 +132,13 @@ export interface AnnotationProps {
     isAutoAddEnabled?: boolean
     bulkSelectAnnotation?: () => void
     isBulkSelected?: boolean
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
+    selectSpaceForEditorPicker?: (spaceId: number) => void
+    addNewSpaceViaWikiLinksEditNote?: (
+        spaceName: string,
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
+    ) => void
 }
 
 export interface AnnotationEditableEventProps {
@@ -416,37 +424,61 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             barColor={barColor}
                         />
                     )}
-                    <HighlightEditContainer
-                        hasHighlight={this.theme.hasHighlight}
-                    >
-                        <AnnotationEdit
-                            ref={this.annotEditRef}
-                            {...this.props.annotationEditDependencies}
-                            rows={2}
-                            editorHeight={this.state.editorHeight}
-                            isShared={this.props.isShared}
-                            isBulkShareProtected={
-                                this.props.isBulkShareProtected
-                            }
-                            getYoutubePlayer={this.props.getYoutubePlayer}
-                            imageSupport={this.props.imageSupport}
-                            comment={this.props.body}
-                            onCommentChange={
-                                this.props.annotationEditDependencies
-                                    .onBodyChange
-                            }
-                            slimEditorActions={true}
-                            isEditMode={this.props.isEditingHighlight}
-                            onEditCancel={
-                                this.props.annotationEditDependencies
-                                    .onEditCancel
-                            }
-                            setEditing={
-                                this.props.annotationFooterDependencies
-                                    .onEditHighlightIconClick
-                            }
-                        />
-                    </HighlightEditContainer>
+                    {/* This is the highlight Editing section, not the annotationEditSection */}
+                    {true || this.props.isEditingHighlight ? (
+                        <HighlightEditContainer
+                            hasHighlight={this.theme.hasHighlight}
+                        >
+                            <AnnotationEdit
+                                ref={this.annotEditRef}
+                                {...this.props.annotationEditDependencies}
+                                rows={2}
+                                editorHeight={this.state.editorHeight}
+                                isShared={this.props.isShared}
+                                isBulkShareProtected={
+                                    this.props.isBulkShareProtected
+                                }
+                                getYoutubePlayer={this.props.getYoutubePlayer}
+                                imageSupport={this.props.imageSupport}
+                                comment={this.props.body}
+                                onCommentChange={
+                                    this.props.annotationEditDependencies
+                                        .onBodyChange
+                                }
+                                slimEditorActions={true}
+                                isEditMode={this.props.isEditingHighlight}
+                                onEditCancel={
+                                    this.props.annotationEditDependencies
+                                        .onEditCancel
+                                }
+                                setEditing={
+                                    this.props.annotationFooterDependencies
+                                        .onEditHighlightIconClick
+                                }
+                                updateSpacesSearchSuggestions={
+                                    this.props.updateSpacesSearchSuggestions
+                                }
+                                spaceSearchSuggestions={
+                                    this.props.spaceSearchSuggestions
+                                }
+                                selectSpaceForEditorPicker={
+                                    this.props.selectSpaceForEditorPicker
+                                }
+                                addNewSpaceViaWikiLinks={(spaceName) =>
+                                    this.props.addNewSpaceViaWikiLinksEditNote(
+                                        spaceName,
+                                        this.props.unifiedId,
+                                    )
+                                }
+                            />
+                        </HighlightEditContainer>
+                    ) : (
+                        <Markdown isHighlight pageUrl={this.props.pageUrl}>
+                            {this.state.isTruncatedHighlight
+                                ? this.state.truncatedTextHighlight
+                                : this.props.body}
+                        </Markdown>
+                    )}
                 </HighlightSection>
             </HighlightStyled>
         )
@@ -760,6 +792,51 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         if (!comment?.length && !isEditing) {
             return
         }
+
+        if (true) {
+            return (
+                <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
+                    <AnnotationEdit
+                        ref={this.annotEditRef}
+                        {...annotationEditDependencies}
+                        rows={2}
+                        editorHeight={this.state.editorHeight}
+                        isShared={this.props.isShared}
+                        isBulkShareProtected={this.props.isBulkShareProtected}
+                        getYoutubePlayer={this.props.getYoutubePlayer}
+                        imageSupport={this.props.imageSupport}
+                        isEditMode={this.props.isEditing}
+                        setEditing={
+                            annotationFooterDependencies.onEditIconClick
+                        }
+                        comment={comment}
+                        onCommentChange={
+                            this.props.annotationEditDependencies
+                                .onCommentChange
+                        }
+                        onEditCancel={
+                            this.props.annotationEditDependencies.onEditCancel
+                        }
+                        updateSpacesSearchSuggestions={
+                            this.props.updateSpacesSearchSuggestions
+                        }
+                        spaceSearchSuggestions={
+                            this.props.spaceSearchSuggestions
+                        }
+                        selectSpaceForEditorPicker={
+                            this.props.selectSpaceForEditorPicker
+                        }
+                        addNewSpaceViaWikiLinks={(spaceName) =>
+                            this.props.addNewSpaceViaWikiLinksEditNote(
+                                spaceName,
+                                this.props.unifiedId,
+                            )
+                        }
+                    />
+                </AnnotationEditContainer>
+            )
+        }
+
         return (
             <AnnotationEditContainer hasHighlight={this.theme.hasHighlight}>
                 <AnnotationEdit

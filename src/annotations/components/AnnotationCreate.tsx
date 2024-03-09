@@ -6,6 +6,7 @@ import styled, { css } from 'styled-components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
+    SpaceSearchSuggestion,
 } from '@worldbrain/memex-common/lib/editor'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
@@ -36,6 +37,8 @@ interface State {
 
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
+    addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
+    selectSpaceForEditorPicker: (spaceId: number) => void
     onCancel: () => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
@@ -60,6 +63,8 @@ export interface AnnotationCreateGeneralProps {
     sidebarEvents?: AnnotationsSidebarInPageEventEmitter
     imageSupport: ImageSupportInterface<'caller'>
     getRootElement: () => HTMLElement
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
 }
 
 export interface Props
@@ -421,6 +426,16 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.setState({ onEditClick: editing })
                             }
                             setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                            updateSpacesSearchSuggestions={
+                                this.props.updateSpacesSearchSuggestions
+                            }
+                            spaceSearchSuggestions={
+                                this.props.spaceSearchSuggestions
+                            }
+                            selectSpace={this.props.selectSpaceForEditorPicker}
+                            addNewSpaceViaWikiLinks={
+                                this.props.addNewSpaceViaWikiLinksNewNote
+                            }
                         />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&
