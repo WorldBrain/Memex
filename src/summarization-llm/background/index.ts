@@ -8,6 +8,7 @@ import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import { trackQueryAI } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import { PromptData } from '@worldbrain/memex-common/lib/ai-chat/types'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -19,8 +20,9 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             apiKey?: string
             outputLocation?: 'editor' | 'summaryContainer' | 'chapterSummary'
             chapterSummaryIndex?: number
-            AImodel?: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+            AImodel?: 'gpt-3' | 'gpt-4'
             isContentSearch?: boolean
+            promptData?: PromptData
         }
     >
     isApiKeyValid: RemoteFunction<

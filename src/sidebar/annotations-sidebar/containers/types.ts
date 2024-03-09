@@ -42,6 +42,7 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import { PromptData } from '@worldbrain/memex-common/lib/ai-chat/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -326,6 +327,7 @@ interface SidebarEvents {
     checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
+    queryAPIService: { promptData: PromptData }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null

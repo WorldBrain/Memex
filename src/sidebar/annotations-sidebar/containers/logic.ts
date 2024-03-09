@@ -248,10 +248,6 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private get resultLimit(): number {
-        return this.options.searchResultLimit ?? DEF_RESULT_LIMIT
-    }
-
     getInitialState(): SidebarContainerState {
         let sidebarWidth = SIDEBAR_WIDTH_STORAGE_KEY
         if (window.location.href.includes('youtube.com/watch')) {
@@ -378,6 +374,10 @@ export class SidebarContainerLogic extends UILogic<
             localFoldersList: [],
             bulkSelectionState: [],
         }
+    }
+
+    private get resultLimit(): number {
+        return this.options.searchResultLimit ?? DEF_RESULT_LIMIT
     }
 
     buildConversationId: ConversationIdBuilder = (
@@ -2980,16 +2980,6 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
-        incoming,
-    ) => {}
-
-    fetchSuggestedTags: EventHandler<'fetchSuggestedTags'> = (incoming) => {}
-
-    fetchSuggestedDomains: EventHandler<'fetchSuggestedDomains'> = (
-        incoming,
-    ) => {}
-
     private async loadRemoteAnnototationReferencesForCachedLists(
         state: SidebarContainerState,
     ): Promise<void> {
@@ -3141,82 +3131,6 @@ export class SidebarContainerLogic extends UILogic<
             textToAnalyse = document.title + document.body.innerText
         }
 
-        if (
-            previousState.activeAITab === 'ExistingKnowledge' ||
-            previousState.activeAITab === 'InFollowedFeeds'
-        ) {
-            if (previousState.prompt?.length === 0 && prompt.length === 0) {
-                this.emitMutation({
-                    loadState: { $set: 'success' },
-                })
-                return
-            }
-            const results = await this.options.customListsBG.findSimilarBackground(
-                previousState.prompt || prompt,
-                normalizeUrl(
-                    this.previousState?.fullPageUrl || this.fullPageUrl,
-                    {
-                        skipProtocolTrim: true,
-                    },
-                ),
-            )
-
-            if (results.length === 0) {
-                this.emitMutation({
-                    loadState: { $set: 'success' },
-                    pageSummary: { $set: 'No references to analyse' },
-                })
-                return
-            }
-
-            let extractedData
-
-            if (previousState.activeAITab === 'ExistingKnowledge') {
-                this.emitMutation({
-                    activeSuggestionsTab: { $set: 'MySuggestions' },
-                })
-
-                extractedData = results.filter((result) => {
-                    return (
-                        result.creatorId ===
-                            previousState.currentUserReference.id ||
-                        result.creatorId === '1'
-                    )
-                })
-
-                extractedData = extractedData.map((result) => {
-                    return {
-                        pageTitle: result.pageTitle,
-                        contentText: result.contentText,
-                    }
-                })
-            }
-            if (previousState.activeAITab === 'InFollowedFeeds') {
-                this.emitMutation({
-                    activeSuggestionsTab: { $set: 'OtherSuggestions' },
-                })
-
-                extractedData = results.filter((result) => {
-                    return (
-                        result.creatorId !==
-                        previousState.currentUserReference.id
-                    )
-                })
-
-                extractedData = extractedData.map((result) => {
-                    return {
-                        pageTitle: result.pageTitle,
-                        contentText: result.contentText,
-                    }
-                })
-            }
-
-            textToAnalyse = JSON.stringify(extractedData)
-            isContentSearch = true
-
-            await this.updateSuggestionResults(results)
-        }
-
         const response = await this.options.summarizeBG.startPageSummaryStream({
             fullPageUrl:
                 isPagePDF || previousState.fetchLocalHTML
@@ -3236,7 +3150,37 @@ export class SidebarContainerLogic extends UILogic<
         return response
     }
 
-    async executeAIquery() {}
+    queryAPIService: EventHandler<'queryAPIService'> = async ({
+        event,
+        previousState,
+    }) => {
+        const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
+        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
+
+        if (!hasAPIKey) {
+            let canQueryAI = false
+            if (previousState.isTrial) {
+                canQueryAI = true
+            } else if (await AIActionAllowed(this.options.analyticsBG)) {
+                canQueryAI = true
+            }
+            if (!canQueryAI) {
+                this.emitMutation({
+                    showUpgradeModal: { $set: true },
+                })
+                return
+            }
+        }
+
+        const response = await this.options.summarizeBG.startPageSummaryStream({
+            promptData: event.promptData,
+            apiKey: openAIKey ? openAIKey : undefined,
+            outputLocation: 'editor',
+            AImodel: previousState.AImodel,
+        })
+
+        return response
+    }
 
     removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
         event,

@@ -64,6 +64,7 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import PageCitations from 'src/citations/PageCitations'
+import { PromptData } from '@worldbrain/memex-common/lib/ai-chat/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -1603,80 +1604,6 @@ export class AnnotationsSidebarContainer<
                                 )
                             }}
                             renderPageLinkMenuForList={() => null}
-                            //     <>
-                            //         <PageCitations
-                            //             annotationUrls={page.noteIds['user']}
-                            //             copyPasterProps={{
-                            //                 copyPasterBG: this.props
-                            //                     .copyPasterBG,
-                            //                 getRootElement: this.props
-                            //                     .getRootElement,
-                            //                 onClickOutside:
-                            //                     interactionProps.onCopyPasterBtnClick,
-                            //             }}
-                            //             pageLinkProps={{
-                            //                 authBG: this.props.authBG,
-                            //                 analyticsBG: this.props.analyticsBG,
-                            //                 annotationsCache: this.props
-                            //                     .annotationsCache,
-                            //                 contentSharingBG: this.props
-                            //                     .contentSharingBG,
-                            //                 contentSharingByTabsBG: this.props
-                            //                     .contentSharingByTabsBG,
-                            //                 copyToClipboard: this.props
-                            //                     .onPageLinkCopy,
-                            //                 fullPageUrl: page.fullUrl,
-                            //                 getRootElement: this.props
-                            //                     .getRootElement,
-                            //                 showSpacesTab: this.props
-                            //                     .showSpacesTab,
-                            //             }}
-                            //         />
-                            //         <PageLinkMenu
-                            //             autoCreateLinkIfNone
-                            //             analyticsBG={this.props.analyticsBG}
-                            //             contentSharingBG={
-                            //                 this.props.contentSharingBG
-                            //             }
-                            //             contentSharingByTabsBG={
-                            //                 this.props.contentSharingByTabsBG
-                            //             }
-                            //             authBG={this.props.authBG}
-                            //             annotationsCache={
-                            //                 this.props.annotationsCache
-                            //             }
-                            //             fullPageUrl={this.state.fullPageUrl!}
-                            //             showSpacesTab={() => {
-                            //                 this.processEvent(
-                            //                     'closePageLinkShareMenu',
-                            //                     null,
-                            //                 )
-                            //                 this.processEvent(
-                            //                     'setActiveSidebarTab',
-                            //                     { tab: 'spaces' },
-                            //                 )
-                            //                 this.processEvent(
-                            //                     'setSelectedList',
-                            //                     {
-                            //                         unifiedListId: null,
-                            //                     },
-                            //                 )
-                            //             }}
-                            //             onNewPageLinkCreate={async (
-                            //                 pageLinkListId,
-                            //             ) => {
-                            //                 await (this
-                            //                     .logic as SidebarContainerLogic).setLocallyAvailableSelectedList(
-                            //                     this.state,
-                            //                     pageLinkListId,
-                            //                 )
-                            //             }}
-                            //             getRootElement={
-                            //                 this.props.getRootElement
-                            //             }
-                            //         />
-                            //     </>
-                            // )}
                             authBG={this.props.authBG}
                             contentSharingBG={this.props.contentSharingBG}
                             contentSharingByTabsBG={
@@ -1847,6 +1774,11 @@ export class AnnotationsSidebarContainer<
                                     annotationIds: annotationIds,
                                 })
                             }}
+                            queryAIservice={(promptData: PromptData) =>
+                                this.processEvent('queryAPIService', {
+                                    promptData: promptData,
+                                })
+                            }
                         />
                     </Rnd>
                 </ContainerStyled>
