@@ -118,6 +118,7 @@ import Raven from 'raven-js'
 import analytics from 'src/analytics'
 
 import MarkdownIt from 'markdown-it'
+import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -363,7 +364,7 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
-            AImodel: 'gpt-3.5-turbo-1106',
+            AImodel: 'gpt-3',
             hasKey: false,
             highlightColors: null,
             suggestionsResults: [],
@@ -494,6 +495,7 @@ export class SidebarContainerLogic extends UILogic<
                 newToken = newToken.trimStart() // Remove the first two characters
             }
             isPageSummaryEmpty = false
+            console.log('newToken', newToken)
             this.emitMutation({
                 loadState: { $set: 'success' },
                 pageSummary: { $apply: (prev) => prev + newToken },
@@ -3150,7 +3152,23 @@ export class SidebarContainerLogic extends UILogic<
         return response
     }
 
-    queryAPIService: EventHandler<'queryAPIService'> = async ({
+    updateAIChatHistoryState: EventHandler<
+        'updateAIChatHistoryState'
+    > = async ({ event }) => {
+        this.emitMutation({
+            AIChatHistoryState: { $set: event.AIchatHistoryState },
+        })
+    }
+    updateAIChatEditorState: EventHandler<'updateAIChatEditorState'> = async ({
+        event,
+    }) => {
+        console.log('ar', event.AIChatEditorState)
+        this.emitMutation({
+            aiQueryEditorState: { $set: event.AIChatEditorState },
+        })
+    }
+
+    queryAIService: EventHandler<'queryAIService'> = async ({
         event,
         previousState,
     }) => {
@@ -3172,10 +3190,23 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
 
+        this.emitMutation({
+            loadState: { $set: 'running' },
+            aiQueryEditorState: {
+                $set: event.promptData.context.originalFullMessage,
+            },
+            currentChatId: { $set: event.promptData.chatId },
+        })
+
+        let promptData = event.promptData
+        promptData.context.originalFullMessage = replaceImgSrcWithRemoteIdBrowser(
+            promptData.context.originalFullMessage,
+        )
+
         const response = await this.options.summarizeBG.startPageSummaryStream({
             promptData: event.promptData,
             apiKey: openAIKey ? openAIKey : undefined,
-            outputLocation: 'editor',
+            outputLocation: null,
             AImodel: previousState.AImodel,
         })
 
@@ -3393,6 +3424,23 @@ export class SidebarContainerLogic extends UILogic<
                 this._updateFocusAISuggestions(focusIndex + 1, displayEntries)
             }
         }
+    }
+
+    async getLocalContent() {
+        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
+        let fullTextToProcess
+        if (isPagePDF) {
+            const searchParams = new URLSearchParams(window.location.search)
+            const filePath = searchParams.get('file')
+            const pdf: PDFDocumentProxy = await (globalThis as any)[
+                'pdfjsLib'
+            ].getDocument(filePath).promise
+            const text = await extractDataFromPDFDocument(pdf, true)
+            fullTextToProcess = document.body.innerText
+        } else {
+            fullTextToProcess = (document.title ?? '') + document.body.innerText
+        }
+        return fullTextToProcess
     }
 
     queryAIwithPrompt: EventHandler<'queryAIwithPrompt'> = async ({

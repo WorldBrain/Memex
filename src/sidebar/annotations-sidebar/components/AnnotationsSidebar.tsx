@@ -106,7 +106,13 @@ import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import debounce from 'lodash/debounce'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import AIChatComponent from '@worldbrain/memex-common/lib/ai-chat'
-import { PromptData } from '@worldbrain/memex-common/lib/ai-chat/types'
+import {
+    AIChatState,
+    ChatMessage,
+    PromptData,
+} from '@worldbrain/memex-common/lib/ai-chat/types'
+import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
+import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -317,6 +323,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     queryAIservice: (promptData: PromptData) => Promise<void>
     setAPIKey: (apiKey: string) => Promise<void>
     userAPIkey: string
+    updateAIChatHistoryState: (newState: ChatMessage[]) => void
+    updateAIChatEditorState: (AIChatEditorState: string) => void
 }
 
 interface AnnotationsSidebarState {
@@ -554,6 +562,23 @@ export class AnnotationsSidebar extends React.Component<
                 this.props.bulkSelectAnnotations(annotationIds)
             }
         }
+    }
+
+    async getLocalContent() {
+        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
+        let fullTextToProcess
+        if (isPagePDF) {
+            const searchParams = new URLSearchParams(window.location.search)
+            const filePath = searchParams.get('file')
+            const pdf: PDFDocumentProxy = await (globalThis as any)[
+                'pdfjsLib'
+            ].getDocument(filePath).promise
+            const text = await extractDataFromPDFDocument(pdf, true)
+            fullTextToProcess = document.body.innerText
+        } else {
+            fullTextToProcess = (document.title ?? '') + document.body.innerText
+        }
+        return fullTextToProcess
     }
 
     handleClickOutside = (event) => {
@@ -1803,6 +1828,8 @@ export class AnnotationsSidebar extends React.Component<
             contentType = 'page'
         }
 
+        console.log('response', this.props.pageSummary)
+
         let InstructionsTitlePlaceholder: JSX.Element | string = (
             <span>
                 Summarise or ask questions about
@@ -1838,110 +1865,39 @@ export class AnnotationsSidebar extends React.Component<
                 'Just type in a question or pick one of the templates'
         }
 
-        let referencesCounter
-
-        if (this.props.activeAITab === 'ExistingKnowledge') {
-            referencesCounter = this.props.suggestionsResults?.filter(
-                (item: SuggestionCard) => {
-                    return (
-                        item.creatorId === this.props.currentUser.id &&
-                        item.contentType !== 'rss-feed-item'
-                    )
-                },
-            )
-        } else if (this.props.activeAITab === 'InFollowedFeeds') {
-            referencesCounter = this.props.suggestionsResults?.filter(
-                (item: SuggestionCard) => {
-                    return (
-                        item.creatorId !== this.props.currentUser.id ||
-                        item.contentType == 'rss-feed-item'
-                    )
-                },
-            )
-        }
-
+        console.log('pagesummary', this.props.pageSummary)
         return (
-            <SummarySection>
-                {this.props.activeAITab !== 'ThisPage' && (
-                    <SuggestionsListSwitcher>
-                        <SuggestionsSwitcherButton
-                            onClick={() => this.props.setSummaryMode('Answer')}
-                            active={
-                                this.props.summaryModeActiveTab === 'Answer'
-                            }
+            <SummaryContainer>
+                {this.props.showLengthError &&
+                    this.props.queryMode === 'summarize' && (
+                        <ErrorContainer>
+                            This article is too big. Consider summarising per
+                            paragraph for better quality.
+                        </ErrorContainer>
+                    )}
+                {this.props.pageSummary?.length > 0 ? (
+                    <SummaryText ref={this.pageSummaryText}>
+                        <Markdown
+                            getYoutubePlayer={this.props.getYoutubePlayer}
+                            contextLocation={this.props.sidebarContext}
+                            isStream={true}
                         >
-                            Answer
-                        </SuggestionsSwitcherButton>
-                        <SuggestionsSwitcherButton
-                            onClick={() =>
-                                this.props.setSummaryMode('References')
-                            }
-                            active={
-                                this.props.summaryModeActiveTab === 'References'
-                            }
-                        >
-                            References
-                            <SuggestionsCounter
-                                hasResults={referencesCounter.length}
-                            >
-                                {referencesCounter.length}
-                            </SuggestionsCounter>
-                        </SuggestionsSwitcherButton>
-                    </SuggestionsListSwitcher>
+                            {this.props.pageSummary?.trim()}
+                        </Markdown>
+                    </SummaryText>
+                ) : (
+                    this.props.activeTab === 'summary' && (
+                        <AIContainerNotif>
+                            <AIContainerNotifTitle>
+                                {InstructionsTitlePlaceholder}
+                            </AIContainerNotifTitle>
+                            <AIContainerNotifSubTitle>
+                                {instructionsSubTitlePlaceholder}
+                            </AIContainerNotifSubTitle>
+                        </AIContainerNotif>
+                    )
                 )}
-                {this.props.summaryModeActiveTab === 'References' &&
-                    this.props.activeAITab !== 'ThisPage' &&
-                    this.renderRabbitHoleList()}
-                {(this.props.summaryModeActiveTab === 'Answer' ||
-                    this.props.activeAITab === 'ThisPage') && (
-                    <SummaryContainer>
-                        {this.props.showLengthError &&
-                            this.props.queryMode === 'summarize' && (
-                                <ErrorContainer>
-                                    This article is too big. Consider
-                                    summarising per paragraph for better
-                                    quality.
-                                </ErrorContainer>
-                            )}
-                        {this.props.pageSummary?.length > 0 ? (
-                            <SummaryText ref={this.pageSummaryText}>
-                                <Markdown
-                                    getYoutubePlayer={
-                                        this.props.getYoutubePlayer
-                                    }
-                                    contextLocation={this.props.sidebarContext}
-                                    isStream={true}
-                                >
-                                    {this.props.pageSummary?.trim()}
-                                </Markdown>
-                            </SummaryText>
-                        ) : (
-                            this.props.activeTab === 'summary' && (
-                                <AIContainerNotif>
-                                    <AIContainerNotifTitle>
-                                        {InstructionsTitlePlaceholder}
-                                    </AIContainerNotifTitle>
-                                    <AIContainerNotifSubTitle>
-                                        {instructionsSubTitlePlaceholder}
-                                    </AIContainerNotifSubTitle>
-                                </AIContainerNotif>
-                            )
-                        )}
-                    </SummaryContainer>
-                )}
-                {/* {this.state
-                    .summarizeArticleLoadState[
-                    entry.normalizedUrl
-                ] === 'error' && (
-                    <ErrorContainer>
-                        Page could not be
-                        summarised. This
-                        may be because it
-                        is behind a
-                        paywall.
-                    </ErrorContainer>
-                )} */}
-            </SummarySection>
+            </SummaryContainer>
         )
     }
     private showChapterList() {
@@ -2208,6 +2164,22 @@ export class AnnotationsSidebar extends React.Component<
                         queryAIservice={this.props.queryAIservice}
                         currentAIResponse={this.props.pageSummary}
                         renderAICounter={this.props.renderAICounter}
+                        isInTrial={this.props.isTrial}
+                        getLocalContent={() => this.getLocalContent()}
+                        updateAIChatHistoryState={
+                            this.props.updateAIChatHistoryState
+                        }
+                        updateEditorContentState={
+                            this.props.updateAIChatEditorState
+                        }
+                        aiChatStateExternal={{
+                            loadState: this.props.loadState,
+                            selectedModel: this.props.AImodel,
+                            fetchLocalSetting: this.props.fetchLocalHTML,
+                            editorContent: this.props.aiQueryEditorState,
+                            chatHistory: this.props.AIChatHistoryState,
+                            currentChatId: this.props.currentChatId,
+                        }}
                     />
                     {/* <QueryContainer
                         AIDropDownShown={
@@ -2425,13 +2397,13 @@ export class AnnotationsSidebar extends React.Component<
                                     hideDescriptionInPreview
                                     menuItems={[
                                         {
-                                            id: 'gpt-3.5-turbo-1106',
+                                            id: 'gpt-3',
                                             name: 'GPT 3.5',
                                             info:
                                                 'Faster & good for summarization',
                                         },
                                         {
-                                            id: 'gpt-4-1106-preview',
+                                            id: 'gpt-4',
                                             name: 'GPT 4',
                                             isDisabled: this.props.hasKey
                                                 ? false
@@ -2450,8 +2422,7 @@ export class AnnotationsSidebar extends React.Component<
                                         this.props.setAIModel(item.id)
                                     }}
                                     initSelectedItem={
-                                        this.props.AImodel ??
-                                        'gpt-3.5-turbo-1106'
+                                        this.props.AImodel ?? 'gpt-3'
                                     }
                                     keepSelectedState
                                     getRootElement={this.props.getRootElement}
@@ -2465,8 +2436,6 @@ export class AnnotationsSidebar extends React.Component<
                         <LoaderBoxInSummary>
                             {this.renderLoader()}
                         </LoaderBoxInSummary>
-                    ) : this.props.showChapters ? (
-                        this.showChapterList()
                     ) : (
                         this.showSummary()
                     )}
@@ -3545,24 +3514,6 @@ export class AnnotationsSidebar extends React.Component<
         // ) {
         //     return this.renderLoader()
         // }
-
-        if (this.props.activeTab === 'rabbitHole') {
-            if (this.props.rabbitHoleBetaFeatureAccess == null) {
-                return (
-                    <LoaderBox>
-                        <LoadingIndicator size={30} />
-                    </LoaderBox>
-                )
-            }
-            if (this.props.rabbitHoleBetaFeatureAccess === 'onboarded') {
-                return <>{this.renderRabbitHoleList()}</>
-            } else if (this.props.rabbitHoleBetaFeatureAccess === 'granted') {
-                return <>{this.renderBetaAccessOnboarding()}</>
-            } else {
-                return <>{this.renderBetaAccessOnboarding()}</>
-            }
-        }
-
         if (this.props.activeTab === 'summary') {
             if (
                 this.props.prompt?.length > 0 &&
@@ -5273,7 +5224,7 @@ const OptionsContainer = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 0px 15px 10px 15px;
+    padding: 5px 15px 5px 15px;
     width: fill-available;
     grid-gap: 2px;
     z-index: 101;

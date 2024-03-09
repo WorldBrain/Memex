@@ -42,7 +42,12 @@ import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
-import { PromptData } from '@worldbrain/memex-common/lib/ai-chat/types'
+
+import {
+    AImodels,
+    PromptData,
+} from '@worldbrain/memex-common/lib/summarization/types'
+import { ChatMessage } from '@worldbrain/memex-common/lib/ai-chat/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -142,7 +147,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     spaceSearchSuggestions?: SpaceSearchSuggestion[]
     suggestionsResults: SuggestionCard[]
     suggestionsResultsLoadState: TaskState
-
     activeTab: SidebarTab
     activeAITab: SidebarAITab
     summaryModeActiveTab: 'Answer' | 'References'
@@ -254,8 +258,11 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     // Search result propsallowed
     shouldShowCount: boolean
     isInvalidSearch: boolean
+    AIChatHistoryState: ChatMessage[]
+    currentChatId: string
     totalResultCount: number
     searchResultSkip: number
+    aiQueryEditorState: string
 
     isListFilterActive: boolean
     showLoginModal: boolean
@@ -294,7 +301,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
             loadingState: TaskState
         }
     }
-    AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+    AImodel: AImodels
     localFoldersList: LocalFolder[]
     showFeedSourcesMenu: boolean
     bulkSelectionState: string[]
@@ -327,11 +334,13 @@ interface SidebarEvents {
     checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
-    queryAPIService: { promptData: PromptData }
+    queryAIService: { promptData: PromptData }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null
     toggleAutoAdd: null
+    updateAIChatHistoryState: { AIchatHistoryState: ChatMessage[] }
+    updateAIChatEditorState: { AIChatEditorState: string }
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
         videoRangeTimestamps: {
@@ -408,7 +417,7 @@ interface SidebarEvents {
     setQueryMode: {
         mode: string
     }
-    setAIModel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+    setAIModel: AImodels
 
     toggleAISuggestionsDropDown: null
     removeSelectedTextAIPreview: null
@@ -551,7 +560,6 @@ interface SidebarEvents {
     }
 
     openWebUIPageForSpace: { unifiedListId: UnifiedList['unifiedId'] }
-
     // Search
     paginateSearch: null
     setPillVisibility: { value: string }

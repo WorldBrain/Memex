@@ -8,7 +8,10 @@ import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import { trackQueryAI } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { PromptData } from '@worldbrain/memex-common/lib/ai-chat/types'
+import {
+    AImodels,
+    PromptData,
+} from '@worldbrain/memex-common/lib/summarization/types'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -20,7 +23,7 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             apiKey?: string
             outputLocation?: 'editor' | 'summaryContainer' | 'chapterSummary'
             chapterSummaryIndex?: number
-            AImodel?: 'gpt-3' | 'gpt-4'
+            AImodel?: AImodels
             isContentSearch?: boolean
             promptData?: PromptData
         }
@@ -84,7 +87,7 @@ export default class SummarizeBackground {
             outputLocation,
             chapterSummaryIndex,
             AImodel,
-            isContentSearch,
+            promptData,
         },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
@@ -97,6 +100,8 @@ export default class SummarizeBackground {
             }
         }
 
+        console.log('Starting summarization stream')
+
         for await (const result of this.summarizationService.queryAI(
             fullPageUrl,
             textToProcess,
@@ -104,9 +109,10 @@ export default class SummarizeBackground {
             apiKey,
             undefined,
             AImodel,
-            isContentSearch,
+            promptData,
         )) {
             const token = result?.t
+            console.log('Token:', token)
             if (token?.length > 0) {
                 if (outputLocation === 'editor') {
                     this.options.remoteEventEmitter.emitToTab(
@@ -126,6 +132,7 @@ export default class SummarizeBackground {
                         },
                     )
                 } else {
+                    console.log('Emitting to summary container')
                     this.options.remoteEventEmitter.emitToTab(
                         'newSummaryToken',
                         tab.id,

@@ -64,7 +64,10 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import PageCitations from 'src/citations/PageCitations'
-import { PromptData } from '@worldbrain/memex-common/lib/ai-chat/types'
+import {
+    ChatMessage,
+    PromptData,
+} from '@worldbrain/memex-common/lib/ai-chat/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -1775,10 +1778,22 @@ export class AnnotationsSidebarContainer<
                                 })
                             }}
                             queryAIservice={(promptData: PromptData) =>
-                                this.processEvent('queryAPIService', {
+                                this.processEvent('queryAIService', {
                                     promptData: promptData,
                                 })
                             }
+                            updateAIChatHistoryState={(
+                                newState: ChatMessage[],
+                            ) => {
+                                this.processEvent('updateAIChatHistoryState', {
+                                    AIchatHistoryState: newState,
+                                })
+                            }}
+                            updateAIChatEditorState={(newState: string) => {
+                                this.processEvent('updateAIChatEditorState', {
+                                    AIChatEditorState: newState,
+                                })
+                            }}
                         />
                     </Rnd>
                 </ContainerStyled>
