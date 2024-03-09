@@ -26,6 +26,7 @@ import { ImageSupportInterface } from 'src/image-support/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { Storage } from 'webextension-polyfill'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 
 interface TooltipRootProps {
     mount: InPageUIRootMount
@@ -48,6 +49,7 @@ interface TooltipRootState {
     currentAnnotation?: UnifiedAnnotation
     currentAnnotationLists: UnifiedList[]
     showSpacePicker: boolean
+    spaceSearchResults: any[]
 }
 
 class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
@@ -55,6 +57,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         currentAnnotation: null,
         currentAnnotationLists: [],
         showSpacePicker: false,
+        spaceSearchResults: [],
     }
 
     async componentDidMount() {
@@ -80,6 +83,25 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                 showSpacePicker: stateToSet,
             })
         }
+    }
+
+    updateSpacesSearchSuggestions = async (query: string) => {
+        const lists = this.props.annotationsCache.lists.allIds
+            .filter(
+                (listId) =>
+                    this.props.annotationsCache.lists.byId[listId].name
+                        .toLowerCase()
+                        .includes(query.toLowerCase()) &&
+                    this.props.annotationsCache.lists.byId[listId].type !==
+                        'page-link',
+            )
+            .map((listId) => ({
+                id: this.props.annotationsCache.lists.byId[listId].localId,
+                name: this.props.annotationsCache.lists.byId[listId].name,
+            }))
+        this.setState({
+            spaceSearchResults: lists,
+        })
     }
 
     getAnnotationLists = async (annotationId: string) => {
@@ -185,6 +207,37 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         })
     }
 
+    addNewSpaceViaWikiLinks = async (spaceName: string) => {
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await this.props.spacesBG.createCustomList({
+            name: spaceName,
+        })
+
+        const creatorId = (await this.props.authBG.getCurrentUser()).id
+        const userReference: UserReference = {
+            type: 'user-reference',
+            id: creatorId,
+        }
+
+        this.props.annotationsCache.addList({
+            name: spaceName,
+            collabKey,
+            localId: localListId,
+            remoteId: remoteListId,
+            hasRemoteAnnotationsToLoad: false,
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            creator: userReference ?? undefined,
+            parentLocalId: null,
+            isPrivate: true,
+        })
+
+        await this.selectSpaceForAnnotation(localListId)
+    }
+
     saveAnnotation = async (commentState: string) => {
         const currentAnnotation = this.state.currentAnnotation
         const existingHighlight = this.props.annotationsCache.annotations.byId[
@@ -266,8 +319,10 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                 return (
                     <PopoutBox
                         targetElementRef={buttonRef.current}
-                        placement="bottom-end"
+                        placement="bottom-start"
                         getPortalRoot={this.props.getRootElement}
+                        offsetX={12}
+                        offsetY={-10}
                     >
                         {CollectionsPickerElement}
                     </PopoutBox>
@@ -304,6 +359,12 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         getAnnotationLists={this.getAnnotationLists}
                         toggleSpacePicker={this.toggleSpacePicker}
                         removeSpaceForAnnotation={this.removeSpaceForAnnotation}
+                        selectSpaceForAnnotation={this.selectSpaceForAnnotation}
+                        updateSpacesSearchSuggestions={
+                            this.updateSpacesSearchSuggestions
+                        }
+                        spaceSearchResults={this.state.spaceSearchResults}
+                        addNewSpaceViaWikiLinks={this.addNewSpaceViaWikiLinks}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
