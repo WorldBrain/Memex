@@ -123,20 +123,7 @@ export default class CopyPasterContainer extends React.PureComponent<
         const selection = window.getSelection()
         selection.removeAllRanges()
         selection.addRange(range)
-
-        // Create a new Blob object with the HTML content and the type 'text/html'
-        const blob = new Blob([hiddenDiv.innerHTML], { type: 'text/html' })
-        const data = [new ClipboardItem({ 'text/html': blob })]
-
-        // Use the Clipboard API to write the Blob to the clipboard
-        navigator.clipboard
-            .write(data)
-            .then(() => {
-                console.log('Content copied to clipboard successfully!')
-            })
-            .catch((err) => {
-                console.error('Failed to copy content to clipboard:', err)
-            })
+        document.execCommand('copy')
 
         // Remove the hidden div from the body
         document.body.removeChild(hiddenDiv)
