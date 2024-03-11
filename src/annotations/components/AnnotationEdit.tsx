@@ -4,6 +4,7 @@ import styled from 'styled-components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
+    SpaceSearchSuggestion,
 } from '@worldbrain/memex-common/lib/editor'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
@@ -34,6 +35,10 @@ export interface AnnotationEditEventProps {
     copyLoadingState: TaskState
     setEditing: React.MouseEventHandler
     onBodyChange: (content: string) => void
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
+    selectSpaceForEditorPicker?: (spaceId: number) => void
+    addNewSpaceViaWikiLinks?: (spaceName: string) => void
 }
 
 export interface AnnotationEditGeneralProps {
@@ -89,6 +94,12 @@ class AnnotationEdit extends React.Component<Props> {
             } else if (this.props.isEditMode) {
                 this.setState({ shouldShowEditor: true })
             }
+        }
+        if (
+            prevProps.comment !== this.props.comment &&
+            !this.props.isEditMode
+        ) {
+            this.editorRef?.updateContentExternally(this.props.comment)
         }
     }
 
@@ -190,6 +201,16 @@ class AnnotationEdit extends React.Component<Props> {
                         editable={this.props.isEditMode}
                         setEditing={this.props.setEditing}
                         setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                        updateSpacesSearchSuggestions={
+                            this.props.updateSpacesSearchSuggestions
+                        }
+                        spaceSearchSuggestions={
+                            this.props.spaceSearchSuggestions
+                        }
+                        selectSpace={this.props.selectSpaceForEditorPicker}
+                        addNewSpaceViaWikiLinks={
+                            this.props.addNewSpaceViaWikiLinks
+                        }
                     />
                 </EditorContainer>
             )

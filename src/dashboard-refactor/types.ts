@@ -49,6 +49,7 @@ import type {
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
 export interface RootState {
     loadState: TaskState
@@ -72,6 +73,7 @@ export interface RootState {
     blurEffectReset: boolean
     showFullScreen: boolean
     focusLockUntilMouseStart: boolean
+    spaceSearchSuggestions: SpaceSearchSuggestion[]
 }
 
 export type Events = UIEvent<

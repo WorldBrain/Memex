@@ -70,19 +70,6 @@ function getShortcutHandlers({
     return {
         addComment: () => inPageUI.showRibbon({ action: 'comment' }),
         addTag: () => inPageUI.showRibbon({ action: 'tag' }),
-        addToCollection: async () => {
-            if (userSelectedText()) {
-                await annotationFunctions.createAnnotation(
-                    window.getSelection(),
-                    false,
-                    true,
-                    true,
-                    null,
-                )
-            } else {
-                await inPageUI.showRibbon({ action: 'list' })
-            }
-        },
         sharePage: () =>
             inPageUI.showSidebar({
                 action: 'cite_page',
@@ -113,9 +100,6 @@ function getShortcutHandlers({
             })
             inPageUI.hideTooltip()
         },
-        // window.getSelection().toString().length === 0
-        //     ?
-        //     : inPageUI.showTooltip('AImode'),
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createSharedAnnotation: () =>
             annotationFunctions.createAnnotation(
@@ -125,21 +109,39 @@ function getShortcutHandlers({
                 false,
                 null,
             ),
-        createSharedHighlight: () =>
-            annotationFunctions.createHighlight(window.getSelection(), true),
-        createHighlight: () =>
-            annotationFunctions.createHighlight(window.getSelection(), false),
-        createAnnotation: () =>
-            annotationFunctions.createAnnotation(
+        createSharedHighlight: async () => {
+            annotationFunctions.createHighlight(window.getSelection(), true)
+            return
+        },
+        createHighlight: async () => {
+            await annotationFunctions.createHighlight(
                 window.getSelection(),
                 false,
-                false,
-                false,
-                null,
             ),
-        copyCurrentLink: () => {
+                inPageUI.hideTooltip()
+        },
+        createAnnotation: async () => {
+            inPageUI.events.emit('tooltipAction', {
+                annotationCacheId: null,
+                selection: window.getSelection(),
+                openForSpaces: false,
+            })
+            return // This ensures the function returns Promise<void>
+        },
+        addToCollection: async () => {
             if (userSelectedText()) {
-                return annotationFunctions.createHighlight(
+                inPageUI.events.emit('tooltipAction', {
+                    annotationCacheId: null,
+                    selection: window.getSelection(),
+                    openForSpaces: true,
+                })
+            } else {
+                await inPageUI.showRibbon({ action: 'list' })
+            }
+        },
+        copyCurrentLink: async () => {
+            if (userSelectedText()) {
+                await annotationFunctions.createHighlight(
                     window.getSelection(),
                     null,
                     true,
@@ -147,6 +149,8 @@ function getShortcutHandlers({
                     undefined,
                     true,
                 )
+                // Explicitly return void
+                return
             } else {
                 return inPageUI.showSidebar({
                     action: 'share_page_link',
