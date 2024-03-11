@@ -138,9 +138,6 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                         <FormSectionItem>
                             <FormFieldTitle>DOI</FormFieldTitle>
                             <TextField
-                                onKeyDown={(e) => {
-                                    e.stopPropagation()
-                                }}
                                 value={this.state.doi}
                                 onChange={this.handleTextInputChange('doi')}
                                 onKeyDown={(e) => {
@@ -187,7 +184,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                             onKeyDown={(e) => {
                                 e.stopPropagation()
                             }}
-                            value={this.state.accessDate}
+                            value={new Date(this.state.accessDate).toString()}
                             onChange={this.handleTextInputChange('accessDate')}
                         />
                     </FormSectionItem>
@@ -347,7 +344,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                 onKeyDown={(e) => {
                                     e.stopPropagation()
                                 }}
-                                value={this.state.releaseDate}
+                                value={new Date(
+                                    this.state.accessDate,
+                                ).toString()}
                                 onChange={this.handleTextInputChange(
                                     'releaseDate',
                                 )}
