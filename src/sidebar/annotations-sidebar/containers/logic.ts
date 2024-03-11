@@ -2700,8 +2700,6 @@ export class SidebarContainerLogic extends UILogic<
         'updateListsForAnnotation'
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
-        console.log('arrives here', event.added)
-
         // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
@@ -2733,7 +2731,6 @@ export class SidebarContainerLogic extends UILogic<
                 )
             }
 
-            console.log('cacheList', cacheList, unifiedListIds)
             if (unifiedListIds.has(cacheList.unifiedId)) {
                 return
             }
@@ -2827,8 +2824,6 @@ export class SidebarContainerLogic extends UILogic<
             isPrivate: true,
         })
 
-        console.log('goes through here', event)
-
         this.processUIEvent('updateListsForAnnotation', {
             event: {
                 added: localListId,
@@ -2880,6 +2875,24 @@ export class SidebarContainerLogic extends UILogic<
         if (newLists.length > 0) {
             this.emitMutation({
                 commentBox: { lists: { $set: newLists } },
+            })
+        }
+    }
+    removePageNoteList: EventHandler<'removePageNoteList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const existingLists = new Set(previousState.commentBox.lists)
+        const listsToRemove = event.lists.filter((list) =>
+            existingLists.has(list),
+        )
+
+        if (listsToRemove.length > 0) {
+            const updatedLists = [...existingLists].filter(
+                (list) => !listsToRemove.includes(list),
+            )
+            this.emitMutation({
+                commentBox: { lists: { $set: updatedLists } },
             })
         }
     }

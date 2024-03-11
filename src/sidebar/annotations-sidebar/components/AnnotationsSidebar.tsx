@@ -306,6 +306,11 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
         newNote?: boolean
         unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
     }) => void
+    removeSpaceFromEditorPicker: (
+        spaceId: UnifiedList['localId'],
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
+        newNote?: boolean,
+    ) => void
     addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
     addNewSpaceViaWikiLinksEditNote: (
         spaceName: string,
@@ -719,6 +724,15 @@ export class AnnotationsSidebar extends React.Component<
                             unifiedAnnotationId: null,
                         })
                     }
+                    removeSpaceFromEditorPicker={(
+                        spaceId: UnifiedList['localId'],
+                    ) => {
+                        this.props.removeSpaceFromEditorPicker(
+                            spaceId,
+                            null,
+                            true,
+                        )
+                    }}
                     addNewSpaceViaWikiLinksNewNote={
                         this.props.addNewSpaceViaWikiLinksNewNote
                     }
@@ -1068,6 +1082,14 @@ export class AnnotationsSidebar extends React.Component<
                                     unifiedAnnotationId: annotation.unifiedId,
                                 })
                             }
+                            removeSpaceFromEditorPicker={(
+                                spaceId: UnifiedList['localId'],
+                            ) => {
+                                this.props.removeSpaceFromEditorPicker(
+                                    spaceId,
+                                    annotation.unifiedId,
+                                )
+                            }}
                             addNewSpaceViaWikiLinksEditNote={
                                 this.props.addNewSpaceViaWikiLinksEditNote
                             }
@@ -3948,6 +3970,14 @@ export class AnnotationsSidebar extends React.Component<
                                     unifiedAnnotationId: annot.unifiedId,
                                 })
                             }
+                            removeSpaceFromEditorPicker={(
+                                spaceId: UnifiedList['localId'],
+                            ) => {
+                                this.props.removeSpaceFromEditorPicker(
+                                    spaceId,
+                                    annot.unifiedId,
+                                )
+                            }}
                             addNewSpaceViaWikiLinksEditNote={
                                 this.props.addNewSpaceViaWikiLinksEditNote
                             }

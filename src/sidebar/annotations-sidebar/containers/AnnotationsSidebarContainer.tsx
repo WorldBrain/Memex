@@ -1178,6 +1178,29 @@ export class AnnotationsSidebarContainer<
                                     )
                                 }
                             }}
+                            removeSpaceFromEditorPicker={(
+                                spaceId: UnifiedList['localId'],
+                                unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
+                                newNote?: boolean,
+                            ) => {
+                                if (newNote) {
+                                    this.processEvent('removePageNoteList', {
+                                        lists: [
+                                            ...this.state.commentBox.lists,
+                                            spaceId,
+                                        ],
+                                    })
+                                } else {
+                                    this.processEvent(
+                                        'updateListsForAnnotation',
+                                        {
+                                            added: null,
+                                            deleted: spaceId,
+                                            unifiedAnnotationId: unifiedAnnotationId,
+                                        },
+                                    )
+                                }
+                            }}
                             addNewSpaceViaWikiLinksEditNote={async (
                                 spaceName,
                                 unifiedAnnotationId,

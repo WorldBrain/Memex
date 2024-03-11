@@ -13,7 +13,7 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 import type { NoteResultHoverState, FocusableComponent } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
+
 import type { ListDetailsGetter } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -25,6 +25,8 @@ import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-si
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { sleepPromise } from 'src/util/promises'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import ListsSegment from '@worldbrain/memex-common/lib/common-ui/components/result-item-spaces-segment'
+import { UnifiedList } from '../cache/types'
 
 interface State {
     isTagPickerShown: boolean
@@ -39,6 +41,7 @@ export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
     addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
     selectSpaceForEditorPicker: (spaceId: number) => void
+    removeSpaceFromEditorPicker: (spaceId: UnifiedList['localId']) => void
     onCancel: () => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
@@ -186,14 +189,14 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private get displayLists(): Array<{
-        id: number
+        localId: number
         name: string | JSX.Element
         isShared: boolean
         type: 'page-link' | 'user-list' | 'special-list' | 'rss-feed'
     }> {
-        return this.props.lists.map((id) => ({
-            id,
-            ...this.props.getListDetailsById(id),
+        return this.props.lists.map((localId) => ({
+            localId,
+            ...this.props.getListDetailsById(localId),
         }))
     }
 
@@ -471,6 +474,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.setState({
                                     isListPickerShown: true,
                                 })
+                            }
+                            removeSpaceForAnnotation={
+                                this.props.removeSpaceFromEditorPicker
                             }
                             spacePickerButtonRef={this.spacePickerButtonRef}
                             renderSpacePicker={this.renderSpacePicker}
