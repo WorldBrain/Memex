@@ -53,6 +53,10 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
           })
         | null
     >
+    setEntityOrder: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { id: number; order: number }
+    >
 }
 
 export type PageMetadataUpdateArgs = Omit<PageMetadata, 'accessDate'> & {
