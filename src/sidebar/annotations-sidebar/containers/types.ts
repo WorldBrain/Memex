@@ -112,6 +112,7 @@ export type SidebarTab =
     | 'feed'
     | 'summary'
     | 'rabbitHole'
+    | 'askAI'
 export type SidebarAITab = 'ThisPage' | 'ExistingKnowledge' | 'InFollowedFeeds'
 
 export type SuggestionsTab =

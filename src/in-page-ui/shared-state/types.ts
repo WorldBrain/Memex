@@ -11,6 +11,7 @@ import type {
     OnDemandInPageUIProps,
 } from 'src/search-injection/types'
 import type { ContentScriptComponent } from 'src/content-scripts/types'
+import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -90,6 +91,7 @@ export interface SharedInPageUIEvents {
         component: OnDemandInPageUIComponents
         options?: OnDemandInPageUIProps
     }) => void
+    setActiveSidebarTab: (event: { activeTab: SidebarTab }) => void
 }
 
 export interface ShouldSetUpOptions {
@@ -105,6 +107,7 @@ export interface SharedInPageUIInterface {
 
     // Misc. states that need to be shared between content scripts
     selectedList: UnifiedList['unifiedId'] | null
+    activeSidebarTab: SidebarTab | null
     /** Resolves when all data is loaded to hydate UI annotations/lists cache. */
     cacheLoadPromise: Resolvable<void>
 

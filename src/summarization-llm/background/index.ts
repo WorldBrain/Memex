@@ -35,6 +35,12 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
         },
         { isValid: boolean }
     >
+    setActiveSidebarTab: RemoteFunction<
+        Role,
+        {
+            activeTab?: 'askAI' | null
+        }
+    >
     getTextSummary: RemoteFunction<
         Role,
         {
@@ -68,6 +74,7 @@ export default class SummarizeBackground {
             startPageSummaryStream: this.startPageSummaryStream,
             getTextSummary: this.getTextSummary,
             isApiKeyValid: this.isApiKeyValid,
+            setActiveSidebarTab: this.setActiveSidebarTab,
         }
     }
 
@@ -169,5 +176,17 @@ export default class SummarizeBackground {
         const isValid = await this.summarizationService.isApiKeyValid(apiKey)
 
         return { isValid }
+    }
+
+    setActiveSidebarTab: SummarizationInterface<
+        'provider'
+    >['setAskAIActive'] = async ({ tab }, { activeTab }) => {
+        this.options.remoteEventEmitter.emitToTab(
+            'setActiveSidebarTab',
+            tab.id,
+            {
+                activeTab: activeTab,
+            },
+        )
     }
 }

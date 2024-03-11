@@ -495,7 +495,6 @@ export class SidebarContainerLogic extends UILogic<
                 newToken = newToken.trimStart() // Remove the first two characters
             }
             isPageSummaryEmpty = false
-            console.log('newToken', newToken)
             this.emitMutation({
                 loadState: { $set: 'success' },
                 pageSummary: { $apply: (prev) => prev + newToken },
@@ -1996,6 +1995,7 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 prompt: { $set: undefined },
             })
+
             await this.queryAI(
                 event.fullPageUrl,
                 undefined,
@@ -3065,91 +3065,82 @@ export class SidebarContainerLogic extends UILogic<
             | null,
         chapterSummaryIndex?: number,
     ) {
-        this.emitMutation({
-            loadState: { $set: 'running' },
-        })
-
-        const selectedText =
-            highlightedText || previousState?.selectedTextAIPreview
-
-        const isPagePDF =
-            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
-        const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
-        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
-
-        if (!hasAPIKey) {
-            let canQueryAI = false
-            if (previousState.isTrial) {
-                canQueryAI = true
-            } else if (await AIActionAllowed(this.options.analyticsBG)) {
-                canQueryAI = true
-            }
-            if (!canQueryAI) {
-                this.emitMutation({
-                    showUpgradeModal: { $set: true },
-                })
-                return
-            }
-        }
-
-        let queryPrompt = prompt
-
-        if (!previousState.isTrial) {
-            await updateAICounter()
-        }
-        this.emitMutation({
-            selectedTextAIPreview: {
-                $set:
-                    selectedText?.length && outputLocation !== 'chapterSummary'
-                        ? selectedText
-                        : null,
-            },
-            loadState: {
-                $set:
-                    outputLocation !== 'editor' &&
-                    outputLocation !== 'chapterSummary'
-                        ? 'running'
-                        : 'pristine',
-            },
-            prompt: {
-                $set:
-                    outputLocation !== 'chapterSummary'
-                        ? prompt
-                        : previousState.prompt,
-            },
-            showAICounter: { $set: true },
-            hasKey: { $set: hasAPIKey },
-        })
-
-        let textToAnalyse
-        let isContentSearch = false
-        textToAnalyse = textAsAlternative
-            ? textAsAlternative
-            : selectedText
-            ? selectedText
-            : null
-
-        if (previousState.fetchLocalHTML) {
-            textToAnalyse = document.title + document.body.innerText
-        }
-
-        const response = await this.options.summarizeBG.startPageSummaryStream({
-            fullPageUrl:
-                isPagePDF || previousState.fetchLocalHTML
-                    ? undefined
-                    : fullPageUrl && fullPageUrl
-                    ? fullPageUrl
-                    : undefined,
-            textToProcess: textToAnalyse,
-            queryPrompt: queryPrompt,
-            apiKey: openAIKey ? openAIKey : undefined,
-            outputLocation: outputLocation ?? null,
-            chapterSummaryIndex: chapterSummaryIndex ?? null,
-            AImodel: previousState.AImodel,
-            isContentSearch: isContentSearch ? true : false,
-        })
-
-        return response
+        // this.emitMutation({
+        //     loadState: { $set: 'running' },
+        // })
+        // const selectedText =
+        //     highlightedText || previousState?.selectedTextAIPreview
+        // const isPagePDF =
+        //     fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
+        // const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
+        // const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
+        // if (!hasAPIKey) {
+        //     let canQueryAI = false
+        //     if (previousState.isTrial) {
+        //         canQueryAI = true
+        //     } else if (await AIActionAllowed(this.options.analyticsBG)) {
+        //         canQueryAI = true
+        //     }
+        //     if (!canQueryAI) {
+        //         this.emitMutation({
+        //             showUpgradeModal: { $set: true },
+        //         })
+        //         return
+        //     }
+        // }
+        // let queryPrompt = prompt
+        // if (!previousState.isTrial) {
+        //     await updateAICounter()
+        // }
+        // this.emitMutation({
+        //     selectedTextAIPreview: {
+        //         $set:
+        //             selectedText?.length && outputLocation !== 'chapterSummary'
+        //                 ? selectedText
+        //                 : null,
+        //     },
+        //     loadState: {
+        //         $set:
+        //             outputLocation !== 'editor' &&
+        //             outputLocation !== 'chapterSummary'
+        //                 ? 'running'
+        //                 : 'pristine',
+        //     },
+        //     prompt: {
+        //         $set:
+        //             outputLocation !== 'chapterSummary'
+        //                 ? prompt
+        //                 : previousState.prompt,
+        //     },
+        //     showAICounter: { $set: true },
+        //     hasKey: { $set: hasAPIKey },
+        // })
+        // let textToAnalyse
+        // let isContentSearch = false
+        // textToAnalyse = textAsAlternative
+        //     ? textAsAlternative
+        //     : selectedText
+        //     ? selectedText
+        //     : null
+        // if (previousState.fetchLocalHTML) {
+        //     textToAnalyse = document.title + document.body.innerText
+        // }
+        // const response = await this.options.summarizeBG.startPageSummaryStream({
+        //     fullPageUrl:
+        //         isPagePDF || previousState.fetchLocalHTML
+        //             ? undefined
+        //             : fullPageUrl && fullPageUrl
+        //             ? fullPageUrl
+        //             : undefined,
+        //     textToProcess: textToAnalyse,
+        //     queryPrompt: queryPrompt,
+        //     apiKey: openAIKey ? openAIKey : undefined,
+        //     outputLocation: outputLocation ?? null,
+        //     chapterSummaryIndex: chapterSummaryIndex ?? null,
+        //     AImodel: previousState.AImodel,
+        //     isContentSearch: isContentSearch ? true : false,
+        // })
+        // return response
     }
 
     updateAIChatHistoryState: EventHandler<
@@ -3162,7 +3153,6 @@ export class SidebarContainerLogic extends UILogic<
     updateAIChatEditorState: EventHandler<'updateAIChatEditorState'> = async ({
         event,
     }) => {
-        console.log('ar', event.AIChatEditorState)
         this.emitMutation({
             aiQueryEditorState: { $set: event.AIChatEditorState },
         })
@@ -3192,9 +3182,6 @@ export class SidebarContainerLogic extends UILogic<
 
         this.emitMutation({
             loadState: { $set: 'running' },
-            aiQueryEditorState: {
-                $set: event.promptData.context.originalFullMessage,
-            },
             currentChatId: { $set: event.promptData.chatId },
         })
 
@@ -3570,6 +3557,18 @@ export class SidebarContainerLogic extends UILogic<
     askAIviaInPageInteractions: EventHandler<
         'askAIviaInPageInteractions'
     > = async ({ event, previousState }) => {
+        this.setActiveSidebarTabEvents('summary')
+        if (previousState.activeTab === 'summary') {
+            this.options.events.emit(
+                'addSelectedTextToAIquery',
+                {
+                    selectedText: event.textToProcess,
+                },
+                (success) => {},
+            )
+            return
+        }
+
         this.emitMutation({ activeTab: { $set: 'summary' } })
 
         let prompt =
@@ -3666,6 +3665,10 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    setActiveSidebarTabEvents(activeTab) {
+        this.options.summarizeBG.setActiveSidebarTab({ activeTab: activeTab })
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -3674,6 +3677,8 @@ export class SidebarContainerLogic extends UILogic<
             'mouseup',
             this.handleMouseUpToTriggerRabbitHole,
         )
+
+        this.setActiveSidebarTabEvents(event.tab)
 
         this.emitMutation({
             activeTab: { $set: event.tab },
@@ -3709,6 +3714,10 @@ export class SidebarContainerLogic extends UILogic<
             ((event.prompt && event.prompt?.length > 0) ||
                 event.textToProcess?.length > 0)
         ) {
+            console.log('event acitve')
+            this.options.events?.emit('setActiveSidebarTab', {
+                activeTab: 'askAI',
+            })
             if (previousState.pageSummary?.length === 0) {
                 let isPagePDF = window.location.href.includes(
                     '/pdfjs/viewer.html?',

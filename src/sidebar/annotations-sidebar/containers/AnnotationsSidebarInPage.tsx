@@ -204,7 +204,12 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             },
         )
         sidebarEvents.on('setSelectedList', async (selectedList) => {
+            console.log('setSelectedList', selectedList)
             inPageUI.selectedList = selectedList
+        })
+        sidebarEvents.on('setActiveSidebarTab', async (activeTab) => {
+            console.log('setActiveSidebarTab', activeTab)
+            inPageUI.activeSidebarTab = activeTab.activeTab
         })
     }
 

@@ -68,6 +68,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
      *
      */
     selectedList: SharedInPageUIInterface['selectedList'] = null
+    activeSidebarTab: SharedInPageUIInterface['activeSidebarTab'] = null
     cacheLoadPromise: SharedInPageUIInterface['cacheLoadPromise'] = resolvablePromise()
 
     private _pendingEvents: {
@@ -88,6 +89,11 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         )
 
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
+
+        this.summarisePageEvents.on('setActiveSidebarTab', ({ activeTab }) => {
+            console.log('reaches hereee', activeTab)
+            this.activeSidebarTab = activeTab
+        })
     }
 
     private handlePageAddedToSharedList: ContentSharingEvents['pageAddedToSharedList'] = async ({

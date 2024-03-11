@@ -6,4 +6,5 @@ export interface PageSummaryBackgroundEvents {
         token: string
         chapterSummaryIndex: number
     }): void
+    setActiveSidebarTab(event: { activeTab: 'askAI' | null }): void
 }

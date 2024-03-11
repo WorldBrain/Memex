@@ -3,6 +3,7 @@ import type {
     UnifiedAnnotation,
     UnifiedList,
 } from 'src/annotations/cache/types'
+import { SidebarTab } from './containers/types'
 
 export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     setSelectedList: (unifiedListId: UnifiedList['unifiedId']) => void
@@ -19,6 +20,8 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     triggerListenerRestart: () => void
     addImageToEditor: (args: { imageData: string }, callback) => void
     addVideoSnapshotToEditor: (args: { imageData: string }, callback) => void
+    addSelectedTextToAIquery: (args: { selectedText: string }, callback) => void
+    setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
     // No longer used, as of the sidebar refactor
     // removeTemporaryHighlights: () => void
     // removeAnnotationHighlight: (args: { url: string }) => void
