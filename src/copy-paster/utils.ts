@@ -8,6 +8,7 @@ import type {
     TemplateDocKey,
 } from './types'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
+import moment from 'moment'
 
 export function renderTemplate(
     template: Pick<Template, 'code'>,
@@ -24,10 +25,21 @@ export function renderTemplate(
         }
     })
 
+    const renderFormattedDate = (date?: number) =>
+        date == null
+            ? undefined
+            : () => (format: string, render: (text: string) => string) =>
+                  render(moment(date).format(format))
+
     const rendered = mustache
         .render(template.code, {
             ...doc,
             literal: () => (text: string) => text,
+            // TODO: Find a better way to do this. e.g., earlier in template-doc-generation logic
+            NoteCreatedAt: renderFormattedDate(doc.NoteCreatedAt),
+            PageCreatedAt: renderFormattedDate(doc.PageCreatedAt),
+            PageAccessDate: renderFormattedDate(doc.PageAccessDate),
+            PageReleaseDate: renderFormattedDate(doc.PageReleaseDate),
         })
         .replace('\r\n', '\n')
 
@@ -133,16 +145,18 @@ export function analyzeTemplate(
         const requirement = KEYS_TO_REQUIREMENTS[key]
         requirements[requirement] = true
 
-        // If page-related data is required, ensure we also require page
-        if (['pageLink', 'pageSpaces', 'pageCreatedAt'].includes(requirement)) {
-            requirements.page = true
-        }
-
         usesLegacyTags = usesLegacyTags || LEGACY_KEYS.has(key)
     }
     if (!expectedContext) {
         expectedContext = 'page'
     }
+
+    // Always requiring certain local fields - got to here as it was too difficult to figure out how to update this code
+    //  to conditionally add require flags for date fields
+    requirements.pageMetadata = true
+    requirements.pageCreatedAt = true
+    requirements.noteCreatedAt = true
+    requirements.page = true
 
     return { usesLegacyTags, expectedContext, requirements }
 }

@@ -42,17 +42,14 @@ export const joinSpaces = (spaceNames?: string[]): string | undefined =>
               '',
           )
 
-export const serializeDate = (
-    date?: Date | number,
-    locale = globalThis.navigator.language,
-): string | undefined => {
+export const serializeDate = (date?: Date | number): number | undefined => {
     if (date == null) {
         return undefined
     }
     if (typeof date === 'number') {
         date = new Date(date)
     }
-    return date.toLocaleString(locale)
+    return date.valueOf()
 }
 
 const groupDataByPages = <T>(
@@ -92,7 +89,10 @@ const omitEmptyFields = (docs: TemplateDoc[]): TemplateDoc[] =>
 const omitEmpty = <T extends any>(obj: T): T => {
     const clone = { ...(obj as any) }
     for (const key in clone) {
-        if (clone[key] == null || clone[key]?.length === 0) {
+        if (
+            clone[key] == null ||
+            (typeof clone[key] === 'string' && clone[key]?.length === 0)
+        ) {
             delete clone[key]
         }
     }
