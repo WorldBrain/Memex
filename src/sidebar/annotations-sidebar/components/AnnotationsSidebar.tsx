@@ -104,6 +104,8 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import debounce from 'lodash/debounce'
+import { PageMetadataForm } from 'src/page-indexing/ui/metadata-form'
+import { PageIndexingInterface } from 'src/page-indexing/background/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -289,6 +291,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     inPageMode?: boolean
     authBG: AuthRemoteFunctionsInterface
     analyticsBG: AnalyticsCoreInterface
+    pageIndexingBG: PageIndexingInterface<'caller'>
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     copyToClipboard: (text: string) => Promise<boolean>
@@ -3507,6 +3510,18 @@ export class AnnotationsSidebar extends React.Component<
         }
     }
 
+    renderCitations() {
+        return (
+            <PageMetadataForm
+                pageIndexingBG={this.props.pageIndexingBG}
+                normalizedPageUrl={this.props.normalizedPageUrl}
+                fullPageUrl={this.props.fullPageUrl}
+                onSave={null}
+                onCancel={null}
+            />
+        )
+    }
+
     private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
 
@@ -3566,6 +3581,10 @@ export class AnnotationsSidebar extends React.Component<
                     </AnnotationsSectionStyled>
                 </>
             )
+        }
+
+        if (this.props.activeTab === 'citations') {
+            return this.renderCitations()
         }
 
         return (

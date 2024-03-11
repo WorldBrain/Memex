@@ -1061,6 +1061,7 @@ export class AnnotationsSidebarContainer<
                                     chapterIndex,
                                 )
                             }}
+                            pageIndexingBG={this.props.pageIndexingBG}
                             analyticsBG={this.props.analyticsBG}
                             copyToClipboard={this.props.copyToClipboard}
                             loadState={this.state.loadState}

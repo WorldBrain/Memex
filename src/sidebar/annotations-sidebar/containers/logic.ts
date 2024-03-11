@@ -1525,7 +1525,10 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ showPageLinkShareMenu: { $set: true } })
     }
     openPageCitationMenu: EventHandler<'openPageCitationMenu'> = async ({}) => {
-        this.emitMutation({ showPageCitationMenu: { $set: true } })
+        this.emitMutation({
+            showPageCitationMenu: { $set: true },
+            activeTab: { $set: 'citations' },
+        })
     }
 
     closePageLinkShareMenu: EventHandler<
