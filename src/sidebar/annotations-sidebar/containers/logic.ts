@@ -2367,6 +2367,7 @@ export class SidebarContainerLogic extends UILogic<
         const body = formData.body?.trim()
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
+        console.log('commentforimageupload', comment)
         await executeUITask(this, 'noteEditState', async () => {
             let commentForSaving = await processCommentForImageUpload(
                 comment,
@@ -2564,6 +2565,8 @@ export class SidebarContainerLogic extends UILogic<
             annotationId,
             this.options.imageSupportBG,
         )
+
+        console.log('original comment', OriginalCommentForCache)
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },

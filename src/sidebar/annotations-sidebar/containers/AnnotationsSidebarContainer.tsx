@@ -366,13 +366,15 @@ export class AnnotationsSidebarContainer<
         return {
             body: annotationCardInstance?.body,
             comment: annotationCardInstance?.comment,
-            onCommentChange: (comment) =>
+            onCommentChange: (comment) => {
+                console.log('onCommentChange', comment)
                 this.processEvent('setAnnotationEditCommentText', {
                     instanceLocation,
                     unifiedAnnotationId,
                     comment,
                     annotation,
-                }),
+                })
+            },
             onBodyChange: (body) =>
                 this.processEvent('setAnnotationEditBodyText', {
                     instanceLocation,
