@@ -1282,6 +1282,27 @@ export class DashboardContainer extends StatefulUIElement<
                             ],
                         })
                     },
+                    removeSpaceFromEditorPicker: (day, pageId) => (
+                        spaceId: number,
+                    ) => {
+                        const listData = this.props.annotationsCache.getListByLocalId(
+                            spaceId,
+                        )
+                        if (!listData) {
+                            throw new Error(
+                                'Specified list to add to page could not be found',
+                            )
+                        }
+                        this.processEvent('setPageNewNoteLists', {
+                            day,
+                            pageId,
+                            lists: this.state.searchResults.results[
+                                day
+                            ].pages.byId[pageId].newNoteForm.lists.filter(
+                                (id) => id !== listData.unifiedId,
+                            ),
+                        })
+                    },
                 }}
                 noteInteractionProps={{
                     onEditBtnClick: (noteId) => () =>

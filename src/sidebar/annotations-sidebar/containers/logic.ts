@@ -2367,6 +2367,7 @@ export class SidebarContainerLogic extends UILogic<
         const body = formData.body?.trim()
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
+        console.log('commentforimageupload', comment)
         await executeUITask(this, 'noteEditState', async () => {
             let commentForSaving = await processCommentForImageUpload(
                 comment,
@@ -2565,6 +2566,8 @@ export class SidebarContainerLogic extends UILogic<
             this.options.imageSupportBG,
         )
 
+        console.log('original comment', OriginalCommentForCache)
+
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
             showCommentBox: { $set: false },
@@ -2700,7 +2703,6 @@ export class SidebarContainerLogic extends UILogic<
         'updateListsForAnnotation'
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
-
         // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
@@ -2730,6 +2732,10 @@ export class SidebarContainerLogic extends UILogic<
                 throw new Error(
                     'Cannot find list to add to annotation in cache',
                 )
+            }
+
+            if (unifiedListIds.has(cacheList.unifiedId)) {
+                return
             }
 
             unifiedListIds.add(cacheList.unifiedId)
@@ -2866,9 +2872,32 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            commentBox: { lists: { $set: event.lists } },
-        })
+        const existingLists = new Set(previousState.commentBox.lists)
+        const newLists = event.lists.filter((list) => !existingLists.has(list))
+
+        if (newLists.length > 0) {
+            this.emitMutation({
+                commentBox: { lists: { $set: newLists } },
+            })
+        }
+    }
+    removePageNoteList: EventHandler<'removePageNoteList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const existingLists = new Set(previousState.commentBox.lists)
+        const listsToRemove = event.lists.filter((list) =>
+            existingLists.has(list),
+        )
+
+        if (listsToRemove.length > 0) {
+            const updatedLists = [...existingLists].filter(
+                (list) => !listsToRemove.includes(list),
+            )
+            this.emitMutation({
+                commentBox: { lists: { $set: updatedLists } },
+            })
+        }
     }
 
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
