@@ -1,4 +1,3 @@
-import type fetch from 'node-fetch'
 import type {
     PageEntity as _PageEntity,
     PageMetadata as _PageMetadata,
@@ -8,7 +7,7 @@ const CROSS_REF_API_URL = 'https://api.crossref.org/works/'
 
 type PageEntity = Omit<_PageEntity, 'id' | 'normalizedPageUrl' | 'order'>
 type PageMetadata = Omit<_PageMetadata, 'normalizedPageUrl' | 'accessDate'> & {
-    authors: PageEntity[]
+    entities: PageEntity[]
 }
 
 interface CrossRefAPIAuthor {
@@ -69,7 +68,7 @@ export async function doiToPageMetadata(params: {
     doi: string
     fetch: typeof fetch
 }): Promise<PageMetadata | null> {
-    const metadata: PageMetadata = { doi: params.doi, authors: [] }
+    const metadata: PageMetadata = { doi: params.doi, entities: [] }
     const response = await params.fetch(CROSS_REF_API_URL + params.doi)
     if (!response.ok) {
         throw new Error(
@@ -91,6 +90,6 @@ export async function doiToPageMetadata(params: {
     metadata.journalName = data.message['container-title']?.[0]
     metadata.journalIssue = data.message['journal-issue']?.issue
     metadata.releaseDate = crossRefDateToTimestamp(data.message.published)
-    metadata.authors = crossRefAuthorsToEntities(data.message.author)
+    metadata.entities = crossRefAuthorsToEntities(data.message.author)
     return metadata
 }

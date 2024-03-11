@@ -66,6 +66,7 @@ import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { AuthBackground } from 'src/authentication/background'
+import { doiToPageMetadata } from '../doi-to-page-metadata'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -111,6 +112,7 @@ export class PageIndexingBackground {
             pkmSyncBG: PKMSyncBackgroundModule
             onPagePut?: PagePutHandler
             getNow: () => number
+            fetch: typeof fetch
         },
     ) {
         this.storage = new PageStorage({
@@ -144,6 +146,9 @@ export class PageIndexingBackground {
             lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
                 this.lookupPageTitleForUrl,
             ),
+            fetchPageMetadataByDOI: remoteFunctionWithoutExtraArgs(
+                this.fetchPageMetadataByDOI,
+            ),
             getPageMetadata: remoteFunctionWithoutExtraArgs(
                 this.getPageMetadata,
             ),
@@ -170,6 +175,16 @@ export class PageIndexingBackground {
         }
         const entities = await this.storage.getPageEntities(normalizedPageUrl)
         return { ...metadata, entities }
+    }
+
+    fetchPageMetadataByDOI: PageIndexingInterface<
+        'provider'
+    >['fetchPageMetadataByDOI']['function'] = async ({ doi }) => {
+        const metadata = await doiToPageMetadata({
+            doi,
+            fetch: this.options.fetch,
+        })
+        return metadata
     }
 
     async initContentIdentifier(
