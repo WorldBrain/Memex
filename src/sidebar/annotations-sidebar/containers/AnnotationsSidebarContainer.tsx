@@ -499,6 +499,13 @@ export class AnnotationsSidebarContainer<
                     })
                 }
             },
+            removeSpaceFromEditorPicker(spaceId) {
+                this.processEvent('setNewPageNoteLists', {
+                    lists: this.state.commentBox.lists.filter(
+                        (id) => id !== spaceId,
+                    ),
+                })
+            },
         }
     }
 
