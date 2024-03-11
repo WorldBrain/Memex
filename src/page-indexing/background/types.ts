@@ -45,6 +45,14 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
           })
         | null
     >
+    fetchPageMetadataByDOI: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { doi: string },
+        | (Omit<PageMetadata, 'normalizedPageUrl'> & {
+              entities: Omit<PageEntity, 'normalizedPageUrl'>[]
+          })
+        | null
+    >
 }
 
 export type PageMetadataUpdateArgs = Omit<PageMetadata, 'accessDate'> & {

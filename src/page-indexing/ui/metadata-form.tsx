@@ -30,9 +30,10 @@ export interface State
     entities: Omit<PageEntity, 'normalizedPageUrl'>[]
     loadState: UITaskState
     submitState: UITaskState
+    autoFillState: UITaskState
     contentType: 'web' | 'pdf'
     formChanged: boolean
-    autoFillChanged: boolean
+    showAutoFillBtn: boolean
 }
 
 export class PageMetadataForm extends React.PureComponent<Props, State> {
@@ -50,9 +51,10 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         entities: [],
         loadState: 'pristine',
         submitState: 'pristine',
+        autoFillState: 'pristine',
         contentType: 'web',
         formChanged: false,
-        autoFillChanged: false,
+        showAutoFillBtn: false,
     }
 
     async componentDidMount() {
@@ -60,8 +62,6 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             (this.props.fullPageUrl &&
                 this.props.fullPageUrl.includes('memex.cloud')) ||
             window.location.href.includes('/pdfjs/viewer.html?')
-
-        console.log('isPagePDF', isPagePDF, this.props.fullPageUrl)
 
         this.setState({
             loadState: 'running',
@@ -112,14 +112,49 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         this.setState({ [stateKey]: e.target.value, formChanged: true } as any)
 
         if (stateKey === 'doi') {
-            this.setState({ autoFillChanged: true })
+            this.setState({ showAutoFillBtn: true })
         }
     }
 
-    handleAutoFill = async () => {
-        this.setState({ autoFillChanged: false })
+    private handleAutoFill = async () => {
+        if (!this.state.doi.trim().length) {
+            return
+        }
+        this.setState({ autoFillState: 'running' })
+        const pageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
+            { doi: this.state.doi },
+        )
+        if (!pageMetadata) {
+            this.setState({
+                autoFillState: 'success',
+                showAutoFillBtn: false,
+            })
+        }
+        this.setState((state) => {
+            // Append any new entities to existing, deduping by `name`
+            const allEntities = new Map<string, PageEntity>(
+                pageMetadata.entities
+                    .map((e) => [e.name, e] as any)
+                    .concat(state.entities.map((e) => [e.name, e])),
+            )
+            return {
+                autoFillState: 'success',
+                entities: [...allEntities.values()],
+                doi: pageMetadata.doi ?? state.doi,
+                title: pageMetadata.title ?? state.title,
+                annotation: pageMetadata.annotation ?? state.annotation,
+                sourceName: pageMetadata.sourceName ?? state.sourceName,
+                journalName: pageMetadata.journalName ?? state.journalName,
+                journalPage: pageMetadata.journalPage ?? state.journalPage,
+                journalIssue: pageMetadata.journalIssue ?? state.journalIssue,
+                journalVolume:
+                    pageMetadata.journalVolume ?? state.journalVolume,
+                releaseDate: pageMetadata.releaseDate ?? state.releaseDate,
+            }
+        })
     }
-    handleAddMoreEntities = async () => {}
+
+    private handleAddMoreEntities = () => {}
 
     private onDragEnd: OnDragEndResponder = (result) => {
         if (
@@ -144,7 +179,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                     e.stopPropagation()
                                 }}
                             />
-                            {this.state.autoFillChanged && (
+                            {this.state.showAutoFillBtn && (
                                 <PrimaryAction
                                     type="glass"
                                     label="Autofill"
