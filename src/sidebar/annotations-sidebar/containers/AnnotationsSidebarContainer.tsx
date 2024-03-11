@@ -1182,17 +1182,13 @@ export class AnnotationsSidebarContainer<
                                 spaceName,
                                 unifiedAnnotationId,
                             ) => {
-                                const {
-                                    localListId,
-                                } = await this.props.customListsBG.createCustomList(
-                                    { name: spaceName },
+                                this.processEvent(
+                                    'addNewSpaceViaWikiLinksEditNote',
+                                    {
+                                        spaceName: spaceName,
+                                        unifiedAnnotationId: unifiedAnnotationId,
+                                    },
                                 )
-
-                                this.processEvent('updateListsForAnnotation', {
-                                    added: localListId,
-                                    deleted: null,
-                                    unifiedAnnotationId: unifiedAnnotationId,
-                                })
                             }}
                             spaceSearchSuggestions={
                                 this.state.spaceSearchSuggestions

@@ -2437,7 +2437,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setPageNewNoteLists: EventHandler<'setPageNewNoteLists'> = ({ event }) => {
+    setPageNewNoteLists: EventHandler<'setPageNewNoteLists'> = ({
+        event,
+        previousState,
+    }) => {
+        const existingLists =
+            previousState.searchResults.results[event.day].pages.byId[
+                event.pageId
+            ].newNoteForm.lists
+        const uniqueLists = event.lists.filter(
+            (list) => !existingLists.includes(list),
+        )
+
         this.emitMutation({
             searchResults: {
                 results: {
@@ -2446,7 +2457,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             byId: {
                                 [event.pageId]: {
                                     newNoteForm: {
-                                        lists: { $set: event.lists },
+                                        lists: { $set: uniqueLists },
                                     },
                                 },
                             },
@@ -3049,6 +3060,13 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const { contentShareBG } = this.options
         const noteData = previousState.searchResults.noteData.byId[event.noteId]
+
+        const noteListIds = new Set(noteData.lists)
+
+        if (noteListIds.has(event.added)) {
+            return
+        }
+
         const pageData =
             previousState.searchResults.pageData.byId[noteData.pageUrl]
         const listData = getListData(
@@ -3059,7 +3077,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         let remoteFn: () => Promise<any>
 
-        const noteListIds = new Set(noteData.lists)
         const pageListIds = new Set(pageData.lists)
 
         if (event.added != null) {

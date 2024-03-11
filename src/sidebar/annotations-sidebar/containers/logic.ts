@@ -2700,6 +2700,7 @@ export class SidebarContainerLogic extends UILogic<
         'updateListsForAnnotation'
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
+        console.log('arrives here', event.added)
 
         // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
@@ -2730,6 +2731,11 @@ export class SidebarContainerLogic extends UILogic<
                 throw new Error(
                     'Cannot find list to add to annotation in cache',
                 )
+            }
+
+            console.log('cacheList', cacheList, unifiedListIds)
+            if (unifiedListIds.has(cacheList.unifiedId)) {
+                return
             }
 
             unifiedListIds.add(cacheList.unifiedId)
@@ -2821,6 +2827,8 @@ export class SidebarContainerLogic extends UILogic<
             isPrivate: true,
         })
 
+        console.log('goes through here', event)
+
         this.processUIEvent('updateListsForAnnotation', {
             event: {
                 added: localListId,
@@ -2866,9 +2874,14 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            commentBox: { lists: { $set: event.lists } },
-        })
+        const existingLists = new Set(previousState.commentBox.lists)
+        const newLists = event.lists.filter((list) => !existingLists.has(list))
+
+        if (newLists.length > 0) {
+            this.emitMutation({
+                commentBox: { lists: { $set: newLists } },
+            })
+        }
     }
 
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({
