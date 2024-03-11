@@ -10,6 +10,11 @@ import type {
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
 import moment from 'moment'
 
+type MustacheRenderFn = (
+    text: string,
+    render: (text: string) => string,
+) => string
+
 export function renderTemplate(
     template: Pick<Template, 'code'>,
     doc: TemplateDoc,
@@ -28,13 +33,15 @@ export function renderTemplate(
     const renderFormattedDate = (date?: number) =>
         date == null
             ? undefined
-            : () => (format: string, render: (text: string) => string) =>
+            : (): MustacheRenderFn => (format, render) =>
                   render(moment(date).format(format))
 
     const rendered = mustache
         .render(template.code, {
             ...doc,
-            literal: () => (text: string) => text,
+            literal: (): MustacheRenderFn => (text) => text,
+            b: (): MustacheRenderFn => (text, render) => `__${render(text)}__`,
+            i: (): MustacheRenderFn => (text, render) => `_${render(text)}_`,
             // TODO: Find a better way to do this. e.g., earlier in template-doc-generation logic
             NoteCreatedAt: renderFormattedDate(doc.NoteCreatedAt),
             PageCreatedAt: renderFormattedDate(doc.PageCreatedAt),
