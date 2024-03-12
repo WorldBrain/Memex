@@ -20,8 +20,8 @@ export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
     normalizedPageUrl: string
     fullPageUrl: string
-    onCancel: () => void
-    onSave: () => void
+    onSave?: () => void
+    onCancel?: () => void
     getRootElement?: () => HTMLElement
 }
 
@@ -75,9 +75,16 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
 
         this.setState((previousState) => ({
             doi: metadata.doi ?? previousState.doi,
-            // TODO: Fill in
+            journalVolume: metadata.journalVolume,
+            journalIssue: metadata.journalIssue,
+            journalName: metadata.journalName,
+            journalPage: metadata.journalPage,
+            releaseDate: metadata.releaseDate,
+            sourceName: metadata.sourceName,
+            annotation: metadata.annotation,
             accessDate: metadata.accessDate,
             entities: metadata.entities,
+            title: metadata.title,
             loadState: 'success',
         }))
     }
@@ -87,26 +94,25 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         this.setState({ submitState: 'running', formChanged: false })
 
         await this.props.pageIndexingBG.updatePageMetadata({
-            normalizedPageUrl: this.props.normalizedPageUrl,
-            entities: this.state.entities,
-            title: this.state.title,
             doi: this.state.doi,
+            title: this.state.title,
+            entities: this.state.entities,
             annotation: this.state.annotation,
-            // TODO: Fill in
-            sourceName: '',
-            journalName: '',
-            journalPage: '',
-            journalIssue: '',
-            journalVolume: '',
-            releaseDate: 0,
-            accessDate: 0,
+            sourceName: this.state.sourceName,
+            accessDate: this.state.accessDate,
+            releaseDate: this.state.releaseDate,
+            journalName: this.state.journalName,
+            journalPage: this.state.journalPage,
+            journalIssue: this.state.journalIssue,
+            journalVolume: this.state.journalVolume,
+            normalizedPageUrl: this.props.normalizedPageUrl,
         })
         this.setState({ submitState: 'success' })
-        this.props.onSave()
+        this.props.onSave?.()
     }
 
     private handleTextInputChange = (
-        stateKey: string,
+        stateKey: keyof State,
     ): React.ChangeEventHandler<HTMLInputElement> => (e) => {
         e.stopPropagation()
         this.setState({ [stateKey]: e.target.value, formChanged: true } as any)
@@ -204,6 +210,16 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                         />
                     </FormSectionItem>
                     <FormSectionItem>
+                        <FormFieldTitle>Source name</FormFieldTitle>
+                        <TextField
+                            onKeyDown={(e) => {
+                                e.stopPropagation()
+                            }}
+                            value={this.state.sourceName}
+                            onChange={this.handleTextInputChange('sourceName')}
+                        />
+                    </FormSectionItem>
+                    <FormSectionItem>
                         <FormFieldTitle>URL</FormFieldTitle>
                         <TextField
                             onKeyDown={(e) => {
@@ -270,6 +286,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                                                                 e.stopPropagation()
                                                                             }}
                                                                             placeholder="First Name"
+                                                                            value={
+                                                                                template.additionalName
+                                                                            }
                                                                         />
                                                                         <TextField
                                                                             onKeyDown={(
@@ -278,6 +297,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                                                                 e.stopPropagation()
                                                                             }}
                                                                             placeholder="Last Name"
+                                                                            value={
+                                                                                template.name
+                                                                            }
                                                                         />
                                                                     </EntitiesItem>
                                                                 </div>
@@ -417,7 +439,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                             type="tertiary"
                             onClick={(e) => {
                                 e.preventDefault()
-                                this.props.onCancel()
+                                this.props.onCancel?.()
                             }}
                             label="Cancel"
                             size="small"
