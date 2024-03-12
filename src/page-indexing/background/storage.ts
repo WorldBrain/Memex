@@ -129,11 +129,15 @@ export default class PageStorage extends StorageModule {
                     },
                     {
                         name: '$name:string',
-                        order: '$order:int',
                         isPrimary: '$isPrimary:boolean',
                         additionalName: '$additionalName:string',
                     },
                 ],
+            },
+            updatePageEntityOrder: {
+                operation: 'updateObject',
+                collection: 'pageEntities',
+                args: [{ id: '$id:number' }, { order: '$order:number' }],
             },
             deletePageEntitiesByUrl: {
                 operation: 'deleteObjects',
@@ -400,7 +404,7 @@ export default class PageStorage extends StorageModule {
 
     private async updatePageEntities(
         normalizedPageUrl: string,
-        incomingEntities: Omit<PageEntity, 'normalizedPageUrl'>[],
+        incomingEntities: Omit<PageEntity, 'normalizedPageUrl' | 'order'>[],
     ): Promise<void> {
         const existingEntities = await this.getPageEntities(normalizedPageUrl)
         const existingIds = new Set(existingEntities.map((e) => e.id))
@@ -424,15 +428,13 @@ export default class PageStorage extends StorageModule {
                 existing.name === incomingEntity.name.trim() &&
                 existing.additionalName ===
                     incomingEntity.additionalName?.trim() &&
-                existing.isPrimary === incomingEntity.isPrimary &&
-                existing.order === incomingEntity.order
+                existing.isPrimary === incomingEntity.isPrimary
             ) {
                 continue
             }
             await this.operation('updatePageEntity', {
                 id: incomingEntity.id,
                 name: incomingEntity.name.trim(),
-                order: incomingEntity.order,
                 isPrimary: incomingEntity.isPrimary,
                 additionalName: incomingEntity.additionalName?.trim(),
             })
@@ -455,6 +457,10 @@ export default class PageStorage extends StorageModule {
             { normalizedPageUrl },
         )
         return existingEntities
+    }
+
+    async setEntityOrder(id: number, order: number): Promise<void> {
+        await this.operation('updatePageEntityOrder', { id, order })
     }
 
     async updatePageMetadata({

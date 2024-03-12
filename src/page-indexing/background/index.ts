@@ -124,6 +124,7 @@ export class PageIndexingBackground {
         })
 
         this.remoteFunctions = {
+            setEntityOrder: remoteFunctionWithoutExtraArgs(this.setEntityOrder),
             updatePageMetadata: remoteFunctionWithoutExtraArgs(
                 this.updatePageMetadata,
             ),
@@ -943,6 +944,12 @@ export class PageIndexingBackground {
             return
         }
         return time !== '$now' ? time : this.options.getNow()
+    }
+
+    setEntityOrder: PageIndexingInterface<
+        'provider'
+    >['setEntityOrder']['function'] = async ({ id, order }) => {
+        await this.storage.setEntityOrder(id, order)
     }
 
     updatePageMetadata: PageIndexingInterface<
