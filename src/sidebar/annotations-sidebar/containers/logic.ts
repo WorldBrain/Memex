@@ -2533,15 +2533,13 @@ export class SidebarContainerLogic extends UILogic<
             activeTab,
         } = previousState
 
-        let OriginalCommentForCache = commentBox.commentText.trim()
-        OriginalCommentForCache = sanitizeHTMLhelper(OriginalCommentForCache)
-        if (OriginalCommentForCache.length === 0) {
+        let originalCommentForCache = commentBox.commentText.trim()
+        originalCommentForCache = sanitizeHTMLhelper(originalCommentForCache)
+        if (originalCommentForCache.length === 0) {
             return
         }
 
-        let syncSettings: SyncSettingsStore<'extension'>
-
-        syncSettings = createSyncSettingsStore({
+        const syncSettings = createSyncSettingsStore({
             syncSettingsBG: this.options.syncSettingsBG,
         })
 
@@ -2559,14 +2557,12 @@ export class SidebarContainerLogic extends UILogic<
 
         // this checks for all images in the comment that have not been uploaded yet, uploads them and gives back an updated version of the html code.
         // however the original comment is put in cache
-        let commentForSaving = await processCommentForImageUpload(
-            OriginalCommentForCache,
+        const commentForSaving = await processCommentForImageUpload(
+            originalCommentForCache,
             normalizeUrl(fullPageUrl),
             annotationId,
             this.options.imageSupportBG,
         )
-
-        console.log('original comment', OriginalCommentForCache)
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -2669,7 +2665,7 @@ export class SidebarContainerLogic extends UILogic<
                     // These only contain lists added in the UI dropdown (to be checked in case any are shared, which should influence the annot privacy level)
                     localListIds: [...commentBox.lists],
                     unifiedListIds, // These contain the context list (selected list or list instance)
-                    comment: OriginalCommentForCache,
+                    comment: originalCommentForCache,
                 },
             )
 

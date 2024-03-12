@@ -10,7 +10,8 @@ import {
     createSyncSettingsStore,
 } from 'src/sync-settings/util'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { RGBAColor } from './cache/types'
+import type { RGBAColor } from './cache/types'
+import type { AnnotationSharingState } from '@worldbrain/memex-common/lib/content-sharing/service/types'
 
 export interface AnnotationShareOpts {
     shouldShare?: boolean
@@ -114,14 +115,16 @@ export async function createAnnotation({
             )
 
             if (annotationData.localListIds?.length) {
-                await contentSharingBG.shareAnnotationToSomeLists({
+                const {
+                    sharingState,
+                } = await contentSharingBG.shareAnnotationToSomeLists({
                     annotationUrl,
                     skipListExistenceCheck,
                     localListIds: annotationData.localListIds,
                 })
             }
 
-            let shareData = null
+            let shareData: AnnotationSharingState = null
             if (shareOpts?.shouldCopyShareLink) {
                 shareData = await contentSharingBG.shareAnnotation({
                     annotationUrl,
@@ -146,11 +149,15 @@ export async function createAnnotation({
                 })
             }
 
-            await contentSharingBG.setAnnotationPrivacyLevel({
-                annotationUrl,
-                privacyLevel:
-                    privacyLevelOverride ?? shareOptsToPrivacyLvl(shareOpts),
-            })
+            // If adding to local lists, then the annotation should already have a privacy level
+            if (!annotationData.localListIds?.length) {
+                await contentSharingBG.setAnnotationPrivacyLevel({
+                    annotationUrl,
+                    privacyLevel:
+                        privacyLevelOverride ??
+                        shareOptsToPrivacyLvl(shareOpts),
+                })
+            }
 
             if (shareData?.remoteId != null) {
                 createAndCopyShareLink(
