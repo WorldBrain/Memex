@@ -2868,14 +2868,13 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const existingLists = new Set(previousState.commentBox.lists)
-        const newLists = event.lists.filter((list) => !existingLists.has(list))
-
-        if (newLists.length > 0) {
-            this.emitMutation({
-                commentBox: { lists: { $set: newLists } },
-            })
-        }
+        const existingLists = new Set([
+            ...previousState.commentBox.lists,
+            ...event.lists,
+        ])
+        this.emitMutation({
+            commentBox: { lists: { $set: [...existingLists] } },
+        })
     }
     removePageNoteList: EventHandler<'removePageNoteList'> = async ({
         event,
