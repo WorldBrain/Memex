@@ -404,7 +404,7 @@ export default class PageStorage extends StorageModule {
 
     private async updatePageEntities(
         normalizedPageUrl: string,
-        incomingEntities: Omit<PageEntity, 'normalizedPageUrl' | 'order'>[],
+        incomingEntities: Omit<PageEntity, 'normalizedPageUrl'>[],
     ): Promise<void> {
         const existingEntities = await this.getPageEntities(normalizedPageUrl)
         const existingIds = new Set(existingEntities.map((e) => e.id))
@@ -414,7 +414,10 @@ export default class PageStorage extends StorageModule {
         const toDelete = existingEntities.filter((e) => !incomingIds.has(e.id))
 
         for (const entity of toAdd) {
-            await this.operation('createPageEntity', entity)
+            await this.operation('createPageEntity', {
+                ...entity,
+                normalizedPageUrl,
+            })
         }
         for (const entity of toDelete) {
             await this.operation('deletePageEntity', entity)

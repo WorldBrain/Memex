@@ -15,6 +15,10 @@ import {
     OnDragEndResponder,
 } from 'react-beautiful-dnd'
 import ReactDOM from 'react-dom'
+import {
+    defaultOrderableSorter,
+    pushOrderedItem,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -27,6 +31,10 @@ export interface Props {
 
 export interface State
     extends Required<Omit<PageMetadata, 'normalizedPageUrl'>> {
+    newEntityName: string
+    newEntityIsPrimary: boolean
+    newEntityAdditionalName: string
+    /** Assumed to be sorted by `order` field. */
     entities: Omit<PageEntity, 'normalizedPageUrl'>[]
     loadState: UITaskState
     submitState: UITaskState
@@ -46,6 +54,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         journalPage: '',
         journalIssue: '',
         journalVolume: '',
+        newEntityName: '',
+        newEntityIsPrimary: false,
+        newEntityAdditionalName: '',
         releaseDate: Date.now(),
         accessDate: Date.now(),
         entities: [],
@@ -74,6 +85,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         })) ?? { entities: [], accessDate: initAccessDate }
 
         this.setState((previousState) => ({
+            entities: metadata.entities.sort(defaultOrderableSorter),
             doi: metadata.doi ?? previousState.doi,
             journalVolume: metadata.journalVolume,
             journalIssue: metadata.journalIssue,
@@ -83,10 +95,13 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             sourceName: metadata.sourceName,
             annotation: metadata.annotation,
             accessDate: metadata.accessDate,
-            entities: metadata.entities,
             title: metadata.title,
             loadState: 'success',
         }))
+    }
+
+    private get shouldShowAddEntityBtn(): boolean {
+        return this.state.newEntityName.trim().length > 0
     }
 
     private handleSubmit: React.FormEventHandler = async (e) => {
@@ -145,7 +160,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             )
             return {
                 autoFillState: 'success',
-                entities: [...allEntities.values()],
+                entities: [...allEntities.values()].sort(
+                    defaultOrderableSorter,
+                ),
                 doi: pageMetadata.doi ?? state.doi,
                 title: pageMetadata.title ?? state.title,
                 annotation: pageMetadata.annotation ?? state.annotation,
@@ -160,7 +177,41 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         })
     }
 
-    private handleAddMoreEntities = () => {}
+    private handleDeleteEntity = (entityId: number) => () => {
+        const foundEntity = this.state.entities.find((e) => e.id === entityId)
+        if (!foundEntity) {
+            throw new Error(
+                `Cannot delete entity that does not exist in state - ID: ${entityId}`,
+            )
+        }
+        this.setState((state) => ({
+            entities: [...state.entities].filter((e) => e.id !== entityId),
+        }))
+    }
+
+    private handleAddEntity = () => {
+        if (!this.shouldShowAddEntityBtn) {
+            throw new Error('Cannot add entity if input state not yet set')
+        }
+        const orderedEntityItems = this.state.entities.map((e) => ({
+            key: e.order,
+            id: e.id,
+        }))
+        const nextId = Date.now()
+        const newEntity: Omit<PageEntity, 'normalizedPageUrl'> = {
+            id: nextId,
+            name: this.state.newEntityName.trim(),
+            isPrimary: this.state.newEntityIsPrimary,
+            additionalName: this.state.newEntityAdditionalName.trim(),
+            order: pushOrderedItem(orderedEntityItems, nextId).create.key,
+        }
+        this.setState((state) => ({
+            newEntityName: '',
+            newEntityIsPrimary: false,
+            newEntityAdditionalName: '',
+            entities: [...state.entities, newEntity],
+        }))
+    }
 
     private onDragEnd: OnDragEndResponder = (result) => {
         if (
@@ -336,22 +387,31 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                         e.stopPropagation()
                                     }}
                                     placeholder="First Name"
+                                    value={this.state.newEntityAdditionalName}
+                                    onChange={this.handleTextInputChange(
+                                        'newEntityAdditionalName',
+                                    )}
                                 />
                                 <TextField
                                     onKeyDown={(e) => {
                                         e.stopPropagation()
                                     }}
                                     placeholder="Last Name"
+                                    value={this.state.newEntityName}
+                                    onChange={this.handleTextInputChange(
+                                        'newEntityName',
+                                    )}
                                 />
                             </EntitiesItem>
                             <PrimaryAction
-                                label="Add More"
+                                label="Add"
                                 size="small"
                                 icon="plus"
                                 type="glass"
                                 fullWidth
                                 iconColor="prime1"
-                                onClick={this.handleAddMoreEntities}
+                                onClick={this.handleAddEntity}
+                                disabled={!this.shouldShowAddEntityBtn}
                                 fontColor="greyScale6"
                             />
                         </EntitiesContainer>
