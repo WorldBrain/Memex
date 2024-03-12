@@ -22,6 +22,7 @@ import {
     buildBaseLocatorUrl,
     fingerprintsEqual,
     isMemexPageAPdf,
+    pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 import PageStorage from './storage'
@@ -144,6 +145,9 @@ export class PageIndexingBackground {
                         tabId: params.tabId ?? info.tab?.id,
                     }),
             ),
+            getOriginalUrlForPdfPage: remoteFunctionWithoutExtraArgs(
+                this.getOriginalUrlForPdfPage,
+            ),
             lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
                 this.lookupPageTitleForUrl,
             ),
@@ -165,6 +169,21 @@ export class PageIndexingBackground {
     >['lookupPageTitleForUrl']['function'] = async ({ fullPageUrl }) => {
         const pageData = await this.storage.getPage(fullPageUrl)
         return pageData?.fullTitle ?? null
+    }
+
+    getOriginalUrlForPdfPage: PageIndexingInterface<
+        'provider'
+    >['getOriginalUrlForPdfPage']['function'] = async ({
+        normalizedPageUrl,
+    }) => {
+        const locators = await this.storage.findLocatorsByNormalizedUrl(
+            normalizedPageUrl,
+        )
+        const mainLocator = pickBestLocator(locators, {
+            ignoreUploadLocators: true,
+            priority: ContentLocatorType.Remote,
+        })
+        return mainLocator?.originalLocation ?? null
     }
 
     getPageMetadata: PageIndexingInterface<

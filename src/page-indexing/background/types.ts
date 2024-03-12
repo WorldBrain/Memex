@@ -24,6 +24,11 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         WaitForContentIdentifierParams,
         WaitForContentIdentifierReturns
     >
+    getOriginalUrlForPdfPage: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { normalizedPageUrl: string },
+        string | null
+    >
     lookupPageTitleForUrl: RemoteFunctionWithoutExtraArgs<
         Role,
         { fullPageUrl: string },
