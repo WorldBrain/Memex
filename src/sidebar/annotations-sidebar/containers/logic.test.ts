@@ -127,6 +127,8 @@ const setupLogicHelper = async ({
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
         pageIndexingBG: {
+            getOriginalUrlForPdfPage:
+                backgroundModules.page.getOriginalUrlForPdfPage,
             setEntityOrder: backgroundModules.pages.setEntityOrder,
             fetchPageMetadataByDOI:
                 backgroundModules.pages.fetchPageMetadataByDOI,

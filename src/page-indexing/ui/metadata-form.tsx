@@ -103,7 +103,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             : fullPageUrl
 
         this.setState((previousState) => ({
-            displayFullUrl: originalUrl,
+            displayFullUrl: decodeURIComponent(originalUrl),
             entities: initNormalizedState({
                 seedData: metadata.entities.sort(defaultOrderableSorter),
                 getId: (e) => e.id,
