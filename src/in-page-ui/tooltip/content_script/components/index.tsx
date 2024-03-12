@@ -148,6 +148,14 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         if (!currentAnnotation) {
             return
         }
+
+        const isListAlreadySelected = this.state.currentAnnotationLists.some(
+            (currentList) => currentList.localId === listId,
+        )
+        if (isListAlreadySelected) {
+            return
+        }
+
         const newList = this.props.annotationsCache.getListByLocalId(listId)
         const listsForState = [...this.state.currentAnnotationLists]
         listsForState.push(newList)

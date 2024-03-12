@@ -1090,13 +1090,27 @@ export class PKMSyncBackgroundModule {
         }
     }
 }
-
 function convertHTMLintoMarkdown(html) {
     let turndownService = new TurndownService({
         headingStyle: 'atx',
         hr: '---',
         codeBlockStyle: 'fenced',
     })
-    const markdown = turndownService.turndown(html)
+
+    // Add a rule for handling paragraphs to remove extra newlines
+    turndownService.addRule('paragraph', {
+        filter: 'p',
+        replacement: function (content) {
+            // Trim the content to remove leading and trailing whitespace
+            // and return the content with a single newline at the end
+            return content.trim() + '\n'
+        },
+    })
+
+    let markdown = turndownService.turndown(html)
+
+    // The following replacements might not be necessary anymore if the custom rule handles the conversion correctly
+    markdown = markdown.replace(/[\\](?!\n)/g, '')
+
     return markdown
 }

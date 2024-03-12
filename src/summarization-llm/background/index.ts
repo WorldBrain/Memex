@@ -12,6 +12,7 @@ import {
     AImodels,
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
+import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -38,7 +39,7 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     setActiveSidebarTab: RemoteFunction<
         Role,
         {
-            activeTab?: 'askAI' | null
+            activeTab?: SidebarTab
         }
     >
     getTextSummary: RemoteFunction<
@@ -180,7 +181,7 @@ export default class SummarizeBackground {
 
     setActiveSidebarTab: SummarizationInterface<
         'provider'
-    >['setAskAIActive'] = async ({ tab }, { activeTab }) => {
+    >['setActiveSidebarTab'] = async ({ tab }, { activeTab }) => {
         this.options.remoteEventEmitter.emitToTab(
             'setActiveSidebarTab',
             tab.id,

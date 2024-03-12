@@ -20,7 +20,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     triggerListenerRestart: () => void
     addImageToEditor: (args: { imageData: string }, callback) => void
     addVideoSnapshotToEditor: (args: { imageData: string }, callback) => void
-    addSelectedTextToAIquery: (args: { selectedText: string }, callback) => void
+    addSelectedTextToAIquery: (selectedText: string, callback) => void
     setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
     // No longer used, as of the sidebar refactor
     // removeTemporaryHighlights: () => void

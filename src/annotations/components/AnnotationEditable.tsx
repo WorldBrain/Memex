@@ -22,13 +22,13 @@ import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-n
 import { getShareButtonData } from '../sharing-utils'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
+
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
-import type { RGBAColor, UnifiedAnnotation } from '../cache/types'
+import type { RGBAColor, UnifiedAnnotation, UnifiedList } from '../cache/types'
 import { ANNOT_BOX_ID_PREFIX } from 'src/sidebar/annotations-sidebar/constants'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import { ImageSupportInterface } from 'src/image-support/background/types'
@@ -44,6 +44,7 @@ import KeyboardShortcuts from '@worldbrain/memex-common/lib/common-ui/components
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import CheckboxNotInput from 'src/common-ui/components/CheckboxNotInput'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import ListsSegment from '@worldbrain/memex-common/lib/common-ui/components/result-item-spaces-segment'
 
 export interface HighlightProps extends AnnotationProps {
     body: string
@@ -135,6 +136,7 @@ export interface AnnotationProps {
     updateSpacesSearchSuggestions?: (query: string) => void
     spaceSearchSuggestions?: SpaceSearchSuggestion[]
     selectSpaceForEditorPicker?: (spaceId: number) => void
+    removeSpaceFromEditorPicker: (spaceId: UnifiedList['localId']) => void
     addNewSpaceViaWikiLinksEditNote?: (
         spaceName: string,
         unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
@@ -303,7 +305,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
     }
 
     private get displayLists(): Array<{
-        id: number
+        localId: number
         name: string | JSX.Element
         isShared: boolean
         type: 'page-link' | 'user-list' | 'special-list'
@@ -318,9 +320,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                     list !== SPECIAL_LIST_IDS.FEED &&
                     list != this.props.listIdToFilterOut,
             )
-            .map((id) => ({
-                id,
-                ...getListDetailsById(id),
+            .map((localId) => ({
+                localId,
+                ...getListDetailsById(localId),
             }))
 
         return displayLists
@@ -1423,6 +1425,9 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                         this.props.isEditing
                                             ? '10px 15px 10px 10px'
                                             : '0px 15px 10px 15px'
+                                    }
+                                    removeSpaceForAnnotation={
+                                        this.props.removeSpaceFromEditorPicker
                                     }
                                 />
                             )}

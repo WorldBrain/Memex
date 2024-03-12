@@ -162,6 +162,17 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             removeSpaceForAnnotation: (listId: number) => {
                 return // Placeholder function, replace with actual implementation
             },
+            selectSpaceForAnnotation: (listId: number) => {
+                // Placeholder function, replace with actual implementation
+            },
+            updateSpacesSearchSuggestions: async (query: string) => {
+                // Placeholder function, replace with actual implementation
+                return [] // Assuming this function returns an array of suggestions
+            },
+            spaceSearchResults: [], // Assuming this is an array, adjust according to your needs
+            addNewSpaceViaWikiLinks: async (spaceName: string) => {
+                // Placeholder function, replace with actual implementation
+            },
         },
         {
             annotationsBG: params.annotationsBG,

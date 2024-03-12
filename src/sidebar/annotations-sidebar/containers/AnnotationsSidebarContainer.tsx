@@ -65,9 +65,9 @@ import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import PageCitations from 'src/citations/PageCitations'
 import {
-    ChatMessage,
+    ChatHistoryItem,
     PromptData,
-} from '@worldbrain/memex-common/lib/ai-chat/types'
+} from '@worldbrain/memex-common/lib/summarization/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -370,13 +370,15 @@ export class AnnotationsSidebarContainer<
         return {
             body: annotationCardInstance?.body,
             comment: annotationCardInstance?.comment,
-            onCommentChange: (comment) =>
+            onCommentChange: (comment) => {
+                console.log('onCommentChange', comment)
                 this.processEvent('setAnnotationEditCommentText', {
                     instanceLocation,
                     unifiedAnnotationId,
                     comment,
                     annotation,
-                }),
+                })
+            },
             onBodyChange: (body) =>
                 this.processEvent('setAnnotationEditBodyText', {
                     instanceLocation,
@@ -500,6 +502,13 @@ export class AnnotationsSidebarContainer<
                         unifiedAnnotationId: unifiedAnnotationId,
                     })
                 }
+            },
+            removeSpaceFromEditorPicker(spaceId) {
+                this.processEvent('setNewPageNoteLists', {
+                    lists: this.state.commentBox.lists.filter(
+                        (id) => id !== spaceId,
+                    ),
+                })
             },
         }
     }
@@ -1182,21 +1191,40 @@ export class AnnotationsSidebarContainer<
                                     )
                                 }
                             }}
+                            removeSpaceFromEditorPicker={(
+                                spaceId: UnifiedList['localId'],
+                                unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
+                                newNote?: boolean,
+                            ) => {
+                                if (newNote) {
+                                    this.processEvent('removePageNoteList', {
+                                        lists: [
+                                            ...this.state.commentBox.lists,
+                                            spaceId,
+                                        ],
+                                    })
+                                } else {
+                                    this.processEvent(
+                                        'updateListsForAnnotation',
+                                        {
+                                            added: null,
+                                            deleted: spaceId,
+                                            unifiedAnnotationId: unifiedAnnotationId,
+                                        },
+                                    )
+                                }
+                            }}
                             addNewSpaceViaWikiLinksEditNote={async (
                                 spaceName,
                                 unifiedAnnotationId,
                             ) => {
-                                const {
-                                    localListId,
-                                } = await this.props.customListsBG.createCustomList(
-                                    { name: spaceName },
+                                this.processEvent(
+                                    'addNewSpaceViaWikiLinksEditNote',
+                                    {
+                                        spaceName: spaceName,
+                                        unifiedAnnotationId: unifiedAnnotationId,
+                                    },
                                 )
-
-                                this.processEvent('updateListsForAnnotation', {
-                                    added: localListId,
-                                    deleted: null,
-                                    unifiedAnnotationId: unifiedAnnotationId,
-                                })
                             }}
                             spaceSearchSuggestions={
                                 this.state.spaceSearchSuggestions
@@ -1783,7 +1811,7 @@ export class AnnotationsSidebarContainer<
                                 })
                             }
                             updateAIChatHistoryState={(
-                                newState: ChatMessage[],
+                                newState: ChatHistoryItem[],
                             ) => {
                                 this.processEvent('updateAIChatHistoryState', {
                                     AIchatHistoryState: newState,
@@ -1862,7 +1890,7 @@ const PickerWrapper = styled.div`
 const ContainerStyled = styled.div<{
     sidebarContext: string
     isShown: string
-    theme
+    theme: any
     rightPosition?: number
     inPageMode?: boolean
 }>`
@@ -1887,7 +1915,7 @@ const ContainerStyled = styled.div<{
         props.rightPosition ? props.rightPosition + 'px' : TOOLTIP_WIDTH};
 
     width: ${(props) => props.theme.sidebarWidth};
-    &:: -webkit-scrollbar {
+    &::-webkit-scrollbar {
         display: none;
     }
     transition: all 0.2s cubic-bezier(0.3, 0.35, 0.14, 0.8);

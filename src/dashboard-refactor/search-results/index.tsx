@@ -515,6 +515,13 @@ export default class SearchResultsContainer extends React.Component<
                         selected: [],
                     })
                 }
+                removeSpaceFromEditorPicker={(listId) =>
+                    interactionProps.updateLists({
+                        added: null,
+                        deleted: listId,
+                        selected: [],
+                    })
+                }
                 addNewSpaceViaWikiLinksEditNote={
                     interactionProps.addNewSpaceViaWikiLinksEditNote
                 }
@@ -582,6 +589,9 @@ export default class SearchResultsContainer extends React.Component<
                         }
                         selectSpaceForEditorPicker={
                             boundAnnotCreateProps.selectSpaceForEditorPicker
+                        }
+                        removeSpaceFromEditorPicker={
+                            boundAnnotCreateProps.removeSpaceFromEditorPicker
                         }
                         addNewSpaceViaWikiLinksNewNote={
                             boundAnnotCreateProps.addNewSpaceViaWikiLinksNewNote

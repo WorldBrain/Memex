@@ -46,8 +46,8 @@ import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import {
     AImodels,
     PromptData,
+    ChatHistoryItem,
 } from '@worldbrain/memex-common/lib/summarization/types'
-import { ChatMessage } from '@worldbrain/memex-common/lib/ai-chat/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -259,7 +259,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     // Search result propsallowed
     shouldShowCount: boolean
     isInvalidSearch: boolean
-    AIChatHistoryState: ChatMessage[]
+    AIChatHistoryState: ChatHistoryItem[]
     currentChatId: string
     totalResultCount: number
     searchResultSkip: number
@@ -340,7 +340,7 @@ interface SidebarEvents {
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null
     toggleAutoAdd: null
-    updateAIChatHistoryState: { AIchatHistoryState: ChatMessage[] }
+    updateAIChatHistoryState: { AIchatHistoryState: ChatHistoryItem[] }
     updateAIChatEditorState: { AIChatEditorState: string }
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
@@ -442,6 +442,7 @@ interface SidebarEvents {
     }
     cancelNewPageNote: null
     setNewPageNoteLists: { lists: number[] }
+    removePageNoteList: { lists: number[] }
 
     // List instance events
     expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
