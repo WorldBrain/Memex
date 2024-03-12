@@ -48,6 +48,7 @@ export interface State
     autoFillState: UITaskState
     contentType: 'web' | 'pdf'
     formChanged: boolean
+    displayFullUrl: string
 }
 
 export class PageMetadataForm extends React.PureComponent<Props, State> {
@@ -71,6 +72,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         autoFillState: 'pristine',
         contentType: 'web',
         formChanged: false,
+        displayFullUrl: '',
     }
     private normalizedPageUrl: string
 
@@ -80,8 +82,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
     }
 
     async componentDidMount() {
+        const { pageIndexingBG, fullPageUrl } = this.props
         const isPagePDF =
-            this.props.fullPageUrl.includes('memex.cloud') ||
+            fullPageUrl.includes('memex.cloud') ||
             window.location.href.includes(PDF_VIEWER_HTML)
 
         this.setState({
@@ -90,11 +93,17 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         })
 
         let initAccessDate = Date.now() // TODO: Replace this with a call to get the oldest visit/bookmark for this page
-        const metadata = (await this.props.pageIndexingBG.getPageMetadata({
+        const metadata = (await pageIndexingBG.getPageMetadata({
             normalizedPageUrl: this.normalizedPageUrl,
         })) ?? { entities: [], accessDate: initAccessDate }
+        const originalUrl = isPagePDF
+            ? await pageIndexingBG.getOriginalUrlForPdfPage({
+                  normalizedPageUrl: this.normalizedPageUrl,
+              })
+            : fullPageUrl
 
         this.setState((previousState) => ({
+            displayFullUrl: originalUrl,
             entities: initNormalizedState({
                 seedData: metadata.entities.sort(defaultOrderableSorter),
                 getId: (e) => e.id,
@@ -346,7 +355,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                             onKeyDown={(e) => {
                                 e.stopPropagation()
                             }}
-                            value={this.props.fullPageUrl}
+                            value={this.state.displayFullUrl}
                             disabled
                         />
                     </FormSectionItem>
