@@ -114,4 +114,6 @@ export interface SpacePickerDependencies {
     context?: string
     closePicker?: (event) => void
     bgScriptBG: RemoteBGScriptInterface
+    headlessQuery?: string
+    isHeadLess?: boolean
 }

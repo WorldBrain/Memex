@@ -36,11 +36,19 @@ const showHighlights = async (options: HighlightDependencies) => {
             selector: annot.selector,
             color: annot.color as RGBAColor,
         })),
-        ({ annotationId, openInEdit }) =>
-            options.inPageUI.showSidebar({
-                action: openInEdit ? 'edit_annotation' : 'show_annotation',
-                annotationCacheId: annotationId.toString(),
-            }),
+        ({ annotationId, openInEdit }) => {
+            if (openInEdit || options.inPageUI.componentsShown.sidebar) {
+                return options.inPageUI.showSidebar({
+                    action: openInEdit ? 'edit_annotation' : 'show_annotation',
+                    annotationCacheId: annotationId.toString(),
+                })
+            } else {
+                options.inPageUI.showTooltip({
+                    annotationCacheId: annotationId.toString(),
+                })
+            }
+        },
+
         { removeExisting: false },
     )
 }

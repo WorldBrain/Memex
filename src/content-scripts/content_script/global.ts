@@ -283,8 +283,37 @@ export async function main(
         return Promise.resolve() // Return a resolved promise for non-matching actions or to avoid unhandled promise rejections
     })
 
+    // 3. Creates an instance of the InPageUI manager class to encapsulate
+    // business logic of initialising and hide/showing components.
+    const loadContentScript = createContentScriptLoader({
+        contentScriptsBG,
+        loadRemotely: params.loadRemotely,
+    })
+    const inPageUI = new SharedInPageUIState({
+        getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
+        loadComponent: async (component) => {
+            // Treat highlights differently as they're not a separate content script
+            if (component === 'highlights') {
+                components.highlights = resolvablePromise<void>()
+                components.highlights.resolve()
+            }
+
+            if (!components[component]) {
+                components[component] = resolvablePromise<void>()
+                loadContentScript(component)
+            }
+            return components[component]!
+        },
+        unloadComponent: (component) => {
+            delete components[component]
+        },
+    })
+
     const highlightRenderer = new HighlightRenderer({
         getDocument: () => document,
+        isToolTipShown: () => {
+            return inPageUI.componentsShown.tooltip
+        },
         icons: (iconName) => theme({ variant: 'dark' }).icons[iconName],
         captureException,
         getUndoHistory: async () => {
@@ -454,32 +483,6 @@ export async function main(
         (await sidebarUtils.getSidebarState()) &&
         (pageInfo.isPdf ? isPdfViewerRunning : true)
 
-    // 3. Creates an instance of the InPageUI manager class to encapsulate
-    // business logic of initialising and hide/showing components.
-    const loadContentScript = createContentScriptLoader({
-        contentScriptsBG,
-        loadRemotely: params.loadRemotely,
-    })
-    const inPageUI = new SharedInPageUIState({
-        getNormalizedPageUrl: pageInfo.getNormalizedPageUrl,
-        loadComponent: async (component) => {
-            // Treat highlights differently as they're not a separate content script
-            if (component === 'highlights') {
-                components.highlights = resolvablePromise<void>()
-                components.highlights.resolve()
-            }
-
-            if (!components[component]) {
-                components[component] = resolvablePromise<void>()
-                loadContentScript(component)
-            }
-            return components[component]!
-        },
-        unloadComponent: (component) => {
-            delete components[component]
-        },
-    })
-
     // TODO: Type this
     async function saveHighlight(
         shouldShare: boolean,
@@ -507,13 +510,18 @@ export async function main(
         try {
             const result = await highlightRenderer.saveAndRenderHighlight({
                 currentUser,
-                onClick: ({ annotationId, openInEdit }) =>
-                    inPageUI.showSidebar({
-                        annotationCacheId: annotationId.toString(),
-                        action: openInEdit
-                            ? 'edit_annotation'
-                            : 'show_annotation',
-                    }),
+                onClick: ({ annotationId, openInEdit }) => {
+                    if (openInEdit || inPageUI.componentsShown.sidebar) {
+                        return inPageUI.showSidebar({
+                            annotationCacheId: annotationId.toString(),
+                            action: 'edit_annotation',
+                        })
+                    } else {
+                        inPageUI.events.emit('tooltipAction', {
+                            annotationCacheId: annotationId.toString(),
+                        })
+                    }
+                },
                 getSelection: () => document.getSelection(),
                 getFullPageUrl: async () => pageInfo.getFullPageUrl(),
                 isPdf: pageInfo.isPdf,
@@ -563,6 +571,7 @@ export async function main(
                 })
             }
             let screenshotGrabResult: PdfScreenshot
+            let annotationId = null
             if (
                 isPdfViewerRunning &&
                 window.getSelection().toString().length === 0
@@ -592,7 +601,7 @@ export async function main(
                     imageSupportBG,
                     highlightColor,
                 )
-
+                annotationId = results.annotationId
                 await results.createPromise
             } else if (
                 selection &&
@@ -606,10 +615,11 @@ export async function main(
                     null,
                     highlightColor,
                 )
+                annotationId = results.annotationId
                 await results.createPromise
             }
 
-            await inPageUI.hideTooltip()
+            // await inPageUI.hideTooltip()
 
             if (preventHideTooltip) {
                 const styleSheet = document.createElement('style')
@@ -653,6 +663,8 @@ export async function main(
                     )
                 }
             }
+
+            return annotationId
         },
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
@@ -781,7 +793,7 @@ export async function main(
             //     commentText: commentText,
             // })
 
-            await inPageUI.hideTooltip()
+            // await inPageUI.hideTooltip()
             if (analyticsBG) {
                 // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
                 try {
@@ -1012,6 +1024,16 @@ export async function main(
                         fullPageUrl: originalPageURL,
                     })
                 },
+                annotationsBG,
+                annotationsCache,
+                contentSharingBG,
+                imageSupportBG,
+                authBG,
+                spacesBG: collectionsBG,
+                bgScriptsBG: bgScriptBG,
+                analyticsBG,
+                pageActivityIndicatorBG,
+                localStorageAPI: browser.storage.local,
             })
             components.tooltip?.resolve()
         },

@@ -6,13 +6,14 @@ import styled, { css } from 'styled-components'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import MemexEditor, {
     MemexEditorInstance,
+    SpaceSearchSuggestion,
 } from '@worldbrain/memex-common/lib/editor'
 import SaveBtn from './save-btn'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { NoteResultHoverState, FocusableComponent } from './types'
 import type { AnnotationFooterEventProps } from 'src/annotations/components/AnnotationFooter'
 import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
-import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
+
 import type { ListDetailsGetter } from '../types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import Margin from 'src/dashboard-refactor/components/Margin'
@@ -24,6 +25,8 @@ import { AnnotationsSidebarInPageEventEmitter } from 'src/sidebar/annotations-si
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import { sleepPromise } from 'src/util/promises'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import ListsSegment from '@worldbrain/memex-common/lib/common-ui/components/result-item-spaces-segment'
+import { UnifiedList } from '../cache/types'
 
 interface State {
     isTagPickerShown: boolean
@@ -36,6 +39,9 @@ interface State {
 
 export interface AnnotationCreateEventProps {
     onSave: (shouldShare: boolean, isProtected?: boolean) => Promise<void>
+    addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
+    selectSpaceForEditorPicker: (spaceId: number) => void
+    removeSpaceFromEditorPicker: (spaceId: UnifiedList['localId']) => void
     onCancel: () => void
     onCommentChange: (text: string) => void
     getListDetailsById: ListDetailsGetter
@@ -60,6 +66,8 @@ export interface AnnotationCreateGeneralProps {
     sidebarEvents?: AnnotationsSidebarInPageEventEmitter
     imageSupport: ImageSupportInterface<'caller'>
     getRootElement: () => HTMLElement
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
 }
 
 export interface Props
@@ -181,14 +189,14 @@ export class AnnotationCreate extends React.Component<Props, State>
     }
 
     private get displayLists(): Array<{
-        id: number
+        localId: number
         name: string | JSX.Element
         isShared: boolean
         type: 'page-link' | 'user-list' | 'special-list' | 'rss-feed'
     }> {
-        return this.props.lists.map((id) => ({
-            id,
-            ...this.props.getListDetailsById(id),
+        return this.props.lists.map((localId) => ({
+            localId,
+            ...this.props.getListDetailsById(localId),
         }))
     }
 
@@ -421,6 +429,16 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.setState({ onEditClick: editing })
                             }
                             setDebouncingSaveBlock={this.setDebouncingSaveBlock}
+                            updateSpacesSearchSuggestions={
+                                this.props.updateSpacesSearchSuggestions
+                            }
+                            spaceSearchSuggestions={
+                                this.props.spaceSearchSuggestions
+                            }
+                            selectSpace={this.props.selectSpaceForEditorPicker}
+                            addNewSpaceViaWikiLinks={
+                                this.props.addNewSpaceViaWikiLinksNewNote
+                            }
                         />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&
@@ -456,6 +474,9 @@ export class AnnotationCreate extends React.Component<Props, State>
                                 this.setState({
                                     isListPickerShown: true,
                                 })
+                            }
+                            removeSpaceForAnnotation={
+                                this.props.removeSpaceFromEditorPicker
                             }
                             spacePickerButtonRef={this.spacePickerButtonRef}
                             renderSpacePicker={this.renderSpacePicker}

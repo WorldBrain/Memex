@@ -100,12 +100,13 @@ import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/compon
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import PageCitations from 'src/citations/PageCitations'
-import { TaskState } from 'ui-logic-core/lib/types'
+import type { TaskState } from 'ui-logic-core/lib/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import debounce from 'lodash/debounce'
 import { PageMetadataForm } from 'src/page-indexing/ui/metadata-form'
-import { PageIndexingInterface } from 'src/page-indexing/background/types'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
+import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -301,6 +302,23 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     toggleAutoAddBulk: (toggleState: boolean) => void
     bulkSelectAnnotations: (annotationIds: string[]) => void
     bulkSelectionState: string[]
+    updateSpacesSearchSuggestions?: (query: string) => void
+    spaceSearchSuggestions?: SpaceSearchSuggestion[]
+    selectSpaceForEditorPicker: (params: {
+        spaceId: number
+        newNote?: boolean
+        unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
+    }) => void
+    removeSpaceFromEditorPicker: (
+        spaceId: UnifiedList['localId'],
+        unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
+        newNote?: boolean,
+    ) => void
+    addNewSpaceViaWikiLinksNewNote: (spaceName: string) => void
+    addNewSpaceViaWikiLinksEditNote: (
+        spaceName: string,
+        unifiedAnnotationId: string,
+    ) => void
 }
 
 interface AnnotationsSidebarState {
@@ -522,9 +540,8 @@ export class AnnotationsSidebar extends React.Component<
 
     handleSelectAll = async (e) => {
         if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
-            e.preventDefault()
-
             if (this.lastClickInsideSidebar) {
+                e.preventDefault()
                 const annotations = cacheUtils.getUserAnnotationsArray(
                     {
                         annotations: this.props.annotations,
@@ -699,6 +716,29 @@ export class AnnotationsSidebar extends React.Component<
                     autoFocus={this.state.autoFocusCreateForm}
                     sidebarEvents={this.props.events && this.props.events}
                     imageSupport={this.props.imageSupport}
+                    updateSpacesSearchSuggestions={
+                        this.props.updateSpacesSearchSuggestions
+                    }
+                    spaceSearchSuggestions={this.props.spaceSearchSuggestions}
+                    selectSpaceForEditorPicker={(spaceId: number) =>
+                        this.props.selectSpaceForEditorPicker({
+                            spaceId,
+                            newNote: true,
+                            unifiedAnnotationId: null,
+                        })
+                    }
+                    removeSpaceFromEditorPicker={(
+                        spaceId: UnifiedList['localId'],
+                    ) => {
+                        this.props.removeSpaceFromEditorPicker(
+                            spaceId,
+                            null,
+                            true,
+                        )
+                    }}
+                    addNewSpaceViaWikiLinksNewNote={
+                        this.props.addNewSpaceViaWikiLinksNewNote
+                    }
                 />
             </NewAnnotationSection>
         )
@@ -1032,6 +1072,30 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.shareMenuAnnotationInstanceId ===
                                     instanceId && annotation.unifiedId
                             }
+                            updateSpacesSearchSuggestions={
+                                this.props.updateSpacesSearchSuggestions
+                            }
+                            spaceSearchSuggestions={
+                                this.props.spaceSearchSuggestions
+                            }
+                            selectSpaceForEditorPicker={(spaceId: number) =>
+                                this.props.selectSpaceForEditorPicker({
+                                    spaceId,
+                                    newNote: false,
+                                    unifiedAnnotationId: annotation.unifiedId,
+                                })
+                            }
+                            removeSpaceFromEditorPicker={(
+                                spaceId: UnifiedList['localId'],
+                            ) => {
+                                this.props.removeSpaceFromEditorPicker(
+                                    spaceId,
+                                    annotation.unifiedId,
+                                )
+                            }}
+                            addNewSpaceViaWikiLinksEditNote={
+                                this.props.addNewSpaceViaWikiLinksEditNote
+                            }
                         />
                         {listData.remoteId != null &&
                             annotation.remoteId != null && (
@@ -1170,6 +1234,7 @@ export class AnnotationsSidebar extends React.Component<
                 )}
                 {listAnnotations}
                 {this.renderAnnotationDropdowns()}
+                <Spacer />
             </FollowedNotesContainer>
         )
     }
@@ -1414,6 +1479,7 @@ export class AnnotationsSidebar extends React.Component<
                     listData,
                     this.spaceEditBtnRefs[listData.unifiedId],
                 )}
+                <Spacer />
             </FollowedListNotesContainer>
         )
     }
@@ -3630,6 +3696,7 @@ export class AnnotationsSidebar extends React.Component<
                                         this.renderSharedNotesByList()}
                                 </>
                             )}
+                            <Spacer />
                         </AnnotationSectionScrollContainer>
                     </AnnotationsSectionStyled>
                 )}
@@ -3909,6 +3976,30 @@ export class AnnotationsSidebar extends React.Component<
                                 this.props.shareMenuAnnotationInstanceId ===
                                     instanceId && annot.unifiedId
                             }
+                            updateSpacesSearchSuggestions={
+                                this.props.updateSpacesSearchSuggestions
+                            }
+                            spaceSearchSuggestions={
+                                this.props.spaceSearchSuggestions
+                            }
+                            selectSpaceForEditorPicker={(spaceId: number) =>
+                                this.props.selectSpaceForEditorPicker({
+                                    spaceId,
+                                    newNote: false,
+                                    unifiedAnnotationId: annot.unifiedId,
+                                })
+                            }
+                            removeSpaceFromEditorPicker={(
+                                spaceId: UnifiedList['localId'],
+                            ) => {
+                                this.props.removeSpaceFromEditorPicker(
+                                    spaceId,
+                                    annot.unifiedId,
+                                )
+                            }}
+                            addNewSpaceViaWikiLinksEditNote={
+                                this.props.addNewSpaceViaWikiLinksEditNote
+                            }
                         />
                     </AnnotationBox>
                 )
@@ -3957,6 +4048,7 @@ export class AnnotationsSidebar extends React.Component<
                             <AnnotationContainer>
                                 {this.renderAnnotationDropdowns()}
                                 {annots}
+                                <Spacer />
                             </AnnotationContainer>
                         ) : (
                             <EmptyMessageContainer>
@@ -6481,7 +6573,7 @@ const BulkEditBarContainer = styled.div`
     display: flex;
     align-items: center;
     padding: 0 15px 0 15px;
-    height: 40px;
+    min-height: 40px;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
     border-bottom: 1px solid ${(props) => props.theme.colors.greyScale2};
     color: ${(props) => props.theme.colors.greyScale6};
@@ -6525,4 +6617,8 @@ const AutoAddBulkSelection = styled.div`
     }
     color: ${(props) => props.theme.colors.greyScale6};
     font-size: 14px;
+`
+const Spacer = styled.div`
+    min-height: 120px;
+    width: 120px;
 `

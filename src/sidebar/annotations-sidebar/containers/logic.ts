@@ -553,6 +553,27 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
+    updateSpacesSearchSuggestions: EventHandler<
+        'updateSpacesSearchSuggestions'
+    > = async ({ event, previousState }) => {
+        const lists = this.options.annotationsCache.lists.allIds
+            .filter(
+                (listId) =>
+                    this.options.annotationsCache.lists.byId[listId].name
+                        .toLowerCase()
+                        .includes(event.searchQuery.toLowerCase()) &&
+                    this.options.annotationsCache.lists.byId[listId].type !==
+                        'page-link',
+            )
+            .map((listId) => ({
+                id: this.options.annotationsCache.lists.byId[listId].localId,
+                name: this.options.annotationsCache.lists.byId[listId].name,
+            }))
+
+        this.emitMutation({
+            spaceSearchSuggestions: { $set: lists },
+        })
+    }
     getHighlightColorSettings: EventHandler<
         'getHighlightColorSettings'
     > = async ({ event, previousState }) => {
@@ -2349,6 +2370,7 @@ export class SidebarContainerLogic extends UILogic<
         const body = formData.body?.trim()
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
+        console.log('commentforimageupload', comment)
         await executeUITask(this, 'noteEditState', async () => {
             let commentForSaving = await processCommentForImageUpload(
                 comment,
@@ -2547,6 +2569,8 @@ export class SidebarContainerLogic extends UILogic<
             this.options.imageSupportBG,
         )
 
+        console.log('original comment', OriginalCommentForCache)
+
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
             showCommentBox: { $set: false },
@@ -2682,7 +2706,6 @@ export class SidebarContainerLogic extends UILogic<
         'updateListsForAnnotation'
     > = async ({ event }) => {
         const { annotationsCache, contentSharingBG } = this.options
-
         // this.emitMutation({ confirmSelectNoteSpaceArgs: { $set: null } })
 
         const existing =
@@ -2712,6 +2735,10 @@ export class SidebarContainerLogic extends UILogic<
                 throw new Error(
                     'Cannot find list to add to annotation in cache',
                 )
+            }
+
+            if (unifiedListIds.has(cacheList.unifiedId)) {
+                return
             }
 
             unifiedListIds.add(cacheList.unifiedId)
@@ -2779,13 +2806,101 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
+    addNewSpaceViaWikiLinksEditNote: EventHandler<
+        'addNewSpaceViaWikiLinksEditNote'
+    > = async ({ event, previousState }) => {
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await this.options.customListsBG.createCustomList({
+            name: event.spaceName,
+        })
+
+        this.options.annotationsCache.addList({
+            name: event.spaceName,
+            collabKey,
+            localId: localListId,
+            remoteId: remoteListId,
+            hasRemoteAnnotationsToLoad: false,
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            creator: previousState.currentUserReference ?? undefined,
+            parentLocalId: null,
+            isPrivate: true,
+        })
+
+        this.processUIEvent('updateListsForAnnotation', {
+            event: {
+                added: localListId,
+                deleted: null,
+                unifiedAnnotationId: event.unifiedAnnotationId,
+            },
+            previousState,
+        })
+    }
+
+    addNewSpaceViaWikiLinksNewNote: EventHandler<
+        'addNewSpaceViaWikiLinksNewNote'
+    > = async ({ event, previousState }) => {
+        const {
+            localListId,
+            remoteListId,
+            collabKey,
+        } = await this.options.customListsBG.createCustomList({
+            name: event.spaceName,
+        })
+
+        this.options.annotationsCache.addList({
+            name: event.spaceName,
+            collabKey,
+            localId: localListId,
+            remoteId: remoteListId,
+            hasRemoteAnnotationsToLoad: false,
+            type: 'user-list',
+            unifiedAnnotationIds: [],
+            creator: previousState.currentUserReference ?? undefined,
+            parentLocalId: null,
+            isPrivate: true,
+        })
+
+        const listsToAdd = [...previousState.commentBox.lists, localListId]
+
+        this.emitMutation({
+            commentBox: { lists: { $set: listsToAdd } },
+        })
+    }
+
     setNewPageNoteLists: EventHandler<'setNewPageNoteLists'> = async ({
         event,
         previousState,
     }) => {
-        this.emitMutation({
-            commentBox: { lists: { $set: event.lists } },
-        })
+        const existingLists = new Set(previousState.commentBox.lists)
+        const newLists = event.lists.filter((list) => !existingLists.has(list))
+
+        if (newLists.length > 0) {
+            this.emitMutation({
+                commentBox: { lists: { $set: newLists } },
+            })
+        }
+    }
+    removePageNoteList: EventHandler<'removePageNoteList'> = async ({
+        event,
+        previousState,
+    }) => {
+        const existingLists = new Set(previousState.commentBox.lists)
+        const listsToRemove = event.lists.filter((list) =>
+            existingLists.has(list),
+        )
+
+        if (listsToRemove.length > 0) {
+            const updatedLists = [...existingLists].filter(
+                (list) => !listsToRemove.includes(list),
+            )
+            this.emitMutation({
+                commentBox: { lists: { $set: updatedLists } },
+            })
+        }
     }
 
     goToAnnotationInNewTab: EventHandler<'goToAnnotationInNewTab'> = async ({

@@ -366,13 +366,15 @@ export class AnnotationsSidebarContainer<
         return {
             body: annotationCardInstance?.body,
             comment: annotationCardInstance?.comment,
-            onCommentChange: (comment) =>
+            onCommentChange: (comment) => {
+                console.log('onCommentChange', comment)
                 this.processEvent('setAnnotationEditCommentText', {
                     instanceLocation,
                     unifiedAnnotationId,
                     comment,
                     annotation,
-                }),
+                })
+            },
             onBodyChange: (body) =>
                 this.processEvent('setAnnotationEditBodyText', {
                     instanceLocation,
@@ -466,7 +468,7 @@ export class AnnotationsSidebarContainer<
                         this.processEvent('setSelectedList', { unifiedListId })
                     }}
                     getRootElement={this.props.getRootElement}
-                    autoFocus
+                    autoFocus={true}
                 />
             ),
             getListDetailsById: this.getListDetailsById,
@@ -475,6 +477,35 @@ export class AnnotationsSidebarContainer<
             hoverState: null,
             imageSupport: this.props.imageSupport,
             getRootElement: this.props.getRootElement,
+            addNewSpaceViaWikiLinksNewNote: (spaceName) => {
+                this.processEvent('addNewSpaceViaWikiLinksNewNote', {
+                    spaceName: spaceName,
+                })
+            },
+            selectSpaceForEditorPicker: (
+                spaceId: number,
+                newNote?: boolean,
+                unifiedAnnotationId?: UnifiedAnnotation['unifiedId'],
+            ) => {
+                if (newNote) {
+                    this.processEvent('setNewPageNoteLists', {
+                        lists: [...this.state.commentBox.lists, spaceId],
+                    })
+                } else {
+                    this.processEvent('updateListsForAnnotation', {
+                        added: spaceId,
+                        deleted: null,
+                        unifiedAnnotationId: unifiedAnnotationId,
+                    })
+                }
+            },
+            removeSpaceFromEditorPicker(spaceId) {
+                this.processEvent('setNewPageNoteLists', {
+                    lists: this.state.commentBox.lists.filter(
+                        (id) => id !== spaceId,
+                    ),
+                })
+            },
         }
     }
 
@@ -1116,6 +1147,84 @@ export class AnnotationsSidebarContainer<
                                     'getHighlightColorSettings',
                                     null,
                                 )
+                            }
+                            updateSpacesSearchSuggestions={(query: string) => {
+                                this.processEvent(
+                                    'updateSpacesSearchSuggestions',
+                                    { searchQuery: query },
+                                )
+                            }}
+                            addNewSpaceViaWikiLinksNewNote={async (
+                                spaceName,
+                            ) => {
+                                this.processEvent(
+                                    'addNewSpaceViaWikiLinksNewNote',
+                                    {
+                                        spaceName: spaceName,
+                                    },
+                                )
+                            }}
+                            selectSpaceForEditorPicker={(params: {
+                                spaceId: number
+                                newNote?: boolean
+                                unifiedAnnotationId?: UnifiedAnnotation['unifiedId']
+                            }) => {
+                                if (params.newNote) {
+                                    this.processEvent('setNewPageNoteLists', {
+                                        lists: [
+                                            ...this.state.commentBox.lists,
+                                            params.spaceId,
+                                        ],
+                                    })
+                                } else {
+                                    this.processEvent(
+                                        'updateListsForAnnotation',
+                                        {
+                                            added: params.spaceId,
+                                            deleted: null,
+                                            unifiedAnnotationId:
+                                                params.unifiedAnnotationId,
+                                        },
+                                    )
+                                }
+                            }}
+                            removeSpaceFromEditorPicker={(
+                                spaceId: UnifiedList['localId'],
+                                unifiedAnnotationId: UnifiedAnnotation['unifiedId'],
+                                newNote?: boolean,
+                            ) => {
+                                if (newNote) {
+                                    this.processEvent('removePageNoteList', {
+                                        lists: [
+                                            ...this.state.commentBox.lists,
+                                            spaceId,
+                                        ],
+                                    })
+                                } else {
+                                    this.processEvent(
+                                        'updateListsForAnnotation',
+                                        {
+                                            added: null,
+                                            deleted: spaceId,
+                                            unifiedAnnotationId: unifiedAnnotationId,
+                                        },
+                                    )
+                                }
+                            }}
+                            addNewSpaceViaWikiLinksEditNote={async (
+                                spaceName,
+                                unifiedAnnotationId,
+                            ) => {
+                                this.processEvent(
+                                    'addNewSpaceViaWikiLinksEditNote',
+                                    {
+                                        spaceName: spaceName,
+                                        unifiedAnnotationId: unifiedAnnotationId,
+                                    },
+                                )
+                            }}
+                            spaceSearchSuggestions={
+                                this.state.spaceSearchSuggestions
                             }
                             highlightColorSettings={this.state.highlightColors}
                             initGetReplyEditProps={(sharedListReference) => (
