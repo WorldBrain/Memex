@@ -24,10 +24,11 @@ import {
     initNormalizedState,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { PDF_VIEWER_HTML } from 'src/pdf/constants'
 
 export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
-    normalizedPageUrl: string
     fullPageUrl: string
     onSave?: () => void
     onCancel?: () => void
@@ -72,12 +73,17 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         formChanged: false,
         showAutoFillBtn: false,
     }
+    private normalizedPageUrl: string
+
+    constructor(props: Props) {
+        super(props)
+        this.normalizedPageUrl = normalizeUrl(props.fullPageUrl)
+    }
 
     async componentDidMount() {
         const isPagePDF =
-            (this.props.fullPageUrl &&
-                this.props.fullPageUrl.includes('memex.cloud')) ||
-            window.location.href.includes('/pdfjs/viewer.html?')
+            this.props.fullPageUrl.includes('memex.cloud') ||
+            window.location.href.includes(PDF_VIEWER_HTML)
 
         this.setState({
             loadState: 'running',
@@ -86,7 +92,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
 
         let initAccessDate = Date.now() // TODO: Replace this with a call to get the oldest visit/bookmark for this page
         const metadata = (await this.props.pageIndexingBG.getPageMetadata({
-            normalizedPageUrl: this.props.normalizedPageUrl,
+            normalizedPageUrl: this.normalizedPageUrl,
         })) ?? { entities: [], accessDate: initAccessDate }
 
         this.setState((previousState) => ({
@@ -127,7 +133,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             journalPage: this.state.journalPage,
             journalIssue: this.state.journalIssue,
             journalVolume: this.state.journalVolume,
-            normalizedPageUrl: this.props.normalizedPageUrl,
+            normalizedPageUrl: this.normalizedPageUrl,
             entities: normalizedStateToArray(this.state.entities),
         })
         this.setState({ submitState: 'success' })

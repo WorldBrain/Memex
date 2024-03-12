@@ -3580,7 +3580,6 @@ export class AnnotationsSidebar extends React.Component<
         return (
             <PageMetadataForm
                 pageIndexingBG={this.props.pageIndexingBG}
-                normalizedPageUrl={this.props.normalizedPageUrl}
                 fullPageUrl={this.props.fullPageUrl}
             />
         )
