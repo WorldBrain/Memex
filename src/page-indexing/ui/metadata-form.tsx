@@ -19,6 +19,11 @@ import {
     defaultOrderableSorter,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import {
+    NormalizedState,
+    initNormalizedState,
+    normalizedStateToArray,
+} from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 
 export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -35,7 +40,7 @@ export interface State
     newEntityIsPrimary: boolean
     newEntityAdditionalName: string
     /** Assumed to be sorted by `order` field. */
-    entities: Omit<PageEntity, 'normalizedPageUrl'>[]
+    entities: NormalizedState<Omit<PageEntity, 'normalizedPageUrl'>, number>
     loadState: UITaskState
     submitState: UITaskState
     autoFillState: UITaskState
@@ -59,7 +64,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         newEntityAdditionalName: '',
         releaseDate: Date.now(),
         accessDate: Date.now(),
-        entities: [],
+        entities: initNormalizedState(),
         loadState: 'pristine',
         submitState: 'pristine',
         autoFillState: 'pristine',
@@ -85,7 +90,10 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         })) ?? { entities: [], accessDate: initAccessDate }
 
         this.setState((previousState) => ({
-            entities: metadata.entities.sort(defaultOrderableSorter),
+            entities: initNormalizedState({
+                seedData: metadata.entities.sort(defaultOrderableSorter),
+                getId: (e) => e.id,
+            }),
             doi: metadata.doi ?? previousState.doi,
             journalVolume: metadata.journalVolume,
             journalIssue: metadata.journalIssue,
@@ -111,7 +119,6 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         await this.props.pageIndexingBG.updatePageMetadata({
             doi: this.state.doi,
             title: this.state.title,
-            entities: this.state.entities,
             annotation: this.state.annotation,
             sourceName: this.state.sourceName,
             accessDate: this.state.accessDate,
@@ -121,6 +128,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             journalIssue: this.state.journalIssue,
             journalVolume: this.state.journalVolume,
             normalizedPageUrl: this.props.normalizedPageUrl,
+            entities: normalizedStateToArray(this.state.entities),
         })
         this.setState({ submitState: 'success' })
         this.props.onSave?.()
@@ -135,6 +143,27 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         if (stateKey === 'doi') {
             this.setState({ showAutoFillBtn: true })
         }
+    }
+
+    private handleEntityTextInputChange = (
+        stateKey: keyof Pick<PageEntity, 'name' | 'additionalName'>,
+        entityId: number,
+    ): React.ChangeEventHandler<HTMLInputElement> => (e) => {
+        e.stopPropagation()
+
+        this.setState((state) => ({
+            entities: {
+                ...state.entities,
+                byId: {
+                    ...state.entities.byId,
+                    [entityId]: {
+                        ...state.entities.byId[entityId],
+                        [stateKey]: e.target.value,
+                    },
+                },
+            },
+            formChanged: true,
+        }))
     }
 
     private handleAutoFill = async () => {
@@ -156,13 +185,21 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             const allEntities = new Map<string, PageEntity>(
                 pageMetadata.entities
                     .map((e) => [e.name, e] as any)
-                    .concat(state.entities.map((e) => [e.name, e])),
+                    .concat(
+                        normalizedStateToArray(state.entities).map((e) => [
+                            e.name,
+                            e,
+                        ]),
+                    ),
             )
             return {
                 autoFillState: 'success',
-                entities: [...allEntities.values()].sort(
-                    defaultOrderableSorter,
-                ),
+                entities: initNormalizedState({
+                    seedData: [...allEntities.values()].sort(
+                        defaultOrderableSorter,
+                    ),
+                    getId: (e) => e.id,
+                }),
                 doi: pageMetadata.doi ?? state.doi,
                 title: pageMetadata.title ?? state.title,
                 annotation: pageMetadata.annotation ?? state.annotation,
@@ -178,14 +215,18 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
     }
 
     private handleDeleteEntity = (entityId: number) => () => {
-        const foundEntity = this.state.entities.find((e) => e.id === entityId)
-        if (!foundEntity) {
+        if (!this.state.entities.byId[entityId]) {
             throw new Error(
                 `Cannot delete entity that does not exist in state - ID: ${entityId}`,
             )
         }
         this.setState((state) => ({
-            entities: [...state.entities].filter((e) => e.id !== entityId),
+            entities: initNormalizedState({
+                seedData: normalizedStateToArray(state.entities).filter(
+                    (e) => e.id !== entityId,
+                ),
+                getId: (e) => e.id,
+            }),
         }))
     }
 
@@ -193,7 +234,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         if (!this.shouldShowAddEntityBtn) {
             throw new Error('Cannot add entity if input state not yet set')
         }
-        const orderedEntityItems = this.state.entities.map((e) => ({
+        const orderedEntityItems = normalizedStateToArray(
+            this.state.entities,
+        ).map((e) => ({
             key: e.order,
             id: e.id,
         }))
@@ -209,7 +252,13 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             newEntityName: '',
             newEntityIsPrimary: false,
             newEntityAdditionalName: '',
-            entities: [...state.entities, newEntity],
+            entities: {
+                allIds: [...state.entities.allIds, nextId],
+                byId: {
+                    ...state.entities.byId,
+                    [nextId]: newEntity,
+                },
+            },
         }))
     }
 
@@ -300,82 +349,87 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                             {...provided.droppableProps}
                                             ref={provided.innerRef}
                                         >
-                                            {this.state.entities.map(
-                                                (template, index) => (
-                                                    <Draggable
-                                                        key={template.id}
-                                                        draggableId={String(
-                                                            template.id,
-                                                        )}
-                                                        index={index}
-                                                    >
-                                                        {(
-                                                            provided,
-                                                            snapshot,
-                                                        ) => {
-                                                            // Use a portal for the dragging item
-                                                            const draggableContent = (
-                                                                <div
-                                                                    ref={
-                                                                        provided.innerRef
-                                                                    }
-                                                                    {...provided.draggableProps}
-                                                                    {...provided.dragHandleProps}
-                                                                    style={{
-                                                                        ...provided
-                                                                            .draggableProps
-                                                                            .style,
-                                                                        zIndex: 30000000000000,
-                                                                        // Additional styles if needed
-                                                                    }}
-                                                                >
-                                                                    <EntitiesItem>
-                                                                        <TextField
-                                                                            onKeyDown={(
-                                                                                e,
-                                                                            ) => {
-                                                                                e.stopPropagation()
-                                                                            }}
-                                                                            placeholder="First Name"
-                                                                            value={
-                                                                                template.additionalName
-                                                                            }
-                                                                        />
-                                                                        <TextField
-                                                                            onKeyDown={(
-                                                                                e,
-                                                                            ) => {
-                                                                                e.stopPropagation()
-                                                                            }}
-                                                                            placeholder="Last Name"
-                                                                            value={
-                                                                                template.name
-                                                                            }
-                                                                        />
-                                                                    </EntitiesItem>
-                                                                </div>
+                                            {normalizedStateToArray(
+                                                this.state.entities,
+                                            ).map((entity, index) => (
+                                                <Draggable
+                                                    key={entity.id}
+                                                    draggableId={String(
+                                                        entity.id,
+                                                    )}
+                                                    index={index}
+                                                >
+                                                    {(provided, snapshot) => {
+                                                        // Use a portal for the dragging item
+                                                        const draggableContent = (
+                                                            <div
+                                                                ref={
+                                                                    provided.innerRef
+                                                                }
+                                                                {...provided.draggableProps}
+                                                                {...provided.dragHandleProps}
+                                                                style={{
+                                                                    ...provided
+                                                                        .draggableProps
+                                                                        .style,
+                                                                    zIndex: 30000000000000,
+                                                                    // Additional styles if needed
+                                                                }}
+                                                            >
+                                                                <EntitiesItem>
+                                                                    <TextField
+                                                                        onKeyDown={(
+                                                                            e,
+                                                                        ) => {
+                                                                            e.stopPropagation()
+                                                                        }}
+                                                                        placeholder="First Name"
+                                                                        value={
+                                                                            entity.additionalName
+                                                                        }
+                                                                        onChange={this.handleEntityTextInputChange(
+                                                                            'additionalName',
+                                                                            entity.id,
+                                                                        )}
+                                                                    />
+                                                                    <TextField
+                                                                        onKeyDown={(
+                                                                            e,
+                                                                        ) => {
+                                                                            e.stopPropagation()
+                                                                        }}
+                                                                        placeholder="Last Name"
+                                                                        value={
+                                                                            entity.name
+                                                                        }
+                                                                        onChange={this.handleEntityTextInputChange(
+                                                                            'name',
+                                                                            entity.id,
+                                                                        )}
+                                                                    />
+                                                                </EntitiesItem>
+                                                            </div>
+                                                        )
+
+                                                        const portalRoot =
+                                                            this.props.getRootElement?.() ??
+                                                            document.querySelector(
+                                                                'body',
                                                             )
 
-                                                            const portalRoot =
-                                                                this.props.getRootElement?.() ??
-                                                                document.querySelector(
-                                                                    'body',
-                                                                )
+                                                        if (
+                                                            snapshot.isDragging
+                                                        ) {
+                                                            return ReactDOM.createPortal(
+                                                                draggableContent,
+                                                                portalRoot,
+                                                            )
+                                                        }
 
-                                                            if (
-                                                                snapshot.isDragging
-                                                            ) {
-                                                                return ReactDOM.createPortal(
-                                                                    draggableContent,
-                                                                    portalRoot,
-                                                                )
-                                                            }
-
-                                                            return draggableContent
-                                                        }}
-                                                    </Draggable>
-                                                ),
-                                            )}
+                                                        return draggableContent
+                                                    }}
+                                                </Draggable>
+                                            ))}
                                             {provided.placeholder}
                                         </div>
                                     )}
