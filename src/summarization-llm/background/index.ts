@@ -108,8 +108,6 @@ export default class SummarizeBackground {
             }
         }
 
-        console.log('Starting summarization stream')
-
         for await (const result of this.summarizationService.queryAI(
             fullPageUrl,
             textToProcess,
@@ -120,7 +118,6 @@ export default class SummarizeBackground {
             promptData,
         )) {
             const token = result?.t
-            console.log('Token:', token)
             if (token?.length > 0) {
                 if (outputLocation === 'editor') {
                     this.options.remoteEventEmitter.emitToTab(
@@ -140,7 +137,6 @@ export default class SummarizeBackground {
                         },
                     )
                 } else {
-                    console.log('Emitting to summary container')
                     this.options.remoteEventEmitter.emitToTab(
                         'newSummaryToken',
                         tab.id,

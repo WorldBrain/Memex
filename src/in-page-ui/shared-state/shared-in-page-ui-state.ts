@@ -91,7 +91,6 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
         this.summarisePageEvents.on('setActiveSidebarTab', ({ activeTab }) => {
-            console.log('reaches hereee', activeTab)
             this.activeSidebarTab = activeTab
         })
     }

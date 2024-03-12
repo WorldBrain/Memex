@@ -321,6 +321,15 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tab: 'rabbitHole',
             })
             return true
+        } else if (event.action === 'add_media_range_to_ai_context') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('AddMediaRangeToAIcontext', {
+                range: event.range,
+                prompt: event.prompt,
+            })
+            return true
         }
 
         // Don't handle any external action that depend on cache until init logic has completed

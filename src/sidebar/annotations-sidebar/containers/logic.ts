@@ -2372,7 +2372,6 @@ export class SidebarContainerLogic extends UILogic<
         const body = formData.body?.trim()
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
-        console.log('commentforimageupload', comment)
         await executeUITask(this, 'noteEditState', async () => {
             let commentForSaving = await processCommentForImageUpload(
                 comment,
@@ -2570,8 +2569,6 @@ export class SidebarContainerLogic extends UILogic<
             annotationId,
             this.options.imageSupportBG,
         )
-
-        console.log('original comment', OriginalCommentForCache)
 
         this.emitMutation({
             commentBox: { $set: INIT_FORM_STATE },
@@ -3625,6 +3622,48 @@ export class SidebarContainerLogic extends UILogic<
             },
         })
     }
+    AddMediaRangeToAIcontext: EventHandler<
+        'AddMediaRangeToAIcontext'
+    > = async ({ event, previousState }) => {
+        this.setActiveSidebarTabEvents('summary')
+
+        await sleepPromise(1000)
+        if (previousState.activeTab === 'summary') {
+            this.options.events.emit(
+                'addMediaRangeToEditor',
+                event.range.from,
+                event.range.to,
+                event.prompt,
+            )
+            return
+        }
+
+        // this.emitMutation({ activeTab: { $set: 'summary' } })
+
+        // let prompt =
+        //     event.prompt?.length > 0
+        //         ? event.prompt
+        //         : 'Tell me the key takeaways: '
+        // let highlightedText =
+        //     event.textToProcess?.length > 0 ? event.textToProcess : null
+
+        // await this.processUIEvent('queryAIwithPrompt', {
+        //     event: {
+        //         prompt: prompt,
+        //         highlightedText: event.textToProcess,
+        //         queryMode: 'summarize',
+        //     },
+        //     previousState,
+        // })
+
+        // this.emitMutation({
+        //     pageSummary: { $set: '' },
+        //     selectedTextAIPreview: { $set: event.textToProcess },
+        //     prompt: {
+        //         $set: prompt,
+        //     },
+        // })
+    }
 
     private handleMouseUpToTriggerRabbitHole = (event) => {
         this.listenToTextHighlightSuggestions()
@@ -3744,7 +3783,6 @@ export class SidebarContainerLogic extends UILogic<
             ((event.prompt && event.prompt?.length > 0) ||
                 event.textToProcess?.length > 0)
         ) {
-            console.log('event acitve')
             this.options.events?.emit('setActiveSidebarTab', {
                 activeTab: 'askAI',
             })

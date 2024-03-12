@@ -363,8 +363,6 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         }
         const { props } = this
 
-        console.log('TooltipRoot render', props.inPageUI)
-
         return (
             <StyleSheetManager target={props.mount.shadowRoot as any}>
                 <ThemeProvider theme={theme({ variant: themeVariant })}>

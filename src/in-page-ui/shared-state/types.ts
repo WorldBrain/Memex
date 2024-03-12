@@ -34,6 +34,7 @@ export type InPageUISidebarAction =
     | 'save_image_as_new_note'
     | 'cite_page'
     | 'share_page_link'
+    | 'add_media_range_to_ai_context'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = ContentScriptComponent
@@ -66,6 +67,7 @@ export interface SidebarActionOptions {
     videoRangeTimestamps?: number[]
     imageData?: string
     prompt?: string
+    range?: { from: number; to: number }
 }
 export interface ToolTipActionOptions {
     annotationCacheId?: UnifiedAnnotation['unifiedId']

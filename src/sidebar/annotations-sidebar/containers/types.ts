@@ -409,6 +409,10 @@ interface SidebarEvents {
         url?: string
         prompt?: string
     }
+    AddMediaRangeToAIcontext: {
+        range?: { from: number; to: number }
+        prompt?: string
+    }
     selectAISuggestion: { suggestion: string }
     queryAIwithPrompt: {
         prompt: string

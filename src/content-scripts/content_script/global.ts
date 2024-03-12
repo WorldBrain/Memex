@@ -815,6 +815,16 @@ export async function main(
             })
             inPageUI.hideTooltip()
         },
+        askAIwithMediaRange: () => (
+            range: { from: number; to: number },
+            prompt: string,
+        ) => {
+            inPageUI.showSidebar({
+                action: 'add_media_range_to_ai_context',
+                range,
+                prompt,
+            })
+        },
         createTimestampWithAISummary: async (includeLastFewSecs, prompt) => {
             const timestampToPass = await getTimestampedNoteWithAIsummaryForYoutubeNotes(
                 includeLastFewSecs,

@@ -489,6 +489,15 @@ export class AnnotationsSidebar extends React.Component<
         document.addEventListener('keydown', this.handleSelectAll)
         document.addEventListener('mousedown', this.handleLastClick)
         document.addEventListener('mousemove', this.trackMouseOverSidebar)
+
+        this.props.events.on(
+            'addMediaRangeToEditor',
+            (from: number, to: number, url: string) => {
+                console.log('sidebar reached addMediaRangeToEditor event')
+
+                // this.editor.addMediaRangeToEditor(from, to, url)
+            },
+        )
     }
 
     async componentDidUpdate(
@@ -508,6 +517,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     handleLastClick = (e) => {
+        console.log('last click inside sidebar', this.lastClickInsideSidebar)
         const rootElement = this.props.getRootElement()
         const sidebarContainer = rootElement.querySelector(
             '#annotationSidebarContainer',
@@ -2094,6 +2104,7 @@ export class AnnotationsSidebar extends React.Component<
                     updateEditorContentState={
                         this.props.updateAIChatEditorState
                     }
+                    getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{
                         loadState: this.props.loadState,
