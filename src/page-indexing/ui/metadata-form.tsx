@@ -26,6 +26,7 @@ import {
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { PDF_VIEWER_HTML } from 'src/pdf/constants'
+import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 
 export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -47,7 +48,6 @@ export interface State
     autoFillState: UITaskState
     contentType: 'web' | 'pdf'
     formChanged: boolean
-    showAutoFillBtn: boolean
 }
 
 export class PageMetadataForm extends React.PureComponent<Props, State> {
@@ -71,7 +71,6 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         autoFillState: 'pristine',
         contentType: 'web',
         formChanged: false,
-        showAutoFillBtn: false,
     }
     private normalizedPageUrl: string
 
@@ -114,8 +113,14 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         }))
     }
 
-    private get shouldShowAddEntityBtn(): boolean {
+    private get shouldEnableAddEntityBtn(): boolean {
         return this.state.newEntityName.trim().length > 0
+    }
+    private get shouldEnableAutoFillBtn(): boolean {
+        return (
+            this.state.doi.trim().length > 0 &&
+            this.state.autoFillState === 'pristine'
+        )
     }
 
     private handleSubmit: React.FormEventHandler = async (e) => {
@@ -146,8 +151,9 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         e.stopPropagation()
         this.setState({ [stateKey]: e.target.value, formChanged: true } as any)
 
+        // Reset autofill state on DOI change to allow for re-autofill attempts
         if (stateKey === 'doi') {
-            this.setState({ showAutoFillBtn: true })
+            this.setState({ autoFillState: 'pristine' })
         }
     }
 
@@ -181,10 +187,8 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             { doi: this.state.doi },
         )
         if (!pageMetadata) {
-            this.setState({
-                autoFillState: 'success',
-                showAutoFillBtn: false,
-            })
+            this.setState({ autoFillState: 'success' })
+            return
         }
         this.setState((state) => {
             // Append any new entities to existing, deduping by `name`
@@ -237,7 +241,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
     }
 
     private handleAddEntity = () => {
-        if (!this.shouldShowAddEntityBtn) {
+        if (!this.shouldEnableAddEntityBtn) {
             throw new Error('Cannot add entity if input state not yet set')
         }
         const orderedEntityItems = normalizedStateToArray(
@@ -291,18 +295,29 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                     e.stopPropagation()
                                 }}
                             />
-                            {this.state.showAutoFillBtn && (
-                                <PrimaryAction
-                                    type="glass"
-                                    label="Autofill"
-                                    size="small"
-                                    icon="stars"
-                                    padding="2px 5px"
-                                    width="100%"
-                                    onClick={this.handleAutoFill}
-                                    fontColor="greyScale6"
-                                />
-                            )}
+                            <PrimaryAction
+                                type="glass"
+                                label={'Autofill'}
+                                spinningIcon={
+                                    this.state.autoFillState === 'running'
+                                }
+                                size="small"
+                                icon={
+                                    this.state.autoFillState === 'running' ? (
+                                        <LoadingIndicator
+                                            size={10}
+                                            margin="5px"
+                                        />
+                                    ) : (
+                                        'stars'
+                                    )
+                                }
+                                padding="2px 5px"
+                                width="100%"
+                                onClick={this.handleAutoFill}
+                                fontColor="greyScale6"
+                                disabled={!this.shouldEnableAutoFillBtn}
+                            />
                         </FormSectionItem>
                     )}
                     <FormSectionItem>
@@ -471,7 +486,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                 fullWidth
                                 iconColor="prime1"
                                 onClick={this.handleAddEntity}
-                                disabled={!this.shouldShowAddEntityBtn}
+                                disabled={!this.shouldEnableAddEntityBtn}
                                 fontColor="greyScale6"
                             />
                         </EntitiesContainer>
