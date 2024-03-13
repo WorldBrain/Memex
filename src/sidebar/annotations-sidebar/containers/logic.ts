@@ -3587,48 +3587,92 @@ export class SidebarContainerLogic extends UILogic<
     askAIviaInPageInteractions: EventHandler<
         'askAIviaInPageInteractions'
     > = async ({ event, previousState }) => {
+        console.log('pageinteractions', event)
         this.setActiveSidebarTabEvents('summary')
-        if (previousState.activeTab === 'summary') {
-            this.options.events.emit(
-                'addSelectedTextToAIquery',
-                event.textToProcess,
-                (success) => {},
-            )
+        this.emitMutation({ activeTab: { $set: 'summary' } })
+        console.log('open sidebar')
+        if (event.textToProcess && event.prompt) {
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addSelectedTextAndInstaPrompt',
+                        event.textToProcess,
+                        event.prompt,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 10))
+            }
+            return
+        }
+        if (event.textToProcess) {
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addSelectedTextToAIquery',
+                        event.textToProcess,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 10))
+            }
+            return
+        }
+        if (!event.textToProcess) {
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addPageUrlToEditor',
+                        window.location.href,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 10))
+            }
+
             return
         }
 
-        this.emitMutation({ activeTab: { $set: 'summary' } })
+        // let prompt =
+        //     event.prompt?.length > 0
+        //         ? event.prompt
+        //         : 'Tell me the key takeaways: '
+        // let highlightedText =
+        //     event.textToProcess?.length > 0 ? event.textToProcess : null
 
-        let prompt =
-            event.prompt?.length > 0
-                ? event.prompt
-                : 'Tell me the key takeaways: '
-        let highlightedText =
-            event.textToProcess?.length > 0 ? event.textToProcess : null
+        // await this.processUIEvent('queryAIwithPrompt', {
+        //     event: {
+        //         prompt: prompt,
+        //         highlightedText: event.textToProcess,
+        //         queryMode: 'summarize',
+        //     },
+        //     previousState,
+        // })
 
-        await this.processUIEvent('queryAIwithPrompt', {
-            event: {
-                prompt: prompt,
-                highlightedText: event.textToProcess,
-                queryMode: 'summarize',
-            },
-            previousState,
-        })
-
-        this.emitMutation({
-            pageSummary: { $set: '' },
-            selectedTextAIPreview: { $set: event.textToProcess },
-            prompt: {
-                $set: prompt,
-            },
-        })
+        // this.emitMutation({
+        //     pageSummary: { $set: '' },
+        //     selectedTextAIPreview: { $set: event.textToProcess },
+        //     prompt: {
+        //         $set: prompt,
+        //     },
+        // })
     }
+
     AddMediaRangeToAIcontext: EventHandler<
         'AddMediaRangeToAIcontext'
     > = async ({ event, previousState }) => {
         this.setActiveSidebarTabEvents('summary')
 
-        await sleepPromise(1000)
+        await sleepPromise(10)
         if (previousState.activeTab === 'summary') {
             this.options.events.emit(
                 'addMediaRangeToEditor',

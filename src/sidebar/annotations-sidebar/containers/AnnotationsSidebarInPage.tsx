@@ -248,6 +248,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     private handleExternalAction = async (event: SidebarActionOptions) => {
         // instantl load page summaries bc they are not dependent on initlogicpromise
 
+        console.log('eventtttt', event)
         if (event.action === 'show_page_summary') {
             await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
@@ -320,15 +321,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 tab: 'rabbitHole',
             })
             return true
-        } else if (event.action === 'add_media_range_to_ai_context') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab: 'summary',
-            })
-            await this.processEvent('AddMediaRangeToAIcontext', {
-                range: event.range,
-                prompt: event.prompt,
-            })
-            return true
         }
 
         // Don't handle any external action that depend on cache until init logic has completed
@@ -336,8 +328,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.initLogicPromise,
             this.props.inPageUI.cacheLoadPromise,
         ])
-
-        console.log('move', event.action, event)
 
         // if (event.action === 'comment') {
         //     await this.processEvent('setActiveSidebarTab', {
@@ -354,6 +344,15 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 sharedListId: event.sharedListId,
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
+        } else if (event.action === 'add_media_range_to_ai_context') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('AddMediaRangeToAIcontext', {
+                range: event.range,
+                prompt: event.prompt,
+            })
+            return true
         } else if (event.action === 'show_annotation') {
             await this.activateAnnotation(event.annotationCacheId, 'show')
             console.log('show')
