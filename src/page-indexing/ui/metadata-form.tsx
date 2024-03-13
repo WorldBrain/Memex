@@ -27,6 +27,7 @@ import {
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { PDF_VIEWER_HTML } from 'src/pdf/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import type { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 
 export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -136,11 +137,23 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
     private get shouldEnableAddEntityBtn(): boolean {
         return this.state.newEntityName.trim().length > 0
     }
+
     private get shouldEnableAutoFillBtn(): boolean {
         return (
             this.state.doi.trim().length > 0 &&
             this.state.autoFillState === 'pristine'
         )
+    }
+
+    private get autoFillBtnIcon(): IconKeys | JSX.Element {
+        const { autoFillState } = this.state
+        if (autoFillState === 'running') {
+            return <LoadingIndicator size={10} margin="5px" />
+        }
+        if (autoFillState === 'error') {
+            return 'sadFace'
+        }
+        return 'stars'
     }
 
     private handleSubmit: React.FormEventHandler = async (e) => {
@@ -203,45 +216,50 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             return
         }
         this.setState({ autoFillState: 'running' })
-        const pageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
-            { doi: this.state.doi },
-        )
-        if (!pageMetadata) {
-            this.setState({ autoFillState: 'success' })
-            return
-        }
-        this.setState((state) => {
-            // Append any new entities to existing, deduping by `name`
-            const allEntities = new Map<string, PageEntity>(
-                pageMetadata.entities
-                    .map((e) => [e.name, e] as any)
-                    .concat(
-                        normalizedStateToArray(state.entities).map((e) => [
-                            e.name,
-                            e,
-                        ]),
-                    ),
+        try {
+            const pageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
+                { doi: this.state.doi },
             )
-            return {
-                autoFillState: 'success',
-                entities: initNormalizedState({
-                    seedData: [...allEntities.values()].sort(
-                        defaultOrderableSorter,
-                    ),
-                    getId: (e) => e.id,
-                }),
-                doi: pageMetadata.doi ?? state.doi,
-                title: pageMetadata.title ?? state.title,
-                annotation: pageMetadata.annotation ?? state.annotation,
-                sourceName: pageMetadata.sourceName ?? state.sourceName,
-                journalName: pageMetadata.journalName ?? state.journalName,
-                journalPage: pageMetadata.journalPage ?? state.journalPage,
-                journalIssue: pageMetadata.journalIssue ?? state.journalIssue,
-                journalVolume:
-                    pageMetadata.journalVolume ?? state.journalVolume,
-                releaseDate: pageMetadata.releaseDate ?? state.releaseDate,
+            if (!pageMetadata) {
+                this.setState({ autoFillState: 'success' })
+                return
             }
-        })
+            this.setState((state) => {
+                // Append any new entities to existing, deduping by `name`
+                const allEntities = new Map<string, PageEntity>(
+                    pageMetadata.entities
+                        .map((e) => [e.name, e] as any)
+                        .concat(
+                            normalizedStateToArray(state.entities).map((e) => [
+                                e.name,
+                                e,
+                            ]),
+                        ),
+                )
+                return {
+                    autoFillState: 'success',
+                    entities: initNormalizedState({
+                        seedData: [...allEntities.values()].sort(
+                            defaultOrderableSorter,
+                        ),
+                        getId: (e) => e.id,
+                    }),
+                    doi: pageMetadata.doi ?? state.doi,
+                    title: pageMetadata.title ?? state.title,
+                    annotation: pageMetadata.annotation ?? state.annotation,
+                    sourceName: pageMetadata.sourceName ?? state.sourceName,
+                    journalName: pageMetadata.journalName ?? state.journalName,
+                    journalPage: pageMetadata.journalPage ?? state.journalPage,
+                    journalIssue:
+                        pageMetadata.journalIssue ?? state.journalIssue,
+                    journalVolume:
+                        pageMetadata.journalVolume ?? state.journalVolume,
+                    releaseDate: pageMetadata.releaseDate ?? state.releaseDate,
+                }
+            })
+        } catch (err) {
+            this.setState({ autoFillState: 'error' })
+        }
     }
 
     private handleDeleteEntity = (entityId: number) => () => {
@@ -322,20 +340,12 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                     this.state.autoFillState === 'running'
                                 }
                                 size="small"
-                                icon={
-                                    this.state.autoFillState === 'running' ? (
-                                        <LoadingIndicator
-                                            size={10}
-                                            margin="5px"
-                                        />
-                                    ) : (
-                                        'stars'
-                                    )
-                                }
+                                icon={this.autoFillBtnIcon}
                                 padding="2px 5px"
                                 width="100%"
                                 onClick={this.handleAutoFill}
                                 fontColor="greyScale6"
+                                iconColor="greyScale6"
                                 disabled={!this.shouldEnableAutoFillBtn}
                             />
                         </FormSectionItem>
