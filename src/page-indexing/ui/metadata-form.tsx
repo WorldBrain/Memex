@@ -39,7 +39,12 @@ export interface Props {
 }
 
 export interface State
-    extends Required<Omit<PageMetadata, 'normalizedPageUrl'>> {
+    extends Required<
+        Omit<
+            PageMetadata,
+            'normalizedPageUrl' | 'description' | 'previewImageUrl'
+        >
+    > {
     newEntityName: string
     newEntityIsPrimary: boolean
     newEntityAdditionalName: string

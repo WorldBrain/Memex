@@ -495,9 +495,11 @@ export default class PageStorage extends StorageModule {
             releaseDate: metadata.releaseDate,
             annotation: metadata.annotation?.trim(),
             sourceName: metadata.sourceName?.trim(),
+            description: metadata.description?.trim(),
             journalName: metadata.journalName?.trim(),
             journalPage: metadata.journalPage?.trim(),
             journalVolume: metadata.journalVolume?.trim(),
+            previewImageUrl: metadata.previewImageUrl?.trim(),
             journalIssue: metadata.journalIssue,
         }
 
