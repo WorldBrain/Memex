@@ -68,6 +68,10 @@ import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/ut
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { AuthBackground } from 'src/authentication/background'
 import { doiToPageMetadata } from '../doi-to-page-metadata'
+import {
+    DEFAULT_KEY,
+    DEFAULT_SPACE_BETWEEN,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -213,12 +217,27 @@ export class PageIndexingBackground {
 
     fetchPageMetadataByDOI: PageIndexingInterface<
         'provider'
-    >['fetchPageMetadataByDOI']['function'] = async ({ doi }) => {
-        const metadata = await doiToPageMetadata({
-            doi,
-            fetch: this.options.fetch,
-        })
-        return metadata
+    >['fetchPageMetadataByDOI']['function'] = async ({
+        doi,
+        now = Date.now(),
+    }) => {
+        try {
+            const metadata = await doiToPageMetadata({
+                doi,
+                fetch: this.options.fetch,
+            })
+            return {
+                ...metadata,
+                entities: metadata.entities.map((e, i) => ({
+                    ...e,
+                    // Filling in (hopefully) unique IDs and orders for fetched entities. This could be improved
+                    id: now + i,
+                    order: DEFAULT_KEY + i * DEFAULT_SPACE_BETWEEN - now,
+                })),
+            }
+        } catch (err) {
+            return null
+        }
     }
 
     async initContentIdentifier(
@@ -723,13 +742,26 @@ export class PageIndexingBackground {
         if (isPdf) {
             const doi = this.attemptToExtractDOIFromPDFAnalysis(pageData)
             if (doi?.length) {
-                await this.storage.updatePageMetadata({
-                    normalizedPageUrl: pageData.url,
-                    accessDate: this._getTime(props.visitTime),
-                    entities: [],
+                const fetchedPageMetadata = await this.fetchPageMetadataByDOI({
                     doi,
                 })
+                await this.storage.updatePageMetadata({
+                    doi,
+                    normalizedPageUrl: pageData.url,
+                    accessDate: this._getTime(props.visitTime),
+                    entities: fetchedPageMetadata?.entities ?? [],
+                    title: fetchedPageMetadata?.title,
+                    annotation: fetchedPageMetadata?.annotation,
+                    sourceName: fetchedPageMetadata?.sourceName,
+                    journalName: fetchedPageMetadata?.journalName,
+                    journalPage: fetchedPageMetadata?.journalPage,
+                    journalIssue: fetchedPageMetadata?.journalIssue,
+                    journalVolume: fetchedPageMetadata?.journalVolume,
+                    releaseDate: fetchedPageMetadata?.releaseDate,
+                })
             }
+        } else {
+            console.log('No PDF :(')
         }
 
         try {
@@ -835,6 +867,7 @@ export class PageIndexingBackground {
                 pdfMetadata.metadataMap?.['crossmark:doi'] ??
                 pdfMetadata.metadataMap?.['pdfx:doi'] ??
                 pdfMetadata.metadataMap?.['prism:doi']
+            console.log('doi 1:', doi)
         }
         // Else try to extract from first page's text
         if (!doi && pdfPageTexts?.length) {
@@ -843,6 +876,7 @@ export class PageIndexingBackground {
             if (matchRes?.length) {
                 doi = matchRes[0]
             }
+            console.log('doi 2:', doi, pdfPageTexts[0])
         }
         return doi
     }

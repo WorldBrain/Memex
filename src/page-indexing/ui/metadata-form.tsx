@@ -16,8 +16,6 @@ import {
 } from 'react-beautiful-dnd'
 import ReactDOM from 'react-dom'
 import {
-    DEFAULT_KEY,
-    DEFAULT_SPACE_BETWEEN,
     defaultOrderableSorter,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
@@ -219,57 +217,41 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             return
         }
         this.setState({ autoFillState: 'running' })
-        try {
-            const fetchedPageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
-                { doi: this.state.doi },
-            )
-            if (!fetchedPageMetadata) {
-                this.setState({ autoFillState: 'success' })
-                return
-            }
-            const now = Date.now()
-            this.setState((state) => {
-                // Merge any new auto-filled entities with existing
-                const nextEntities = mergeNormalizedStates(
-                    this.state.entities,
-                    initNormalizedState({
-                        getId: (e) => e.id,
-                        seedData: fetchedPageMetadata.entities.map((e, i) => ({
-                            ...e,
-                            // Filling in (hopefully) unique IDs and orders for fetched entities. This could be improved
-                            id: now + i,
-                            order:
-                                DEFAULT_KEY +
-                                (i + 1) * DEFAULT_SPACE_BETWEEN -
-                                now,
-                        })),
-                    }),
-                )
-                return {
-                    autoFillState: 'success',
-                    entities: nextEntities,
-                    doi: fetchedPageMetadata.doi ?? state.doi,
-                    title: fetchedPageMetadata.title ?? state.title,
-                    annotation:
-                        fetchedPageMetadata.annotation ?? state.annotation,
-                    sourceName:
-                        fetchedPageMetadata.sourceName ?? state.sourceName,
-                    journalName:
-                        fetchedPageMetadata.journalName ?? state.journalName,
-                    journalPage:
-                        fetchedPageMetadata.journalPage ?? state.journalPage,
-                    journalIssue:
-                        fetchedPageMetadata.journalIssue ?? state.journalIssue,
-                    journalVolume:
-                        fetchedPageMetadata.journalVolume ??
-                        state.journalVolume,
-                    releaseDate:
-                        fetchedPageMetadata.releaseDate ?? state.releaseDate,
-                }
-            })
-        } catch (err) {
+        const fetchedPageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
+            { doi: this.state.doi },
+        )
+        if (!fetchedPageMetadata) {
             this.setState({ autoFillState: 'error' })
+            return
         }
+        this.setState((state) => {
+            // Merge any new auto-filled entities with existing
+            const nextEntities = mergeNormalizedStates(
+                this.state.entities,
+                initNormalizedState({
+                    seedData: fetchedPageMetadata.entities,
+                    getId: (e) => e.id,
+                }),
+            )
+            return {
+                autoFillState: 'success',
+                entities: nextEntities,
+                doi: fetchedPageMetadata.doi ?? state.doi,
+                title: fetchedPageMetadata.title ?? state.title,
+                annotation: fetchedPageMetadata.annotation ?? state.annotation,
+                sourceName: fetchedPageMetadata.sourceName ?? state.sourceName,
+                journalName:
+                    fetchedPageMetadata.journalName ?? state.journalName,
+                journalPage:
+                    fetchedPageMetadata.journalPage ?? state.journalPage,
+                journalIssue:
+                    fetchedPageMetadata.journalIssue ?? state.journalIssue,
+                journalVolume:
+                    fetchedPageMetadata.journalVolume ?? state.journalVolume,
+                releaseDate:
+                    fetchedPageMetadata.releaseDate ?? state.releaseDate,
+            }
+        })
     }
 
     private handleDeleteEntity = (entityId: number) => () => {
