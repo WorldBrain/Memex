@@ -1635,7 +1635,16 @@ export class AnnotationsSidebar extends React.Component<
                     </IconBox>
                     <InfoText>
                         This page is not yet in a Space <br /> you created,
-                        follow or collaborate in.
+                        follow or collaborate in. <b /> click on the
+                        <span>
+                            {' '}
+                            <Icon
+                                icon="plus"
+                                heightAndWidth="20px"
+                                hoverOff
+                            />{' '}
+                        </span>
+                        icon on the right
                     </InfoText>
                 </EmptyMessageContainer>
             )
