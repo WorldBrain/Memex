@@ -6,12 +6,10 @@ import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexin
 import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
 
-export interface PageAnalysis {
+export interface PageAnalysis extends Partial<ExtractedPDFData> {
     content: PageContent
     favIconURI?: string
     htmlBody?: string
-    pdfMetadata?: { [key: string]: any }
-    pdfPageTexts?: string[]
 }
 
 export type PageAnalyzer = (args: {

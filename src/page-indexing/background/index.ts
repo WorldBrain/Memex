@@ -720,6 +720,18 @@ export class PageIndexingBackground {
             // })
         }
 
+        if (isPdf) {
+            const doi = this.attemptToExtractDOIFromPDFAnalysis(pageData)
+            if (doi?.length) {
+                await this.storage.updatePageMetadata({
+                    normalizedPageUrl: pageData.url,
+                    accessDate: this._getTime(props.visitTime),
+                    entities: [],
+                    doi,
+                })
+            }
+        }
+
         try {
             const signupDate = new Date(
                 (
@@ -808,10 +820,37 @@ export class PageIndexingBackground {
         return { ...pageData, isLocalPdf }
     }
 
+    private attemptToExtractDOIFromPDFAnalysis({
+        pdfMetadata,
+        pdfPageTexts,
+    }: Partial<ExtractedPDFData>): string | null {
+        if (!pdfMetadata && !pdfPageTexts?.length) {
+            return null
+        }
+        let doi: string = null
+
+        // Attempt to look in common metadata fields first
+        if (pdfMetadata) {
+            doi =
+                pdfMetadata.metadataMap?.['crossmark:doi'] ??
+                pdfMetadata.metadataMap?.['pdfx:doi'] ??
+                pdfMetadata.metadataMap?.['prism:doi']
+        }
+        // Else try to extract from first page's text
+        if (!doi && pdfPageTexts?.length) {
+            const doiRegex = /\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/(?:(?!["&\'<>])[\x21-\x7E])+)\b/i
+            const matchRes = pdfPageTexts[0].match(doiRegex)
+            if (matchRes?.length) {
+                doi = matchRes[0]
+            }
+        }
+        return doi
+    }
+
     private async processPageDataFromUrl(
         props: PageCreationProps,
     ): Promise<PipelineRes & { isExisting?: boolean; isLocalPdf?: boolean }> {
-        const pageDoc: PageDoc = {
+        const pageDoc: PageDoc & Partial<ExtractedPDFData> = {
             url: props.fullUrl,
             originalUrl: props.fullUrl,
             content: {},
@@ -869,6 +908,8 @@ export class PageIndexingBackground {
             pageDoc.url = baseLocator.fullUrl
             pageDoc.content.title = pdfData.title
             pageDoc.content.fullText = pdfData.fullText
+            pageDoc.pdfMetadata = pdfData.pdfMetadata
+            pageDoc.pdfPageTexts = pdfData.pdfPageTexts
         }
 
         return pagePipeline({ pageDoc })
