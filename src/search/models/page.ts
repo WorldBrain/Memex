@@ -285,6 +285,10 @@ export default class Page extends AbstractModel
     }
 
     async delete() {
+        const annotations: Array<{ url: string }> = await this.db
+            .collection('annotations')
+            .findObjects({ pageUrl: this.url })
+        const annotationIds = annotations.map((a) => a.url)
         return this.db.operation('executeBatch', [
             {
                 collection: 'visits',
@@ -305,6 +309,21 @@ export default class Page extends AbstractModel
                 collection: 'pageListEntries',
                 operation: 'deleteObjects',
                 where: { pageUrl: this.url },
+            },
+            {
+                collection: 'annotListEntries',
+                operation: 'deleteObjects',
+                where: { url: { $in: annotationIds } },
+            },
+            {
+                collection: 'annotationPrivacyLevels',
+                operation: 'deleteObjects',
+                where: { annotation: { $in: annotationIds } },
+            },
+            {
+                collection: 'images',
+                operation: 'deleteObjects',
+                where: { normalizedUrl: this.url },
             },
             {
                 collection: 'annotations',

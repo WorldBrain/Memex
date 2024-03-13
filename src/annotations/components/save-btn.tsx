@@ -212,7 +212,7 @@ export default class AnnotationSaveBtn extends React.PureComponent<
                                             this.props.getRootElement
                                         }
                                     />
-                                    to make auto-add to all Spaces
+                                    to auto-add to all page Spaces
                                 </BottomText>
                             </SaveButtonTooltipContainer>
                         }
