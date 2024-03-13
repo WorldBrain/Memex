@@ -1,4 +1,3 @@
-import { extractPageMetadataFromRawContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import type { PageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
@@ -58,8 +57,11 @@ const analysePage: PageAnalyzer = async (options) => {
         delete pdfContent.pdfPageTexts
         content = pdfContent
     } else {
-        content = extractPageMetadataFromRawContent(rawContent)
-        // content.title = document.title ?? null
+        content = {
+            title: rawContent.metadata.title ?? '',
+            metadata: rawContent.metadata,
+            fullText: '',
+        } as PageContent
     }
 
     if (options.includeContent === 'metadata-with-full-text') {

@@ -760,6 +760,20 @@ export class PageIndexingBackground {
                     releaseDate: fetchedPageMetadata?.releaseDate,
                 })
             }
+        } else if (pageData.pageMetadata) {
+            const releaseDate = pageData.pageMetadata.publishedTime
+                ? new Date(pageData.pageMetadata.publishedTime).valueOf()
+                : undefined
+            await this.storage.updatePageMetadata({
+                normalizedPageUrl: pageData.url,
+                accessDate: this._getTime(props.visitTime),
+                title: pageData.pageMetadata.title,
+                sourceName: pageData.pageMetadata.provider,
+                previewImageUrl: pageData.pageMetadata.image,
+                description: pageData.pageMetadata.description,
+                releaseDate,
+                entities: [],
+            })
         }
 
         try {
