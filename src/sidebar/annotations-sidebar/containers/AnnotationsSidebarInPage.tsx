@@ -208,7 +208,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             inPageUI.selectedList = selectedList
         })
         sidebarEvents.on('setActiveSidebarTab', async (activeTab) => {
-            console.log('setActiveSidebarTab', activeTab)
             inPageUI.activeSidebarTab = activeTab.activeTab
         })
     }
@@ -338,25 +337,28 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.props.inPageUI.cacheLoadPromise,
         ])
 
-        if (event.action === 'comment') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab:
-                    this.state.selectedListId &&
-                    this.state.activeTab === 'spaces'
-                        ? 'spaces'
-                        : 'annotations',
-            })
-            await this.processEvent('setNewPageNoteText', {
-                comment: event.annotationData?.commentText ?? '',
-            })
-        } else if (event.action === 'selected_list_mode_from_web_ui') {
+        console.log('move', event.action, event)
+
+        // if (event.action === 'comment') {
+        //     await this.processEvent('setActiveSidebarTab', {
+        //         tab: this.state.selectedListId ? 'spaces' : 'annotations',
+        //     })
+        //     if (this.state.activeTab === 'annotations') {
+        //         await this.processEvent('setNewPageNoteText', {
+        //             comment: event.annotationData?.commentText ?? '',
+        //         })
+        //     }
+        // } else
+        if (event.action === 'selected_list_mode_from_web_ui') {
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
         } else if (event.action === 'show_annotation') {
             await this.activateAnnotation(event.annotationCacheId, 'show')
+            console.log('show')
             await sleepPromise(500)
+            console.log('showafter')
             if (
                 this.state.selectedListId &&
                 this.state.activeTab === 'spaces'

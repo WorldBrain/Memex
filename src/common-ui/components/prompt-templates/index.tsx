@@ -132,6 +132,12 @@ export default class PromptTemplatesComponent extends UIElement<
                                 <div
                                     {...provided.droppableProps}
                                     ref={provided.innerRef}
+                                    style={{
+                                        gridGap: '3px',
+                                        display: 'flex',
+                                        flexDirection: 'column',
+                                        // Additional styles if needed
+                                    }}
                                 >
                                     {this.state.promptTemplatesArray.map(
                                         (template, index) => (
@@ -432,7 +438,7 @@ const Header = styled.div`
     display: flex;
     flex-direction: row;
     justify-content: space-between;
-    padding: 15px 15px 0px 25px;
+    padding: 15px 15px 0px 24px;
     height: 30px;
     align-items: center;
 `
@@ -639,6 +645,7 @@ const TemplateRowTitle = styled.div<{
     font-style: normal;
     font-weight: normal;
     font-size: 14px;
+    width: 90%;
     color: ${(props) => props.theme.colors.greyScale6};
 
     outline: none;
@@ -665,7 +672,7 @@ const RowContainer = styled.div<{
     width: 100%;
     height: 40px;
     border-radius: 8px;
-    padding: 0 0 0 18px;
+    padding: 0 0 0 10px;
     box-sizing: border-box;
 
     ${(props) =>
