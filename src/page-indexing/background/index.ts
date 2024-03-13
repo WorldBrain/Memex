@@ -740,7 +740,7 @@ export class PageIndexingBackground {
         }
 
         if (isPdf) {
-            const doi = this.attemptToExtractDOIFromPDFAnalysis(pageData)
+            const doi = this.attemptToExtractDOIFromPDFData(pageData)
             if (doi?.length) {
                 const fetchedPageMetadata = await this.fetchPageMetadataByDOI({
                     doi,
@@ -760,8 +760,6 @@ export class PageIndexingBackground {
                     releaseDate: fetchedPageMetadata?.releaseDate,
                 })
             }
-        } else {
-            console.log('No PDF :(')
         }
 
         try {
@@ -852,7 +850,7 @@ export class PageIndexingBackground {
         return { ...pageData, isLocalPdf }
     }
 
-    private attemptToExtractDOIFromPDFAnalysis({
+    private attemptToExtractDOIFromPDFData({
         pdfMetadata,
         pdfPageTexts,
     }: Partial<ExtractedPDFData>): string | null {
@@ -867,7 +865,6 @@ export class PageIndexingBackground {
                 pdfMetadata.metadataMap?.['crossmark:doi'] ??
                 pdfMetadata.metadataMap?.['pdfx:doi'] ??
                 pdfMetadata.metadataMap?.['prism:doi']
-            console.log('doi 1:', doi)
         }
         // Else try to extract from first page's text
         if (!doi && pdfPageTexts?.length) {
@@ -876,7 +873,6 @@ export class PageIndexingBackground {
             if (matchRes?.length) {
                 doi = matchRes[0]
             }
-            console.log('doi 2:', doi, pdfPageTexts[0])
         }
         return doi
     }

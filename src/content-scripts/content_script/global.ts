@@ -1510,6 +1510,7 @@ class PageInfo {
             fingerprints:
                 (await this.options?.getContentFingerprints?.()) ?? [],
         })
+        console.log('init:', this._identifier)
         if (!this._identifier?.normalizedUrl || !this._identifier?.fullUrl) {
             console.error(`Invalid content identifier`, this._identifier)
             throw new Error(`Got invalid content identifier`)
