@@ -92,10 +92,20 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             contentType: isPagePDF ? 'pdf' : 'web',
         })
 
-        let initAccessDate = Date.now() // TODO: Replace this with a call to get the oldest visit/bookmark for this page
-        const metadata = (await pageIndexingBG.getPageMetadata({
+        let metadata = await pageIndexingBG.getPageMetadata({
             normalizedPageUrl: this.normalizedPageUrl,
-        })) ?? { entities: [], accessDate: initAccessDate }
+        })
+        if (!metadata) {
+            const firstAccessTime = await pageIndexingBG.getFirstAccessTimeForPage(
+                { normalizedPageUrl: this.normalizedPageUrl },
+            )
+            metadata = {
+                entities: [],
+                accessDate: firstAccessTime ?? Date.now(),
+            }
+        }
+
+        // TODO: This won't yet work for non-indexed PDF pages
         const originalUrl = isPagePDF
             ? await pageIndexingBG.getOriginalUrlForPdfPage({
                   normalizedPageUrl: this.normalizedPageUrl,
@@ -103,21 +113,22 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
             : fullPageUrl
 
         this.setState((previousState) => ({
-            displayFullUrl: decodeURIComponent(originalUrl),
+            displayFullUrl: decodeURIComponent(originalUrl ?? ''),
             entities: initNormalizedState({
                 seedData: metadata.entities.sort(defaultOrderableSorter),
                 getId: (e) => e.id,
             }),
+            journalVolume:
+                metadata.journalVolume ?? previousState.journalVolume,
+            journalIssue: metadata.journalIssue ?? previousState.journalIssue,
+            journalName: metadata.journalName ?? previousState.journalName,
+            journalPage: metadata.journalPage ?? previousState.journalPage,
+            releaseDate: metadata.releaseDate ?? previousState.releaseDate,
+            sourceName: metadata.sourceName ?? previousState.sourceName,
+            annotation: metadata.annotation ?? previousState.annotation,
+            accessDate: metadata.accessDate ?? previousState.accessDate,
+            title: metadata.title ?? previousState.title,
             doi: metadata.doi ?? previousState.doi,
-            journalVolume: metadata.journalVolume,
-            journalIssue: metadata.journalIssue,
-            journalName: metadata.journalName,
-            journalPage: metadata.journalPage,
-            releaseDate: metadata.releaseDate,
-            sourceName: metadata.sourceName,
-            annotation: metadata.annotation,
-            accessDate: metadata.accessDate,
-            title: metadata.title,
             loadState: 'success',
         }))
     }

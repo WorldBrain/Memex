@@ -29,10 +29,15 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         { normalizedPageUrl: string },
         string | null
     >
-    lookupPageTitleForUrl: RemoteFunctionWithoutExtraArgs<
+    getTitleForPage: RemoteFunctionWithoutExtraArgs<
         Role,
         { fullPageUrl: string },
         string | null
+    >
+    getFirstAccessTimeForPage: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { normalizedPageUrl: string },
+        number | null
     >
     updatePageTitle: RemoteFunctionWithExtraArgs<
         Role,

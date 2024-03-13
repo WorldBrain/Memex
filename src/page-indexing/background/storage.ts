@@ -30,8 +30,10 @@ import {
 } from 'src/pkm-integrations/background/backend/utils'
 import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
 import {
+    Bookmark,
     PageEntity,
     PageMetadata,
+    Visit,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import { PageMetadataUpdateArgs } from './types'
 
@@ -168,6 +170,14 @@ export default class PageStorage extends StorageModule {
                     { sort: [['time', 'desc']], limit: 1 },
                 ],
             },
+            findOldestVisitByUrl: {
+                operation: 'findObjects',
+                collection: 'visits',
+                args: [
+                    { url: '$url:string' },
+                    { sort: [['time', 'asc']], limit: 1 },
+                ],
+            },
             findVisitsByUrl: {
                 operation: 'findObjects',
                 collection: 'visits',
@@ -200,6 +210,11 @@ export default class PageStorage extends StorageModule {
                 args: {
                     url: '$url:string',
                 },
+            },
+            findBookmarkByUrl: {
+                operation: 'findObject',
+                collection: 'bookmarks',
+                args: { url: '$url:string' },
             },
             findLocatorsByNormalizedUrl: {
                 operation: 'findObjects',
@@ -536,6 +551,23 @@ export default class PageStorage extends StorageModule {
         await this.operation('deletePage', {
             url: normalizedUrl,
         })
+    }
+
+    async getFirstVisitOrBookmarkTime(
+        normalizedPageUrl: string,
+    ): Promise<number | null> {
+        const [visit]: Visit[] = await this.operation('findOldestVisitByUrl', {
+            url: normalizedPageUrl,
+        })
+        const bookmark: Bookmark = await this.operation('findBookmarkByUrl', {
+            url: normalizedPageUrl,
+        })
+        if (!visit && !bookmark) {
+            return null
+        }
+        return Math.min(
+            ...[bookmark?.time, visit?.time].filter((t) => t != null),
+        )
     }
 
     async getLatestVisit(

@@ -148,8 +148,11 @@ export class PageIndexingBackground {
             getOriginalUrlForPdfPage: remoteFunctionWithoutExtraArgs(
                 this.getOriginalUrlForPdfPage,
             ),
-            lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
-                this.lookupPageTitleForUrl,
+            getFirstAccessTimeForPage: remoteFunctionWithoutExtraArgs(
+                this.getFirstAccessTimeForPage,
+            ),
+            getTitleForPage: remoteFunctionWithoutExtraArgs(
+                this.getTitleForPage,
             ),
             fetchPageMetadataByDOI: remoteFunctionWithoutExtraArgs(
                 this.fetchPageMetadataByDOI,
@@ -164,9 +167,20 @@ export class PageIndexingBackground {
         registerRemoteFunctions(this.remoteFunctions)
     }
 
-    lookupPageTitleForUrl: PageIndexingInterface<
+    getFirstAccessTimeForPage: PageIndexingInterface<
         'provider'
-    >['lookupPageTitleForUrl']['function'] = async ({ fullPageUrl }) => {
+    >['getFirstAccessTimeForPage']['function'] = async ({
+        normalizedPageUrl,
+    }) => {
+        const accessTime = await this.storage.getFirstVisitOrBookmarkTime(
+            normalizedPageUrl,
+        )
+        return accessTime
+    }
+
+    getTitleForPage: PageIndexingInterface<
+        'provider'
+    >['getTitleForPage']['function'] = async ({ fullPageUrl }) => {
         const pageData = await this.storage.getPage(fullPageUrl)
         return pageData?.fullTitle ?? null
     }
