@@ -2098,6 +2098,9 @@ export class AnnotationsSidebar extends React.Component<
                     updateEditorContentState={
                         this.props.updateAIChatEditorState
                     }
+                    createNewNoteFromAISummary={
+                        this.props.createNewNoteFromAISummary
+                    }
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{

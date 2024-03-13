@@ -29,13 +29,27 @@ export default class PromptTemplatesLogic extends UILogic<
         this.syncSettings = createSyncSettingsStore({
             syncSettingsBG: this.dependencies.syncSettingsBG,
         })
-        const promptTemplateArray: PromptTemplate[] =
+        let promptTemplateArray =
             (await this.syncSettings.openAI?.get('promptSuggestions')) ??
-            AI_PROMPT_DEFAULTS.map((text, index) => ({
+            AI_PROMPT_DEFAULTS.map((text) => ({
                 text,
-                isEditing: false,
+                isEditing: null,
                 isFocused: false,
             }))
+
+        if (promptTemplateArray[0].text == null) {
+            promptTemplateArray =
+                promptTemplateArray?.map((text) => ({
+                    text,
+                    isEditing: null,
+                    isFocused: false,
+                })) ??
+                AI_PROMPT_DEFAULTS.map((text) => ({
+                    text,
+                    isEditing: null,
+                    isFocused: false,
+                }))
+        }
 
         this.emitMutation({
             promptTemplatesArray: { $set: promptTemplateArray },

@@ -2495,7 +2495,7 @@ export class SidebarContainerLogic extends UILogic<
     createNewNoteFromAISummary: EventHandler<
         'createNewNoteFromAISummary'
     > = async ({ event }) => {
-        const comment = '<div>' + marked.parse(event.comment) + '</div>'
+        const comment = marked.parse(event.comment)
         this.emitMutation({
             activeTab: { $set: 'annotations' },
             commentBox: {
