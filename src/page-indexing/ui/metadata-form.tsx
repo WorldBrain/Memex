@@ -16,12 +16,15 @@ import {
 } from 'react-beautiful-dnd'
 import ReactDOM from 'react-dom'
 import {
+    DEFAULT_KEY,
+    DEFAULT_SPACE_BETWEEN,
     defaultOrderableSorter,
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import {
     NormalizedState,
     initNormalizedState,
+    mergeNormalizedStates,
     normalizedStateToArray,
 } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
@@ -217,44 +220,51 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         }
         this.setState({ autoFillState: 'running' })
         try {
-            const pageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
+            const fetchedPageMetadata = await this.props.pageIndexingBG.fetchPageMetadataByDOI(
                 { doi: this.state.doi },
             )
-            if (!pageMetadata) {
+            if (!fetchedPageMetadata) {
                 this.setState({ autoFillState: 'success' })
                 return
             }
+            const now = Date.now()
             this.setState((state) => {
-                // Append any new entities to existing, deduping by `name`
-                const allEntities = new Map<string, PageEntity>(
-                    pageMetadata.entities
-                        .map((e) => [e.name, e] as any)
-                        .concat(
-                            normalizedStateToArray(state.entities).map((e) => [
-                                e.name,
-                                e,
-                            ]),
-                        ),
+                // Merge any new auto-filled entities with existing
+                const nextEntities = mergeNormalizedStates(
+                    this.state.entities,
+                    initNormalizedState({
+                        getId: (e) => e.id,
+                        seedData: fetchedPageMetadata.entities.map((e, i) => ({
+                            ...e,
+                            // Filling in (hopefully) unique IDs and orders for fetched entities. This could be improved
+                            id: now + i,
+                            order:
+                                DEFAULT_KEY +
+                                (i + 1) * DEFAULT_SPACE_BETWEEN -
+                                now,
+                        })),
+                    }),
                 )
                 return {
                     autoFillState: 'success',
-                    entities: initNormalizedState({
-                        seedData: [...allEntities.values()].sort(
-                            defaultOrderableSorter,
-                        ),
-                        getId: (e) => e.id,
-                    }),
-                    doi: pageMetadata.doi ?? state.doi,
-                    title: pageMetadata.title ?? state.title,
-                    annotation: pageMetadata.annotation ?? state.annotation,
-                    sourceName: pageMetadata.sourceName ?? state.sourceName,
-                    journalName: pageMetadata.journalName ?? state.journalName,
-                    journalPage: pageMetadata.journalPage ?? state.journalPage,
+                    entities: nextEntities,
+                    doi: fetchedPageMetadata.doi ?? state.doi,
+                    title: fetchedPageMetadata.title ?? state.title,
+                    annotation:
+                        fetchedPageMetadata.annotation ?? state.annotation,
+                    sourceName:
+                        fetchedPageMetadata.sourceName ?? state.sourceName,
+                    journalName:
+                        fetchedPageMetadata.journalName ?? state.journalName,
+                    journalPage:
+                        fetchedPageMetadata.journalPage ?? state.journalPage,
                     journalIssue:
-                        pageMetadata.journalIssue ?? state.journalIssue,
+                        fetchedPageMetadata.journalIssue ?? state.journalIssue,
                     journalVolume:
-                        pageMetadata.journalVolume ?? state.journalVolume,
-                    releaseDate: pageMetadata.releaseDate ?? state.releaseDate,
+                        fetchedPageMetadata.journalVolume ??
+                        state.journalVolume,
+                    releaseDate:
+                        fetchedPageMetadata.releaseDate ?? state.releaseDate,
                 }
             })
         } catch (err) {
@@ -612,10 +622,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                         />
                         <PrimaryAction
                             type="primary"
-                            onClick={(e) => {
-                                e.preventDefault()
-                                this.handleSubmit(e)
-                            }}
+                            onClick={this.handleSubmit}
                             label="Save"
                             size="small"
                             icon="check"
