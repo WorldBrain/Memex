@@ -371,7 +371,6 @@ export class AnnotationsSidebarContainer<
             body: annotationCardInstance?.body,
             comment: annotationCardInstance?.comment,
             onCommentChange: (comment) => {
-                console.log('onCommentChange', comment)
                 this.processEvent('setAnnotationEditCommentText', {
                     instanceLocation,
                     unifiedAnnotationId,
@@ -1132,6 +1131,7 @@ export class AnnotationsSidebarContainer<
                                     color: color,
                                 })
                             }}
+                            syncSettingsBG={this.props.syncSettingsBG}
                             onGoToAnnotation={async (unifiedAnnotationId) =>
                                 this.processEvent('goToAnnotationInNewTab', {
                                     unifiedAnnotationId,

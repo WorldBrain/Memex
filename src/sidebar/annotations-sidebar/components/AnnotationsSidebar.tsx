@@ -14,8 +14,6 @@ import type {
 } from '@worldbrain/memex-common/lib/content-sharing/types'
 import type { NewReplyEventHandlers } from '@worldbrain/memex-common/lib/content-conversations/ui/components/new-reply'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
-import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-area'
-import { VideoFrame } from '@worldbrain/memex-common/lib/common-ui/components/videoFrameWrapper'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import AnnotationCreate, {
     Props as AnnotationCreateProps,
@@ -78,8 +76,6 @@ import { UpdateNotifBanner } from 'src/common-ui/containers/UpdateNotifBanner'
 import { YoutubePlayer } from '@worldbrain/memex-common/lib/services/youtube/types'
 import IconBox from '@worldbrain/memex-common/lib/common-ui/components/icon-box'
 import { normalizedStateToArray } from '@worldbrain/memex-common/lib/common-ui/utils/normalized-state'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 import {
     getFeedUrl,
     getListShareUrl,
@@ -93,16 +89,12 @@ import Checkbox from 'src/common-ui/components/Checkbox'
 import { DropdownMenuBtn as DropdownMenuBtnSmall } from 'src/common-ui/components/dropdown-menu-small'
 import { interceptLinks } from '@worldbrain/memex-common/lib/common-ui/utils/interceptVideoLinks'
 import ItemBox from '@worldbrain/memex-common/lib/common-ui/components/item-box'
-import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
-import BlockContent from '@worldbrain/memex-common/lib/common-ui/components/block-content'
 import { sleepPromise } from 'src/util/promises'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import PageCitations from 'src/citations/PageCitations'
 import { TaskState } from 'ui-logic-core/lib/types'
-import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
-import SpacePicker from 'src/custom-lists/ui/CollectionPicker'
 import debounce from 'lodash/debounce'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import AIChatComponent from '@worldbrain/memex-common/lib/ai-chat'
@@ -112,6 +104,8 @@ import {
     ChatHistoryItem,
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
+import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
+import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -266,6 +260,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     fetchLocalHTML: boolean
     changeFetchLocalHTML: (value) => void
     setAIModel: (AImodel) => void
+    syncSettingsBG: RemoteSyncSettingsInterface
     saveHighlightColor: (noteId, colorId, color) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
@@ -517,7 +512,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     handleLastClick = (e) => {
-        console.log('last click inside sidebar', this.lastClickInsideSidebar)
         const rootElement = this.props.getRootElement()
         const sidebarContainer = rootElement.querySelector(
             '#annotationSidebarContainer',
@@ -2115,7 +2109,22 @@ export class AnnotationsSidebar extends React.Component<
                         currentChatId: this.props.currentChatId,
                         currentAIresponse: this.props.pageSummary,
                     }}
+                    syncSettingsBG={this.props.syncSettingsBG}
                     renderOptionsContainer={() => this.renderOptionsContainer()}
+                    renderPromptTemplates={() => {
+                        return (
+                            <PromptTemplatesComponent
+                                syncSettingsBG={this.props.syncSettingsBG}
+                                getRootElement={this.props.getRootElement}
+                                onTemplateSelect={(text: string) =>
+                                    this.props.events.emit(
+                                        'addTextToEditor',
+                                        text,
+                                    )
+                                }
+                            />
+                        )
+                    }}
                 />
             </AISidebarContainer>
         )

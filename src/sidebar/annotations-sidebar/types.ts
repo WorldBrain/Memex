@@ -21,6 +21,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     addImageToEditor: (args: { imageData: string }, callback) => void
     addVideoSnapshotToEditor: (args: { imageData: string }, callback) => void
     addSelectedTextToAIquery: (selectedText: string, callback) => void
+    addTextToEditor: (text: string) => void
     addMediaRangeToEditor?: (from: number, to: number, url: string) => void
     setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
     // No longer used, as of the sidebar refactor

@@ -336,19 +336,27 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 {children}
                             </div>
                         )}
-                        renderThumb={({ props }) => (
-                            <div
-                                {...props}
-                                style={{
-                                    ...props.style,
-                                    height: '24px',
-                                    width: '10px',
-                                    borderRadius: '10px',
-                                    marginTop: '-2px',
-                                    backgroundColor: '#6AE394',
-                                }}
-                            />
-                        )}
+                        renderThumb={({ props }) => {
+                            const {
+                                style,
+                                onKeyDown,
+                                onKeyUp,
+                                ...divProps
+                            } = props
+                            return (
+                                <div
+                                    {...divProps}
+                                    style={{
+                                        ...style,
+                                        height: '24px',
+                                        width: '10px',
+                                        borderRadius: '10px',
+                                        marginTop: '-2px',
+                                        backgroundColor: '#6AE394',
+                                    }}
+                                />
+                            )
+                        }}
                     />
                     <MemexButtonContainer>
                         {this.state.YTChapterContainerVisible && (

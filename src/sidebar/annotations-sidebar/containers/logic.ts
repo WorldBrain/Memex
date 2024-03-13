@@ -3182,6 +3182,7 @@ export class SidebarContainerLogic extends UILogic<
     updateAIChatEditorState: EventHandler<'updateAIChatEditorState'> = async ({
         event,
     }) => {
+        console.log('newState', event.AIChatEditorState)
         this.emitMutation({
             aiQueryEditorState: { $set: event.AIChatEditorState },
         })
