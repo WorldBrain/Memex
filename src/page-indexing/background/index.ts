@@ -215,6 +215,14 @@ export class PageIndexingBackground {
         return { ...metadata, entities }
     }
 
+    /**
+     * Fills in (hopefully) unique IDs and orders for remotely fetched entities. This could be improved
+     */
+    private assignEntityData = (idBase: number, idOffset: number) => ({
+        id: idBase + idOffset,
+        order: DEFAULT_KEY + idOffset * DEFAULT_SPACE_BETWEEN - idBase,
+    })
+
     fetchPageMetadataByDOI: PageIndexingInterface<
         'provider'
     >['fetchPageMetadataByDOI']['function'] = async ({
@@ -230,9 +238,7 @@ export class PageIndexingBackground {
                 ...metadata,
                 entities: metadata.entities.map((e, i) => ({
                     ...e,
-                    // Filling in (hopefully) unique IDs and orders for fetched entities. This could be improved
-                    id: now + i,
-                    order: DEFAULT_KEY + i * DEFAULT_SPACE_BETWEEN - now,
+                    ...this.assignEntityData(now, i),
                 })),
             }
         } catch (err) {
@@ -761,18 +767,23 @@ export class PageIndexingBackground {
                 })
             }
         } else if (pageData.pageMetadata) {
+            const now = Date.now()
             const releaseDate = pageData.pageMetadata.publishedTime
                 ? new Date(pageData.pageMetadata.publishedTime).valueOf()
                 : undefined
             await this.storage.updatePageMetadata({
+                releaseDate,
                 normalizedPageUrl: pageData.url,
                 accessDate: this._getTime(props.visitTime),
                 title: pageData.pageMetadata.title,
                 sourceName: pageData.pageMetadata.provider,
                 previewImageUrl: pageData.pageMetadata.image,
                 description: pageData.pageMetadata.description,
-                releaseDate,
-                entities: [],
+                entities: pageData.pageMetadata.authors.map((name, i) => ({
+                    name,
+                    isPrimary: false,
+                    ...this.assignEntityData(now, i),
+                })),
             })
         }
 
