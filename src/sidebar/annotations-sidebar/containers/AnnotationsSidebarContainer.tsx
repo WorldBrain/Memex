@@ -1662,7 +1662,7 @@ export class AnnotationsSidebarContainer<
                             renderListPickerForBulkEdit={
                                 this.renderListPickerForBulkEdit
                             }
-                            setActiveTab={(tab) => (event) => {
+                            setActiveTab={(tab) => {
                                 this.processEvent('setActiveSidebarTab', {
                                     tab,
                                 })
@@ -1822,6 +1822,15 @@ export class AnnotationsSidebarContainer<
                                     AIChatEditorState: newState,
                                 })
                             }}
+                            isTrial={this.state.isTrial}
+                            signupDate={this.state.signupDate}
+                            addedKey={() => this.processEvent('addedKey', null)}
+                            checkIfKeyValid={(apiKey) =>
+                                this.processEvent('checkIfKeyValid', {
+                                    apiKey: apiKey,
+                                })
+                            }
+                            isKeyValid={this.state.isKeyValid}
                         />
                     </Rnd>
                 </ContainerStyled>

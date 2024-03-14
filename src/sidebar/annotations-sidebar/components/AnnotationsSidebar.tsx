@@ -106,6 +106,8 @@ import {
 } from '@worldbrain/memex-common/lib/summarization/types'
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
+import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
+import { browser } from 'webextension-polyfill-ts'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -165,7 +167,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     renderEditMenuForList: (listData: UnifiedList) => JSX.Element
     renderPageLinkMenuForList: () => JSX.Element
 
-    setActiveTab: (tab: SidebarTab) => React.MouseEventHandler
+    setActiveTab: (tab: SidebarTab) => void
     setActiveAITab: (tab: SidebarAITab) => React.MouseEventHandler
     setActiveSuggestionsTab: (tab: SuggestionsTab) => React.MouseEventHandler
     expandFollowedListNotes: (listId: string) => void
@@ -322,6 +324,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     queryAIservice: (promptData: PromptData) => Promise<void>
     updateAIChatHistoryState: (newState: ChatHistoryItem[]) => void
     updateAIChatEditorState: (AIChatEditorState: string) => void
+    addedKey?: () => void
+    checkIfKeyValid?: (apiKey: string) => void
+    signupDate?: number
 }
 
 interface AnnotationsSidebarState {
@@ -2023,77 +2028,7 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     renderQaASection() {
-        // const addPromptButton = (prompt) => (
-        //     <PromptTemplateButton
-        //         onClick={(event) => {
-        //             event.stopPropagation()
-        //             event.preventDefault()
-        //             this.props.saveAIPrompt(prompt)
-        //         }}
-        //     >
-        //         <TooltipBox
-        //             tooltipText="Save prompt as template"
-        //             placement="bottom-end"
-        //             getPortalRoot={this.props.getRootElement}
-        //         >
-        //             <Icon
-        //                 filePath={icons.plus}
-        //                 heightAndWidth="20px"
-        //                 color="prime1"
-        //             />
-        //         </TooltipBox>
-        //     </PromptTemplateButton>
-        // )
-
-        // const SuggestionsList = ({
-        //     AIsuggestions,
-        // }: Pick<AnnotationsSidebarProps, 'AIsuggestions'>) => {
-        //     return (
-        //         <ClickAway
-        //             onClickAway={() => this.props.toggleAISuggestionsDropDown()}
-        //         >
-        //             <DropDown>
-        //                 {AIsuggestions.map((suggestion) => (
-        //                     <DropDownItem
-        //                         key={suggestion.prompt}
-        //                         onClick={() =>
-        //                             this.props.selectAISuggestion(
-        //                                 suggestion.prompt,
-        //                             )
-        //                         }
-        //                         focused={
-        //                             suggestion.focused && suggestion.focused
-        //                         }
-        //                     >
-        //                         {suggestion.prompt}
-        //                         <RemoveTemplateIconBox>
-        //                             <TooltipBox
-        //                                 tooltipText="Remove template"
-        //                                 placement="left"
-        //                                 getPortalRoot={
-        //                                     this.props.getRootElement
-        //                                 }
-        //                             >
-        //                                 <Icon
-        //                                     filePath={icons.removeX}
-        //                                     heightAndWidth="18px"
-        //                                     color="greyScale5"
-        //                                     onClick={(event) => {
-        //                                         event.stopPropagation()
-        //                                         this.props.removeAISuggestion(
-        //                                             suggestion.prompt,
-        //                                         )
-        //                                     }}
-        //                                 />
-        //                             </TooltipBox>
-        //                         </RemoveTemplateIconBox>
-        //                     </DropDownItem>
-        //                 ))}
-        //             </DropDown>
-        //         </ClickAway>
-        //     )
-        // }
-
+        console.log('ai model', this.props.isTrial)
         return (
             <AISidebarContainer>
                 <AIChatComponent
@@ -2102,7 +2037,7 @@ export class AnnotationsSidebar extends React.Component<
                     queryAIservice={this.props.queryAIservice}
                     currentAIResponse={this.props.pageSummary}
                     renderAICounter={this.props.renderAICounter}
-                    isInTrial={this.props.isTrial}
+                    isTrial={this.props.isTrial}
                     getLocalContent={() => this.getLocalContent()}
                     updateAIChatHistoryState={
                         this.props.updateAIChatHistoryState
@@ -2124,8 +2059,15 @@ export class AnnotationsSidebar extends React.Component<
                         currentChatId: this.props.currentChatId,
                         currentAIresponse: this.props.pageSummary,
                     }}
+                    signupDate={this.props.signupDate}
+                    hasKey={this.props.hasKey}
                     syncSettingsBG={this.props.syncSettingsBG}
+                    browserAPIs={browser}
+                    isKeyValid={this.props.isKeyValid}
+                    checkIfKeyValid={this.props.checkIfKeyValid}
                     renderOptionsContainer={() => this.renderOptionsContainer()}
+                    counterStorageKey={COUNTER_STORAGE_KEY}
+                    setAIModel={this.props.setAIModel}
                     renderPromptTemplates={() => {
                         return (
                             <PromptTemplatesComponent
@@ -2338,13 +2280,17 @@ export class AnnotationsSidebar extends React.Component<
                     <AnnotationsSectionStyled>
                         <SuggestionsListSwitcher>
                             <SuggestionsSwitcherButton
-                                onClick={this.props.setActiveTab('annotations')}
+                                onClick={() => {
+                                    this.props.setActiveTab('annotations')
+                                }}
                                 active={this.props.activeTab === 'annotations'}
                             >
                                 All Notes{' '}
                             </SuggestionsSwitcherButton>
                             <SuggestionsSwitcherButton
-                                onClick={this.props.setActiveTab('spaces')}
+                                onClick={() => {
+                                    this.props.setActiveTab('spaces')
+                                }}
                                 active={this.props.activeTab === 'spaces'}
                             >
                                 By Spaces{' '}
@@ -2755,7 +2701,9 @@ export class AnnotationsSidebar extends React.Component<
                 <TopBarTabsContainer>
                     <TopBarButtonContainer>
                         <PrimaryAction
-                            onClick={this.props.setActiveTab('annotations')}
+                            onClick={() => {
+                                this.props.setActiveTab('annotations')
+                            }}
                             label={'Notes'}
                             active={
                                 this.props.activeTab === 'annotations' ||
@@ -2771,7 +2719,24 @@ export class AnnotationsSidebar extends React.Component<
 
                     <TopBarButtonContainer>
                         <PrimaryAction
-                            onClick={this.props.setActiveTab('summary')}
+                            onClick={async () => {
+                                this.props.setActiveTab('summary')
+                                let executed = false
+                                while (!executed) {
+                                    try {
+                                        executed = this.props.events.emit(
+                                            'addPageUrlToEditor',
+                                            window.location.href,
+                                            (success) => {
+                                                executed = success
+                                            },
+                                        )
+                                    } catch (e) {}
+                                    await new Promise((resolve) =>
+                                        setTimeout(resolve, 10),
+                                    )
+                                }
+                            }}
                             label={'Ask'}
                             active={this.props.activeTab === 'summary'}
                             type={'menuBar'}
@@ -2823,9 +2788,9 @@ export class AnnotationsSidebar extends React.Component<
                             'onboarded' && (
                             <TopBarButtonContainer>
                                 <PrimaryAction
-                                    onClick={this.props.setActiveTab(
-                                        'rabbitHole',
-                                    )}
+                                    onClick={() => {
+                                        this.props.setActiveTab('rabbitHole')
+                                    }}
                                     label={'RabbitHole'}
                                     active={
                                         this.props.activeTab === 'rabbitHole'

@@ -367,7 +367,7 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
-            AImodel: 'gpt-3',
+            AImodel: 'claude-3-haiku',
             hasKey: false,
             highlightColors: null,
             suggestionsResults: [],
@@ -895,8 +895,13 @@ export class SidebarContainerLogic extends UILogic<
         const openAIKey = await this.syncSettings.openAI?.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
+        const selectedModel = await this.syncSettings.openAI.get(
+            'selectedModel',
+        )
+
         this.emitMutation({
             hasKey: { $set: hasAPIKey },
+            AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
         })
         const signupDate = new Date(
             await (await this.options.authBG.getCurrentUser())?.creationTime,
@@ -1379,6 +1384,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             AImodel: { $set: event },
         })
+        this.syncSettings.openAI.set('selectedModel', event)
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
@@ -3179,7 +3185,6 @@ export class SidebarContainerLogic extends UILogic<
     updateAIChatEditorState: EventHandler<'updateAIChatEditorState'> = async ({
         event,
     }) => {
-        console.log('newState', event.AIChatEditorState)
         this.emitMutation({
             aiQueryEditorState: { $set: event.AIChatEditorState },
         })
@@ -3266,6 +3271,9 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         if (event.apiKey?.length === 0) {
             await this.syncSettings.openAI.set('apiKey', event.apiKey?.trim())
+            this.emitMutation({
+                isKeyValid: { $set: false },
+            })
             return
         }
         this.emitMutation({
@@ -3584,10 +3592,8 @@ export class SidebarContainerLogic extends UILogic<
     askAIviaInPageInteractions: EventHandler<
         'askAIviaInPageInteractions'
     > = async ({ event, previousState }) => {
-        console.log('pageinteractions', event)
         this.setActiveSidebarTabEvents('summary')
         this.emitMutation({ activeTab: { $set: 'summary' } })
-        console.log('open sidebar')
         if (event.textToProcess && event.prompt) {
             let executed = false
             while (!executed) {

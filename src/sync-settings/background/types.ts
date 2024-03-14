@@ -1,4 +1,5 @@
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { AImodels } from '@worldbrain/memex-common/lib/summarization/types'
 import { PromptTemplate } from 'src/common-ui/components/prompt-templates/types'
 
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
@@ -84,6 +85,7 @@ export interface SyncSettingsByFeature {
         apiKey: string
         promptSuggestions: PromptTemplate[]
         videoPromptSetting: string
+        selectedModel: AImodels
     }
     inPageUI: {
         ribbonEnabled: boolean
