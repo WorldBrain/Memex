@@ -779,11 +779,13 @@ export class PageIndexingBackground {
                 sourceName: pageData.pageMetadata.provider,
                 previewImageUrl: pageData.pageMetadata.image,
                 description: pageData.pageMetadata.description,
-                entities: pageData.pageMetadata.authors.map((name, i) => ({
-                    name,
-                    isPrimary: false,
-                    ...this.assignEntityData(now, i),
-                })),
+                entities: pageData.pageMetadata.authors
+                    .filter((name) => name?.trim().length)
+                    .map((name, i) => ({
+                        name,
+                        isPrimary: false,
+                        ...this.assignEntityData(now, i),
+                    })),
             })
         }
 
