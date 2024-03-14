@@ -30,6 +30,7 @@ interface State {
     summarizePrompt: string
     fromSecondsPosition: number
     toSecondsPosition: number
+    videoDuration: number
 }
 
 export default class YoutubeButtonMenu extends React.Component<Props, State> {
@@ -52,6 +53,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             summarizePrompt: '',
             fromSecondsPosition: 0,
             toSecondsPosition: 100,
+            videoDuration: 0,
         }
     }
 
@@ -81,7 +83,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 summarizePrompt: summarizeVideoPromptSetting,
             })
         }
-
+        this.getYoutubeVideoDuration()
         // Logic to check for YTChapterContainer and existingMemexButtons
         // Logic to retrieve smartNoteSeconds and noteSeconds from storage
         this.adjustScaleToFitParent()
@@ -96,6 +98,16 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
         await sleepPromise(1000)
         this.adjustScaleToFitParent()
+    }
+
+    getYoutubeVideoDuration() {
+        let video = document.getElementsByTagName('video')[0]
+        let duration = video.duration
+
+        console.log('duration', duration)
+        this.setState({
+            videoDuration: duration,
+        })
     }
 
     handleLeftButtonChange = (position) => {
@@ -302,273 +314,367 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
     render() {
         const { runtime } = this.props
+        const sliderValues = [
+            this.state.fromSecondsPosition,
+            this.state.toSecondsPosition,
+        ]
         return (
             <ParentContainer ref={this.parentContainerRef}>
                 <InnerContainer
                     id={'MemexButtonContainer'}
                     ref={this.memexButtonContainerRef}
                 >
-                    <Range
-                        step={0.1}
-                        min={0}
-                        max={100}
-                        values={[
-                            this.state.fromSecondsPosition,
-                            this.state.toSecondsPosition,
-                        ]}
-                        onChange={(values) =>
-                            this.setState({
-                                fromSecondsPosition: values[0],
-                                toSecondsPosition: values[1],
-                            })
-                        }
-                        renderTrack={({ props, children }) => (
-                            <div
-                                {...props}
-                                style={{
-                                    ...props.style,
-                                    height: '16px',
-                                    width: '100%',
-                                    backgroundColor: '#12131B',
-                                    borderRadius: '10px',
-                                }}
-                            >
-                                {children}
-                            </div>
-                        )}
-                        renderThumb={({ props }) => {
-                            const {
-                                style,
-                                onKeyDown,
-                                onKeyUp,
-                                ...divProps
-                            } = props
-                            return (
-                                <div
-                                    {...divProps}
-                                    style={{
-                                        ...style,
-                                        height: '24px',
-                                        width: '10px',
-                                        borderRadius: '10px',
-                                        marginTop: '-2px',
-                                        backgroundColor: '#6AE394',
-                                    }}
-                                />
-                            )
-                        }}
-                    />
-                    <MemexButtonContainer>
-                        {this.state.YTChapterContainerVisible && (
+                    <MemexButtonInnerContainer>
+                        {/* {this.state.YTChapterContainerVisible && (
                             <YTChapterContainer />
-                        )}
-                        <Icon
-                            filePath={runtime.getURL('/img/memexLogo.svg')}
-                            height={'24px'}
-                            color={'prime1'}
-                            padding={'0 10px'}
-                            hoverOff
-                        />
-                        <TooltipBox
-                            getPortalRoot={this.props.getRootElement}
-                            tooltipText={
-                                <span>
-                                    Add a note with a link to the current time.{' '}
-                                    <br />
-                                    Optionally: Adjust seconds into past via the
-                                    text field
-                                </span>
-                            }
-                            placement="bottom"
-                        >
-                            <YTPMenuItem
-                                onClick={this.handleAnnotateButtonClick}
+                        )} */}
+                        <TopArea>
+                            <Icon
+                                filePath={runtime.getURL('/img/memexLogo.svg')}
+                                height={'24px'}
+                                color={'prime1'}
+                                padding={'0 10px'}
+                                hoverOff
+                            />
+                            <TooltipBox
+                                getPortalRoot={this.props.getRootElement}
+                                tooltipText={
+                                    <span>
+                                        Add a note with a link to the current
+                                        time. <br />
+                                        Optionally: Adjust seconds into past via
+                                        the text field
+                                    </span>
+                                }
+                                placement="bottom"
                             >
-                                <Icon
-                                    filePath={runtime.getURL(
-                                        '/img/clockForYoutubeInjection.svg',
-                                    )}
-                                    heightAndWidth="20px"
-                                    color={'greyScale6'}
-                                    hoverOff
-                                />
-                                <YTPMenuItemLabel>
-                                    Timestamped Note
-                                </YTPMenuItemLabel>
-                                <TextFieldContainer>
+                                <YTPMenuItem
+                                    onClick={this.handleAnnotateButtonClick}
+                                >
                                     <Icon
                                         filePath={runtime.getURL(
-                                            '/img/historyYoutubeInjection.svg',
+                                            '/img/clockForYoutubeInjection.svg',
                                         )}
-                                        heightAndWidth="16px"
-                                        color={'greyScale5'}
+                                        heightAndWidth="20px"
+                                        color={'greyScale6'}
                                         hoverOff
                                     />
-                                    <TextFieldSmall
-                                        type="text"
-                                        placeholder="0s"
-                                        value={this.state.noteSeconds}
-                                        onChange={
-                                            this.handleTimestampNoteTimeInput
-                                        }
-                                        id="secondsInPastFieldNote"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (
-                                                e.key === 'Enter' &&
-                                                !e.shiftKey
-                                            ) {
-                                                this.handleAnnotateButtonClick()
+                                    <YTPMenuItemLabel>
+                                        Timestamped Note
+                                    </YTPMenuItemLabel>
+                                    <TextFieldContainer>
+                                        <Icon
+                                            filePath={runtime.getURL(
+                                                '/img/historyYoutubeInjection.svg',
+                                            )}
+                                            heightAndWidth="16px"
+                                            color={'greyScale5'}
+                                            hoverOff
+                                        />
+                                        <TextFieldSmall
+                                            type="text"
+                                            placeholder="0s"
+                                            value={this.state.noteSeconds}
+                                            onChange={
+                                                this
+                                                    .handleTimestampNoteTimeInput
                                             }
-                                        }}
-                                    />
-                                </TextFieldContainer>
-                            </YTPMenuItem>
-                        </TooltipBox>
-                        <TooltipBox
-                            getPortalRoot={this.props.getRootElement}
-                            tooltipText={
-                                <span>
-                                    Summary of the last X seconds with a
-                                    timestamp. <br />
-                                    Optionally: Adjust seconds into past via the
-                                    text field.
-                                </span>
-                            }
-                            placement="bottom"
-                        >
-                            <YTPMenuItem
-                                onMouseDown={() =>
-                                    this.setState({ showAINoteTooltip: true })
+                                            id="secondsInPastFieldNote"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (
+                                                    e.key === 'Enter' &&
+                                                    !e.shiftKey
+                                                ) {
+                                                    this.handleAnnotateButtonClick()
+                                                }
+                                            }}
+                                        />
+                                    </TextFieldContainer>
+                                </YTPMenuItem>
+                            </TooltipBox>
+                            <TooltipBox
+                                getPortalRoot={this.props.getRootElement}
+                                tooltipText={
+                                    <span>
+                                        Summary of the last X seconds with a
+                                        timestamp. <br />
+                                        Optionally: Adjust seconds into past via
+                                        the text field.
+                                    </span>
                                 }
-                                onMouseUp={() => {
-                                    if (!this.state.showAINoteTooltip) {
-                                        this.handleAItimeStampButtonClick()
-                                    }
-                                }}
-                                ref={this.AIButtonRef}
+                                placement="bottom"
                             >
-                                <Icon
-                                    filePath={runtime.getURL(
-                                        '/img/starsYoutube.svg',
-                                    )}
-                                    heightAndWidth="20px"
-                                    color={'greyScale6'}
-                                    hoverOff
-                                />
-                                <YTPMenuItemLabel>AI Note</YTPMenuItemLabel>
-
-                                <TextFieldContainer>
+                                <YTPMenuItem
+                                    onMouseDown={() =>
+                                        this.setState({
+                                            showAINoteTooltip: true,
+                                        })
+                                    }
+                                    onMouseUp={() => {
+                                        if (!this.state.showAINoteTooltip) {
+                                            this.handleAItimeStampButtonClick()
+                                        }
+                                    }}
+                                    ref={this.AIButtonRef}
+                                >
                                     <Icon
                                         filePath={runtime.getURL(
-                                            '/img/historyYoutubeInjection.svg',
+                                            '/img/starsYoutube.svg',
                                         )}
-                                        heightAndWidth="16px"
-                                        color={'greyScale5'}
+                                        heightAndWidth="20px"
+                                        color={'greyScale6'}
+                                        hoverOff
                                     />
-                                    <TextFieldSmall
-                                        type="text"
-                                        placeholder="60s"
-                                        value={this.state.smartNoteSeconds}
-                                        onChange={this.handleSmartNoteTimeInput}
-                                        id="secondsInPastSetting"
-                                        onClick={(e) => {
-                                            e.stopPropagation()
-                                        }}
-                                        onKeyDown={(e) => {
-                                            if (
-                                                e.key === 'Enter' &&
-                                                !e.shiftKey
-                                            ) {
-                                                this.handleAItimeStampButtonClick()
+                                    <YTPMenuItemLabel>AI Note</YTPMenuItemLabel>
+
+                                    <TextFieldContainer>
+                                        <Icon
+                                            filePath={runtime.getURL(
+                                                '/img/historyYoutubeInjection.svg',
+                                            )}
+                                            heightAndWidth="16px"
+                                            color={'greyScale5'}
+                                        />
+                                        <TextFieldSmall
+                                            type="text"
+                                            placeholder="60s"
+                                            value={this.state.smartNoteSeconds}
+                                            onChange={
+                                                this.handleSmartNoteTimeInput
                                             }
-                                        }}
+                                            id="secondsInPastSetting"
+                                            onClick={(e) => {
+                                                e.stopPropagation()
+                                            }}
+                                            onKeyDown={(e) => {
+                                                if (
+                                                    e.key === 'Enter' &&
+                                                    !e.shiftKey
+                                                ) {
+                                                    this.handleAItimeStampButtonClick()
+                                                }
+                                            }}
+                                        />
+                                    </TextFieldContainer>
+                                    {this.state.showAINoteTooltip
+                                        ? this.renderPromptTooltip('AInote')
+                                        : null}
+                                </YTPMenuItem>
+                            </TooltipBox>
+                            <TooltipBox
+                                getPortalRoot={this.props.getRootElement}
+                                tooltipText={
+                                    <span>
+                                        Summarize this video
+                                        <br />
+                                        with custom prompts
+                                    </span>
+                                }
+                                placement="bottom"
+                            >
+                                <YTPMenuItem
+                                    onMouseDown={() =>
+                                        this.setState({
+                                            showSummarizeTooltip: true,
+                                        })
+                                    }
+                                    onMouseUp={() => {
+                                        if (!this.state.showSummarizeTooltip) {
+                                            this.handleSummarizeButtonClick()
+                                        }
+                                    }}
+                                    ref={this.summarizeButtonRef}
+                                >
+                                    <Icon
+                                        filePath={runtime.getURL(
+                                            '/img/summarizeIconForYoutubeInjection.svg',
+                                        )}
+                                        heightAndWidth="20px"
+                                        color={'greyScale6'}
+                                        hoverOff
                                     />
-                                </TextFieldContainer>
-                                {this.state.showAINoteTooltip
-                                    ? this.renderPromptTooltip('AInote')
-                                    : null}
-                            </YTPMenuItem>
-                        </TooltipBox>
-                        <TooltipBox
-                            getPortalRoot={this.props.getRootElement}
-                            tooltipText={
-                                <span>
-                                    Summarize this video
-                                    <br />
-                                    with custom prompts
-                                </span>
-                            }
-                            placement="bottom"
-                        >
-                            <YTPMenuItem
-                                onMouseDown={() =>
+                                    <YTPMenuItemLabel>
+                                        Summarize Video
+                                    </YTPMenuItemLabel>
+                                    {this.state.showSummarizeTooltip
+                                        ? this.renderPromptTooltip(
+                                              'summarizeVideo',
+                                          )
+                                        : null}
+                                </YTPMenuItem>
+                            </TooltipBox>
+                            <TooltipBox
+                                getPortalRoot={this.props.getRootElement}
+                                tooltipText={
+                                    <span>
+                                        Take a screenshot of the current frame
+                                        <br />
+                                        and adds a linked timestamp.
+                                    </span>
+                                }
+                                placement="bottom"
+                            >
+                                <YTPMenuItem
+                                    onClick={this.handleScreenshotButtonClick}
+                                >
+                                    <Icon
+                                        filePath={runtime.getURL(
+                                            '/img/cameraIcon.svg',
+                                        )}
+                                        heightAndWidth="20px"
+                                        color={'greyScale6'}
+                                        hoverOff
+                                    />
+                                    <YTPMenuItemLabel>
+                                        Screenshot
+                                    </YTPMenuItemLabel>
+                                </YTPMenuItem>
+                            </TooltipBox>
+                            <TutorialButtonContainer>
+                                <TutorialBox
+                                    getRootElement={this.props.getRootElement}
+                                    tutorialId="annotateVideos"
+                                />
+                            </TutorialButtonContainer>
+                        </TopArea>
+                        <BottomArea>
+                            <Range
+                                step={0.1}
+                                min={0}
+                                // draggableTrack
+                                max={100}
+                                values={[
+                                    this.state.fromSecondsPosition,
+                                    this.state.toSecondsPosition,
+                                ]}
+                                onChange={(values) =>
                                     this.setState({
-                                        showSummarizeTooltip: true,
+                                        fromSecondsPosition: values[0],
+                                        toSecondsPosition: values[1],
                                     })
                                 }
-                                onMouseUp={() => {
-                                    if (!this.state.showSummarizeTooltip) {
-                                        this.handleSummarizeButtonClick()
-                                    }
+                                renderTrack={({ props, children }) => (
+                                    <div
+                                        {...props}
+                                        style={{
+                                            ...props.style,
+                                            height: '24px',
+                                            width: '100%',
+                                            borderRadius: '0 0 10px 10px',
+                                            fontSize: '12px',
+                                            color: '#A9A9B1',
+                                            textAlign: 'center',
+                                            verticalAlign: 'middle',
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        {children}
+                                        <InfoText>
+                                            Select a time frame (click or drag)
+                                        </InfoText>
+                                    </div>
+                                )}
+                                renderThumb={({ props, index }) => {
+                                    const {
+                                        style,
+                                        onKeyDown,
+                                        onKeyUp,
+                                        ...divProps
+                                    } = props
+                                    return (
+                                        <div
+                                            {...divProps}
+                                            style={{
+                                                ...props.style,
+                                                ...style,
+                                                height: '24px',
+                                                outline: 'none',
+                                                width: 'fit-content',
+                                                borderRadius: '10px',
+                                                backgroundColor: '#6AE394',
+                                            }}
+                                        >
+                                            <div
+                                                style={{
+                                                    position: 'absolute',
+                                                    ...style,
+                                                    height: '24px',
+                                                    outline: 'none',
+                                                    width: 'fit-content',
+                                                    color: 'white',
+                                                    fontSize: '14px',
+                                                    padding: '0 5px',
+                                                    display: 'flex',
+                                                    backgroundColor: '#313239',
+
+                                                    alignItems: 'center',
+                                                    right: index === 1 && '5px',
+                                                    left: index === 0 && '5px',
+                                                    justifyContent:
+                                                        index === 1
+                                                            ? 'flex-end'
+                                                            : 'flex-start',
+                                                }}
+                                            >
+                                                {(() => {
+                                                    const totalSeconds =
+                                                        (sliderValues[index] /
+                                                            100) *
+                                                        this.state.videoDuration
+                                                    const hours = Math.floor(
+                                                        totalSeconds / 3600,
+                                                    )
+                                                    const minutes = Math.floor(
+                                                        (totalSeconds % 3600) /
+                                                            60,
+                                                    )
+                                                    const seconds = Math.floor(
+                                                        totalSeconds % 60,
+                                                    )
+
+                                                    const paddedMinutes = minutes
+                                                        .toString()
+                                                        .padStart(2, '0')
+                                                    const paddedSeconds = seconds
+                                                        .toString()
+                                                        .padStart(2, '0')
+
+                                                    if (hours > 0) {
+                                                        return `${hours}:${paddedMinutes}:${paddedSeconds}`
+                                                    } else {
+                                                        return `${paddedMinutes}:${paddedSeconds}`
+                                                    }
+                                                })()}
+                                            </div>
+                                            <div
+                                                style={{
+                                                    height: '20px',
+                                                    width: '5px',
+                                                    outline: 'none',
+                                                }}
+                                            />
+                                        </div>
+                                    )
                                 }}
-                                ref={this.summarizeButtonRef}
-                            >
-                                <Icon
-                                    filePath={runtime.getURL(
-                                        '/img/summarizeIconForYoutubeInjection.svg',
-                                    )}
-                                    heightAndWidth="20px"
-                                    color={'greyScale6'}
-                                    hoverOff
-                                />
-                                <YTPMenuItemLabel>
-                                    Summarize Video
-                                </YTPMenuItemLabel>
-                                {this.state.showSummarizeTooltip
-                                    ? this.renderPromptTooltip('summarizeVideo')
-                                    : null}
-                            </YTPMenuItem>
-                        </TooltipBox>
-                        <TooltipBox
-                            getPortalRoot={this.props.getRootElement}
-                            tooltipText={
-                                <span>
-                                    Take a screenshot of the current frame
-                                    <br />
-                                    and adds a linked timestamp.
-                                </span>
-                            }
-                            placement="bottom"
-                        >
-                            <YTPMenuItem
-                                onClick={this.handleScreenshotButtonClick}
-                            >
-                                <Icon
-                                    filePath={runtime.getURL(
-                                        '/img/cameraIcon.svg',
-                                    )}
-                                    heightAndWidth="20px"
-                                    color={'greyScale6'}
-                                    hoverOff
-                                />
-                                <YTPMenuItemLabel>Screenshot</YTPMenuItemLabel>
-                            </YTPMenuItem>
-                        </TooltipBox>
-                        <TutorialButtonContainer>
-                            <TutorialBox
-                                getRootElement={this.props.getRootElement}
-                                tutorialId="annotateVideos"
                             />
-                        </TutorialButtonContainer>
-                    </MemexButtonContainer>
+                        </BottomArea>
+                    </MemexButtonInnerContainer>
                 </InnerContainer>
             </ParentContainer>
         )
     }
 }
+
+const InfoText = styled.div`
+    align-self: center;
+    justify-self: center;
+    width: 100%;
+    justify-content: center;
+`
 
 const TextFieldContainerPrompt = styled.div`
     display: flex;
@@ -601,10 +707,11 @@ const YTChapterContainer = styled.div`
     width: 250px;
 `
 
-const MemexButtonContainer = styled.div`
+const MemexButtonInnerContainer = styled.div`
     display: flex;
     align-items: center;
-    width: fit-content;
+    width: fill-available;
+    flex-direction: column;
     background-color: ${(props) => props.theme.colors.black};
     border-radius: 8px 8px 8px 8px;
 
@@ -699,6 +806,7 @@ const TutorialButtonContainer = styled.div`
     margin-left: 15px;
     padding-left: 10px;
     padding-right: 10px;
+    justify-self: flex-end;
 `
 
 const InnerContainer = styled.div`
@@ -710,5 +818,19 @@ const InnerContainer = styled.div`
     box-sizing: border-box;
     grid-gap: 8px;
     flex-direction: column;
-    padding: 6px 15px 0px 15px;
+    padding: 6px 5px 0px 5px;
+`
+
+const TopArea = styled.div`
+    display: flex;
+    align-items: center;
+    width: 100%;
+`
+
+const BottomArea = styled.div`
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
+    display: flex;
+    width: 100%;
+    padding: 0 10px;
+    box-sizing: border-box;
 `

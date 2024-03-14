@@ -254,6 +254,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 textToProcess: event.highlightedText,
                 prompt: event.prompt,
             })
+        } else if (event.action === 'add_media_range_to_ai_context') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('AddMediaRangeToAIcontext', {
+                range: event.range,
+                prompt: event.prompt,
+            })
         } else if (
             event.action === 'create_youtube_timestamp_with_AI_summary'
         ) {
@@ -344,15 +352,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 sharedListId: event.sharedListId,
                 manuallyPullLocalListData: event.manuallyPullLocalListData,
             })
-        } else if (event.action === 'add_media_range_to_ai_context') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab: 'summary',
-            })
-            await this.processEvent('AddMediaRangeToAIcontext', {
-                range: event.range,
-                prompt: event.prompt,
-            })
-            return true
         } else if (event.action === 'show_annotation') {
             await this.activateAnnotation(event.annotationCacheId, 'show')
             console.log('show')
