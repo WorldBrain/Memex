@@ -1906,7 +1906,7 @@ const ContainerStyled = styled.div<{
     background: ${(props) =>
         props.theme.variant === 'dark'
             ? props.theme.colors.black0
-            : props.theme.colors.black + 'c9'};
+            : props.theme.colors.black};
     border-left: 1px solid ${(props) => props.theme.colors.greyScale2};
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on, 'liga' off;

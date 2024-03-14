@@ -383,6 +383,7 @@ export class AnnotationsSidebar extends React.Component<
     } = {}
     private editorPassedUp = false
     lastClickInsideSidebar = null
+    theme = null
 
     state: AnnotationsSidebarState = {
         searchText: '',
@@ -460,6 +461,8 @@ export class AnnotationsSidebar extends React.Component<
         const isolatedViewNotifVisible = await getLocalStorage(
             SHOW_ISOLATED_VIEW_KEY,
         )
+
+        this.theme = await loadThemeVariant()
 
         if (isolatedViewNotifVisible == null) {
             await setLocalStorage(SHOW_ISOLATED_VIEW_KEY, true)
@@ -1664,7 +1667,16 @@ export class AnnotationsSidebar extends React.Component<
                     </IconBox>
                     <InfoText>
                         This page is not yet in a Space <br /> you created,
-                        follow or collaborate in.
+                        follow or collaborate in. <b /> click on the
+                        <span>
+                            {' '}
+                            <Icon
+                                icon="plus"
+                                heightAndWidth="20px"
+                                hoverOff
+                            />{' '}
+                        </span>
+                        icon on the right
                     </InfoText>
                 </EmptyMessageContainer>
             )
@@ -3398,7 +3410,9 @@ export class AnnotationsSidebar extends React.Component<
                     size={'small'}
                     height={'30px'}
                     icon={'removeX'}
-                    fontColor="greyScale7"
+                    fontColor={
+                        this.theme === 'dark' ? 'greyScale7' : 'greyScale5'
+                    }
                     iconPosition="right"
                 />
 

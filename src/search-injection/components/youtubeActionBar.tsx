@@ -136,7 +136,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         )
 
         if (videoURLWithTime != null) {
-            videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
+            videoTimeStampForComment = `<a href="${videoURLWithTime}">${humanTimestamp}</a><span>${` `}</span>`
 
             return videoTimeStampForComment
         } else {
