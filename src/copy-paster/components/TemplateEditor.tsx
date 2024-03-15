@@ -9,6 +9,8 @@ import { TaskState } from 'ui-logic-core/lib/types'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import { DEFAULT_TEMPLATES } from '../background/default-templates'
+import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 
 interface TemplateEditorProps {
     previewString: string
@@ -169,11 +171,14 @@ const TemplateButtonOptions = [
 interface State {
     confirmDelete: boolean
     draggedButton: number | null
+    showPremadeTemplatesModal: boolean
 }
 export default class TemplateEditor extends PureComponent<
     TemplateEditorProps,
     State
 > {
+    premadeTemplateButtonRef = React.createRef<HTMLDivElement>()
+
     private get isSaveDisabled(): boolean {
         return (
             !this.props.template?.title.length ||
@@ -184,6 +189,7 @@ export default class TemplateEditor extends PureComponent<
     state = {
         confirmDelete: false,
         draggedButton: null,
+        showPremadeTemplatesModal: false,
     }
 
     componentDidMount(): void {
@@ -214,6 +220,42 @@ export default class TemplateEditor extends PureComponent<
     handleConfirmDelete = () => {
         this.props?.onClickDelete()
         this.setState({ confirmDelete: false })
+    }
+
+    renderPremadeTemplatesList() {
+        if (this.state.showPremadeTemplatesModal) {
+            return (
+                <PopoutBox
+                    getPortalRoot={this.props.getRootElement}
+                    placement={'bottom-end'}
+                    targetElementRef={this.premadeTemplateButtonRef.current}
+                    closeComponent={() => {
+                        this.setState({ showPremadeTemplatesModal: false })
+                    }}
+                >
+                    <TemplateInsertContainer>
+                        {DEFAULT_TEMPLATES.map((template) => {
+                            return (
+                                <TemplateRow
+                                    onClick={() => {
+                                        this.insertIntoEditor(template.code)
+                                    }}
+                                >
+                                    {template.title}
+                                    <HoverOverlay>
+                                        Add to template Editor
+                                    </HoverOverlay>
+                                </TemplateRow>
+                            )
+                        })}
+                    </TemplateInsertContainer>
+                </PopoutBox>
+            )
+        }
+    }
+
+    insertIntoEditor = (templateText: string) => {
+        this.props.onCodeChange(templateText)
     }
 
     render() {
@@ -368,6 +410,22 @@ export default class TemplateEditor extends PureComponent<
                                         </OutputSwitcher>
                                     </TooltipBox>
                                 </OutputSwitcherContainer>
+                                <AddDefaultTemplateButton>
+                                    {this.renderPremadeTemplatesList()}
+                                    <PrimaryAction
+                                        label={'Prefill with Template'}
+                                        type={'tertiary'}
+                                        size={'small'}
+                                        icon={'copy'}
+                                        innerRef={this.premadeTemplateButtonRef}
+                                        padding={'3px 10px 3px 5px'}
+                                        onClick={() =>
+                                            this.setState({
+                                                showPremadeTemplatesModal: true,
+                                            })
+                                        }
+                                    />
+                                </AddDefaultTemplateButton>
                             </HeaderBox>
 
                             <TemplateInput
@@ -892,4 +950,49 @@ const EditorBox = styled.div`
     min-height: 10%;
     flex: 1;
     min-width: 10%;
+`
+
+const AddDefaultTemplateButton = styled.div``
+
+const HoverOverlay = styled.div`
+    display: none;
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: ${(props) => props.theme.colors.black};
+    backdrop-filter: blur(10px);
+    box-sizing: border-box;
+    border-radius: 8px;
+    color: ${(props) => props.theme.colors.greyScale7};
+`
+
+const TemplateRow = styled.div`
+    display: flex;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+    border-radius: 8px;
+    padding: 0 10px;
+    height: 34px;
+    position: relative;
+    width: 200px;
+    color: ${(props) => props.theme.colors.greyScale6};
+
+    &:hover ${HoverOverlay} {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+    }
+
+    &:hover {
+        outline: 1px solid ${(props) => props.theme.colors.greyScale2};
+    }
+`
+const TemplateInsertContainer = styled.div`
+    display: flex;
+    flex-direction: column;
+    grid-gap: 2px;
+    padding: 10px;
 `

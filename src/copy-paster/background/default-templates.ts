@@ -188,7 +188,7 @@ export const HTML_TEMPLATE: Template = {
 `,
 }
 
-const DEFAULT_TEMPLATES = [
+export const DEFAULT_TEMPLATES = [
     HTML_TEMPLATE,
     ROAM_MD_TEMPLATE,
     LOGSEQ_MD_TEMPLATE,
