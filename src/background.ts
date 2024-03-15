@@ -208,9 +208,7 @@ export async function main(): Promise<void> {
     })
     __debugCounter++
 
-    services.contentSharing.preKeyGeneration = async (params: {
-        key: Pick<SharedListKey, 'roleID' | 'disabled'>
-    }) => {
+    services.contentSharing.preKeyGeneration = async (params) => {
         if (params.key.roleID > SharedListRoleID.Commenter) {
             await backgroundModules.personalCloud.waitForSync()
         }

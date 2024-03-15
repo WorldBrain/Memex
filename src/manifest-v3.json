@@ -51,14 +51,14 @@
     "permissions": [
         "alarms",
         "bookmarks",
-        "history",
-        "scripting",
-        "tabs",
         "contextMenus",
-        "unlimitedStorage",
+        "tabs",
+        "scripting",
         "webNavigation",
         "notifications",
-        "storage"
+        "unlimitedStorage",
+        "storage",
+        "clipboardWrite"
     ],
     "host_permissions": ["<all_urls>"],
     "web_accessible_resources": [
