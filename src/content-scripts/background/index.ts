@@ -18,7 +18,7 @@ export class ContentScriptsBackground {
             injectScriptInTab: (tabId: number, file: string) => Promise<void>
             browserAPIs: Pick<
                 Browser,
-                'tabs' | 'storage' | 'webRequest' | 'runtime' | 'webNavigation'
+                'tabs' | 'storage' | 'runtime' | 'webNavigation'
             >
         },
     ) {

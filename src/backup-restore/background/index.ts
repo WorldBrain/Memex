@@ -283,18 +283,6 @@ export class BackupBackgroundModule {
         this.restoreProcedure = null
     }
 
-    // setupRequestInterceptor(backupBackend: BackupBackend = null) {
-    //     const backend = backupBackend || this.backend
-    //     setupRequestInterceptors({
-    //         webRequest: globalThis['browser'].webRequest,
-    //         handleLoginRedirectedBack: backend
-    //             ? backend.handleLoginRedirectedBack.bind(backend)
-    //             : null,
-    //         // isAutomaticBackupEnabled: () => this.isAutomaticBackupEnabled(),
-    //         memexCloudOrigin: _getMemexCloudOrigin(),
-    //     })
-    // }
-
     async startRecordingChangesIfNeeded() {
         if (
             !(await this.localBackupSettings.get('lastBackup')) ||
