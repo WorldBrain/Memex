@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.15.1",
+    "version": "3.16.0",
     "homepage": "https://memex.garden",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -61,7 +61,7 @@
         "@tiptap/extension-code-block": "^2.2.4",
         "@tiptap/extension-heading": "^2.2.4",
         "@tiptap/extension-highlight": "^2.2.1",
-        "@tiptap/extension-image":  "^2.2.4",
+        "@tiptap/extension-image": "^2.2.4",
         "@tiptap/extension-link": "^2.2.4",
         "@tiptap/extension-list-item": "^2.2.4",
         "@tiptap/extension-placeholder": "^2.2.4",
@@ -133,6 +133,7 @@
         "react-helmet": "^5.2.1",
         "react-html-parser": "^2.0.2",
         "react-popper": "^2.3.0",
+        "react-range": "^1.8.14",
         "react-redux": "^5.0.7",
         "react-rnd": "^10.3.5",
         "react-router": "^3.2.1",

@@ -4,10 +4,11 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { ClickAway } from '@worldbrain/memex-common/lib/common-ui/components/click-away-wrapper'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
+import { AImodels } from '@worldbrain/memex-common/lib/summarization/types'
 
 export interface MenuItemProps {
     name: string
-    id?: string | number
+    id?: AImodels
     info?: string | JSX.Element
     isDisabled?: boolean
     soonAvailable?: boolean

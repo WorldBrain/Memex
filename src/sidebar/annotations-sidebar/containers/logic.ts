@@ -118,6 +118,8 @@ import Raven from 'raven-js'
 import analytics from 'src/analytics'
 
 import MarkdownIt from 'markdown-it'
+import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
+import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -248,10 +250,6 @@ export class SidebarContainerLogic extends UILogic<
         )
     }
 
-    private get resultLimit(): number {
-        return this.options.searchResultLimit ?? DEF_RESULT_LIMIT
-    }
-
     getInitialState(): SidebarContainerState {
         let sidebarWidth = SIDEBAR_WIDTH_STORAGE_KEY
         if (window.location.href.includes('youtube.com/watch')) {
@@ -280,6 +278,9 @@ export class SidebarContainerLogic extends UILogic<
             sidebarWidth: sidebarWidth,
             activeSuggestionsTab: 'MySuggestions',
             activeAITab: 'ThisPage',
+            AIChatHistoryState: [],
+            currentChatId: null,
+            aiQueryEditorState: null,
 
             users: {},
             currentUserReference: null,
@@ -367,7 +368,7 @@ export class SidebarContainerLogic extends UILogic<
             showChapters: false,
             chapterSummaries: [],
             chapterList: [],
-            AImodel: 'gpt-3.5-turbo-1106',
+            AImodel: 'claude-3-haiku',
             hasKey: false,
             highlightColors: null,
             suggestionsResults: [],
@@ -378,6 +379,10 @@ export class SidebarContainerLogic extends UILogic<
             localFoldersList: [],
             bulkSelectionState: [],
         }
+    }
+
+    private get resultLimit(): number {
+        return this.options.searchResultLimit ?? DEF_RESULT_LIMIT
     }
 
     buildConversationId: ConversationIdBuilder = (
@@ -891,8 +896,13 @@ export class SidebarContainerLogic extends UILogic<
         const openAIKey = await this.syncSettings.openAI?.get('apiKey')
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
+        const selectedModel = await this.syncSettings.openAI.get(
+            'selectedModel',
+        )
+
         this.emitMutation({
             hasKey: { $set: hasAPIKey },
+            AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
         })
         const signupDate = new Date(
             await (await this.options.authBG.getCurrentUser())?.creationTime,
@@ -1375,6 +1385,7 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             AImodel: { $set: event },
         })
+        this.syncSettings.openAI.set('selectedModel', event)
     }
 
     show: EventHandler<'show'> = async ({ event }) => {
@@ -1994,6 +2005,7 @@ export class SidebarContainerLogic extends UILogic<
             this.emitMutation({
                 prompt: { $set: undefined },
             })
+
             await this.queryAI(
                 event.fullPageUrl,
                 undefined,
@@ -2367,7 +2379,6 @@ export class SidebarContainerLogic extends UILogic<
         const body = formData.body?.trim()
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
-        console.log('commentforimageupload', comment)
         await executeUITask(this, 'noteEditState', async () => {
             let commentForSaving = await processCommentForImageUpload(
                 comment,
@@ -2491,7 +2502,7 @@ export class SidebarContainerLogic extends UILogic<
     createNewNoteFromAISummary: EventHandler<
         'createNewNoteFromAISummary'
     > = async ({ event }) => {
-        const comment = '<div>' + marked.parse(event.comment) + '</div>'
+        const comment = marked.parse(event.comment)
         this.emitMutation({
             activeTab: { $set: 'annotations' },
             commentBox: {
@@ -3004,16 +3015,6 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    setAnnotationsExpanded: EventHandler<'setAnnotationsExpanded'> = (
-        incoming,
-    ) => {}
-
-    fetchSuggestedTags: EventHandler<'fetchSuggestedTags'> = (incoming) => {}
-
-    fetchSuggestedDomains: EventHandler<'fetchSuggestedDomains'> = (
-        incoming,
-    ) => {}
-
     private async loadRemoteAnnototationReferencesForCachedLists(
         state: SidebarContainerState,
     ): Promise<void> {
@@ -3097,15 +3098,103 @@ export class SidebarContainerLogic extends UILogic<
             | null,
         chapterSummaryIndex?: number,
     ) {
+        // this.emitMutation({
+        //     loadState: { $set: 'running' },
+        // })
+        // const selectedText =
+        //     highlightedText || previousState?.selectedTextAIPreview
+        // const isPagePDF =
+        //     fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
+        // const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
+        // const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
+        // if (!hasAPIKey) {
+        //     let canQueryAI = false
+        //     if (previousState.isTrial) {
+        //         canQueryAI = true
+        //     } else if (await AIActionAllowed(this.options.analyticsBG)) {
+        //         canQueryAI = true
+        //     }
+        //     if (!canQueryAI) {
+        //         this.emitMutation({
+        //             showUpgradeModal: { $set: true },
+        //         })
+        //         return
+        //     }
+        // }
+        // let queryPrompt = prompt
+        // if (!previousState.isTrial) {
+        //     await updateAICounter()
+        // }
+        // this.emitMutation({
+        //     selectedTextAIPreview: {
+        //         $set:
+        //             selectedText?.length && outputLocation !== 'chapterSummary'
+        //                 ? selectedText
+        //                 : null,
+        //     },
+        //     loadState: {
+        //         $set:
+        //             outputLocation !== 'editor' &&
+        //             outputLocation !== 'chapterSummary'
+        //                 ? 'running'
+        //                 : 'pristine',
+        //     },
+        //     prompt: {
+        //         $set:
+        //             outputLocation !== 'chapterSummary'
+        //                 ? prompt
+        //                 : previousState.prompt,
+        //     },
+        //     showAICounter: { $set: true },
+        //     hasKey: { $set: hasAPIKey },
+        // })
+        // let textToAnalyse
+        // let isContentSearch = false
+        // textToAnalyse = textAsAlternative
+        //     ? textAsAlternative
+        //     : selectedText
+        //     ? selectedText
+        //     : null
+        // if (previousState.fetchLocalHTML) {
+        //     textToAnalyse = document.title + document.body.innerText
+        // }
+        // const response = await this.options.summarizeBG.startPageSummaryStream({
+        //     fullPageUrl:
+        //         isPagePDF || previousState.fetchLocalHTML
+        //             ? undefined
+        //             : fullPageUrl && fullPageUrl
+        //             ? fullPageUrl
+        //             : undefined,
+        //     textToProcess: textToAnalyse,
+        //     queryPrompt: queryPrompt,
+        //     apiKey: openAIKey ? openAIKey : undefined,
+        //     outputLocation: outputLocation ?? null,
+        //     chapterSummaryIndex: chapterSummaryIndex ?? null,
+        //     AImodel: previousState.AImodel,
+        //     isContentSearch: isContentSearch ? true : false,
+        // })
+        // return response
+    }
+
+    updateAIChatHistoryState: EventHandler<
+        'updateAIChatHistoryState'
+    > = async ({ event }) => {
         this.emitMutation({
-            loadState: { $set: 'running' },
+            AIChatHistoryState: { $set: event.AIchatHistoryState },
         })
+    }
+    updateAIChatEditorState: EventHandler<'updateAIChatEditorState'> = async ({
+        event,
+    }) => {
+        this.emitMutation({
+            aiQueryEditorState: { $set: event.AIChatEditorState },
+        })
+    }
 
-        const selectedText =
-            highlightedText || previousState?.selectedTextAIPreview
-
-        const isPagePDF =
-            fullPageUrl && fullPageUrl.includes('/pdfjs/viewer.html?')
+    queryAIService: EventHandler<'queryAIService'> = async ({
+        event,
+        previousState,
+    }) => {
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
@@ -3124,168 +3213,53 @@ export class SidebarContainerLogic extends UILogic<
             }
         }
 
-        let queryPrompt = prompt
-
-        if (!previousState.isTrial) {
-            await updateAICounter()
-        }
         this.emitMutation({
-            selectedTextAIPreview: {
-                $set:
-                    selectedText?.length && outputLocation !== 'chapterSummary'
-                        ? selectedText
-                        : null,
-            },
             loadState: {
-                $set:
-                    outputLocation !== 'editor' &&
-                    outputLocation !== 'chapterSummary'
-                        ? 'running'
-                        : 'pristine',
+                $set: event.outputLocation !== 'editor' ? 'running' : 'success',
             },
-            prompt: {
-                $set:
-                    outputLocation !== 'chapterSummary'
-                        ? prompt
-                        : previousState.prompt,
-            },
-            showAICounter: { $set: true },
-            hasKey: { $set: hasAPIKey },
+            currentChatId: { $set: event.promptData.chatId },
         })
 
-        let textToAnalyse
-        let isContentSearch = false
-        textToAnalyse = textAsAlternative
-            ? textAsAlternative
-            : selectedText
-            ? selectedText
-            : null
+        let promptData = event.promptData
 
-        if (previousState.fetchLocalHTML) {
-            textToAnalyse = document.title + document.body.innerText
-        }
-
-        if (
-            previousState.activeAITab === 'ExistingKnowledge' ||
-            previousState.activeAITab === 'InFollowedFeeds'
-        ) {
-            if (previousState.prompt?.length === 0 && prompt.length === 0) {
-                this.emitMutation({
-                    loadState: { $set: 'success' },
-                })
-                return
-            }
-            const results = await this.options.customListsBG.findSimilarBackground(
-                previousState.prompt || prompt,
-                normalizeUrl(
-                    this.previousState?.fullPageUrl || this.fullPageUrl,
-                    {
-                        skipProtocolTrim: true,
-                    },
-                ),
-            )
-
-            if (results.length === 0) {
-                this.emitMutation({
-                    loadState: { $set: 'success' },
-                    pageSummary: { $set: 'No references to analyse' },
-                })
-                return
-            }
-
-            let extractedData
-
-            if (previousState.activeAITab === 'ExistingKnowledge') {
-                this.emitMutation({
-                    activeSuggestionsTab: { $set: 'MySuggestions' },
-                })
-
-                extractedData = results.filter((result) => {
-                    return (
-                        result.creatorId ===
-                            previousState.currentUserReference.id ||
-                        result.creatorId === '1'
-                    )
-                })
-
-                extractedData = extractedData.map((result) => {
-                    return {
-                        pageTitle: result.pageTitle,
-                        contentText: result.contentText,
-                    }
-                })
-            }
-            if (previousState.activeAITab === 'InFollowedFeeds') {
-                this.emitMutation({
-                    activeSuggestionsTab: { $set: 'OtherSuggestions' },
-                })
-
-                extractedData = results.filter((result) => {
-                    return (
-                        result.creatorId !==
-                        previousState.currentUserReference.id
-                    )
-                })
-
-                extractedData = extractedData.map((result) => {
-                    return {
-                        pageTitle: result.pageTitle,
-                        contentText: result.contentText,
-                    }
-                })
-            }
-
-            textToAnalyse = JSON.stringify(extractedData)
-            isContentSearch = true
-
-            await this.updateSuggestionResults(results)
-        }
+        promptData.context.originalFullMessage = replaceImgSrcWithRemoteIdBrowser(
+            promptData.context.originalFullMessage,
+        )
 
         const response = await this.options.summarizeBG.startPageSummaryStream({
-            fullPageUrl:
-                isPagePDF || previousState.fetchLocalHTML
-                    ? undefined
-                    : fullPageUrl && fullPageUrl
-                    ? fullPageUrl
-                    : undefined,
-            textToProcess: textToAnalyse,
-            queryPrompt: queryPrompt,
+            promptData: event.promptData,
             apiKey: openAIKey ? openAIKey : undefined,
-            outputLocation: outputLocation ?? null,
-            chapterSummaryIndex: chapterSummaryIndex ?? null,
+            outputLocation: event.outputLocation ?? null,
             AImodel: previousState.AImodel,
-            isContentSearch: isContentSearch ? true : false,
         })
 
         return response
     }
 
-    async executeAIquery() {}
+    // removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
+    //     event,
+    //     previousState,
+    // }) => {
+    //     let suggestions = this.AIpromptSuggestions
 
-    removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
-        event,
-        previousState,
-    }) => {
-        let suggestions = this.AIpromptSuggestions
+    //     const suggestionToRemove = event.suggestion
+    //     const newSuggestions = suggestions.filter(
+    //         (item) => item.prompt !== suggestionToRemove,
+    //     )
 
-        const suggestionToRemove = event.suggestion
-        const newSuggestions = suggestions.filter(
-            (item) => item.prompt !== suggestionToRemove,
-        )
+    //     const newSuggestionsToSave = newSuggestions.map((item) => item.prompt)
 
-        const newSuggestionsToSave = newSuggestions.map((item) => item.prompt)
+    //     await this.syncSettings.openAI.set(
+    //         'promptSuggestions',
+    //         newSuggestionsToSave,
+    //     )
 
-        await this.syncSettings.openAI.set(
-            'promptSuggestions',
-            newSuggestionsToSave,
-        )
+    //     this.emitMutation({
+    //         AIsuggestions: { $set: newSuggestions },
+    //     })
 
-        this.emitMutation({
-            AIsuggestions: { $set: newSuggestions },
-        })
-
-        this.AIpromptSuggestions = newSuggestions
-    }
+    //     this.AIpromptSuggestions = newSuggestions
+    // }
 
     addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
         this.emitMutation({
@@ -3301,6 +3275,9 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         if (event.apiKey?.length === 0) {
             await this.syncSettings.openAI.set('apiKey', event.apiKey?.trim())
+            this.emitMutation({
+                isKeyValid: { $set: false },
+            })
             return
         }
         this.emitMutation({
@@ -3328,79 +3305,79 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    saveAIPrompt: EventHandler<'saveAIPrompt'> = async ({
-        event,
-        previousState,
-    }) => {
-        this.emitMutation({
-            showAISuggestionsDropDown: { $set: true },
-        })
-        let suggestions = this.AIpromptSuggestions
+    // saveAIPrompt: EventHandler<'saveAIPrompt'> = async ({
+    //     event,
+    //     previousState,
+    // }) => {
+    //     this.emitMutation({
+    //         showAISuggestionsDropDown: { $set: true },
+    //     })
+    //     let suggestions = this.AIpromptSuggestions
 
-        let newSuggestion = { prompt: event.prompt, focused: null }
+    //     let newSuggestion = { prompt: event.prompt, focused: null }
 
-        suggestions.unshift(newSuggestion)
+    //     suggestions.unshift(newSuggestion)
 
-        const newSuggestionsToSave = suggestions.map((item) => item.prompt)
+    //     const newSuggestionsToSave = suggestions.map((item) => item.prompt)
 
-        await this.syncSettings.openAI.set(
-            'promptSuggestions',
-            newSuggestionsToSave,
-        )
+    //     await this.syncSettings.openAI.set(
+    //         'promptSuggestions',
+    //         newSuggestionsToSave,
+    //     )
 
-        this._updateFocusAISuggestions(-1, suggestions)
+    //     this._updateFocusAISuggestions(-1, suggestions)
 
-        this.AIpromptSuggestions = suggestions
-    }
+    //     this.AIpromptSuggestions = suggestions
+    // }
 
-    toggleAISuggestionsDropDown: EventHandler<
-        'toggleAISuggestionsDropDown'
-    > = async ({ event, previousState }) => {
-        if (previousState.showAISuggestionsDropDown) {
-            this._updateFocusAISuggestions(-1, previousState.AIsuggestions)
-            this.emitMutation({
-                showAISuggestionsDropDown: {
-                    $set: false,
-                },
-            })
-            return
-        }
+    // toggleAISuggestionsDropDown: EventHandler<
+    //     'toggleAISuggestionsDropDown'
+    // > = async ({ event, previousState }) => {
+    //     if (previousState.showAISuggestionsDropDown) {
+    //         this._updateFocusAISuggestions(-1, previousState.AIsuggestions)
+    //         this.emitMutation({
+    //             showAISuggestionsDropDown: {
+    //                 $set: false,
+    //             },
+    //         })
+    //         return
+    //     }
 
-        const rawSuggestions = await this.syncSettings.openAI.get(
-            'promptSuggestions',
-        )
+    //     const rawSuggestions = await this.syncSettings.openAI.get(
+    //         'promptSuggestions',
+    //     )
 
-        let suggestions = []
+    //     let suggestions = []
 
-        if (!rawSuggestions) {
-            await this.syncSettings.openAI.set(
-                'promptSuggestions',
-                AI_PROMPT_DEFAULTS,
-            )
+    //     if (!rawSuggestions) {
+    //         await this.syncSettings.openAI.set(
+    //             'promptSuggestions',
+    //             AI_PROMPT_DEFAULTS,
+    //         )
 
-            suggestions = AI_PROMPT_DEFAULTS.map((prompt: string) => {
-                return { prompt, focused: null }
-            })
-        } else {
-            suggestions = rawSuggestions.map((prompt: string) => ({
-                prompt,
-                focused: null,
-            }))
-        }
+    //         suggestions = AI_PROMPT_DEFAULTS.map((prompt: string) => {
+    //             return { prompt, focused: null }
+    //         })
+    //     } else {
+    //         suggestions = rawSuggestions.map((prompt: string) => ({
+    //             prompt,
+    //             focused: null,
+    //         }))
+    //     }
 
-        this.emitMutation({
-            showAISuggestionsDropDown: {
-                $set: !previousState.showAISuggestionsDropDown,
-            },
-        })
+    //     this.emitMutation({
+    //         showAISuggestionsDropDown: {
+    //             $set: !previousState.showAISuggestionsDropDown,
+    //         },
+    //     })
 
-        if (!previousState.showAISuggestionsDropDown) {
-            this.emitMutation({
-                AIsuggestions: { $set: suggestions },
-            })
-        }
-        this.AIpromptSuggestions = suggestions
-    }
+    //     if (!previousState.showAISuggestionsDropDown) {
+    //         this.emitMutation({
+    //             AIsuggestions: { $set: suggestions },
+    //         })
+    //     }
+    //     this.AIpromptSuggestions = suggestions
+    // }
 
     private _updateFocusAISuggestions = (
         focusIndex: number | undefined,
@@ -3473,6 +3450,23 @@ export class SidebarContainerLogic extends UILogic<
                 this._updateFocusAISuggestions(focusIndex + 1, displayEntries)
             }
         }
+    }
+
+    async getLocalContent() {
+        let isPagePDF = window.location.href.includes('/pdfjs/viewer.html?')
+        let fullTextToProcess
+        if (isPagePDF) {
+            const searchParams = new URLSearchParams(window.location.search)
+            const filePath = searchParams.get('file')
+            const pdf: PDFDocumentProxy = await (globalThis as any)[
+                'pdfjsLib'
+            ].getDocument(filePath).promise
+            const text = await extractDataFromPDFDocument(pdf, true)
+            fullTextToProcess = document.body.innerText
+        } else {
+            fullTextToProcess = (document.title ?? '') + document.body.innerText
+        }
+        return fullTextToProcess
     }
 
     queryAIwithPrompt: EventHandler<'queryAIwithPrompt'> = async ({
@@ -3602,31 +3596,126 @@ export class SidebarContainerLogic extends UILogic<
     askAIviaInPageInteractions: EventHandler<
         'askAIviaInPageInteractions'
     > = async ({ event, previousState }) => {
+        this.setActiveSidebarTabEvents('summary')
         this.emitMutation({ activeTab: { $set: 'summary' } })
+        if (event.textToProcess && event.prompt) {
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addSelectedTextAndInstaPrompt',
+                        event.textToProcess,
+                        event.prompt,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 10))
+            }
+            return
+        }
+        if (event.textToProcess) {
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addSelectedTextToAIquery',
+                        event.textToProcess,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 10))
+            }
+            return
+        }
+        if (!event.textToProcess) {
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addPageUrlToEditor',
+                        window.location.href,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 10))
+            }
 
-        let prompt =
-            event.prompt?.length > 0
-                ? event.prompt
-                : 'Tell me the key takeaways: '
-        let highlightedText =
-            event.textToProcess?.length > 0 ? event.textToProcess : null
+            return
+        }
 
-        await this.processUIEvent('queryAIwithPrompt', {
-            event: {
-                prompt: prompt,
-                highlightedText: event.textToProcess,
-                queryMode: 'summarize',
-            },
-            previousState,
-        })
+        // let prompt =
+        //     event.prompt?.length > 0
+        //         ? event.prompt
+        //         : 'Tell me the key takeaways: '
+        // let highlightedText =
+        //     event.textToProcess?.length > 0 ? event.textToProcess : null
 
-        this.emitMutation({
-            pageSummary: { $set: '' },
-            selectedTextAIPreview: { $set: event.textToProcess },
-            prompt: {
-                $set: prompt,
-            },
-        })
+        // await this.processUIEvent('queryAIwithPrompt', {
+        //     event: {
+        //         prompt: prompt,
+        //         highlightedText: event.textToProcess,
+        //         queryMode: 'summarize',
+        //     },
+        //     previousState,
+        // })
+
+        // this.emitMutation({
+        //     pageSummary: { $set: '' },
+        //     selectedTextAIPreview: { $set: event.textToProcess },
+        //     prompt: {
+        //         $set: prompt,
+        //     },
+        // })
+    }
+
+    AddMediaRangeToAIcontext: EventHandler<
+        'AddMediaRangeToAIcontext'
+    > = async ({ event, previousState }) => {
+        this.setActiveSidebarTabEvents('summary')
+
+        await sleepPromise(10)
+        if (previousState.activeTab === 'summary') {
+            this.options.events.emit(
+                'addMediaRangeToEditor',
+                event.range.from,
+                event.range.to,
+                event.prompt,
+                () => {},
+            )
+            return
+        }
+
+        // this.emitMutation({ activeTab: { $set: 'summary' } })
+
+        // let prompt =
+        //     event.prompt?.length > 0
+        //         ? event.prompt
+        //         : 'Tell me the key takeaways: '
+        // let highlightedText =
+        //     event.textToProcess?.length > 0 ? event.textToProcess : null
+
+        // await this.processUIEvent('queryAIwithPrompt', {
+        //     event: {
+        //         prompt: prompt,
+        //         highlightedText: event.textToProcess,
+        //         queryMode: 'summarize',
+        //     },
+        //     previousState,
+        // })
+
+        // this.emitMutation({
+        //     pageSummary: { $set: '' },
+        //     selectedTextAIPreview: { $set: event.textToProcess },
+        //     prompt: {
+        //         $set: prompt,
+        //     },
+        // })
     }
 
     private handleMouseUpToTriggerRabbitHole = (event) => {
@@ -3698,6 +3787,10 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    setActiveSidebarTabEvents(activeTab) {
+        this.options.summarizeBG.setActiveSidebarTab({ activeTab: activeTab })
+    }
+
     setActiveSidebarTab: EventHandler<'setActiveSidebarTab'> = async ({
         event,
         previousState,
@@ -3706,6 +3799,8 @@ export class SidebarContainerLogic extends UILogic<
             'mouseup',
             this.handleMouseUpToTriggerRabbitHole,
         )
+
+        this.setActiveSidebarTabEvents(event.tab)
 
         this.emitMutation({
             activeTab: { $set: event.tab },
@@ -3741,6 +3836,9 @@ export class SidebarContainerLogic extends UILogic<
             ((event.prompt && event.prompt?.length > 0) ||
                 event.textToProcess?.length > 0)
         ) {
+            this.options.events?.emit('setActiveSidebarTab', {
+                activeTab: 'askAI',
+            })
             if (previousState.pageSummary?.length === 0) {
                 let isPagePDF = window.location.href.includes(
                     '/pdfjs/viewer.html?',
@@ -4762,21 +4860,6 @@ export class SidebarContainerLogic extends UILogic<
     createYoutubeTimestampWithAISummary: EventHandler<
         'createYoutubeTimestampWithAISummary'
     > = async ({ previousState, event }) => {
-        let transcript = null
-        if (previousState.youtubeTranscriptJSON == null) {
-            transcript = await this.getYoutubeTranscript(window.location.href)
-            this.emitMutation({
-                youtubeTranscriptJSON: { $set: transcript },
-            })
-        } else {
-            transcript = previousState.youtubeTranscriptJSON
-        }
-
-        const filteredTranscript = await this.getTranscriptSection(
-            transcript,
-            event.videoRangeTimestamps.startTimeSecs,
-            event.videoRangeTimestamps.endTimeSecs,
-        )
         this.emitMutation({
             loadState: { $set: 'success' },
             activeTab: { $set: 'annotations' },
@@ -4796,52 +4879,82 @@ export class SidebarContainerLogic extends UILogic<
         const maxRetries = 30
         let handledSuccessfully = false
 
-        const humanTimestamp = this.createHumanTimestamp(
-            event.videoRangeTimestamps.startTimeSecs,
-        )
+        const from = event.range.from
+        const to = event.range.to
 
-        const videoURLWithTime = constructVideoURLwithTimeStamp(
+        const humanTimestampStart = this.createHumanTimestamp(from)
+        const videoURLWithTimeStart = constructVideoURLwithTimeStamp(
             window.location.href,
-            event.videoRangeTimestamps.startTimeSecs,
+            from,
+        )
+        const humanTimestampEnd = this.createHumanTimestamp(to)
+
+        const videoURLWithTimeEnd = constructVideoURLwithTimeStamp(
+            window.location.href,
+            to,
         )
 
-        for (let i = 0; i < maxRetries; i++) {
-            if (
-                this.options.events.emit(
+        let executed = false
+        let retries = 0
+        while (!executed && maxRetries < 50) {
+            try {
+                executed = this.options.events.emit(
                     'triggerYoutubeTimestampSummary',
                     {
-                        text: `[${humanTimestamp}](${videoURLWithTime}) `,
+                        text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
                         showLoadingSpinner: true,
                     },
                     (success) => {
-                        handledSuccessfully = success
+                        if (success) {
+                            executed = success
+                        }
                     },
                 )
-            ) {
-                break
-            }
-            await sleepPromise(50) // wait for half a second before trying again
+            } catch (e) {}
+            await new Promise((resolve) => setTimeout(resolve, 10 * retries))
         }
 
-        const combinedText = filteredTranscript
-            .map(({ start, text }) => ({
-                start: Math.floor(start),
-                timestamp: this.createHumanTimestamp(Math.floor(start)),
-                text,
-            }))
-            .map((item) => JSON.stringify(item))
-            .join(' ')
+        // for (let i = 0; i < maxRetries; i++) {
+        //     if (
+        //         this.options.events.emit(
+        //             'triggerYoutubeTimestampSummary',
+        //             {
+        //                 text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
+        //                 showLoadingSpinner: true,
+        //             },
+        //             (success) => {
+        //                 handledSuccessfully = success
+        //             },
+        //         )
+        //     ) {
+        //         break
+        //     }
+        //     await sleepPromise(50) // wait for half a second before trying again
+        // }
 
         let prompt = event.prompt ?? 'Summarise this concisely and briefly'
 
-        await this.queryAI(
-            this.fullPageUrl,
-            combinedText,
-            prompt,
+        const promptData: PromptData = {
+            chatId: null,
+            context: {
+                mediaRanges: {
+                    url: window.location.href,
+                    ranges: [
+                        {
+                            from: from,
+                            to: to,
+                        },
+                    ],
+                },
+            },
+            userPrompt: event.prompt,
+            model: previousState.AImodel ?? 'claude-3-haiku',
+        }
+
+        await this.processUIEvent('queryAIService', {
+            event: { promptData: promptData, outputLocation: 'editor' },
             previousState,
-            null,
-            'editor',
-        )
+        })
 
         this.emitMutation({
             pageSummary: { $set: '' },

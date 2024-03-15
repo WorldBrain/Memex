@@ -93,6 +93,7 @@ class AnnotationEdit extends React.Component<Props> {
                 this.setState({ shouldShowEditor: false })
             } else if (this.props.isEditMode) {
                 this.setState({ shouldShowEditor: true })
+                this.editorRef.focus()
             }
         }
         if (
@@ -194,7 +195,7 @@ class AnnotationEdit extends React.Component<Props> {
                         onKeyDown={this.handleInputKeyDown}
                         placeholder={`Add Note. Click on ( ? ) for formatting help.`}
                         setEditorInstanceRef={(ref) => (this.editorRef = ref)}
-                        autoFocus
+                        autoFocus={this.props.isEditMode}
                         imageSupport={this.props.imageSupport}
                         getRootElement={this.props.getRootElement}
                         slimEditorActions={this.props.slimEditorActions}
