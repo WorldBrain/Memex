@@ -3195,7 +3195,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        console.log('queryAIService', event)
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
@@ -3237,30 +3236,30 @@ export class SidebarContainerLogic extends UILogic<
         return response
     }
 
-    removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
-        event,
-        previousState,
-    }) => {
-        let suggestions = this.AIpromptSuggestions
+    // removeAISuggestion: EventHandler<'removeAISuggestion'> = async ({
+    //     event,
+    //     previousState,
+    // }) => {
+    //     let suggestions = this.AIpromptSuggestions
 
-        const suggestionToRemove = event.suggestion
-        const newSuggestions = suggestions.filter(
-            (item) => item.prompt !== suggestionToRemove,
-        )
+    //     const suggestionToRemove = event.suggestion
+    //     const newSuggestions = suggestions.filter(
+    //         (item) => item.prompt !== suggestionToRemove,
+    //     )
 
-        const newSuggestionsToSave = newSuggestions.map((item) => item.prompt)
+    //     const newSuggestionsToSave = newSuggestions.map((item) => item.prompt)
 
-        await this.syncSettings.openAI.set(
-            'promptSuggestions',
-            newSuggestionsToSave,
-        )
+    //     await this.syncSettings.openAI.set(
+    //         'promptSuggestions',
+    //         newSuggestionsToSave,
+    //     )
 
-        this.emitMutation({
-            AIsuggestions: { $set: newSuggestions },
-        })
+    //     this.emitMutation({
+    //         AIsuggestions: { $set: newSuggestions },
+    //     })
 
-        this.AIpromptSuggestions = newSuggestions
-    }
+    //     this.AIpromptSuggestions = newSuggestions
+    // }
 
     addedKey: EventHandler<'addedKey'> = ({ event, previousState }) => {
         this.emitMutation({
@@ -3306,79 +3305,79 @@ export class SidebarContainerLogic extends UILogic<
         }
     }
 
-    saveAIPrompt: EventHandler<'saveAIPrompt'> = async ({
-        event,
-        previousState,
-    }) => {
-        this.emitMutation({
-            showAISuggestionsDropDown: { $set: true },
-        })
-        let suggestions = this.AIpromptSuggestions
+    // saveAIPrompt: EventHandler<'saveAIPrompt'> = async ({
+    //     event,
+    //     previousState,
+    // }) => {
+    //     this.emitMutation({
+    //         showAISuggestionsDropDown: { $set: true },
+    //     })
+    //     let suggestions = this.AIpromptSuggestions
 
-        let newSuggestion = { prompt: event.prompt, focused: null }
+    //     let newSuggestion = { prompt: event.prompt, focused: null }
 
-        suggestions.unshift(newSuggestion)
+    //     suggestions.unshift(newSuggestion)
 
-        const newSuggestionsToSave = suggestions.map((item) => item.prompt)
+    //     const newSuggestionsToSave = suggestions.map((item) => item.prompt)
 
-        await this.syncSettings.openAI.set(
-            'promptSuggestions',
-            newSuggestionsToSave,
-        )
+    //     await this.syncSettings.openAI.set(
+    //         'promptSuggestions',
+    //         newSuggestionsToSave,
+    //     )
 
-        this._updateFocusAISuggestions(-1, suggestions)
+    //     this._updateFocusAISuggestions(-1, suggestions)
 
-        this.AIpromptSuggestions = suggestions
-    }
+    //     this.AIpromptSuggestions = suggestions
+    // }
 
-    toggleAISuggestionsDropDown: EventHandler<
-        'toggleAISuggestionsDropDown'
-    > = async ({ event, previousState }) => {
-        if (previousState.showAISuggestionsDropDown) {
-            this._updateFocusAISuggestions(-1, previousState.AIsuggestions)
-            this.emitMutation({
-                showAISuggestionsDropDown: {
-                    $set: false,
-                },
-            })
-            return
-        }
+    // toggleAISuggestionsDropDown: EventHandler<
+    //     'toggleAISuggestionsDropDown'
+    // > = async ({ event, previousState }) => {
+    //     if (previousState.showAISuggestionsDropDown) {
+    //         this._updateFocusAISuggestions(-1, previousState.AIsuggestions)
+    //         this.emitMutation({
+    //             showAISuggestionsDropDown: {
+    //                 $set: false,
+    //             },
+    //         })
+    //         return
+    //     }
 
-        const rawSuggestions = await this.syncSettings.openAI.get(
-            'promptSuggestions',
-        )
+    //     const rawSuggestions = await this.syncSettings.openAI.get(
+    //         'promptSuggestions',
+    //     )
 
-        let suggestions = []
+    //     let suggestions = []
 
-        if (!rawSuggestions) {
-            await this.syncSettings.openAI.set(
-                'promptSuggestions',
-                AI_PROMPT_DEFAULTS,
-            )
+    //     if (!rawSuggestions) {
+    //         await this.syncSettings.openAI.set(
+    //             'promptSuggestions',
+    //             AI_PROMPT_DEFAULTS,
+    //         )
 
-            suggestions = AI_PROMPT_DEFAULTS.map((prompt: string) => {
-                return { prompt, focused: null }
-            })
-        } else {
-            suggestions = rawSuggestions.map((prompt: string) => ({
-                prompt,
-                focused: null,
-            }))
-        }
+    //         suggestions = AI_PROMPT_DEFAULTS.map((prompt: string) => {
+    //             return { prompt, focused: null }
+    //         })
+    //     } else {
+    //         suggestions = rawSuggestions.map((prompt: string) => ({
+    //             prompt,
+    //             focused: null,
+    //         }))
+    //     }
 
-        this.emitMutation({
-            showAISuggestionsDropDown: {
-                $set: !previousState.showAISuggestionsDropDown,
-            },
-        })
+    //     this.emitMutation({
+    //         showAISuggestionsDropDown: {
+    //             $set: !previousState.showAISuggestionsDropDown,
+    //         },
+    //     })
 
-        if (!previousState.showAISuggestionsDropDown) {
-            this.emitMutation({
-                AIsuggestions: { $set: suggestions },
-            })
-        }
-        this.AIpromptSuggestions = suggestions
-    }
+    //     if (!previousState.showAISuggestionsDropDown) {
+    //         this.emitMutation({
+    //             AIsuggestions: { $set: suggestions },
+    //         })
+    //     }
+    //     this.AIpromptSuggestions = suggestions
+    // }
 
     private _updateFocusAISuggestions = (
         focusIndex: number | undefined,
@@ -4883,8 +4882,6 @@ export class SidebarContainerLogic extends UILogic<
         const from = event.range.from
         const to = event.range.to
 
-        console.log('fraom', from, to)
-
         const humanTimestampStart = this.createHumanTimestamp(from)
         const videoURLWithTimeStart = constructVideoURLwithTimeStamp(
             window.location.href,
@@ -4897,8 +4894,6 @@ export class SidebarContainerLogic extends UILogic<
             to,
         )
 
-        console.log(humanTimestampStart)
-
         let executed = false
         let retries = 0
         while (!executed && maxRetries < 50) {
@@ -4910,7 +4905,9 @@ export class SidebarContainerLogic extends UILogic<
                         showLoadingSpinner: true,
                     },
                     (success) => {
-                        executed = success
+                        if (success) {
+                            executed = success
+                        }
                     },
                 )
             } catch (e) {}
@@ -4953,8 +4950,6 @@ export class SidebarContainerLogic extends UILogic<
             userPrompt: event.prompt,
             model: previousState.AImodel ?? 'claude-3-haiku',
         }
-
-        console.log('promptData', promptData)
 
         await this.processUIEvent('queryAIService', {
             event: { promptData: promptData, outputLocation: 'editor' },

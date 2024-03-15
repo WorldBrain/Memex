@@ -349,9 +349,6 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                                 'Enter'
                                                                             ) {
                                                                                 // Allow Enter to function normally for new lines
-                                                                                console.log(
-                                                                                    'allow new line',
-                                                                                )
                                                                             } else {
                                                                                 // Handle other keys if needed
                                                                             }

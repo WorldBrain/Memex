@@ -1808,6 +1808,7 @@ export class AnnotationsSidebarContainer<
                             queryAIservice={(promptData: PromptData) =>
                                 this.processEvent('queryAIService', {
                                     promptData: promptData,
+                                    outputLocation: null,
                                 })
                             }
                             updateAIChatHistoryState={(

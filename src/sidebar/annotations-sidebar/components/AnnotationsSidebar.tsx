@@ -108,6 +108,7 @@ import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
 import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
 import { browser } from 'webextension-polyfill-ts'
+import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -326,7 +327,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     updateAIChatEditorState: (AIChatEditorState: string) => void
     addedKey?: () => void
     checkIfKeyValid?: (apiKey: string) => void
-    signupDate?: number
+    signupDate: number
 }
 
 interface AnnotationsSidebarState {
@@ -492,15 +493,6 @@ export class AnnotationsSidebar extends React.Component<
         document.addEventListener('keydown', this.handleSelectAll)
         document.addEventListener('mousedown', this.handleLastClick)
         document.addEventListener('mousemove', this.trackMouseOverSidebar)
-
-        this.props.events.on(
-            'addMediaRangeToEditor',
-            (from: number, to: number, url: string) => {
-                console.log('sidebar reached addMediaRangeToEditor event')
-
-                // this.editor.addMediaRangeToEditor(from, to, url)
-            },
-        )
     }
 
     async componentDidUpdate(
@@ -1944,7 +1936,6 @@ export class AnnotationsSidebar extends React.Component<
     }
 
     renderQaASection() {
-        console.log('ai model', this.props.isTrial)
         return (
             <AISidebarContainer>
                 <AIChatComponent
@@ -1993,6 +1984,7 @@ export class AnnotationsSidebar extends React.Component<
                                     this.props.events.emit(
                                         'addTextToEditor',
                                         text,
+                                        () => {},
                                     )
                                 }
                             />
@@ -2641,17 +2633,25 @@ export class AnnotationsSidebar extends React.Component<
                                 while (!executed) {
                                     try {
                                         if (
-                                            window.location.href.includes(
-                                                '.youtube.com',
-                                            )
+                                            isUrlYTVideo(window.location.href)
                                         ) {
-                                            executed = this.props.events.emit(
+                                            let video = document.getElementsByTagName(
+                                                'video',
+                                            )[0]
+
+                                            let duration = Math.floor(
+                                                video.duration,
+                                            )
+
+                                            executed = await this.props.events.emit(
                                                 'addMediaRangeToEditor',
                                                 0,
-                                                100,
-                                                window.location.href,
+                                                duration,
+                                                '',
                                                 (success) => {
-                                                    executed = success
+                                                    if (success) {
+                                                        executed = success
+                                                    }
                                                 },
                                             )
                                         } else {

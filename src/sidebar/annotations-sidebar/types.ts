@@ -32,7 +32,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         to: number,
         prompt: string,
         callback,
-    ) => void
+    ) => Promise<boolean>
     addPageUrlToEditor?: (url: string, callback) => void
     setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
     // No longer used, as of the sidebar refactor

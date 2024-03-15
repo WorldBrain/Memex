@@ -204,7 +204,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             },
         )
         sidebarEvents.on('setSelectedList', async (selectedList) => {
-            console.log('setSelectedList', selectedList)
             inPageUI.selectedList = selectedList
         })
         sidebarEvents.on('setActiveSidebarTab', async (activeTab) => {
@@ -257,7 +256,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'summary',
             })
-            console.log('event', event)
             await this.processEvent('AddMediaRangeToAIcontext', {
                 range: event.range,
                 prompt: event.prompt,
@@ -351,9 +349,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
         } else if (event.action === 'show_annotation') {
             await this.activateAnnotation(event.annotationCacheId, 'show')
-            console.log('show')
             await sleepPromise(500)
-            console.log('showafter')
             if (
                 this.state.selectedListId &&
                 this.state.activeTab === 'spaces'
