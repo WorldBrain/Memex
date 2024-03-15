@@ -206,6 +206,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
         sidebarEvents.on('setSelectedList', async (selectedList) => {
             inPageUI.selectedList = selectedList
         })
+        sidebarEvents.on('setActiveSidebarTab', async (activeTab) => {
+            inPageUI.activeSidebarTab = activeTab.activeTab
+        })
     }
 
     cleanupEventForwarding = () => {
@@ -249,6 +252,14 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 textToProcess: event.highlightedText,
                 prompt: event.prompt,
             })
+        } else if (event.action === 'add_media_range_to_ai_context') {
+            await this.processEvent('setActiveSidebarTab', {
+                tab: 'summary',
+            })
+            await this.processEvent('AddMediaRangeToAIcontext', {
+                range: event.range,
+                prompt: event.prompt,
+            })
         } else if (
             event.action === 'create_youtube_timestamp_with_AI_summary'
         ) {
@@ -257,10 +268,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
 
             this.processEvent('createYoutubeTimestampWithAISummary', {
-                videoRangeTimestamps: {
-                    startTimeSecs: event.videoRangeTimestamps[0],
-                    endTimeSecs: event.videoRangeTimestamps[1],
-                },
+                range: event.range,
                 prompt: event.prompt,
             })
             return true
@@ -324,18 +332,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.props.inPageUI.cacheLoadPromise,
         ])
 
-        if (event.action === 'comment') {
-            await this.processEvent('setActiveSidebarTab', {
-                tab:
-                    this.state.selectedListId &&
-                    this.state.activeTab === 'spaces'
-                        ? 'spaces'
-                        : 'annotations',
-            })
-            await this.processEvent('setNewPageNoteText', {
-                comment: event.annotationData?.commentText ?? '',
-            })
-        } else if (event.action === 'selected_list_mode_from_web_ui') {
+        // if (event.action === 'comment') {
+        //     await this.processEvent('setActiveSidebarTab', {
+        //         tab: this.state.selectedListId ? 'spaces' : 'annotations',
+        //     })
+        //     if (this.state.activeTab === 'annotations') {
+        //         await this.processEvent('setNewPageNoteText', {
+        //             comment: event.annotationData?.commentText ?? '',
+        //         })
+        //     }
+        // } else
+        if (event.action === 'selected_list_mode_from_web_ui') {
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,
                 manuallyPullLocalListData: event.manuallyPullLocalListData,

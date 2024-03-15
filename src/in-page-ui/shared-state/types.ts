@@ -11,6 +11,7 @@ import type {
     OnDemandInPageUIProps,
 } from 'src/search-injection/types'
 import type { ContentScriptComponent } from 'src/content-scripts/types'
+import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export type InPageUISidebarAction =
     | 'comment'
@@ -33,6 +34,7 @@ export type InPageUISidebarAction =
     | 'save_image_as_new_note'
     | 'cite_page'
     | 'share_page_link'
+    | 'add_media_range_to_ai_context'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = ContentScriptComponent
@@ -65,6 +67,7 @@ export interface SidebarActionOptions {
     videoRangeTimestamps?: number[]
     imageData?: string
     prompt?: string
+    range?: { from: number; to: number }
 }
 export interface ToolTipActionOptions {
     annotationCacheId?: UnifiedAnnotation['unifiedId']
@@ -90,6 +93,7 @@ export interface SharedInPageUIEvents {
         component: OnDemandInPageUIComponents
         options?: OnDemandInPageUIProps
     }) => void
+    setActiveSidebarTab: (event: { activeTab: SidebarTab }) => void
 }
 
 export interface ShouldSetUpOptions {
@@ -105,6 +109,7 @@ export interface SharedInPageUIInterface {
 
     // Misc. states that need to be shared between content scripts
     selectedList: UnifiedList['unifiedId'] | null
+    activeSidebarTab: SidebarTab | null
     /** Resolves when all data is loaded to hydate UI annotations/lists cache. */
     cacheLoadPromise: Resolvable<void>
 

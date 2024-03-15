@@ -43,6 +43,12 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 
+import {
+    AImodels,
+    PromptData,
+    ChatHistoryItem,
+} from '@worldbrain/memex-common/lib/summarization/types'
+
 export interface SidebarContainerDependencies {
     elements?: {
         topBarLeft?: JSX.Element
@@ -107,6 +113,7 @@ export type SidebarTab =
     | 'summary'
     | 'rabbitHole'
     | 'citations'
+    | 'askAI'
 export type SidebarAITab = 'ThisPage' | 'ExistingKnowledge' | 'InFollowedFeeds'
 
 export type SuggestionsTab =
@@ -142,7 +149,6 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     spaceSearchSuggestions?: SpaceSearchSuggestion[]
     suggestionsResults: SuggestionCard[]
     suggestionsResultsLoadState: TaskState
-
     activeTab: SidebarTab
     activeAITab: SidebarAITab
     summaryModeActiveTab: 'Answer' | 'References'
@@ -254,8 +260,11 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     // Search result propsallowed
     shouldShowCount: boolean
     isInvalidSearch: boolean
+    AIChatHistoryState: ChatHistoryItem[]
+    currentChatId: string
     totalResultCount: number
     searchResultSkip: number
+    aiQueryEditorState: string
 
     isListFilterActive: boolean
     showLoginModal: boolean
@@ -294,7 +303,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
             loadingState: TaskState
         }
     }
-    AImodel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+    AImodel: AImodels
     localFoldersList: LocalFolder[]
     showFeedSourcesMenu: boolean
     bulkSelectionState: string[]
@@ -327,15 +336,21 @@ interface SidebarEvents {
     checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
+    queryAIService: {
+        promptData: PromptData
+        outputLocation: 'editor' | 'summaryContainer' | 'chapterSummary' | null
+    }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null
     toggleAutoAdd: null
+    updateAIChatHistoryState: { AIchatHistoryState: ChatHistoryItem[] }
+    updateAIChatEditorState: { AIChatEditorState: string }
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
-        videoRangeTimestamps: {
-            startTimeSecs: number
-            endTimeSecs: number
+        range: {
+            from: number
+            to: number
         }
         prompt: string
     }
@@ -398,6 +413,10 @@ interface SidebarEvents {
         url?: string
         prompt?: string
     }
+    AddMediaRangeToAIcontext: {
+        range?: { from: number; to: number }
+        prompt?: string
+    }
     selectAISuggestion: { suggestion: string }
     queryAIwithPrompt: {
         prompt: string
@@ -407,7 +426,7 @@ interface SidebarEvents {
     setQueryMode: {
         mode: string
     }
-    setAIModel: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+    setAIModel: AImodels
 
     toggleAISuggestionsDropDown: null
     removeSelectedTextAIPreview: null
@@ -551,7 +570,6 @@ interface SidebarEvents {
     }
 
     openWebUIPageForSpace: { unifiedListId: UnifiedList['unifiedId'] }
-
     // Search
     paginateSearch: null
     setPillVisibility: { value: string }
