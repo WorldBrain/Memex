@@ -1054,9 +1054,15 @@ export class AnnotationsSidebarContainer<
                         default={{
                             x: 0,
                             y: 0,
-                            width: this.state.sidebarWidth,
-                            // ? this.state.sidebarWidth
-                            // : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                            width:
+                                parseFloat(
+                                    this.state.sidebarWidth.replace('px', ''),
+                                ) > 0
+                                    ? this.state.sidebarWidth
+                                    : SIDEBAR_WIDTH_STORAGE_KEY.replace(
+                                          'px',
+                                          '',
+                                      ),
                             height: 'auto',
                         }}
                         resizeHandleWrapperClass={'sidebarResizeHandle'}
