@@ -64,6 +64,10 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
 import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import PageCitations from 'src/citations/PageCitations'
+import {
+    ChatHistoryItem,
+    PromptData,
+} from '@worldbrain/memex-common/lib/summarization/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -367,7 +371,6 @@ export class AnnotationsSidebarContainer<
             body: annotationCardInstance?.body,
             comment: annotationCardInstance?.comment,
             onCommentChange: (comment) => {
-                console.log('onCommentChange', comment)
                 this.processEvent('setAnnotationEditCommentText', {
                     instanceLocation,
                     unifiedAnnotationId,
@@ -1051,9 +1054,15 @@ export class AnnotationsSidebarContainer<
                         default={{
                             x: 0,
                             y: 0,
-                            width: this.state.sidebarWidth,
-                            // ? this.state.sidebarWidth
-                            // : SIDEBAR_WIDTH_STORAGE_KEY.replace('px', ''),
+                            width:
+                                parseFloat(
+                                    this.state.sidebarWidth.replace('px', ''),
+                                ) > 0
+                                    ? this.state.sidebarWidth
+                                    : SIDEBAR_WIDTH_STORAGE_KEY.replace(
+                                          'px',
+                                          '',
+                                      ),
                             height: 'auto',
                         }}
                         resizeHandleWrapperClass={'sidebarResizeHandle'}
@@ -1128,6 +1137,7 @@ export class AnnotationsSidebarContainer<
                                     color: color,
                                 })
                             }}
+                            syncSettingsBG={this.props.syncSettingsBG}
                             onGoToAnnotation={async (unifiedAnnotationId) =>
                                 this.processEvent('goToAnnotationInNewTab', {
                                     unifiedAnnotationId,
@@ -1631,80 +1641,6 @@ export class AnnotationsSidebarContainer<
                                 )
                             }}
                             renderPageLinkMenuForList={() => null}
-                            //     <>
-                            //         <PageCitations
-                            //             annotationUrls={page.noteIds['user']}
-                            //             copyPasterProps={{
-                            //                 copyPasterBG: this.props
-                            //                     .copyPasterBG,
-                            //                 getRootElement: this.props
-                            //                     .getRootElement,
-                            //                 onClickOutside:
-                            //                     interactionProps.onCopyPasterBtnClick,
-                            //             }}
-                            //             pageLinkProps={{
-                            //                 authBG: this.props.authBG,
-                            //                 analyticsBG: this.props.analyticsBG,
-                            //                 annotationsCache: this.props
-                            //                     .annotationsCache,
-                            //                 contentSharingBG: this.props
-                            //                     .contentSharingBG,
-                            //                 contentSharingByTabsBG: this.props
-                            //                     .contentSharingByTabsBG,
-                            //                 copyToClipboard: this.props
-                            //                     .onPageLinkCopy,
-                            //                 fullPageUrl: page.fullUrl,
-                            //                 getRootElement: this.props
-                            //                     .getRootElement,
-                            //                 showSpacesTab: this.props
-                            //                     .showSpacesTab,
-                            //             }}
-                            //         />
-                            //         <PageLinkMenu
-                            //             autoCreateLinkIfNone
-                            //             analyticsBG={this.props.analyticsBG}
-                            //             contentSharingBG={
-                            //                 this.props.contentSharingBG
-                            //             }
-                            //             contentSharingByTabsBG={
-                            //                 this.props.contentSharingByTabsBG
-                            //             }
-                            //             authBG={this.props.authBG}
-                            //             annotationsCache={
-                            //                 this.props.annotationsCache
-                            //             }
-                            //             fullPageUrl={this.state.fullPageUrl!}
-                            //             showSpacesTab={() => {
-                            //                 this.processEvent(
-                            //                     'closePageLinkShareMenu',
-                            //                     null,
-                            //                 )
-                            //                 this.processEvent(
-                            //                     'setActiveSidebarTab',
-                            //                     { tab: 'spaces' },
-                            //                 )
-                            //                 this.processEvent(
-                            //                     'setSelectedList',
-                            //                     {
-                            //                         unifiedListId: null,
-                            //                     },
-                            //                 )
-                            //             }}
-                            //             onNewPageLinkCreate={async (
-                            //                 pageLinkListId,
-                            //             ) => {
-                            //                 await (this
-                            //                     .logic as SidebarContainerLogic).setLocallyAvailableSelectedList(
-                            //                     this.state,
-                            //                     pageLinkListId,
-                            //                 )
-                            //             }}
-                            //             getRootElement={
-                            //                 this.props.getRootElement
-                            //             }
-                            //         />
-                            //     </>
-                            // )}
                             authBG={this.props.authBG}
                             contentSharingBG={this.props.contentSharingBG}
                             contentSharingByTabsBG={
@@ -1732,7 +1668,7 @@ export class AnnotationsSidebarContainer<
                             renderListPickerForBulkEdit={
                                 this.renderListPickerForBulkEdit
                             }
-                            setActiveTab={(tab) => (event) => {
+                            setActiveTab={(tab) => {
                                 this.processEvent('setActiveSidebarTab', {
                                     tab,
                                 })
@@ -1875,6 +1811,33 @@ export class AnnotationsSidebarContainer<
                                     annotationIds: annotationIds,
                                 })
                             }}
+                            queryAIservice={(promptData: PromptData) =>
+                                this.processEvent('queryAIService', {
+                                    promptData: promptData,
+                                    outputLocation: null,
+                                })
+                            }
+                            updateAIChatHistoryState={(
+                                newState: ChatHistoryItem[],
+                            ) => {
+                                this.processEvent('updateAIChatHistoryState', {
+                                    AIchatHistoryState: newState,
+                                })
+                            }}
+                            updateAIChatEditorState={(newState: string) => {
+                                this.processEvent('updateAIChatEditorState', {
+                                    AIChatEditorState: newState,
+                                })
+                            }}
+                            isTrial={this.state.isTrial}
+                            signupDate={this.state.signupDate}
+                            addedKey={() => this.processEvent('addedKey', null)}
+                            checkIfKeyValid={(apiKey) =>
+                                this.processEvent('checkIfKeyValid', {
+                                    apiKey: apiKey,
+                                })
+                            }
+                            isKeyValid={this.state.isKeyValid}
                         />
                     </Rnd>
                 </ContainerStyled>
@@ -1943,7 +1906,7 @@ const PickerWrapper = styled.div`
 const ContainerStyled = styled.div<{
     sidebarContext: string
     isShown: string
-    theme
+    theme: any
     rightPosition?: number
     inPageMode?: boolean
 }>`
@@ -1968,7 +1931,7 @@ const ContainerStyled = styled.div<{
         props.rightPosition ? props.rightPosition + 'px' : TOOLTIP_WIDTH};
 
     width: ${(props) => props.theme.sidebarWidth};
-    &:: -webkit-scrollbar {
+    &::-webkit-scrollbar {
         display: none;
     }
     transition: all 0.2s cubic-bezier(0.3, 0.35, 0.14, 0.8);

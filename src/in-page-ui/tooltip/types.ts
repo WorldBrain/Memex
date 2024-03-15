@@ -10,9 +10,10 @@ import { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicato
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { Storage } from 'webextension-polyfill'
+import { SharedInPageUIState } from '../shared-state/shared-in-page-ui-state'
 
 export interface TooltipDependencies extends AnnotationFunctions {
-    inPageUI: SharedInPageUIInterface
+    inPageUI: SharedInPageUIState
     annotationsBG: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCache
     contentSharingBG: ContentSharingInterface

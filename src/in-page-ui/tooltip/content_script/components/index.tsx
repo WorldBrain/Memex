@@ -27,6 +27,11 @@ import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/t
 import { Storage } from 'webextension-polyfill'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import { SharedInPageUIInterface } from 'src/in-page-ui/shared-state/types'
+import {
+    TypedRemoteEventEmitter,
+    getRemoteEventEmitter,
+} from 'src/util/webextensionRPC'
 
 interface TooltipRootProps {
     mount: InPageUIRootMount
@@ -42,6 +47,7 @@ interface TooltipRootProps {
     pageActivityIndicatorBG: RemotePageActivityIndicatorInterface
     localStorageAPI: Storage.LocalStorageArea
     getRootElement: () => HTMLElement
+    inPageUI: SharedInPageUIInterface
 }
 
 interface TooltipRootState {
@@ -50,6 +56,7 @@ interface TooltipRootState {
     currentAnnotationLists: UnifiedList[]
     showSpacePicker: boolean
     spaceSearchResults: any[]
+    askAITabActive?: boolean
 }
 
 class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
@@ -58,11 +65,21 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         currentAnnotationLists: [],
         showSpacePicker: false,
         spaceSearchResults: [],
+        askAITabActive: false,
     }
+    private summarisePageEvents: TypedRemoteEventEmitter<'pageSummary'>
 
     async componentDidMount() {
         this.setState({
             themeVariant: await loadThemeVariant(),
+        })
+
+        this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
+
+        this.summarisePageEvents.on('setActiveSidebarTab', ({ activeTab }) => {
+            this.setState({
+                askAITabActive: true,
+            })
         })
     }
 
@@ -373,6 +390,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         }
                         spaceSearchResults={this.state.spaceSearchResults}
                         addNewSpaceViaWikiLinks={this.addNewSpaceViaWikiLinks}
+                        isAskAIOpen={this.state.askAITabActive}
                     />
                 </ThemeProvider>
             </StyleSheetManager>
@@ -401,6 +419,7 @@ export function setupUIContainer(
                 pageActivityIndicatorBG={props.pageActivityIndicatorBG}
                 localStorageAPI={props.localStorageAPI}
                 getRootElement={props.getRootElement}
+                inPageUI={props.inPageUI}
             />,
             mount.rootElement,
         )
