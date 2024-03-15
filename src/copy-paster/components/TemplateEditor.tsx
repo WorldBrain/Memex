@@ -44,6 +44,72 @@ const TemplateButtonOptions = [
         TooltipText: 'Adds the page URL',
     },
     {
+        buttonText: 'Page Meta Title',
+        insertedText: `{{{PageMetaTitle}}} `,
+        TooltipText: 'Adds the meta title of the page',
+    },
+    {
+        buttonText: 'Page Annotation',
+        insertedText: `{{{PageAnnotation}}} `,
+        TooltipText: 'Adds the annotation of the page',
+    },
+    {
+        buttonText: 'Page Source Name',
+        insertedText: `{{{PageSourceName}}} `,
+        TooltipText: 'Adds the source name of the page',
+    },
+    {
+        buttonText: 'PDF Journal Name',
+        insertedText: `{{{PageJournalName}}} `,
+        TooltipText: 'Adds the journal name of the page',
+    },
+    {
+        buttonText: 'PDF DOI',
+        insertedText: `{{{PageDOI}}} `,
+        TooltipText: 'Adds the DOI of the page',
+    },
+    {
+        buttonText: 'PDF Journal Page',
+        insertedText: `{{{PageJournalPage}}} `,
+        TooltipText: 'Adds the journal page of the page',
+    },
+    {
+        buttonText: 'PDF Journal Issue',
+        insertedText: `{{{PageJournalIssue}}} `,
+        TooltipText: 'Adds the journal issue of the page',
+    },
+    {
+        buttonText: 'PDF Journal Volume',
+        insertedText: `{{{PageJournalVolume}}} `,
+        TooltipText: 'Adds the journal volume of the page',
+    },
+    {
+        buttonText: 'PDF Journal Release Date',
+        insertedText: `{{#PageReleaseDate}}YYYY-MM-DD{{/PageReleaseDate}} `,
+        TooltipText: 'Adds the release date of the page',
+    },
+    {
+        buttonText: 'Access Date',
+        insertedText: `{{#PageAccessDate}}YYYY-MM-DD{{/PageAccessDate}} `,
+        TooltipText: 'Adds the access date of the page',
+    },
+    {
+        buttonText: 'Authors List',
+        insertedText: `{{#PageEntities}}{{{.}}} {{/PageEntities}} `,
+        TooltipText:
+            'Loops through and adds all entities associated with the page',
+    },
+    {
+        buttonText: 'Author First Name',
+        insertedText: `{{{EntityAdditionalName}}} `,
+        TooltipText: 'The first name of the Author',
+    },
+    {
+        buttonText: 'Author Last Name',
+        insertedText: `{{{EntityName}}} `,
+        TooltipText: 'The first name of the Author',
+    },
+    {
         buttonText: 'Page Link',
         insertedText: `{{{PageLink}}} `,
         TooltipText: (
@@ -238,6 +304,9 @@ export default class TemplateEditor extends PureComponent<
                             return (
                                 <TemplateRow
                                     onClick={() => {
+                                        this.setState({
+                                            showPremadeTemplatesModal: false,
+                                        })
                                         this.insertIntoEditor(template.code)
                                     }}
                                 >
@@ -852,6 +921,11 @@ const PreviewInput = styled.textarea`
     text-overflow: nowrap;
 
     scrollbar-width: none;
+
+    & em {
+        font-style: italic;
+        font-weight: inherit;
+    }
 `
 
 const ErrorText = styled.div`
@@ -915,6 +989,16 @@ const PreviewRichText = styled.div`
 
     a {
         color: ${(props) => props.theme.colors.prime1};
+    }
+
+    & em {
+        font-style: italic;
+        font-weight: inherit;
+    }
+
+    em {
+        font-style: italic;
+        font-weight: inherit;
     }
 
     scrollbar-width: none;
