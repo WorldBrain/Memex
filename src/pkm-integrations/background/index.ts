@@ -1,6 +1,6 @@
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { MemexLocalBackend } from '../background/backend'
-import TurndownService from 'turndown'
+import TurndownService from 'turndown/index'
 import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'

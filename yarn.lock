@@ -19256,10 +19256,9 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
-turndown@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/turndown/-/turndown-7.1.1.tgz#96992f2d9b40a1a03d3ea61ad31b5a5c751ef77f"
-  integrity sha512-BEkXaWH7Wh7e9bd2QumhfAXk5g34+6QUmmWx+0q6ThaVOLuLUqsnkq35HQ5SBHSaxjSfSM7US5o4lhJNH7B9MA==
+turndown@mixmark-io/turndown#4afc32881bd371a34284d262613c1e1363809963:
+  version "7.1.2"
+  resolved "https://codeload.github.com/mixmark-io/turndown/tar.gz/4afc32881bd371a34284d262613c1e1363809963"
   dependencies:
     domino "^2.1.6"
 

@@ -22,7 +22,7 @@ import type {
 import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
-import TurndownService from 'turndown'
+import TurndownService from 'turndown/index'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { CustomList } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { FollowedListEntry } from 'src/page-activity-indicator/background/types'
