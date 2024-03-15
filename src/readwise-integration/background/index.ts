@@ -21,7 +21,7 @@ import {
 import type { Page } from 'src/search'
 import type DirectLinkingBackground from 'src/annotations/background'
 import type CustomListBackground from 'src/custom-lists/background'
-import TurndownService from 'turndown/index'
+import TurndownService from 'turndown/src/turndown'
 
 type ReadwiseInterfaceMethod<
     Method extends keyof ReadwiseInterface<'provider'>
