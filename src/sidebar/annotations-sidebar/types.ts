@@ -30,7 +30,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     addMediaRangeToEditor?: (
         from: number,
         to: number,
-        url: string,
+        prompt: string,
         callback,
     ) => void
     addPageUrlToEditor?: (url: string, callback) => void

@@ -2640,13 +2640,29 @@ export class AnnotationsSidebar extends React.Component<
                                 let executed = false
                                 while (!executed) {
                                     try {
-                                        executed = this.props.events.emit(
-                                            'addPageUrlToEditor',
-                                            window.location.href,
-                                            (success) => {
-                                                executed = success
-                                            },
-                                        )
+                                        if (
+                                            window.location.href.includes(
+                                                '.youtube.com',
+                                            )
+                                        ) {
+                                            executed = this.props.events.emit(
+                                                'addMediaRangeToEditor',
+                                                0,
+                                                100,
+                                                window.location.href,
+                                                (success) => {
+                                                    executed = success
+                                                },
+                                            )
+                                        } else {
+                                            executed = this.props.events.emit(
+                                                'addPageUrlToEditor',
+                                                window.location.href,
+                                                (success) => {
+                                                    executed = success
+                                                },
+                                            )
+                                        }
                                     } catch (e) {}
                                     await new Promise((resolve) =>
                                         setTimeout(resolve, 10),

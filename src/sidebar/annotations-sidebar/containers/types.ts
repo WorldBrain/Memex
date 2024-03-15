@@ -335,7 +335,10 @@ interface SidebarEvents {
     checkIfKeyValid: { apiKey: string }
     saveAIPrompt: { prompt: string }
     removeAISuggestion: { suggestion: string }
-    queryAIService: { promptData: PromptData }
+    queryAIService: {
+        promptData: PromptData
+        outputLocation: 'editor' | 'summaryContainer' | 'chapterSummary' | null
+    }
     navigateFocusInList: { direction: 'up' | 'down' }
     setSpaceTitleEditValue: { value: string }
     setSharingTutorialVisibility: null
@@ -344,9 +347,9 @@ interface SidebarEvents {
     updateAIChatEditorState: { AIChatEditorState: string }
     getAnnotationEditorIntoState: { ref: any }
     createYoutubeTimestampWithAISummary: {
-        videoRangeTimestamps: {
-            startTimeSecs: number
-            endTimeSecs: number
+        range: {
+            from: number
+            to: number
         }
         prompt: string
     }

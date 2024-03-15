@@ -248,7 +248,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     private handleExternalAction = async (event: SidebarActionOptions) => {
         // instantl load page summaries bc they are not dependent on initlogicpromise
 
-        console.log('eventtttt', event)
         if (event.action === 'show_page_summary') {
             await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
@@ -258,6 +257,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'summary',
             })
+            console.log('event', event)
             await this.processEvent('AddMediaRangeToAIcontext', {
                 range: event.range,
                 prompt: event.prompt,
@@ -270,10 +270,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
 
             this.processEvent('createYoutubeTimestampWithAISummary', {
-                videoRangeTimestamps: {
-                    startTimeSecs: event.videoRangeTimestamps[0],
-                    endTimeSecs: event.videoRangeTimestamps[1],
-                },
+                range: event.range,
                 prompt: event.prompt,
             })
             return true

@@ -119,6 +119,7 @@ import analytics from 'src/analytics'
 
 import MarkdownIt from 'markdown-it'
 import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
+import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -3194,6 +3195,7 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        console.log('queryAIService', event)
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
@@ -3213,11 +3215,14 @@ export class SidebarContainerLogic extends UILogic<
         }
 
         this.emitMutation({
-            loadState: { $set: 'running' },
+            loadState: {
+                $set: event.outputLocation !== 'editor' ? 'running' : 'success',
+            },
             currentChatId: { $set: event.promptData.chatId },
         })
 
         let promptData = event.promptData
+
         promptData.context.originalFullMessage = replaceImgSrcWithRemoteIdBrowser(
             promptData.context.originalFullMessage,
         )
@@ -3225,7 +3230,7 @@ export class SidebarContainerLogic extends UILogic<
         const response = await this.options.summarizeBG.startPageSummaryStream({
             promptData: event.promptData,
             apiKey: openAIKey ? openAIKey : undefined,
-            outputLocation: null,
+            outputLocation: event.outputLocation ?? null,
             AImodel: previousState.AImodel,
         })
 
@@ -3682,6 +3687,7 @@ export class SidebarContainerLogic extends UILogic<
                 event.range.from,
                 event.range.to,
                 event.prompt,
+                () => {},
             )
             return
         }
@@ -4855,21 +4861,6 @@ export class SidebarContainerLogic extends UILogic<
     createYoutubeTimestampWithAISummary: EventHandler<
         'createYoutubeTimestampWithAISummary'
     > = async ({ previousState, event }) => {
-        let transcript = null
-        if (previousState.youtubeTranscriptJSON == null) {
-            transcript = await this.getYoutubeTranscript(window.location.href)
-            this.emitMutation({
-                youtubeTranscriptJSON: { $set: transcript },
-            })
-        } else {
-            transcript = previousState.youtubeTranscriptJSON
-        }
-
-        const filteredTranscript = await this.getTranscriptSection(
-            transcript,
-            event.videoRangeTimestamps.startTimeSecs,
-            event.videoRangeTimestamps.endTimeSecs,
-        )
         this.emitMutation({
             loadState: { $set: 'success' },
             activeTab: { $set: 'annotations' },
@@ -4889,52 +4880,86 @@ export class SidebarContainerLogic extends UILogic<
         const maxRetries = 30
         let handledSuccessfully = false
 
-        const humanTimestamp = this.createHumanTimestamp(
-            event.videoRangeTimestamps.startTimeSecs,
-        )
+        const from = event.range.from
+        const to = event.range.to
 
-        const videoURLWithTime = constructVideoURLwithTimeStamp(
+        console.log('fraom', from, to)
+
+        const humanTimestampStart = this.createHumanTimestamp(from)
+        const videoURLWithTimeStart = constructVideoURLwithTimeStamp(
             window.location.href,
-            event.videoRangeTimestamps.startTimeSecs,
+            from,
+        )
+        const humanTimestampEnd = this.createHumanTimestamp(to)
+
+        const videoURLWithTimeEnd = constructVideoURLwithTimeStamp(
+            window.location.href,
+            to,
         )
 
-        for (let i = 0; i < maxRetries; i++) {
-            if (
-                this.options.events.emit(
+        console.log(humanTimestampStart)
+
+        let executed = false
+        let retries = 0
+        while (!executed && maxRetries < 50) {
+            try {
+                executed = this.options.events.emit(
                     'triggerYoutubeTimestampSummary',
                     {
-                        text: `[${humanTimestamp}](${videoURLWithTime}) `,
+                        text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
                         showLoadingSpinner: true,
                     },
                     (success) => {
-                        handledSuccessfully = success
+                        executed = success
                     },
                 )
-            ) {
-                break
-            }
-            await sleepPromise(50) // wait for half a second before trying again
+            } catch (e) {}
+            await new Promise((resolve) => setTimeout(resolve, 10 * retries))
         }
 
-        const combinedText = filteredTranscript
-            .map(({ start, text }) => ({
-                start: Math.floor(start),
-                timestamp: this.createHumanTimestamp(Math.floor(start)),
-                text,
-            }))
-            .map((item) => JSON.stringify(item))
-            .join(' ')
+        // for (let i = 0; i < maxRetries; i++) {
+        //     if (
+        //         this.options.events.emit(
+        //             'triggerYoutubeTimestampSummary',
+        //             {
+        //                 text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
+        //                 showLoadingSpinner: true,
+        //             },
+        //             (success) => {
+        //                 handledSuccessfully = success
+        //             },
+        //         )
+        //     ) {
+        //         break
+        //     }
+        //     await sleepPromise(50) // wait for half a second before trying again
+        // }
 
         let prompt = event.prompt ?? 'Summarise this concisely and briefly'
 
-        await this.queryAI(
-            this.fullPageUrl,
-            combinedText,
-            prompt,
+        const promptData: PromptData = {
+            chatId: null,
+            context: {
+                mediaRanges: {
+                    url: window.location.href,
+                    ranges: [
+                        {
+                            from: from,
+                            to: to,
+                        },
+                    ],
+                },
+            },
+            userPrompt: event.prompt,
+            model: previousState.AImodel ?? 'claude-3-haiku',
+        }
+
+        console.log('promptData', promptData)
+
+        await this.processUIEvent('queryAIService', {
+            event: { promptData: promptData, outputLocation: 'editor' },
             previousState,
-            null,
-            'editor',
-        )
+        })
 
         this.emitMutation({
             pageSummary: { $set: '' },
