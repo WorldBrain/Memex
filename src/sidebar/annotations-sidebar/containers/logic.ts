@@ -3185,6 +3185,11 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({
             AIChatHistoryState: { $set: event.AIchatHistoryState },
         })
+        if (event.AIchatHistoryState == null) {
+            this.emitMutation({
+                pageSummary: { $set: '' },
+            })
+        }
     }
     updateAIChatEditorState: EventHandler<'updateAIChatEditorState'> = async ({
         event,
