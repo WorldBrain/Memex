@@ -579,8 +579,8 @@ export class AnnotationsSidebar extends React.Component<
             const pdf: PDFDocumentProxy = await (globalThis as any)[
                 'pdfjsLib'
             ].getDocument(filePath).promise
-            const text = await extractDataFromPDFDocument(pdf, true)
-            fullTextToProcess = document.body.innerText
+            const pdfDoc = await extractDataFromPDFDocument(pdf, true)
+            fullTextToProcess = pdfDoc.fullText ?? document.body.innerText
         } else {
             fullTextToProcess = (document.title ?? '') + document.body.innerText
         }
