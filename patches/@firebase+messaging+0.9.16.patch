@@ -1,0 +1,39 @@
+diff --git a/node_modules/@firebase/messaging/dist/index.cjs.js b/node_modules/@firebase/messaging/dist/index.cjs.js
+index 276a717..eca2aba 100644
+--- a/node_modules/@firebase/messaging/dist/index.cjs.js
++++ b/node_modules/@firebase/messaging/dist/index.cjs.js
+@@ -766,7 +766,7 @@ function getPushSubscription(swRegistration, vapidKey) {
+                         return [2 /*return*/, subscription];
+                     }
+                     return [2 /*return*/, swRegistration.pushManager.subscribe({
+-                            userVisibleOnly: true,
++                            userVisibleOnly: false,
+                             // Chrome <= 75 doesn't support base64-encoded VAPID key. For backward compatibility, VAPID key
+                             // submitted to pushManager#subscribe must be of type Uint8Array.
+                             applicationServerKey: base64ToArray(vapidKey)
+diff --git a/node_modules/@firebase/messaging/dist/index.sw.cjs b/node_modules/@firebase/messaging/dist/index.sw.cjs
+index e0af48f..b725957 100644
+--- a/node_modules/@firebase/messaging/dist/index.sw.cjs
++++ b/node_modules/@firebase/messaging/dist/index.sw.cjs
+@@ -765,7 +765,7 @@ function getPushSubscription(swRegistration, vapidKey) {
+                         return [2 /*return*/, subscription];
+                     }
+                     return [2 /*return*/, swRegistration.pushManager.subscribe({
+-                            userVisibleOnly: true,
++                            userVisibleOnly: false,
+                             // Chrome <= 75 doesn't support base64-encoded VAPID key. For backward compatibility, VAPID key
+                             // submitted to pushManager#subscribe must be of type Uint8Array.
+                             applicationServerKey: base64ToArray(vapidKey)
+diff --git a/node_modules/@firebase/messaging/dist/index.sw.esm2017.js b/node_modules/@firebase/messaging/dist/index.sw.esm2017.js
+index ec56995..630033f 100644
+--- a/node_modules/@firebase/messaging/dist/index.sw.esm2017.js
++++ b/node_modules/@firebase/messaging/dist/index.sw.esm2017.js
+@@ -568,7 +568,7 @@ async function getPushSubscription(swRegistration, vapidKey) {
+         return subscription;
+     }
+     return swRegistration.pushManager.subscribe({
+-        userVisibleOnly: true,
++        userVisibleOnly: false,
+         // Chrome <= 75 doesn't support base64-encoded VAPID key. For backward compatibility, VAPID key
+         // submitted to pushManager#subscribe must be of type Uint8Array.
+         applicationServerKey: base64ToArray(vapidKey)
