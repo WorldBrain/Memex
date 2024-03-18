@@ -70,6 +70,7 @@ export interface TemplateDocNote {
 export interface TemplateDocPageEntity {
     EntityName?: string
     EntityAdditionalName?: string
+    EntityAdditionalNameShort?: string
 }
 
 export interface TemplateAnalysis {

@@ -100,6 +100,7 @@ export const testAnnotationASpaces = [
 ]
 export const testAnnotationAText = 'this is a comment on the annotation'
 export const testAnnotationACreatedAt = new Date('2022-05-06T01:00')
+
 export const testAnnotationBUrl = testPageA.url + '#2'
 export const testAnnotationBTags = ['a']
 export const testAnnotationBSpaces = ['space 1']

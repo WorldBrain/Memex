@@ -7,7 +7,7 @@ import generateTemplateDocs, {
     joinSpaces,
     serializeDate,
 } from './template-doc-generation'
-import { analyzeTemplate } from './utils'
+import { abbreviateName, analyzeTemplate } from './utils'
 import * as DATA from './template-doc-generation.test.data'
 import { getTemplateDataFetchers } from './background/template-data-fetchers'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
@@ -966,7 +966,7 @@ describe('Content template doc generation', () => {
 
         expect(
             await generate(
-                '{{#Pages}} {{{PageTitle}}} {{{PageTags}}} {{{PageSpaces}}} {{{PageLink}}} {{{PageCreatedAt}}} {{#Notes}} {{{NoteHighlight}}} {{{NoteTags}}} {{{NoteSpaces}}} {{{NoteLink}}} {{{NoteCreatedAt}}} {{/Notes}} {{#PageEntities}} {{{EntityName}}} {{/PageEntities}} {{/Pages}}',
+                '{{#Pages}} {{{PageTitle}}} {{{PageTags}}} {{{PageSpaces}}} {{{PageLink}}} {{{PageCreatedAt}}} {{#Notes}} {{{NoteHighlight}}} {{{NoteText}}} {{{NoteTags}}} {{{NoteSpaces}}} {{{NoteLink}}} {{{NoteCreatedAt}}} {{/Notes}} {{#PageEntities}} {{{EntityName}}} {{/PageEntities}} {{/Pages}}',
             ),
         ).toEqual([
             {
@@ -1069,12 +1069,19 @@ describe('Content template doc generation', () => {
                         PageLink: expect.any(String),
                         PageCreatedAt: serializeDate(DATA.testPageBCreatedAt),
 
+                        PageAccessDate: expect.any(Number),
+                        PageAnnotation: DATA.testPageBMetadata.annotation,
+                        PageSourceName: DATA.testPageBMetadata.sourceName,
+
                         PageEntities: [
                             { EntityName: DATA.testPageBEntityA.name },
                             {
                                 EntityName: DATA.testPageBEntityB.name,
                                 EntityAdditionalName:
                                     DATA.testPageBEntityB.additionalName,
+                                EntityAdditionalNameShort: abbreviateName(
+                                    DATA.testPageBEntityB.additionalName,
+                                ),
                             },
                         ],
 
@@ -1095,6 +1102,11 @@ describe('Content template doc generation', () => {
                                 NoteCreatedAt: serializeDate(
                                     DATA.testAnnotationCCreatedAt,
                                 ),
+                                PageAccessDate: expect.any(Number),
+                                PageAnnotation:
+                                    DATA.testPageBMetadata.annotation,
+                                PageSourceName:
+                                    DATA.testPageBMetadata.sourceName,
                                 PageTitle: DATA.testPageB.fullTitle,
                                 PageTags: joinTags(DATA.testPageBTags),
                                 PageTagList: DATA.testPageBTags,
@@ -1128,6 +1140,7 @@ describe('Content template doc generation', () => {
                         PageTagList: DATA.testPageATags,
                         PageUrl: DATA.testPageAUrl,
                         PageLink: expect.any(String),
+                        PageCreatedAt: DATA.testPageACreatedAt.valueOf(),
                         PageEntities: [],
                         title: DATA.testPageA.fullTitle,
                         tags: DATA.testPageATags,
@@ -1135,6 +1148,8 @@ describe('Content template doc generation', () => {
                         HasNotes: true,
                         Notes: [
                             {
+                                NoteCreatedAt: DATA.testAnnotationACreatedAt.valueOf(),
+                                PageCreatedAt: DATA.testPageACreatedAt.valueOf(),
                                 NoteText: DATA.testAnnotationAText,
                                 NoteLink: expect.any(String),
                                 PageTitle: DATA.testPageA.fullTitle,
@@ -1147,6 +1162,8 @@ describe('Content template doc generation', () => {
                                 url: DATA.testPageAUrl,
                             },
                             {
+                                NoteCreatedAt: DATA.testAnnotationBCreatedAt.valueOf(),
+                                PageCreatedAt: DATA.testPageACreatedAt.valueOf(),
                                 NoteHighlight: DATA.testAnnotationBHighlight,
                                 PageTitle: DATA.testPageA.fullTitle,
                                 PageTags: joinTags(DATA.testPageATags),
@@ -1165,6 +1182,10 @@ describe('Content template doc generation', () => {
                         PageTagList: DATA.testPageBTags,
                         PageUrl: DATA.testPageBUrl,
                         PageLink: expect.any(String),
+                        PageSourceName: DATA.testPageBMetadata.sourceName,
+                        PageAccessDate: DATA.testPageBMetadata.accessDate,
+                        PageAnnotation: DATA.testPageBMetadata.annotation,
+                        PageCreatedAt: DATA.testPageBCreatedAt.valueOf(),
                         PageEntities: [],
                         title: DATA.testPageB.fullTitle,
                         tags: DATA.testPageBTags,
@@ -1172,6 +1193,14 @@ describe('Content template doc generation', () => {
                         HasNotes: true,
                         Notes: [
                             {
+                                NoteCreatedAt: DATA.testAnnotationCCreatedAt.valueOf(),
+                                PageCreatedAt: DATA.testPageBCreatedAt.valueOf(),
+                                PageSourceName:
+                                    DATA.testPageBMetadata.sourceName,
+                                PageAccessDate:
+                                    DATA.testPageBMetadata.accessDate,
+                                PageAnnotation:
+                                    DATA.testPageBMetadata.annotation,
                                 NoteHighlight: DATA.testAnnotationCHighlight,
                                 PageTitle: DATA.testPageB.fullTitle,
                                 PageTags: joinTags(DATA.testPageBTags),

@@ -174,3 +174,20 @@ export function convertHTMlTemplateToMarkdown(htmlTemplate) {
         .replace(/<[^>]+>/g, '')
     return markdownTemplate
 }
+
+export function abbreviateName(originalName?: string, options?: {}): string {
+    if (!originalName?.length) {
+        return undefined
+    }
+
+    const names = originalName.split(' ')
+    let abbreviateName = ''
+    for (const name of names) {
+        if (!name.length) {
+            continue
+        }
+        const firstChar = name[0].toUpperCase()
+        abbreviateName += firstChar + '.'
+    }
+    return abbreviateName
+}

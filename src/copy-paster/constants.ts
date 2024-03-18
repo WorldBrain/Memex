@@ -29,6 +29,7 @@ export const KEYS_TO_REQUIREMENTS: {
 
     EntityName: 'pageEntities',
     EntityAdditionalName: 'pageEntities',
+    EntityAdditionalNameShort: 'pageEntities',
 
     HasNotes: 'hasNotes',
     NoteHighlight: 'note',

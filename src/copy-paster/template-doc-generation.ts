@@ -11,6 +11,7 @@ import type {
     TemplateDoc,
 } from './types'
 import fromPairs from 'lodash/fromPairs'
+import { abbreviateName } from './utils'
 
 interface GeneratorInput {
     templateAnalysis: TemplateAnalysis
@@ -223,6 +224,9 @@ const generateForPages = async ({
             PageEntities: pageEntities[normalizedPageUrl]?.map((entity) => ({
                 EntityName: entity.name,
                 EntityAdditionalName: entity.additionalName,
+                EntityAdditionalNameShort: abbreviateName(
+                    entity.additionalName,
+                ),
             })),
 
             HasNotes: noteUrls.length > 0,
@@ -354,6 +358,9 @@ const generateForNotes = async ({
                 PageEntities: pageEntities[pageUrl]?.map((entity) => ({
                     EntityName: entity.name,
                     EntityAdditionalName: entity.additionalName,
+                    EntityAdditionalNameShort: abbreviateName(
+                        entity.additionalName,
+                    ),
                 })),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
@@ -414,6 +421,9 @@ const generateForNotes = async ({
                 PageEntities: pageEntities[pageUrl]?.map((entity) => ({
                     EntityName: entity.name,
                     EntityAdditionalName: entity.additionalName,
+                    EntityAdditionalNameShort: abbreviateName(
+                        entity.additionalName,
+                    ),
                 })),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
@@ -464,6 +474,9 @@ const generateForNotes = async ({
                 PageEntities: pageEntities[pageUrl]?.map((entity) => ({
                     EntityName: entity.name,
                     EntityAdditionalName: entity.additionalName,
+                    EntityAdditionalNameShort: abbreviateName(
+                        entity.additionalName,
+                    ),
                 })),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
@@ -519,6 +532,9 @@ const generateForNotes = async ({
             PageEntities: pageEntities[pageUrl]?.map((entity) => ({
                 EntityName: entity.name,
                 EntityAdditionalName: entity.additionalName,
+                EntityAdditionalNameShort: abbreviateName(
+                    entity.additionalName,
+                ),
             })),
 
             Notes: notesByPageUrl[pageUrl].map(
