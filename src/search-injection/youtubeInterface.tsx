@@ -254,7 +254,6 @@ export const handleRenderYoutubeInterface = async (
                 syncSettings={syncSettings}
                 annotationsFunctions={annotationsFunctions}
                 syncSettingsBG={syncSettingsBG}
-                getCurrentVideoDuration={getCurrentVideoDuration}
             />,
             target,
         )
