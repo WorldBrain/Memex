@@ -25,7 +25,26 @@ export const testPageB = {
     fullUrl: testPageBUrl,
     fullTitle: 'test page B title',
 }
+export const testPageBMetadata = {
+    normalizedPageUrl: normalizeUrl(testPageBUrl),
+    annotation: 'this is a good page',
+    sourceName: 'Test Website',
+    accessDate: 1641443857993,
+}
 export const testPageBCreatedAt = new Date('2022-05-06T00:35')
+export const testPageBEntityA = {
+    normalizedPageUrl: testPageB.url,
+    name: 'test entity 1 page b',
+    isPrimary: true,
+    order: 200,
+}
+export const testPageBEntityB = {
+    normalizedPageUrl: testPageB.url,
+    name: 'test entity 2 page b',
+    additionalName: 'extra name',
+    isPrimary: false,
+    order: 300,
+}
 
 export const testPageCUrl = 'https://memex.cloud/ct/test-fingerprint-a.pdf'
 export const testPageCTags = ['ttt']
@@ -50,6 +69,25 @@ export const testLocatorC = {
     valid: true,
     version: 0,
 }
+export const testPageCMetadata = {
+    normalizedPageUrl: testPageC.url,
+    doi: 'test-doi',
+    title: 'Really cool research',
+    annotation: 'trust me bro this is really good research',
+    sourceName: 'School of hard knocks',
+    journalName: 'Secret Journal',
+    journalPage: 'p123123',
+    journalIssue: 'Latest issue',
+    journalVolume: 'Secret volume',
+    releaseDate: 1641223847993,
+    accessDate: 1641443847993,
+}
+export const testPageCEntityA = {
+    normalizedPageUrl: testPageC.url,
+    name: 'test entity 1 page c',
+    isPrimary: true,
+    order: 200,
+}
 
 // Children of page A
 export const testAnnotationAUrl = testPageA.url + '#1'
@@ -62,6 +100,7 @@ export const testAnnotationASpaces = [
 ]
 export const testAnnotationAText = 'this is a comment on the annotation'
 export const testAnnotationACreatedAt = new Date('2022-05-06T01:00')
+
 export const testAnnotationBUrl = testPageA.url + '#2'
 export const testAnnotationBTags = ['a']
 export const testAnnotationBSpaces = ['space 1']

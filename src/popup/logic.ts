@@ -148,7 +148,6 @@ export default class PopupLogic extends UILogic<State, Event> {
 
                 const isSavedPage = await this.loadBookmarkState(
                     identifier.fullUrl,
-                    pageIndexingBG,
                 )
 
                 this.emitMutation({
@@ -160,10 +159,12 @@ export default class PopupLogic extends UILogic<State, Event> {
         })
     }
 
-    loadBookmarkState = async (fullUrl: string, pageIndexingBG) => {
-        const pageTitle = await pageIndexingBG.lookupPageTitleForUrl({
-            fullPageUrl: fullUrl,
-        })
+    loadBookmarkState = async (fullUrl: string) => {
+        const pageTitle = await this.dependencies.pageIndexingBG.getTitleForPage(
+            {
+                fullPageUrl: fullUrl,
+            },
+        )
         if (pageTitle && pageTitle.length > 0) {
             return true
         } else {

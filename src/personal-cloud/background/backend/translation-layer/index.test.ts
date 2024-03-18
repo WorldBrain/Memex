@@ -10,6 +10,7 @@ import { setupSyncBackgroundTest } from '../../index.tests'
 import {
     LOCAL_TEST_DATA_V24,
     REMOTE_TEST_DATA_V24,
+    REMOTE_METADATA_V24_AMENDED,
     insertTestPages,
     insertReadwiseAPIKey,
 } from './index.test.data'
@@ -469,7 +470,7 @@ async function setup(options?: {
         ) => {
             const clientSchemaVersion =
                 downloadOptions?.clientSchemaVersion ??
-                STORAGE_VERSIONS[35].version
+                STORAGE_VERSIONS[37].version
             const { batch } = await downloadClientUpdates({
                 getNow,
                 startTime: 0,
@@ -811,6 +812,10 @@ describe('Personal cloud translation layer', () => {
 
             testSyncPushTrigger({ wasTriggered: false })
             await insertTestPages(setups[0].storageManager)
+            // Adding pageMetadata here as it should also get deleted on DL as a result of page delete
+            await setups[0].storageManager
+                .collection('pageMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.pageMetadata.first)
             await setups[0].storageManager.collection('pages').deleteObjects({
                 url: LOCAL_TEST_DATA_V24.pages.first.url,
             })
@@ -831,6 +836,9 @@ describe('Personal cloud translation layer', () => {
                 ], { getWhere: getPersonalWhere }),
             ).toEqual({
                 ...personalDataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id, {
+                        pageMetadata: true,
+                    }],
                     [DataChangeType.Delete, 'personalContentMetadata', testMetadata.first.id, {
                         normalizedUrl: testLocators.first.location
                     }],
@@ -843,7 +851,270 @@ describe('Personal cloud translation layer', () => {
             // prettier-ignore
             await testDownload([
                 { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.first.url } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'pageMetadata', where: { normalizedPageUrl: LOCAL_TEST_DATA_V24.pages.first.url } },
             ], { skip: 1 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should create page metadata and entities', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
+            testSyncPushTrigger({ wasTriggered: false })
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pageMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.pageMetadata.first)
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .createObject(LOCAL_TEST_DATA_V24.pageEntities.first)
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .createObject(LOCAL_TEST_DATA_V24.pageEntities.second)
+
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testEntities = remoteData.personalContentEntity
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentEntity',
+                    'personalContentLocator',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id, { pageMetadata: true }],
+                    [DataChangeType.Create, 'personalContentEntity', testEntities.first.id],
+                    [DataChangeType.Create, 'personalContentEntity', testEntities.second.id],
+                ]),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
+                personalContentMetadata: [{ ...testMetadata.first, ...REMOTE_METADATA_V24_AMENDED.first }, testMetadata.second],
+                personalContentEntity: [testEntities.first, testEntities.second],
+                personalContentLocator: [testLocators.first, testLocators.second],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pageMetadata', object: LOCAL_TEST_DATA_V24.pageMetadata.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pageEntities', object: LOCAL_TEST_DATA_V24.pageEntities.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pageEntities', object: LOCAL_TEST_DATA_V24.pageEntities.second },
+            ])
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should update page metadata and entities', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
+            testSyncPushTrigger({ wasTriggered: false })
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pageMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.pageMetadata.first)
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .createObject(LOCAL_TEST_DATA_V24.pageEntities.first)
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .createObject(LOCAL_TEST_DATA_V24.pageEntities.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // First try to update an entity
+            const updatedEntityName = 'updated name'
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .updateOneObject(
+                    {
+                        id: LOCAL_TEST_DATA_V24.pageEntities.first.id,
+                    },
+                    {
+                        name: updatedEntityName,
+                    },
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testEntities = remoteData.personalContentEntity
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentEntity',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalContentEntity', testEntities.first.id],
+                ], { skipChanges: 7 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
+                personalContentMetadata: [{ ...testMetadata.first, ...REMOTE_METADATA_V24_AMENDED.first }, testMetadata.second],
+                personalContentEntity: [{ ...testEntities.first, name: updatedEntityName }, testEntities.second],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pageEntities', object: { ...LOCAL_TEST_DATA_V24.pageEntities.first, name: updatedEntityName } },
+            ], { skip: 5 })
+            testSyncPushTrigger({ wasTriggered: true })
+
+            // Next try to update page metadata
+            const metadata = {
+                doi: undefined,
+                journalPage: 'p3423424',
+                journalName: 'my journal',
+                journalIssue: 'best issue',
+                journalVolume: 'newest volume',
+            }
+            await setups[0].storageManager
+                .collection('pageMetadata')
+                .updateOneObject(
+                    {
+                        normalizedPageUrl:
+                            LOCAL_TEST_DATA_V24.pageMetadata.first
+                                .normalizedPageUrl,
+                    },
+                    metadata,
+                )
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentEntity',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Modify, 'personalContentEntity', testEntities.first.id],
+                    [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id, { pageMetadata: true }],
+                ], { skipChanges: 7 }),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
+                personalContentMetadata: [{ ...testMetadata.first, ...REMOTE_METADATA_V24_AMENDED.first, ...metadata }, testMetadata.second],
+                personalContentEntity: [{ ...testEntities.first, name: updatedEntityName }, testEntities.second],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pageEntities', object: { ...LOCAL_TEST_DATA_V24.pageEntities.first, name: updatedEntityName } },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pageMetadata', object: { ...LOCAL_TEST_DATA_V24.pageMetadata.first, ...metadata } },
+            ], { skip: 5 })
+            testSyncPushTrigger({ wasTriggered: true })
+        })
+
+        it('should delete page entities', async () => {
+            const {
+                setups,
+                serverIdCapturer,
+                getPersonalWhere,
+                personalDataChanges,
+                personalBlockStats,
+                getDatabaseContents,
+                testDownload,
+                testSyncPushTrigger,
+            } = await setup()
+
+            testSyncPushTrigger({ wasTriggered: false })
+            testSyncPushTrigger({ wasTriggered: false })
+            await insertTestPages(setups[0].storageManager)
+            await setups[0].storageManager
+                .collection('pageMetadata')
+                .createObject(LOCAL_TEST_DATA_V24.pageMetadata.first)
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .createObject(LOCAL_TEST_DATA_V24.pageEntities.first)
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .createObject(LOCAL_TEST_DATA_V24.pageEntities.second)
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            await setups[0].storageManager
+                .collection('pageEntities')
+                .deleteObjects({
+                    normalizedPageUrl:
+                        LOCAL_TEST_DATA_V24.pageEntities.first
+                            .normalizedPageUrl,
+                })
+            await setups[0].backgroundModules.personalCloud.waitForSync()
+
+            const remoteData = serverIdCapturer.mergeIds(REMOTE_TEST_DATA_V24)
+            const testMetadata = remoteData.personalContentMetadata
+            const testEntities = remoteData.personalContentEntity
+            const testLocators = remoteData.personalContentLocator
+
+            // prettier-ignore
+            expect(
+                await getDatabaseContents([
+                    // 'dataUsageEntry',
+                    'personalDataChange',
+                    'personalBlockStats',
+                    'personalContentMetadata',
+                    'personalContentEntity',
+                    'personalContentLocator',
+                ], { getWhere: getPersonalWhere }),
+            ).toEqual({
+                ...personalDataChanges(remoteData, [
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.first.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.first.id],
+                    [DataChangeType.Create, 'personalContentMetadata', testMetadata.second.id],
+                    [DataChangeType.Create, 'personalContentLocator', testLocators.second.id],
+                    [DataChangeType.Modify, 'personalContentMetadata', testMetadata.first.id, { pageMetadata: true }],
+                    [DataChangeType.Create, 'personalContentEntity', testEntities.first.id],
+                    [DataChangeType.Create, 'personalContentEntity', testEntities.second.id],
+                    [DataChangeType.Delete, 'personalContentEntity', testEntities.first.id, { localId: testEntities.first.localId }],
+                    [DataChangeType.Delete, 'personalContentEntity', testEntities.second.id, { localId: testEntities.second.localId }],
+                ]),
+                personalBlockStats: [personalBlockStats({ usedBlocks: 2 })],
+                personalContentMetadata: [{ ...testMetadata.first, ...REMOTE_METADATA_V24_AMENDED.first }, testMetadata.second],
+                personalContentEntity: [],
+                personalContentLocator: [testLocators.first, testLocators.second],
+            })
+            // prettier-ignore
+            await testDownload([
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
+                { type: PersonalCloudUpdateType.Overwrite, collection: 'pageMetadata', object: LOCAL_TEST_DATA_V24.pageMetadata.first },
+                // { type: PersonalCloudUpdateType.Overwrite, collection: 'pageEntities', object: LOCAL_TEST_DATA_V24.pageEntities.first },
+                // { type: PersonalCloudUpdateType.Overwrite, collection: 'pageEntities', object: LOCAL_TEST_DATA_V24.pageEntities.second },
+                { type: PersonalCloudUpdateType.Delete, collection: 'pageEntities', where: { id: LOCAL_TEST_DATA_V24.pageEntities.first.id } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'pageEntities', where: { id: LOCAL_TEST_DATA_V24.pageEntities.second.id } },
+            ])
             testSyncPushTrigger({ wasTriggered: true })
         })
 
@@ -1143,6 +1414,7 @@ describe('Personal cloud translation layer', () => {
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.first },
                 { type: PersonalCloudUpdateType.Overwrite, collection: 'pages', object: LOCAL_TEST_DATA_V24.pages.second },
                 { type: PersonalCloudUpdateType.Delete, collection: 'pages', where: { url: LOCAL_TEST_DATA_V24.pages.third.url } },
+                { type: PersonalCloudUpdateType.Delete, collection: 'pageMetadata', where: { normalizedPageUrl: LOCAL_TEST_DATA_V24.pages.third.url } },
                 { type: PersonalCloudUpdateType.Delete, collection: 'locators', where: { id: LOCAL_TEST_DATA_V24.locators.third.id } },
             ])
             testSyncPushTrigger({ wasTriggered: true })

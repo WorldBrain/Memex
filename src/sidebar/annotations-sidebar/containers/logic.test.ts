@@ -127,9 +127,17 @@ const setupLogicHelper = async ({
             backgroundModules.contentConversations.remoteFunctions,
         syncSettingsBG: backgroundModules.syncSettings,
         pageIndexingBG: {
+            getOriginalUrlForPdfPage:
+                backgroundModules.pages.getOriginalUrlForPdfPage,
+            setEntityOrder: backgroundModules.pages.setEntityOrder,
+            fetchPageMetadataByDOI:
+                backgroundModules.pages.fetchPageMetadataByDOI,
+            updatePageMetadata: backgroundModules.pages.updatePageMetadata,
+            getPageMetadata: backgroundModules.pages.getPageMetadata,
             updatePageTitle: backgroundModules.pages.updatePageTitle,
-            lookupPageTitleForUrl:
-                backgroundModules.pages.lookupPageTitleForUrl,
+            getTitleForPage: backgroundModules.pages.getTitleForPage,
+            getFirstAccessTimeForPage:
+                backgroundModules.pages.getFirstAccessTimeForPage,
             initContentIdentifier:
                 backgroundModules.pages.initContentIdentifier,
             waitForContentIdentifier:
