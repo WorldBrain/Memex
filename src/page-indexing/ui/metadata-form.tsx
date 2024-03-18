@@ -29,6 +29,7 @@ import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { PDF_VIEWER_HTML } from 'src/pdf/constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import type { IconKeys } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 
 export interface Props {
     pageIndexingBG: PageIndexingInterface<'caller'>
@@ -259,7 +260,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
         })
     }
 
-    private handleDeleteEntity = (entityId: number) => () => {
+    private handleDeleteEntity = (entityId: number) => {
         if (!this.state.entities.byId[entityId]) {
             throw new Error(
                 `Cannot delete entity that does not exist in state - ID: ${entityId}`,
@@ -273,6 +274,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                 getId: (e) => e.id,
             }),
         }))
+        this.setState({ formChanged: true })
     }
 
     private handleAddEntity = () => {
@@ -304,6 +306,7 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                     [nextId]: newEntity,
                 },
             },
+            formChanged: true,
         }))
     }
 
@@ -431,12 +434,12 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                                                         ) => {
                                                                             e.stopPropagation()
                                                                         }}
-                                                                        placeholder="First Name"
+                                                                        placeholder="Last Name or Org"
                                                                         value={
-                                                                            entity.additionalName
+                                                                            entity.name
                                                                         }
                                                                         onChange={this.handleEntityTextInputChange(
-                                                                            'additionalName',
+                                                                            'name',
                                                                             entity.id,
                                                                         )}
                                                                     />
@@ -446,14 +449,26 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                                                         ) => {
                                                                             e.stopPropagation()
                                                                         }}
-                                                                        placeholder="Last Name"
+                                                                        placeholder="First Name"
                                                                         value={
-                                                                            entity.name
+                                                                            entity.additionalName
                                                                         }
                                                                         onChange={this.handleEntityTextInputChange(
-                                                                            'name',
+                                                                            'additionalName',
                                                                             entity.id,
                                                                         )}
+                                                                    />
+                                                                    <Icon
+                                                                        filePath="removeX"
+                                                                        onClick={() => {
+                                                                            console.log(
+                                                                                'handlelick',
+                                                                            )
+                                                                            this.handleDeleteEntity(
+                                                                                entity.id,
+                                                                            )
+                                                                        }}
+                                                                        heightAndWidth="20px"
                                                                     />
                                                                 </EntitiesItem>
                                                             </div>
@@ -505,17 +520,20 @@ export class PageMetadataForm extends React.PureComponent<Props, State> {
                                     )}
                                 />
                             </EntitiesItem>
-                            <PrimaryAction
-                                label="Add"
-                                size="small"
-                                icon="plus"
-                                type="glass"
-                                fullWidth
-                                iconColor="prime1"
-                                onClick={this.handleAddEntity}
-                                disabled={!this.shouldEnableAddEntityBtn}
-                                fontColor="greyScale6"
-                            />
+                            {(this.state.newEntityAdditionalName?.length > 0 ||
+                                this.state.newEntityName?.length > 0) && (
+                                <PrimaryAction
+                                    label="Add"
+                                    size="small"
+                                    icon="plus"
+                                    type="glass"
+                                    fullWidth
+                                    iconColor="prime1"
+                                    onClick={this.handleAddEntity}
+                                    disabled={!this.shouldEnableAddEntityBtn}
+                                    fontColor="greyScale6"
+                                />
+                            )}
                         </EntitiesContainer>
                     </FormSectionItem>
                 </FormSection>
@@ -705,4 +723,5 @@ const EntitiesItem = styled.div`
     display: flex;
     align-items: center;
     grid-gap: 5px;
+    margin-bottom: 5px;
 `

@@ -195,7 +195,7 @@ export const MLA_EDITION_9: Template = {
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 9,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{#secondLast}} and {{/secondLast}} {{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 // still missing abbreviated first names and lists "Jeffery, E.H. and Araya, M. "
@@ -215,7 +215,7 @@ export const IEEE: Template = {
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 10,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityAdditionalName}}} {{{EntityName}}}, {{/PageEntities}} "{{{PageTitle}}}," _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, pp. {{{PageJournalPage}}}, {{#PageReleaseDate}}MMM. YYYY{{/PageReleaseDate}}, https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{{EntityAdditionalNameShort}}} {{{EntityName}}}{{#secondLast}} and {{/secondLast}}{{/PageEntities}}, "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 export const DEFAULT_TEMPLATES = [
@@ -223,6 +223,8 @@ export const DEFAULT_TEMPLATES = [
     URL_AND_TITLE,
     HTML_TEMPLATE,
     MLA_EDITION_9,
+    IEEE,
+    HARVARD_EDITION_12,
     ROAM_MD_TEMPLATE,
     LOGSEQ_MD_TEMPLATE,
     NOTION_MD_TEMPLATE,
