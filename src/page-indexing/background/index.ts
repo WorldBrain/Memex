@@ -22,6 +22,7 @@ import {
     buildBaseLocatorUrl,
     fingerprintsEqual,
     isMemexPageAPdf,
+    pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
 
 import PageStorage from './storage'
@@ -66,6 +67,11 @@ import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import type { AuthBackground } from 'src/authentication/background'
+import { doiToPageMetadata } from '../doi-to-page-metadata'
+import {
+    DEFAULT_KEY,
+    DEFAULT_SPACE_BETWEEN,
+} from '@worldbrain/memex-common/lib/utils/item-ordering'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -111,6 +117,7 @@ export class PageIndexingBackground {
             pkmSyncBG: PKMSyncBackgroundModule
             onPagePut?: PagePutHandler
             getNow: () => number
+            fetch: typeof fetch
         },
     ) {
         this.storage = new PageStorage({
@@ -122,6 +129,10 @@ export class PageIndexingBackground {
         })
 
         this.remoteFunctions = {
+            setEntityOrder: remoteFunctionWithoutExtraArgs(this.setEntityOrder),
+            updatePageMetadata: remoteFunctionWithoutExtraArgs(
+                this.updatePageMetadata,
+            ),
             updatePageTitle: remoteFunctionWithExtraArgs((info, params) =>
                 this.updatePageTitle(params),
             ),
@@ -138,8 +149,20 @@ export class PageIndexingBackground {
                         tabId: params.tabId ?? info.tab?.id,
                     }),
             ),
-            lookupPageTitleForUrl: remoteFunctionWithoutExtraArgs(
-                this.lookupPageTitleForUrl,
+            getOriginalUrlForPdfPage: remoteFunctionWithoutExtraArgs(
+                this.getOriginalUrlForPdfPage,
+            ),
+            getFirstAccessTimeForPage: remoteFunctionWithoutExtraArgs(
+                this.getFirstAccessTimeForPage,
+            ),
+            getTitleForPage: remoteFunctionWithoutExtraArgs(
+                this.getTitleForPage,
+            ),
+            fetchPageMetadataByDOI: remoteFunctionWithoutExtraArgs(
+                this.fetchPageMetadataByDOI,
+            ),
+            getPageMetadata: remoteFunctionWithoutExtraArgs(
+                this.getPageMetadata,
             ),
         }
     }
@@ -148,11 +171,79 @@ export class PageIndexingBackground {
         registerRemoteFunctions(this.remoteFunctions)
     }
 
-    lookupPageTitleForUrl: PageIndexingInterface<
+    getFirstAccessTimeForPage: PageIndexingInterface<
         'provider'
-    >['lookupPageTitleForUrl']['function'] = async ({ fullPageUrl }) => {
+    >['getFirstAccessTimeForPage']['function'] = async ({
+        normalizedPageUrl,
+    }) => {
+        const accessTime = await this.storage.getFirstVisitOrBookmarkTime(
+            normalizedPageUrl,
+        )
+        return accessTime
+    }
+
+    getTitleForPage: PageIndexingInterface<
+        'provider'
+    >['getTitleForPage']['function'] = async ({ fullPageUrl }) => {
         const pageData = await this.storage.getPage(fullPageUrl)
         return pageData?.fullTitle ?? null
+    }
+
+    getOriginalUrlForPdfPage: PageIndexingInterface<
+        'provider'
+    >['getOriginalUrlForPdfPage']['function'] = async ({
+        normalizedPageUrl,
+    }) => {
+        const locators = await this.storage.findLocatorsByNormalizedUrl(
+            normalizedPageUrl,
+        )
+        const mainLocator = pickBestLocator(locators, {
+            ignoreUploadLocators: true,
+            priority: ContentLocatorType.Remote,
+        })
+        return mainLocator?.originalLocation ?? null
+    }
+
+    getPageMetadata: PageIndexingInterface<
+        'provider'
+    >['getPageMetadata']['function'] = async ({ normalizedPageUrl }) => {
+        const metadata = await this.storage.getPageMetadata(normalizedPageUrl)
+        if (!metadata) {
+            return null
+        }
+        const entities = await this.storage.getPageEntities(normalizedPageUrl)
+        return { ...metadata, entities }
+    }
+
+    /**
+     * Fills in (hopefully) unique IDs and orders for remotely fetched entities. This could be improved
+     */
+    private assignEntityData = (idBase: number, idOffset: number) => ({
+        id: idBase + idOffset,
+        order: DEFAULT_KEY + idOffset * DEFAULT_SPACE_BETWEEN - idBase,
+    })
+
+    fetchPageMetadataByDOI: PageIndexingInterface<
+        'provider'
+    >['fetchPageMetadataByDOI']['function'] = async ({
+        doi,
+        now = Date.now(),
+    }) => {
+        try {
+            const metadata = await doiToPageMetadata({
+                doi,
+                fetch: this.options.fetch,
+            })
+            return {
+                ...metadata,
+                entities: metadata.entities.map((e, i) => ({
+                    ...e,
+                    ...this.assignEntityData(now, i),
+                })),
+            }
+        } catch (err) {
+            return null
+        }
     }
 
     async initContentIdentifier(
@@ -654,6 +745,50 @@ export class PageIndexingBackground {
             // })
         }
 
+        if (isPdf) {
+            const doi = this.attemptToExtractDOIFromPDFData(pageData)
+            if (doi?.length) {
+                const fetchedPageMetadata = await this.fetchPageMetadataByDOI({
+                    doi,
+                })
+                await this.storage.updatePageMetadata({
+                    doi,
+                    normalizedPageUrl: pageData.url,
+                    accessDate: this._getTime(props.visitTime),
+                    entities: fetchedPageMetadata?.entities ?? [],
+                    title: fetchedPageMetadata?.title,
+                    annotation: fetchedPageMetadata?.annotation,
+                    sourceName: fetchedPageMetadata?.sourceName,
+                    journalName: fetchedPageMetadata?.journalName,
+                    journalPage: fetchedPageMetadata?.journalPage,
+                    journalIssue: fetchedPageMetadata?.journalIssue,
+                    journalVolume: fetchedPageMetadata?.journalVolume,
+                    releaseDate: fetchedPageMetadata?.releaseDate,
+                })
+            }
+        } else if (pageData.pageMetadata) {
+            const now = Date.now()
+            const releaseDate = pageData.pageMetadata.publishedTime
+                ? new Date(pageData.pageMetadata.publishedTime).valueOf()
+                : undefined
+            await this.storage.updatePageMetadata({
+                releaseDate,
+                normalizedPageUrl: pageData.url,
+                accessDate: this._getTime(props.visitTime),
+                title: pageData.pageMetadata.title,
+                sourceName: pageData.pageMetadata.provider,
+                previewImageUrl: pageData.pageMetadata.image,
+                description: pageData.pageMetadata.description,
+                entities: pageData.pageMetadata.authors
+                    .filter((name) => name?.trim().length)
+                    .map((name, i) => ({
+                        name,
+                        isPrimary: false,
+                        ...this.assignEntityData(now, i),
+                    })),
+            })
+        }
+
         try {
             const signupDate = new Date(
                 (
@@ -742,10 +877,37 @@ export class PageIndexingBackground {
         return { ...pageData, isLocalPdf }
     }
 
+    private attemptToExtractDOIFromPDFData({
+        pdfMetadata,
+        pdfPageTexts,
+    }: Partial<ExtractedPDFData>): string | null {
+        if (!pdfMetadata && !pdfPageTexts?.length) {
+            return null
+        }
+        let doi: string = null
+
+        // Attempt to look in common metadata fields first
+        if (pdfMetadata) {
+            doi =
+                pdfMetadata.metadataMap?.['crossmark:doi'] ??
+                pdfMetadata.metadataMap?.['pdfx:doi'] ??
+                pdfMetadata.metadataMap?.['prism:doi']
+        }
+        // Else try to extract from first page's text
+        if (!doi && pdfPageTexts?.length) {
+            const doiRegex = /\b(10[.][0-9]{4,}(?:[.][0-9]+)*\/(?:(?!["&\'<>])[\x21-\x7E])+)\b/i
+            const matchRes = pdfPageTexts[0].match(doiRegex)
+            if (matchRes?.length) {
+                doi = matchRes[0]
+            }
+        }
+        return doi
+    }
+
     private async processPageDataFromUrl(
         props: PageCreationProps,
     ): Promise<PipelineRes & { isExisting?: boolean; isLocalPdf?: boolean }> {
-        const pageDoc: PageDoc = {
+        const pageDoc: PageDoc & Partial<ExtractedPDFData> = {
             url: props.fullUrl,
             originalUrl: props.fullUrl,
             content: {},
@@ -803,6 +965,8 @@ export class PageIndexingBackground {
             pageDoc.url = baseLocator.fullUrl
             pageDoc.content.title = pdfData.title
             pageDoc.content.fullText = pdfData.fullText
+            pageDoc.pdfMetadata = pdfData.pdfMetadata
+            pageDoc.pdfPageTexts = pdfData.pdfPageTexts
         }
 
         return pagePipeline({ pageDoc })
@@ -911,5 +1075,23 @@ export class PageIndexingBackground {
             return
         }
         return time !== '$now' ? time : this.options.getNow()
+    }
+
+    setEntityOrder: PageIndexingInterface<
+        'provider'
+    >['setEntityOrder']['function'] = async ({ id, order }) => {
+        await this.storage.setEntityOrder(id, order)
+    }
+
+    updatePageMetadata: PageIndexingInterface<
+        'provider'
+    >['updatePageMetadata']['function'] = async ({
+        normalizedPageUrl,
+        ...metadata
+    }) => {
+        await this.storage.updatePageMetadata({
+            normalizedPageUrl,
+            ...metadata,
+        })
     }
 }

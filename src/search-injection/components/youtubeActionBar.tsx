@@ -14,6 +14,9 @@ import { SyncSettingsStore } from 'src/sync-settings/util'
 import { sleepPromise } from 'src/util/promises'
 import styled from 'styled-components'
 import { Range } from 'react-range'
+import { runInTab } from 'src/util/webextensionRPC'
+import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
+import { browser } from 'webextension-polyfill-ts'
 
 interface Props {
     runtime: any
@@ -100,17 +103,24 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         if (this.parentContainerRef.current) {
             resizeObserver.observe(this.parentContainerRef.current)
         }
+        browser.runtime.onMessage.addListener((message) => {
+            if (message.type === 'URL_CHANGE') {
+                console.log('URL_CHANGE', message.url)
+                this.getYoutubeVideoDuration()
+            }
+        })
 
         await sleepPromise(1000)
         this.adjustScaleToFitParent()
     }
 
     async getYoutubeVideoDuration() {
+        await sleepPromise(1000)
         let video = document.getElementsByTagName('video')[0]
-
         if (video) {
             let duration = video.duration
 
+            console.log('duration', duration)
             this.setState({
                 videoDuration: duration,
             })
@@ -280,8 +290,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             from,
             to,
         )
-
-        console.log('range', rangeInSeconds)
 
         this.props.annotationsFunctions.createTimestampWithAISummary(
             rangeInSeconds,
@@ -543,140 +551,164 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 />
                             </TutorialButtonContainer>
                         </TopArea>
-                        {this.state.videoDuration != null && (
-                            <BottomArea>
-                                <Range
-                                    step={0.1}
-                                    min={0}
-                                    // draggableTrack
-                                    max={100}
-                                    values={[
-                                        this.state.fromSecondsPosition,
-                                        this.state.toSecondsPosition,
-                                    ]}
-                                    onChange={(values) =>
-                                        this.setState({
-                                            fromSecondsPosition: values[0],
-                                            toSecondsPosition: values[1],
-                                        })
-                                    }
-                                    renderTrack={({ props, children }) => (
-                                        <div
-                                            {...props}
-                                            style={{
-                                                ...props.style,
-                                                height: '24px',
-                                                width: '100%',
-                                                borderRadius: '0 0 10px 10px',
-                                                fontSize: '12px',
-                                                color: '#A9A9B1',
-                                                textAlign: 'center',
-                                                verticalAlign: 'middle',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                            }}
-                                        >
-                                            {children}
-                                            <InfoText>
-                                                Select a time frame (click or
-                                                drag)
-                                            </InfoText>
-                                        </div>
-                                    )}
-                                    renderThumb={({ props, index }) => {
-                                        const {
-                                            style,
-                                            onKeyDown,
-                                            onKeyUp,
-                                            ...divProps
-                                        } = props
-                                        return (
+                        {this.state.videoDuration != null &&
+                            this.state.videoDuration !== 0 && (
+                                <BottomArea>
+                                    <Range
+                                        step={0.1}
+                                        min={0}
+                                        // draggableTrack
+                                        max={100}
+                                        values={[
+                                            this.state.fromSecondsPosition,
+                                            this.state.toSecondsPosition,
+                                        ]}
+                                        onChange={(values) =>
+                                            this.setState({
+                                                fromSecondsPosition: values[0],
+                                                toSecondsPosition: values[1],
+                                            })
+                                        }
+                                        renderTrack={({ props, children }) => (
                                             <div
-                                                {...divProps}
+                                                {...props}
                                                 style={{
                                                     ...props.style,
-                                                    ...style,
                                                     height: '24px',
-                                                    outline: 'none',
-                                                    width: 'fit-content',
-                                                    borderRadius: '10px',
-                                                    backgroundColor: '#6AE394',
+                                                    width: '100%',
+                                                    borderRadius:
+                                                        '0 0 10px 10px',
+                                                    fontSize: '12px',
+                                                    color: '#A9A9B1',
+                                                    textAlign: 'center',
+                                                    verticalAlign: 'middle',
+                                                    display: 'flex',
+                                                    alignItems: 'center',
                                                 }}
                                             >
-                                                <div
-                                                    style={{
-                                                        position: 'absolute',
-                                                        ...style,
-                                                        height: '24px',
-                                                        outline: 'none',
-                                                        width: 'fit-content',
-                                                        color: 'white',
-                                                        fontSize: '14px',
-                                                        padding: '0 5px',
-                                                        display: 'flex',
-                                                        backgroundColor:
-                                                            '#313239',
-
-                                                        alignItems: 'center',
-                                                        right:
-                                                            index === 1 &&
-                                                            '5px',
-                                                        left:
-                                                            index === 0 &&
-                                                            '5px',
-                                                        justifyContent:
-                                                            index === 1
-                                                                ? 'flex-end'
-                                                                : 'flex-start',
-                                                    }}
-                                                >
-                                                    {(() => {
-                                                        const totalSeconds =
-                                                            (sliderValues[
-                                                                index
-                                                            ] /
-                                                                100) *
-                                                            this.state
-                                                                .videoDuration
-                                                        const hours = Math.floor(
-                                                            totalSeconds / 3600,
-                                                        )
-                                                        const minutes = Math.floor(
-                                                            (totalSeconds %
-                                                                3600) /
-                                                                60,
-                                                        )
-                                                        const seconds = Math.floor(
-                                                            totalSeconds % 60,
-                                                        )
-
-                                                        const paddedMinutes = minutes
-                                                            .toString()
-                                                            .padStart(2, '0')
-                                                        const paddedSeconds = seconds
-                                                            .toString()
-                                                            .padStart(2, '0')
-
-                                                        if (hours > 0) {
-                                                            return `${hours}:${paddedMinutes}:${paddedSeconds}`
-                                                        } else {
-                                                            return `${paddedMinutes}:${paddedSeconds}`
-                                                        }
-                                                    })()}
-                                                </div>
-                                                <div
-                                                    style={{
-                                                        height: '20px',
-                                                        width: '5px',
-                                                        outline: 'none',
-                                                    }}
-                                                />
+                                                {children}
+                                                <InfoText>
+                                                    Select a time frame (click
+                                                    or drag)
+                                                </InfoText>
                                             </div>
-                                        )
-                                    }}
-                                />
-                            </BottomArea>
-                        )}
+                                        )}
+                                        renderThumb={({ props, index }) => {
+                                            const {
+                                                style,
+                                                onKeyDown,
+                                                onKeyUp,
+                                                ...divProps
+                                            } = props
+                                            return (
+                                                !isNaN(
+                                                    this.state.videoDuration,
+                                                ) && (
+                                                    <div
+                                                        {...divProps}
+                                                        style={{
+                                                            ...props.style,
+                                                            ...style,
+                                                            height: '24px',
+                                                            outline: 'none',
+                                                            width:
+                                                                'fit-content',
+                                                            borderRadius:
+                                                                '10px',
+                                                            backgroundColor:
+                                                                '#6AE394',
+                                                        }}
+                                                    >
+                                                        <div
+                                                            style={{
+                                                                position:
+                                                                    'absolute',
+                                                                ...style,
+                                                                height: '24px',
+                                                                outline: 'none',
+                                                                width:
+                                                                    'fit-content',
+                                                                color: 'white',
+                                                                fontSize:
+                                                                    '14px',
+                                                                padding:
+                                                                    '0 5px',
+                                                                display: 'flex',
+                                                                backgroundColor:
+                                                                    '#313239',
+
+                                                                alignItems:
+                                                                    'center',
+                                                                right:
+                                                                    index ===
+                                                                        1 &&
+                                                                    '5px',
+                                                                left:
+                                                                    index ===
+                                                                        0 &&
+                                                                    '5px',
+                                                                justifyContent:
+                                                                    index === 1
+                                                                        ? 'flex-end'
+                                                                        : 'flex-start',
+                                                            }}
+                                                        >
+                                                            {(() => {
+                                                                const totalSeconds =
+                                                                    (sliderValues[
+                                                                        index
+                                                                    ] /
+                                                                        100) *
+                                                                    this.state
+                                                                        .videoDuration
+                                                                const hours = Math.floor(
+                                                                    totalSeconds /
+                                                                        3600,
+                                                                )
+                                                                const minutes = Math.floor(
+                                                                    (totalSeconds %
+                                                                        3600) /
+                                                                        60,
+                                                                )
+                                                                const seconds = Math.floor(
+                                                                    totalSeconds %
+                                                                        60,
+                                                                )
+
+                                                                const paddedMinutes = minutes
+                                                                    .toString()
+                                                                    .padStart(
+                                                                        2,
+                                                                        '0',
+                                                                    )
+                                                                const paddedSeconds = seconds
+                                                                    .toString()
+                                                                    .padStart(
+                                                                        2,
+                                                                        '0',
+                                                                    )
+
+                                                                if (hours > 0) {
+                                                                    return `${hours}:${paddedMinutes}:${paddedSeconds}`
+                                                                } else {
+                                                                    return `${paddedMinutes}:${paddedSeconds}`
+                                                                }
+                                                            })()}
+                                                        </div>
+                                                        <div
+                                                            style={{
+                                                                height: '20px',
+                                                                width: '5px',
+                                                                outline: 'none',
+                                                            }}
+                                                        />
+                                                    </div>
+                                                )
+                                            )
+                                        }}
+                                    />
+                                </BottomArea>
+                            )}
                     </MemexButtonInnerContainer>
                 </InnerContainer>
             </ParentContainer>

@@ -1,3 +1,8 @@
+import type {
+    PageEntity,
+    PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+
 export interface Template {
     id: number
     title: string
@@ -8,13 +13,17 @@ export interface Template {
 }
 
 export type TemplateDoc = {
-    Notes?: Array<TemplateDocNote>
     Pages?: Array<TemplateDocPage>
 } & TemplateDocPage &
-    TemplateDocNote
+    TemplateDocNote &
+    TemplateDocPageEntity
 
-export type TemplateDocKey = keyof (Omit<TemplateDocPage, 'Notes'> &
-    TemplateDocNote)
+export type TemplateDocKey = keyof (Omit<
+    TemplateDocPage,
+    'Notes' | 'PageEntities'
+> &
+    TemplateDocNote &
+    TemplateDocPageEntity)
 
 export interface TemplateDocPage {
     PageUrl?: string
@@ -23,7 +32,20 @@ export interface TemplateDocPage {
     PageTagList?: string[]
     PageSpaces?: string
     PageSpacesList?: string[]
-    PageCreatedAt?: string
+    PageCreatedAt?: number
+
+    PageDOI?: string
+    PageMetaTitle?: string
+    PageAnnotation?: string
+    PageSourceName?: string
+    PageJournalName?: string
+    PageJournalPage?: string
+    PageJournalIssue?: string
+    PageJournalVolume?: string
+    PageReleaseDate?: number
+    PageAccessDate?: number
+    PageEntities?: TemplateDocPageEntity[]
+
     HasNotes?: boolean
     PageLink?: string
     Notes?: TemplateDocNote[]
@@ -41,8 +63,14 @@ export interface TemplateDocNote {
     NoteTagList?: string[]
     NoteSpaces?: string
     NoteSpacesList?: string[]
-    NoteCreatedAt?: string
+    NoteCreatedAt?: number
     NoteLink?: string
+}
+
+export interface TemplateDocPageEntity {
+    EntityName?: string
+    EntityAdditionalName?: string
+    EntityAdditionalNameShort?: string
 }
 
 export interface TemplateAnalysis {
@@ -55,6 +83,8 @@ export interface TemplateRequirements {
     page?: boolean
     pageTags?: boolean
     pageSpaces?: boolean
+    pageMetadata?: boolean
+    pageEntities?: boolean
     pageCreatedAt?: boolean
     hasNotes?: boolean
     pageLink?: boolean
@@ -83,6 +113,12 @@ export interface TemplateDataFetchers {
     getSpacesForPages(
         normalizedPageUrls: string[],
     ): Promise<UrlMappedData<string[]>>
+    getMetadataForPages(
+        normalizedPageUrls: string[],
+    ): Promise<UrlMappedData<PageMetadata>>
+    getEntitiesForPages(
+        normalizedPageUrls: string[],
+    ): Promise<UrlMappedData<PageEntity[]>>
     getCreatedAtForPages(
         normalizedPageUrls: string[],
     ): Promise<UrlMappedData<Date>>
