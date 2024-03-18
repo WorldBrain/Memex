@@ -100,6 +100,17 @@ const omitEmpty = <T extends any>(obj: T): T => {
     return clone
 }
 
+const genPageEntityTemplate = (totalEntities: number) => (
+    entity: PageEntity,
+    i: number,
+) => ({
+    EntityName: entity.name,
+    EntityAdditionalName: entity.additionalName,
+    EntityAdditionalNameShort: abbreviateName(entity.additionalName),
+    secondLast: i + 1 === totalEntities - 1,
+    last: i + 1 === totalEntities,
+})
+
 // This function covers all single page cases + multi-page cases when no notes are referenced
 const generateForPages = async ({
     templateAnalysis,
@@ -221,13 +232,9 @@ const generateForPages = async ({
                 pageMetadata[normalizedPageUrl]?.accessDate,
             ),
 
-            PageEntities: pageEntities[normalizedPageUrl]?.map((entity) => ({
-                EntityName: entity.name,
-                EntityAdditionalName: entity.additionalName,
-                EntityAdditionalNameShort: abbreviateName(
-                    entity.additionalName,
-                ),
-            })),
+            PageEntities: pageEntities[normalizedPageUrl]?.map(
+                genPageEntityTemplate(pageEntities[normalizedPageUrl]?.length),
+            ),
 
             HasNotes: noteUrls.length > 0,
             Notes: noteUrls.map((url) => ({
@@ -355,13 +362,9 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
-                PageEntities: pageEntities[pageUrl]?.map((entity) => ({
-                    EntityName: entity.name,
-                    EntityAdditionalName: entity.additionalName,
-                    EntityAdditionalNameShort: abbreviateName(
-                        entity.additionalName,
-                    ),
-                })),
+                PageEntities: pageEntities[pageUrl]?.map(
+                    genPageEntityTemplate(pageEntities[pageUrl]?.length),
+                ),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -418,13 +421,9 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
-                PageEntities: pageEntities[pageUrl]?.map((entity) => ({
-                    EntityName: entity.name,
-                    EntityAdditionalName: entity.additionalName,
-                    EntityAdditionalNameShort: abbreviateName(
-                        entity.additionalName,
-                    ),
-                })),
+                PageEntities: pageEntities[pageUrl]?.map(
+                    genPageEntityTemplate(pageEntities[pageUrl]?.length),
+                ),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -471,13 +470,9 @@ const generateForNotes = async ({
                     ? serializeDate(createdAt)
                     : undefined,
 
-                PageEntities: pageEntities[pageUrl]?.map((entity) => ({
-                    EntityName: entity.name,
-                    EntityAdditionalName: entity.additionalName,
-                    EntityAdditionalNameShort: abbreviateName(
-                        entity.additionalName,
-                    ),
-                })),
+                PageEntities: pageEntities[pageUrl]?.map(
+                    genPageEntityTemplate(pageEntities[pageUrl]?.length),
+                ),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -529,13 +524,9 @@ const generateForNotes = async ({
             url: fullUrl,
             tags: pageTags[pageUrl],
 
-            PageEntities: pageEntities[pageUrl]?.map((entity) => ({
-                EntityName: entity.name,
-                EntityAdditionalName: entity.additionalName,
-                EntityAdditionalNameShort: abbreviateName(
-                    entity.additionalName,
-                ),
-            })),
+            PageEntities: pageEntities[pageUrl]?.map(
+                genPageEntityTemplate[pageEntities[pageUrl]?.length],
+            ),
 
             Notes: notesByPageUrl[pageUrl].map(
                 ({ url: noteUrl, body, comment, createdAt }) => ({
