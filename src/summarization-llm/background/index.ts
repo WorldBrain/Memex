@@ -8,6 +8,11 @@ import { makeRemotelyCallable, RemoteFunction } from 'src/util/webextensionRPC'
 import type { RemoteEventEmitter } from '../../util/webextensionRPC'
 import { trackQueryAI } from '@worldbrain/memex-common/lib/analytics/events'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import {
+    AImodels,
+    PromptData,
+} from '@worldbrain/memex-common/lib/summarization/types'
+import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -19,8 +24,9 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             apiKey?: string
             outputLocation?: 'editor' | 'summaryContainer' | 'chapterSummary'
             chapterSummaryIndex?: number
-            AImodel?: 'gpt-3.5-turbo-1106' | 'gpt-4-0613' | 'gpt-4-32k'
+            AImodel?: AImodels
             isContentSearch?: boolean
+            promptData?: PromptData
         }
     >
     isApiKeyValid: RemoteFunction<
@@ -29,6 +35,12 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             apiKey?: string
         },
         { isValid: boolean }
+    >
+    setActiveSidebarTab: RemoteFunction<
+        Role,
+        {
+            activeTab?: SidebarTab
+        }
     >
     getTextSummary: RemoteFunction<
         Role,
@@ -63,6 +75,7 @@ export default class SummarizeBackground {
             startPageSummaryStream: this.startPageSummaryStream,
             getTextSummary: this.getTextSummary,
             isApiKeyValid: this.isApiKeyValid,
+            setActiveSidebarTab: this.setActiveSidebarTab,
         }
     }
 
@@ -82,7 +95,7 @@ export default class SummarizeBackground {
             outputLocation,
             chapterSummaryIndex,
             AImodel,
-            isContentSearch,
+            promptData,
         },
     ) => {
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
@@ -102,7 +115,7 @@ export default class SummarizeBackground {
             apiKey,
             undefined,
             AImodel,
-            isContentSearch,
+            promptData,
         )) {
             const token = result?.t
             if (token?.length > 0) {
@@ -160,5 +173,17 @@ export default class SummarizeBackground {
         const isValid = await this.summarizationService.isApiKeyValid(apiKey)
 
         return { isValid }
+    }
+
+    setActiveSidebarTab: SummarizationInterface<
+        'provider'
+    >['setActiveSidebarTab'] = async ({ tab }, { activeTab }) => {
+        this.options.remoteEventEmitter.emitToTab(
+            'setActiveSidebarTab',
+            tab.id,
+            {
+                activeTab: activeTab,
+            },
+        )
     }
 }

@@ -48,9 +48,9 @@ export function injectFakeTabs(params: {
                 : undefined,
             lang: 'en',
             metadata: params.includeTitle
-                ? {
+                ? ({
                       title: fakeTab.title ?? `Title ${tabId}`,
-                  }
+                  } as any)
                 : {},
         }
     }

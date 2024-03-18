@@ -7,6 +7,7 @@ import { openPDFInViewer } from 'src/pdf/util'
 import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import { sleepPromise } from 'src/util/promises'
 import type { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
+import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
@@ -81,6 +82,12 @@ export class ContentScriptsBackground {
                     runInTab<InPageUIContentScriptRemoteInterface>(
                         tabId,
                     ).handleHistoryStateUpdate(tabId)
+                }
+                if (isUrlYTVideo(changeInfo?.url)) {
+                    this.options.browserAPIs.tabs.sendMessage(tabId, {
+                        type: 'URL_CHANGE',
+                        url: changeInfo?.url,
+                    })
                 }
             },
         )

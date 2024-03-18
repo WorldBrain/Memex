@@ -188,15 +188,48 @@ export const HTML_TEMPLATE: Template = {
 `,
 }
 
-const DEFAULT_TEMPLATES = [
+// still missing list names "Jeffery, Elizabeth H., and Marcela Araya."
+export const MLA_EDITION_9: Template = {
+    id: 8,
+    title: 'MLA 9th Edition',
+    isFavourite: false,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 9,
+    outputFormat: 'rich-text',
+    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{#secondLast}} and {{/secondLast}} {{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+}
+
+// still missing abbreviated first names and lists "Jeffery, E.H. and Araya, M. "
+export const HARVARD_EDITION_12: Template = {
+    id: 8,
+    title: 'Harvard 12th Edition',
+    isFavourite: false,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 10,
+    outputFormat: 'rich-text',
+    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{/PageEntities}} ({{#PageReleaseDate}}YYYY{{/PageReleaseDate}}) '{{{PageTitle}}},' _{{{PageJournalName}}}_, {{{PageJournalVolume}}}( {{{PageJournalIssue}}}), pp. {{{PageJournalPage}}}. https://doi.org/{{{PageDOI}}}.`,
+}
+
+// still missing abbreviated first names names and lists "E. H. Jeffery and M. Araya,"
+export const IEEE: Template = {
+    id: 8,
+    title: 'IEEE',
+    isFavourite: false,
+    order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 10,
+    outputFormat: 'rich-text',
+    code: `{{#PageEntities}}{{{EntityAdditionalNameShort}}} {{{EntityName}}}{{#secondLast}} and {{/secondLast}}{{/PageEntities}}, "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+}
+
+export const DEFAULT_TEMPLATES = [
+    JUST_URL,
+    URL_AND_TITLE,
     HTML_TEMPLATE,
+    MLA_EDITION_9,
+    IEEE,
+    HARVARD_EDITION_12,
     ROAM_MD_TEMPLATE,
     LOGSEQ_MD_TEMPLATE,
     NOTION_MD_TEMPLATE,
     OBSIDIAN_MD_TEMPLATE,
     TANA_PASTE_TEMPLATE,
-    JUST_URL,
-    URL_AND_TITLE,
 ]
 
 export default async function insertDefaultTemplates({

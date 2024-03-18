@@ -8,6 +8,12 @@ import type {
     TemplateDocKey,
 } from './types'
 import { KEYS_TO_REQUIREMENTS, LEGACY_KEYS, NOTE_KEYS } from './constants'
+import moment from 'moment'
+
+type MustacheRenderFn = (
+    text: string,
+    render: (text: string) => string,
+) => string
 
 export function renderTemplate(
     template: Pick<Template, 'code'>,
@@ -24,10 +30,23 @@ export function renderTemplate(
         }
     })
 
+    const renderFormattedDate = (date?: number) =>
+        date == null
+            ? undefined
+            : (): MustacheRenderFn => (format, render) =>
+                  render(moment(date).format(format))
+
     const rendered = mustache
         .render(template.code, {
             ...doc,
-            literal: () => (text: string) => text,
+            literal: (): MustacheRenderFn => (text) => text,
+            b: (): MustacheRenderFn => (text, render) => `__${render(text)}__`,
+            i: (): MustacheRenderFn => (text, render) => `_${render(text)}_`,
+            // TODO: Find a better way to do this. e.g., earlier in template-doc-generation logic
+            NoteCreatedAt: renderFormattedDate(doc.NoteCreatedAt),
+            PageCreatedAt: renderFormattedDate(doc.PageCreatedAt),
+            PageAccessDate: renderFormattedDate(doc.PageAccessDate),
+            PageReleaseDate: renderFormattedDate(doc.PageReleaseDate),
         })
         .replace('\r\n', '\n')
 
@@ -93,11 +112,16 @@ export function joinTemplateDocs(
 export function analyzeTemplate(
     template: Pick<Template, 'code'>,
 ): TemplateAnalysis {
-    const templateDoc: TemplateDoc = { Pages: [{}], Notes: [{}] }
+    const templateDoc: TemplateDoc = {
+        Pages: [{}],
+        Notes: [{}],
+        PageEntities: [{}],
+    }
     for (const key of Object.keys(KEYS_TO_REQUIREMENTS)) {
         templateDoc[key] = `@key%${key}.note@endkey%`
         templateDoc.Pages[0][key] = `@key%${key}.page-list@endkey%`
         templateDoc.Notes[0][key] = `@key%${key}.page@endkey%`
+        templateDoc.PageEntities[0][key] = `@key%${key}.entities@endkey%`
     }
     const rendered = renderTemplate(template, templateDoc)
 
@@ -128,16 +152,18 @@ export function analyzeTemplate(
         const requirement = KEYS_TO_REQUIREMENTS[key]
         requirements[requirement] = true
 
-        // If page-related data is required, ensure we also require page
-        if (['pageLink', 'pageSpaces', 'pageCreatedAt'].includes(requirement)) {
-            requirements.page = true
-        }
-
         usesLegacyTags = usesLegacyTags || LEGACY_KEYS.has(key)
     }
     if (!expectedContext) {
         expectedContext = 'page'
     }
+
+    // Always requiring certain local fields - got to here as it was too difficult to figure out how to update this code
+    //  to conditionally add require flags for date fields
+    requirements.pageMetadata = true
+    requirements.pageCreatedAt = true
+    requirements.noteCreatedAt = true
+    requirements.page = true
 
     return { usesLegacyTags, expectedContext, requirements }
 }
@@ -147,4 +173,21 @@ export function convertHTMlTemplateToMarkdown(htmlTemplate) {
         .replace(/<br\s*\/?>/g, '\n')
         .replace(/<[^>]+>/g, '')
     return markdownTemplate
+}
+
+export function abbreviateName(originalName?: string, options?: {}): string {
+    if (!originalName?.length) {
+        return undefined
+    }
+
+    const names = originalName.split(' ')
+    let abbreviateName = ''
+    for (const name of names) {
+        if (!name.length) {
+            continue
+        }
+        const firstChar = name[0].toUpperCase()
+        abbreviateName += firstChar + '.'
+    }
+    return abbreviateName
 }

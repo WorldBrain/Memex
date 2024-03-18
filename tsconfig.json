@@ -111,6 +111,6 @@
             "esnext.asynciterable"
         ]
     },
-    "include": ["./src/**/*"],
+    "include": ["./src/**/*", "src/common-ui/components/prompt-templates"],
     "exclude": ["node_modules", "./src/**/*.js", "./src/**/*.jsx"]
 }

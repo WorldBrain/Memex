@@ -82,22 +82,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 openAIKey: '',
             })
         }
-
-        // await browser.storage.local.get(OPEN_AI_API_KEY).then((result) => {
-        //     if (
-        //         result[OPEN_AI_API_KEY].sQ != null &&
-        //         result[COUNTER_STORAGE_KEY].sQ < 10000
-        //     ) {
-        //         this.setState({
-        //             shouldShow: true,
-        //             totalCount: parseInt(result[COUNTER_STORAGE_KEY].sQ),
-        //             currentCount: result[COUNTER_STORAGE_KEY].cQ,
-        //         })
-        //         browser.storage.onChanged.addListener((changes) =>
-        //             this.counterStorageListenerExecution(changes),
-        //         )
-        //     }
-        // })
     }
     async componentWillUnmount() {
         if (this.state.shouldShow) {
@@ -136,22 +120,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
         }
 
         return undefined
-    }
-
-    private daysAgo = (timestamp) => {
-        // Get the current date and passed timestamp as Date objects
-        const currentDate: any = new Date()
-        const givenDate: any = new Date(Number(timestamp))
-
-        // Calculate the difference in milliseconds
-        const differenceInMilliseconds: any = currentDate - givenDate
-        // Convert the difference from milliseconds to days
-        // 1 day = 24 hours = 24 x 60 minutes = 24 x 60 x 60 seconds = 24 x 60 x 60 x 1000 milliseconds
-        const differenceInDays =
-            30 - differenceInMilliseconds / (24 * 60 * 60 * 1000 * 1000)
-
-        // Return the rounded number of days
-        return Math.ceil(differenceInDays)
     }
 
     daysUntilNextMonth() {
@@ -198,107 +166,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
     }
 
     renderTooltip = () => {
-        return (
-            <PopoutBox
-                placement="bottom-end"
-                targetElementRef={this.tooltipButtonRef.current}
-                closeComponent={() => this.setState({ showTooltip: false })}
-                offsetX={20}
-                strategy="fixed"
-                getPortalRoot={this.props.getRootElement}
-            >
+        if (this.state.showTooltip) {
+            return (
                 <InfoTooltipContainer>
-                    <InfoTooltipTitleArea>
-                        {(this.props.isTrial ||
-                            this.state.totalCount < 10000) && (
-                            <TitleAreaContainer>
-                                {this.props.isTrial && (
-                                    <InfoTooltipTitle>
-                                        <strong>Trial</strong> ends in{' '}
-                                        {this.daysRemainingToComplete30()} days.
-                                    </InfoTooltipTitle>
-                                )}
-
-                                {(this.state.openAIKey == null ||
-                                    this.state.openAIKey?.length === 0) &&
-                                    this.state.totalCount < 10000 &&
-                                    !this.props.isTrial && (
-                                        <InfoTooltipTitle>
-                                            <strong>
-                                                {this.leftOverBlocks}
-                                            </strong>{' '}
-                                            AI queries left this month
-                                        </InfoTooltipTitle>
-                                    )}
-                                {(this.state.totalCount < 10000 ||
-                                    this.props.isTrial) && (
-                                    <PrimaryAction
-                                        label="Upgrade"
-                                        icon={'longArrowRight'}
-                                        padding="0px 5px 0 10px"
-                                        onClick={() => {
-                                            window.open(
-                                                this.whichCheckOutURL(),
-                                                '_blank',
-                                            )
-                                        }}
-                                        size="medium"
-                                        type="primary"
-                                        iconPosition="right"
-                                    />
-                                )}
-                            </TitleAreaContainer>
-                        )}
-                        {(this.leftOverBlocks === 0 ||
-                            (!this.props.isTrial &&
-                                this.state.totalCount < 10000) ||
-                            this.props.isTrial) && (
-                            <InfoTooltipSubTitleBox>
-                                {!this.props.isTrial &&
-                                    this.leftOverBlocks === 0 && (
-                                        <InfoTooltipSubTitle>
-                                            You can't make any more AI summaries
-                                            or queries.
-                                            <br />
-                                            <strong>
-                                                Resets in{' '}
-                                                {this.daysUntilNextMonth()}{' '}
-                                                days.
-                                            </strong>
-                                        </InfoTooltipSubTitle>
-                                    )}
-                                {!this.props.isTrial &&
-                                    this.state.totalCount < 10000 && (
-                                        <InfoTooltipSubTitle>
-                                            <strong>
-                                                Resets in{' '}
-                                                {this.daysUntilNextMonth()}{' '}
-                                                days.
-                                            </strong>
-                                            <br />
-                                            Add OpenAI AI key for ♾️ queries at
-                                            your own cost + GPT-4 support.
-                                        </InfoTooltipSubTitle>
-                                    )}
-                                {this.props.isTrial && (
-                                    <InfoTooltipSubTitle>
-                                        Make as many AI queries & summaries you
-                                        want.
-                                        <br />
-                                        After the trial: 60 days
-                                        money-back-guarantee and a free tier
-                                        with 25 AI queries per month.
-                                    </InfoTooltipSubTitle>
-                                )}
-                            </InfoTooltipSubTitleBox>
-                        )}
-                    </InfoTooltipTitleArea>
                     <OpenAIKeyContainer>
-                        <OpenAIKeyTitle>OpenAI API Key</OpenAIKeyTitle>
-                        <OpenAIKeySubTitle>
-                            Add OpenAI AI key for ♾️ queries at your own cost +
-                            GPT-4 support.
-                        </OpenAIKeySubTitle>
                         <KeyBox>
                             <TextField
                                 placeholder={
@@ -351,8 +222,9 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                             ? 'Checking'
                                             : 'Check Key'
                                     }
+                                    fullWidth
                                     type="secondary"
-                                    size="medium"
+                                    size="small"
                                 />
                             )}
                             {this.props.isKeyValid == true && (
@@ -373,78 +245,38 @@ export class AICounterIndicator extends React.Component<Props, State> {
                                 </ErrorBoxSubTitle>
                             </ErrorBox>
                         )}
-                        {/* <ModelSwitchBox>
-                            <ModelSwitchTitle>
-                                Model to use for queries
-                            </ModelSwitchTitle>
-                            <ModelButton
-                                isActive={this.state.selectedModel === 'GPT-4'}
-                                onClick={() => {
-                                    this.setState({
-                                        selectedModel: 'GPT-4',
-                                    })
-                                    this.props.syncSettingsBG.openAI.set(
-                                        'openAIkey',
-                                        this.state.openAIKey,
-                                    )
-                                }}
-                            >
-                                GPT-4
-                            </ModelButton>
-                            <ModelButton
-                                isActive={this.state.selectedModel === 'GPT-4'}
-                                onClick={() => {
-                                    this.setState({
-                                        selectedModel: 'GPT-4',
-                                    })
-                                    this.props.syncSettingsBG.openAI.set(
-                                        'openAIkey',
-                                        this.state.openAIKey,
-                                    )
-                                }}
-                            >
-                                GPT-3.5
-                            </ModelButton>
-                        </ModelSwitchBox> */}
                     </OpenAIKeyContainer>
                 </InfoTooltipContainer>
-            </PopoutBox>
-        )
+            )
+        }
     }
 
     render() {
-        const progressPercentNumber =
-            (100 - (this.state.currentCount / this.state.totalCount) * 100) *
-            3.6
-
         return (
-            <>
-                {this.state.showTooltip && this.renderTooltip()}
-                <TooltipBox
-                    placement="bottom-end"
-                    tooltipText={
-                        <TooltipTextContainer>
-                            <TooltipTextTop>
-                                Upgrade or add API key.
-                            </TooltipTextTop>
-                        </TooltipTextContainer>
+            <Container>
+                <PrimaryAction
+                    label="Add API Key"
+                    type="forth"
+                    size="small"
+                    padding="5px 10px"
+                    fullWidth
+                    icon="key"
+                    onClick={() =>
+                        this.setState({ showTooltip: !this.state.showTooltip })
                     }
-                    getPortalRoot={this.props.getRootElement}
-                >
-                    <PrimaryAction
-                        label="Add API Key"
-                        type="secondary"
-                        size="medium"
-                        fullWidth
-                        icon="key"
-                        onClick={() => this.setState({ showTooltip: true })}
-                        innerRef={this.tooltipButtonRef}
-                    />
-                </TooltipBox>
-            </>
+                    innerRef={this.tooltipButtonRef}
+                />
+                {this.renderTooltip()}
+            </Container>
         )
     }
 }
+
+const Container = styled.div`
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+`
 
 const ButtonBox = styled.div`
     display: flex;
@@ -484,8 +316,9 @@ const ORBox = styled.div`
 `
 
 const OpenAIKeyContainer = styled.div`
-    width: 90%;
-    padding: 0px 20px 20px 20px;
+    margin-top: 10px;
+    width: 100%;
+    box-sizing: border-box;
 `
 
 const OpenAIKeyTitle = styled.div`
@@ -505,6 +338,7 @@ const KeyBox = styled.div`
     display: flex;
     grid-gap: 10px;
     align-items: center;
+    flex-direction: column;
 `
 
 const ModelSwitchBox = styled.div``
@@ -592,7 +426,6 @@ const InfoTooltipContainer = styled.div`
     justify-content: flex-start;
     height: fit-content;
     grid-gap: 20px;
-    width: 400px;
 `
 
 const InfoTooltipTitleArea = styled.div`

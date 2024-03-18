@@ -311,6 +311,16 @@ export default class Page extends AbstractModel
                 where: { pageUrl: this.url },
             },
             {
+                collection: 'pageMetadata',
+                operation: 'deleteObjects',
+                where: { normalizedPageUrl: this.url },
+            },
+            {
+                collection: 'pageEntities',
+                operation: 'deleteObjects',
+                where: { normalizedPageUrl: this.url },
+            },
+            {
                 collection: 'annotListEntries',
                 operation: 'deleteObjects',
                 where: { url: { $in: annotationIds } },
