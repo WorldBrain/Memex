@@ -28,7 +28,7 @@ import type { CustomList } from '@worldbrain/memex-common/lib/types/core-data-ty
 import type { FollowedListEntry } from 'src/page-activity-indicator/background/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import replaceImgSrcWithFunctionOutputBrowser from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
+import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressNode'
 
 export function getTemplateDataFetchers({
     storageManager,
@@ -420,7 +420,7 @@ export function getTemplateDataFetchers({
 }
 
 async function convertHTMLintoMarkdown(inputHtml, imageSupport) {
-    const html = await replaceImgSrcWithFunctionOutputBrowser(
+    const html = await replaceImgSrcWithFunctionOutput(
         inputHtml,
         process.env.NODE_ENV,
     )

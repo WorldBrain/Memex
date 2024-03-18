@@ -1,7 +1,5 @@
-import replaceImgSrcWithFunctionOutputBrowser from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressNode'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 // TODO: Refactor this so it's not importing and using the browser global
 import { browser } from 'webextension-polyfill-ts'
@@ -32,7 +30,7 @@ export async function shareAnnotationWithPKM(
             .replace(/\n/g, ' ')
 
         if (annotationData.comment) {
-            annotationData = await replaceImgSrcWithFunctionOutputBrowser(
+            annotationData = await replaceImgSrcWithFunctionOutput(
                 annotationData.comment,
                 process.env.NODE_ENV,
             )
