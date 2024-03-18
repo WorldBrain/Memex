@@ -106,12 +106,20 @@ export const handleRenderYoutubeInterface = async (
                             if (node instanceof HTMLElement) {
                                 // Check if the "player" element is in the added node or its descendants
                                 if (node.querySelector('#player')) {
+                                    const existingElement = document.getElementById(
+                                        'MemexButtonContainer',
+                                    )
+
+                                    if (existingElement) {
+                                        return
+                                    }
                                     const below = document.querySelector(
                                         '#below',
                                     )
                                     const player = document.querySelector(
                                         '#player',
                                     )
+
                                     injectYoutubeContextMenu(
                                         annotationsFunctions,
                                     )
@@ -130,6 +138,13 @@ export const handleRenderYoutubeInterface = async (
                             if (node instanceof HTMLElement) {
                                 // Check if the "below" element is in the added node or its descendants
                                 if (node.querySelector('#below')) {
+                                    const existingElement = document.getElementById(
+                                        'MemexButtonContainer',
+                                    )
+
+                                    if (existingElement) {
+                                        return
+                                    }
                                     const below = document.querySelector(
                                         '#below',
                                     )
@@ -239,6 +254,7 @@ export const handleRenderYoutubeInterface = async (
                 syncSettings={syncSettings}
                 annotationsFunctions={annotationsFunctions}
                 syncSettingsBG={syncSettingsBG}
+                getCurrentVideoDuration={getCurrentVideoDuration}
             />,
             target,
         )
