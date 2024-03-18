@@ -236,7 +236,7 @@ export default class BookmarksBackground {
         }
 
         const pageHasBookmark = await this.storage.pageHasBookmark(tab.url)
-        // await this.setBookmarkStatus(pageHasBookmark, tabId)
+        await this.setBookmarkStatus(pageHasBookmark, tabId)
     }
 
     setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
