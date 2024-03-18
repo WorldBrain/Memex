@@ -94,10 +94,11 @@ import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/compon
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import PageCitations from 'src/citations/PageCitations'
-import { TaskState } from 'ui-logic-core/lib/types'
-import debounce from 'lodash/debounce'
-import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
-import AIChatComponent from '@worldbrain/memex-common/lib/ai-chat'
+import type { TaskState } from 'ui-logic-core/lib/types'
+import { PageMetadataForm } from 'src/page-indexing/ui/metadata-form'
+import type { PageIndexingInterface } from 'src/page-indexing/background/types'
+import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import AIChatComponent from '@worldbrain/memex-common/lib/ai-chat/index'
 import { PDFDocumentProxy } from 'pdfjs-dist/types/display/api'
 import { extractDataFromPDFDocument } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-pdf-content'
 import {
@@ -109,6 +110,7 @@ import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/
 import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
 import { browser } from 'webextension-polyfill-ts'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
+import debounce from 'lodash/debounce'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -295,6 +297,7 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     inPageMode?: boolean
     authBG: AuthRemoteFunctionsInterface
     analyticsBG: AnalyticsCoreInterface
+    pageIndexingBG: PageIndexingInterface<'caller'>
     contentSharingBG: ContentSharingInterface
     contentSharingByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     copyToClipboard: (text: string) => Promise<boolean>
@@ -2138,6 +2141,15 @@ export class AnnotationsSidebar extends React.Component<
         )
     }
 
+    renderCitations() {
+        return (
+            <PageMetadataForm
+                pageIndexingBG={this.props.pageIndexingBG}
+                fullPageUrl={this.props.fullPageUrl}
+            />
+        )
+    }
+
     private renderResultsBody(themeVariant: MemexThemeVariant) {
         const listData = this.props.lists.byId[this.props.selectedListId]
 
@@ -2179,6 +2191,10 @@ export class AnnotationsSidebar extends React.Component<
                     </AnnotationsSectionStyled>
                 </>
             )
+        }
+
+        if (this.props.activeTab === 'citations') {
+            return this.renderCitations()
         }
 
         return (

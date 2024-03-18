@@ -273,6 +273,7 @@ export function createBackgroundModules(options: {
         getNow,
         authBG: auth,
         pkmSyncBG,
+        fetch,
     })
     tabManagement.events.on('tabRemoved', async (event) => {
         await pages.handleTabClose(event)

@@ -1138,7 +1138,7 @@ export default class ContentSharingBackground {
         if (customPageTitle) {
             pageTitle = customPageTitle
         } else {
-            pageTitle = await bgModules.pages.lookupPageTitleForUrl({
+            pageTitle = await bgModules.pages.getTitleForPage({
                 fullPageUrl,
             })
         }

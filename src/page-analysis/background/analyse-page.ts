@@ -1,4 +1,3 @@
-import { extractPageMetadataFromRawContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
 import type { PageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
@@ -6,12 +5,10 @@ import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexin
 import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
 
-export interface PageAnalysis {
+export interface PageAnalysis extends Partial<ExtractedPDFData> {
     content: PageContent
     favIconURI?: string
     htmlBody?: string
-    pdfMetadata?: { [key: string]: any }
-    pdfPageTexts?: string[]
 }
 
 export type PageAnalyzer = (args: {
@@ -60,8 +57,11 @@ const analysePage: PageAnalyzer = async (options) => {
         delete pdfContent.pdfPageTexts
         content = pdfContent
     } else {
-        content = extractPageMetadataFromRawContent(rawContent)
-        // content.title = document.title ?? null
+        content = {
+            title: rawContent.metadata.title ?? '',
+            metadata: rawContent.metadata,
+            fullText: '',
+        } as PageContent
     }
 
     if (options.includeContent === 'metadata-with-full-text') {

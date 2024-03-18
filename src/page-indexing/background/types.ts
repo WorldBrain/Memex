@@ -1,9 +1,13 @@
-import {
+import type {
     ContentLocator,
     ContentIdentifier,
 } from '@worldbrain/memex-common/lib/page-indexing/types'
-import { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import {
+import type { ContentFingerprint } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
+import type {
+    PageEntity,
+    PageMetadata,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type {
     RemoteFunctionRole,
     RemoteFunctionWithExtraArgs,
     RemoteFunctionWithoutExtraArgs,
@@ -20,15 +24,54 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
         WaitForContentIdentifierParams,
         WaitForContentIdentifierReturns
     >
-    lookupPageTitleForUrl: RemoteFunctionWithoutExtraArgs<
+    getOriginalUrlForPdfPage: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { normalizedPageUrl: string },
+        string | null
+    >
+    getTitleForPage: RemoteFunctionWithoutExtraArgs<
         Role,
         { fullPageUrl: string },
         string | null
+    >
+    getFirstAccessTimeForPage: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { normalizedPageUrl: string },
+        number | null
     >
     updatePageTitle: RemoteFunctionWithExtraArgs<
         Role,
         { normaliedPageUrl: string; title: string }
     >
+    updatePageMetadata: RemoteFunctionWithoutExtraArgs<
+        Role,
+        PageMetadataUpdateArgs
+    >
+    getPageMetadata: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { normalizedPageUrl: string },
+        | (Omit<PageMetadata, 'normalizedPageUrl'> & {
+              entities: Omit<PageEntity, 'normalizedPageUrl'>[]
+          })
+        | null
+    >
+    fetchPageMetadataByDOI: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { doi: string; now?: number },
+        | (Omit<PageMetadata, 'normalizedPageUrl' | 'accessDate'> & {
+              entities: Omit<PageEntity, 'normalizedPageUrl'>[]
+          })
+        | null
+    >
+    setEntityOrder: RemoteFunctionWithoutExtraArgs<
+        Role,
+        { id: number; order: number }
+    >
+}
+
+export type PageMetadataUpdateArgs = Omit<PageMetadata, 'accessDate'> & {
+    accessDate?: number
+    entities: Omit<PageEntity, 'normalizedPageUrl'>[]
 }
 
 export interface InitContentIdentifierParams {
