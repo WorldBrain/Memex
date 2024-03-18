@@ -218,12 +218,12 @@ export default class BookmarksBackground {
 
     private async setBookmarkStatus(isSet: boolean, tabId: number) {
         if (isSet) {
-            await browser.browserAction.setBadgeText({ text: '❤️', tabId })
-            await browser.browserAction.setBadgeBackgroundColor({
+            await browser.action.setBadgeText({ text: '❤️', tabId })
+            await browser.action.setBadgeBackgroundColor({
                 color: 'white',
             })
         } else {
-            await browser.browserAction.setBadgeText({ text: '', tabId })
+            await browser.action.setBadgeText({ text: '', tabId })
         }
     }
 
@@ -236,7 +236,7 @@ export default class BookmarksBackground {
         }
 
         const pageHasBookmark = await this.storage.pageHasBookmark(tab.url)
-        await this.setBookmarkStatus(pageHasBookmark, tabId)
+        // await this.setBookmarkStatus(pageHasBookmark, tabId)
     }
 
     setBookmarkStatusInBrowserIcon: BookmarksInterface['setBookmarkStatusInBrowserIcon'] = async (
