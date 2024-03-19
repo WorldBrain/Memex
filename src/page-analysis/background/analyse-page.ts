@@ -1,6 +1,6 @@
 import type { PageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
 import type { InPDFPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
 import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
 import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'

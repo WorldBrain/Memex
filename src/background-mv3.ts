@@ -1,5 +1,7 @@
 import browser from 'webextension-polyfill'
 import XMLHttpRequest from 'xhr-shim'
+import { parseHTML } from 'linkedom/worker'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
 import { getToken } from 'firebase/messaging'
 import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import {
@@ -36,7 +38,6 @@ import { setupOmnibar } from 'src/omnibar'
 import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
-import { getOnlineBackendEnv } from './util/env'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
@@ -101,8 +102,8 @@ async function main() {
             fetchPageData({
                 url,
                 fetch,
-                domParser: (html) =>
-                    new DOMParser().parseFromString(html, 'text/html'),
+                transformPageHTML,
+                domParser: (html) => parseHTML(html).document,
                 opts: { includePageContent: true, includeFavIcon: true },
             }).run(),
         fetchPDFData: async (url) =>

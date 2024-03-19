@@ -4,7 +4,7 @@ import type { PageActivityIndicatorBackground } from 'src/page-activity-indicato
 import { PersonalCloudClientStorageType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { StoredContentType } from 'src/page-indexing/background/types'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
