@@ -1,5 +1,4 @@
 import type Storex from '@worldbrain/storex'
-
 import {
     getNoteShareUrl,
     getSinglePageShareUrl,
@@ -24,7 +23,6 @@ import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
 import TurndownService from 'turndown/src/turndown'
-import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type {
     CustomList,
     PageEntity,
@@ -33,12 +31,12 @@ import type {
 import type { FollowedListEntry } from 'src/page-activity-indicator/background/types'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { ContentLocatorType } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressNode'
+import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
+import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
 
 export function getTemplateDataFetchers({
     storageManager,
     contentSharing,
-    imageSupport,
     previewMode,
 }: {
     storageManager: Storex
@@ -49,7 +47,6 @@ export function getTemplateDataFetchers({
         | 'ensureRemotePageId'
         | 'scheduleManyPageLinkCreations'
     >
-    imageSupport: ImageSupportInterface<'caller'>
     previewMode?: boolean
 }): TemplateDataFetchers {
     const getTagsForUrls = async (
@@ -154,16 +151,20 @@ export function getTemplateDataFetchers({
                     url: note.url,
                     body:
                         note.body != null
-                            ? await convertHTMLintoMarkdown(
-                                  note.body,
-                                  imageSupport,
+                            ? htmlToMarkdown(
+                                  resolveImgSrc(
+                                      note.body,
+                                      process.env.NODE_ENV,
+                                  ),
                               )
                             : '',
                     comment:
                         note.comment != null
-                            ? await convertHTMLintoMarkdown(
-                                  note.comment,
-                                  imageSupport,
+                            ? htmlToMarkdown(
+                                  resolveImgSrc(
+                                      note.comment,
+                                      process.env.NODE_ENV,
+                                  ),
                               )
                             : '',
                     pageUrl: note.pageUrl,
@@ -437,23 +438,5 @@ export function getTemplateDataFetchers({
 
             return entries
         }),
-    }
-}
-
-async function convertHTMLintoMarkdown(inputHtml, imageSupport) {
-    const html = await replaceImgSrcWithFunctionOutput(
-        inputHtml,
-        process.env.NODE_ENV,
-    )
-    if (html) {
-        let turndownService = new TurndownService({
-            headingStyle: 'atx',
-            hr: '---',
-            codeBlockStyle: 'fenced',
-        })
-        const markdown = turndownService.turndown(html)
-        return markdown
-    } else {
-        return
     }
 }

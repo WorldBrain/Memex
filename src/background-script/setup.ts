@@ -586,13 +586,6 @@ export function createBackgroundModules(options: {
         storageManager,
         contentSharing,
         search,
-        imageSupport: new ImageSupportBackground({
-            backend: options.imageSupportBackend,
-            storageManager: options.storageManager,
-            generateImageId() {
-                return generateServerId('UPLOADED_IMAGES') as string
-            },
-        }),
     })
 
     const bgScript = new BackgroundScript({

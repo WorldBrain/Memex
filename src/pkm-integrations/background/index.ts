@@ -6,6 +6,7 @@ import moment from 'moment'
 import type { PkmSyncInterface } from './types'
 import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
+import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -1090,24 +1091,19 @@ export class PKMSyncBackgroundModule {
         }
     }
 }
-function convertHTMLintoMarkdown(html) {
-    let turndownService = new TurndownService({
-        headingStyle: 'atx',
-        hr: '---',
-        codeBlockStyle: 'fenced',
-    })
 
-    // Add a rule for handling paragraphs to remove extra newlines
-    turndownService.addRule('paragraph', {
-        filter: 'p',
-        replacement: function (content) {
-            // Trim the content to remove leading and trailing whitespace
-            // and return the content with a single newline at the end
-            return content.trim() + '\n'
-        },
+function convertHTMLintoMarkdown(html: string) {
+    let markdown = htmlToMarkdown(html, (turndownService) => {
+        // Add a rule for handling paragraphs to remove extra newlines
+        turndownService.addRule('paragraph', {
+            filter: 'p',
+            replacement: function (content) {
+                // Trim the content to remove leading and trailing whitespace
+                // and return the content with a single newline at the end
+                return content.trim() + '\n'
+            },
+        })
     })
-
-    let markdown = turndownService.turndown(html)
 
     // The following replacements might not be necessary anymore if the custom rule handles the conversion correctly
     markdown = markdown.replace(/[\\](?!\n)/g, '')
