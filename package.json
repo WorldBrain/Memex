@@ -158,7 +158,7 @@
         "styled-props": "^1.1.2",
         "tinycolor2": "^1.6.0",
         "traverse": "^0.6.6",
-        "turndown": "7.1.3",
+        "turndown": "poltak/turndown#64722bcaaf9576f90f34209912fcf7580882203d",
         "tweetnacl": "^1.0.1",
         "tweetnacl-async": "^2.0.0",
         "tweetnacl-util": "^0.15.0",

@@ -9,7 +9,6 @@ import {
     startOfDay,
     WEEK_IN_MS,
 } from '@worldbrain/memex-common/lib/utils/date-time'
-import chrome from 'webextension-polyfill'
 
 const getDirNestedCollectionName = (dirNode) => {
     const parentCollectionName = dirNode.collectionName ?? ''

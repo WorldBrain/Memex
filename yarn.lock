@@ -19481,10 +19481,9 @@ tunnel-agent@^0.6.0:
   dependencies:
     safe-buffer "^5.0.1"
 
-turndown@7.1.3:
+turndown@poltak/turndown#64722bcaaf9576f90f34209912fcf7580882203d:
   version "7.1.3"
-  resolved "https://registry.yarnpkg.com/turndown/-/turndown-7.1.3.tgz#2890eb76c603e66bf0c9e91526582b563065c57d"
-  integrity sha512-Z3/iJ6IWh8VBiACWQJaA5ulPQE5E1QwvBHj00uGzdQxdRnd8fh1DPqNOJqzQDu6DkOstORrtXzf/9adB+vMtEA==
+  resolved "https://codeload.github.com/poltak/turndown/tar.gz/64722bcaaf9576f90f34209912fcf7580882203d"
   dependencies:
     domino "^2.1.6"
 
