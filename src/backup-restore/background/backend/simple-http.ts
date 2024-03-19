@@ -10,7 +10,7 @@ import {
     shouldWriteImages,
 } from 'src/backup-restore/background/backend/utils'
 import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
-import { browser } from 'webextension-polyfill-ts'
+import chrome from 'webextension-polyfill'
 
 export class MemexLocalBackend extends BackupBackend {
     private url
@@ -74,9 +74,7 @@ export class MemexLocalBackend extends BackupBackend {
 
     async _writeToPath(url: string, body: string) {
         const syncKey = await getPkmSyncKey()
-        const backupFolder = await browser.storage.local.get(
-            'PKMSYNCpkmFolders',
-        )
+        const backupFolder = await chrome.storage.local.get('PKMSYNCpkmFolders')
         const backupFolderPath = backupFolder.PKMSYNCpkmFolders.backupFolder
         let bodyJSON = JSON.parse(body)
         bodyJSON.syncKey = syncKey

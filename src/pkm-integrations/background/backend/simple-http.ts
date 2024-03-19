@@ -1,4 +1,5 @@
-import { browser } from 'webextension-polyfill-ts'
+import chrome from 'webextension-polyfill'
+
 import { getPkmSyncKey } from './utils'
 import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 
@@ -69,29 +70,29 @@ export class MemexLocalBackend {
     }
 
     async bufferPKMSyncItems(itemToBuffer) {
-        // Get the current buffer from browser.storage.local
-        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        // Get the current buffer from chrome.storage.local
+        const data = await chrome.storage.local.get('PKMSYNCbufferedItems')
         const currentBuffer = data.PKMSYNCbufferedItems || []
 
         if (currentBuffer.length > 2000) {
-            await browser.storage.local.set({ PKMSYNCbufferMaxReached: true })
+            await chrome.storage.local.set({ PKMSYNCbufferMaxReached: true })
             return
         }
 
         // Append the new item to the buffer
         currentBuffer.push(itemToBuffer)
 
-        // Save the updated buffer back to browser.storage.local
-        await browser.storage.local.set({ PKMSYNCbufferedItems: currentBuffer })
+        // Save the updated buffer back to chrome.storage.local
+        await chrome.storage.local.set({ PKMSYNCbufferedItems: currentBuffer })
     }
 
     async getBufferedItems() {
-        // Check for buffered items in browser.storage.local
-        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        // Check for buffered items in chrome.storage.local
+        const data = await chrome.storage.local.get('PKMSYNCbufferedItems')
         const bufferedItems = data.PKMSYNCbufferedItems || []
 
         // After retrieving the buffered items, delete them from local storage
-        await browser.storage.local.remove('PKMSYNCbufferedItems')
+        await chrome.storage.local.remove('PKMSYNCbufferedItems')
 
         return bufferedItems
     }
@@ -119,7 +120,7 @@ export class MemexLocalBackend {
         })
 
         if (response.ok) {
-            await browser.storage.local.set({
+            await chrome.storage.local.set({
                 PKMSYNCsyncWasSetupBefore: true,
             })
         }

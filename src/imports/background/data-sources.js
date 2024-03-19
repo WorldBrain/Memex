@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import checkBrowser from '../../util/check-browser'
 import {
     IMPORT_TYPE as TYPE,
@@ -10,6 +9,7 @@ import {
     startOfDay,
     WEEK_IN_MS,
 } from '@worldbrain/memex-common/lib/utils/date-time'
+import chrome from 'webextension-polyfill'
 
 const getDirNestedCollectionName = (dirNode) => {
     const parentCollectionName = dirNode.collectionName ?? ''

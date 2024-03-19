@@ -1,12 +1,13 @@
 /* eslint eqeqeq: 0 */
 import createNotif from 'src/util/notifications'
 import { PAUSE_STORAGE_KEY } from '..'
+import chrome from 'webextension-polyfill'
 
 export const pauseIconPath = '/img/worldbrain-logo-narrow-pause.png'
 export const unpauseIconPath = '/img/worldbrain-logo-narrow-bw.png'
 
 export const getState = async () => {
-    const state = (await browser.storage.local.get(PAUSE_STORAGE_KEY))[
+    const state = (await chrome.storage.local.get(PAUSE_STORAGE_KEY))[
         PAUSE_STORAGE_KEY
     ]
 
@@ -25,22 +26,22 @@ const setState = async (state) => {
     const transformState = (val) => {
         switch (val) {
             case Infinity: {
-                browser.browserAction.setIcon({ path: pauseIconPath })
+                chrome.browserAction.setIcon({ path: pauseIconPath })
                 return 0
             }
             case true: {
-                browser.browserAction.setIcon({ path: pauseIconPath })
+                chrome.browserAction.setIcon({ path: pauseIconPath })
                 return 1
             }
             case false:
             default: {
-                browser.browserAction.setIcon({ path: unpauseIconPath })
+                chrome.browserAction.setIcon({ path: unpauseIconPath })
                 return 2
             }
         }
     }
 
-    return browser.storage.local.set({
+    return chrome.storage.local.set({
         [PAUSE_STORAGE_KEY]: transformState(state),
     })
 }
