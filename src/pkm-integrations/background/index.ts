@@ -7,6 +7,7 @@ import type { PkmSyncInterface } from './types'
 import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
+import replaceImgSrcWithFunctionOutputBrowser from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -511,7 +512,7 @@ export class PKMSyncBackgroundModule {
                     pageTitleFormat,
                 )
             } else if (item.type === 'annotation') {
-                annotationsSection = this.replaceOrAppendAnnotation(
+                annotationsSection = await this.replaceOrAppendAnnotation(
                     annotationsSection,
                     item,
                     pkmType,
@@ -560,7 +561,7 @@ export class PKMSyncBackgroundModule {
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
-                annotationsSection = this.annotationObjectDefault(
+                annotationsSection = await this.annotationObjectDefault(
                     item.data.annotationId,
                     item.data.body
                         ? convertHTMLintoMarkdown(item.data.body)
@@ -583,7 +584,7 @@ export class PKMSyncBackgroundModule {
         return await this.backendNew.storeObject(fileName, fileContent, pkmType)
     }
 
-    replaceOrAppendAnnotation(
+    async replaceOrAppendAnnotation(
         annotationsSection,
         item,
         pkmType,
@@ -608,7 +609,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -643,7 +644,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -666,7 +667,7 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
-            const newAnnotationContent = this.annotationObjectDefault(
+            const newAnnotationContent = await this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
                 item.data.comment,
@@ -688,7 +689,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    extractAndUpdateAnnotationData(
+    async extractAndUpdateAnnotationData(
         annotationContent,
         annotationId,
         body,
@@ -764,7 +765,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(', ')
 
-            updatedAnnotation = this.annotationObjectDefault(
+            updatedAnnotation = await this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -814,7 +815,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(' ')
 
-            updatedAnnotation = this.annotationObjectDefault(
+            updatedAnnotation = await this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -1034,7 +1035,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    annotationObjectDefault(
+    async annotationObjectDefault(
         annotationId,
         body,
         comment,
@@ -1044,12 +1045,27 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
     ) {
+        const commentWithImageLinks = await replaceImgSrcWithFunctionOutputBrowser(
+            comment,
+            process.env.NODE_ENV,
+        )
+        const bodyWithImageLinks = await replaceImgSrcWithFunctionOutputBrowser(
+            body,
+            process.env.NODE_ENV,
+        )
+
+        console.log('commentWithImageLinks', commentWithImageLinks)
+        console.log('bodyWithImageLinks', bodyWithImageLinks)
+
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
-            let highlightTextLine = body ? `> ${body.trim()}\n\n` : ''
-            const highlightNoteLine = comment
+            let highlightTextLine = bodyWithImageLinks
+                ? `> ${bodyWithImageLinks.trim()}\n\n`
+                : ''
+
+            const highlightNoteLine = commentWithImageLinks
                 ? `<!-- Note -->\n${convertHTMLintoMarkdown(
-                      comment,
+                      commentWithImageLinks,
                   )}\n<div id="end"/>\n\r`
                 : ''
             const highlightSpacesLine = annotationSpaces
@@ -1070,10 +1086,14 @@ export class PKMSyncBackgroundModule {
         if (pkmType === 'logseq') {
             let highlightTextLine = ''
             const separatedLine = `- <!-- NoteStartLine ${annotationId} -->---\n`
-            highlightTextLine = body ? ` - > ${body}\n` : ''
+            highlightTextLine = bodyWithImageLinks
+                ? ` - > ${bodyWithImageLinks}\n`
+                : ''
 
-            const highlightNoteLine = comment
-                ? `  - **Note** \n    - ${convertHTMLintoMarkdown(comment)}\n`
+            const highlightNoteLine = commentWithImageLinks
+                ? `  - **Note** \n    - ${convertHTMLintoMarkdown(
+                      commentWithImageLinks,
+                  )}\n`
                 : ''
             const highlightSpacesLine = annotationSpaces
                 ? `  - **Spaces:** ${annotationSpaces}\n`
