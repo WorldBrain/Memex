@@ -105,6 +105,7 @@
         "jsdom": "^20.0.0",
         "json-date-parser": "^1.0.1",
         "katex": "^0.16.9",
+        "linkedom": "^0.16.10",
         "lodash": "^4.17.4",
         "markdown-it": "^13.0.1",
         "marked": "^4.0.2",

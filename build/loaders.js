@@ -84,7 +84,9 @@ export default ({ mode, context, isCI = false, injectStyles = false }) => {
             ...Object.values(externalTsModules).map((mod) =>
                 path.resolve(context, `./external/${mod}`),
             ),
+            // Put node modules here which use modern syntax that needs transpilation
             path.join(context, 'node_modules/zeed-dom'),
+            path.join(context, 'node_modules/linkedom'),
         ],
         use: [babelLoader, tsLoader],
     }
