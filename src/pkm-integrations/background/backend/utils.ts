@@ -1,4 +1,4 @@
-import replaceImgSrcWithFunctionOutput from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressNode'
+import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 // TODO: Refactor this so it's not importing and using the browser global
@@ -30,7 +30,7 @@ export async function shareAnnotationWithPKM(
             .replace(/\n/g, ' ')
 
         if (annotationData.comment) {
-            annotationData = await replaceImgSrcWithFunctionOutput(
+            annotationData = resolveImgSrc(
                 annotationData.comment,
                 process.env.NODE_ENV,
             )
