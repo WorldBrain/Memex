@@ -194,8 +194,6 @@ export class DashboardContainer extends StatefulUIElement<
                 this.processEvent('changeFocusItem', {
                     direction: event.key === 'ArrowUp' ? 'up' : 'down',
                 })
-                // const searchBox = document.getElementById('search-bar')
-                // searchBox.blur()
             }
         }
     }
