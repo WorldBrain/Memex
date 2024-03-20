@@ -11,12 +11,16 @@ export default class PushMessagingClient {
         },
     ) {}
 
-    async handleIncomingMessage(
+    handleIncomingMessage(
         payload: PushMessagePayload,
         opts?: { now?: number },
-    ): Promise<void> {
+    ): void {
         const { bgModules } = this.deps
         if (payload.type === 'downloadClientUpdates') {
+            bgModules.personalCloud.options.backend.events.emit(
+                'incomingChangesPending',
+                { changeCountDelta: 1 },
+            )
             bgModules.personalCloud.triggerSyncContinuation()
         }
         // This is the setup for the old FCM-based implementation for page activity indicator

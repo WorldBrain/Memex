@@ -157,13 +157,13 @@ async function main() {
     const pushMessagingClient = new PushMessagingClient({
         bgModules: backgroundModules,
     })
-    onBackgroundMessage(getMessaging(), async (message) => {
+    onBackgroundMessage(getMessaging(), (message) => {
         const payload = message.data as PushMessagePayload
         if (payload == null) {
             return
         }
 
-        await pushMessagingClient.handleIncomingMessage(payload)
+        pushMessagingClient.handleIncomingMessage(payload)
     })
 
     await setupBackgroundModules(backgroundModules, storageManager)

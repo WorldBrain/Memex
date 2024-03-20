@@ -142,7 +142,6 @@ export class PersonalCloudBackground {
             })
             await this.options.settingStore.set('lastSyncUpload', Date.now())
         })
-        // TODO: re-implement pending download count
         this.options.backend.events.on('incomingChangesPending', (event) => {
             this._modifyStats({
                 pendingDownloads:
@@ -150,8 +149,9 @@ export class PersonalCloudBackground {
             })
         })
         this.options.backend.events.on('incomingChangesProcessed', (event) => {
+            const pendingDownloads = this.stats.pendingDownloads - event.count
             this._modifyStats({
-                pendingDownloads: this.stats.pendingDownloads - event.count,
+                pendingDownloads: pendingDownloads < 0 ? 0 : pendingDownloads,
             })
         })
     }
