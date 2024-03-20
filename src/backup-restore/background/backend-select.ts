@@ -1,7 +1,7 @@
 import * as driveBackup from './backend/google-drive'
 import * as localBackup from './backend/simple-http'
 import * as backup from '.'
-import chrome from 'webextension-polyfill'
+import browser from 'webextension-polyfill'
 import { BackupBackend } from './backend/types'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from './types'
@@ -46,7 +46,7 @@ export class BackendSelect {
     }
 
     async restoreBackendLocation(): Promise<string> {
-        const storageObject = await chrome.storage.local.get('backendInfo')
+        const storageObject = await browser.storage.local.get('backendInfo')
         if (storageObject.backendInfo) {
             const backendLocation = storageObject.backendInfo.location
             return backendLocation
@@ -56,7 +56,7 @@ export class BackendSelect {
     }
 
     async saveBackendLocation(location: string): Promise<void> {
-        const response = await chrome.storage.local.set({
+        const response = await browser.storage.local.set({
             backendInfo: { location },
         })
         return response

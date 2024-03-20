@@ -1,11 +1,11 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
 import ProgressManager from './progress-manager'
 import getImportStateManager from './state-manager'
+import browser from 'webextension-polyfill'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
-import chrome from 'webextension-polyfill'
 
 export default class ImportConnectionHandler {
     static IMPORTS_PROGRESS_KEY = 'is-imports-in-progress'
@@ -181,7 +181,7 @@ export default class ImportConnectionHandler {
     }
 
     async getImportInProgressFlag() {
-        const storage = await chrome.storage.local.get({
+        const storage = await browser.storage.local.get({
             [ImportConnectionHandler.IMPORTS_PROGRESS_KEY]: false,
         })
 
@@ -189,7 +189,7 @@ export default class ImportConnectionHandler {
     }
 
     async setImportInProgressFlag(value) {
-        return chrome.storage.local.set({
+        return browser.storage.local.set({
             [ImportConnectionHandler.IMPORTS_PROGRESS_KEY]: value,
         })
     }

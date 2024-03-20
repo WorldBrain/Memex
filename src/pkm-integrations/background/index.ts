@@ -1,6 +1,6 @@
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { MemexLocalBackend } from '../background/backend'
-import chrome from 'webextension-polyfill'
+import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'
 import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
@@ -36,7 +36,7 @@ export class PKMSyncBackgroundModule {
     getSystemArchAndOS = async () => {
         let os
         let arch
-        await chrome.runtime.getPlatformInfo().then(function (info) {
+        await browser.runtime.getPlatformInfo().then(function (info) {
             os = info.os
             arch = info.arch
         })
@@ -208,7 +208,7 @@ export class PKMSyncBackgroundModule {
         if (await this.backendNew.isConnected()) {
             const bufferedItems = await this.getBufferedItems()
             bufferedItems.push(item)
-            const PKMSYNCremovewarning = await chrome.storage.local.get(
+            const PKMSYNCremovewarning = await browser.storage.local.get(
                 'PKMSYNCremovewarning',
             )
 
@@ -226,7 +226,7 @@ export class PKMSyncBackgroundModule {
     async applySyncFilters(pkmType, item, checkForFilteredSpaces) {
         const spaces = item.data.annotationSpaces || item.data.pageSpaces
         if (pkmType === 'obsidian') {
-            const filterTagsObsidian = await chrome.storage.local.get(
+            const filterTagsObsidian = await browser.storage.local.get(
                 'PKMSYNCfilterTagsObsidian',
             )
             if (
@@ -258,7 +258,7 @@ export class PKMSyncBackgroundModule {
         }
 
         if (pkmType === 'logseq') {
-            const filterTagsLogseq = await chrome.storage.local.get(
+            const filterTagsLogseq = await browser.storage.local.get(
                 'PKMSYNCfilterTagsLogseq',
             )
 
@@ -293,35 +293,35 @@ export class PKMSyncBackgroundModule {
     }
 
     async bufferPKMSyncItems(itemToBuffer) {
-        // Get the current buffer from chrome.storage.local
-        const data = await chrome.storage.local.get('PKMSYNCbufferedItems')
+        // Get the current buffer from browser.storage.local
+        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
         const currentBuffer = data.PKMSYNCbufferedItems || []
 
         if (currentBuffer?.length > 2000) {
-            await chrome.storage.local.set({ PKMSYNCbufferMaxReached: true })
+            await browser.storage.local.set({ PKMSYNCbufferMaxReached: true })
             return
         }
 
         // Append the new item to the buffer
         currentBuffer.push(itemToBuffer)
 
-        // Save the updated buffer back to chrome.storage.local
-        await chrome.storage.local.set({ PKMSYNCbufferedItems: currentBuffer })
+        // Save the updated buffer back to browser.storage.local
+        await browser.storage.local.set({ PKMSYNCbufferedItems: currentBuffer })
     }
 
     async getBufferedItems() {
-        // Check for buffered items in chrome.storage.local
-        const data = await chrome.storage.local.get('PKMSYNCbufferedItems')
+        // Check for buffered items in browser.storage.local
+        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
         const bufferedItems = data.PKMSYNCbufferedItems || []
 
         // After retrieving the buffered items, delete them from local storage
-        await chrome.storage.local.remove('PKMSYNCbufferedItems')
+        await browser.storage.local.remove('PKMSYNCbufferedItems')
 
         return bufferedItems
     }
 
     private async getValidFolders() {
-        const data = await chrome.storage.local.get('PKMSYNCpkmFolders')
+        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
         const folders = data.PKMSYNCpkmFolders || {}
 
         const validFolders = {
@@ -346,17 +346,17 @@ export class PKMSyncBackgroundModule {
             ) {
                 return
             }
-            // let syncOnlyAnnotatedPagesLogseq = await chrome.storage.local.get(
+            // let syncOnlyAnnotatedPagesLogseq = await browser.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
             // )
 
-            const PKMSYNCtitleformatLogseq = await chrome.storage.local.get(
+            const PKMSYNCtitleformatLogseq = await browser.storage.local.get(
                 'PKMSYNCtitleformatLogseq',
             )
-            const PKMSYNCdateformatLogseq = await chrome.storage.local.get(
+            const PKMSYNCdateformatLogseq = await browser.storage.local.get(
                 'PKMSYNCdateformatLogseq',
             )
-            const customTagsLogseq = await chrome.storage.local.get(
+            const customTagsLogseq = await browser.storage.local.get(
                 'PKMSYNCcustomTagsLogseq',
             )
 
@@ -392,16 +392,16 @@ export class PKMSyncBackgroundModule {
             ) {
                 return
             }
-            // let syncOnlyAnnotatedPagesObsidian = await chrome.storage.local.get(
+            // let syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
             // )
-            const PKMSYNCtitleformatObsidian = await chrome.storage.local.get(
+            const PKMSYNCtitleformatObsidian = await browser.storage.local.get(
                 'PKMSYNCtitleformatObsidian',
             )
-            const PKMSYNCdateformatObsidian = await chrome.storage.local.get(
+            const PKMSYNCdateformatObsidian = await browser.storage.local.get(
                 'PKMSYNCdateformatObsidian',
             )
-            const customTagsObsidian = await chrome.storage.local.get(
+            const customTagsObsidian = await browser.storage.local.get(
                 'PKMSYNCcustomTagsObsidian',
             )
 

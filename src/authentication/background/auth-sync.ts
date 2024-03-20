@@ -9,7 +9,7 @@ import {
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
 import type { Runtime } from 'webextension-polyfill'
-import chrome from 'webextension-polyfill'
+import { browser } from 'webextension-polyfill-ts'
 
 function validSender(sender: any, expectedOrigins: string[]) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
@@ -153,5 +153,5 @@ export async function listenToWebAppMessage(
 }
 
 async function storeURLtoOpenAfterLogin(message) {
-    await chrome.storage.local.set({ '@URL_TO_OPEN': JSON.parse(message) })
+    await browser.storage.local.set({ '@URL_TO_OPEN': JSON.parse(message) })
 }

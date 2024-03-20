@@ -1,3 +1,4 @@
+import browser from 'webextension-polyfill'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
@@ -6,7 +7,6 @@ import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
-import chrome from 'webextension-polyfill'
 
 /**
  * TransitionType strings that we care about in the context of the ext.
@@ -36,7 +36,7 @@ const filterVisitItemByTransType = (item) =>
  *  filtering.
  */
 async function checkVisitItemTransitionTypes({ url }) {
-    const visitItems = await chrome.history.getVisits({ url })
+    const visitItems = await browser.history.getVisits({ url })
 
     // Only keep VisitItems with wanted TransitionType
     const filteredVisitItems = visitItems.filter(filterVisitItemByTransType)
@@ -48,13 +48,13 @@ async function checkVisitItemTransitionTypes({ url }) {
 }
 
 const getVisitTimes = ({ url }) =>
-    chrome.history
+    browser.history
         .getVisits({ url })
         .then((visits) => visits.map((visit) => Math.trunc(visit.visitTime)))
 
 async function getBookmarkTime({ browserId }) {
     // Web Ext. API should return array of BookmarkItems; grab first one
-    const [bookmarkItem] = await chrome.bookmarks.get(browserId)
+    const [bookmarkItem] = await browser.bookmarks.get(browserId)
 
     if (bookmarkItem) {
         return bookmarkItem.dateAdded || undefined

@@ -1,4 +1,4 @@
-import chrome from 'webextension-polyfill'
+import browser from 'webextension-polyfill'
 
 export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
     return ({ url, tabId }) => {
@@ -8,12 +8,12 @@ export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
         }
 
         handleLoginRedirectedBack(url)
-        const targetUrl = `${chrome.runtime.getURL('/options.html')}#/backup`
+        const targetUrl = `${browser.runtime.getURL('/options.html')}#/backup`
 
         // to get around the blocked state of the request, we update the original tab with the backup screen.
         // this is probably a bit glitchy at first, but we may be able to improve on that experience. For now it should be OK.
         setTimeout(() => {
-            chrome.tabs.update(tabId, { active: true, url: targetUrl })
+            browser.tabs.update(tabId, { active: true, url: targetUrl })
         }, 1000)
 
         return { redirectUrl: targetUrl }
