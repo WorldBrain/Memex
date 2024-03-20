@@ -2657,6 +2657,7 @@ export class SidebarContainerLogic extends UILogic<
                 skipListExistenceCheck:
                     previousState.hasListDataBeenManuallyPulled,
                 privacyLevelOverride: privacyLevel,
+                skipPageIndexing: this.options.sidebarContext === 'dashboard',
                 shareOpts: {
                     shouldShare:
                         shouldShareSettings ||
