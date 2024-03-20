@@ -717,7 +717,7 @@ export class PageIndexingBackground {
             (props.fullUrl.includes('web.telegram.org/') ||
                 props.fullUrl.includes('x.com/') ||
                 props.fullUrl.includes('twitter.com/')) &&
-            props.metaData.pageTitle
+            props.metaData?.pageTitle != null
         ) {
             pageData.fullTitle = props.metaData.pageTitle
         }
@@ -934,7 +934,7 @@ export class PageIndexingBackground {
             })
 
             pageDoc.favIconURI = favIconURI
-            pageDoc.content.title = content?.title || props.metaData.pageTitle
+            pageDoc.content.title = content?.title || props.metaData?.pageTitle
             pageDoc.content.fullText = content?.fullText
         } else {
             const pdfData = await this.options.fetchPdfData(props.fullUrl)
