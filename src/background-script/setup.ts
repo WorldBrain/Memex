@@ -257,7 +257,9 @@ export function createBackgroundModules(options: {
     const getCurrentUserId = async (): Promise<AutoPk | null> =>
         (await auth.authService.getCurrentUser())?.id ?? null
 
-    const pkmSyncBG = new PKMSyncBackgroundModule()
+    const pkmSyncBG = new PKMSyncBackgroundModule({
+        browserAPIs: options.browserAPIs,
+    })
 
     const pages = new PageIndexingBackground({
         persistentStorageManager: options.persistentStorageManager,
@@ -267,6 +269,7 @@ export function createBackgroundModules(options: {
         ),
         fetchPageData: options.fetchPageData,
         fetchPdfData: options.fetchPDFData,
+        browserAPIs: options.browserAPIs,
         createInboxEntry,
         storageManager,
         tabManagement,
@@ -430,11 +433,9 @@ export function createBackgroundModules(options: {
         tabManagement,
         contentSharing,
         contentSharingBackend,
-        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-        windows: options.browserAPIs.windows,
+        browserAPIs: options.browserAPIs,
         searchIndex: search.searchIndex,
         pages,
-        localBrowserStorage: options.browserAPIs.storage.local,
         authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
             directLinking,
@@ -571,6 +572,7 @@ export function createBackgroundModules(options: {
             pageActivityIndicatorBG: pageActivityIndicator,
             persistentStorageManager: options.persistentStorageManager,
             storageManager: options.storageManager,
+            browserAPIs: options.browserAPIs,
             pkmSyncBG,
             imageSupport: new ImageSupportBackground({
                 backend: options.imageSupportBackend,
@@ -641,6 +643,7 @@ export function createBackgroundModules(options: {
             storageManager,
             searchIndex: search.searchIndex,
             jobScheduler: jobScheduler.scheduler,
+            storageAPI: options.browserAPIs.storage,
             localBackupSettings: new BrowserSettingsStore(
                 options.browserAPIs.storage.local,
                 { prefix: 'localBackup.' },
@@ -748,6 +751,7 @@ export function createBackgroundModules(options: {
 export async function setupBackgroundModules(
     backgroundModules: BackgroundModules,
     storageManager: StorageManager,
+    browserAPIs: Browser,
 ) {
     backgroundModules.bgScript.setupWebExtAPIHandlers()
 
@@ -761,6 +765,8 @@ export async function setupBackgroundModules(
         tagsModule: backgroundModules.tags,
         customListsModule: backgroundModules.customLists,
         bookmarks: backgroundModules.bookmarks,
+        runtimeAPI: browserAPIs.runtime,
+        storageAPI: browserAPIs.storage,
     })
 
     // TODO mv3: migrate web req APIs

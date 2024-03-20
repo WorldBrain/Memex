@@ -166,7 +166,7 @@ async function main() {
         pushMessagingClient.handleIncomingMessage(payload)
     })
 
-    await setupBackgroundModules(backgroundModules, storageManager)
+    await setupBackgroundModules(backgroundModules, storageManager, browser)
 
     setStorex(storageManager)
     setupOmnibar({

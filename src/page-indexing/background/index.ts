@@ -24,7 +24,7 @@ import {
     isMemexPageAPdf,
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
-
+import type { Browser } from 'webextension-polyfill'
 import PageStorage from './storage'
 import {
     PageAddRequest,
@@ -107,6 +107,7 @@ export class PageIndexingBackground {
             authBG: AuthBackground
             tabManagement: TabManagementBackground
             storageManager: StorageManager
+            browserAPIs: Pick<Browser, 'storage'>
             persistentStorageManager: StorageManager
             pageIndexingSettingsStore: BrowserSettingsStore<
                 LocalPageIndexingSettings
@@ -121,8 +122,9 @@ export class PageIndexingBackground {
         },
     ) {
         this.storage = new PageStorage({
-            storageManager: options.storageManager,
             pkmSyncBG: options.pkmSyncBG,
+            storageManager: options.storageManager,
+            ___storageAPI: options.browserAPIs.storage,
         })
         this.persistentStorage = new PersistentPageStorage({
             storageManager: options.persistentStorageManager,

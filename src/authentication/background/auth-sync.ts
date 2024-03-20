@@ -8,8 +8,8 @@ import {
     logPackedMessage,
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
-import type { Runtime } from 'webextension-polyfill'
-import { browser } from 'webextension-polyfill-ts'
+import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
+import type { Runtime, Storage } from 'webextension-polyfill'
 
 function validSender(sender: any, expectedOrigins: string[]) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
@@ -92,6 +92,7 @@ async function loginWithAppTokenHandler(
 export async function listenToWebAppMessage(
     authService: AuthService,
     runtimeAPI: Runtime.Static,
+    localStorageAPI: LimitedBrowserStorage,
 ) {
     const expectedOrigins =
         process.env.NODE_ENV === 'production'
@@ -117,7 +118,9 @@ export async function listenToWebAppMessage(
                 return true
             }
             if (messageObj.message === ExtMessage.URL_TO_OPEN) {
-                storeURLtoOpenAfterLogin(messageObj.payload)
+                localStorageAPI.set({
+                    '@URL_TO_OPEN': JSON.parse(messageObj.payload),
+                })
                 sendResponse(packMessage(ExtMessage.URL_TO_OPEN))
                 reactingToMessage = false
                 return true
@@ -150,8 +153,4 @@ export async function listenToWebAppMessage(
         expectedOrigins,
         runtimeAPI,
     )
-}
-
-async function storeURLtoOpenAfterLogin(message) {
-    await browser.storage.local.set({ '@URL_TO_OPEN': JSON.parse(message) })
 }

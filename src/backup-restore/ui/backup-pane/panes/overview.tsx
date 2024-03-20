@@ -1,5 +1,6 @@
 import React, { Component } from 'react'
 import classNames from 'classnames'
+import browser from 'webextension-polyfill'
 import { remoteFunction, runInBackground } from 'src/util/webextensionRPC'
 import LoadingBlocker from '../../../../common-ui/components/loading-blocker'
 import RestoreConfirmation from '../components/restore-confirmation'
@@ -55,7 +56,7 @@ export class OverviewContainer extends Component<Props & AuthContextInterface> {
     }
 
     async componentDidMount() {
-        const status = await checkServerStatus()
+        const status = await checkServerStatus({ storageAPI: browser.storage })
         const backupTimes = await remoteFunction('getBackupTimes')()
         const hasInitialBackup = await remoteFunction('hasInitialBackup')()
         const backupLocation = await remoteFunction('getBackendLocation')()

@@ -19,6 +19,7 @@ import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { checkServerStatus } from '../../backup-restore/ui/utils'
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { Storage } from 'webextension-polyfill'
 
 export * from './backend'
 
@@ -46,6 +47,7 @@ export class BackupBackgroundModule {
     notifications: NotificationBackground
     checkAuthorizedForAutoBackup: () => Promise<boolean>
     jobScheduler: JobScheduler
+    storageAPI: Storage.Static
 
     constructor(options: {
         storageManager: Storex
@@ -54,6 +56,7 @@ export class BackupBackgroundModule {
         queueOpts?: QueueOpts
         notifications: NotificationBackground
         jobScheduler: JobScheduler
+        storageAPI: Storage.Static // TODO: Unify this with `localBackupSettings`
         localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
         checkAuthorizedForAutoBackup: () => Promise<boolean>
     }) {
@@ -63,7 +66,9 @@ export class BackupBackgroundModule {
             concurrency: 1,
         }
 
+        this.storageAPI = options.storageAPI
         this.backendSelect = new BackendSelect({
+            storageAPI: options.storageAPI,
             localBackupSettings: options.localBackupSettings,
         })
         this.jobScheduler = options.jobScheduler
@@ -257,6 +262,7 @@ export class BackupBackgroundModule {
         this.backupProcedure = new BackupProcedure({
             localBackupSettings: this.localBackupSettings,
             storageManager: this.storageManager,
+            storageAPI: this.storageAPI,
             storage: this.storage,
             backend: this.backend,
         })
@@ -428,7 +434,7 @@ export class BackupBackgroundModule {
     }
 
     async doBackup() {
-        const status = await checkServerStatus()
+        const status = await checkServerStatus({ storageAPI: this.storageAPI })
         if (!status) {
             await this.localBackupSettings.set('backupStatus', 'fail')
         }
