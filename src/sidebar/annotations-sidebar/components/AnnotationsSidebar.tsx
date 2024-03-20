@@ -331,6 +331,10 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     addedKey?: () => void
     checkIfKeyValid?: (apiKey: string) => void
     signupDate: number
+    createCheckOutLink: (
+        billingPeriod: 'monthly' | 'yearly',
+        planName: string,
+    ) => void
 }
 
 interface AnnotationsSidebarState {
@@ -1978,6 +1982,7 @@ export class AnnotationsSidebar extends React.Component<
                     renderOptionsContainer={() => this.renderOptionsContainer()}
                     counterStorageKey={COUNTER_STORAGE_KEY}
                     setAIModel={this.props.setAIModel}
+                    createCheckOutLink={this.props.createCheckOutLink}
                     renderPromptTemplates={() => {
                         return (
                             <PromptTemplatesComponent

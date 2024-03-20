@@ -1447,15 +1447,13 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 
-    copyNoteLink: EventHandler<'copyNoteLink'> = async ({
-        event: { link },
+    createCheckOutLink: EventHandler<'createCheckOutLink'> = async ({
+        event,
     }) => {
-        this.options.analytics.trackEvent({
-            category: 'ContentSharing',
-            action: 'copyNoteLink',
-        })
-
-        await this.options.copyToClipboard(link)
+        this.options.bgScriptBG.createCheckoutLink(
+            event.billingPeriod,
+            event.upgradePlan,
+        )
     }
 
     copyPageLink: EventHandler<'copyPageLink'> = async ({

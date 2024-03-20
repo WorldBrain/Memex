@@ -562,6 +562,10 @@ interface SidebarEvents {
     // Misc events
     copyNoteLink: { link: string }
     copyPageLink: { link: string }
+    createCheckOutLink: {
+        billingPeriod: 'monthly' | 'yearly'
+        upgradePlan: string
+    }
 
     setPageUrl: {
         fullPageUrl: string

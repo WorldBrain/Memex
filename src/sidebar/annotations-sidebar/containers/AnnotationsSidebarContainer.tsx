@@ -1126,6 +1126,16 @@ export class AnnotationsSidebarContainer<
                                     error: error,
                                 })
                             }}
+                            createCheckOutLink={(
+                                billingPeriod,
+                                upgradePlan,
+                            ) => {
+                                console.log('test', billingPeriod, upgradePlan)
+                                this.processEvent('createCheckOutLink', {
+                                    billingPeriod,
+                                    upgradePlan,
+                                })
+                            }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}

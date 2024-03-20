@@ -25,6 +25,10 @@ export interface RemoteBGScriptInterface {
     ) => Promise<void>
     openLearnMoreTab: (params?: OpenTabParams) => Promise<void>
     confirmBackgroundScriptLoaded: () => Promise<void>
+    createCheckoutLink: (
+        billingPeriod: 'monthly' | 'yearly',
+        planName: string,
+    ) => Promise<void>
 }
 
 // TODO: Fill in this type with remaining BG modules

@@ -9,6 +9,7 @@ import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
+import chrome from 'webextension-polyfill'
 import {
     OVERVIEW_URL,
     __OLD_INSTALL_TIME_KEY,
@@ -75,6 +76,7 @@ class BackgroundScript {
             openOptionsTab: this.openOptionsPage,
             openOverviewTab: this.openDashboardPage,
             openLearnMoreTab: this.openLearnMorePage,
+            createCheckoutLink: this.createCheckoutLink,
             confirmBackgroundScriptLoaded: async () => {},
         }
 
@@ -418,6 +420,31 @@ class BackgroundScript {
         await this.chooseTabOpenFn(params)({
             url: LEARN_MORE_URL,
         })
+    }
+
+    private createCheckoutLink: RemoteBGScriptInterface['createCheckoutLink'] = async (
+        billingPeriod: 'monthly' | 'yearly',
+        powerUpPlan: string,
+    ) => {
+        const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
+        const currentUserEmail = currentUser.email
+        const currentBillingPeriod = billingPeriod
+        const baseLink =
+            process.env.NODE_ENV === 'production'
+                ? 'https://cloudfare-memex.memex.workers.dev/create-checkout/'
+                : 'https://cloudfare-memex.memex.workers.dev/create-checkout/'
+        const checkoutLink = `${baseLink}${currentBillingPeriod}/${powerUpPlan}?prefilled_email=${encodeURIComponent(
+            currentUserEmail,
+        )}`
+
+        try {
+            // Use the WebExtensions API to open the URL in a new tab
+            if (chrome.tabs && chrome.tabs.create) {
+                chrome.tabs.create({ url: checkoutLink })
+            }
+        } catch (error) {
+            console.error('Error fetching checkout link:', error)
+        }
     }
 }
 
