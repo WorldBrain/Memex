@@ -1,13 +1,12 @@
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { MemexLocalBackend } from '../background/backend'
 import chrome from 'webextension-polyfill'
-import TurndownService from 'turndown/src/turndown'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'
 import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
 import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
-import replaceImgSrcWithFunctionOutputBrowser from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
+import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -512,7 +511,7 @@ export class PKMSyncBackgroundModule {
                     pageTitleFormat,
                 )
             } else if (item.type === 'annotation') {
-                annotationsSection = await this.replaceOrAppendAnnotation(
+                annotationsSection = this.replaceOrAppendAnnotation(
                     annotationsSection,
                     item,
                     pkmType,
@@ -561,7 +560,7 @@ export class PKMSyncBackgroundModule {
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
-                annotationsSection = await this.annotationObjectDefault(
+                annotationsSection = this.annotationObjectDefault(
                     item.data.annotationId,
                     item.data.body
                         ? convertHTMLintoMarkdown(item.data.body)
@@ -584,7 +583,7 @@ export class PKMSyncBackgroundModule {
         return await this.backendNew.storeObject(fileName, fileContent, pkmType)
     }
 
-    async replaceOrAppendAnnotation(
+    replaceOrAppendAnnotation(
         annotationsSection,
         item,
         pkmType,
@@ -609,7 +608,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -644,7 +643,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -667,7 +666,7 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
-            const newAnnotationContent = await this.annotationObjectDefault(
+            const newAnnotationContent = this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
                 item.data.comment,
@@ -689,7 +688,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    async extractAndUpdateAnnotationData(
+    extractAndUpdateAnnotationData(
         annotationContent,
         annotationId,
         body,
@@ -765,7 +764,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(', ')
 
-            updatedAnnotation = await this.annotationObjectDefault(
+            updatedAnnotation = this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -815,7 +814,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(' ')
 
-            updatedAnnotation = await this.annotationObjectDefault(
+            updatedAnnotation = this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -1035,7 +1034,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    async annotationObjectDefault(
+    annotationObjectDefault(
         annotationId,
         body,
         comment,
@@ -1045,24 +1044,17 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
     ) {
-        const commentWithImageLinks = await replaceImgSrcWithFunctionOutputBrowser(
+        const commentWithImageLinks = resolveImgSrc(
             comment,
             process.env.NODE_ENV,
         )
-        const bodyWithImageLinks = await replaceImgSrcWithFunctionOutputBrowser(
-            body,
-            process.env.NODE_ENV,
-        )
-
-        console.log('commentWithImageLinks', commentWithImageLinks)
-        console.log('bodyWithImageLinks', bodyWithImageLinks)
+        const bodyWithImageLinks = resolveImgSrc(body, process.env.NODE_ENV)
 
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
             let highlightTextLine = bodyWithImageLinks
                 ? `> ${bodyWithImageLinks.trim()}\n\n`
                 : ''
-
             const highlightNoteLine = commentWithImageLinks
                 ? `<!-- Note -->\n${convertHTMLintoMarkdown(
                       commentWithImageLinks,
