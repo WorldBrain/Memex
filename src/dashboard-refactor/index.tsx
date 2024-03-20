@@ -191,11 +191,11 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                     this.processEvent('setFocusLock', true)
                 }
-                const searchBox = document.getElementById('search-bar')
-                searchBox.blur()
                 this.processEvent('changeFocusItem', {
                     direction: event.key === 'ArrowUp' ? 'up' : 'down',
                 })
+                // const searchBox = document.getElementById('search-bar')
+                // searchBox.blur()
             }
         }
     }
