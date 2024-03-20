@@ -5,12 +5,14 @@ import { handleRenderYoutubeInterface } from '../../search-injection/youtubeInte
 import { renderErrorDisplay } from '../../search-injection/error-display'
 import { renderSearchDisplay } from '../../search-injection/search-display'
 import type { ContentScriptRegistry, InPageUIInjectionsMain } from './types'
+import { renderUpgradeModal } from 'src/search-injection/upgrade-modal-display'
 
 export const main: InPageUIInjectionsMain = async ({
     inPageUI,
     annotationsFunctions,
     requestSearcher,
     searchDisplayProps,
+    upgradeModalProps,
     syncSettings,
     syncSettingsBG,
 }) => {
@@ -21,6 +23,8 @@ export const main: InPageUIInjectionsMain = async ({
                 if (options?.errorDisplayProps) {
                     renderErrorDisplay(options.errorDisplayProps)
                 }
+            } else if (component === 'upgrade-modal') {
+                renderUpgradeModal(upgradeModalProps)
             } else if (component === 'dashboard') {
                 renderSearchDisplay(searchDisplayProps)
             } else if (component === 'youtube-integration') {

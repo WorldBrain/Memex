@@ -109,6 +109,7 @@ import type { ContentConversationsInterface } from 'src/content-conversations/ba
 import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { Storage } from 'webextension-polyfill-ts'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -282,6 +283,29 @@ export async function main(
         }
         return Promise.resolve() // Return a resolved promise for non-matching actions or to avoid unhandled promise rejections
     })
+
+    // add listener for when a person is over the pricing limit for saved pages
+
+    const counterStorageListener = (
+        changes: Record<string, Storage.StorageChange>,
+    ) => {
+        const COUNTER_STORAGE_KEY = '@status'
+
+        if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
+            const changesValues = changes[COUNTER_STORAGE_KEY]?.newValue
+
+            console.log('chnagesvalue', changesValues)
+            if (changesValues.c > 25) {
+                inPageUI.loadOnDemandInPageUI({
+                    component: 'upgrade-modal',
+                })
+            }
+        }
+
+        return undefined
+    }
+
+    browser.storage.onChanged.addListener(counterStorageListener)
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -767,32 +791,6 @@ export async function main(
                 })
             }
 
-            // if (selection && window.getSelection().toString().length > 0) {
-            //     const annotationId = await saveHighlight(shouldShare)
-            //     await inPageUI.showSidebar(
-            //         annotationId
-            //             ? {
-            //                   annotationCacheId: annotationId.toString(),
-            //                   action: showSpacePicker
-            //                       ? 'edit_annotation_spaces'
-            //                       : 'edit_annotation',
-            //               }
-            //             : {
-            //                   action: 'comment',
-            //                   commentText: commentText ?? '',
-            //               },
-            //     )
-            // } else {
-            //     await inPageUI.showSidebar({
-            //         action: 'youtube_timestamp',
-            //         commentText: commentText,
-            //     })
-            // }
-            // await inPageUI.showSidebar({
-            //     action: 'youtube_timestamp',
-            //     commentText: commentText,
-            // })
-
             // await inPageUI.hideTooltip()
             if (analyticsBG) {
                 // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
@@ -1082,6 +1080,10 @@ export async function main(
                     services: createUIServices(),
                     renderUpdateNotifBanner: () => null,
                     bgScriptBG,
+                },
+                upgradeModalProps: {
+                    createCheckOutLink: bgScriptBG.createCheckoutLink,
+                    browserAPIs: browser,
                 },
                 annotationsFunctions,
             })

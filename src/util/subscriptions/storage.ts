@@ -214,15 +214,9 @@ export async function checkStatus() {
 }
 
 export async function pageActionAllowed(analyticsBG) {
-    const isStaging =
-        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-        process.env.NODE_ENV === 'development'
-    let urlToOpen = isStaging
-        ? 'https://memex.garden/upgradeStaging'
-        : 'https://memex.garden/upgrade'
-
     const status = await checkStatus()
     if (status.pageLimit > 10000 || status.pageLimit > status.pageCounter) {
+        updatePageCounter()
         return true
     } else {
         if (analyticsBG) {
@@ -234,8 +228,7 @@ export async function pageActionAllowed(analyticsBG) {
                 )
             }
         }
-
-        window.open(urlToOpen, '_blank')
+        updatePageCounter()
         return false
     }
 }

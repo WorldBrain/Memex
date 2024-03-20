@@ -33,3 +33,4 @@ export type OnDemandInPageUIComponents =
     | 'search-engine-integration'
     | 'dashboard'
     | 'error-display'
+    | 'upgrade-modal'
