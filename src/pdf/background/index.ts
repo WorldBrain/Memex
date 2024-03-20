@@ -26,6 +26,7 @@ export class PDFBackground {
 
     constructor(
         private deps: {
+            manifestVersion: '2' | '3'
             tabsAPI: Pick<Tabs.Static, 'update'>
             storageAPI: Pick<Storage.Static, 'local'>
             runtimeAPI: Pick<Runtime.Static, 'getURL'>
@@ -142,7 +143,9 @@ export class PDFBackground {
             const response = await this.deps.fetch(objectUrl)
             const content = await response.blob()
             await this.deps.pdfUploads.uploadPdfContent({ token, content })
-            URL.revokeObjectURL(objectUrl) // TODO: Need to remove this when we move to MV3
+            if (this.deps.manifestVersion === '2') {
+                URL.revokeObjectURL(objectUrl)
+            }
         }
 
         await this.deps.pageStorage.updateLocatorStatus({
