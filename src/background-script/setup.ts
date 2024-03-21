@@ -68,8 +68,8 @@ import { SyncSettingsBackground } from 'src/sync-settings/background'
 import { AuthServices, Services } from 'src/services/types'
 import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
-import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
-import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
+// import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
+// import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import {
     PersonalDeviceType,
     PersonalDeviceProduct,
@@ -141,7 +141,7 @@ export interface BackgroundModules {
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
     activityStreams: ActivityStreamsBackground
-    userMessages: UserMessageService
+    // userMessages: UserMessageService
     personalCloud: PersonalCloudBackground
     imageSupport: ImageSupportBackground
     pkmSyncBG: PKMSyncBackgroundModule
@@ -170,7 +170,7 @@ export function createBackgroundModules(options: {
     auth?: AuthBackground
     analyticsManager: Analytics
     captureException?: typeof captureException
-    userMessageService?: UserMessageService
+    // userMessageService?: UserMessageService
     getNow?: () => number
     fetch: typeof fetch
     generateServerId?: (collectionName: string) => number | string
@@ -368,30 +368,34 @@ export function createBackgroundModules(options: {
         callFirebaseFunction,
     })
 
-    if (!options.userMessageService) {
-        const userMessagesService = new FirebaseUserMessageService({
-            firebase: getFirebase,
-            auth: { getCurrentUserId },
-        })
-        options.userMessageService = userMessagesService
-        userMessagesService.startListening({
-            auth: { events: auth.authService.events },
-            lastSeen: {
-                get: async () =>
-                    (
-                        await options.browserAPIs.storage.local.get(
-                            'userMessages.lastSeen',
-                        )
-                    ).lastUserMessageSeen,
-                set: async (value) => {
-                    await options.browserAPIs.storage.local.set({
-                        'userMessages.lastSeen': value,
-                    })
-                },
-            },
-        })
-    }
-    const userMessages = options.userMessageService
+    // NOTE: Commented this stuff out as it brought in a dep on FB Realtime Database, which we didn't
+    //  seem to be using anywhere, apart from setting the local storage lastSeen key here (which is unused).
+    //  Realtime DB seemed to try and ping FB very often to get the data, which started causing lots of errors in MV3
+    //  due to the stricter CSP.
+    // if (!options.userMessageService) {
+    //     const userMessagesService = new FirebaseUserMessageService({
+    //         firebase: getFirebase,
+    //         auth: { getCurrentUserId },
+    //     })
+    //     options.userMessageService = userMessagesService
+    //     userMessagesService.startListening({
+    //         auth: { events: auth.authService.events },
+    //         lastSeen: {
+    //             get: async () =>
+    //                 (
+    //                     await options.browserAPIs.storage.local.get(
+    //                         'userMessages.lastSeen',
+    //                     )
+    //                 ).lastUserMessageSeen,
+    //             set: async (value) => {
+    //                 await options.browserAPIs.storage.local.set({
+    //                     'userMessages.lastSeen': value,
+    //                 })
+    //             },
+    //         },
+    //     })
+    // }
+    // const userMessages = options.userMessageService
     const contentSharingBackend =
         options.contentSharingBackend ??
         firebaseService<ContentSharingBackend>(
@@ -731,7 +735,7 @@ export function createBackgroundModules(options: {
         }),
         copyPaster,
         activityStreams,
-        userMessages,
+        // userMessages,
         personalCloud,
         contentSharing,
         contentConversations: new ContentConversationsBackground({
