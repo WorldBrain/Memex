@@ -535,7 +535,7 @@ export class PKMSyncBackgroundModule {
                     pageTitleFormat,
                 )
             } else if (item.type === 'annotation') {
-                annotationsSection = this.replaceOrAppendAnnotation(
+                annotationsSection = await this.replaceOrAppendAnnotation(
                     annotationsSection,
                     item,
                     pkmType,
@@ -584,7 +584,7 @@ export class PKMSyncBackgroundModule {
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
-                annotationsSection = this.annotationObjectDefault(
+                annotationsSection = await this.annotationObjectDefault(
                     item.data.annotationId,
                     item.data.body
                         ? convertHTMLintoMarkdown(item.data.body)
@@ -607,7 +607,7 @@ export class PKMSyncBackgroundModule {
         return await this.backendNew.storeObject(fileName, fileContent, pkmType)
     }
 
-    replaceOrAppendAnnotation(
+    async replaceOrAppendAnnotation(
         annotationsSection,
         item,
         pkmType,
@@ -632,7 +632,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -667,7 +667,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -690,7 +690,7 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
-            const newAnnotationContent = this.annotationObjectDefault(
+            const newAnnotationContent = await this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
                 item.data.comment,
@@ -712,7 +712,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    extractAndUpdateAnnotationData(
+    async extractAndUpdateAnnotationData(
         annotationContent,
         annotationId,
         body,
@@ -788,7 +788,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(', ')
 
-            updatedAnnotation = this.annotationObjectDefault(
+            updatedAnnotation = await this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -838,7 +838,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(' ')
 
-            updatedAnnotation = this.annotationObjectDefault(
+            updatedAnnotation = await this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -1058,7 +1058,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    annotationObjectDefault(
+    async annotationObjectDefault(
         annotationId,
         body,
         comment,
