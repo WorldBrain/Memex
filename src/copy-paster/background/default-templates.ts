@@ -190,32 +190,32 @@ export const HTML_TEMPLATE: Template = {
 
 // still missing list names "Jeffery, Elizabeth H., and Marcela Araya."
 export const MLA_EDITION_9: Template = {
-    id: 8,
+    id: 9,
     title: 'MLA 9th Edition',
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 9,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{#secondLast}} and {{/secondLast}} {{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{etAL}}{{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 // still missing abbreviated first names and lists "Jeffery, E.H. and Araya, M. "
 export const HARVARD_EDITION_12: Template = {
-    id: 8,
+    id: 10,
     title: 'Harvard 12th Edition',
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 10,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{/PageEntities}} ({{#PageReleaseDate}}YYYY{{/PageReleaseDate}}) '{{{PageTitle}}},' _{{{PageJournalName}}}_, {{{PageJournalVolume}}}( {{{PageJournalIssue}}}), pp. {{{PageJournalPage}}}. https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}} {{etAL}}{{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 // still missing abbreviated first names names and lists "E. H. Jeffery and M. Araya,"
 export const IEEE: Template = {
-    id: 8,
+    id: 11,
     title: 'IEEE',
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 10,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityAdditionalNameShort}}} {{{EntityName}}}{{#secondLast}} and {{/secondLast}}{{/PageEntities}}, "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{{EntityAdditionalNameShort}}} {{{EntityName}}},  {{#secondLast}} and {{/secondLast}}{{/PageEntities}}, "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 export const DEFAULT_TEMPLATES = [

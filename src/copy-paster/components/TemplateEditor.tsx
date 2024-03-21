@@ -105,9 +105,19 @@ const TemplateButtonOptions = [
         TooltipText: 'The first name of the Author',
     },
     {
+        buttonText: 'Author First Name Short',
+        insertedText: `{{{EntityAdditionalNameShort}}} `,
+        TooltipText: 'The first name of the Author, abbreviated with a dot',
+    },
+    {
         buttonText: 'Author Last Name',
         insertedText: `{{{EntityName}}} `,
         TooltipText: 'The first name of the Author',
+    },
+    {
+        buttonText: 'Author Last Name Short',
+        insertedText: `{{{EntityNameShort}}} `,
+        TooltipText: 'The first name of the Author, abbreviated with a dot',
     },
     {
         buttonText: 'Page Link',
