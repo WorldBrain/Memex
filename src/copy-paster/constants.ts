@@ -30,6 +30,10 @@ export const KEYS_TO_REQUIREMENTS: {
     EntityName: 'pageEntities',
     EntityAdditionalName: 'pageEntities',
     EntityAdditionalNameShort: 'pageEntities',
+    isPrimary: 'pageEntities',
+    showEtAl: 'pageEntities',
+    secondLast: 'pageEntities',
+    last: 'pageEntities',
 
     HasNotes: 'hasNotes',
     NoteHighlight: 'note',
