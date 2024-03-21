@@ -643,7 +643,7 @@ export function createBackgroundModules(options: {
             storageManager,
             searchIndex: search.searchIndex,
             jobScheduler: jobScheduler.scheduler,
-            storageAPI: options.browserAPIs.storage,
+            browserAPIs: options.browserAPIs,
             localBackupSettings: new BrowserSettingsStore(
                 options.browserAPIs.storage.local,
                 { prefix: 'localBackup.' },

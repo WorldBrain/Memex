@@ -51,6 +51,7 @@ import type { Runtime } from 'webextension-polyfill'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
+import { keepWorkerAlive } from 'src/util/service-worker-utils'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -102,7 +103,10 @@ export class PersonalCloudBackground {
             collectionName: 'personalCloudAction',
             versions: { initial: STORAGE_VERSIONS[25].version },
             retryIntervalInMs: PERSONAL_CLOUD_ACTION_RETRY_INTERVAL,
-            executeAction: this.processPersonalCloudAction,
+            executeAction: (args) =>
+                keepWorkerAlive(this.processPersonalCloudAction(args), {
+                    runtimeAPI: options.runtimeAPI,
+                }),
             preprocessAction: this.preprocessAction,
             onSetupError: (err) => Raven.captureException(err),
             setTimeout: (job, timeout) => {
@@ -285,8 +289,13 @@ export class PersonalCloudBackground {
         try {
             for await (const { batch, lastSeen } of backend.streamUpdates()) {
                 try {
-                    await this.integrateUpdates(batch)
-                    await settingStore.set('lastSeen', lastSeen)
+                    await keepWorkerAlive(
+                        (async () => {
+                            await this.integrateUpdates(batch)
+                            await settingStore.set('lastSeen', lastSeen)
+                        })(),
+                        { runtimeAPI: this.options.runtimeAPI },
+                    )
                 } catch (err) {
                     if (this.strictErrorReporting) {
                         this._integrationError = err
