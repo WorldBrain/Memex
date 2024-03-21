@@ -1,10 +1,7 @@
-import replaceImgSrcWithFunctionOutputBrowser from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
-import { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
+import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
+import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
-// TODO: Refactor this so it's not importing and using the browser global
-import { browser } from 'webextension-polyfill-ts'
+import type { Storage } from 'webextension-polyfill'
 
 export async function shareAnnotationWithPKM(
     annotationData,
@@ -32,7 +29,7 @@ export async function shareAnnotationWithPKM(
             .replace(/\n/g, ' ')
 
         if (annotationData.comment) {
-            annotationData = await replaceImgSrcWithFunctionOutputBrowser(
+            annotationData = resolveImgSrc(
                 annotationData.comment,
                 process.env.NODE_ENV,
             )
@@ -106,9 +103,8 @@ export async function sharePageWithPKM(
     }
 }
 
-export async function getPkmSyncKey() {
-    // Check for pkmSyncKey in browser.storage.local
-    let data = await browser.storage.local.get('PKMSYNCpkmSyncKey')
+export async function getPkmSyncKey(deps: { storageAPI: Storage.Static }) {
+    let data = await deps.storageAPI.local.get('PKMSYNCpkmSyncKey')
 
     let pkmSyncKey = data.PKMSYNCpkmSyncKey
 
@@ -118,15 +114,15 @@ export async function getPkmSyncKey() {
         pkmSyncKey =
             Math.random().toString(36).substring(2, 15) +
             Math.random().toString(36).substring(2, 15)
-        await browser.storage.local.set({ PKMSYNCpkmSyncKey: pkmSyncKey })
+        await deps.storageAPI.local.set({ PKMSYNCpkmSyncKey: pkmSyncKey })
     }
 
     return pkmSyncKey
 }
 
-export async function isPkmSyncEnabled() {
+export async function isPkmSyncEnabled(deps: { storageAPI: Storage.Static }) {
     try {
-        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const data = await deps.storageAPI.local.get('PKMSYNCpkmFolders')
         if (
             data.PKMSYNCpkmFolders &&
             (data.PKMSYNCpkmFolders.obsidianFolder?.length > 0 ||
@@ -141,8 +137,11 @@ export async function isPkmSyncEnabled() {
     }
 }
 
-export async function getFolder(pkmToSync: string) {
-    const pkmSyncKey = await getPkmSyncKey()
+export async function getFolder(
+    pkmToSync: string,
+    deps: { storageAPI: Storage.Static },
+) {
+    const pkmSyncKey = await getPkmSyncKey(deps)
 
     const serverToTalkTo = LOCAL_SERVER_ROOT
 
@@ -168,7 +167,7 @@ export async function getFolder(pkmToSync: string) {
     const folderPath = await getFolderPath(pkmToSync)
 
     // Fetch the existing "PKMSYNCpkmFolders" from local storage
-    let data = await browser.storage.local.get('PKMSYNCpkmFolders')
+    let data = await deps.storageAPI.local.get('PKMSYNCpkmFolders')
     data = data.PKMSYNCpkmFolders || {}
 
     // Update the value in it that corresponds to the pkmToSync
@@ -181,15 +180,9 @@ export async function getFolder(pkmToSync: string) {
     }
 
     // Write the update to local storage
-    await browser.storage.local.set({ PKMSYNCpkmFolders: data })
+    await deps.storageAPI.local.set({ PKMSYNCpkmFolders: data })
 
     return data
-}
-
-export async function getPathsFromLocalStorage() {
-    const data = await browser.storage.local.get('PKMSYNCpkmFolders')
-
-    return data.PKMSYNCpkmFolders
 }
 
 export type rabbitHoleDocument = {

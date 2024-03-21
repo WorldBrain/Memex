@@ -5,7 +5,6 @@ import {
 } from 'src/authentication/background/setup'
 import { MemoryAuthService } from '@worldbrain/memex-common/lib/authentication/memory'
 import { MemorySubscriptionsService } from '@worldbrain/memex-common/lib/subscriptions/memory'
-import { subscriptionRedirect } from 'src/authentication/background/redirect'
 
 export function createAuthServices(options: {
     backend: 'firebase' | 'memory'
@@ -18,7 +17,7 @@ export function createAuthServices(options: {
     }
 
     const authDeps = createAuthDependencies({
-        redirectUrl: subscriptionRedirect,
+        redirectUrl: 'https://memex.cloud/auth/chargebee/callback',
         devAuthState: process.env.DEV_AUTH_STATE as DevAuthState,
     })
 

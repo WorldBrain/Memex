@@ -1,9 +1,6 @@
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { LOCAL_SERVER_ENDPOINTS } from './backup-pane/constants'
-import {
-    getPkmSyncKey,
-    getFolder,
-} from 'src/pkm-integrations/background/backend/utils'
+import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
 export async function redirectToGDriveLogin() {
     window.location.href = await remoteFunction('getBackupProviderLoginLink')({
         returnUrl: 'http://memex.cloud/backup/auth-redirect/google-drive',
@@ -16,9 +13,9 @@ export const getStringFromResponseBody = async (response) => {
     return new TextDecoder('utf-8').decode(value)
 }
 
-export const checkServerStatus = async () => {
+export const checkServerStatus = async ({ storageAPI }) => {
     try {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey({ storageAPI })
 
         const body = JSON.stringify({
             syncKey: syncKey,
@@ -73,13 +70,4 @@ export const fetchBackupPath = async () => {
         return null
     }
     return null
-}
-
-export const changeBackupPath = async () => {
-    try {
-        const folder = await getFolder('backup')
-        return folder
-    } catch (err) {
-        return false
-    }
 }

@@ -109,6 +109,7 @@ const genPageEntityTemplate = (totalEntities: number) => (
     EntityAdditionalNameShort: abbreviateName(entity.additionalName),
     secondLast: i + 1 === totalEntities - 1,
     last: i + 1 === totalEntities,
+    isPrimary: entity.isPrimary,
 })
 
 // This function covers all single page cases + multi-page cases when no notes are referenced

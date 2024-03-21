@@ -11,11 +11,11 @@ import { COLLECTION_NAMES as PAGE_COLLECTION_NAMES } from '@worldbrain/memex-com
 import { COLLECTION_NAMES as TAG_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/tags/constants'
 import { COLLECTION_NAMES as LIST_COLLECTION_NAMES } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
-import { Tag } from 'src/search'
+import type { Tag } from 'src/search'
 import { AnnotationsListPlugin } from 'src/search/background/annots-list'
-import { AnnotSearchParams } from 'src/search/background/types'
+import type { AnnotSearchParams } from 'src/search/background/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
-import { Annotation, AnnotListEntry } from 'src/annotations/types'
+import type { Annotation, AnnotListEntry } from 'src/annotations/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
@@ -23,7 +23,8 @@ import {
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
-import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import type { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import type { Storage } from 'webextension-polyfill'
 
 export default class AnnotationStorage extends StorageModule {
     static PAGES_COLL = PAGE_COLLECTION_NAMES.page
@@ -36,6 +37,8 @@ export default class AnnotationStorage extends StorageModule {
     constructor(
         private options: {
             storageManager: Storex
+            /** Please do not add new references to this. Access to be refactored to a higher level. */
+            ___storageAPI: Storage.Static
             pkmSyncBG: PKMSyncBackgroundModule
             imageSupport?: ImageSupportInterface
         },
@@ -348,7 +351,11 @@ export default class AnnotationStorage extends StorageModule {
 
         // Send to PKM Sync
         try {
-            if (await isPkmSyncEnabled()) {
+            if (
+                await isPkmSyncEnabled({
+                    storageAPI: this.options.___storageAPI,
+                })
+            ) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
                 const listData = await this.options.storageManager
@@ -422,7 +429,11 @@ export default class AnnotationStorage extends StorageModule {
         await this.operation('deleteAnnotationFromList', { listId, url })
 
         try {
-            if (await isPkmSyncEnabled()) {
+            if (
+                await isPkmSyncEnabled({
+                    storageAPI: this.options.___storageAPI,
+                })
+            ) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
                 const listData = await this.options.storageManager
@@ -537,7 +548,11 @@ export default class AnnotationStorage extends StorageModule {
             )
         }
         try {
-            if (await isPkmSyncEnabled()) {
+            if (
+                await isPkmSyncEnabled({
+                    storageAPI: this.options.___storageAPI,
+                })
+            ) {
                 const pageVisitStorage = await this.options.storageManager
                     .collection('visits')
                     .findOneObject<{ time: string }>({
@@ -628,7 +643,11 @@ export default class AnnotationStorage extends StorageModule {
         userId?: string,
     ) {
         try {
-            if (await isPkmSyncEnabled()) {
+            if (
+                await isPkmSyncEnabled({
+                    storageAPI: this.options.___storageAPI,
+                })
+            ) {
                 const annotationsData = await this.getAnnotations([url])
                 const annotationDataForPKMSyncUpdate = annotationsData[0]
 

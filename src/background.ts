@@ -1,5 +1,6 @@
 import browser from 'webextension-polyfill'
 
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
 import initStorex from './search/memex-storex'
 import getDb, { setStorex } from './search/get-db'
 import {
@@ -33,10 +34,7 @@ import initSentry, { captureException } from 'src/util/raven'
 import { createSelfTests } from './tests/self-tests'
 import { createPersistentStorageManager } from './storage/persistent-storage'
 import { createAuthServices } from './services/local-services'
-import {
-    SharedListKey,
-    SharedListRoleID,
-} from '@worldbrain/memex-common/lib/content-sharing/types'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 import { initFirestoreSyncTriggerListener } from '@worldbrain/memex-common/lib/personal-cloud/backend/utils'
 import { setupOmnibar } from 'src/omnibar'
 import delay from './util/delay'
@@ -112,6 +110,7 @@ export async function main(): Promise<void> {
             fetchPageData({
                 url,
                 fetch,
+                transformPageHTML,
                 domParser: (html) =>
                     new DOMParser().parseFromString(html, 'text/html'),
                 opts: { includePageContent: true, includeFavIcon: true },
@@ -158,7 +157,7 @@ export async function main(): Promise<void> {
         backgroundModules,
     )
     __debugCounter++
-    await setupBackgroundModules(backgroundModules, storageManager)
+    await setupBackgroundModules(backgroundModules, storageManager, browser)
     __debugCounter++
 
     navigator?.storage
@@ -208,9 +207,7 @@ export async function main(): Promise<void> {
     })
     __debugCounter++
 
-    services.contentSharing.preKeyGeneration = async (params: {
-        key: Pick<SharedListKey, 'roleID' | 'disabled'>
-    }) => {
+    services.contentSharing.preKeyGeneration = async (params) => {
         if (params.key.roleID > SharedListRoleID.Commenter) {
             await backgroundModules.personalCloud.waitForSync()
         }

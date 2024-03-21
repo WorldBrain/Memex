@@ -19,6 +19,8 @@ import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import { checkServerStatus } from '../../backup-restore/ui/utils'
 import type { StorageOperationEvent } from '@worldbrain/storex-middleware-change-watcher/lib/types'
+import type { Browser } from 'webextension-polyfill'
+import { keepWorkerAlive } from 'src/util/service-worker-utils'
 
 export * from './backend'
 
@@ -47,16 +49,19 @@ export class BackupBackgroundModule {
     checkAuthorizedForAutoBackup: () => Promise<boolean>
     jobScheduler: JobScheduler
 
-    constructor(options: {
-        storageManager: Storex
-        searchIndex: SearchIndex
-        createQueue?: typeof Queue
-        queueOpts?: QueueOpts
-        notifications: NotificationBackground
-        jobScheduler: JobScheduler
-        localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
-        checkAuthorizedForAutoBackup: () => Promise<boolean>
-    }) {
+    constructor(
+        private options: {
+            storageManager: Storex
+            searchIndex: SearchIndex
+            createQueue?: typeof Queue
+            queueOpts?: QueueOpts
+            notifications: NotificationBackground
+            jobScheduler: JobScheduler
+            browserAPIs: Pick<Browser, 'runtime' | 'storage'>
+            localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
+            checkAuthorizedForAutoBackup: () => Promise<boolean>
+        },
+    ) {
         options.createQueue = options.createQueue || Queue
         options.queueOpts = options.queueOpts || {
             autostart: true,
@@ -64,6 +69,7 @@ export class BackupBackgroundModule {
         }
 
         this.backendSelect = new BackendSelect({
+            storageAPI: options.browserAPIs.storage,
             localBackupSettings: options.localBackupSettings,
         })
         this.jobScheduler = options.jobScheduler
@@ -103,7 +109,9 @@ export class BackupBackgroundModule {
                     )
                 }
 
-                await this.doBackup()
+                await keepWorkerAlive(this.doBackup(), {
+                    runtimeAPI: options.browserAPIs.runtime,
+                })
                 this.backupUiCommunication.connect(this.backupProcedure.events)
             },
         }
@@ -257,6 +265,7 @@ export class BackupBackgroundModule {
         this.backupProcedure = new BackupProcedure({
             localBackupSettings: this.localBackupSettings,
             storageManager: this.storageManager,
+            storageAPI: this.options.browserAPIs.storage,
             storage: this.storage,
             backend: this.backend,
         })
@@ -282,18 +291,6 @@ export class BackupBackgroundModule {
     resetRestoreProcedure() {
         this.restoreProcedure = null
     }
-
-    // setupRequestInterceptor(backupBackend: BackupBackend = null) {
-    //     const backend = backupBackend || this.backend
-    //     setupRequestInterceptors({
-    //         webRequest: globalThis['browser'].webRequest,
-    //         handleLoginRedirectedBack: backend
-    //             ? backend.handleLoginRedirectedBack.bind(backend)
-    //             : null,
-    //         // isAutomaticBackupEnabled: () => this.isAutomaticBackupEnabled(),
-    //         memexCloudOrigin: _getMemexCloudOrigin(),
-    //     })
-    // }
 
     async startRecordingChangesIfNeeded() {
         if (
@@ -440,7 +437,9 @@ export class BackupBackgroundModule {
     }
 
     async doBackup() {
-        const status = await checkServerStatus()
+        const status = await checkServerStatus({
+            storageAPI: this.options.browserAPIs.storage,
+        })
         if (!status) {
             await this.localBackupSettings.set('backupStatus', 'fail')
         }

@@ -13,12 +13,10 @@ import type {
     AnnotsByPageUrl,
     AnnotationsSearchResponse,
 } from 'src/search/background/types'
-import type { ImageSupportInterface } from 'src/image-support/background/types'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage
     remoteFunctions: RemoteCopyPasterInterface
-    imageSupport: ImageSupportInterface<'caller'>
 
     constructor(
         private options: {
@@ -31,7 +29,6 @@ export default class CopyPasterBackground {
                 | 'ensureRemotePageId'
                 | 'scheduleManyPageLinkCreations'
             >
-            imageSupport: ImageSupportInterface<'caller'>
         },
     ) {
         this.storage = new CopyPasterStorage({

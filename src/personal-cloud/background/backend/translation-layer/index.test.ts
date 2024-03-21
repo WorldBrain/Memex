@@ -6163,7 +6163,7 @@ describe('Personal cloud translation layer', () => {
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
 
-                const firstHighlight = await cloudDataToReadwiseHighlight(
+                const firstHighlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6174,7 +6174,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const secondHighlight = await cloudDataToReadwiseHighlight(
+                const secondHighlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.second,
                         locator: testLocators.first as any,
@@ -6224,7 +6224,7 @@ describe('Personal cloud translation layer', () => {
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
 
-                const highlight = await cloudDataToReadwiseHighlight(
+                const highlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6271,7 +6271,7 @@ describe('Personal cloud translation layer', () => {
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
 
-                const highlight = await cloudDataToReadwiseHighlight(
+                const highlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6282,7 +6282,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const highlightWithTags = await cloudDataToReadwiseHighlight(
+                const highlightWithTags = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6340,7 +6340,7 @@ describe('Personal cloud translation layer', () => {
                 const testTags = remoteData.personalTag
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
-                const firstHighlight = await cloudDataToReadwiseHighlight(
+                const firstHighlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6351,7 +6351,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const firstHighlightWithTags = await cloudDataToReadwiseHighlight(
+                const firstHighlightWithTags = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6362,7 +6362,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const secondHighlight = await cloudDataToReadwiseHighlight(
+                const secondHighlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.second,
                         locator: testLocators.first as any,
@@ -6372,7 +6372,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const secondHighlightWithTags = await cloudDataToReadwiseHighlight(
+                const secondHighlightWithTags = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.second,
                         locator: testLocators.first as any,
@@ -6429,7 +6429,7 @@ describe('Personal cloud translation layer', () => {
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
 
-                const highlight = await cloudDataToReadwiseHighlight(
+                const highlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6440,7 +6440,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const highlightWithLists = await cloudDataToReadwiseHighlight(
+                const highlightWithLists = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6505,7 +6505,7 @@ describe('Personal cloud translation layer', () => {
                 const testLists = remoteData.personalList
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
-                const firstHighlight = await cloudDataToReadwiseHighlight(
+                const firstHighlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6516,7 +6516,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const firstHighlightWithLists = await cloudDataToReadwiseHighlight(
+                const firstHighlightWithLists = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6527,7 +6527,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const secondHighlight = await cloudDataToReadwiseHighlight(
+                const secondHighlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.second,
                         locator: testLocators.first as any,
@@ -6537,7 +6537,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const secondHighlightWithLists = await cloudDataToReadwiseHighlight(
+                const secondHighlightWithLists = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.second,
                         locator: testLocators.first as any,
@@ -6611,7 +6611,7 @@ describe('Personal cloud translation layer', () => {
                 const testAnnotations = remoteData.personalAnnotation
                 const testSelectors = remoteData.personalAnnotationSelector
 
-                const highlight = await cloudDataToReadwiseHighlight(
+                const highlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6622,7 +6622,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const highlightWithTags = await cloudDataToReadwiseHighlight(
+                const highlightWithTags = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6633,7 +6633,7 @@ describe('Personal cloud translation layer', () => {
                     },
                     'production',
                 )
-                const highlightWithTagsAndSpaces = await cloudDataToReadwiseHighlight(
+                const highlightWithTagsAndSpaces = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,
@@ -6687,7 +6687,7 @@ describe('Personal cloud translation layer', () => {
                 const testSelectors = remoteData.personalAnnotationSelector
 
                 const { title, ...titlelessMetadata } = testMetadata.first
-                const highlight = await cloudDataToReadwiseHighlight(
+                const highlight = cloudDataToReadwiseHighlight(
                     {
                         annotation: testAnnotations.first,
                         selector: testSelectors.first,

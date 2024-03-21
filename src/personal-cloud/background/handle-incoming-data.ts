@@ -4,7 +4,7 @@ import type { PageActivityIndicatorBackground } from 'src/page-activity-indicato
 import { PersonalCloudClientStorageType } from '@worldbrain/memex-common/lib/personal-cloud/backend/types'
 import { StoredContentType } from 'src/page-indexing/background/types'
 import { updateOrCreate } from '@worldbrain/storex/lib/utils'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
 import { transformPageText } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import {
@@ -13,7 +13,8 @@ import {
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import type { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import type { Browser } from 'webextension-polyfill'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -29,6 +30,7 @@ export const handleIncomingData = (deps: {
     storageManager: StorageManager
     pkmSyncBG: PKMSyncBackgroundModule
     imageSupport: ImageSupportInterface
+    browserAPIs: Browser
 }) => async ({
     storageType,
     collection,
@@ -106,7 +108,7 @@ export const handleIncomingData = (deps: {
             where,
             deps.storageManager,
             deps.imageSupport,
-            deps.customListsBG,
+            deps.browserAPIs,
         )
     } catch (e) {}
 }
@@ -118,7 +120,7 @@ async function handleSyncedDataForPKMSync(
     where,
     storageManager: StorageManager,
     imageSupport: ImageSupportInterface,
-    customListsBG: CustomListBackground,
+    browserAPIs: Browser,
 ) {
     async function checkIfAnnotationInfilteredList({
         url,
@@ -188,7 +190,7 @@ async function handleSyncedDataForPKMSync(
     }
 
     try {
-        if (await isPkmSyncEnabled()) {
+        if (await isPkmSyncEnabled({ storageAPI: browserAPIs.storage })) {
             if (collection === 'annotations') {
                 const pageDataStorage = await storageManager
                     .collection('pages')

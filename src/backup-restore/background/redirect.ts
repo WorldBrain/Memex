@@ -1,19 +1,5 @@
 import browser from 'webextension-polyfill'
 
-export function setupRequestInterceptors({
-    webRequest,
-    handleLoginRedirectedBack,
-    memexCloudOrigin,
-}) {
-    if (handleLoginRedirectedBack) {
-        webRequest.onBeforeRequest.addListener(
-            makeGoogleCallbackHandler({ handleLoginRedirectedBack }),
-            { urls: [`${memexCloudOrigin}/auth/google/callback*`] },
-            ['blocking'],
-        )
-    }
-}
-
 export function makeGoogleCallbackHandler({ handleLoginRedirectedBack }) {
     return ({ url, tabId }) => {
         if (tabId === -1) {

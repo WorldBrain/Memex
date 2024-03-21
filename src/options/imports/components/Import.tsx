@@ -1,4 +1,5 @@
 import React from 'react'
+import browser from 'webextension-polyfill'
 
 import { IMPORT_TYPE } from '../constants'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
@@ -8,12 +9,8 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import styled from 'styled-components'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
-import { browser } from 'webextension-polyfill-ts'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import {
-    getFolder,
-    getPathsFromLocalStorage,
-} from 'src/pkm-integrations/background/backend/utils'
+import { getFolder } from 'src/pkm-integrations/background/backend/utils'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import Checkbox from 'src/common-ui/components/Checkbox'
@@ -86,7 +83,7 @@ class Import extends React.PureComponent<Props> {
         })
         // Check local storage for saved paths when the component mounts
 
-        const folders = await getPathsFromLocalStorage()
+        const folders = await browser.storage.local.get('PKMSYNCpkmFolders')
 
         if (folders) {
             this.setState({
@@ -97,6 +94,7 @@ class Import extends React.PureComponent<Props> {
 
         this.serverOnline = await new MemexLocalBackend({
             url: this.serverToTalkTo,
+            storageAPI: browser.storage,
         }).isReachable()
 
         this.setState({
@@ -107,6 +105,7 @@ class Import extends React.PureComponent<Props> {
         setInterval(async () => {
             const serverOnline = await new MemexLocalBackend({
                 url: this.serverToTalkTo,
+                storageAPI: browser.storage,
             }).isReachable()
 
             this.setState({
@@ -324,7 +323,7 @@ class Import extends React.PureComponent<Props> {
     }
 
     private async setFolderForPKM(pkmToSync: string) {
-        const data = await getFolder(pkmToSync)
+        const data = await getFolder(pkmToSync, { storageAPI: browser.storage })
 
         this.setState({
             logSeqFolder: data.logSeqFolder || null,

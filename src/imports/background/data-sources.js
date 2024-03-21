@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import checkBrowser from '../../util/check-browser'
 import {
     IMPORT_TYPE as TYPE,

@@ -1,4 +1,3 @@
-import browser from 'webextension-polyfill'
 import { IMPORT_TYPE, DOWNLOAD_STATUS } from 'src/options/imports/constants'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import { TAG_SUGGESTIONS_KEY } from 'src/constants'
@@ -22,46 +21,6 @@ const wantedTransitionTypes = new Set([
     'reload',
     'auto_toplevel',
 ])
-
-/**
- * @param {history.VisitItem} item VisitItem object received from the WebExt History API.
- * @returns {boolean}
- */
-const filterVisitItemByTransType = (item) =>
-    wantedTransitionTypes.has(item.transition)
-
-/**
- * @param {IImportItem} importItem
- * @throws {Error} Allows short-circuiting of the import process for current item if no VisitItems left after
- *  filtering.
- */
-async function checkVisitItemTransitionTypes({ url }) {
-    const visitItems = await browser.history.getVisits({ url })
-
-    // Only keep VisitItems with wanted TransitionType
-    const filteredVisitItems = visitItems.filter(filterVisitItemByTransType)
-
-    // Throw if no VisitItems left post-filtering (only if there was items to begin with)
-    if (visitItems.length < 0 && filteredVisitItems.length === 0) {
-        throw new Error('Unused TransitionType')
-    }
-}
-
-const getVisitTimes = ({ url }) =>
-    browser.history
-        .getVisits({ url })
-        .then((visits) => visits.map((visit) => Math.trunc(visit.visitTime)))
-
-async function getBookmarkTime({ browserId }) {
-    // Web Ext. API should return array of BookmarkItems; grab first one
-    const [bookmarkItem] = await browser.bookmarks.get(browserId)
-
-    if (bookmarkItem) {
-        return bookmarkItem.dateAdded || undefined
-    }
-
-    return undefined
-}
 
 export default class ImportItemProcessor {
     /**

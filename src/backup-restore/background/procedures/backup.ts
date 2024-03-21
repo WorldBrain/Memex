@@ -12,6 +12,7 @@ import { getCurrentSchemaVersion } from '@worldbrain/memex-common/lib/storage/ut
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from '../types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
+import type { Storage } from 'webextension-polyfill'
 
 const pickBy = require('lodash/pickBy')
 
@@ -45,10 +46,12 @@ export default class BackupProcedure {
     constructor({
         localBackupSettings,
         storageManager,
+        storageAPI,
         storage,
         backend,
     }: {
         localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
+        storageAPI: Storage.Static
         storageManager: Storex
         storage: BackupStorage
         backend: BackupBackend
@@ -59,6 +62,7 @@ export default class BackupProcedure {
         this.backend = backend
         this.pkmBackend = new MemexLocalBackend({
             url: LOCAL_SERVER_ROOT,
+            storageAPI,
         })
         this.currentSchemaVersion = getCurrentSchemaVersion(
             storageManager,
