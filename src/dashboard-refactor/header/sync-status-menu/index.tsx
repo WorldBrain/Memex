@@ -228,14 +228,14 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                     </Row>
 
                     {/* TODO: Re-implement this */}
-                    <Row>
+                    {/* <Row>
                         <InfoText> pending downloads</InfoText>
                         <SectionCircle>
                             {pendingRemoteChangeCount < 0
                                 ? 0
                                 : pendingRemoteChangeCount}
                         </SectionCircle>
-                    </Row>
+                    </Row> */}
                 </RowContainer>
                 <Separator />
                 <BottomRow>

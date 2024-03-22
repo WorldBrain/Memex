@@ -1,7 +1,7 @@
 import { CMDS, DEF_CONCURRENCY } from 'src/options/imports/constants'
 import ProgressManager from './progress-manager'
 import getImportStateManager from './state-manager'
-import browser from 'webextension-polyfill'
+import type { Storage } from 'webextension-polyfill'
 import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
@@ -27,14 +27,17 @@ export default class ImportConnectionHandler {
 
     _includeErrs = false
 
-    constructor(options: {
-        port: any
-        quick?: boolean
-        tagsModule: TagsBackground
-        customListsModule: CustomListBackground
-        bookmarks: BookmarksBackground
-        pages: PageIndexingBackground
-    }) {
+    constructor(
+        private options: {
+            port: any
+            quick?: boolean
+            storageAPI: Storage.Static
+            tagsModule: TagsBackground
+            customListsModule: CustomListBackground
+            bookmarks: BookmarksBackground
+            pages: PageIndexingBackground
+        },
+    ) {
         // Main `runtime.Port` that this class hides away to handle connection with the imports UI script
         this.port = options.port
 
@@ -181,7 +184,7 @@ export default class ImportConnectionHandler {
     }
 
     async getImportInProgressFlag() {
-        const storage = await browser.storage.local.get({
+        const storage = await this.options.storageAPI.local.get({
             [ImportConnectionHandler.IMPORTS_PROGRESS_KEY]: false,
         })
 
@@ -189,7 +192,7 @@ export default class ImportConnectionHandler {
     }
 
     async setImportInProgressFlag(value) {
-        return browser.storage.local.set({
+        return this.options.storageAPI.local.set({
             [ImportConnectionHandler.IMPORTS_PROGRESS_KEY]: value,
         })
     }

@@ -1,5 +1,7 @@
 import browser from 'webextension-polyfill'
 import XMLHttpRequest from 'xhr-shim'
+import { parseHTML } from 'linkedom/worker'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
 import { getToken } from 'firebase/messaging'
 import { onBackgroundMessage, getMessaging } from 'firebase/messaging/sw'
 import {
@@ -36,7 +38,7 @@ import { setupOmnibar } from 'src/omnibar'
 import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data'
 import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
-import { getOnlineBackendEnv } from './util/env'
+import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -54,6 +56,16 @@ async function main() {
     })
 
     const firebase = getFirebase()
+
+    // Set up incoming FCM handling logic (`onBackgroundMessage` wraps the SW `push` event)
+    const pushMessagingClient = new PushMessagingClient()
+    onBackgroundMessage(getMessaging(), (message) => {
+        const payload = message.data as PushMessagePayload
+        if (payload == null) {
+            return
+        }
+        pushMessagingClient.handleIncomingMessage(payload)
+    })
 
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
@@ -79,17 +91,20 @@ async function main() {
     const authServices = createAuthServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
     })
-    const servicesPromise = createServices({
+    const services = createServices({
         backend: process.env.NODE_ENV === 'test' ? 'memory' : 'firebase',
         serverStorage,
         authService: authServices.auth,
     })
 
-    const fetch = globalThis.fetch.bind(globalThis)
+    const fetch = globalThis.fetch.bind(
+        globalThis,
+    ) as typeof globalThis['fetch']
 
     const backgroundModules = createBackgroundModules({
         manifestVersion: '3',
-        services: servicesPromise,
+        authServices,
+        services,
         serverStorage,
         analyticsManager: analytics,
         localStorageChangesManager,
@@ -97,8 +112,8 @@ async function main() {
             fetchPageData({
                 url,
                 fetch,
-                domParser: (html) =>
-                    new DOMParser().parseFromString(html, 'text/html'),
+                transformPageHTML,
+                domParser: (html) => parseHTML(html).document,
                 opts: { includePageContent: true, includeFavIcon: true },
             }).run(),
         fetchPDFData: async (url) =>
@@ -109,7 +124,6 @@ async function main() {
         fetch,
         browserAPIs: browser,
         captureException,
-        authServices,
         storageManager,
         persistentStorageManager,
         callFirebaseFunction: async <Returns>(name: string, ...args: any[]) => {
@@ -128,37 +142,28 @@ async function main() {
                     ? 'production'
                     : 'staging',
         }),
-        backendEnv: getOnlineBackendEnv(),
+        backendEnv:
+            process.env.NODE_ENV === 'production' ? 'production' : 'staging',
     })
+    pushMessagingClient.bgModules = backgroundModules
+
     registerBackgroundModuleCollections({
         storageManager,
         persistentStorageManager,
         backgroundModules,
     })
-
-    setStorageMiddleware(storageManager, backgroundModules)
-
     // NOTE: This is a hack to manually init Dexie, which is synchronous, before needing to do the async storex init calls.
     //  Doing this as all event listeners need to be set up synchronously, before any async logic happens. AND to avoid needing to update storex yet.
     ;(storageManager.backend as DexieStorageBackend)._onRegistryInitialized()
-
-    // Set up incoming FCM handling logic (`onBackgroundMessage` wraps the SW `push` event)
-    const pushMessagingClient = new PushMessagingClient({
-        bgModules: backgroundModules,
-    })
-    onBackgroundMessage(getMessaging(), async (message) => {
-        const payload = message.data as PushMessagePayload
-        if (payload == null) {
-            return
-        }
-
-        await pushMessagingClient.handleIncomingMessage(payload)
-    })
-
-    await setupBackgroundModules(backgroundModules, storageManager)
+    const { setStorageLoggingEnabled } = setStorageMiddleware(
+        storageManager,
+        backgroundModules,
+    )
 
     await storageManager.finishInitialization()
     await persistentStorageManager.finishInitialization()
+
+    await setupBackgroundModules(backgroundModules, storageManager, browser)
 
     setStorex(storageManager)
     setupOmnibar({
@@ -191,13 +196,22 @@ async function main() {
         pdf: backgroundModules.pdfBg.remoteFunctions,
         analyticsBG: backgroundModules.analyticsBG,
     })
+
+    // TODO: Why is this here?
+    services.contentSharing.preKeyGeneration = async (params) => {
+        if (params.key.roleID > SharedListRoleID.Commenter) {
+            await backgroundModules.personalCloud.waitForSync()
+        }
+    }
+
     rpcManager.unpause()
 
-    const services = await servicesPromise
-    global['bgModules'] = backgroundModules
-    global['bgServices'] = services
-    global['storageManager'] = storageManager
-    global['persistentStorageManager'] = persistentStorageManager
+    globalThis['bgServices'] = services
+    globalThis['storageMan'] = storageManager
+    globalThis['bgModules'] = backgroundModules
+    globalThis['serverStorage'] = serverStorage
+    globalThis['persistentStorageManager'] = persistentStorageManager
+    globalThis['setStorageLoggingEnabled'] = setStorageLoggingEnabled
 }
 
 main().catch((err) => {

@@ -28,7 +28,10 @@ export default class BookmarksBackground {
         private options: {
             storageManager: Storex
             pages: PageIndexingBackground
-            browserAPIs: Pick<Browser, 'bookmarks' | 'tabs' | 'storage'>
+            browserAPIs: Pick<
+                Browser,
+                'bookmarks' | 'tabs' | 'storage' | 'action'
+            >
             analytics: Analytics
             analyticsBG: AnalyticsCoreInterface
         },
@@ -218,12 +221,18 @@ export default class BookmarksBackground {
 
     private async setBookmarkStatus(isSet: boolean, tabId: number) {
         if (isSet) {
-            await browser.browserAction.setBadgeText({ text: '❤️', tabId })
-            await browser.browserAction.setBadgeBackgroundColor({
+            await this.options.browserAPIs.action.setBadgeText({
+                text: '❤️',
+                tabId,
+            })
+            await this.options.browserAPIs.action.setBadgeBackgroundColor({
                 color: 'white',
             })
         } else {
-            await browser.browserAction.setBadgeText({ text: '', tabId })
+            await this.options.browserAPIs.action.setBadgeText({
+                text: '',
+                tabId,
+            })
         }
     }
 

@@ -249,6 +249,5 @@ export default class PopupLogic extends UILogic<State, Event> {
             'shouldAutoOpen',
             !previousState.isPDFReaderEnabled,
         )
-        await pdfIntegrationBG.refreshSetting()
     }
 }

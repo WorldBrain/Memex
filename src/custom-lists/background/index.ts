@@ -1,5 +1,5 @@
 import type Storex from '@worldbrain/storex'
-import type { Windows, Tabs, Storage } from 'webextension-polyfill'
+import type { Browser } from 'webextension-polyfill'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/utils'
 import CustomListStorage from './storage'
@@ -31,7 +31,6 @@ import {
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { MemexLocalBackend } from 'src/pkm-integrations/background/backend'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
-import { browser } from 'webextension-polyfill-ts'
 
 const limitSuggestionsStorageLength = 25
 
@@ -52,9 +51,7 @@ export default class CustomListBackground {
             pages: PageIndexingBackground
             tabManagement: TabManagementBackground
             analytics: Analytics
-            queryTabs?: Tabs.Static['query']
-            windows?: Windows.Static
-            localBrowserStorage: Storage.LocalStorageArea
+            browserAPIs: Pick<Browser, 'tabs' | 'storage' | 'windows'>
             authServices: Pick<AuthServices, 'auth'>
             // TODO: the fact this needs to be passed down tells me this ideally should be done at a higher level (content sharing BG?)
             removeChildAnnotationsFromList: (
@@ -68,6 +65,7 @@ export default class CustomListBackground {
         this.storage = new CustomListStorage({
             storageManager: options.storageManager,
             pkmSyncBG: options.pkmSyncBG,
+            ___storageAPI: options.browserAPIs.storage,
         })
 
         this.remoteFunctions = {
@@ -77,7 +75,7 @@ export default class CustomListBackground {
             updateListTreeOrder: this.updateListTreeOrder,
             insertPageToList: async (params) => {
                 if (!params.indexUrl) {
-                    const currentTab = await this.options.queryTabs?.({
+                    const currentTab = await options.browserAPIs.tabs.query({
                         active: true,
                         currentWindow: true,
                     })
@@ -113,8 +111,10 @@ export default class CustomListBackground {
         }
 
         this.localStorage = new BrowserSettingsStore(
-            options.localBrowserStorage,
-            { prefix: 'custom-lists_' },
+            options.browserAPIs.storage.local,
+            {
+                prefix: 'custom-lists_',
+            },
         )
     }
 
@@ -260,6 +260,7 @@ export default class CustomListBackground {
     ) => {
         const backend = new MemexLocalBackend({
             url: this.serverToTalkTo,
+            storageAPI: this.options.browserAPIs.storage,
         })
         const results = await backend.findSimilar(currentPageContent, fullUrl)
 
@@ -376,9 +377,12 @@ export default class CustomListBackground {
         const spaceData = await this.fetchListById({ id: listId })
         const spaceEntries = spaceData.pages
 
-        const newWindow = await browser.windows.create()
+        const newWindow = await this.options.browserAPIs.windows.create()
         for (const url of spaceEntries) {
-            await browser.tabs.create({ windowId: newWindow.id, url })
+            await this.options.browserAPIs.tabs.create({
+                windowId: newWindow.id,
+                url,
+            })
         }
     }
 

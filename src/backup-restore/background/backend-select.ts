@@ -1,17 +1,18 @@
 import * as driveBackup from './backend/google-drive'
 import * as localBackup from './backend/simple-http'
 import * as backup from '.'
-import browser from 'webextension-polyfill'
-import { BackupBackend } from './backend/types'
+import type { BackupBackend } from './backend/types'
 import type { BrowserSettingsStore } from 'src/util/settings'
 import type { LocalBackupSettings } from './types'
 import { LOCAL_SERVER_ROOT } from '../ui/backup-pane/constants'
+import type { Storage } from 'webextension-polyfill'
 
 export class BackendSelect {
     serverToTalkTo = LOCAL_SERVER_ROOT
     constructor(
         private deps: {
             localBackupSettings: BrowserSettingsStore<LocalBackupSettings>
+            storageAPI: Storage.Static // TODO: Unify this with `localBackupSettings`
         },
     ) {}
 
@@ -42,11 +43,14 @@ export class BackendSelect {
     async initLocalBackend(): Promise<BackupBackend> {
         return new localBackup.MemexLocalBackend({
             url: this.serverToTalkTo,
+            storageAPI: this.deps.storageAPI,
         })
     }
 
     async restoreBackendLocation(): Promise<string> {
-        const storageObject = await browser.storage.local.get('backendInfo')
+        const storageObject = await this.deps.storageAPI.local.get(
+            'backendInfo',
+        )
         if (storageObject.backendInfo) {
             const backendLocation = storageObject.backendInfo.location
             return backendLocation
@@ -56,7 +60,7 @@ export class BackendSelect {
     }
 
     async saveBackendLocation(location: string): Promise<void> {
-        const response = await browser.storage.local.set({
+        const response = await this.deps.storageAPI.local.set({
             backendInfo: { location },
         })
         return response

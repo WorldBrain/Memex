@@ -29,7 +29,7 @@ async function resizeImage(image, scale, maxHeight) {
                 resolve(canvas.toDataURL())
             }
 
-            const newWidth = Math.floor(img.width / img.height * newHeight)
+            const newWidth = Math.floor((img.width / img.height) * newHeight)
 
             if (newHeight >= maxHeight) {
                 canvas.width = newWidth

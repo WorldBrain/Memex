@@ -28,19 +28,25 @@ import {
     isPkmSyncEnabled,
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
-import { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
-import {
+import type { AuthenticatedUser } from '@worldbrain/memex-common/lib/authentication/types'
+import type {
     Bookmark,
     PageEntity,
     PageMetadata,
     Visit,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
-import { PageMetadataUpdateArgs } from './types'
+import type { PageMetadataUpdateArgs } from './types'
+import type { Storage } from 'webextension-polyfill'
 
 export default class PageStorage extends StorageModule {
     disableBlobProcessing = false
 
-    constructor(private options: StorageModuleConstructorArgs) {
+    constructor(
+        private options: StorageModuleConstructorArgs & {
+            /** Please do not add new references to this. Access to be refactored to a higher level. */
+            ___storageAPI: Storage.Static
+        },
+    ) {
         super(options)
     }
 
@@ -269,7 +275,9 @@ export default class PageStorage extends StorageModule {
             url: normalizedUrl,
         })
 
-        if (await isPkmSyncEnabled()) {
+        if (
+            await isPkmSyncEnabled({ storageAPI: this.options.___storageAPI })
+        ) {
             try {
                 let dataToSave
                 // if pdfs

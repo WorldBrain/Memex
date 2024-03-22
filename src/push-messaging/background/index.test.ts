@@ -9,9 +9,8 @@ async function setupTest(opts: {
     createAssocLocalFollowedList?: boolean
 }) {
     const context = await setupBackgroundIntegrationTest()
-    const pushMessagingClient = new PushMessagingClient({
-        bgModules: context.backgroundModules,
-    })
+    const pushMessagingClient = new PushMessagingClient()
+    pushMessagingClient.bgModules = context.backgroundModules
 
     const serverStorage = context.serverStorage
     let defaultListId: string | null = null

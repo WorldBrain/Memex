@@ -27,7 +27,6 @@ import {
 } from './types'
 import * as Raven from 'src/util/raven'
 import { isDev } from 'src/analytics/internal/constants'
-import { setupRequestInterceptors } from 'src/authentication/background/redirect'
 import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
@@ -149,19 +148,17 @@ export class AuthBackground {
             },
         }
 
-        listenToWebAppMessage(this.authService, options.runtimeAPI)
+        listenToWebAppMessage(
+            this.authService,
+            options.runtimeAPI,
+            options.localStorageArea,
+        )
     }
 
     refreshUserInfo = async () => {
         await this.options.remoteEmitter.emit('onLoadingUser', true)
         await this.authService.refreshUserInfo()
         await this.options.remoteEmitter.emit('onLoadingUser', false)
-    }
-
-    setupRequestInterceptor() {
-        setupRequestInterceptors({
-            webRequest: globalThis['browser'].webRequest,
-        })
     }
 
     _scheduleSubscriptionCheck = (

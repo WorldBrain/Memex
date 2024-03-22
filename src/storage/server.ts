@@ -1,5 +1,5 @@
 import { getFirebase } from 'src/util/firebase-app-initialized'
-import 'firebase/compat/database'
+// import 'firebase/compat/database'
 import 'firebase/compat/firestore'
 import StorageManager, { StorageBackend } from '@worldbrain/storex'
 import { FirestoreStorageBackend } from '@worldbrain/storex-backend-firestore'

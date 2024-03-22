@@ -17,7 +17,8 @@
         ]
     },
     "background": {
-        "service_worker": "background.js"
+        "service_worker": "background.js",
+        "scripts": ["background.js"]
     },
     "content_scripts": [
         {
@@ -27,12 +28,9 @@
             "run_at": "document_end"
         }
     ],
-    "applications": {
-        "gecko": {
-            "id": "info@worldbrain.io"
-        }
+    "options_ui": {
+        "page": "./options.html#/settings"
     },
-    "options_page": "./options.html#/settings",
     "action": {
         "default_popup": "./popup.html",
         "default_title": "Memex",
@@ -51,14 +49,14 @@
     "permissions": [
         "alarms",
         "bookmarks",
-        "history",
-        "scripting",
-        "tabs",
         "contextMenus",
-        "unlimitedStorage",
+        "tabs",
+        "scripting",
         "webNavigation",
         "notifications",
-        "storage"
+        "unlimitedStorage",
+        "storage",
+        "clipboardWrite"
     ],
     "host_permissions": ["<all_urls>"],
     "web_accessible_resources": [

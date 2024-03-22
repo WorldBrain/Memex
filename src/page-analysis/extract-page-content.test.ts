@@ -2,7 +2,7 @@
 
 import { JSDOM } from 'jsdom'
 import { extractRawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/extract-page-content'
-import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html'
+import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-html.service-worker'
 
 describe('Extract page content', () => {
     // beforeAll(() => {

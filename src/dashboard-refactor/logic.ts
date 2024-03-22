@@ -152,9 +152,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     pendingLocalChangeCount: { $set: stats.pendingUploads },
                     // TODO: re-implement pending download count
                     pendingRemoteChangeCount: { $set: stats.pendingDownloads },
-                    lastSuccessfulSyncDate: {
-                        $set: new Date(dateNow),
-                    },
                 },
             })
 

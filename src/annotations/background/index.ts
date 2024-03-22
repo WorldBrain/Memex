@@ -45,7 +45,7 @@ export default class DirectLinkingBackground {
 
     constructor(
         private options: {
-            browserAPIs: Pick<Browser, 'tabs'>
+            browserAPIs: Pick<Browser, 'tabs' | 'storage'>
             storageManager: Storex
             analyticsBG: AnalyticsCoreInterface
             pages: PageIndexingBackground
@@ -69,6 +69,7 @@ export default class DirectLinkingBackground {
             storageManager: options.storageManager,
             pkmSyncBG: options.pkmSyncBG,
             imageSupport: options.imageSupport,
+            ___storageAPI: options.browserAPIs.storage,
         })
 
         this._normalizeUrl = options.normalizeUrl || normalizeUrl

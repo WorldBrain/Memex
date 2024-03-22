@@ -1,15 +1,13 @@
 import React from 'react'
+import browser from 'webextension-polyfill'
 // import PropTypes from 'prop-types'
 // import classNames from 'classnames'
 import * as logic from './restore-where.logic'
 import { ProviderList } from 'src/backup-restore/ui/backup-pane/components/provider-list'
 import { DownloadOverlay } from '../components/overlays'
-import {
-    fetchBackupPath,
-    checkServerStatus,
-    changeBackupPath,
-} from '../../utils'
+import { fetchBackupPath, checkServerStatus } from '../../utils'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
+import { getFolder } from 'src/pkm-integrations/background/backend/utils'
 
 const settingsStyle = require('src/options/settings/components/settings.css')
 const STYLES = require('../../styles.css')
@@ -29,7 +27,7 @@ export default class RestoreWhere extends React.Component<Props> {
     private proceedIfServerIsRunning = async () => {
         let overlay = null
         let backupPath = null
-        const status = await checkServerStatus()
+        const status = await checkServerStatus({ storageAPI: browser.storage })
         if (status) {
             backupPath = await fetchBackupPath()
         } else {
@@ -46,7 +44,9 @@ export default class RestoreWhere extends React.Component<Props> {
     }
 
     private handleChangeBackupPath = async () => {
-        const backupPath = await changeBackupPath()
+        const backupPath = await getFolder('backup', {
+            storageAPI: browser.storage,
+        })
         if (backupPath) {
             this.handleEvent({
                 type: 'onChangeBackupPath',

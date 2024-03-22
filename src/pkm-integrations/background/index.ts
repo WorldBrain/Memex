@@ -1,11 +1,12 @@
 import { makeRemotelyCallable } from '../../util/webextensionRPC'
 import { MemexLocalBackend } from '../background/backend'
-import TurndownService from 'turndown'
-import { browser } from 'webextension-polyfill-ts'
 import moment from 'moment'
 import type { PkmSyncInterface } from './types'
-import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
+import type { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 import { LOCAL_SERVER_ROOT } from 'src/backup-restore/ui/backup-pane/constants'
+import { htmlToMarkdown } from 'src/background-script/html-to-markdown'
+import resolveImgSrc from '@worldbrain/memex-common/lib/annotations/replace-img-src-with-cloud-address.service-worker'
+import type { Browser } from 'webextension-polyfill'
 
 export class PKMSyncBackgroundModule {
     backend: MemexLocalBackend
@@ -14,8 +15,13 @@ export class PKMSyncBackgroundModule {
     backendNew: MemexLocalBackend
     PKMSYNCremovewarning = true
     serverToTalkTo = LOCAL_SERVER_ROOT
-    constructor() {
+    constructor(
+        private deps: {
+            browserAPIs: Pick<Browser, 'runtime' | 'storage'>
+        },
+    ) {
         this.backendNew = new MemexLocalBackend({
+            storageAPI: deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
         this.remoteFunctions = {
@@ -35,10 +41,12 @@ export class PKMSyncBackgroundModule {
     getSystemArchAndOS = async () => {
         let os
         let arch
-        await browser.runtime.getPlatformInfo().then(function (info) {
-            os = info.os
-            arch = info.arch
-        })
+        await this.deps.browserAPIs.runtime
+            .getPlatformInfo()
+            .then(function (info) {
+                os = info.os
+                arch = info.arch
+            })
 
         if (arch === 'aarch64' || arch === 'arm' || arch === 'arm64') {
             arch = 'arm'
@@ -79,6 +87,7 @@ export class PKMSyncBackgroundModule {
     }
     loadFeedSources = async () => {
         const backend = new MemexLocalBackend({
+            storageAPI: this.deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
         return await backend.loadFeedSources()
@@ -92,6 +101,7 @@ export class PKMSyncBackgroundModule {
         }[],
     ) => {
         const backend = new MemexLocalBackend({
+            storageAPI: this.deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
 
@@ -99,6 +109,7 @@ export class PKMSyncBackgroundModule {
     }
     openLocalFile = async (path: string) => {
         const backend = new MemexLocalBackend({
+            storageAPI: this.deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
 
@@ -106,6 +117,7 @@ export class PKMSyncBackgroundModule {
     }
     removeFeedSource = async (feedUrl: string) => {
         const backend = new MemexLocalBackend({
+            storageAPI: this.deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
 
@@ -113,6 +125,7 @@ export class PKMSyncBackgroundModule {
     }
     removeLocalFolder = async (id: number) => {
         const backend = new MemexLocalBackend({
+            storageAPI: this.deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
 
@@ -120,6 +133,7 @@ export class PKMSyncBackgroundModule {
     }
     addLocalFolder = async (): Promise<LocalFolder> => {
         const backend = new MemexLocalBackend({
+            storageAPI: this.deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
 
@@ -128,6 +142,7 @@ export class PKMSyncBackgroundModule {
     }
     getLocalFolders = async (): Promise<LocalFolder[]> => {
         const backend = new MemexLocalBackend({
+            storageAPI: this.deps.browserAPIs.storage,
             url: this.serverToTalkTo,
         })
 
@@ -207,7 +222,7 @@ export class PKMSyncBackgroundModule {
         if (await this.backendNew.isConnected()) {
             const bufferedItems = await this.getBufferedItems()
             bufferedItems.push(item)
-            const PKMSYNCremovewarning = await browser.storage.local.get(
+            const PKMSYNCremovewarning = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCremovewarning',
             )
 
@@ -225,7 +240,7 @@ export class PKMSyncBackgroundModule {
     async applySyncFilters(pkmType, item, checkForFilteredSpaces) {
         const spaces = item.data.annotationSpaces || item.data.pageSpaces
         if (pkmType === 'obsidian') {
-            const filterTagsObsidian = await browser.storage.local.get(
+            const filterTagsObsidian = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCfilterTagsObsidian',
             )
             if (
@@ -257,7 +272,7 @@ export class PKMSyncBackgroundModule {
         }
 
         if (pkmType === 'logseq') {
-            const filterTagsLogseq = await browser.storage.local.get(
+            const filterTagsLogseq = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCfilterTagsLogseq',
             )
 
@@ -293,11 +308,15 @@ export class PKMSyncBackgroundModule {
 
     async bufferPKMSyncItems(itemToBuffer) {
         // Get the current buffer from browser.storage.local
-        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        const data = await this.deps.browserAPIs.storage.local.get(
+            'PKMSYNCbufferedItems',
+        )
         const currentBuffer = data.PKMSYNCbufferedItems || []
 
         if (currentBuffer?.length > 2000) {
-            await browser.storage.local.set({ PKMSYNCbufferMaxReached: true })
+            await this.deps.browserAPIs.storage.local.set({
+                PKMSYNCbufferMaxReached: true,
+            })
             return
         }
 
@@ -305,22 +324,28 @@ export class PKMSyncBackgroundModule {
         currentBuffer.push(itemToBuffer)
 
         // Save the updated buffer back to browser.storage.local
-        await browser.storage.local.set({ PKMSYNCbufferedItems: currentBuffer })
+        await this.deps.browserAPIs.storage.local.set({
+            PKMSYNCbufferedItems: currentBuffer,
+        })
     }
 
     async getBufferedItems() {
-        // Check for buffered items in browser.storage.local
-        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        // Check for buffered items in this.deps.browserAPIs.storage.local
+        const data = await this.deps.browserAPIs.storage.local.get(
+            'PKMSYNCbufferedItems',
+        )
         const bufferedItems = data.PKMSYNCbufferedItems || []
 
         // After retrieving the buffered items, delete them from local storage
-        await browser.storage.local.remove('PKMSYNCbufferedItems')
+        await this.deps.browserAPIs.storage.local.remove('PKMSYNCbufferedItems')
 
         return bufferedItems
     }
 
     private async getValidFolders() {
-        const data = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const data = await this.deps.browserAPIs.storage.local.get(
+            'PKMSYNCpkmFolders',
+        )
         const folders = data.PKMSYNCpkmFolders || {}
 
         const validFolders = {
@@ -349,13 +374,13 @@ export class PKMSyncBackgroundModule {
             //     'PKMSYNCsyncOnlyAnnotatedPagesLogseq',
             // )
 
-            const PKMSYNCtitleformatLogseq = await browser.storage.local.get(
+            const PKMSYNCtitleformatLogseq = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCtitleformatLogseq',
             )
-            const PKMSYNCdateformatLogseq = await browser.storage.local.get(
+            const PKMSYNCdateformatLogseq = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCdateformatLogseq',
             )
-            const customTagsLogseq = await browser.storage.local.get(
+            const customTagsLogseq = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCcustomTagsLogseq',
             )
 
@@ -394,13 +419,13 @@ export class PKMSyncBackgroundModule {
             // let syncOnlyAnnotatedPagesObsidian = await browser.storage.local.get(
             //     'PKMSYNCsyncOnlyAnnotatedPagesObsidian',
             // )
-            const PKMSYNCtitleformatObsidian = await browser.storage.local.get(
+            const PKMSYNCtitleformatObsidian = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCtitleformatObsidian',
             )
-            const PKMSYNCdateformatObsidian = await browser.storage.local.get(
+            const PKMSYNCdateformatObsidian = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCdateformatObsidian',
             )
-            const customTagsObsidian = await browser.storage.local.get(
+            const customTagsObsidian = await this.deps.browserAPIs.storage.local.get(
                 'PKMSYNCcustomTagsObsidian',
             )
 
@@ -510,7 +535,7 @@ export class PKMSyncBackgroundModule {
                     pageTitleFormat,
                 )
             } else if (item.type === 'annotation') {
-                annotationsSection = this.replaceOrAppendAnnotation(
+                annotationsSection = await this.replaceOrAppendAnnotation(
                     annotationsSection,
                     item,
                     pkmType,
@@ -559,7 +584,7 @@ export class PKMSyncBackgroundModule {
             )
 
             if (item.type === 'annotation' || item.type === 'note') {
-                annotationsSection = this.annotationObjectDefault(
+                annotationsSection = await this.annotationObjectDefault(
                     item.data.annotationId,
                     item.data.body
                         ? convertHTMLintoMarkdown(item.data.body)
@@ -582,7 +607,7 @@ export class PKMSyncBackgroundModule {
         return await this.backendNew.storeObject(fileName, fileContent, pkmType)
     }
 
-    replaceOrAppendAnnotation(
+    async replaceOrAppendAnnotation(
         annotationsSection,
         item,
         pkmType,
@@ -607,7 +632,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -642,7 +667,7 @@ export class PKMSyncBackgroundModule {
                     annotationEndIndex,
                 )
 
-                const newAnnotationContent = this.extractAndUpdateAnnotationData(
+                const newAnnotationContent = await this.extractAndUpdateAnnotationData(
                     annotationContent,
                     item.data.annotationId,
                     item.data.body,
@@ -665,7 +690,7 @@ export class PKMSyncBackgroundModule {
         }
 
         if (annotationStartIndex === -1 || annotationsSection === null) {
-            const newAnnotationContent = this.annotationObjectDefault(
+            const newAnnotationContent = await this.annotationObjectDefault(
                 item.data.annotationId,
                 item.data.body ? convertHTMLintoMarkdown(item.data.body) : '',
                 item.data.comment,
@@ -687,7 +712,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    extractAndUpdateAnnotationData(
+    async extractAndUpdateAnnotationData(
         annotationContent,
         annotationId,
         body,
@@ -763,7 +788,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(', ')
 
-            updatedAnnotation = this.annotationObjectDefault(
+            updatedAnnotation = await this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -813,7 +838,7 @@ export class PKMSyncBackgroundModule {
                 .map((space) => `[[${space}]]`)
                 .join(' ')
 
-            updatedAnnotation = this.annotationObjectDefault(
+            updatedAnnotation = await this.annotationObjectDefault(
                 annotationId,
                 newHighlightText,
                 newHighlightNote,
@@ -1033,7 +1058,7 @@ export class PKMSyncBackgroundModule {
         }
     }
 
-    annotationObjectDefault(
+    async annotationObjectDefault(
         annotationId,
         body,
         comment,
@@ -1043,12 +1068,20 @@ export class PKMSyncBackgroundModule {
         pkmType,
         syncDateFormat,
     ) {
+        const commentWithImageLinks = resolveImgSrc(
+            comment,
+            process.env.NODE_ENV,
+        )
+        const bodyWithImageLinks = resolveImgSrc(body, process.env.NODE_ENV)
+
         if (pkmType === 'obsidian') {
             const annotationStartLine = `<span class="annotationStartLine" id="${annotationId}"></span>\n`
-            let highlightTextLine = body ? `> ${body.trim()}\n\n` : ''
-            const highlightNoteLine = comment
+            let highlightTextLine = bodyWithImageLinks
+                ? `> ${bodyWithImageLinks.trim()}\n\n`
+                : ''
+            const highlightNoteLine = commentWithImageLinks
                 ? `<!-- Note -->\n${convertHTMLintoMarkdown(
-                      comment,
+                      commentWithImageLinks,
                   )}\n<div id="end"/>\n\r`
                 : ''
             const highlightSpacesLine = annotationSpaces
@@ -1069,10 +1102,14 @@ export class PKMSyncBackgroundModule {
         if (pkmType === 'logseq') {
             let highlightTextLine = ''
             const separatedLine = `- <!-- NoteStartLine ${annotationId} -->---\n`
-            highlightTextLine = body ? ` - > ${body}\n` : ''
+            highlightTextLine = bodyWithImageLinks
+                ? ` - > ${bodyWithImageLinks}\n`
+                : ''
 
-            const highlightNoteLine = comment
-                ? `  - **Note** \n    - ${convertHTMLintoMarkdown(comment)}\n`
+            const highlightNoteLine = commentWithImageLinks
+                ? `  - **Note** \n    - ${convertHTMLintoMarkdown(
+                      commentWithImageLinks,
+                  )}\n`
                 : ''
             const highlightSpacesLine = annotationSpaces
                 ? `  - **Spaces:** ${annotationSpaces}\n`
@@ -1090,24 +1127,19 @@ export class PKMSyncBackgroundModule {
         }
     }
 }
-function convertHTMLintoMarkdown(html) {
-    let turndownService = new TurndownService({
-        headingStyle: 'atx',
-        hr: '---',
-        codeBlockStyle: 'fenced',
-    })
 
-    // Add a rule for handling paragraphs to remove extra newlines
-    turndownService.addRule('paragraph', {
-        filter: 'p',
-        replacement: function (content) {
-            // Trim the content to remove leading and trailing whitespace
-            // and return the content with a single newline at the end
-            return content.trim() + '\n'
-        },
+function convertHTMLintoMarkdown(html: string) {
+    let markdown = htmlToMarkdown(html, (turndownService) => {
+        // Add a rule for handling paragraphs to remove extra newlines
+        turndownService.addRule('paragraph', {
+            filter: 'p',
+            replacement: function (content) {
+                // Trim the content to remove leading and trailing whitespace
+                // and return the content with a single newline at the end
+                return content.trim() + '\n'
+            },
+        })
     })
-
-    let markdown = turndownService.turndown(html)
 
     // The following replacements might not be necessary anymore if the custom rule handles the conversion correctly
     markdown = markdown.replace(/[\\](?!\n)/g, '')

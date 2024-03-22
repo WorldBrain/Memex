@@ -187,7 +187,7 @@ export function abbreviateName(originalName?: string, options?: {}): string {
             continue
         }
         const firstChar = name[0].toUpperCase()
-        abbreviateName += firstChar + '.'
+        abbreviateName += firstChar + '. '
     }
     return abbreviateName
 }

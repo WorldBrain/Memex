@@ -1,23 +1,24 @@
-import { browser } from 'webextension-polyfill-ts'
 import { getPkmSyncKey } from './utils'
-import { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
+import type { Storage } from 'webextension-polyfill'
+import type { LocalFolder } from 'src/sidebar/annotations-sidebar/containers/types'
 
 export class MemexLocalBackend {
-    private url
-
-    constructor({ url }: { url: string }) {
-        this.url = url
-    }
+    constructor(
+        private deps: {
+            url: string
+            storageAPI: Storage.Static
+        },
+    ) {}
 
     async isConnected() {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
         })
 
         try {
-            const response = await fetch(`${this.url}/status`, {
+            const response = await fetch(`${this.deps.url}/status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -37,14 +38,14 @@ export class MemexLocalBackend {
         }
     }
     async isReadyToSync() {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
         })
 
         try {
-            const response = await fetch(`${this.url}/status`, {
+            const response = await fetch(`${this.deps.url}/status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -70,11 +71,15 @@ export class MemexLocalBackend {
 
     async bufferPKMSyncItems(itemToBuffer) {
         // Get the current buffer from browser.storage.local
-        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        const data = await this.deps.storageAPI.local.get(
+            'PKMSYNCbufferedItems',
+        )
         const currentBuffer = data.PKMSYNCbufferedItems || []
 
         if (currentBuffer.length > 2000) {
-            await browser.storage.local.set({ PKMSYNCbufferMaxReached: true })
+            await this.deps.storageAPI.local.set({
+                PKMSYNCbufferMaxReached: true,
+            })
             return
         }
 
@@ -82,16 +87,20 @@ export class MemexLocalBackend {
         currentBuffer.push(itemToBuffer)
 
         // Save the updated buffer back to browser.storage.local
-        await browser.storage.local.set({ PKMSYNCbufferedItems: currentBuffer })
+        await this.deps.storageAPI.local.set({
+            PKMSYNCbufferedItems: currentBuffer,
+        })
     }
 
     async getBufferedItems() {
         // Check for buffered items in browser.storage.local
-        const data = await browser.storage.local.get('PKMSYNCbufferedItems')
+        const data = await this.deps.storageAPI.local.get(
+            'PKMSYNCbufferedItems',
+        )
         const bufferedItems = data.PKMSYNCbufferedItems || []
 
         // After retrieving the buffered items, delete them from local storage
-        await browser.storage.local.remove('PKMSYNCbufferedItems')
+        await this.deps.storageAPI.local.remove('PKMSYNCbufferedItems')
 
         return bufferedItems
     }
@@ -101,7 +110,7 @@ export class MemexLocalBackend {
         fileContent: string,
         pkmType: string,
     ): Promise<any> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             pageTitle: fileName,
@@ -110,7 +119,7 @@ export class MemexLocalBackend {
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/update-file`, {
+        const response = await fetch(`${this.deps.url}/update-file`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
@@ -119,7 +128,7 @@ export class MemexLocalBackend {
         })
 
         if (response.ok) {
-            await browser.storage.local.set({
+            await this.deps.storageAPI.local.set({
                 PKMSYNCsyncWasSetupBefore: true,
             })
         }
@@ -130,7 +139,7 @@ export class MemexLocalBackend {
     }
 
     async vectorIndexDocument(document): Promise<any> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
         let body
 
         if (document.contentType === 'annotation') {
@@ -145,7 +154,7 @@ export class MemexLocalBackend {
                 syncKey: syncKey,
             }
 
-            const response = await fetch(`${this.url}/add_annotation`, {
+            const response = await fetch(`${this.deps.url}/add_annotation`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,7 +180,7 @@ export class MemexLocalBackend {
                 syncKey: syncKey,
             }
 
-            const response = await fetch(`${this.url}/add_page`, {
+            const response = await fetch(`${this.deps.url}/add_page`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -188,7 +197,7 @@ export class MemexLocalBackend {
         }
     }
     async findSimilar(document?, fullUrl?): Promise<any> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = {
             contentText: document,
@@ -197,7 +206,7 @@ export class MemexLocalBackend {
         }
 
         try {
-            const response = await fetch(`${this.url}/get_similar`, {
+            const response = await fetch(`${this.deps.url}/get_similar`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -229,14 +238,14 @@ export class MemexLocalBackend {
             feedFavIcon?: string
         }[],
     ): Promise<any> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             feedSources: feedSources,
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/add_feed_source`, {
+        const response = await fetch(`${this.deps.url}/add_feed_source`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -255,13 +264,13 @@ export class MemexLocalBackend {
         }
     }
     async loadFeedSources(): Promise<any> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/load_feed_sources`, {
+        const response = await fetch(`${this.deps.url}/load_feed_sources`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -280,7 +289,7 @@ export class MemexLocalBackend {
     }
 
     async listObjects(): Promise<string[]> {
-        const response = await fetch(`${this.url}/backup/change-sets`)
+        const response = await fetch(`${this.deps.url}/backup/change-sets`)
         if (response.status === 404) {
             return []
         }
@@ -298,7 +307,7 @@ export class MemexLocalBackend {
     }
 
     async retrievePage(fileName: string, pkmType: string) {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         let body = {
             pageTitle: fileName,
@@ -306,7 +315,7 @@ export class MemexLocalBackend {
             syncKey: syncKey,
         }
 
-        const response = await fetch(`${this.url}/get-file-content`, {
+        const response = await fetch(`${this.deps.url}/get-file-content`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -324,18 +333,18 @@ export class MemexLocalBackend {
 
     async retrieveIndexFile(object: string) {
         return (
-            await fetch(`${this.url}/Memex Sync/Memex Sync History.md`)
+            await fetch(`${this.deps.url}/Memex Sync/Memex Sync History.md`)
         ).json()
     }
 
     async addLocalFolder(): Promise<LocalFolder> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/watch_new_folder`, {
+        const response = await fetch(`${this.deps.url}/watch_new_folder`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -355,13 +364,13 @@ export class MemexLocalBackend {
         }
     }
     async getLocalFolders(): Promise<LocalFolder[]> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
         })
 
-        const response = await fetch(`${this.url}/fetch_all_folders`, {
+        const response = await fetch(`${this.deps.url}/fetch_all_folders`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -383,14 +392,14 @@ export class MemexLocalBackend {
     }
 
     async openLocalFile(path: string): Promise<void> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
             path: path,
         })
 
-        const response = await fetch(`${this.url}/open_file`, {
+        const response = await fetch(`${this.deps.url}/open_file`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -409,14 +418,14 @@ export class MemexLocalBackend {
     }
 
     async removeFeedSource(feedUrl: string): Promise<void> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
             feedUrl: feedUrl,
         })
 
-        const response = await fetch(`${this.url}/remove_feed_source`, {
+        const response = await fetch(`${this.deps.url}/remove_feed_source`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -435,20 +444,23 @@ export class MemexLocalBackend {
     }
 
     async removeLocalFolder(id: number): Promise<void> {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
             id: id,
         })
 
-        const response = await fetch(`${this.url}/remove_folder_to_watch`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
+        const response = await fetch(
+            `${this.deps.url}/remove_folder_to_watch`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: body,
             },
-            body: body,
-        })
+        )
 
         if (response.ok) {
             const responseObj = await response.json()
