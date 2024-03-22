@@ -195,7 +195,7 @@ export const MLA_EDITION_9: Template = {
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 9,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}}, {{etAL}}{{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{#isPrimary}}{{{EntityName}}}, {{{EntityAdditionalName}}}{{/isPrimary}}{{#showEtAl}}, et al. {{/showEtAl}} {{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMM. YYYY{{/PageReleaseDate}}, {{#PageJournalPage}} pp. {{{PageJournalPage}}}.{{/PageJournalPage}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 // still missing abbreviated first names and lists "Jeffery, E.H. and Araya, M. "
@@ -205,7 +205,7 @@ export const HARVARD_EDITION_12: Template = {
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 10,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityName}}}, {{{EntityAdditionalName}}} {{etAL}}{{/PageEntities}} "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{#isPrimary}}{{{EntityName}}}, {{{EntityAdditionalName}}}{{/isPrimary}}{{#showEtAl}} _et al._ {{/showEtAl}} {{/PageEntities}} ({{#PageReleaseDate}}YYYY{{/PageReleaseDate}}), '{{{PageTitle}}},' _{{{PageJournalName}}}_, {{{PageJournalVolume}}}({{{PageJournalIssue}}}). {{#PageJournalPage}} pp. {{{PageJournalPage}}}.{{/PageJournalPage}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 // still missing abbreviated first names names and lists "E. H. Jeffery and M. Araya,"
@@ -215,7 +215,7 @@ export const IEEE: Template = {
     isFavourite: false,
     order: DEFAULT_KEY + DEFAULT_SPACE_BETWEEN * 10,
     outputFormat: 'rich-text',
-    code: `{{#PageEntities}}{{{EntityAdditionalNameShort}}} {{{EntityName}}},  {{#secondLast}} and {{/secondLast}}{{/PageEntities}}, "{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMMM YYYY{{/PageReleaseDate}}, pp. {{{PageJournalPage}}} https://doi.org/{{{PageDOI}}}.`,
+    code: `{{#PageEntities}}{{{EntityAdditionalNameShort}}} {{{EntityName}}},  {{#secondLast}} and {{/secondLast}}{{/PageEntities}}"{{{PageTitle}}}." _{{{PageJournalName}}}_, vol. {{{PageJournalVolume}}}, no. {{{PageJournalIssue}}}, {{#PageReleaseDate}}MMM. YYYY{{/PageReleaseDate}}{{#PageJournalPage}}, pp. {{{PageJournalPage}}}{{/PageJournalPage}} https://doi.org/{{{PageDOI}}}.`,
 }
 
 export const DEFAULT_TEMPLATES = [
