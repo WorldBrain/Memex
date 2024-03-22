@@ -57,6 +57,16 @@ async function main() {
 
     const firebase = getFirebase()
 
+    // Set up incoming FCM handling logic (`onBackgroundMessage` wraps the SW `push` event)
+    const pushMessagingClient = new PushMessagingClient()
+    onBackgroundMessage(getMessaging(), (message) => {
+        const payload = message.data as PushMessagePayload
+        if (payload == null) {
+            return
+        }
+        pushMessagingClient.handleIncomingMessage(payload)
+    })
+
     const localStorageChangesManager = new StorageChangesManager({
         storage: browser.storage,
     })
@@ -135,6 +145,7 @@ async function main() {
         backendEnv:
             process.env.NODE_ENV === 'production' ? 'production' : 'staging',
     })
+    pushMessagingClient.bgModules = backgroundModules
 
     registerBackgroundModuleCollections({
         storageManager,
@@ -144,27 +155,13 @@ async function main() {
     // NOTE: This is a hack to manually init Dexie, which is synchronous, before needing to do the async storex init calls.
     //  Doing this as all event listeners need to be set up synchronously, before any async logic happens. AND to avoid needing to update storex yet.
     ;(storageManager.backend as DexieStorageBackend)._onRegistryInitialized()
-
-    await storageManager.finishInitialization()
-    await persistentStorageManager.finishInitialization()
-
     const { setStorageLoggingEnabled } = setStorageMiddleware(
         storageManager,
         backgroundModules,
     )
 
-    // Set up incoming FCM handling logic (`onBackgroundMessage` wraps the SW `push` event)
-    const pushMessagingClient = new PushMessagingClient({
-        bgModules: backgroundModules,
-    })
-    onBackgroundMessage(getMessaging(), (message) => {
-        const payload = message.data as PushMessagePayload
-        if (payload == null) {
-            return
-        }
-
-        pushMessagingClient.handleIncomingMessage(payload)
-    })
+    await storageManager.finishInitialization()
+    await persistentStorageManager.finishInitialization()
 
     await setupBackgroundModules(backgroundModules, storageManager, browser)
 
