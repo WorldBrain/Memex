@@ -11,6 +11,7 @@ import type {
     AnnotationsSearchResponse,
     BackgroundSearchParams,
     AnnotPage,
+    UnifiedSearchParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
@@ -25,15 +26,20 @@ import {
     LocationSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
 import { trackSearchExecution } from '@worldbrain/memex-common/lib/analytics/events'
-import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
+import type {
+    Annotation,
+    Bookmark,
+    Visit,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+
+const dayMs = 1000 * 60 * 60 * 24
 
 export default class SearchBackground {
     storage: SearchStorage
     searchIndex: SearchIndex
     private queryBuilderFactory: () => QueryBuilder
-    public remoteFunctions: {
-        search: SearchInterface
-    }
+    public remoteFunctions: SearchInterface
 
     static handleSearchError(e: SearchError) {
         if (e instanceof BadTermError) {
@@ -82,34 +88,130 @@ export default class SearchBackground {
             legacySearch: this.searchIndex.fullSearch,
         })
 
-        this.initRemoteFunctions()
-    }
-
-    private initRemoteFunctions() {
         this.remoteFunctions = {
-            search: {
-                search: this.searchIndex.search,
-                suggest: this.storage.suggest,
-                extendedSuggest: this.storage.suggestExtended,
+            unifiedSearch: this.unifiedSearch,
+            search: this.searchIndex.search,
+            suggest: this.storage.suggest,
+            extendedSuggest: this.storage.suggestExtended,
 
-                delPages: this.options.pages.delPages.bind(this.options.pages),
-                delPagesByDomain: this.options.pages.delPagesByDomain.bind(
-                    this.options.pages,
-                ),
-                delPagesByPattern: this.options.pages.delPagesByPattern.bind(
-                    this.options.pages,
-                ),
+            delPages: this.options.pages.delPages.bind(this.options.pages),
+            delPagesByDomain: this.options.pages.delPagesByDomain.bind(
+                this.options.pages,
+            ),
+            delPagesByPattern: this.options.pages.delPagesByPattern.bind(
+                this.options.pages,
+            ),
 
-                getMatchingPageCount: this.searchIndex.getMatchingPageCount,
-                searchAnnotations: this.searchAnnotations.bind(this),
-                searchPages: this.searchPages.bind(this),
-                searchSocial: this.searchSocial.bind(this),
-            },
+            getMatchingPageCount: this.searchIndex.getMatchingPageCount,
+            searchAnnotations: this.searchAnnotations.bind(this),
+            searchPages: this.searchPages.bind(this),
+            searchSocial: this.searchSocial.bind(this),
         }
     }
 
     setupRemoteFunctions() {
-        makeRemotelyCallable(this.remoteFunctions.search)
+        makeRemotelyCallable(this.remoteFunctions)
+    }
+
+    private async unifiedBlankSearch(
+        params: Pick<UnifiedSearchParams, 'fromWhen' | 'untilWhen'> & {
+            minResultLimit: number
+            daysToSearch: number
+        },
+    ) {
+        let resultsExhausted = false
+        let lowerBound = params.fromWhen
+        let upperBound = params.untilWhen
+        const calcQuery = () => ({ $gt: lowerBound, $lt: upperBound })
+
+        let resultCount = 0
+        const pageToAnnotIds = new Map<
+            string,
+            {
+                timestamp: number
+                annotIds: Set<string>
+            }
+        >()
+        while (resultCount < params.minResultLimit) {
+            const [annotations, visits, bookmarks] = await Promise.all([
+                this.options.storageManager
+                    .collection('annotations')
+                    .findObjects({ lastEdited: calcQuery() }) as Promise<
+                    Annotation[]
+                >,
+                this.options.storageManager
+                    .collection('visits')
+                    .findObjects({ time: calcQuery() }) as Promise<Visit[]>,
+                this.options.storageManager
+                    .collection('bookmarks')
+                    .findObjects({ time: calcQuery() }) as Promise<Bookmark[]>,
+            ])
+
+            if (!annotations.length && !visits.length && !bookmarks.length) {
+                resultsExhausted = true
+                break
+            }
+
+            for (const { url, time } of [...bookmarks, ...visits]) {
+                const existing = pageToAnnotIds.get(url) ?? {
+                    timestamp: 0,
+                    annotIds: new Set(),
+                }
+                // Only keep track of the latest visit/bookmark time if it's newer than anything seen so far
+                if (time > existing.timestamp) {
+                    pageToAnnotIds.set(url, { ...existing, timestamp: time })
+                }
+            }
+            resultCount += pageToAnnotIds.size
+
+            for (const annot of annotations) {
+                resultCount += 1
+                const existing = pageToAnnotIds.get(annot.pageUrl) ?? {
+                    timestamp: 0,
+                    annotIds: new Set(),
+                }
+                // Only keep track of the latest annot time if it's newer than anything seen so far
+                if (annot.lastEdited.valueOf() > existing.timestamp) {
+                    existing.timestamp = annot.lastEdited.valueOf()
+                }
+                existing.annotIds.add(annot.url)
+                pageToAnnotIds.set(annot.pageUrl, existing)
+            }
+
+            // If we've passed the limit then let's truncate our results so far, and finish keeping track of how far we got
+            if (resultCount >= params.minResultLimit) {
+                // TODO: "Truncate" the pageToAnnotIds map to only contain minResultLimit results (sum of both pages and annots)
+                // lowerBound = the oldest result's timestamp
+                // break
+            }
+
+            upperBound = lowerBound
+            lowerBound = Math.max(lowerBound - params.daysToSearch * dayMs, 0)
+        }
+
+        return {
+            resultsExhausted,
+            pageToAnnotIds,
+            oldestResultTimestamp: lowerBound,
+        }
+    }
+
+    unifiedSearch: SearchInterface['unifiedSearch'] = async (params) => {
+        // if (!params.query.trim().length) {
+        const result = await this.unifiedBlankSearch({
+            ...params,
+            daysToSearch: 3,
+            minResultLimit: 10,
+        })
+
+        // TODO: Sort the pageToAnnotsIds Map by:
+        //  - annot.lastEdited, if there are annots.
+        //  - visit, if there are annots.
+
+        console.log('result:', result)
+        return null
+        // }
+        // return null
     }
 
     private processSearchParams(

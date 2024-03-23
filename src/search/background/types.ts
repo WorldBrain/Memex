@@ -169,6 +169,8 @@ export interface SearchBackend {
 }
 
 export interface SearchInterface {
+    unifiedSearch: (params: UnifiedSearchParams) => Promise<UnifiedSearchResult>
+
     search: SearchIndex['search']
     searchAnnotations: (
         params: BackgroundSearchParams,
@@ -187,4 +189,17 @@ export interface SearchInterface {
     delPagesByDomain: PageIndexingBackground['delPagesByDomain']
     delPagesByPattern: PageIndexingBackground['delPagesByPattern']
     getMatchingPageCount: SearchIndex['getMatchingPageCount']
+}
+
+export type UnifiedSearchParams = {
+    query: string
+    fromWhen?: number
+    untilWhen?: number
+    resultPage: number
+}
+
+export type UnifiedSearchResult = {
+    pages: AnnotPage[]
+    totalCount: number
+    resultsExhausted: boolean
 }

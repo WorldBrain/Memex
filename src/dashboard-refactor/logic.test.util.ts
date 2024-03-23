@@ -198,7 +198,7 @@ export async function setupTest(
                     { ...fnArgs, skipPageIndexing: true },
                 ),
         },
-        searchBG: device.backgroundModules.search.remoteFunctions.search,
+        searchBG: device.backgroundModules.search.remoteFunctions,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
         contentShareByTabsBG: insertBackgroundFunctionTab(
             device.backgroundModules.contentSharing.remoteFunctionsByTab,
