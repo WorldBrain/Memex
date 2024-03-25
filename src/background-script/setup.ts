@@ -105,6 +105,7 @@ import { ImageSupportBackground } from 'src/image-support/background'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
 import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
+import { browser } from 'webextension-polyfill-ts'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -762,6 +763,7 @@ export async function setupBackgroundModules(
     setImportStateManager(
         new ImportStateManager({
             storageManager,
+            browserAPIs,
         }),
     )
     setupImportBackgroundModule({

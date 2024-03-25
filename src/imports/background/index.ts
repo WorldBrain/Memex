@@ -6,7 +6,7 @@ import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
-import type { Runtime, Storage } from 'webextension-polyfill'
+import type { Runtime, Storage } from 'webextension-polyfill-ts'
 
 // Constants
 export const importStateStorageKey = 'import_items'

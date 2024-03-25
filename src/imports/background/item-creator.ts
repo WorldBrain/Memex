@@ -4,6 +4,7 @@ import { isLoggable } from 'src/activity-logger'
 import { IMPORT_TYPE as TYPE } from 'src/options/imports/constants'
 import DataSources from './data-sources'
 import { chunk } from 'src/util/chunk'
+import { Browser } from 'webextension-polyfill'
 
 // Binds an import type to a function that transforms a history/bookmark doc to an import item.
 const deriveImportItem = (type) => (item) => ({
@@ -72,10 +73,12 @@ export default class ImportItemCreator {
      * @param {ItemCreatorParams} args
      */
     constructor({
+        browserAPIs,
         limits = ImportItemCreator.DEF_LIMITS,
-        dataSources = new DataSources({}),
+        dataSources = new DataSources({ browserAPIs: browserAPIs }),
         existingKeySource,
     }: {
+        browserAPIs: Browser
         limits?: any
         dataSources?: DataSources
         existingKeySource: () => Promise<{

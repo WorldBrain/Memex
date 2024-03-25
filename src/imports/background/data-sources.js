@@ -9,6 +9,7 @@ import {
     startOfDay,
     WEEK_IN_MS,
 } from '@worldbrain/memex-common/lib/utils/date-time'
+import { browser } from 'webextension-polyfill-ts'
 
 const getDirNestedCollectionName = (dirNode) => {
     const parentCollectionName = dirNode.collectionName ?? ''
@@ -39,14 +40,10 @@ export default class ImportDataSources {
         }
     }
 
-    constructor({
-        history = typeof browser !== 'undefined' ? browser.history : undefined,
-        bookmarks = typeof browser !== 'undefined'
-            ? browser.bookmarks
-            : undefined,
-    }) {
+    constructor({ history = null, bookmarks = null, browserAPIs = null }) {
         this._history = history
         this._bookmarks = bookmarks
+        this.browserAPIs = browserAPIs
     }
 
     _createHistParams = (time) => ({
@@ -81,9 +78,10 @@ export default class ImportDataSources {
         if (!dirNode) {
             dirNode = this.ROOT_BM
         }
-
         // Folders don't contain `url`; recurse!
-        const children = await this._bookmarks.getChildren(dirNode.id)
+        const children = await this.browserAPIs.bookmarks.getChildren(
+            dirNode.id,
+        )
 
         // Split into folders and bookmarks
         const childGroups = children.reduce(
