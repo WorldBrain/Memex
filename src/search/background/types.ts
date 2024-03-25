@@ -1,8 +1,8 @@
-import { User } from 'src/social-integration/types'
-import SearchStorage from './storage'
-import { SearchIndex } from '../types'
-import { Annotation } from 'src/annotations/types'
-import { PageIndexingBackground } from 'src/page-indexing/background'
+import type { User } from 'src/social-integration/types'
+import type SearchStorage from './storage'
+import type { SearchIndex } from '../types'
+import type { Annotation } from 'src/annotations/types'
+import type { PageIndexingBackground } from 'src/page-indexing/background'
 
 export interface AnnotPage {
     url: string
@@ -10,16 +10,11 @@ export interface AnnotPage {
     fullPdfUrl?: string
     title?: string
     hasBookmark: boolean
-    /** Object URL to the in-memory location of the assoc. screenshot. */
-    screenshot?: string
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string
     displayTime?: number
-    /** Total count of annots associated with this page. (regardless of search) */
-    annotsCount: number
     annotations: Annotation[]
     pageId?: string
-    tags: string[]
     lists: number[]
     text: string
 }
@@ -200,6 +195,5 @@ export type UnifiedSearchParams = {
 
 export type UnifiedSearchResult = {
     pages: AnnotPage[]
-    totalCount: number
     resultsExhausted: boolean
 }

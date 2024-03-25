@@ -30,10 +30,28 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type {
     Annotation,
     Bookmark,
+    Page,
     Visit,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 
 const dayMs = 1000 * 60 * 60 * 24
+
+type UnifiedBlankSearchResult = {
+    oldestResultTimestamp: number
+    resultsExhausted: boolean
+    pageToAnnotIds: Map<
+        string,
+        {
+            timestamp: number
+            annotIds: Set<string>
+        }
+    >
+}
+
+type UnifiedSearchLookupData = {
+    pages: Map<string, Omit<AnnotPage, 'lists' | 'annotations' | 'hasBookmark'>>
+    annotations: Map<string, Annotation>
+}
 
 export default class SearchBackground {
     storage: SearchStorage
@@ -118,20 +136,15 @@ export default class SearchBackground {
             minResultLimit: number
             daysToSearch: number
         },
-    ) {
+    ): Promise<UnifiedBlankSearchResult> {
         let resultsExhausted = false
         let lowerBound = params.fromWhen
         let upperBound = params.untilWhen
         const calcQuery = () => ({ $gt: lowerBound, $lt: upperBound })
 
         let resultCount = 0
-        const pageToAnnotIds = new Map<
-            string,
-            {
-                timestamp: number
-                annotIds: Set<string>
-            }
-        >()
+        // TODO: Make annots an array, not set
+        const pageToAnnotIds: UnifiedBlankSearchResult['pageToAnnotIds'] = new Map()
         while (resultCount < params.minResultLimit) {
             const [annotations, visits, bookmarks] = await Promise.all([
                 this.options.storageManager
@@ -190,28 +203,84 @@ export default class SearchBackground {
         }
 
         return {
-            resultsExhausted,
             pageToAnnotIds,
+            resultsExhausted,
             oldestResultTimestamp: lowerBound,
         }
     }
 
     unifiedSearch: SearchInterface['unifiedSearch'] = async (params) => {
-        // if (!params.query.trim().length) {
-        const result = await this.unifiedBlankSearch({
-            ...params,
-            daysToSearch: 3,
-            minResultLimit: 10,
-        })
+        let result: UnifiedBlankSearchResult
+        if (!params.query.trim().length) {
+            result = await this.unifiedBlankSearch({
+                ...params,
+                daysToSearch: 3,
+                minResultLimit: 10,
+            })
+        } else {
+            throw new Error('TODO: Implement terms search')
+        }
 
-        // TODO: Sort the pageToAnnotsIds Map by:
-        //  - annot.lastEdited, if there are annots.
-        //  - visit, if there are annots.
+        const dataLookups = await this.lookupDataForUnifiedResults(result)
+        const sortedResultPages = [...result.pageToAnnotIds].sort(
+            ([, a], [, b]) => b.timestamp - a.timestamp,
+        )
+        const mappedAnnotPages = sortedResultPages
+            .map(([pageId, { annotIds }]) => {
+                const page = dataLookups.pages.get(pageId)
+                if (!page) {
+                    throw new Error(
+                        'Search error: Missing page data for search result',
+                    )
+                }
+                return {
+                    ...page,
+                    lists: [], // TODO: lookup lists
+                    hasBookmark: false, // TODO: lookup bookmark
+                    annotations: [...annotIds]
+                        .map((annotId) => dataLookups.annotations.get(annotId))
+                        .filter(Boolean),
+                }
+            })
+            .filter(Boolean)
 
-        console.log('result:', result)
-        return null
-        // }
-        // return null
+        return {
+            pages: mappedAnnotPages,
+            resultsExhausted: result.resultsExhausted,
+        }
+    }
+
+    private async lookupDataForUnifiedResults({
+        pageToAnnotIds,
+    }: UnifiedBlankSearchResult): Promise<UnifiedSearchLookupData> {
+        const lookups: UnifiedSearchLookupData = {
+            annotations: new Map(),
+            pages: new Map(),
+        }
+
+        const pageIds = [...pageToAnnotIds.keys()]
+        const pageData: Page[] = await this.options.storageManager
+            .collection('pages')
+            .findObjects({
+                url: { $in: pageIds },
+            })
+
+        const annotIdForAllPages = [...pageToAnnotIds.values()].flatMap(
+            ({ annotIds }) => annotIds,
+        )
+        const annotIds = new Set<string>()
+        for (const annotIds of annotIdForAllPages) {
+            annotIds.forEach((annotId) => annotIds.add(annotId))
+        }
+        const annotData: Annotation[] = await this.options.storageManager
+            .collection('annotations')
+            .findObjects({
+                url: { $in: [...annotIds] },
+            })
+
+        pageData.map((p) => lookups.pages.set(p.url, p))
+        annotData.map((a) => lookups.annotations.set(a.url, a))
+        return lookups
     }
 
     private processSearchParams(

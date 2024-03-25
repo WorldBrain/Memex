@@ -150,14 +150,13 @@ const pageResultToPageData = (
         .filter((id) => id != null)
     return {
         lists,
-        tags: pageResult.tags,
         fullUrl: pageResult.fullUrl,
         fullTitle: pageResult.title,
         text: pageResult.text,
         normalizedUrl: pageResult.url,
         favIconURI: pageResult.favIcon,
         displayTime: pageResult.displayTime,
-        hasNotes: pageResult.annotsCount > 0,
+        hasNotes: pageResult.annotations.length > 0,
         type: isPdf ? 'pdf' : 'page',
         fullPdfUrl: isPdf ? pageResult.fullPdfUrl! : undefined,
     }

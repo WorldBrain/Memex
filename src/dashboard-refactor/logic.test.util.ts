@@ -116,13 +116,6 @@ export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> =
             })
         }
 
-        for (const tag of page.tags) {
-            await storageManager.collection('tags').createObject({
-                name: tag,
-                url: page.url,
-            })
-        }
-
         if (page.hasBookmark) {
             await storageManager.collection('bookmarks').createObject({
                 url: page.url,

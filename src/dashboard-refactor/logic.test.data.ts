@@ -25,10 +25,8 @@ const pageDataToSearchRes = (
         metadata?.notes?.map(({ note, metadata }) =>
             noteDataToSearchRes(note, page, metadata),
         ) ?? [],
-    annotsCount: metadata?.notes?.length ?? 0,
     displayTime: page.displayTime,
     lists: metadata?.lists ?? [],
-    tags: metadata?.tags ?? [],
     text: page?.text ?? '',
 })
 
@@ -59,7 +57,6 @@ export const PAGE_1: PageData = {
     displayTime: new Date('2020-11-26T01:00').getTime(),
     hasNotes: true,
     lists: [],
-    tags: [],
     type: 'page',
 }
 
@@ -70,7 +67,6 @@ export const PAGE_2: PageData = {
     displayTime: new Date('2020-11-26T05:00').getTime(),
     hasNotes: false,
     lists: [],
-    tags: [],
     type: 'page',
 }
 
@@ -81,7 +77,6 @@ export const PAGE_3: PageData = {
     displayTime: new Date('2020-11-26T05:10').getTime(),
     hasNotes: true,
     lists: [],
-    tags: [],
     type: 'page',
 }
 

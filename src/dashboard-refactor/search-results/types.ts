@@ -155,7 +155,7 @@ export interface NoteData {
 
 export type PageData = Pick<
     PipelineRes,
-    'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI' | 'text'
+    'fullUrl' | 'fullTitle' | 'favIconURI' | 'text'
 > & {
     normalizedUrl: string
     lists: string[]
