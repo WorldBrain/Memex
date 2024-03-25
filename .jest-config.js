@@ -21,6 +21,7 @@ module.exports = {
     moduleNameMapper: {
         '\\.(css|less)$': 'identity-obj-proxy',
         ...externalTsModuleMappings,
+        'linkedom/worker': 'linkedom',
     },
     moduleFileExtensions: ['js', 'jsx', 'ts', 'tsx'],
     setupFiles: ['jest-webextension-mock', './setupJest.js'],
