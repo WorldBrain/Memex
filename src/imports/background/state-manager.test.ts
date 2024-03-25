@@ -7,6 +7,7 @@ import { ImportItem } from './types'
 
 import * as urlLists from './url-list.test.data'
 import initData, { TestData, diff } from './state-manager.test.data'
+import { browser } from 'webextension-polyfill-ts'
 
 type ForEachChunkCb = (
     values: [string, ImportItem][],
@@ -26,6 +27,7 @@ const runSuite = (DATA: TestData) => () => {
         const dataSources = new DataSources({
             history: DATA.history as any,
             bookmarks: DATA.bookmarks as any,
+            browserAPIs: browser,
         })
 
         const itemCreator = new ItemCreator({
@@ -49,6 +51,7 @@ const runSuite = (DATA: TestData) => () => {
         const dataSources = new DataSources({
             history: [...DATA.history, ...DATA.history] as any,
             bookmarks: [] as any,
+            browserAPIs: browser,
         })
 
         const itemCreator = new ItemCreator({
