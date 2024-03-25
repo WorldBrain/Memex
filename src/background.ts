@@ -157,7 +157,7 @@ export async function main(): Promise<void> {
         backgroundModules,
     )
     __debugCounter++
-    await setupBackgroundModules(backgroundModules, storageManager)
+    await setupBackgroundModules(backgroundModules, storageManager, browser)
     __debugCounter++
 
     navigator?.storage

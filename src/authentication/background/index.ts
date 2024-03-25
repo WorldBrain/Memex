@@ -148,7 +148,11 @@ export class AuthBackground {
             },
         }
 
-        listenToWebAppMessage(this.authService, options.runtimeAPI)
+        listenToWebAppMessage(
+            this.authService,
+            options.runtimeAPI,
+            options.localStorageArea,
+        )
     }
 
     refreshUserInfo = async () => {

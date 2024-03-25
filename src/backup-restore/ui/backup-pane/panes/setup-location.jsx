@@ -1,5 +1,6 @@
 import React from 'react'
-import { checkServerStatus, changeBackupPath } from '../../utils'
+import browser from 'webextension-polyfill'
+import { checkServerStatus } from '../../utils'
 import PropTypes from 'prop-types'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
@@ -8,6 +9,7 @@ import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import ButtonBar from 'src/options/imports/components/ButtonBar'
+import { getFolder } from 'src/pkm-integrations/background/backend/utils'
 
 export default class SetupLocation extends React.Component {
     state = {
@@ -52,7 +54,7 @@ export default class SetupLocation extends React.Component {
 
     _proceedIfServerIsRunning = async () => {
         let overlay = null
-        const status = await checkServerStatus()
+        const status = await checkServerStatus({ storageAPI: browser.storage })
         if (status) {
             overlay = null
         } else {
@@ -64,7 +66,9 @@ export default class SetupLocation extends React.Component {
     }
 
     _handleChangeBackupPath = async () => {
-        const newBackupPath = await changeBackupPath()
+        const newBackupPath = await getFolder('backup', {
+            storageAPI: browser.storage,
+        })
 
         if (newBackupPath) {
             const { initialBackup, backendLocation, backupPath } = this.state

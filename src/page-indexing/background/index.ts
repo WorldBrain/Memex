@@ -24,7 +24,7 @@ import {
     isMemexPageAPdf,
     pickBestLocator,
 } from '@worldbrain/memex-common/lib/page-indexing/utils'
-
+import type { Browser } from 'webextension-polyfill'
 import PageStorage from './storage'
 import {
     PageAddRequest,
@@ -107,6 +107,7 @@ export class PageIndexingBackground {
             authBG: AuthBackground
             tabManagement: TabManagementBackground
             storageManager: StorageManager
+            browserAPIs: Pick<Browser, 'storage'>
             persistentStorageManager: StorageManager
             pageIndexingSettingsStore: BrowserSettingsStore<
                 LocalPageIndexingSettings
@@ -121,8 +122,9 @@ export class PageIndexingBackground {
         },
     ) {
         this.storage = new PageStorage({
-            storageManager: options.storageManager,
             pkmSyncBG: options.pkmSyncBG,
+            storageManager: options.storageManager,
+            ___storageAPI: options.browserAPIs.storage,
         })
         this.persistentStorage = new PersistentPageStorage({
             storageManager: options.persistentStorageManager,
@@ -717,7 +719,7 @@ export class PageIndexingBackground {
             (props.fullUrl.includes('web.telegram.org/') ||
                 props.fullUrl.includes('x.com/') ||
                 props.fullUrl.includes('twitter.com/')) &&
-            props.metaData.pageTitle
+            props.metaData?.pageTitle != null
         ) {
             pageData.fullTitle = props.metaData.pageTitle
         }
@@ -934,7 +936,7 @@ export class PageIndexingBackground {
             })
 
             pageDoc.favIconURI = favIconURI
-            pageDoc.content.title = content?.title || props.metaData.pageTitle
+            pageDoc.content.title = content?.title || props.metaData?.pageTitle
             pageDoc.content.fullText = content?.fullText
         } else {
             const pdfData = await this.options.fetchPdfData(props.fullUrl)

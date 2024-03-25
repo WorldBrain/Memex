@@ -6,18 +6,13 @@
     "background": {
         "scripts": ["lib/browser-polyfill.js", "background.js"]
     },
-    "permissions": [
-        "storage",
-        "<all_urls>",
-        "alarms",
-        "bookmarks",
-        "contextMenus",
-        "tabs",
-        "webNavigation",
-        "notifications",
-        "unlimitedStorage",
-        "clipboardWrite"
-    ],
+    "externally_connectable": {
+        "matches": [
+            "http://localhost:3000/*",
+            "https://staging.memex.social/*",
+            "https://memex.social/*"
+        ]
+    },
     "content_scripts": [
         {
             "matches": ["<all_urls>"],
@@ -40,6 +35,18 @@
         "48": "./img/browserIcons/logo-48.png",
         "128": "./img/browserIcons/logo-128.png"
     },
+    "permissions": [
+        "<all_urls>",
+        "alarms",
+        "bookmarks",
+        "contextMenus",
+        "tabs",
+        "webNavigation",
+        "notifications",
+        "unlimitedStorage",
+        "storage",
+        "clipboardWrite"
+    ],
     "web_accessible_resources": [
         "/lib/pdf.worker.min.js",
         "/img/*",
@@ -61,12 +68,5 @@
         "page": "./options.html#/settings",
         "open_in_tab": true
     },
-    "manifest_version": 2,
-    "externally_connectable": {
-        "matches": [
-            "http://localhost:3000/*",
-            "https://staging.memex.social/*",
-            "https://memex.social/*"
-        ]
-    }
+    "manifest_version": 2
 }

@@ -68,8 +68,8 @@ import { SyncSettingsBackground } from 'src/sync-settings/background'
 import { AuthServices, Services } from 'src/services/types'
 import { captureException } from 'src/util/raven'
 import { PDFBackground } from 'src/pdf/background'
-import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
-import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
+// import { FirebaseUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/firebase'
+// import { UserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/types'
 import {
     PersonalDeviceType,
     PersonalDeviceProduct,
@@ -105,6 +105,7 @@ import { ImageSupportBackground } from 'src/image-support/background'
 import { ImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/types'
 import { PdfUploadService } from '@worldbrain/memex-common/lib/pdf/uploads/service'
 import { dataUrlToBlob } from '@worldbrain/memex-common/lib/utils/blob-to-data-url'
+import { browser } from 'webextension-polyfill-ts'
 
 export interface BackgroundModules {
     analyticsBG: AnalyticsCoreInterface
@@ -141,7 +142,7 @@ export interface BackgroundModules {
     tabManagement: TabManagementBackground
     readwise: ReadwiseBackground
     activityStreams: ActivityStreamsBackground
-    userMessages: UserMessageService
+    // userMessages: UserMessageService
     personalCloud: PersonalCloudBackground
     imageSupport: ImageSupportBackground
     pkmSyncBG: PKMSyncBackgroundModule
@@ -170,7 +171,7 @@ export function createBackgroundModules(options: {
     auth?: AuthBackground
     analyticsManager: Analytics
     captureException?: typeof captureException
-    userMessageService?: UserMessageService
+    // userMessageService?: UserMessageService
     getNow?: () => number
     fetch: typeof fetch
     generateServerId?: (collectionName: string) => number | string
@@ -257,7 +258,9 @@ export function createBackgroundModules(options: {
     const getCurrentUserId = async (): Promise<AutoPk | null> =>
         (await auth.authService.getCurrentUser())?.id ?? null
 
-    const pkmSyncBG = new PKMSyncBackgroundModule()
+    const pkmSyncBG = new PKMSyncBackgroundModule({
+        browserAPIs: options.browserAPIs,
+    })
 
     const pages = new PageIndexingBackground({
         persistentStorageManager: options.persistentStorageManager,
@@ -267,6 +270,7 @@ export function createBackgroundModules(options: {
         ),
         fetchPageData: options.fetchPageData,
         fetchPdfData: options.fetchPDFData,
+        browserAPIs: options.browserAPIs,
         createInboxEntry,
         storageManager,
         tabManagement,
@@ -316,7 +320,7 @@ export function createBackgroundModules(options: {
         env: options.backendEnv,
     })
     const pdfBg = new PDFBackground({
-        webRequestAPI: options.browserAPIs.webRequest,
+        manifestVersion: options.manifestVersion,
         runtimeAPI: options.browserAPIs.runtime,
         storageAPI: options.browserAPIs.storage,
         tabsAPI: options.browserAPIs.tabs,
@@ -365,30 +369,34 @@ export function createBackgroundModules(options: {
         callFirebaseFunction,
     })
 
-    if (!options.userMessageService) {
-        const userMessagesService = new FirebaseUserMessageService({
-            firebase: getFirebase,
-            auth: { getCurrentUserId },
-        })
-        options.userMessageService = userMessagesService
-        userMessagesService.startListening({
-            auth: { events: auth.authService.events },
-            lastSeen: {
-                get: async () =>
-                    (
-                        await options.browserAPIs.storage.local.get(
-                            'userMessages.lastSeen',
-                        )
-                    ).lastUserMessageSeen,
-                set: async (value) => {
-                    await options.browserAPIs.storage.local.set({
-                        'userMessages.lastSeen': value,
-                    })
-                },
-            },
-        })
-    }
-    const userMessages = options.userMessageService
+    // NOTE: Commented this stuff out as it brought in a dep on FB Realtime Database, which we didn't
+    //  seem to be using anywhere, apart from setting the local storage lastSeen key here (which is unused).
+    //  Realtime DB seemed to try and ping FB very often to get the data, which started causing lots of errors in MV3
+    //  due to the stricter CSP.
+    // if (!options.userMessageService) {
+    //     const userMessagesService = new FirebaseUserMessageService({
+    //         firebase: getFirebase,
+    //         auth: { getCurrentUserId },
+    //     })
+    //     options.userMessageService = userMessagesService
+    //     userMessagesService.startListening({
+    //         auth: { events: auth.authService.events },
+    //         lastSeen: {
+    //             get: async () =>
+    //                 (
+    //                     await options.browserAPIs.storage.local.get(
+    //                         'userMessages.lastSeen',
+    //                     )
+    //                 ).lastUserMessageSeen,
+    //             set: async (value) => {
+    //                 await options.browserAPIs.storage.local.set({
+    //                     'userMessages.lastSeen': value,
+    //                 })
+    //             },
+    //         },
+    //     })
+    // }
+    // const userMessages = options.userMessageService
     const contentSharingBackend =
         options.contentSharingBackend ??
         firebaseService<ContentSharingBackend>(
@@ -430,11 +438,9 @@ export function createBackgroundModules(options: {
         tabManagement,
         contentSharing,
         contentSharingBackend,
-        queryTabs: bindMethod(options.browserAPIs.tabs, 'query'),
-        windows: options.browserAPIs.windows,
+        browserAPIs: options.browserAPIs,
         searchIndex: search.searchIndex,
         pages,
-        localBrowserStorage: options.browserAPIs.storage.local,
         authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
             directLinking,
@@ -571,6 +577,7 @@ export function createBackgroundModules(options: {
             pageActivityIndicatorBG: pageActivityIndicator,
             persistentStorageManager: options.persistentStorageManager,
             storageManager: options.storageManager,
+            browserAPIs: options.browserAPIs,
             pkmSyncBG,
             imageSupport: new ImageSupportBackground({
                 backend: options.imageSupportBackend,
@@ -641,6 +648,7 @@ export function createBackgroundModules(options: {
             storageManager,
             searchIndex: search.searchIndex,
             jobScheduler: jobScheduler.scheduler,
+            browserAPIs: options.browserAPIs,
             localBackupSettings: new BrowserSettingsStore(
                 options.browserAPIs.storage.local,
                 { prefix: 'localBackup.' },
@@ -728,7 +736,7 @@ export function createBackgroundModules(options: {
         }),
         copyPaster,
         activityStreams,
-        userMessages,
+        // userMessages,
         personalCloud,
         contentSharing,
         contentConversations: new ContentConversationsBackground({
@@ -748,12 +756,14 @@ export function createBackgroundModules(options: {
 export async function setupBackgroundModules(
     backgroundModules: BackgroundModules,
     storageManager: StorageManager,
+    browserAPIs: Browser,
 ) {
     backgroundModules.bgScript.setupWebExtAPIHandlers()
 
     setImportStateManager(
         new ImportStateManager({
             storageManager,
+            browserAPIs,
         }),
     )
     setupImportBackgroundModule({
@@ -761,6 +771,8 @@ export async function setupBackgroundModules(
         tagsModule: backgroundModules.tags,
         customListsModule: backgroundModules.customLists,
         bookmarks: backgroundModules.bookmarks,
+        runtimeAPI: browserAPIs.runtime,
+        storageAPI: browserAPIs.storage,
     })
 
     // TODO mv3: migrate web req APIs

@@ -2,22 +2,28 @@ import type { PushMessagePayload } from '@worldbrain/memex-common/lib/push-messa
 import type { BackgroundModules } from 'src/background-script/setup'
 
 export default class PushMessagingClient {
-    constructor(
-        private deps: {
-            bgModules: Pick<
-                BackgroundModules,
-                'personalCloud' | 'pageActivityIndicator'
-            >
-        },
-    ) {}
+    bgModules?: Pick<
+        BackgroundModules,
+        'personalCloud' | 'pageActivityIndicator'
+    >
 
-    async handleIncomingMessage(
+    handleIncomingMessage(
         payload: PushMessagePayload,
         opts?: { now?: number },
-    ): Promise<void> {
-        const { bgModules } = this.deps
+    ): void {
+        if (!this.bgModules) {
+            console.warn(
+                'BGModules not yet initialized - skipping incoming sync trigger message',
+            )
+            return
+        }
+
         if (payload.type === 'downloadClientUpdates') {
-            bgModules.personalCloud.triggerSyncContinuation()
+            this.bgModules.personalCloud.options.backend.events.emit(
+                'incomingChangesPending',
+                { changeCountDelta: 1 },
+            )
+            this.bgModules.personalCloud.triggerSyncContinuation()
         }
         // This is the setup for the old FCM-based implementation for page activity indicator
         // } else if (payload.type === 'createPageListEntry') {

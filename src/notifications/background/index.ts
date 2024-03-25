@@ -3,8 +3,7 @@ import NotificationStorage from './storage'
 import * as notifications from '../notifications'
 import createNotif from 'src/util/notifications'
 import { NotifDefinition } from '../types'
-import chrome from 'webextension-polyfill'
-
+import browser from 'webextension-polyfill'
 import StorageManager from '@worldbrain/storex'
 import type { RemoteNotificationsInterface } from './types'
 
@@ -131,7 +130,7 @@ export default class NotificationBackground {
                 },
                 () => {
                     if (url) {
-                        return chrome.tabs.create({
+                        return browser.tabs.create({
                             url,
                         })
                     }
@@ -142,7 +141,7 @@ export default class NotificationBackground {
 
     async deliverStaticNotifications() {
         const lastReleaseTime = (
-            await chrome.storage.local.get(
+            await browser.storage.local.get(
                 NotificationBackground.LAST_NOTIF_TIME,
             )
         )[NotificationBackground.LAST_NOTIF_TIME]
@@ -162,7 +161,7 @@ export default class NotificationBackground {
                             message: notification.system.message,
                         },
                         () => {
-                            return chrome.tabs.create({
+                            return browser.tabs.create({
                                 url,
                             })
                         },
@@ -187,7 +186,7 @@ export default class NotificationBackground {
             }
         }
 
-        chrome.storage.local.set({
+        browser.storage.local.set({
             [NotificationBackground.LAST_NOTIF_TIME]: Date.now(),
         })
     }

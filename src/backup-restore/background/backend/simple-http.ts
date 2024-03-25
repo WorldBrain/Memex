@@ -10,25 +10,27 @@ import {
     shouldWriteImages,
 } from 'src/backup-restore/background/backend/utils'
 import { getPkmSyncKey } from 'src/pkm-integrations/background/backend/utils'
-import chrome from 'webextension-polyfill'
+import type { Storage } from 'webextension-polyfill'
 
 export class MemexLocalBackend extends BackupBackend {
-    private url
-
-    constructor({ url }: { url: string }) {
+    constructor(
+        private deps: {
+            url: string
+            storageAPI: Storage.Static
+        },
+    ) {
         super()
-        this.url = url
     }
 
     async isConnected() {
-        const syncKey = await getPkmSyncKey()
+        const syncKey = await getPkmSyncKey(this.deps)
 
         const body = JSON.stringify({
             syncKey: syncKey,
         })
 
         try {
-            const response = await fetch(`${this.url}/status`, {
+            const response = await fetch(`${this.deps.url}/status`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -73,8 +75,10 @@ export class MemexLocalBackend extends BackupBackend {
     }
 
     async _writeToPath(url: string, body: string) {
-        const syncKey = await getPkmSyncKey()
-        const backupFolder = await chrome.storage.local.get('PKMSYNCpkmFolders')
+        const syncKey = await getPkmSyncKey(this.deps)
+        const backupFolder = await this.deps.storageAPI.local.get(
+            'PKMSYNCpkmFolders',
+        )
         const backupFolderPath = backupFolder.PKMSYNCpkmFolders.backupFolder
         let bodyJSON = JSON.parse(body)
         bodyJSON.syncKey = syncKey
@@ -82,7 +86,7 @@ export class MemexLocalBackend extends BackupBackend {
         bodyJSON = JSON.stringify(bodyJSON)
 
         try {
-            const response = await fetch(`${this.url}/${url}`, {
+            const response = await fetch(`${this.deps.url}/${url}`, {
                 method: 'PUT',
                 headers: {
                     'Content-Type': 'application/json',
@@ -143,7 +147,7 @@ export class MemexLocalBackend extends BackupBackend {
     }
 
     async listObjects(collection: string): Promise<string[]> {
-        const response = await fetch(`${this.url}/backup/${collection}`)
+        const response = await fetch(`${this.deps.url}/backup/${collection}`)
         if (response.status === 404) {
             return []
         }
@@ -162,7 +166,7 @@ export class MemexLocalBackend extends BackupBackend {
 
     async retrieveObject(collection: string, object: string) {
         return (
-            await fetch(`${this.url}/backup/${collection}/${object}`)
+            await fetch(`${this.deps.url}/backup/${collection}/${object}`)
         ).json()
     }
 }

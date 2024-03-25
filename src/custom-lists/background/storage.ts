@@ -45,6 +45,7 @@ import { ROOT_NODE_PARENT_ID } from '@worldbrain/memex-common/lib/content-sharin
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { OperationBatch } from '@worldbrain/storex'
 import { moveTree } from '@worldbrain/memex-common/lib/content-sharing/storage/move-tree'
+import type { Storage } from 'webextension-polyfill'
 
 const cleanListTree = (listTree: ListTree) => ({
     ...listTree,
@@ -65,7 +66,12 @@ export default class CustomListStorage extends StorageModule {
     static filterOutSpecialLists = (list: { name: string }) =>
         !Object.values<string>(SPECIAL_LIST_NAMES).includes(list.name)
 
-    constructor(private options: StorageModuleConstructorArgs) {
+    constructor(
+        private options: StorageModuleConstructorArgs & {
+            /** Please do not add new references to this. Access to be refactored to a higher level. */
+            ___storageAPI: Storage.Static
+        },
+    ) {
         super(options)
     }
 
@@ -921,7 +927,7 @@ export default class CustomListStorage extends StorageModule {
                 }
             }
 
-            if (isPkmSyncEnabled()) {
+            if (isPkmSyncEnabled({ storageAPI: this.options.___storageAPI })) {
                 try {
                     const pageToSave = await this.operation('findPageByUrl', {
                         url: normalizeUrl(fullUrl),
@@ -963,7 +969,7 @@ export default class CustomListStorage extends StorageModule {
         listId: number
         pageUrl: string
     }) {
-        if (isPkmSyncEnabled()) {
+        if (isPkmSyncEnabled({ storageAPI: this.options.___storageAPI })) {
             try {
                 const list = await this.fetchListById(listId)
                 const pageToSave = await this.operation('findPageByUrl', {

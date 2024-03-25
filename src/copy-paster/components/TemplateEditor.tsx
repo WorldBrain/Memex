@@ -105,9 +105,25 @@ const TemplateButtonOptions = [
         TooltipText: 'The first name of the Author',
     },
     {
+        buttonText: 'Author First Name Short',
+        insertedText: `{{{EntityAdditionalNameShort}}} `,
+        TooltipText: 'The first name of the Author, abbreviated with a dot',
+    },
+    {
         buttonText: 'Author Last Name',
         insertedText: `{{{EntityName}}} `,
         TooltipText: 'The first name of the Author',
+    },
+    {
+        buttonText: 'Author Last Name Short',
+        insertedText: `{{{EntityNameShort}}} `,
+        TooltipText: 'The first name of the Author, abbreviated with a dot',
+    },
+    {
+        buttonText: 'Add et al.',
+        insertedText: `{{#showEtAl}}, et al. {{/showEtAl}} `,
+        TooltipText:
+            'a string you can include that shows instead of secondary authors',
     },
     {
         buttonText: 'Page Link',
@@ -229,6 +245,26 @@ const TemplateButtonOptions = [
             <span>
                 The text between between elements will be shown
                 <br /> if the select variable is NOT available
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Bold Text',
+        insertedText: `{{#b}} {{/b}} `,
+        TooltipText: (
+            <span>
+                The text between between will be bold. <br /> Only include 1
+                variable at a time. <br /> You can also use double underscore __
+            </span>
+        ),
+    },
+    {
+        buttonText: 'Italic Text',
+        insertedText: `{{#i}} {{/i}} `,
+        TooltipText: (
+            <span>
+                The text between between will be bold. <br /> Only include 1
+                variable at a time. <br /> You can also use single underscore _
             </span>
         ),
     },

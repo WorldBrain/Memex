@@ -11,6 +11,7 @@ import type {
     TemplateDoc,
 } from './types'
 import fromPairs from 'lodash/fromPairs'
+import { defaultOrderableSorter } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { abbreviateName } from './utils'
 
 interface GeneratorInput {
@@ -100,16 +101,24 @@ const omitEmpty = <T extends any>(obj: T): T => {
     return clone
 }
 
-const genPageEntityTemplate = (totalEntities: number) => (
-    entity: PageEntity,
-    i: number,
-) => ({
-    EntityName: entity.name,
-    EntityAdditionalName: entity.additionalName,
-    EntityAdditionalNameShort: abbreviateName(entity.additionalName),
-    secondLast: i + 1 === totalEntities - 1,
-    last: i + 1 === totalEntities,
-})
+const genPageEntityTemplates = (entities: PageEntity[] = []) => {
+    const sorted = entities.sort((a, b) => {
+        const byOrder = defaultOrderableSorter(a, b)
+        const byPrimary = Number(b.isPrimary) - Number(a.isPrimary)
+        return byPrimary * byOrder
+    })
+
+    const lastPrimaryIndex = sorted.findIndex((entity) => !entity.isPrimary) - 1
+    return sorted.map((entity, i) => ({
+        EntityName: entity.name,
+        EntityAdditionalName: entity.additionalName,
+        EntityAdditionalNameShort: abbreviateName(entity.additionalName),
+        secondLast: i + 1 === entities.length - 1,
+        last: i + 1 === entities.length,
+        isPrimary: entity.isPrimary,
+        showEtAl: i === lastPrimaryIndex,
+    }))
+}
 
 // This function covers all single page cases + multi-page cases when no notes are referenced
 const generateForPages = async ({
@@ -232,8 +241,8 @@ const generateForPages = async ({
                 pageMetadata[normalizedPageUrl]?.accessDate,
             ),
 
-            PageEntities: pageEntities[normalizedPageUrl]?.map(
-                genPageEntityTemplate(pageEntities[normalizedPageUrl]?.length),
+            PageEntities: genPageEntityTemplates(
+                pageEntities[normalizedPageUrl],
             ),
 
             HasNotes: noteUrls.length > 0,
@@ -362,9 +371,7 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
-                PageEntities: pageEntities[pageUrl]?.map(
-                    genPageEntityTemplate(pageEntities[pageUrl]?.length),
-                ),
+                PageEntities: genPageEntityTemplates(pageEntities[pageUrl]),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -421,9 +428,7 @@ const generateForNotes = async ({
                 PageLink: pageLinks[pageUrl],
                 PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
 
-                PageEntities: pageEntities[pageUrl]?.map(
-                    genPageEntityTemplate(pageEntities[pageUrl]?.length),
-                ),
+                PageEntities: genPageEntityTemplates(pageEntities[pageUrl]),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -470,9 +475,7 @@ const generateForNotes = async ({
                     ? serializeDate(createdAt)
                     : undefined,
 
-                PageEntities: pageEntities[pageUrl]?.map(
-                    genPageEntityTemplate(pageEntities[pageUrl]?.length),
-                ),
+                PageEntities: genPageEntityTemplates(pageEntities[pageUrl]),
 
                 PageDOI: pageMetadata[pageUrl]?.doi,
                 PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -524,9 +527,7 @@ const generateForNotes = async ({
             url: fullUrl,
             tags: pageTags[pageUrl],
 
-            PageEntities: pageEntities[pageUrl]?.map(
-                genPageEntityTemplate[pageEntities[pageUrl]?.length],
-            ),
+            PageEntities: genPageEntityTemplates(pageEntities[pageUrl]),
 
             Notes: notesByPageUrl[pageUrl].map(
                 ({ url: noteUrl, body, comment, createdAt }) => ({

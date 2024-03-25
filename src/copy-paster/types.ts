@@ -71,6 +71,10 @@ export interface TemplateDocPageEntity {
     EntityName?: string
     EntityAdditionalName?: string
     EntityAdditionalNameShort?: string
+    secondLast?: boolean
+    isPrimary?: boolean
+    showEtAl?: boolean
+    last?: boolean
 }
 
 export interface TemplateAnalysis {

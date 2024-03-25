@@ -22,7 +22,6 @@ import type {
 import type { Visit, Bookmark, Tag, Page } from 'src/search'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { sortByPagePosition } from 'src/sidebar/annotations-sidebar/sorting'
-import TurndownService from 'turndown/src/turndown'
 import type {
     CustomList,
     PageEntity,

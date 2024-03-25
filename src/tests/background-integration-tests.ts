@@ -27,7 +27,6 @@ import { createMemoryServerStorage } from 'src/storage/server.tests'
 import { ServerStorage } from 'src/storage/types'
 import { Browser } from 'webextension-polyfill'
 import { createServices } from 'src/services'
-import { MemoryUserMessageService } from '@worldbrain/memex-common/lib/user-messages/service/memory'
 import {
     PersonalCloudBackend,
     PersonalCloudMediaBackend,
@@ -216,7 +215,7 @@ export async function setupBackgroundIntegrationTest(
     const pushMessagingService =
         options?.pushMessagingService ?? new MockPushMessagingService()
     let nextServerId = 1337
-    const userMessages = new MemoryUserMessageService()
+    // const userMessages = new MemoryUserMessageService()
     const getUserId = async () =>
         (await backgroundModules.auth.authService.getCurrentUser())?.id
     const personalCloudHub = new PersonalCloudHub()
@@ -232,7 +231,7 @@ export async function setupBackgroundIntegrationTest(
         services,
         authServices,
         fetch,
-        userMessageService: userMessages,
+        // userMessageService: userMessages,
         callFirebaseFunction: async (name, ...args) => {
             return callFirebaseFunction(name, ...args) as any
         },

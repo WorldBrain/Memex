@@ -1,13 +1,12 @@
 import delay from 'src/util/delay'
 import { whenPageLoadComplete, whenTabActive } from 'src/util/tab-events'
-import chrome from 'webextension-polyfill'
 
 // Take a screenshot of the tabId, if it is active.
 // Returns a promise of the screenshot (a png image in a data URL).
 // The promise rejects if the tab is not currently active!
 async function snapNow({ tabId }) {
-    const tab = await chrome.tabs.get(tabId)
-    let image = await chrome.tabs.captureVisibleTab(tab.windowId, {
+    const tab = await browser.tabs.get(tabId)
+    let image = await browser.tabs.captureVisibleTab(tab.windowId, {
         format: 'jpeg',
     })
     // Reduces the size of image to save space
