@@ -11,16 +11,6 @@ import {
 } from '@worldbrain/memex-common/lib/utils/date-time'
 import { browser } from 'webextension-polyfill-ts'
 
-const getDirNestedCollectionName = (dirNode) => {
-    const parentCollectionName = dirNode.collectionName ?? ''
-    const subCollectionName = dirNode.title ?? ''
-    const collectionName =
-        parentCollectionName !== ''
-            ? `${parentCollectionName} > ${subCollectionName}`
-            : subCollectionName
-    // if collectionName is empty, return undefined so that it can be in no collection
-    return collectionName || undefined
-}
 export default class ImportDataSources {
     static LOOKBACK_WEEKS = 12 // Browser history is limited to the last 3 months
 
@@ -87,13 +77,11 @@ export default class ImportDataSources {
         const childGroups = children.reduce(
             (prev, childNode) => {
                 const stateKey = !childNode.url ? 'dirs' : 'bms'
-                const collectionName = getDirNestedCollectionName(dirNode)
                 // only add to collection if it's not a dir
                 const newNode = {
                     ...childNode,
-                    collectionName,
-                    ...(collectionName && {
-                        collections: [collectionName],
+                    ...(childNode.parentId && {
+                        parentId: childNode.parentId,
                     }),
                 }
                 return {
