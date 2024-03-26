@@ -762,6 +762,7 @@ export async function setupBackgroundModules(
     setImportStateManager(
         new ImportStateManager({
             storageManager,
+            browserAPIs,
         }),
     )
     setupImportBackgroundModule({

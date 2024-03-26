@@ -8,6 +8,8 @@ import Processor from './item-processor'
 
 import * as urlLists from './url-list.test.data'
 import initData, { TestData, diff } from './state-manager.test.data'
+import browser from 'webextension-polyfill'
+import { Browser } from 'webextension-polyfill'
 
 jest.mock('src/blacklist/background/interface')
 jest.mock('src/activity-logger')
@@ -23,6 +25,7 @@ const runSuite = (DATA: TestData, skip = false) => () => {
         const dataSources = new DataSources({
             history: DATA.history as any,
             bookmarks: DATA.bookmarks as any,
+            browserAPIs: browser as Browser,
         })
 
         const itemCreator = new ItemCreator({
@@ -31,6 +34,7 @@ const runSuite = (DATA: TestData, skip = false) => () => {
                 histKeys: new Set(),
                 bmKeys: new Set(),
             }),
+            browserAPIs: browser as Browser,
         })
         stateManager = new ImportStateManager({
             storageManager: null,

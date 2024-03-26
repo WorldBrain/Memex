@@ -6,6 +6,17 @@ import TagsBackground from 'src/tags/background'
 import CustomListBackground from 'src/custom-lists/background'
 import { PageIndexingBackground } from 'src/page-indexing/background'
 import BookmarksBackground from 'src/bookmarks/background'
+import checkBrowser from 'src/util/check-browser'
+import browser from 'webextension-polyfill'
+
+type BookmarkNode = {
+    id: string
+    parentId: string
+    title: string
+    url?: string // Make url optional since folders won't have URLs
+    localListId?: number // Optional property for custom list ID
+    children?: BookmarkNode[] // Optional property for child nodes
+}
 
 /**
  * TransitionType strings that we care about in the context of the ext.
@@ -77,36 +88,35 @@ export default class ImportItemProcessor {
         })
     }
 
-    async _storeOtherData({ url, tags = [], collections, annotations }) {
+    /*
+    how to do it: 
+    Every item processed has a parentId and the collectionName as such. I need a representation of the entire tree with values for
+    - item processed bookmark id, item processed space Id, so that every new item processed can be added to the right space
+    Once an folder is processed first time and in that bookmarktree list, it will not be recreated again, however the first time it will. 
+    - when creating, check against their saved parentID to make it a subspace of that
+*/
+
+    async _storeOtherData({ url, spaceId }) {
         this._checkCancelled()
-        try {
-            const listIds = await this.options.customListsModule.createCustomLists(
-                {
-                    names: collections,
-                },
-            )
-            await Promise.all([
-                ...listIds.map(async (listId) => {
-                    await this.options.customListsModule.insertPageToList({
-                        id: listId,
-                        url,
-                        suppressVisitCreation: true,
-                    })
-                }),
-                ...tags.map(async (tag) => {
-                    await this.options.tagsModule
-                        .addTagToExistingUrl({
-                            url,
-                            tag,
-                        })
-                        .catch((e) => {}) // Lots of outside tags may violate our tag validity pattern; catch them and try others
-                }),
-            ])
-        } catch (e) {
-            console.error(e, url)
+        if (spaceId != null && url != null) {
+            try {
+                // Check if the parentId exists in this.spaceTree to find the corresponding spaceId
+                if (!spaceId) {
+                    console.error(`No spaceId found for parentId: ${spaceId}`)
+                    return
+                }
+
+                await this.options.customListsModule.insertPageToList({
+                    id: spaceId,
+                    url: url,
+                    suppressVisitCreation: true,
+                    skipPageIndexing: true,
+                })
+            } catch (e) {
+                console.error(e, url)
+            }
         }
     }
-
     /**
      * Handles processing of a bookmark import item. Checks for exisitng page docs that have the same URL.
      *
@@ -114,14 +124,19 @@ export default class ImportItemProcessor {
      * @returns {any} Status string denoting the outcome of import processing as `status`
      *  + optional filled-out page doc as `pageDoc` field.
      */
-    async _processBookmark(importItem, options: { indexTitle?: any } = {}) {
-        const { url, title, tags, collections, annotations } = importItem
+    async _processBookmark(
+        importItem,
+        spaceTreeMap,
+        options: { indexTitle?: any } = {},
+    ) {
+        const { url, title, parentId } = importItem
 
         const timeAdded = normalizeTimestamp(importItem.timeAdded)
 
         await this.options.pages.indexPage({
             fullUrl: importItem.url,
             skipUpdatePageCount: true,
+            metaData: { pageTitle: title },
         })
 
         await this.options.bookmarks.storage.createBookmarkIfNeeded(
@@ -129,7 +144,8 @@ export default class ImportItemProcessor {
             timeAdded ?? Date.now(),
         )
 
-        await this._storeOtherData({ url, tags, collections, annotations })
+        const spaceId = spaceTreeMap[parentId]
+        await this._storeOtherData({ url: importItem.url, spaceId: spaceId })
 
         this._checkCancelled()
         // If we finally got here without an error being thrown, return the success status message + pageDoc data
@@ -138,9 +154,10 @@ export default class ImportItemProcessor {
 
     async _processBookmarkWithTags(
         importItem,
+        spaceTreeMap,
         options: { indexTitle?: any } = {},
     ) {
-        const status = this._processBookmark(importItem, options)
+        const status = this._processBookmark(importItem, spaceTreeMap, options)
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
 
         await setLocalStorage(TAG_SUGGESTIONS_KEY, [
@@ -153,7 +170,7 @@ export default class ImportItemProcessor {
     }
 
     async _processService(importItem, options: { indexTitle?: any } = {}) {
-        const { url, title, tags, collections, annotations } = importItem
+        const { url, title, spaceId } = importItem
 
         const timeAdded = normalizeTimestamp(importItem.timeAdded)
 
@@ -164,12 +181,12 @@ export default class ImportItemProcessor {
             timeAdded ?? Date.now(),
         )
 
-        await this._storeOtherData({ url, tags, collections, annotations })
+        await this._storeOtherData({ url, spaceId })
 
         const tagSuggestions = await getLocalStorage(TAG_SUGGESTIONS_KEY, [])
 
         await setLocalStorage(TAG_SUGGESTIONS_KEY, [
-            ...new Set([...tagSuggestions, ...tags]),
+            ...new Set([...tagSuggestions]),
         ])
 
         this._checkCancelled()
@@ -185,12 +202,12 @@ export default class ImportItemProcessor {
      * @returns {Promise<any>} Resolves to a status string denoting the outcome of import processing as `status`.
      *  Rejects for any other error, including bad content check errors, and cancellation - caller should handle.
      */
-    async process(importItem, options = {}) {
+    async process(importItem, spaceTreeMap, options = {}) {
         this._checkCancelled()
 
         switch (importItem.type) {
             case IMPORT_TYPE.BOOKMARK:
-                return this._processBookmark(importItem, options)
+                return this._processBookmark(importItem, spaceTreeMap, options)
             case IMPORT_TYPE.OTHERS:
                 return this._processService(importItem, options)
             default:

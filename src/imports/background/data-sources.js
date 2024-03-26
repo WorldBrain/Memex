@@ -10,16 +10,6 @@ import {
     WEEK_IN_MS,
 } from '@worldbrain/memex-common/lib/utils/date-time'
 
-const getDirNestedCollectionName = (dirNode) => {
-    const parentCollectionName = dirNode.collectionName ?? ''
-    const subCollectionName = dirNode.title ?? ''
-    const collectionName =
-        parentCollectionName !== ''
-            ? `${parentCollectionName} > ${subCollectionName}`
-            : subCollectionName
-    // if collectionName is empty, return undefined so that it can be in no collection
-    return collectionName || undefined
-}
 export default class ImportDataSources {
     static LOOKBACK_WEEKS = 12 // Browser history is limited to the last 3 months
 
@@ -39,14 +29,10 @@ export default class ImportDataSources {
         }
     }
 
-    constructor({
-        history = typeof browser !== 'undefined' ? browser.history : undefined,
-        bookmarks = typeof browser !== 'undefined'
-            ? browser.bookmarks
-            : undefined,
-    }) {
+    constructor({ history = null, bookmarks = null, browserAPIs = null }) {
         this._history = history
         this._bookmarks = bookmarks
+        this.browserAPIs = browserAPIs
     }
 
     _createHistParams = (time) => ({
@@ -81,21 +67,20 @@ export default class ImportDataSources {
         if (!dirNode) {
             dirNode = this.ROOT_BM
         }
-
         // Folders don't contain `url`; recurse!
-        const children = await this._bookmarks.getChildren(dirNode.id)
+        const children = await this.browserAPIs.bookmarks.getChildren(
+            dirNode.id,
+        )
 
         // Split into folders and bookmarks
         const childGroups = children.reduce(
             (prev, childNode) => {
                 const stateKey = !childNode.url ? 'dirs' : 'bms'
-                const collectionName = getDirNestedCollectionName(dirNode)
                 // only add to collection if it's not a dir
                 const newNode = {
                     ...childNode,
-                    collectionName,
-                    ...(collectionName && {
-                        collections: [collectionName],
+                    ...(childNode.parentId && {
+                        parentId: childNode.parentId,
                     }),
                 }
                 return {
