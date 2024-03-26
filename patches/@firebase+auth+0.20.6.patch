@@ -1,0 +1,16 @@
+diff --git a/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js b/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js
+index 9abd2b3..294cc95 100644
+--- a/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js
++++ b/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js
+@@ -8851,8 +8851,9 @@ function loadGapi(auth) {
+                 }
+             };
+             // Load GApi loader.
+-            return _loadJS(`https://apis.google.com/js/api.js?onload=${cbName}`)
+-                .catch(e => reject(e));
++            // Skip this as it won't work in our BG SW
++            // return _loadJS(`https://apis.google.com/js/api.js?onload=${cbName}`)
++            //     .catch(e => reject(e));
+         }
+     }).catch(error => {
+         // Reset cached promise to allow for retrial.

@@ -6,6 +6,7 @@ import { DexieUtilsPlugin } from 'src/search/plugins'
 import StorageManager from '@worldbrain/storex'
 import { initErrHandler } from 'src/search/storage'
 import { Browser } from 'webextension-polyfill'
+import CustomListBackground from 'src/custom-lists/background'
 
 /**
  * Object with keys for each import item type and corresponding unsigned int values,
@@ -139,11 +140,6 @@ export class ImportStateManager {
             if (type === TYPE.BOOKMARK) {
                 // Bookmarks should always yield before history
                 bookmarkIds = new Set([...bookmarkIds, ...data.keys()])
-            } else if (type === TYPE.HISTORY) {
-                // Don't include pages in history that exist as bookmarks as well
-                data = new Map(
-                    [...data].filter(([key]) => !bookmarkIds.has(key)),
-                )
             }
 
             // Cache current processed chunk for checking against future chunks (count state change happens in here)
