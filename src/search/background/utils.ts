@@ -1,5 +1,5 @@
-import { ContentTypes, AnnotSearchParams, AnnotPage } from './types'
-import { SearchParams as OldSearchParams } from '../types'
+import type { ContentTypes, UnifiedBlankSearchResult } from './types'
+import type { SearchParams as OldSearchParams } from '../types'
 
 export const contentTypeChecks = {
     pagesOnly: (flags: ContentTypes) =>
@@ -59,3 +59,8 @@ export const reshapePageForDisplay = (page) => ({
     displayTime: page.displayTime,
     annotsCount: page.annotsCount,
 })
+
+export const sortUnifiedBlankSearchResult = ({
+    resultDataByPage,
+}: UnifiedBlankSearchResult) =>
+    [...resultDataByPage].sort(([, a], [, b]) => b.timestamp - a.timestamp)

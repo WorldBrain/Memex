@@ -197,3 +197,15 @@ export type UnifiedSearchResult = {
     pages: AnnotPage[]
     resultsExhausted: boolean
 }
+
+export type UnifiedBlankSearchResult = {
+    oldestResultTimestamp: number
+    resultsExhausted: boolean
+    resultDataByPage: Map<
+        string,
+        {
+            timestamp: number
+            annotIds: string[]
+        }
+    >
+}

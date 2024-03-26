@@ -13,6 +13,7 @@ import type {
     BackgroundSearchParams,
     AnnotPage,
     UnifiedSearchParams,
+    UnifiedBlankSearchResult,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
@@ -34,20 +35,9 @@ import type {
     Page,
     Visit,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import { sortUnifiedBlankSearchResult } from './utils'
 
 const dayMs = 1000 * 60 * 60 * 24
-
-type UnifiedBlankSearchResult = {
-    oldestResultTimestamp: number
-    resultsExhausted: boolean
-    resultDataByPage: Map<
-        string,
-        {
-            timestamp: number
-            annotIds: string[]
-        }
-    >
-}
 
 type UnifiedSearchLookupData = {
     pages: Map<string, Omit<AnnotPage, 'lists' | 'annotations' | 'hasBookmark'>>
@@ -132,85 +122,77 @@ export default class SearchBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
+    private async calcSearchLowestTimeBound(): Promise<number> {
+        // Real lower bound (for blank search) would be the time of the oldest bookmark or visit, whichever is oldest
+        const oldestTimestamps = (await Promise.all(
+            ['visits', 'bookmarks'].map((coll) =>
+                this.options.storageManager
+                    .collection(coll)
+                    .findObject({}, { order: [['time', 'asc']] }),
+            ),
+        )) as [Visit?, Bookmark?]
+
+        const oldestTimestamp = Math.min(
+            ...oldestTimestamps.filter(Boolean).map((t) => t.time),
+        )
+        return oldestTimestamp !== Infinity ? oldestTimestamp : 0
+    }
+
     private async unifiedBlankSearch(
         params: Pick<UnifiedSearchParams, 'fromWhen' | 'untilWhen'> & {
-            minResultLimit: number
             daysToSearch: number
         },
     ): Promise<UnifiedBlankSearchResult> {
-        let resultsExhausted = false
-        let lowerBound = params.fromWhen ?? 0
         let upperBound = params.untilWhen ?? Date.now()
+        let lowerBound =
+            params.fromWhen ?? upperBound - params.daysToSearch * dayMs
+
         const calcQuery = () => ({ $gt: lowerBound, $lt: upperBound })
 
-        let resultCount = 0
-        // TODO: Make annots an array, not set
-        const pageResultData: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
-        while (resultCount < params.minResultLimit) {
-            const [annotations, visits, bookmarks] = await Promise.all([
-                this.options.storageManager
-                    .collection('annotations')
-                    .findObjects({ lastEdited: calcQuery() }) as Promise<
-                    Annotation[]
-                >,
-                this.options.storageManager
-                    .collection('visits')
-                    .findObjects({ time: calcQuery() }) as Promise<Visit[]>,
-                this.options.storageManager
-                    .collection('bookmarks')
-                    .findObjects({ time: calcQuery() }) as Promise<Bookmark[]>,
-            ])
+        const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
+        const [annotations, visits, bookmarks] = await Promise.all([
+            this.options.storageManager
+                .collection('annotations')
+                .findObjects({ lastEdited: calcQuery() }) as Promise<
+                Annotation[]
+            >,
+            this.options.storageManager
+                .collection('visits')
+                .findObjects({ time: calcQuery() }) as Promise<Visit[]>,
+            this.options.storageManager
+                .collection('bookmarks')
+                .findObjects({ time: calcQuery() }) as Promise<Bookmark[]>,
+        ])
 
-            if (!annotations.length && !visits.length && !bookmarks.length) {
-                resultsExhausted = true
-                break
-            }
-
-            for (const { url, time } of [...bookmarks, ...visits]) {
-                const existing = pageResultData.get(url) ?? {
-                    timestamp: 0,
-                    annotIds: [],
-                }
-                // Only keep track of the latest visit/bookmark time if it's newer than anything seen so far
-                if (time > existing.timestamp) {
-                    pageResultData.set(url, { ...existing, timestamp: time })
-                }
-            }
-            resultCount += pageResultData.size
-
-            const annotsByPage = groupBy(annotations, (a) => a.pageUrl)
-            for (const [pageId, annots] of Object.entries(annotsByPage)) {
-                const existing = pageResultData.get(pageId) ?? {
-                    timestamp: 0,
-                    annotIds: [],
-                }
-                const sortedAnnots = annots.sort(
-                    (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
-                )
-                existing.annotIds = sortedAnnots.map((a) => a.url)
-                // Only keep track of the latest annot time if it's newer than anything seen so far
-                if (
-                    sortedAnnots[0]?.lastEdited.valueOf() > existing.timestamp
-                ) {
-                    existing.timestamp = sortedAnnots[0].lastEdited.valueOf()
-                }
-                pageResultData.set(pageId, existing)
-            }
-
-            // If we've passed the limit then let's truncate our results so far, and finish keeping track of how far we got
-            if (resultCount >= params.minResultLimit) {
-                // TODO: "Truncate" the pageToAnnotIds map to only contain minResultLimit results (sum of both pages and annots)
-                // lowerBound = the oldest result's timestamp
-                // break
-            }
-
-            upperBound = lowerBound
-            lowerBound = Math.max(lowerBound - params.daysToSearch * dayMs, 0)
+        // Add in all the annotations to the results
+        const annotsByPage = groupBy(annotations, (a) => a.pageUrl)
+        for (const [pageId, annots] of Object.entries(annotsByPage)) {
+            const sortedAnnots = annots.sort(
+                (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
+            )
+            resultDataByPage.set(pageId, {
+                annotIds: sortedAnnots.map((a) => a.url),
+                timestamp: sortedAnnots[0].lastEdited.valueOf(),
+            })
         }
 
+        // Add in all the pages to the results
+        for (const { url, time } of [...bookmarks, ...visits]) {
+            const existing = resultDataByPage.get(url) ?? {
+                timestamp: 0,
+                annotIds: [],
+            }
+            // Only keep track of the visit/bookmark time if it's newer than anything seen so far
+            if (time > existing.timestamp) {
+                resultDataByPage.set(url, { ...existing, timestamp: time })
+            }
+        }
+
+        // TODO: Move this to caller and pass down
+        const lowestBound = await this.calcSearchLowestTimeBound()
         return {
-            resultDataByPage: pageResultData,
-            resultsExhausted,
+            resultDataByPage,
+            resultsExhausted: lowerBound <= lowestBound,
             oldestResultTimestamp: lowerBound,
         }
     }
@@ -221,16 +203,13 @@ export default class SearchBackground {
             result = await this.unifiedBlankSearch({
                 ...params,
                 daysToSearch: 1,
-                minResultLimit: 10,
             })
         } else {
             throw new Error('TODO: Implement terms search')
         }
 
         const dataLookups = await this.lookupDataForUnifiedResults(result)
-        const sortedResultPages = [...result.resultDataByPage].sort(
-            ([, a], [, b]) => b.timestamp - a.timestamp,
-        )
+        const sortedResultPages = sortUnifiedBlankSearchResult(result)
         const mappedAnnotPages = sortedResultPages
             .map(([pageId, { annotIds }]) => {
                 const page = dataLookups.pages.get(pageId)
@@ -375,7 +354,6 @@ export default class SearchBackground {
 
         try {
             searchParams = this.processSearchParams(params)
-            console.log('searchAnnotations params', params)
         } catch (e) {
             return SearchBackground.handleSearchError(e)
         }

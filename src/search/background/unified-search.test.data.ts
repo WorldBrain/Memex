@@ -21,7 +21,7 @@ export const BOOKMARKS = {
     [PAGE_ID_2]: [
         {
             url: PAGE_ID_2,
-            time: new Date('2024-03-25T06:00').valueOf(),
+            time: new Date('2024-03-21T06:00').valueOf(),
         },
     ],
     [PAGE_ID_12]: [
@@ -37,12 +37,6 @@ export const VISITS = {
         {
             url: PAGE_ID_1,
             time: new Date('2024-03-20T06:00').valueOf(),
-        },
-    ],
-    [PAGE_ID_2]: [
-        {
-            url: PAGE_ID_2,
-            time: new Date('2024-03-21T06:01').valueOf(),
         },
     ],
     [PAGE_ID_3]: [
@@ -354,7 +348,7 @@ export const ANNOTATIONS = {
                     content: [],
                 },
             },
-            lastEdited: new Date('2024-03-24T06:01'), // UPDATED
+            lastEdited: new Date('2024-03-25T05:01'), // UPDATED
             createdWhen: new Date('2024-03-22T06:01'),
         },
         {
