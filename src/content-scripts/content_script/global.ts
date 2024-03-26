@@ -1079,7 +1079,7 @@ export async function main(
                     localStorage: browser.storage.local,
                     services: createUIServices(),
                     renderUpdateNotifBanner: () => null,
-                    bgScriptBG,
+                    bgScriptBG: bgScriptBG,
                 },
                 upgradeModalProps: {
                     createCheckOutLink: bgScriptBG.createCheckoutLink,

@@ -122,6 +122,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openSpaceInWebUI'
         | 'summarizeBG'
         | 'imageSupportBG'
+        | 'bgScriptBG'
     > = {
         analytics,
         copyToClipboard,
@@ -144,6 +145,7 @@ export class DashboardContainer extends StatefulUIElement<
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         pdfViewerBG: runInBackground(),
+        bgScriptBG: runInBackground(),
         searchBG: runInBackground(),
         listsBG: runInBackground(),
         authBG: runInBackground(),
