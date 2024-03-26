@@ -1,5 +1,6 @@
 import type Storex from '@worldbrain/storex'
 import type { Browser } from 'webextension-polyfill'
+import groupBy from 'lodash/groupBy'
 
 // import * as index from '..'
 import SearchStorage from './storage'
@@ -39,11 +40,11 @@ const dayMs = 1000 * 60 * 60 * 24
 type UnifiedBlankSearchResult = {
     oldestResultTimestamp: number
     resultsExhausted: boolean
-    pageToAnnotIds: Map<
+    resultDataByPage: Map<
         string,
         {
             timestamp: number
-            annotIds: Set<string>
+            annotIds: string[]
         }
     >
 }
@@ -138,13 +139,13 @@ export default class SearchBackground {
         },
     ): Promise<UnifiedBlankSearchResult> {
         let resultsExhausted = false
-        let lowerBound = params.fromWhen
-        let upperBound = params.untilWhen
+        let lowerBound = params.fromWhen ?? 0
+        let upperBound = params.untilWhen ?? Date.now()
         const calcQuery = () => ({ $gt: lowerBound, $lt: upperBound })
 
         let resultCount = 0
         // TODO: Make annots an array, not set
-        const pageToAnnotIds: UnifiedBlankSearchResult['pageToAnnotIds'] = new Map()
+        const pageResultData: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
         while (resultCount < params.minResultLimit) {
             const [annotations, visits, bookmarks] = await Promise.all([
                 this.options.storageManager
@@ -166,29 +167,34 @@ export default class SearchBackground {
             }
 
             for (const { url, time } of [...bookmarks, ...visits]) {
-                const existing = pageToAnnotIds.get(url) ?? {
+                const existing = pageResultData.get(url) ?? {
                     timestamp: 0,
-                    annotIds: new Set(),
+                    annotIds: [],
                 }
                 // Only keep track of the latest visit/bookmark time if it's newer than anything seen so far
                 if (time > existing.timestamp) {
-                    pageToAnnotIds.set(url, { ...existing, timestamp: time })
+                    pageResultData.set(url, { ...existing, timestamp: time })
                 }
             }
-            resultCount += pageToAnnotIds.size
+            resultCount += pageResultData.size
 
-            for (const annot of annotations) {
-                resultCount += 1
-                const existing = pageToAnnotIds.get(annot.pageUrl) ?? {
+            const annotsByPage = groupBy(annotations, (a) => a.pageUrl)
+            for (const [pageId, annots] of Object.entries(annotsByPage)) {
+                const existing = pageResultData.get(pageId) ?? {
                     timestamp: 0,
-                    annotIds: new Set(),
+                    annotIds: [],
                 }
+                const sortedAnnots = annots.sort(
+                    (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
+                )
+                existing.annotIds = sortedAnnots.map((a) => a.url)
                 // Only keep track of the latest annot time if it's newer than anything seen so far
-                if (annot.lastEdited.valueOf() > existing.timestamp) {
-                    existing.timestamp = annot.lastEdited.valueOf()
+                if (
+                    sortedAnnots[0]?.lastEdited.valueOf() > existing.timestamp
+                ) {
+                    existing.timestamp = sortedAnnots[0].lastEdited.valueOf()
                 }
-                existing.annotIds.add(annot.url)
-                pageToAnnotIds.set(annot.pageUrl, existing)
+                pageResultData.set(pageId, existing)
             }
 
             // If we've passed the limit then let's truncate our results so far, and finish keeping track of how far we got
@@ -203,7 +209,7 @@ export default class SearchBackground {
         }
 
         return {
-            pageToAnnotIds,
+            resultDataByPage: pageResultData,
             resultsExhausted,
             oldestResultTimestamp: lowerBound,
         }
@@ -214,7 +220,7 @@ export default class SearchBackground {
         if (!params.query.trim().length) {
             result = await this.unifiedBlankSearch({
                 ...params,
-                daysToSearch: 3,
+                daysToSearch: 1,
                 minResultLimit: 10,
             })
         } else {
@@ -222,7 +228,7 @@ export default class SearchBackground {
         }
 
         const dataLookups = await this.lookupDataForUnifiedResults(result)
-        const sortedResultPages = [...result.pageToAnnotIds].sort(
+        const sortedResultPages = [...result.resultDataByPage].sort(
             ([, a], [, b]) => b.timestamp - a.timestamp,
         )
         const mappedAnnotPages = sortedResultPages
@@ -251,27 +257,23 @@ export default class SearchBackground {
     }
 
     private async lookupDataForUnifiedResults({
-        pageToAnnotIds,
+        resultDataByPage,
     }: UnifiedBlankSearchResult): Promise<UnifiedSearchLookupData> {
         const lookups: UnifiedSearchLookupData = {
             annotations: new Map(),
             pages: new Map(),
         }
 
-        const pageIds = [...pageToAnnotIds.keys()]
+        const pageIds = [...resultDataByPage.keys()]
         const pageData: Page[] = await this.options.storageManager
             .collection('pages')
             .findObjects({
                 url: { $in: pageIds },
             })
 
-        const annotIdForAllPages = [...pageToAnnotIds.values()].flatMap(
+        const annotIds = [...resultDataByPage.values()].flatMap(
             ({ annotIds }) => annotIds,
         )
-        const annotIds = new Set<string>()
-        for (const annotIds of annotIdForAllPages) {
-            annotIds.forEach((annotId) => annotIds.add(annotId))
-        }
         const annotData: Annotation[] = await this.options.storageManager
             .collection('annotations')
             .findObjects({

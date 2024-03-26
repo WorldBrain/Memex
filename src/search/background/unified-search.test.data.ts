@@ -9,6 +9,7 @@ export const PAGE_ID_8 = 'en.wikipedia.org/wiki/Taxonomy_(biology)'
 export const PAGE_ID_9 = 'en.wikipedia.org/wiki/Phylum'
 export const PAGE_ID_10 = 'en.wikipedia.org/wiki/Organism'
 export const PAGE_ID_11 = 'en.wikipedia.org/wiki/Afro-Eurasia'
+export const PAGE_ID_12 = 'en.wikipedia.org/wiki/Europe'
 
 export const BOOKMARKS = {
     [PAGE_ID_11]: [
@@ -21,6 +22,12 @@ export const BOOKMARKS = {
         {
             url: PAGE_ID_2,
             time: new Date('2024-03-25T06:00').valueOf(),
+        },
+    ],
+    [PAGE_ID_12]: [
+        {
+            url: PAGE_ID_12,
+            time: new Date('2024-02-25T06:00').valueOf(), // Much older page which has new annotations
         },
     ],
 }
@@ -114,7 +121,7 @@ export const ANNOTATIONS = {
                     content: [],
                 },
             },
-            lastEdited: new Date('2024-03-22T06:21'), // UPDATED
+            lastEdited: new Date('2024-03-23T06:21'), // UPDATED
             createdWhen: new Date('2024-03-21T06:21'),
         },
         {
@@ -596,6 +603,16 @@ export const ANNOTATIONS = {
             comment: '<div><p>today</p></div>',
             createdWhen: new Date('2024-03-23T06:04'),
             lastEdited: new Date('2024-03-23T06:04'),
+        },
+    ],
+    [PAGE_ID_12]: [
+        {
+            url: 'en.wikipedia.org/wiki/Europe/#1711179221253',
+            pageTitle: 'Europe - Wikipedia',
+            pageUrl: PAGE_ID_12,
+            comment: '<div><p>test</p></div>',
+            createdWhen: new Date('2024-03-23T07:04'),
+            lastEdited: new Date('2024-03-23T07:04'),
         },
     ],
 }
