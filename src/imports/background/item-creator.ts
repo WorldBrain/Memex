@@ -13,6 +13,7 @@ const deriveImportItem = (type) => (item) => ({
     title: item.title,
     collections: item.collections,
     timeAdded: item.dateAdded,
+    parentId: item.parentId,
     type,
 })
 
@@ -75,7 +76,9 @@ export default class ImportItemCreator {
     constructor({
         browserAPIs,
         limits = ImportItemCreator.DEF_LIMITS,
-        dataSources = new DataSources({ browserAPIs: browserAPIs }),
+        dataSources = new DataSources({
+            browserAPIs: browserAPIs,
+        }),
         existingKeySource,
     }: {
         browserAPIs: Browser
