@@ -11,6 +11,134 @@ export const PAGE_ID_10 = 'en.wikipedia.org/wiki/Organism'
 export const PAGE_ID_11 = 'en.wikipedia.org/wiki/Afro-Eurasia'
 export const PAGE_ID_12 = 'en.wikipedia.org/wiki/Europe'
 
+export const LIST_ID_1 = 111
+export const LIST_ID_2 = 112
+export const LIST_ID_3 = 113
+
+export const LISTS = {
+    [LIST_ID_1]: {
+        id: LIST_ID_1,
+        name: 'test a',
+        searchableName: 'test a',
+        createdAt: new Date('2024-03-20T04:00'),
+    },
+    [LIST_ID_2]: {
+        id: LIST_ID_2,
+        name: 'test b',
+        searchableName: 'test b',
+        createdAt: new Date('2024-03-20T05:00'),
+    },
+    [LIST_ID_3]: {
+        id: LIST_ID_3,
+        name: 'test c',
+        searchableName: 'test c',
+        createdAt: new Date('2024-03-20T05:30'),
+    },
+}
+
+// These may have a `listIds` prop, which will be used to add them to lists if so
+export const PAGES = {
+    [PAGE_ID_1]: {
+        listIds: [LIST_ID_1, LIST_ID_3],
+        url: PAGE_ID_1,
+        fullUrl: 'https://' + PAGE_ID_1,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_2]: {
+        listIds: [LIST_ID_3],
+        url: PAGE_ID_2,
+        fullUrl: 'https://' + PAGE_ID_2,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_3]: {
+        url: PAGE_ID_3,
+        fullUrl: 'https://' + PAGE_ID_3,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_4]: {
+        listIds: [LIST_ID_2],
+        url: PAGE_ID_4,
+        fullUrl: 'https://' + PAGE_ID_4,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_5]: {
+        url: PAGE_ID_5,
+        fullUrl: 'https://' + PAGE_ID_5,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_6]: {
+        url: PAGE_ID_6,
+        fullUrl: 'https://' + PAGE_ID_6,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_7]: {
+        url: PAGE_ID_7,
+        fullUrl: 'https://' + PAGE_ID_7,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_8]: {
+        url: PAGE_ID_8,
+        fullUrl: 'https://' + PAGE_ID_8,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_9]: {
+        url: PAGE_ID_9,
+        fullUrl: 'https://' + PAGE_ID_9,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_10]: {
+        url: PAGE_ID_10,
+        fullUrl: 'https://' + PAGE_ID_10,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_11]: {
+        url: PAGE_ID_11,
+        fullUrl: 'https://' + PAGE_ID_11,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+    [PAGE_ID_12]: {
+        url: PAGE_ID_12,
+        fullUrl: 'https://' + PAGE_ID_12,
+        domain: 'wikipedia.org',
+        hostname: 'en.wikipedia.org',
+        fullTitle: '',
+        text: '',
+    },
+}
+
 export const BOOKMARKS = {
     [PAGE_ID_11]: [
         {
@@ -99,6 +227,7 @@ export const VISITS = {
     ],
 }
 
+// These may have a `listIds` prop, which will be used to add them to lists if so
 export const ANNOTATIONS = {
     [PAGE_ID_4]: [
         {
@@ -119,6 +248,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-21T06:21'),
         },
         {
+            listIds: [LIST_ID_1],
             url: 'en.wikipedia.org/wiki/Eurasia/#1711067799676',
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
@@ -136,6 +266,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-21T06:22'),
         },
         {
+            listIds: [LIST_ID_3],
             url: 'en.wikipedia.org/wiki/Eurasia/#1711067799679',
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,

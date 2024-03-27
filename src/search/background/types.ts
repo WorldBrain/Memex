@@ -194,6 +194,12 @@ export type UnifiedSearchParams = {
     filterByListIds: number[]
 }
 
+export type UnifiedBlankSearchParams = UnifiedSearchParams & {
+    daysToSearch: number
+    /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
+    lowestTimeBound: number
+}
+
 export type UnifiedSearchResult = {
     pages: AnnotPage[]
     resultsExhausted: boolean

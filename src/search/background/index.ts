@@ -16,6 +16,7 @@ import type {
     UnifiedBlankSearchResult,
     UnifiedSearchResult,
     UnifiedBlankSearchPageResultData,
+    UnifiedBlankSearchParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
@@ -36,6 +37,7 @@ import type {
     AnnotationListEntry,
     AnnotationPrivacyLevel,
     Bookmark,
+    ListEntry,
     Page,
     PageListEntry,
     Visit,
@@ -145,40 +147,45 @@ export default class SearchBackground {
     }
 
     private async filterUnifiedSearchResultsByFilters(
-        { resultDataByPage }: UnifiedBlankSearchResult,
+        resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
         { filterByDomains, filterByListIds }: UnifiedSearchParams,
     ) {
-        if (!resultDataByPage.size) {
+        if (
+            !resultDataByPage.size ||
+            (!filterByDomains.length && !filterByListIds.length)
+        ) {
             return
         }
 
         // 1.Filter by domains is easy - we already have all the data we need
-        resultDataByPage.forEach((_, pageId) => {
-            const isDomainIncluded = filterByDomains.reduce(
-                (prev, domain) => prev || pageId.startsWith(domain), // TODO: use regex so 'wiki.org' matches 'en.wiki.org'
-                false,
-            )
-            if (!isDomainIncluded) {
-                resultDataByPage.delete(pageId)
-            }
-        })
+        if (filterByDomains.length) {
+            resultDataByPage.forEach((_, pageId) => {
+                const isDomainIncluded = filterByDomains.reduce(
+                    (acc, domain) => acc || pageId.startsWith(domain), // TODO: use regex so 'wiki.org' matches 'en.wiki.org'
+                    false,
+                )
+                if (!isDomainIncluded) {
+                    resultDataByPage.delete(pageId)
+                }
+            })
+        }
         if (!resultDataByPage.size || !filterByListIds.length) {
             return
         }
 
         // 2. Filter by lists is more tricky. First need to lookup annot privacy level data to know whether they inherit parent page lists or not
-        const annotIds: string[] = []
+        const allAnnotIds: string[] = []
         const pageIdByAnnotId = new Map<string, string>()
         resultDataByPage.forEach(({ annotIds }, pageId) =>
             annotIds.forEach((annotId) => {
-                annotIds.push(annotId)
+                allAnnotIds.push(annotId)
                 pageIdByAnnotId.set(annotId, pageId)
             }),
         )
 
         const privacyLevels: AnnotationPrivacyLevel[] = await this.options.storageManager
             .collection('annotationPrivacyLevels')
-            .findObjects({ annotation: { $in: annotIds } })
+            .findObjects({ annotation: { $in: allAnnotIds } })
         const privacyLevelsByAnnotId = fromPairs(
             privacyLevels.map((p) => [p.annotation, p.privacyLevel]),
         )
@@ -186,12 +193,22 @@ export default class SearchBackground {
         let [
             selectivelySharedAnnotIds,
             autoSharedAnnotIds,
-        ] = partition(annotIds, (id) =>
+        ] = partition(allAnnotIds, (id) =>
             [
                 AnnotationPrivacyLevels.PROTECTED,
                 AnnotationPrivacyLevels.PRIVATE,
             ].includes(privacyLevelsByAnnotId[id]),
         )
+
+        const hasEntriesForAllFilteredLists = (
+            entries: ListEntry[] = [],
+        ): boolean => {
+            const listsWithEntries = entries.map((e) => e.listId)
+            return filterByListIds.reduce(
+                (acc, listId) => acc && listsWithEntries.includes(listId),
+                true,
+            )
+        }
 
         // 3. Filter down selectively-shared annotations
         const annotListEntries: AnnotationListEntry[] = await this.options.storageManager
@@ -200,11 +217,12 @@ export default class SearchBackground {
                 listId: { $in: filterByListIds },
                 url: { $in: selectivelySharedAnnotIds },
             })
-        const annotListEntriesByAnnotId = fromPairs(
-            annotListEntries.map((e) => [e.url, e]),
+        const annotListEntriesByAnnotId = groupBy(
+            annotListEntries,
+            (e) => e.url,
         )
-        selectivelySharedAnnotIds = selectivelySharedAnnotIds.filter(
-            (id) => annotListEntriesByAnnotId[id] != null,
+        selectivelySharedAnnotIds = selectivelySharedAnnotIds.filter((id) =>
+            hasEntriesForAllFilteredLists(annotListEntriesByAnnotId[id]),
         )
 
         // 4. Filter down auto-shared annotations
@@ -214,32 +232,34 @@ export default class SearchBackground {
                 listId: { $in: filterByListIds },
                 pageUrl: { $in: [...resultDataByPage.keys()] },
             })
-        const pageListEntriesByPageId = fromPairs(
-            pageListEntries.map((e) => [e.pageUrl, e]),
+        const pageListEntriesByPageId = groupBy(
+            pageListEntries,
+            (e) => e.pageUrl,
         )
-        autoSharedAnnotIds = autoSharedAnnotIds.filter(
-            (id) => pageListEntriesByPageId[pageIdByAnnotId.get(id)] != null,
+        autoSharedAnnotIds = autoSharedAnnotIds.filter((id) =>
+            hasEntriesForAllFilteredLists(
+                pageListEntriesByPageId[pageIdByAnnotId.get(id)],
+            ),
         )
 
         // 5. Apply annotation filtering to the results, and filter out any pages not in lists without remaining annotations
-        resultDataByPage.forEach(({ annotIds }, pageId) => {
-            annotIds = annotIds.filter(
+        resultDataByPage.forEach((data, pageId) => {
+            data.annotIds = data.annotIds.filter(
                 (id) =>
                     selectivelySharedAnnotIds.includes(id) ||
                     autoSharedAnnotIds.includes(id),
             )
-            if (pageListEntriesByPageId[pageId] == null && !annotIds.length) {
+            if (
+                !data.annotIds.length &&
+                !hasEntriesForAllFilteredLists(pageListEntriesByPageId[pageId])
+            ) {
                 resultDataByPage.delete(pageId)
             }
         })
     }
 
     private async unifiedBlankSearch(
-        params: Pick<UnifiedSearchParams, 'fromWhen' | 'untilWhen'> & {
-            daysToSearch: number
-            /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
-            lowestTimeBound: number
-        },
+        params: UnifiedBlankSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
         let upperBound = params.untilWhen ?? Date.now()
         let lowerBound =
@@ -286,6 +306,7 @@ export default class SearchBackground {
             }
         }
 
+        await this.filterUnifiedSearchResultsByFilters(resultDataByPage, params)
         return {
             resultDataByPage,
             resultsExhausted: lowerBound <= params.lowestTimeBound,
@@ -306,7 +327,6 @@ export default class SearchBackground {
                     daysToSearch: 1,
                     lowestTimeBound,
                 })
-                await this.filterUnifiedSearchResultsByFilters(result, params)
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
             throw new Error('TODO: Implement terms search')
