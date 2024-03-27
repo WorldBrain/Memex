@@ -33,6 +33,7 @@ describe('Unified search tests', () => {
             fromWhen: 0,
             untilWhen: now,
             daysToSearch: 1,
+            lowestTimeBound: 0,
         })
         expect(resultA.resultsExhausted).toBe(true)
         expect([...resultA.resultDataByPage]).toEqual([])
@@ -42,10 +43,14 @@ describe('Unified search tests', () => {
         const { backgroundModules } = await setupTest()
         const now = Date.now()
 
+        const lowestTimeBound = await backgroundModules.search[
+            'calcSearchLowestTimeBound'
+        ]()
         const resultA = await backgroundModules.search['unifiedBlankSearch']({
             fromWhen: 0,
             untilWhen: now,
             daysToSearch: 1,
+            lowestTimeBound,
         })
         expect(resultA.resultsExhausted).toBe(true)
         expect(sortUnifiedBlankSearchResult(resultA)).toEqual([
@@ -183,38 +188,48 @@ describe('Unified search tests', () => {
                 },
             ],
         ])
-        // expect(resultA.oldestResultTimestamp).toBe(false)
     })
 
+    // Check comments scattered throughout this test for more details, as things are quite intentionally structured around the test data timestamps
     it('should return most-recent highlights and their pages on unfiltered, paginated blank search', async () => {
         const { backgroundModules } = await setupTest()
+        const lowestTimeBound = await backgroundModules.search[
+            'calcSearchLowestTimeBound'
+        ]()
         const resultA = await backgroundModules.search['unifiedBlankSearch']({
             untilWhen: new Date('2024-03-25T20:00').valueOf(), // This is calculated based on the test data times
             daysToSearch: 1,
+            lowestTimeBound,
         })
         const resultB = await backgroundModules.search['unifiedBlankSearch']({
             untilWhen: new Date('2024-03-24T20:00').valueOf(),
             daysToSearch: 1,
+            lowestTimeBound,
         })
         const resultC = await backgroundModules.search['unifiedBlankSearch']({
             untilWhen: new Date('2024-03-23T20:00').valueOf(),
             daysToSearch: 1,
+            lowestTimeBound,
         })
         const resultD = await backgroundModules.search['unifiedBlankSearch']({
             untilWhen: new Date('2024-03-22T20:00').valueOf(),
             daysToSearch: 1,
+            lowestTimeBound,
         })
         const resultE = await backgroundModules.search['unifiedBlankSearch']({
             untilWhen: new Date('2024-03-21T20:00').valueOf(),
             daysToSearch: 1,
+            lowestTimeBound,
         })
         const resultF = await backgroundModules.search['unifiedBlankSearch']({
             untilWhen: new Date('2024-03-20T20:00').valueOf(),
             daysToSearch: 1,
+            lowestTimeBound,
         })
         const resultG = await backgroundModules.search['unifiedBlankSearch']({
             untilWhen: new Date('2024-03-19T20:00').valueOf(),
             daysToSearch: 30, // We're really skipping ahead here as we know there's no data until about a month back
+            lowestTimeBound,
         })
         expect(resultA.resultsExhausted).toBe(false)
         expect(resultB.resultsExhausted).toBe(false)

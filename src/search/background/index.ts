@@ -141,6 +141,8 @@ export default class SearchBackground {
     private async unifiedBlankSearch(
         params: Pick<UnifiedSearchParams, 'fromWhen' | 'untilWhen'> & {
             daysToSearch: number
+            /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
+            lowestTimeBound: number
         },
     ): Promise<UnifiedBlankSearchResult> {
         let upperBound = params.untilWhen ?? Date.now()
@@ -188,11 +190,9 @@ export default class SearchBackground {
             }
         }
 
-        // TODO: Move this to caller and pass down
-        const lowestBound = await this.calcSearchLowestTimeBound()
         return {
             resultDataByPage,
-            resultsExhausted: lowerBound <= lowestBound,
+            resultsExhausted: lowerBound <= params.lowestTimeBound,
             oldestResultTimestamp: lowerBound,
         }
     }
@@ -200,10 +200,17 @@ export default class SearchBackground {
     unifiedSearch: SearchInterface['unifiedSearch'] = async (params) => {
         let result: UnifiedBlankSearchResult
         if (!params.query.trim().length) {
-            result = await this.unifiedBlankSearch({
-                ...params,
-                daysToSearch: 1,
-            })
+            const lowestTimeBound = await this.calcSearchLowestTimeBound()
+            // Skip over days where there's no results, until we get results
+            do {
+                result = await this.unifiedBlankSearch({
+                    ...params,
+                    untilWhen:
+                        result?.oldestResultTimestamp ?? params.untilWhen,
+                    daysToSearch: 1,
+                    lowestTimeBound,
+                })
+            } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
             throw new Error('TODO: Implement terms search')
         }
