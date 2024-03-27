@@ -190,7 +190,8 @@ export type UnifiedSearchParams = {
     query: string
     fromWhen?: number
     untilWhen?: number
-    resultPage: number
+    filterByDomains: string[]
+    filterByListIds: number[]
 }
 
 export type UnifiedSearchResult = {
@@ -201,11 +202,10 @@ export type UnifiedSearchResult = {
 export type UnifiedBlankSearchResult = {
     oldestResultTimestamp: number
     resultsExhausted: boolean
-    resultDataByPage: Map<
-        string,
-        {
-            timestamp: number
-            annotIds: string[]
-        }
-    >
+    resultDataByPage: Map<string, UnifiedBlankSearchPageResultData>
+}
+
+export type UnifiedBlankSearchPageResultData = {
+    timestamp: number
+    annotIds: string[]
 }

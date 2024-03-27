@@ -1,8 +1,8 @@
 import type Storex from '@worldbrain/storex'
 import type { Browser } from 'webextension-polyfill'
 import groupBy from 'lodash/groupBy'
-
-// import * as index from '..'
+import fromPairs from 'lodash/fromPairs'
+import partition from 'lodash/partition'
 import SearchStorage from './storage'
 import QueryBuilder from '../query-builder'
 import { makeRemotelyCallable } from 'src/util/webextensionRPC'
@@ -14,6 +14,8 @@ import type {
     AnnotPage,
     UnifiedSearchParams,
     UnifiedBlankSearchResult,
+    UnifiedSearchResult,
+    UnifiedBlankSearchPageResultData,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
@@ -31,11 +33,15 @@ import { trackSearchExecution } from '@worldbrain/memex-common/lib/analytics/eve
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type {
     Annotation,
+    AnnotationListEntry,
+    AnnotationPrivacyLevel,
     Bookmark,
     Page,
+    PageListEntry,
     Visit,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import { sortUnifiedBlankSearchResult } from './utils'
+import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -138,6 +144,96 @@ export default class SearchBackground {
         return oldestTimestamp !== Infinity ? oldestTimestamp : 0
     }
 
+    private async filterUnifiedSearchResultsByFilters(
+        { resultDataByPage }: UnifiedBlankSearchResult,
+        { filterByDomains, filterByListIds }: UnifiedSearchParams,
+    ) {
+        if (!resultDataByPage.size) {
+            return
+        }
+
+        // 1.Filter by domains is easy - we already have all the data we need
+        resultDataByPage.forEach((_, pageId) => {
+            const isDomainIncluded = filterByDomains.reduce(
+                (prev, domain) => prev || pageId.startsWith(domain), // TODO: use regex so 'wiki.org' matches 'en.wiki.org'
+                false,
+            )
+            if (!isDomainIncluded) {
+                resultDataByPage.delete(pageId)
+            }
+        })
+        if (!resultDataByPage.size || !filterByListIds.length) {
+            return
+        }
+
+        // 2. Filter by lists is more tricky. First need to lookup annot privacy level data to know whether they inherit parent page lists or not
+        const annotIds: string[] = []
+        const pageIdByAnnotId = new Map<string, string>()
+        resultDataByPage.forEach(({ annotIds }, pageId) =>
+            annotIds.forEach((annotId) => {
+                annotIds.push(annotId)
+                pageIdByAnnotId.set(annotId, pageId)
+            }),
+        )
+
+        const privacyLevels: AnnotationPrivacyLevel[] = await this.options.storageManager
+            .collection('annotationPrivacyLevels')
+            .findObjects({ annotation: { $in: annotIds } })
+        const privacyLevelsByAnnotId = fromPairs(
+            privacyLevels.map((p) => [p.annotation, p.privacyLevel]),
+        )
+
+        let [
+            selectivelySharedAnnotIds,
+            autoSharedAnnotIds,
+        ] = partition(annotIds, (id) =>
+            [
+                AnnotationPrivacyLevels.PROTECTED,
+                AnnotationPrivacyLevels.PRIVATE,
+            ].includes(privacyLevelsByAnnotId[id]),
+        )
+
+        // 3. Filter down selectively-shared annotations
+        const annotListEntries: AnnotationListEntry[] = await this.options.storageManager
+            .collection('annotListEntries')
+            .findObjects({
+                listId: { $in: filterByListIds },
+                url: { $in: selectivelySharedAnnotIds },
+            })
+        const annotListEntriesByAnnotId = fromPairs(
+            annotListEntries.map((e) => [e.url, e]),
+        )
+        selectivelySharedAnnotIds = selectivelySharedAnnotIds.filter(
+            (id) => annotListEntriesByAnnotId[id] != null,
+        )
+
+        // 4. Filter down auto-shared annotations
+        const pageListEntries: PageListEntry[] = await this.options.storageManager
+            .collection('pageListEntries')
+            .findObjects({
+                listId: { $in: filterByListIds },
+                pageUrl: { $in: [...resultDataByPage.keys()] },
+            })
+        const pageListEntriesByPageId = fromPairs(
+            pageListEntries.map((e) => [e.pageUrl, e]),
+        )
+        autoSharedAnnotIds = autoSharedAnnotIds.filter(
+            (id) => pageListEntriesByPageId[pageIdByAnnotId.get(id)] != null,
+        )
+
+        // 5. Apply annotation filtering to the results, and filter out any pages not in lists without remaining annotations
+        resultDataByPage.forEach(({ annotIds }, pageId) => {
+            annotIds = annotIds.filter(
+                (id) =>
+                    selectivelySharedAnnotIds.includes(id) ||
+                    autoSharedAnnotIds.includes(id),
+            )
+            if (pageListEntriesByPageId[pageId] == null && !annotIds.length) {
+                resultDataByPage.delete(pageId)
+            }
+        })
+    }
+
     private async unifiedBlankSearch(
         params: Pick<UnifiedSearchParams, 'fromWhen' | 'untilWhen'> & {
             daysToSearch: number
@@ -210,6 +306,7 @@ export default class SearchBackground {
                     daysToSearch: 1,
                     lowestTimeBound,
                 })
+                await this.filterUnifiedSearchResultsByFilters(result, params)
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
             throw new Error('TODO: Implement terms search')
