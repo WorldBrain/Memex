@@ -541,7 +541,7 @@ describe('Unified search tests', () => {
             fromWhen: 0,
             untilWhen: now,
             lowestTimeBound,
-            filterByListIds: [DATA.LIST_ID_1, DATA.LIST_ID_3],
+            filterByListIds: [DATA.LIST_ID_1, DATA.LIST_ID_3], // Multiple values do an AND
         })
         const resultC = await search(backgroundModules, {
             fromWhen: 0,
@@ -613,5 +613,62 @@ describe('Unified search tests', () => {
             ],
         ])
         expect(sortUnifiedBlankSearchResult(resultD)).toEqual([])
+    })
+
+    it('should return recent highlights and their pages on domain filtered blank search', async () => {
+        const { backgroundModules } = await setupTest()
+        const lowestTimeBound = await backgroundModules.search[
+            'calcSearchLowestTimeBound'
+        ]()
+        const now = Date.now()
+        const resultA = await search(backgroundModules, {
+            fromWhen: 0,
+            untilWhen: now,
+            lowestTimeBound,
+            filterByDomains: ['test.com'],
+        })
+        const resultB = await search(backgroundModules, {
+            fromWhen: 0,
+            untilWhen: now,
+            lowestTimeBound,
+            filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+        })
+        const resultC = await search(backgroundModules, {
+            fromWhen: 0,
+            untilWhen: now,
+            lowestTimeBound,
+            filterByDomains: [
+                'wikipedia.org',
+                'en.wikipedia.org',
+                'test-2.com',
+                'en.test-2.com',
+                'test.com',
+            ],
+        })
+
+        expect(resultA.resultsExhausted).toBe(true)
+        expect(resultB.resultsExhausted).toBe(true)
+        expect(
+            sortUnifiedBlankSearchResult(resultA).map(([pageId]) => pageId),
+        ).toEqual([DATA.PAGE_ID_10])
+        expect(
+            sortUnifiedBlankSearchResult(resultB).map(([pageId]) => pageId),
+        ).toEqual([DATA.PAGE_ID_10, DATA.PAGE_ID_9])
+        expect(
+            sortUnifiedBlankSearchResult(resultC).map(([pageId]) => pageId),
+        ).toEqual([
+            DATA.PAGE_ID_11,
+            DATA.PAGE_ID_8,
+            DATA.PAGE_ID_10,
+            DATA.PAGE_ID_2,
+            DATA.PAGE_ID_5,
+            DATA.PAGE_ID_12,
+            DATA.PAGE_ID_9,
+            DATA.PAGE_ID_4,
+            DATA.PAGE_ID_7,
+            DATA.PAGE_ID_6,
+            DATA.PAGE_ID_3,
+            DATA.PAGE_ID_1,
+        ])
     })
 })

@@ -157,11 +157,14 @@ export default class SearchBackground {
             return
         }
 
-        // 1.Filter by domains is easy - we already have all the data we need
+        // 1. OR'd filter by domains is easy - we already have all the data we need
         if (filterByDomains.length) {
             resultDataByPage.forEach((_, pageId) => {
                 const isDomainIncluded = filterByDomains.reduce(
-                    (acc, domain) => acc || pageId.startsWith(domain), // TODO: use regex so 'wiki.org' matches 'en.wiki.org'
+                    (acc, domain) => {
+                        const domainRegexp = new RegExp(`^(\\w+\\.)?${domain}`)
+                        return acc || domainRegexp.test(pageId)
+                    },
                     false,
                 )
                 if (!isDomainIncluded) {
@@ -173,7 +176,7 @@ export default class SearchBackground {
             return
         }
 
-        // 2. Filter by lists is more tricky. First need to lookup annot privacy level data to know whether they inherit parent page lists or not
+        // 2. AND'd filter by lists is more tricky. First need to lookup annot privacy level data to know whether they inherit parent page lists or not
         const allAnnotIds: string[] = []
         const pageIdByAnnotId = new Map<string, string>()
         resultDataByPage.forEach(({ annotIds }, pageId) =>
