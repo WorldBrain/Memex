@@ -62,7 +62,7 @@ class Root extends React.PureComponent<RootProps, RootState> {
                         powerUpType={this.state.upgradeModalType}
                         createCheckOutLink={this.props.createCheckOutLink}
                         componentVariant="Modal"
-                        closeComponent={() => this.removeRoot}
+                        closeComponent={this.removeRoot}
                     />
                 </ThemeProvider>
             </StyleSheetManager>

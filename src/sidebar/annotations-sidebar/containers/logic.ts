@@ -824,27 +824,19 @@ export class SidebarContainerLogic extends UILogic<
             runtimeAPI,
         } = this.options
 
+        const signupDate = new Date(
+            await (await this.options.authBG.getCurrentUser())?.creationTime,
+        ).getTime()
+
+        this.emitMutation({
+            signupDate: { $set: signupDate },
+            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+        })
+
         const userReference = await this.options.getCurrentUser()
         this.emitMutation({
             currentUserReference: { $set: userReference ?? null },
         })
-
-        this.setupRemoteEventListeners()
-        annotationsCache.events.addListener(
-            'newAnnotationsState',
-            this.cacheAnnotationsSubscription,
-        )
-        annotationsCache.events.addListener(
-            'newListsState',
-            this.cacheListsSubscription,
-        )
-        annotationsCache.events.addListener(
-            'updatedPageData',
-            this.cachePageListsSubscription,
-        )
-        // Set initial state, based on what's in the cache (assuming it already has been hydrated)
-        this.cacheAnnotationsSubscription(annotationsCache.annotations)
-        this.cacheListsSubscription(annotationsCache.lists)
 
         this.sidebar = document
             .getElementById('memex-sidebar-container')
@@ -878,6 +870,23 @@ export class SidebarContainerLogic extends UILogic<
             await this.setPageActivityState(this.fullPageUrl)
         })
 
+        this.setupRemoteEventListeners()
+        annotationsCache.events.addListener(
+            'newAnnotationsState',
+            this.cacheAnnotationsSubscription,
+        )
+        annotationsCache.events.addListener(
+            'newListsState',
+            this.cacheListsSubscription,
+        )
+        annotationsCache.events.addListener(
+            'updatedPageData',
+            this.cachePageListsSubscription,
+        )
+        // Set initial state, based on what's in the cache (assuming it already has been hydrated)
+        this.cacheAnnotationsSubscription(annotationsCache.annotations)
+        this.cacheListsSubscription(annotationsCache.lists)
+
         if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
             const width = SIDEBAR_WIDTH_STORAGE_KEY
 
@@ -904,14 +913,6 @@ export class SidebarContainerLogic extends UILogic<
             hasKey: { $set: hasAPIKey },
             AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
         })
-        const signupDate = new Date(
-            await (await this.options.authBG.getCurrentUser())?.creationTime,
-        ).getTime()
-
-        this.emitMutation({
-            signupDate: { $set: signupDate },
-            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
-        })
 
         const highlightColorJSON = await this.fetchHighlightColors()
 
@@ -934,7 +935,6 @@ export class SidebarContainerLogic extends UILogic<
                 isAutoAddEnabled: { $set: isAutoAddEnabled },
             })
         }
-        await this.checkRabbitHoleOnboardingStage()
     }
 
     private checkRabbitHoleOnboardingStage = async () => {
