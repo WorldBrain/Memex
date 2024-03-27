@@ -114,13 +114,14 @@ export class AnnotationCreate extends React.Component<Props, State>
             const youtubeSummariseEvents = this.props.sidebarEvents
             youtubeSummariseEvents.on(
                 'triggerYoutubeTimestampSummary',
-                ({ text, showLoadingSpinner }, callback) => {
+                async ({ text, showLoadingSpinner }, callback) => {
                     if (!this.editor) {
                         callback(false) // signal that listener isn't ready
                         return
                     }
 
                     if (text) {
+                        await sleepPromise(50)
                         this.editor?.addYoutubeTimestampWithText(
                             text,
                             showLoadingSpinner,
