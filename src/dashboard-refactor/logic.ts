@@ -327,6 +327,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             spaceSearchSuggestions: [],
             searchResults: {
+                __oldestResultTimestamp: null,
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,
@@ -1229,9 +1230,24 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     private searchPages = async (state: State) => {
-        const result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state, this.options.annotationsCache),
-        )
+        const isBlankSearch =
+            state.searchFilters.searchQuery.trim().length === 0
+        const result = await this.options.searchBG.unifiedSearch({
+            query: state.searchFilters.searchQuery,
+            filterByDomains: state.searchFilters.domainsIncluded,
+            filterByListIds: state.searchFilters.spacesIncluded,
+            fromWhen: state.searchFilters.dateFrom,
+            untilWhen: isBlankSearch
+                ? state.searchResults.__oldestResultTimestamp ??
+                  state.searchFilters.dateTo
+                : state.searchFilters.dateTo,
+        })
+
+        this.emitMutation({
+            searchResults: {
+                __oldestResultTimestamp: { $set: result.oldestResultTimestamp },
+            },
+        })
 
         if (state.searchResults.searchType === 'events') {
             result.docs = result.docs.filter((item) => {
@@ -1247,7 +1263,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.options.annotationsCache,
             ),
             resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
+            searchTermsInvalid: false,
         }
     }
 

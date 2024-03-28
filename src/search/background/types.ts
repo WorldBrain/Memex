@@ -166,7 +166,6 @@ export interface SearchBackend {
 export interface SearchInterface {
     unifiedSearch: (params: UnifiedSearchParams) => Promise<UnifiedSearchResult>
 
-    search: SearchIndex['search']
     searchAnnotations: (
         params: BackgroundSearchParams,
     ) => Promise<StandardSearchResponse | AnnotationsSearchResponse>
@@ -192,6 +191,7 @@ export type UnifiedSearchParams = {
     untilWhen?: number
     filterByDomains: string[]
     filterByListIds: number[]
+    daysToSearch?: number
 }
 
 export type UnifiedBlankSearchParams = UnifiedSearchParams & {
@@ -201,8 +201,9 @@ export type UnifiedBlankSearchParams = UnifiedSearchParams & {
 }
 
 export type UnifiedSearchResult = {
-    pages: AnnotPage[]
+    docs: AnnotPage[]
     resultsExhausted: boolean
+    oldestResultTimestamp: number
 }
 
 export type UnifiedBlankSearchResult = {

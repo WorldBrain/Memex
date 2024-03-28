@@ -240,6 +240,8 @@ export interface RootState {
     isSearchCopyPasterShown: boolean
     isSubscriptionBannerShown: boolean
 
+    __oldestResultTimestamp: number | null
+
     /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
     areResultsExhausted: boolean

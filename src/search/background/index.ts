@@ -107,7 +107,6 @@ export default class SearchBackground {
 
         this.remoteFunctions = {
             unifiedSearch: this.unifiedSearch,
-            search: this.searchIndex.search,
             suggest: this.storage.suggest,
             extendedSuggest: this.storage.suggestExtended,
 
@@ -358,8 +357,9 @@ export default class SearchBackground {
             .filter(Boolean)
 
         return {
-            pages: mappedAnnotPages,
+            docs: mappedAnnotPages,
             resultsExhausted: result.resultsExhausted,
+            oldestResultTimestamp: result.oldestResultTimestamp,
         }
     }
 
