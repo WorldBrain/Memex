@@ -191,8 +191,9 @@ export type UnifiedSearchParams = {
     untilWhen?: number
     filterByDomains: string[]
     filterByListIds: number[]
-    daysToSearch?: number
 }
+
+export type UnifiedTermsSearchParams = UnifiedSearchParams
 
 export type UnifiedBlankSearchParams = UnifiedSearchParams & {
     daysToSearch: number

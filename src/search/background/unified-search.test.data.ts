@@ -44,8 +44,8 @@ export const PAGES = {
         fullUrl: 'https://' + PAGE_ID_1,
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
-        fullTitle: '',
-        text: '',
+        fullTitle: 'dog breeds',
+        text: 'test text about poodles, ridgebacks',
     },
     [PAGE_ID_2]: {
         listIds: [LIST_ID_3],
@@ -53,8 +53,8 @@ export const PAGES = {
         fullUrl: 'https://' + PAGE_ID_2,
         domain: 'wikipedia.org',
         hostname: 'wikipedia.org',
-        fullTitle: '',
-        text: '',
+        fullTitle: 'fruit types',
+        text: 'text about apples, oranges, etc.',
     },
     [PAGE_ID_3]: {
         url: PAGE_ID_3,
@@ -62,7 +62,7 @@ export const PAGES = {
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
         fullTitle: '',
-        text: '',
+        text: 'test',
     },
     [PAGE_ID_4]: {
         listIds: [LIST_ID_2],
@@ -70,8 +70,8 @@ export const PAGES = {
         fullUrl: 'https://' + PAGE_ID_4,
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
-        fullTitle: '',
-        text: '',
+        fullTitle: 'title',
+        text: 'some nonsense test text',
     },
     [PAGE_ID_5]: {
         url: PAGE_ID_5,
@@ -79,7 +79,7 @@ export const PAGES = {
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
         fullTitle: '',
-        text: '',
+        text: 'test',
     },
     [PAGE_ID_6]: {
         url: PAGE_ID_6,
@@ -87,7 +87,7 @@ export const PAGES = {
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
         fullTitle: '',
-        text: '',
+        text: 'test',
     },
     [PAGE_ID_7]: {
         url: PAGE_ID_7,
@@ -95,7 +95,7 @@ export const PAGES = {
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
         fullTitle: '',
-        text: '',
+        text: 'test',
     },
     [PAGE_ID_8]: {
         url: PAGE_ID_8,
@@ -103,7 +103,7 @@ export const PAGES = {
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
         fullTitle: '',
-        text: '',
+        text: 'test',
     },
     [PAGE_ID_9]: {
         url: PAGE_ID_9,
@@ -127,15 +127,15 @@ export const PAGES = {
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
         fullTitle: '',
-        text: '',
+        text: 'test',
     },
     [PAGE_ID_12]: {
         url: PAGE_ID_12,
         fullUrl: 'https://' + PAGE_ID_12,
         domain: 'wikipedia.org',
         hostname: 'en.wikipedia.org',
-        fullTitle: '',
-        text: '',
+        fullTitle: 'test',
+        text: 'text text text',
     },
 }
 
@@ -235,7 +235,8 @@ export const ANNOTATIONS = {
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>division</div>',
-            comment: 'comment',
+            comment:
+                'comment with completely different text to the parent page - cheese',
             color: 'default',
             selector: {
                 quote: '<div>division</div>',
@@ -252,7 +253,7 @@ export const ANNOTATIONS = {
             url: 'en.wikipedia.org/wiki/Eurasia/#1711067799676',
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
-            body: '<div>Honshu</div>',
+            body: '<div>Honshu cheese</div>',
             comment: '',
             color: 'default',
             selector: {
@@ -270,7 +271,7 @@ export const ANNOTATIONS = {
             url: 'en.wikipedia.org/wiki/Eurasia/#1711067799679',
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
-            body: '<div>Honshu</div>',
+            body: '<div>Good highlight test</div>',
             comment: '',
             color: 'default',
             selector: {
@@ -591,8 +592,7 @@ export const ANNOTATIONS = {
         {
             pageTitle: 'Organism - test.com',
             pageUrl: PAGE_ID_10,
-            body:
-                '<div><p>The term "organism" (from <a href="https://en.wikipedia.org/wiki/Greek_language" title="Greek language">Greek</a> ὀργανισμός, <i>organismos</i>, from ὄργανον, <i>organon</i>, i.e. "instrument, implement, tool, organ of sense or apprehension")<sup><a href="#cite_note-LSJ-6">[6]</a></sup><sup><a href="#cite_note-OnlineEtDict-7">[7]</a></sup> first appeared in the English language in 1703 and took on its current definition by 1834 (<i><a href="https://en.wikipedia.org/wiki/Oxford_English_Dictionary" title="Oxford English Dictionary">Oxford English Dictionary</a></i>). It is directly related to the term "organization". There is a long tradition of defining organisms as self-organizing beings, going back at least to <a href="https://en.wikipedia.org/wiki/Immanuel_Kant" title="Immanuel Kant">Immanuel Kant</a>\'s 1790 <i><a href="https://en.wikipedia.org/wiki/Critique_of_Judgment" title="Critique of Judgment">Critique of Judgment</a></i>.<sup><a href="#cite_note-8">[8]</a></sup>\n</p>\n</div>',
+            body: '<div><p>The term "organism"</p></div>',
             comment: '',
             selector: {
                 quote:
@@ -633,7 +633,7 @@ export const ANNOTATIONS = {
             pageUrl: PAGE_ID_9,
             body:
                 '<div><p>The term phylum was coined in 1866 by <a href="https://en.wikipedia.org/wiki/Ernst_Haeckel" title="Ernst Haeckel">Ernst Haeckel</a> from the Greek <span title="Ancient Greek (to 1453)-language romanization"><i lang="grc-Latn">phylon</i></span> (<span lang="grc"><a href="https://en.wiktionary.org/wiki/%CF%86%E1%BF%A6%CE%BB%CE%BF%CE%BD#Ancient_Greek" title="wikt:φῦλον">φῦλον</a></span>, "race, stock"), related to <span title="Ancient Greek (to 1453)-language romanization"><i lang="grc-Latn">phyle</i></span> (<span lang="grc"><a href="https://en.wiktionary.org/wiki/%CF%86%CF%85%CE%BB%CE%AE#Ancient_Greek" title="wikt:φυλή">φυλή</a></span>, "tribe, clan").<sup><a href="#cite_note-FOOTNOTEValentine20048-4">[4]</a></sup><sup><a href="#cite_note-5">[5]</a></sup> Haeckel noted that species constantly evolved into new species that seemed to retain few consistent features among themselves and therefore few features that distinguished them as a group ("a self-contained unity"): "perhaps such a real and completely self-contained unity is the aggregate of all species which have gradually evolved from one and the same common original form, as, for example, all vertebrates. We name this aggregate [a] <span title="German-language text"><i lang="de">Stamm</i></span> [i.e., stock] (<span title="German-language text"><i lang="de">Phylon</i></span>)."<sup><a href="#cite_note-6">[a]</a></sup> In <a href="https://en.wikipedia.org/wiki/Plant_taxonomy" title="Plant taxonomy">plant taxonomy</a>, <a href="https://en.wikipedia.org/wiki/August_W._Eichler" title="August W. Eichler">August W. Eichler</a> (1883) classified plants into <a href="https://en.wikipedia.org/wiki/Eichler_system" title="Eichler system">five groups</a> named divisions, a term that remains in use today for groups of plants, algae and fungi.<sup><a href="#cite_note-ICN-1">[1]</a></sup><sup><a href="#cite_note-7">[6]</a></sup>\nThe definitions of zoological phyla have changed from their origins in the six <a href="https://en.wikipedia.org/wiki/Linnaean_taxonomy" title="Linnaean taxonomy">Linnaean</a> classes and the four <span title="French-language text"><i lang="fr">embranchements</i></span> of <a href="https://en.wikipedia.org/wiki/Georges_Cuvier" title="Georges Cuvier">Georges Cuvier</a>.<sup><a href="#cite_note-8">[7]</a></sup>\n</p></div>',
-            comment: '',
+            comment: 'test',
             selector: {
                 quote:
                     '<div><p>The term phylum was coined in 1866 by <a href="/wiki/Ernst_Haeckel" title="Ernst Haeckel">Ernst Haeckel</a> from the Greek <span title="Ancient Greek (to 1453)-language romanization"><i lang="grc-Latn">phylon</i></span> (<span lang="grc"><a href="https://en.wiktionary.org/wiki/%CF%86%E1%BF%A6%CE%BB%CE%BF%CE%BD#Ancient_Greek" title="wikt:φῦλον">φῦλον</a></span>, "race, stock"), related to <span title="Ancient Greek (to 1453)-language romanization"><i lang="grc-Latn">phyle</i></span> (<span lang="grc"><a href="https://en.wiktionary.org/wiki/%CF%86%CF%85%CE%BB%CE%AE#Ancient_Greek" title="wikt:φυλή">φυλή</a></span>, "tribe, clan").<sup><a href="#cite_note-FOOTNOTEValentine20048-4">[4]</a></sup><sup><a href="#cite_note-5">[5]</a></sup> Haeckel noted that species constantly evolved into new species that seemed to retain few consistent features among themselves and therefore few features that distinguished them as a group ("a self-contained unity"): "perhaps such a real and completely self-contained unity is the aggregate of all species which have gradually evolved from one and the same common original form, as, for example, all vertebrates. We name this aggregate [a] <span title="German-language text"><i lang="de">Stamm</i></span> [i.e., stock] (<span title="German-language text"><i lang="de">Phylon</i></span>)."<sup><a href="#cite_note-6">[a]</a></sup> In <a href="/wiki/Plant_taxonomy" title="Plant taxonomy">plant taxonomy</a>, <a href="/wiki/August_W._Eichler" title="August W. Eichler">August W. Eichler</a> (1883) classified plants into <a href="/wiki/Eichler_system" title="Eichler system">five groups</a> named divisions, a term that remains in use today for groups of plants, algae and fungi.<sup><a href="#cite_note-ICN-1">[1]</a></sup><sup><a href="#cite_note-7">[6]</a></sup>\nThe definitions of zoological phyla have changed from their origins in the six <a href="/wiki/Linnaean_taxonomy" title="Linnaean taxonomy">Linnaean</a> classes and the four <span title="French-language text"><i lang="fr">embranchements</i></span> of <a href="/wiki/Georges_Cuvier" title="Georges Cuvier">Georges Cuvier</a>.<sup><a href="#cite_note-8">[7]</a></sup>\n</p></div>',
@@ -673,7 +673,7 @@ export const ANNOTATIONS = {
             pageTitle: 'Tympanum (anatomy) - Wikipedia',
             pageUrl: PAGE_ID_7,
             body: '<div>anatomy</div>',
-            comment: '',
+            comment: 'test',
             color: 'default',
             selector: {
                 quote: '<div>anatomy</div>',
@@ -725,7 +725,7 @@ export const ANNOTATIONS = {
             url: 'en.wikipedia.org/wiki/Tympanum_(anatomy)/#1711179221253',
             pageTitle: 'Tympanum (anatomy) - Wikipedia',
             pageUrl: PAGE_ID_7,
-            comment: '<div><p>today</p></div>',
+            comment: '<div><p>test today</p></div>',
             createdWhen: new Date('2024-03-23T06:04'),
             lastEdited: new Date('2024-03-23T06:04'),
         },

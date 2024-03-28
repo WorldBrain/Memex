@@ -14,9 +14,8 @@ import type {
     AnnotPage,
     UnifiedSearchParams,
     UnifiedBlankSearchResult,
-    UnifiedSearchResult,
-    UnifiedBlankSearchPageResultData,
     UnifiedBlankSearchParams,
+    UnifiedTermsSearchParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
@@ -317,6 +316,16 @@ export default class SearchBackground {
         }
     }
 
+    private async unifiedTermsSearch(
+        params: UnifiedTermsSearchParams,
+    ): Promise<UnifiedBlankSearchResult> {
+        return {
+            oldestResultTimestamp: 0,
+            resultDataByPage: new Map(),
+            resultsExhausted: true,
+        }
+    }
+
     unifiedSearch: SearchInterface['unifiedSearch'] = async (params) => {
         let result: UnifiedBlankSearchResult
         if (!params.query.trim().length) {
@@ -332,7 +341,7 @@ export default class SearchBackground {
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
-            throw new Error('TODO: Implement terms search')
+            result = await this.unifiedTermsSearch(params)
         }
 
         const dataLookups = await this.lookupDataForUnifiedResults(result)
