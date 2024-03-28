@@ -1283,8 +1283,8 @@ export default class SearchResultsContainer extends React.Component<
 }
 
 const ResultsScrollContainer = styled.div`
-    overflow-y: scroll;
-    overflow-x: hidden;
+    /* overflow-y: scroll;
+    overflow-x: hidden; */
     height: fill-available;
     width: fill-available;
     position: relative;
@@ -1547,6 +1547,8 @@ const PageTopBarBox = styled.div<{
     margin-top: -1px;
     width: fill-available;
     width: -moz-available;
+    background: ${(props) => props.theme.colors.black}98;
+    backdrop-filter: blur(10px);
 
     ${(props) =>
         props.inPageMode &&
@@ -1629,7 +1631,7 @@ const ResultsBox = styled.div`
     width: fill-available;
     height: fill-available;
     grid-gap: 1px;
-    overflow: hidden;
+    /* overflow: hidden; */
     align-items: center;
 `
 
@@ -1644,6 +1646,7 @@ const ResultsContainer = styled.div`
     flex: 1;
     height: fill-available;
     height: -moz-available;
+    overflow: scroll;
 
     &::-webkit-scrollbar {
         display: none;
