@@ -89,6 +89,7 @@ export default class CustomListBackground {
             removeAllListPages: this.removeAllListPages,
             fetchAllLists: this.fetchAllLists,
             fetchListById: this.fetchListById,
+            fetchListTreeById: this.fetchListTreeById,
             findSimilarBackground: this.findSimilarBackground,
             fetchAnnotationRefsForRemoteListsOnPage: this
                 .fetchAnnotationRefsForRemoteListsOnPage,
@@ -248,6 +249,30 @@ export default class CustomListBackground {
                 'number',
             ) as number[],
         }))
+    }
+    fetchListTreeById: RemoteCollectionsInterface['fetchListTreeById'] = async ({
+        id,
+    }) => {
+        const lists = await this.storage.fetchListByIds([id])
+        const list = lists[0]
+        const treeData = await this.storage.getTreeDataForList({
+            localListId: list.id,
+        })
+
+        if (!treeData) {
+            return null // or throw an error if a list must exist
+        }
+
+        return {
+            ...list,
+            ...treeData,
+            order: treeData.order ?? DEFAULT_KEY,
+            parentListId: treeData.parentListId ?? null,
+            pathListIds: extractMaterializedPathIds(
+                treeData.path ?? '',
+                'number',
+            ) as number[],
+        }
     }
 
     fetchListById = async ({ id }: { id: number }) => {
@@ -540,6 +565,7 @@ export default class CustomListBackground {
         },
     ): Promise<{ object: PageListEntry }> => {
         const { id } = params
+
         const url =
             'contentIdentifier' in params
                 ? params.contentIdentifier?.fullUrl

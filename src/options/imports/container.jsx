@@ -103,13 +103,19 @@ class ImportContainer extends Component {
 
     handleInputFile = (event) => {
         const input = event.target
+
         if (!input.files[0]) {
             return
         }
         const file = input.files[0]
-        this.props.boundActions.prepareImport()
-        this.props.boundActions.setBlobUrl(URL.createObjectURL(file))
-        setTimeout(() => this.props.recalcEsts(), 500)
+
+        const reader = new FileReader()
+        reader.onloadend = () => {
+            this.props.boundActions.setBlobUrl(reader.result)
+        }
+        reader.readAsDataURL(file)
+
+        setTimeout(() => this.props.recalcEsts(), 3000)
     }
 
     renderCancelButton() {

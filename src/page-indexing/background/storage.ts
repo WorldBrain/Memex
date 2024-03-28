@@ -173,7 +173,7 @@ export default class PageStorage extends StorageModule {
                 collection: 'visits',
                 args: [
                     { url: '$url:string' },
-                    { sort: [['time', 'desc']], limit: 1 },
+                    { order: [['time', 'desc']], limit: 1 },
                 ],
             },
             findOldestVisitByUrl: {
@@ -181,7 +181,7 @@ export default class PageStorage extends StorageModule {
                 collection: 'visits',
                 args: [
                     { url: '$url:string' },
-                    { sort: [['time', 'asc']], limit: 1 },
+                    { order: [['time', 'asc']], limit: 1 },
                 ],
             },
             findVisitsByUrl: {

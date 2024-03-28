@@ -930,6 +930,7 @@ export class PageIndexingBackground {
             content = pageData.content
             htmlBody = pageData.htmlBody
             favIconURI = pageData.favIconURI
+            // title = pageData.title ?? props.metaData?.pageTitle
 
             await this.storeDocContent(normalizeUrl(props.fullUrl), {
                 htmlBody,
@@ -937,6 +938,7 @@ export class PageIndexingBackground {
 
             pageDoc.favIconURI = favIconURI
             pageDoc.content.title = content?.title || props.metaData?.pageTitle
+
             pageDoc.content.fullText = content?.fullText
         } else {
             const pdfData = await this.options.fetchPdfData(props.fullUrl)

@@ -189,35 +189,58 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         await this.props.annotationsFunctions.createTimestampWithScreenshot()
     }
 
-    handleAnnotateButtonClick = async () => {
-        // Logic for annotate button click
-
+    handleAnnotateButtonClick = async (
+        event: React.MouseEvent<HTMLDivElement>,
+    ) => {
         const currentUrl = window.location.href
         const from = this.state.fromSecondsPosition
         const to = this.state.toSecondsPosition
+        // Check if Shift key is pressed during the click
 
-        const range = this.calculateRangeInSeconds(
-            this.state.videoDuration,
-            from,
-            to,
-        )
+        let timestampToSend = null
 
-        const fromTimestampInfo = this.createTimestampAndURL(
-            currentUrl,
-            range.from,
-        )
-        const toTimestampInfo = this.createTimestampAndURL(currentUrl, range.to)
+        if (event.shiftKey) {
+            console.log('Shift key is pressed during click')
+            const range = this.calculateRangeInSeconds(
+                this.state.videoDuration,
+                from,
+                to,
+            )
+            const fromTimestampInfo = this.createTimestampAndURL(
+                currentUrl,
+                range.from,
+            )
+            const toTimestampInfo = this.createTimestampAndURL(
+                currentUrl,
+                range.to,
+            )
 
+            timestampToSend = (
+                this.createAhref(fromTimestampInfo[1], fromTimestampInfo[0]) +
+                'to ' +
+                this.createAhref(toTimestampInfo[1], toTimestampInfo[0])
+            ).toString()
+        } else {
+            let video = document.getElementsByTagName('video')[0]
+            if (video) {
+                let currentTime = Math.floor(video.currentTime)
+                const currentTimeStamp = this.createTimestampAndURL(
+                    currentUrl,
+                    currentTime,
+                )
+                timestampToSend = this.createAhref(
+                    currentTimeStamp[1],
+                    currentTimeStamp[0],
+                )
+            }
+        }
+        // Logic for annotate button click
         this.props.annotationsFunctions.createAnnotation()(
             false,
             false,
             false,
             false,
-            (
-                this.createAhref(fromTimestampInfo[1], fromTimestampInfo[0]) +
-                'to ' +
-                this.createAhref(toTimestampInfo[1], toTimestampInfo[0])
-            ).toString(),
+            timestampToSend,
         )
     }
 
@@ -414,8 +437,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     <span>
                                         Add a note with a link to the current
                                         time. <br />
-                                        Optionally: Adjust seconds into past via
-                                        the text field
+                                        <strong>+ Shift</strong> to add range
+                                        selected below
                                     </span>
                                 }
                                 placement="bottom"
