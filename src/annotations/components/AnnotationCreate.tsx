@@ -419,7 +419,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             autoFocus={
                                 this.props.autoFocus || this.state.onEditClick
                             }
-                            // placeholder={`Write a note...`}
+                            promptPlaceholder={`Write a note...`}
                             isRibbonCommentBox={this.props.isRibbonCommentBox}
                             getYoutubePlayer={this.props.getYoutubePlayer}
                             sidebarEvents={this.props.sidebarEvents}

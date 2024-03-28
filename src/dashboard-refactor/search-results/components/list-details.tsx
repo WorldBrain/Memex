@@ -41,6 +41,7 @@ interface State {
     showQuickTutorial: boolean
     spaceTitle: string
     isDeboucingEditor: boolean
+    shouldShowEditor: boolean
 }
 
 export default class ListDetails extends PureComponent<Props, State> {
@@ -54,7 +55,43 @@ export default class ListDetails extends PureComponent<Props, State> {
         showQuickTutorial: false,
         spaceTitle: this.props.listData.name,
         isDeboucingEditor: false,
+        shouldShowEditor: true,
     }
+
+    async componentDidMount() {
+        if (
+            !this.editorRef?.checkIfHasContent() &&
+            !this.state.isEditingDescription
+        ) {
+            this.setState({ shouldShowEditor: false })
+        } else if (this.state.isEditingDescription) {
+            this.setState({ shouldShowEditor: true })
+        }
+        if (
+            this.editorRef?.checkIfHasContent() ||
+            this.props.description.length > 0
+        ) {
+            this.setState({ shouldShowEditor: true })
+        }
+    }
+
+    // componentDidUpdate(prevProps: Props, prevState: State) {
+    //     if (
+    //         prevState.isEditingDescription !== this.state.isEditingDescription
+    //     ) {
+    //         this.editorRef?.setEditable(this.state?.isEditingDescription)
+
+    //         if (
+    //             !this.editorRef?.checkIfHasContent() &&
+    //             !this.state?.isEditingDescription
+    //         ) {
+    //             this.setState({ shouldShowEditor: false })
+    //         } else if (this.state?.isEditingDescription) {
+    //             this.setState({ shouldShowEditor: true })
+    //             this.editorRef.focus()
+    //         }
+    //     }
+    // }
 
     async componentWillUpdate(nextProps: Props, prevState: State) {
         if (this.props.listData.unifiedId !== nextProps.listData.unifiedId) {
@@ -152,7 +189,6 @@ export default class ListDetails extends PureComponent<Props, State> {
         // ) {
         //     return <></>
         // }
-
         return (
             <MemexEditor
                 onContentUpdate={(description) =>
@@ -160,7 +196,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                 }
                 markdownContent={this.state.description}
                 onKeyDown={this.handleDescriptionInputKeyDown}
-                placeholder="Write a description for this Space"
+                promptPlaceholder="+ Add Space description"
                 setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                 editable={this.state.isEditingDescription}
                 imageSupport={this.props.imageSupport}
@@ -442,7 +478,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                 </BtnsContainer>
                             </TitleContainer>
                         )}
-                        {this.props.isOwnedList &&
+                        {/* {this.props.isOwnedList &&
                             !this.props.description?.length &&
                             !this.state.isEditingDescription &&
                             !(
@@ -460,7 +496,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                                         + Add Space description
                                     </EditDescriptionButton>
                                 </>
-                            )}
+                            )} */}
                     </Container>
                     <DescriptionContainer>
                         {this.renderDescription()}

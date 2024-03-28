@@ -248,6 +248,12 @@ const EmailListContainer = styled.div`
     align-items: flex-start;
     max-height: 150px;
     overflow-y: scroll;
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
+
+    scrollbar-width: none;
 `
 
 const InviteItemContainer = styled.div`
