@@ -179,10 +179,10 @@ export default class SearchBackground {
         // 2. AND'd filter by lists is more tricky. First need to lookup annot privacy level data to know whether they inherit parent page lists or not
         const allAnnotIds: string[] = []
         const pageIdByAnnotId = new Map<string, string>()
-        resultDataByPage.forEach(({ annotIds }, pageId) =>
-            annotIds.forEach((annotId) => {
-                allAnnotIds.push(annotId)
-                pageIdByAnnotId.set(annotId, pageId)
+        resultDataByPage.forEach(({ annotations: annotIds }, pageId) =>
+            annotIds.forEach((annot) => {
+                allAnnotIds.push(annot.url)
+                pageIdByAnnotId.set(annot.url, pageId)
             }),
         )
 
@@ -247,13 +247,13 @@ export default class SearchBackground {
 
         // 5. Apply annotation filtering to the results, and filter out any pages not in lists without remaining annotations
         resultDataByPage.forEach((data, pageId) => {
-            data.annotIds = data.annotIds.filter(
-                (id) =>
-                    selectivelySharedAnnotIds.includes(id) ||
-                    autoSharedAnnotIds.includes(id),
+            data.annotations = data.annotations.filter(
+                (annot) =>
+                    selectivelySharedAnnotIds.includes(annot.url) ||
+                    autoSharedAnnotIds.includes(annot.url),
             )
             if (
-                !data.annotIds.length &&
+                !data.annotations.length &&
                 !hasEntriesForAllFilteredLists(pageListEntriesByPageId[pageId])
             ) {
                 resultDataByPage.delete(pageId)
@@ -292,21 +292,22 @@ export default class SearchBackground {
                 (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
             )
             resultDataByPage.set(pageId, {
-                annotIds: sortedAnnots.map((a) => a.url),
-                timestamp: sortedAnnots[0].lastEdited.valueOf(),
+                annotations: sortedAnnots,
+                // This gets overwritten in the next loop by the latest visit/bookmark time (if exist in this results "page")
+                latestPageTimestamp: sortedAnnots[0].lastEdited.valueOf(),
             })
         }
 
         // Add in all the pages to the results
-        for (const { url, time } of [...bookmarks, ...visits]) {
-            const existing = resultDataByPage.get(url) ?? {
-                timestamp: 0,
-                annotIds: [],
-            }
-            // Only keep track of the visit/bookmark time if it's newer than anything seen so far
-            if (time > existing.timestamp) {
-                resultDataByPage.set(url, { ...existing, timestamp: time })
-            }
+        const descOrdered = [...bookmarks, ...visits].sort(
+            (a, b) => a.time - b.time,
+        )
+        for (const { url, time } of descOrdered) {
+            const annotations = resultDataByPage.get(url)?.annotations ?? []
+            resultDataByPage.set(url, {
+                annotations,
+                latestPageTimestamp: time, // Should end up being the latest one, given ordering
+            })
         }
 
         await this.filterUnifiedSearchResultsByFilters(resultDataByPage, params)
@@ -338,7 +339,7 @@ export default class SearchBackground {
         const dataLookups = await this.lookupDataForUnifiedResults(result)
         const sortedResultPages = sortUnifiedBlankSearchResult(result)
         const mappedAnnotPages = sortedResultPages
-            .map(([pageId, { annotIds }]) => {
+            .map(([pageId, { annotations }]) => {
                 const page = dataLookups.pages.get(pageId)
                 if (!page) {
                     throw new Error(
@@ -349,8 +350,8 @@ export default class SearchBackground {
                     ...page,
                     lists: [], // TODO: lookup lists
                     hasBookmark: false, // TODO: lookup bookmark
-                    annotations: [...annotIds]
-                        .map((annotId) => dataLookups.annotations.get(annotId))
+                    annotations: annotations
+                        .map((annot) => dataLookups.annotations.get(annot.url))
                         .filter(Boolean),
                 }
             })
@@ -377,9 +378,9 @@ export default class SearchBackground {
                 url: { $in: pageIds },
             })
 
-        const annotIds = [...resultDataByPage.values()].flatMap(
-            ({ annotIds }) => annotIds,
-        )
+        const annotIds = [
+            ...resultDataByPage.values(),
+        ].flatMap(({ annotations }) => annotations.map((a) => a.url))
         const annotData: Annotation[] = await this.options.storageManager
             .collection('annotations')
             .findObjects({

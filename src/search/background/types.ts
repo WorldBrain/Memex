@@ -212,6 +212,6 @@ export type UnifiedBlankSearchResult = {
 }
 
 export type UnifiedBlankSearchPageResultData = {
-    timestamp: number
-    annotIds: string[]
+    latestPageTimestamp: number
+    annotations: Annotation[]
 }

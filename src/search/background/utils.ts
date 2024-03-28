@@ -63,4 +63,14 @@ export const reshapePageForDisplay = (page) => ({
 export const sortUnifiedBlankSearchResult = ({
     resultDataByPage,
 }: UnifiedBlankSearchResult) =>
-    [...resultDataByPage].sort(([, a], [, b]) => b.timestamp - a.timestamp)
+    [...resultDataByPage].sort(
+        ([, a], [, b]) =>
+            Math.max(
+                b.latestPageTimestamp,
+                b.annotations[0]?.lastEdited.valueOf() ?? 0,
+            ) -
+            Math.max(
+                a.latestPageTimestamp,
+                a.annotations[0]?.lastEdited.valueOf() ?? 0,
+            ),
+    )

@@ -108,8 +108,8 @@ export const PAGES = {
     [PAGE_ID_9]: {
         url: PAGE_ID_9,
         fullUrl: 'https://' + PAGE_ID_9,
-        domain: 'test-2.com',
-        hostname: 'en.test-2.com',
+        domain: 'test2.com',
+        hostname: 'en.test2.com',
         fullTitle: '',
         text: '',
     },
@@ -610,7 +610,7 @@ export const ANNOTATIONS = {
     ],
     [PAGE_ID_9]: [
         {
-            pageTitle: 'Phylum - test-2.com',
+            pageTitle: 'Phylum - test2.com',
             pageUrl: PAGE_ID_9,
             body:
                 '<div><p>In <a href="https://en.wikipedia.org/wiki/Biology" title="Biology">biology</a>, a <b>phylum</b> (<span><span lang="en-fonipa"><a href="https://en.wikipedia.org/wiki/Help:IPA/English" title="Help:IPA/English">/<span><span title="/ˈ/: primary stress follows">ˈ</span><span title="\'f\' in \'find\'">f</span><span title="/aɪ/: \'i\' in \'tide\'">aɪ</span><span title="\'l\' in \'lie\'">l</span><span title="/əm/: \'m\' in \'rhythm\'">əm</span></span>/</a></span></span>; <abbr title="plural form">pl.</abbr>: <b>phyla</b>) is a level of classification or <a href="https://en.wikipedia.org/wiki/Taxonomic_rank" title="Taxonomic rank">taxonomic rank</a> below <a href="https://en.wikipedia.org/wiki/Kingdom_(biology)" title="Kingdom (biology)">kingdom</a> and above <a href="https://en.wikipedia.org/wiki/Class_(biology)" title="Class (biology)">class</a>. Traditionally, in <a href="https://en.wikipedia.org/wiki/Botany" title="Botany">botany</a> the term <a href="https://en.wikipedia.org/wiki/Division_(biology)" title="Division (biology)">division</a> has been used instead of phylum, although the <a href="https://en.wikipedia.org/wiki/International_Code_of_Nomenclature_for_algae,_fungi,_and_plants" title="International Code of Nomenclature for algae, fungi, and plants">International Code of Nomenclature for algae, fungi, and plants</a> accepts the terms as equivalent.<sup><a href="#cite_note-ICN-1">[1]</a></sup><sup><a href="#cite_note-2">[2]</a></sup><sup><a href="#cite_note-Berg2007-3">[3]</a></sup> Depending on definitions, the animal kingdom <a href="https://en.wikipedia.org/wiki/Animalia" title="Animalia">Animalia</a> contains about 31 phyla, the plant kingdom <a href="https://en.wikipedia.org/wiki/Plantae" title="Plantae">Plantae</a> contains about 14 phyla, and the fungus kingdom <a href="https://en.wikipedia.org/wiki/Fungi" title="Fungi">Fungi</a> contains about 8 phyla. Current research in <a href="https://en.wikipedia.org/wiki/Phylogenetics" title="Phylogenetics">phylogenetics</a> is uncovering the relationships among phyla within larger <a href="https://en.wikipedia.org/wiki/Clades" title="Clades">clades</a> like <a href="https://en.wikipedia.org/wiki/Ecdysozoa" title="Ecdysozoa">Ecdysozoa</a> and <a href="https://en.wikipedia.org/wiki/Embryophyta" title="Embryophyta">Embryophyta</a>.\n</p>\n\n</div>',
@@ -626,10 +626,10 @@ export const ANNOTATIONS = {
             color: 'default',
             createdWhen: new Date('2024-03-23T06:21'),
             lastEdited: new Date('2024-03-23T06:21'),
-            url: 'en.test-2.com/wiki/Phylum/#1711333382313',
+            url: 'en.test2.com/wiki/Phylum/#1711333382313',
         },
         {
-            pageTitle: 'Phylum - test-2.com',
+            pageTitle: 'Phylum - test2.com',
             pageUrl: PAGE_ID_9,
             body:
                 '<div><p>The term phylum was coined in 1866 by <a href="https://en.wikipedia.org/wiki/Ernst_Haeckel" title="Ernst Haeckel">Ernst Haeckel</a> from the Greek <span title="Ancient Greek (to 1453)-language romanization"><i lang="grc-Latn">phylon</i></span> (<span lang="grc"><a href="https://en.wiktionary.org/wiki/%CF%86%E1%BF%A6%CE%BB%CE%BF%CE%BD#Ancient_Greek" title="wikt:φῦλον">φῦλον</a></span>, "race, stock"), related to <span title="Ancient Greek (to 1453)-language romanization"><i lang="grc-Latn">phyle</i></span> (<span lang="grc"><a href="https://en.wiktionary.org/wiki/%CF%86%CF%85%CE%BB%CE%AE#Ancient_Greek" title="wikt:φυλή">φυλή</a></span>, "tribe, clan").<sup><a href="#cite_note-FOOTNOTEValentine20048-4">[4]</a></sup><sup><a href="#cite_note-5">[5]</a></sup> Haeckel noted that species constantly evolved into new species that seemed to retain few consistent features among themselves and therefore few features that distinguished them as a group ("a self-contained unity"): "perhaps such a real and completely self-contained unity is the aggregate of all species which have gradually evolved from one and the same common original form, as, for example, all vertebrates. We name this aggregate [a] <span title="German-language text"><i lang="de">Stamm</i></span> [i.e., stock] (<span title="German-language text"><i lang="de">Phylon</i></span>)."<sup><a href="#cite_note-6">[a]</a></sup> In <a href="https://en.wikipedia.org/wiki/Plant_taxonomy" title="Plant taxonomy">plant taxonomy</a>, <a href="https://en.wikipedia.org/wiki/August_W._Eichler" title="August W. Eichler">August W. Eichler</a> (1883) classified plants into <a href="https://en.wikipedia.org/wiki/Eichler_system" title="Eichler system">five groups</a> named divisions, a term that remains in use today for groups of plants, algae and fungi.<sup><a href="#cite_note-ICN-1">[1]</a></sup><sup><a href="#cite_note-7">[6]</a></sup>\nThe definitions of zoological phyla have changed from their origins in the six <a href="https://en.wikipedia.org/wiki/Linnaean_taxonomy" title="Linnaean taxonomy">Linnaean</a> classes and the four <span title="French-language text"><i lang="fr">embranchements</i></span> of <a href="https://en.wikipedia.org/wiki/Georges_Cuvier" title="Georges Cuvier">Georges Cuvier</a>.<sup><a href="#cite_note-8">[7]</a></sup>\n</p></div>',
@@ -645,10 +645,10 @@ export const ANNOTATIONS = {
             color: 'default',
             createdWhen: new Date('2024-03-23T06:22'),
             lastEdited: new Date('2024-03-23T06:22'),
-            url: 'en.test-2.com/wiki/Phylum/#1711333384046',
+            url: 'en.test2.com/wiki/Phylum/#1711333384046',
         },
         {
-            pageTitle: 'Phylum - test-2.com',
+            pageTitle: 'Phylum - test2.com',
             pageUrl: PAGE_ID_9,
             body:
                 '<div><p>Informally, phyla can be thought of as groupings of organisms based on general specialization of <a href="https://en.wikipedia.org/wiki/Body_plan" title="Body plan">body plan</a>.<sup><a href="#cite_note-9">[8]</a></sup> At its most basic, a phylum can be defined in two ways: as a group of organisms with a certain degree of morphological or developmental similarity (the <a href="https://en.wikipedia.org/wiki/Phenetic" title="Phenetic">phenetic</a> definition), or a group of organisms with a certain degree of evolutionary relatedness (the <a href="https://en.wikipedia.org/wiki/Phylogenetic" title="Phylogenetic">phylogenetic</a> definition).<sup><a href="#cite_note-Budd2000-10">[9]</a></sup> Attempting to define a level of the <a href="https://en.wikipedia.org/wiki/Linnaean_taxonomy" title="Linnaean taxonomy">Linnean hierarchy</a> without referring to (evolutionary) relatedness is unsatisfactory, but a phenetic definition is useful when addressing questions of a morphological nature—such as how successful different body plans were.<sup>[<i><a href="https://en.wikipedia.org/wiki/Wikipedia:Citation_needed" title="Wikipedia:Citation needed"><span title="This claim needs references to reliable sources. (May 2017)">citation needed</span></a></i>]</sup>\n</p>\n</div>',
@@ -664,7 +664,7 @@ export const ANNOTATIONS = {
             color: 'default',
             createdWhen: new Date('2024-03-23T06:23'),
             lastEdited: new Date('2024-03-23T06:23'),
-            url: 'en.test-2.com/wiki/Phylum/#1711333385412',
+            url: 'en.test2.com/wiki/Phylum/#1711333385412',
         },
     ],
     [PAGE_ID_7]: [
