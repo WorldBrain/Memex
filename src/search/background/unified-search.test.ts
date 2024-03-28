@@ -1,9 +1,12 @@
 import type Storex from '@worldbrain/storex'
 import * as DATA from './unified-search.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
-import { sortUnifiedBlankSearchResult } from './utils'
+import {
+    queryAnnotationsByTerms,
+    queryPagesByTerms,
+    sortUnifiedBlankSearchResult,
+} from './utils'
 import type {
-    UnifiedBlankSearchPageResultData,
     UnifiedBlankSearchParams,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
@@ -95,6 +98,10 @@ const termsSearch = (
     search['unifiedTermsSearch']({
         filterByDomains: [],
         filterByListIds: [],
+        queryPages: queryPagesByTerms(search['options'].storageManager),
+        queryAnnotations: queryAnnotationsByTerms(
+            search['options'].storageManager,
+        ),
         ...params,
     })
 

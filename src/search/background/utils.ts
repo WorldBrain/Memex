@@ -1,5 +1,11 @@
+import type Storex from '@worldbrain/storex'
 import type { ContentTypes, UnifiedBlankSearchResult } from './types'
 import type { SearchParams as OldSearchParams } from '../types'
+import type {
+    Page,
+    Annotation,
+} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 
 export const contentTypeChecks = {
     pagesOnly: (flags: ContentTypes) =>
@@ -74,3 +80,35 @@ export const sortUnifiedBlankSearchResult = ({
                 a.annotations[0]?.lastEdited.valueOf() ?? 0,
             ),
     )
+
+export const queryAnnotationsByTerms = (storageManager: Storex) => (
+    terms: string[],
+): Promise<Annotation[]> =>
+    (storageManager.backend as DexieStorageBackend).dexieInstance
+        .table('annotations')
+        .where('_body_terms')
+        .anyOf(terms)
+        .or('_comment_terms')
+        .anyOf(terms)
+        .distinct()
+        .toArray()
+
+export const queryPagesByTerms = (storageManager: Storex) => async (
+    terms: string[],
+): Promise<Array<Page & { latestTimestamp: number }>> => {
+    const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
+    const pages = (await dexie
+        .table('pages')
+        .where('terms')
+        .anyOf(terms)
+        .or('urlTerms')
+        .anyOf(terms)
+        .or('titleTerms')
+        .anyOf(terms)
+        .distinct()
+        .toArray()) as Page[]
+
+    // TODO: Get latest visit/bm for each page
+
+    return pages.map((p) => ({ ...p, latestTimestamp: 0 }))
+}

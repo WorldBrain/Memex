@@ -41,7 +41,11 @@ import type {
     PageListEntry,
     Visit,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
-import { sortUnifiedBlankSearchResult } from './utils'
+import {
+    sortUnifiedBlankSearchResult,
+    queryAnnotationsByTerms,
+    queryPagesByTerms,
+} from './utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 const dayMs = 1000 * 60 * 60 * 24
@@ -319,9 +323,39 @@ export default class SearchBackground {
     private async unifiedTermsSearch(
         params: UnifiedTermsSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
+        const terms = params.query.split(/\s+/)
+        const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
+
+        const [pages, annotations] = await Promise.all([
+            params.queryPages(terms),
+            params.queryAnnotations(terms),
+        ])
+
+        // Add in all the annotations to the results
+        const annotsByPage = groupBy(annotations, (a) => a.pageUrl)
+        for (const [pageId, annots] of Object.entries(annotsByPage)) {
+            const sortedAnnots = annots.sort(
+                (a, b) => b.lastEdited.valueOf() - a.lastEdited.valueOf(),
+            )
+            resultDataByPage.set(pageId, {
+                annotations: sortedAnnots,
+                // This gets overwritten in the next loop by the latest visit/bookmark time (if exist in this results "page")
+                latestPageTimestamp: sortedAnnots[0].lastEdited.valueOf(),
+            })
+        }
+
+        // Add in all the pages to the results
+        for (const { url, latestTimestamp } of pages) {
+            const annotations = resultDataByPage.get(url)?.annotations ?? []
+            resultDataByPage.set(url, {
+                annotations,
+                latestPageTimestamp: latestTimestamp,
+            })
+        }
+
         return {
             oldestResultTimestamp: 0,
-            resultDataByPage: new Map(),
+            resultDataByPage,
             resultsExhausted: true,
         }
     }
@@ -341,7 +375,13 @@ export default class SearchBackground {
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
-            result = await this.unifiedTermsSearch(params)
+            result = await this.unifiedTermsSearch({
+                ...params,
+                queryPages: queryPagesByTerms(this.options.storageManager),
+                queryAnnotations: queryAnnotationsByTerms(
+                    this.options.storageManager,
+                ),
+            })
         }
 
         const dataLookups = await this.lookupDataForUnifiedResults(result)
