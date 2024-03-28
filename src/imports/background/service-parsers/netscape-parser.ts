@@ -80,7 +80,6 @@ const parseShallowList: ServiceParser = (doc) => {
         ),
     )
     for (let header of headers) {
-        console.log(header)
         const collectionName =
             header.textContent !== ''
                 ? header.textContent

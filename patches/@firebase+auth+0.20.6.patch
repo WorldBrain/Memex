@@ -1,16 +1,39 @@
 diff --git a/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js b/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js
-index 9abd2b3..294cc95 100644
+index 9abd2b3..a83ecba 100644
 --- a/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js
 +++ b/node_modules/@firebase/auth/dist/esm2017/index-6bd8d405.js
-@@ -8851,8 +8851,9 @@ function loadGapi(auth) {
-                 }
-             };
-             // Load GApi loader.
--            return _loadJS(`https://apis.google.com/js/api.js?onload=${cbName}`)
--                .catch(e => reject(e));
-+            // Skip this as it won't work in our BG SW
-+            // return _loadJS(`https://apis.google.com/js/api.js?onload=${cbName}`)
-+            //     .catch(e => reject(e));
-         }
-     }).catch(error => {
-         // Reset cached promise to allow for retrial.
+@@ -7048,20 +7048,21 @@ function getScriptParentElement() {
+     return (_b = (_a = document.getElementsByTagName('head')) === null || _a === void 0 ? void 0 : _a[0]) !== null && _b !== void 0 ? _b : document;
+ }
+ function _loadJS(url) {
++    // Skip all this as it won't work in our BG SW
+     // TODO: consider adding timeout support & cancellation
+-    return new Promise((resolve, reject) => {
+-        const el = document.createElement('script');
+-        el.setAttribute('src', url);
+-        el.onload = resolve;
+-        el.onerror = e => {
+-            const error = _createError("internal-error" /* INTERNAL_ERROR */);
+-            error.customData = e;
+-            reject(error);
+-        };
+-        el.type = 'text/javascript';
+-        el.charset = 'UTF-8';
+-        getScriptParentElement().appendChild(el);
+-    });
++    // return new Promise((resolve, reject) => {
++    //     const el = document.createElement('script');
++    //     el.setAttribute('src', url);
++    //     el.onload = resolve;
++    //     el.onerror = e => {
++    //         const error = _createError("internal-error" /* INTERNAL_ERROR */);
++    //         error.customData = e;
++    //         reject(error);
++    //     };
++    //     el.type = 'text/javascript';
++    //     el.charset = 'UTF-8';
++    //     getScriptParentElement().appendChild(el);
++    // });
+ }
+ function _generateCallbackName(prefix) {
+     return `__${prefix}${Math.floor(Math.random() * 1000000)}`;

@@ -101,7 +101,7 @@ const finishImportsReducer = ({ loading = false, finish = true }) => (
 const prepareImportReducer = (state) => {
     return {
         ...state,
-        importStatus: STATUS.LOADING,
+        // importStatus: STATUS.LOADING,
         loadingMsg: 'Calculating size of history & bookmarks',
     }
 }

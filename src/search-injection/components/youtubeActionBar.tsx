@@ -223,7 +223,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         } else {
             let video = document.getElementsByTagName('video')[0]
             if (video) {
-                let currentTime = video.currentTime
+                let currentTime = Math.floor(video.currentTime)
                 const currentTimeStamp = this.createTimestampAndURL(
                     currentUrl,
                     currentTime,

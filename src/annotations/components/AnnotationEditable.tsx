@@ -389,7 +389,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
 
         return (
             <HighlightStyled
-                //onClick={this.props.onHighlightClick}
+                onClick={this.props.onHighlightClick}
                 hasComment={this.props.comment?.length > 0}
                 // onDoubleClick={
                 //     this.props.isEditingHighlight
