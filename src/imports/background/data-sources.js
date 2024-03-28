@@ -9,6 +9,7 @@ import {
     startOfDay,
     WEEK_IN_MS,
 } from '@worldbrain/memex-common/lib/utils/date-time'
+import { parseHTML } from 'linkedom/worker'
 
 export default class ImportDataSources {
     static LOOKBACK_WEEKS = 12 // Browser history is limited to the last 3 months
@@ -116,11 +117,17 @@ export default class ImportDataSources {
             allowTypes[TYPE.OTHERS] === SERVICES.POCKET ||
             allowTypes[TYPE.OTHERS] === SERVICES.NETSCAPE
         ) {
-            contents = await loadBlob({
-                url,
-                timeout: 10000,
-                responseType: 'document',
-            })
+            if (url.startsWith('data:text/html;base64,')) {
+                const base64Content = url.split('data:text/html;base64,')[1]
+                const htmlContent = atob(base64Content)
+                contents = parseHTML(htmlContent).document
+            } else {
+                contents = await loadBlob({
+                    url,
+                    timeout: 10000,
+                    responseType: 'document',
+                })
+            }
         }
 
         if (allowTypes[TYPE.OTHERS] === SERVICES.POCKET) {
