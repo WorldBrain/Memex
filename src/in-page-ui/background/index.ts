@@ -5,6 +5,8 @@ import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
 // import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { OVERVIEW_URL } from 'src/constants'
+import browser from 'webextension-polyfill'
+import { checkStripePlan } from 'src/util/subscriptions/storage'
 
 export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
 export const CONTEXT_MENU_HIGHLIGHT_ID =
@@ -24,6 +26,8 @@ export class InPageUIBackground {
         this.remoteFunctions = {
             showSidebar: bindMethod(this, 'showSidebar'),
             openDashboard: bindMethod(this, 'openDashboard'),
+            getCurrentTabURL: bindMethod(this, 'getCurrentTabURL'),
+            checkStripePlan: bindMethod(this, 'checkStripePlan'),
             updateContextMenuEntries: bindMethod(
                 this,
                 'updateContextMenuEntries',
@@ -31,10 +35,29 @@ export class InPageUIBackground {
         }
 
         this.setupContextMenuEntries()
+        this.setupTabsAPIMessages()
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable(this.remoteFunctions)
+    }
+
+    setupTabsAPIMessages() {
+        browser.runtime.onMessage.addListener(
+            // @ts-ignore: Temporarily ignore type error until type definitions are updated or corrected.
+            (message, sender, sendResponse) => {
+                if (message.action === 'queryTabs') {
+                    browser.tabs
+                        .query({ active: true, currentWindow: true })
+                        .then((tabs) => {
+                            console.log('tabs11: ', tabs),
+                                sendResponse({ tabs: tabs })
+                        })
+
+                    return true // Indicates you wish to send a response asynchronously
+                }
+            },
+        )
     }
 
     private async getHighlightContextMenuTitle(): Promise<string> {
@@ -102,6 +125,19 @@ export class InPageUIBackground {
 
     async openDashboard() {
         await this.options.tabsAPI.create({ url: OVERVIEW_URL })
+    }
+    async checkStripePlan(email: string) {
+        await checkStripePlan(email)
+    }
+    async getCurrentTabURL() {
+        const tabs = await this.options.tabsAPI.query({
+            active: true,
+            currentWindow: true,
+        })
+        if (tabs.length > 0) {
+            return tabs[0].url // This returns the URL of the current active tab
+        }
+        return null // Return null or an appropriate value if no active tab is found
     }
 
     async showSidebar() {

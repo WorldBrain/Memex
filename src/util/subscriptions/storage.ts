@@ -30,22 +30,20 @@ export async function checkStripePlan(email) {
     if (currentCount[COUNTER_STORAGE_KEY] === undefined) {
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: {
-                s: subscriptionStatus.pageLimit,
-                sQ: subscriptionStatus.AILimit,
                 c: 0,
                 cQ: 0,
                 m: currentMonth,
+                pU: subscriptionStatus,
             },
         })
     } else {
         const { c, cQ, m } = currentCount[COUNTER_STORAGE_KEY]
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: {
-                s: subscriptionStatus.pageLimit,
-                sQ: subscriptionStatus.AILimit,
                 c: c ? c : 0,
                 cQ: cQ ? cQ : 0,
                 m: m ? m : currentMonth,
+                pU: subscriptionStatus,
             },
         })
     }
@@ -53,7 +51,7 @@ export async function checkStripePlan(email) {
     return subscriptionStatus
 }
 
-export async function upgradePlan(pageLimit, AILimit) {
+export async function upgradePlan() {
     const currentCount = await browser.storage.local.get(COUNTER_STORAGE_KEY)
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
@@ -61,22 +59,20 @@ export async function upgradePlan(pageLimit, AILimit) {
     if (currentCount[COUNTER_STORAGE_KEY] === undefined) {
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: {
-                s: pageLimit,
-                sQ: AILimit,
                 c: 0,
                 cQ: 0,
                 m: currentMonth,
+                pU: currentCount[COUNTER_STORAGE_KEY].pU,
             },
         })
     } else {
         const { s, sQ, c, cQ, m } = currentCount[COUNTER_STORAGE_KEY]
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: {
-                s: pageLimit,
-                sQ: AILimit,
                 c: c,
                 cQ: cQ ? cQ : 0,
                 m: m ? m : currentMonth,
+                pU: currentCount[COUNTER_STORAGE_KEY].pU,
             },
         })
     }
@@ -84,26 +80,29 @@ export async function upgradePlan(pageLimit, AILimit) {
     return
 }
 
-export async function enforceTrialPeriod30Days(signupDate) {
-    let installTime
+export async function enforceTrialPeriod30Days(signupDate?) {
+    let signupTimestamp
 
     if (signupDate) {
-        installTime = signupDate
+        signupTimestamp = signupDate
+        await browser.storage.local.set({
+            'localSettings.signupTimestamp': signupDate,
+        })
     } else {
-        const installTimeData = await browser.storage.local.get(
-            'localSettings.installTimestamp',
+        const signupTimestampData = await browser.storage.local.get(
+            'localSettings.signupTimestamp',
         )
-        const installTime = installTimeData['localSettings.installTimestamp']
+        signupTimestamp = signupTimestampData['localSettings.signupTimestamp']
 
-        if (!installTime) {
+        if (!signupTimestamp) {
             console.error('Install timestamp not found!')
-            return
+            return false
         }
     }
     const currentTime = new Date().getTime()
     const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000 // 30 days in seconds
 
-    if (currentTime - installTime < thirtyDaysInMillis) {
+    if (currentTime - signupTimestamp < thirtyDaysInMillis) {
         return true // Return the function if the install time is less than 30 days ago
     } else {
         return false // Return the function if the install time is more than 30 days ago
@@ -121,11 +120,10 @@ export async function updatePageCounter() {
         const { s, sQ, c, cQ, m } = currentCount[COUNTER_STORAGE_KEY]
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: {
-                s: s,
-                sQ: sQ ?? DEFAULT_COUNTER_STORAGE_KEY.sQ,
                 c: c + 1,
                 cQ: cQ ?? 0,
                 m: m,
+                pU: currentCount[COUNTER_STORAGE_KEY].pU,
             },
         })
     }
@@ -146,11 +144,10 @@ export async function updateAICounter() {
         const { s, sQ, c, cQ, m } = currentCount[COUNTER_STORAGE_KEY]
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: {
-                s: s,
-                sQ: sQ,
                 c: c,
                 cQ: cQ + 1,
                 m: m,
+                pU: currentCount[COUNTER_STORAGE_KEY].pU,
             },
         })
     }
@@ -158,11 +155,24 @@ export async function updateAICounter() {
     return
 }
 
-export async function checkStatus() {
+export async function checkStatus(feature: 'bookmarking' | 'AI') {
+    const currentStatus = await browser.storage.local.get(COUNTER_STORAGE_KEY)
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
 
-    const currentStatus = await browser.storage.local.get(COUNTER_STORAGE_KEY)
+    if ((await enforceTrialPeriod30Days()) === true) {
+        return true
+    }
+
+    if (currentStatus.m !== currentMonth) {
+        await browser.storage.local.set({
+            [COUNTER_STORAGE_KEY]: {
+                c: 0,
+                cQ: 0,
+                m: currentMonth,
+            },
+        })
+    }
 
     if (
         currentStatus[COUNTER_STORAGE_KEY] === undefined ||
@@ -172,132 +182,86 @@ export async function checkStatus() {
             [COUNTER_STORAGE_KEY]: DEFAULT_COUNTER_STORAGE_KEY,
         })
 
-        // TODO: make more robust by fetching free tier units from Cloudflare workers and KV
-        return {
-            pageLimit: 26,
-            AIlimit: 26,
-            pageCounter: 0,
-            AIcounter: 0,
-            m: currentMonth,
-        }
-    } else {
-        const { s, sQ, c, cQ, m } = currentStatus[COUNTER_STORAGE_KEY]
+        return false
+    }
 
-        // Resets the counters if the month has changed
-        if (m !== currentMonth) {
-            await browser.storage.local.set({
-                [COUNTER_STORAGE_KEY]: {
-                    s: s,
-                    c: 0,
-                    sQ: sQ,
-                    cQ: 0,
-                    m: currentMonth,
-                },
-            })
-            return {
-                pageLimit: s,
-                AIlimit: sQ,
-                pageCounter: 0,
-                AIcounter: 0,
-                m: currentMonth,
-            }
+    if (feature === 'bookmarking') {
+        const hasBookmarkPowerUp =
+            currentStatus[COUNTER_STORAGE_KEY].pU.Unlimited ||
+            currentStatus[COUNTER_STORAGE_KEY].pU.bookmarksPowerUp
+
+        if (hasBookmarkPowerUp) {
+            return true
         } else {
-            return {
-                pageLimit: s,
-                AIlimit: sQ,
-                pageCounter: c,
-                AIcounter: cQ,
-                m: currentMonth,
+            const currentCounter = currentStatus[COUNTER_STORAGE_KEY].c
+            if (currentCounter < 25) {
+                return true
             }
         }
     }
-}
+    if (feature === 'AI') {
+        const hasAIPowerUp = currentStatus[COUNTER_STORAGE_KEY].pU.AIpowerup
 
-export async function pageActionAllowed(analyticsBG) {
-    const status = await checkStatus()
-    if (status.pageLimit > 10000 || status.pageLimit > status.pageCounter) {
-        updatePageCounter()
-        return true
-    } else {
-        if (analyticsBG) {
-            try {
-                await trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
-            } catch (error) {
-                console.error(
-                    `Error tracking space Entry create event', ${error}`,
-                )
+        if (hasAIPowerUp) {
+            return true
+        } else {
+            const currentCounter = currentStatus[COUNTER_STORAGE_KEY].cQ
+            if (currentCounter < 25) {
+                return true
             }
         }
-        updatePageCounter()
-        return false
     }
+    return false
 }
-export async function AIActionAllowed(analyticsBG) {
-    const isStaging =
-        process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-        process.env.NODE_ENV === 'development'
-    let urlToOpen = isStaging
-        ? 'https://memex.garden/upgradeStaging'
-        : 'https://memex.garden/upgradeNotification'
 
-    const status = await checkStatus()
-
-    if (status.AIlimit > 10000) {
-        return true
-    } else if (status.AIlimit > status.AIcounter) {
-        return true
-    } else {
-        if (analyticsBG) {
-            try {
-                await trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
-            } catch (error) {
-                console.error(
-                    `Error tracking space Entry create event', ${error}`,
-                )
-            }
-        }
-        window.open(urlToOpen, '_blank')
-        return false
-    }
-}
-export async function rabbitHoleBetaFeatureAllowed(
-    authBG: AuthRemoteFunctionsInterface,
-    contentScriptsBG: ContentScriptsInterface<'caller'>,
+export async function pageActionAllowed(
+    analyticsBG,
+    onlyCheckNoUpdate?: boolean,
 ) {
-    const onboardingComplete = await browser.storage.local.get(
-        'rabbitHoleBetaFeatureAccessOnboardingDone',
-    )
-
-    if (onboardingComplete.rabbitHoleBetaFeatureAccessOnboardingDone) {
-        return 'onboarded'
+    const allowed = await checkStatus('bookmarking')
+    console.log('allowed', allowed)
+    if (!onlyCheckNoUpdate) {
+        updatePageCounter()
     }
 
-    const status = await checkStatus()
-
-    const grantedBcOfSubscription = status.AIlimit > 10000
-
-    const email = (await authBG.getCurrentUser()).email
-    const userId = (await authBG.getCurrentUser()).id
-
-    let responseContent = await contentScriptsBG.openBetaFeatureSettings({
-        email,
-        userId,
-    })
-
-    if (responseContent.status === 'granted') {
-        if (grantedBcOfSubscription) {
-            return 'granted'
-        }
-        return 'granted'
-    } else if (
-        responseContent.status === 'requested' &&
-        grantedBcOfSubscription
-    ) {
-        return 'grantedBcOfSubscription'
-    } else if (responseContent.status === 'requested') {
-        return 'requested'
+    if (allowed) {
+        return true
     } else {
-        return 'denied'
+        if (analyticsBG) {
+            try {
+                await trackHitPaywall(analyticsBG, { type: 'pagesLimit' })
+            } catch (error) {
+                console.error(
+                    `Error tracking space Entry create event', ${error}`,
+                )
+            }
+        }
+        return false
+    }
+}
+export async function AIActionAllowed(
+    analyticsBG,
+    onlyCheckNoUpdate?: boolean,
+) {
+    const allowed = await checkStatus('AI')
+
+    if (!onlyCheckNoUpdate) {
+        updateAICounter()
+    }
+
+    if (allowed) {
+        return true
+    } else {
+        if (analyticsBG) {
+            try {
+                await trackHitPaywall(analyticsBG, { type: 'aiLimit' })
+            } catch (error) {
+                console.error(
+                    `Error tracking space Entry create event', ${error}`,
+                )
+            }
+        }
+        return false
     }
 }
 export async function downloadMemexDesktop(getSystemArchAndOS) {

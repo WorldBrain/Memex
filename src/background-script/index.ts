@@ -429,10 +429,12 @@ class BackgroundScript {
         const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
         const currentUserEmail = currentUser.email
         const currentBillingPeriod = billingPeriod
+
+
         const baseLink =
             process.env.NODE_ENV === 'production'
                 ? 'https://cloudfare-memex.memex.workers.dev/create-checkout/'
-                : 'https://cloudfare-memex.memex.workers.dev/create-checkout/'
+                : 'https://cloudflare-memex-staging.memex.workers.dev/create-checkout/'
         const checkoutLink = `${baseLink}${currentBillingPeriod}/${powerUpPlan}?prefilled_email=${encodeURIComponent(
             currentUserEmail,
         )}`

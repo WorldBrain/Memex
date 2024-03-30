@@ -63,7 +63,11 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
+import {
+    checkStripePlan,
+    pageActionAllowed,
+    upgradePlan,
+} from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
@@ -110,6 +114,7 @@ import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import { Storage } from 'webextension-polyfill-ts'
+import { InPageUIInterface } from 'src/in-page-ui/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -286,23 +291,26 @@ export async function main(
 
     // add listener for when a person is over the pricing limit for saved pages
 
-    const counterStorageListener = (
+    const counterStorageListener = async (
         changes: Record<string, Storage.StorageChange>,
     ) => {
         const COUNTER_STORAGE_KEY = '@status'
 
-        if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
-            const changesValues = changes[COUNTER_STORAGE_KEY]?.newValue
+        const currentTabURL = ((await runInBackground<
+            InPageUIInterface<'caller'>
+        >().getCurrentTabURL(null)) as unknown) as string
 
-            console.log('chnagesvalue', changesValues)
-            if (changesValues.c > 25) {
-                inPageUI.loadOnDemandInPageUI({
-                    component: 'upgrade-modal',
-                })
+        if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
+            const isAllowed = pageActionAllowed('bookmarking', true)
+
+            if (!isAllowed) {
+                if (currentTabURL?.includes(window.location.href)) {
+                    inPageUI.loadOnDemandInPageUI({
+                        component: 'upgrade-modal',
+                    })
+                }
             }
         }
-
-        return undefined
     }
 
     browser.storage.onChanged.addListener(counterStorageListener)
@@ -1374,35 +1382,14 @@ export async function main(
     }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
         const email = _currentUser?.email
 
-        const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
-        const url = `${baseUrl}` + '/stripe-subscriptions'
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {},
-            body: JSON.stringify({
-                email,
-            }),
-        })
-
-        const isSubscribed = await response.json()
-        const pageLimit = isSubscribed.planLimit
-        const AIlimit = isSubscribed.aiQueries
-
-        if (
-            isSubscribed.status === 'active' ||
-            isSubscribed.status === 'already-setup'
-        ) {
-            await upgradePlan(pageLimit, AIlimit)
-        }
+        await sleepPromise(3000)
+        await runInBackground<InPageUIInterface<'caller'>>().checkStripePlan(
+            email,
+        )
     }
+
     if (
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgradeNotification' ||

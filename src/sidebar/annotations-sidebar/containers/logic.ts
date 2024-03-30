@@ -81,8 +81,6 @@ import {
 import {
     AIActionAllowed,
     downloadMemexDesktop,
-    rabbitHoleBetaFeatureAllowed,
-    updateAICounter,
 } from 'src/util/subscriptions/storage'
 import {
     getListShareUrl,
