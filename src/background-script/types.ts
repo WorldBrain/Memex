@@ -28,6 +28,7 @@ export interface RemoteBGScriptInterface {
     createCheckoutLink: (
         billingPeriod: 'monthly' | 'yearly',
         planName: string,
+        doNotOpen: boolean,
     ) => Promise<void>
 }
 

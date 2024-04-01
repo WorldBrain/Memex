@@ -24,7 +24,14 @@ export const main: InPageUIInjectionsMain = async ({
                     renderErrorDisplay(options.errorDisplayProps)
                 }
             } else if (component === 'upgrade-modal') {
-                renderUpgradeModal(upgradeModalProps)
+                console.log(
+                    'upgrade-modal',
+                    options.powerUpModalProps.authBG.getCurrentUser(),
+                )
+                renderUpgradeModal({
+                    ...upgradeModalProps,
+                    ...options.powerUpModalProps,
+                })
             } else if (component === 'dashboard') {
                 renderSearchDisplay(searchDisplayProps)
             } else if (component === 'youtube-integration') {

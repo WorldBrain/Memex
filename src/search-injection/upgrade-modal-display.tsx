@@ -7,9 +7,9 @@ import {
     theme,
 } from 'src/common-ui/components/design-library/theme'
 import { createInPageUI } from 'src/in-page-ui/utils'
-import UpgradeModal from '@worldbrain/memex-common/lib/common-ui/components/upgrade-modal'
-import { PowerUpModalVersion } from '@worldbrain/memex-common/lib/common-ui/components/upgrade-modal/types'
-import { Storage } from 'webextension-polyfill'
+import UpgradeModal from 'src/authentication/upgrade-modal'
+import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 
 type RootProps = {
     rootEl: HTMLElement
@@ -17,8 +17,11 @@ type RootProps = {
     createCheckOutLink: (
         billingPeriod: 'monthly' | 'yearly',
         planName: string,
+        doNotOpen: boolean,
     ) => void
     browserAPIs: any
+    authBG: AuthRemoteFunctionsInterface
+    limitReachedNotif: boolean
 }
 
 interface RootState {
@@ -60,9 +63,12 @@ class Root extends React.PureComponent<RootProps, RootState> {
                     <UpgradeModal
                         getRootElement={() => this.props.rootEl}
                         powerUpType={this.state.upgradeModalType}
+                        browserAPIs={this.props.browserAPIs}
+                        authBG={this.props.authBG}
                         createCheckOutLink={this.props.createCheckOutLink}
                         componentVariant="Modal"
                         closeComponent={this.removeRoot}
+                        limitReachedNotif={this.props.limitReachedNotif}
                     />
                 </ThemeProvider>
             </StyleSheetManager>

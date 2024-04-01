@@ -425,11 +425,12 @@ class BackgroundScript {
     private createCheckoutLink: RemoteBGScriptInterface['createCheckoutLink'] = async (
         billingPeriod: 'monthly' | 'yearly',
         powerUpPlan: string,
+        doNotOpen: boolean,
     ) => {
+        console.log('dooooo', doNotOpen)
         const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
         const currentUserEmail = currentUser.email
         const currentBillingPeriod = billingPeriod
-
 
         const baseLink =
             process.env.NODE_ENV === 'production'
@@ -439,13 +440,26 @@ class BackgroundScript {
             currentUserEmail,
         )}`
 
-        try {
-            // Use the WebExtensions API to open the URL in a new tab
-            if (chrome.tabs && chrome.tabs.create) {
-                chrome.tabs.create({ url: checkoutLink })
+        if (doNotOpen) {
+            try {
+                // Execute the checkout link and print the response
+                const response = await fetch(checkoutLink)
+                const responseData = await response.text() // or response.json() if the response is JSON
+                console.log('Checkout link response:', responseData)
+
+                return JSON.parse(responseData).message
+            } catch (error) {
+                console.error('Error executing checkout link:', error)
             }
-        } catch (error) {
-            console.error('Error fetching checkout link:', error)
+        } else {
+            try {
+                // Use the WebExtensions API to open the URL in a new tab
+                if (chrome.tabs && chrome.tabs.create) {
+                    chrome.tabs.create({ url: checkoutLink })
+                }
+            } catch (error) {
+                console.error('Error fetching checkout link:', error)
+            }
         }
     }
 }

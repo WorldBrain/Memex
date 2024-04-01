@@ -1983,6 +1983,7 @@ export class AnnotationsSidebar extends React.Component<
                     counterStorageKey={COUNTER_STORAGE_KEY}
                     setAIModel={this.props.setAIModel}
                     createCheckOutLink={this.props.createCheckOutLink}
+                    authBG={this.props.authBG}
                     renderPromptTemplates={() => {
                         return (
                             <PromptTemplatesComponent

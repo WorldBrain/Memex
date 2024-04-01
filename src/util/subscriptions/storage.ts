@@ -48,7 +48,7 @@ export async function checkStripePlan(email) {
         })
     }
 
-    return subscriptionStatus
+    return subscriptionStatus.status
 }
 
 export async function upgradePlan() {
@@ -135,13 +135,13 @@ export async function updateAICounter() {
 
     if (
         currentCount[COUNTER_STORAGE_KEY] === undefined ||
-        currentCount[COUNTER_STORAGE_KEY].sQ === undefined
+        currentCount[COUNTER_STORAGE_KEY].cQ === undefined
     ) {
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: DEFAULT_COUNTER_STORAGE_KEY,
         })
     } else {
-        const { s, sQ, c, cQ, m } = currentCount[COUNTER_STORAGE_KEY]
+        const { c, cQ, m } = currentCount[COUNTER_STORAGE_KEY]
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: {
                 c: c,
@@ -248,6 +248,7 @@ export async function AIActionAllowed(
     if (!onlyCheckNoUpdate) {
         updateAICounter()
     }
+    return false
 
     if (allowed) {
         return true

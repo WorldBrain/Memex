@@ -1,4 +1,5 @@
 import type { ErrorDisplayProps } from './error-display'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 
 export type SearchEngineName = 'google' | 'duckduckgo' | 'brave' | 'bing'
 export interface SearchEngineInfo {
@@ -26,6 +27,10 @@ export interface ResultItemProps {
 
 export interface OnDemandInPageUIProps {
     errorDisplayProps?: ErrorDisplayProps
+    powerUpModalProps?: {
+        limitReachedNotif: boolean
+        authBG: AuthRemoteFunctionsInterface
+    }
 }
 
 export type OnDemandInPageUIComponents =

@@ -301,12 +301,43 @@ export async function main(
         >().getCurrentTabURL(null)) as unknown) as string
 
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
-            const isAllowed = pageActionAllowed('bookmarking', true)
+            const oldValues = changes[COUNTER_STORAGE_KEY]?.oldValue
+            const newValues = changes[COUNTER_STORAGE_KEY]?.newValue
 
-            if (!isAllowed) {
+            console.log('oldValues', oldValues)
+            console.log('newValues', newValues)
+
+            const counterQueriesHaveChanged = oldValues.cQ !== newValues.cQ
+            const counterSavedHaveChanged = oldValues.c !== newValues.c
+
+            console.log('counterQueriesHaveChanged', counterQueriesHaveChanged)
+            console.log('counterSavedHaveChanged', counterSavedHaveChanged)
+
+            if (!counterQueriesHaveChanged && !counterSavedHaveChanged) {
+                return
+            }
+
+            let isAllowed = true
+            let limitReachedNotif = null
+            if (counterQueriesHaveChanged) {
+                isAllowed = await pageActionAllowed('AI', true)
+                limitReachedNotif = 'AI'
+            }
+            if (counterSavedHaveChanged) {
+                isAllowed = await pageActionAllowed('bookmarking', true)
+                limitReachedNotif = 'Bookmarks'
+            }
+
+            if (isAllowed) {
                 if (currentTabURL?.includes(window.location.href)) {
                     inPageUI.loadOnDemandInPageUI({
                         component: 'upgrade-modal',
+                        options: {
+                            powerUpModalProps: {
+                                limitReachedNotif: limitReachedNotif,
+                                authBG: authBG,
+                            },
+                        },
                     })
                 }
             }
