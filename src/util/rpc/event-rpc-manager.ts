@@ -16,6 +16,7 @@ export class EventBasedRPCManager implements RPCManager {
 
     private log = (msg: string, obj?: any) => {
         if (this.deps.debug === true || globalThis['memex-rpc-debug']) {
+            msg = `RPC::side=${this.deps.sideName}::` + msg
             console['log'](msg, obj ?? {})
         }
     }
@@ -23,10 +24,9 @@ export class EventBasedRPCManager implements RPCManager {
     private async postMessageRequestToRPC<T, O>(
         request: RPCRequest<T>,
     ): Promise<O> {
-        this.log(
-            `RPC::messageRequester::from-${this.deps.sideName}:: Requested for [${request.headers.name}]`,
-            { request },
-        )
+        this.log(`messageRequester:: Requested for [${request.headers.name}]`, {
+            request,
+        })
 
         let ret: RPCRequest<O>
         try {
@@ -42,7 +42,7 @@ export class EventBasedRPCManager implements RPCManager {
             throw new RpcError(err.message)
         }
         this.log(
-            `RPC::messageRequester:: Got response for [${request.headers.name}]`,
+            `messageRequester:: Got response for [${request.headers.name}]`,
             ret.payload,
         )
         return ret.payload
@@ -108,7 +108,7 @@ export class EventBasedRPCManager implements RPCManager {
 
         if (type === 'RPC_REQUEST') {
             this.log(
-                `RPC::messageResponder:: REQUEST received for [${name}]:`,
+                `messageResponder:: REQUEST received for [${name}]:`,
                 request,
             )
 
@@ -125,7 +125,7 @@ export class EventBasedRPCManager implements RPCManager {
                 }
                 Object.defineProperty(f, 'name', { value: name })
 
-                this.log(`RPC::messageResponder:: RUNNING Function [${name}]`)
+                this.log(`messageResponder:: RUNNING Function [${name}]`)
 
                 let tab =
                     sender.tab ??
@@ -139,7 +139,7 @@ export class EventBasedRPCManager implements RPCManager {
                 try {
                     const functionReturn = await f({ tab }, ...payload)
                     this.log(
-                        `RPC::messageResponder:: FINISHED Function [${name}]`,
+                        `messageResponder:: FINISHED Function [${name}]`,
                         functionReturn,
                     )
                     return createRPCResponseObject({
@@ -148,14 +148,12 @@ export class EventBasedRPCManager implements RPCManager {
                         originSide: this.deps.sideName,
                     })
                 } catch (err) {
-                    this.log(
-                        `RPC::messageResponder:: ERRORED Function [${name}]`,
-                    )
+                    this.log(`messageResponder:: ERRORED Function [${name}]`)
                     throw new RpcError(err.message)
                 }
             }
         } else if (type === 'RPC_RESPONSE') {
-            this.log(`RPC::messageResponder:: RESPONSE received for [${name}]`)
+            this.log(`messageResponder:: RESPONSE received for [${name}]`)
             // We don't need to do anything with the response - it's available directly from the `sendMessage` calls
         }
     }
