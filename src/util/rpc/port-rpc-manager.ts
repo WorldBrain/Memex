@@ -1,11 +1,11 @@
 import createResolvable, { Resolvable } from '@josephg/resolvable'
 import { serializeError, deserializeError } from 'serialize-error'
 import type { Runtime } from 'webextension-polyfill'
-import { filterTabUrl } from 'src/util/uri-utils'
+import { resolveTabUrl } from 'src/util/uri-utils'
 import { sleepPromise } from '../promises'
 import { RpcError } from '../webextensionRPC'
 import type { RPCManager, RPCManagerDependencies, RPCRequest } from './types'
-import { createRPCRequestObject } from './utils'
+import { createRPCRequestObject, createRPCResponseObject } from './utils'
 
 interface PendingRequest {
     request: RPCRequest
@@ -15,26 +15,6 @@ interface PendingRequest {
 export class PortBasedRPCManager implements RPCManager {
     private ports = new Map<string, Runtime.Port>()
     private pendingRequests = new Map<string, PendingRequest>()
-
-    static createRPCResponseObject = (
-        params: Omit<RPCRequest, 'headers'> & {
-            packet: { headers: { id: string; name: string } }
-        },
-    ): RPCRequest => {
-        const {
-            packet: { headers },
-        } = params
-        return {
-            headers: {
-                type: 'RPC_RESPONSE',
-                id: headers.id,
-                name: headers.name,
-            },
-            payload: params.payload,
-            error: params.error,
-            serializedError: params.serializedError,
-        }
-    }
 
     constructor(private deps: RPCManagerDependencies) {
         if (deps.initPaused) {
@@ -97,7 +77,7 @@ export class PortBasedRPCManager implements RPCManager {
         )
 
         try {
-            const port = this.deps.runtimeAPI.connect(undefined, {
+            const port = this.deps.browserAPIs.runtime.connect(undefined, {
                 name: pid,
             })
             const portId = this.getPortIdForExtBg()
@@ -177,7 +157,7 @@ export class PortBasedRPCManager implements RPCManager {
             )
         }
 
-        this.deps.runtimeAPI.onConnect.addListener(connected)
+        this.deps.browserAPIs.runtime.onConnect.addListener(connected)
     }
 
     postMessageRequestToBackground: RPCManager['postMessageRequestToBackground'] = async (
@@ -202,7 +182,10 @@ export class PortBasedRPCManager implements RPCManager {
             }
         }
         const port = this.getExtensionPort(name)
-        const request = createRPCRequestObject({ name }, payload)
+        const request = createRPCRequestObject(
+            { name, originSide: this.deps.sideName },
+            payload,
+        )
         return this.postMessageRequestToRPC(request, port, name)
     }
 
@@ -213,7 +196,10 @@ export class PortBasedRPCManager implements RPCManager {
         options,
     ) => {
         const port = this.getTabPort(tabId, name, options?.quietConsole)
-        const request = createRPCRequestObject({ name }, payload)
+        const request = createRPCRequestObject(
+            { name, tabId, originSide: this.deps.sideName },
+            payload,
+        )
         return this.postMessageRequestToRPC(request, port, name)
     }
 
@@ -231,6 +217,7 @@ export class PortBasedRPCManager implements RPCManager {
                 tabId,
                 proxy: 'background',
                 name,
+                originSide: this.deps.sideName,
             },
             payload,
         )
@@ -304,12 +291,12 @@ export class PortBasedRPCManager implements RPCManager {
     }
 
     private messageResponder = async (
-        packet: RPCRequest,
+        request: RPCRequest,
         port: Runtime.Port,
     ) => {
         await this._paused
 
-        const { headers, payload, error, serializedError } = packet
+        const { headers, payload, error, serializedError } = request
         const { id, name, type } = headers
 
         if (type === 'RPC_RESPONSE') {
@@ -330,7 +317,11 @@ export class PortBasedRPCManager implements RPCManager {
                 const f = this.deps.getRegisteredRemoteFunction(name)
 
                 if (!f) {
-                    console.error({ side: this.deps.sideName, packet, port })
+                    console.error({
+                        side: this.deps.sideName,
+                        packet: request,
+                        port,
+                    })
                     throw Error(`No registered remote function called ${name}`)
                 }
                 Object.defineProperty(f, 'name', { value: name })
@@ -339,14 +330,15 @@ export class PortBasedRPCManager implements RPCManager {
                     `RPC::messageResponder::PortName(${port.name}):: RUNNING Function [${name}]`,
                 )
 
-                const tab = filterTabUrl(port?.sender?.tab)
+                const tab = resolveTabUrl(port?.sender?.tab)
                 const functionReturn = f({ tab }, ...payload)
                 Promise.resolve(functionReturn)
                     .then((promiseReturn) => {
                         port.postMessage(
-                            PortBasedRPCManager.createRPCResponseObject({
-                                packet,
+                            createRPCResponseObject({
+                                request,
                                 payload: promiseReturn,
+                                originSide: this.deps.sideName,
                             }),
                         )
                         this.log(
@@ -361,11 +353,12 @@ export class PortBasedRPCManager implements RPCManager {
                             )
                         } else {
                             port.postMessage(
-                                PortBasedRPCManager.createRPCResponseObject({
-                                    packet,
+                                createRPCResponseObject({
+                                    request,
                                     payload: null,
                                     error: err.message,
                                     serializedError: serializeError(err),
+                                    originSide: this.deps.sideName,
                                 }),
                             )
                             this.log(

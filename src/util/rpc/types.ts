@@ -1,23 +1,23 @@
 import type { ErrorObject } from 'serialize-error'
-import type { Runtime } from 'webextension-polyfill'
+import type { Browser } from 'webextension-polyfill'
 
 export interface RPCManager {
-    postMessageRequestToTab<ReturnVal = any, T = {}>(
+    postMessageRequestToTab<Input = any, Output = any>(
         tabId: number,
         name: string,
-        payload: T,
+        payload: Input,
         options?: { quietConsole?: boolean },
-    ): Promise<ReturnVal>
-    postMessageRequestToTabViaBackground<ReturnVal = any>(
+    ): Promise<Output>
+    postMessageRequestToTabViaBackground<Input = any, Output = any>(
         tabId: number,
         name: string,
-        payload: any,
-    ): Promise<ReturnVal>
-    postMessageRequestToBackground<ReturnVal = any>(
+        payload: Input,
+    ): Promise<Output>
+    postMessageRequestToBackground<Input = any, Output = any>(
         name: string,
-        payload: any,
+        payload: Input,
         options?: { skipEnsure?: boolean },
-    ): Promise<ReturnVal>
+    ): Promise<Output>
     setup(): void
     unpause(): void
 }
@@ -25,7 +25,7 @@ export interface RPCManager {
 export interface RPCManagerDependencies {
     role: RpcRole
     sideName: RpcSideName
-    runtimeAPI: Runtime.Static
+    browserAPIs: Browser
     initPaused?: boolean
     debug?: boolean
     getRegisteredRemoteFunction: (
@@ -52,5 +52,6 @@ export interface RPCRequestHeaders {
     name: string
     tabId?: number
     proxy?: 'background'
+    originSide: RpcSideName
     type: 'RPC_RESPONSE' | 'RPC_REQUEST'
 }

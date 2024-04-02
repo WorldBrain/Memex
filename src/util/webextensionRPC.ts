@@ -21,8 +21,8 @@
 import mapValues from 'lodash/fp/mapValues'
 import browser from 'webextension-polyfill'
 import { EventEmitter } from 'events'
-import { PortBasedRPCManager } from 'src/util/rpc/port-rpc-manager'
-import type { RpcSideName, RpcRole } from './rpc/types'
+import { EventBasedRPCManager } from 'src/util/rpc/event-rpc-manager'
+import type { RpcSideName, RpcRole, RPCManager } from './rpc/types'
 import type { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
 import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
 import type { AuthRemoteEvents } from 'src/authentication/background/types'
@@ -407,18 +407,19 @@ export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
 }
 
 // Containing the evil globals here
-let rpcConnection: PortBasedRPCManager
+let rpcConnection: RPCManager
 export const setupRpcConnection = (options: {
     sideName: RpcSideName
     role: RpcRole
     paused?: boolean
 }) => {
-    rpcConnection = new PortBasedRPCManager({
+    rpcConnection = new EventBasedRPCManager({
+        getRegisteredRemoteFunction: (name) => remotelyCallableFunctions[name],
+        browserAPIs: browser,
+        initPaused: options.paused,
         sideName: options.sideName,
         role: options.role,
-        getRegisteredRemoteFunction: (name) => remotelyCallableFunctions[name],
-        runtimeAPI: browser.runtime,
-        initPaused: options.paused,
+        debug: true,
     })
     rpcConnection.setup()
 

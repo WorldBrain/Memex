@@ -1,16 +1,39 @@
 import uuid from 'uuid/v1'
-import type { RPCRequest, RPCRequestHeaders } from './types'
+import type { RPCRequest, RPCRequestHeaders, RpcSideName } from './types'
 
 export const createRPCRequestObject = <T>(
-    { name, tabId, proxy }: Pick<RPCRequestHeaders, 'name' | 'tabId' | 'proxy'>,
+    headers: Pick<RPCRequestHeaders, 'name' | 'tabId' | 'proxy' | 'originSide'>,
     payload: T,
 ): RPCRequest<T> => ({
     headers: {
         type: 'RPC_REQUEST',
         id: uuid(),
-        name,
-        tabId,
-        proxy,
+        name: headers.name,
+        tabId: headers.tabId,
+        proxy: headers.proxy,
+        originSide: headers.originSide,
     },
     payload,
 })
+
+export const createRPCResponseObject = <T>(
+    params: Omit<RPCRequest<T>, 'headers'> & {
+        request: { headers: Pick<RPCRequestHeaders, 'id' | 'name'> }
+        originSide: RpcSideName
+    },
+): RPCRequest<T> => {
+    const {
+        request: { headers },
+    } = params
+    return {
+        headers: {
+            type: 'RPC_RESPONSE',
+            id: headers.id,
+            name: headers.name,
+            originSide: params.originSide,
+        },
+        payload: params.payload,
+        error: params.error,
+        serializedError: params.serializedError,
+    }
+}
