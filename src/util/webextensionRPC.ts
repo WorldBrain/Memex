@@ -19,7 +19,7 @@
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
 import mapValues from 'lodash/fp/mapValues'
-import browser from 'webextension-polyfill'
+import browser, { Browser } from 'webextension-polyfill'
 import { EventEmitter } from 'events'
 import { EventBasedRPCManager } from 'src/util/rpc/event-rpc-manager'
 import type { RpcSideName, RpcRole, RPCManager } from './rpc/types'
@@ -411,11 +411,12 @@ let rpcConnection: RPCManager
 export const setupRpcConnection = (options: {
     sideName: RpcSideName
     role: RpcRole
+    browserAPIs: Browser
     paused?: boolean
 }) => {
     rpcConnection = new EventBasedRPCManager({
         getRegisteredRemoteFunction: (name) => remotelyCallableFunctions[name],
-        browserAPIs: browser,
+        browserAPIs: options.browserAPIs,
         initPaused: options.paused,
         sideName: options.sideName,
         role: options.role,
