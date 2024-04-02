@@ -7,8 +7,6 @@ import {
 import browser from 'webextension-polyfill'
 
 async function main() {
-    setupRpcConnection({ sideName: 'extension-page-options', role: 'content' })
-
     console.log(1)
     await runInBackground<{
         testCallable: () => Promise<void>

@@ -92,16 +92,3 @@ export function setupInPageSidebarUI(
         mount.rootElement,
     )
 }
-
-export function destroyInPageSidebarUI(
-    target: HTMLElement,
-    shadowRoot?: ShadowRoot,
-) {
-    ReactDOM.unmountComponentAtNode(target)
-
-    if (shadowRoot) {
-        shadowRoot.removeChild(target)
-    } else {
-        document.body.removeChild(target)
-    }
-}
