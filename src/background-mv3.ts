@@ -50,6 +50,7 @@ global['XMLHttpRequest'] = XMLHttpRequest
 
 async function main() {
     const rpcManager = setupRpcConnection({
+        browserAPIs: browser,
         sideName: 'background',
         role: 'background',
         paused: true,

@@ -19,7 +19,7 @@ export const getUnderlyingResourceUrl = (
     return url
 }
 
-export const filterTabUrl = (tab) => {
+export const resolveTabUrl = (tab) => {
     if (tab) {
         tab.url = getUnderlyingResourceUrl(tab.url)
     }
