@@ -42,7 +42,7 @@ export class EventBasedRPCManager implements RPCManager {
             throw new RpcError(err.message)
         }
         this.log(
-            `RPC::messageRequester::from-${this.deps.sideName}:: Got response for [${request.headers.name}]`,
+            `RPC::messageRequester:: Got response for [${request.headers.name}]`,
             ret.payload,
         )
         return ret.payload
@@ -92,13 +92,25 @@ export class EventBasedRPCManager implements RPCManager {
         request: RPCRequest,
         sender: Runtime.MessageSender,
     ) => {
-        await this.paused
-
         const { headers, payload, error, serializedError } = request
         const { id, name, type } = headers
 
+        // Forward the request to the BG if it was received on the options page via content script
+        if (
+            this.deps.sideName === 'extension-page-options' &&
+            request.headers.proxy == null &&
+            request.headers.tabId == null
+        ) {
+            return this.postMessageRequestToBackground(name, payload)
+        }
+
+        await this.paused
+
         if (type === 'RPC_REQUEST') {
-            this.log(`RPC::messageResponder:: REQUEST received for [${name}]`)
+            this.log(
+                `RPC::messageResponder:: REQUEST received for [${name}]:`,
+                request,
+            )
 
             // If the Request type was a proxy, the background shouldn't fullill this request itself
             // but pass it on to the specific tab to fullfill
@@ -115,11 +127,13 @@ export class EventBasedRPCManager implements RPCManager {
 
                 this.log(`RPC::messageResponder:: RUNNING Function [${name}]`)
 
-                const tabId = sender.tab?.id ?? request.headers.tabId
                 let tab =
-                    tabId != null
-                        ? await this.deps.browserAPIs.tabs.get(tabId)
-                        : undefined
+                    sender.tab ??
+                    (request.headers.tabId != null
+                        ? await this.deps.browserAPIs.tabs?.get(
+                              request.headers.tabId,
+                          ) // Tabs API only available in non-CS
+                        : undefined)
                 tab = resolveTabUrl(tab)
 
                 try {
