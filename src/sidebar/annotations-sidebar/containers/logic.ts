@@ -3652,7 +3652,7 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     )
                 } catch (e) {}
-                await new Promise((resolve) => setTimeout(resolve, 10))
+                await new Promise((resolve) => setTimeout(resolve, 20))
             }
 
             return
@@ -3690,14 +3690,21 @@ export class SidebarContainerLogic extends UILogic<
 
         await sleepPromise(10)
         if (previousState.activeTab === 'summary') {
-            this.options.events.emit(
-                'addMediaRangeToEditor',
-                event.range.from,
-                event.range.to,
-                event.prompt,
-                () => {},
-            )
-            return
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addMediaRangeToEditor',
+                        event.range.from,
+                        event.range.to,
+                        event.prompt,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 20))
+            }
         }
 
         // this.emitMutation({ activeTab: { $set: 'summary' } })
