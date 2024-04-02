@@ -377,6 +377,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 instaClose
             >
                 <TextFieldContainerPrompt>
+                    Use a custom prompt. Click again to apply.
                     <TextArea
                         type="text"
                         placeholder={'Add your custom prompt here'}
@@ -398,7 +399,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         width="350px"
                         autoFocus={true}
                     />
-                    Use a custom prompt. Click again to apply.
                 </TextFieldContainerPrompt>
             </PopoutBox>
         )
@@ -752,7 +752,7 @@ const TextFieldContainerPrompt = styled.div`
     align-items: center;
     justify-content: center;
     grid-gap: 10px;
-    padding: 5px 5px 10px 5px;
+    padding: 10px 5px 5px 5px;
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     text-align: center;

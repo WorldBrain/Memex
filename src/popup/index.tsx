@@ -2,7 +2,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { Provider } from 'react-redux'
 import { ThemeProvider } from 'styled-components'
-
+import browser from 'webextension-polyfill'
 import {
     loadThemeVariant,
     theme,
@@ -53,7 +53,11 @@ class Root extends React.Component<RootProps, RootState> {
 }
 
 function main() {
-    setupRpcConnection({ sideName: 'content-script-popup', role: 'content' })
+    setupRpcConnection({
+        browserAPIs: browser,
+        sideName: 'content-script-popup',
+        role: 'content',
+    })
 
     const store = configureStore()
 

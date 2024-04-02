@@ -9,7 +9,11 @@ import {
 import type { DashboardDependencies } from 'src/dashboard-refactor/types'
 import { DashboardContainer } from 'src/dashboard-refactor'
 import { InPageSearchModal } from '@worldbrain/memex-common/lib/common-ui/components/inPage-search-modal'
-import { createInPageUI } from 'src/in-page-ui/utils'
+import {
+    createInPageUI,
+    destroyInPageUI,
+    unmountInPageUI,
+} from 'src/in-page-ui/utils'
 
 type RootProps = Omit<DashboardDependencies, 'theme' | 'openSpaceInWebUI'> & {
     rootEl: HTMLElement
@@ -30,10 +34,8 @@ class Root extends React.PureComponent<RootProps, RootState> {
     }
 
     private removeRoot = () => {
-        const unmountResult = ReactDOM.unmountComponentAtNode(this.props.rootEl)
-        if (unmountResult) {
-            this.props.rootEl.remove()
-        }
+        destroyInPageUI('search-display')
+        unmountInPageUI(this.props.rootEl, this.props.shadowRoot)
     }
 
     render() {

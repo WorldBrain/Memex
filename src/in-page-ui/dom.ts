@@ -1,5 +1,6 @@
 import { injectCSS } from 'src/util/content-injection'
 import { runtime } from 'webextension-polyfill'
+import type { InPageUIRootMount } from './types'
 
 export function createInPageUIRoot({
     containerId,
@@ -13,7 +14,7 @@ export function createInPageUIRoot({
     cssFile?: string
     rootClassNames?: string[]
     containerClassNames?: string[]
-}) {
+}): InPageUIRootMount {
     const container = document.createElement('div')
     container.setAttribute('id', containerId)
 
@@ -91,7 +92,7 @@ const rootDirectory = runtime.getURL('/fonts/Satoshi/')
 const styles = `
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-Variable.woff) format('woff'),
         url(${rootDirectory}Satoshi-Variable.ttf) format('truetype');
     font-weight: 300;
@@ -101,7 +102,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-VariableItalic.woff) format('woff'),
         url(${rootDirectory}Satoshi-VariableItalic.ttf) format('truetype');
     font-weight: 300;
@@ -111,7 +112,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-Light.woff) format('woff'),
         url(${rootDirectory}Satoshi-Light.ttf) format('truetype');
     font-weight: 300;
@@ -121,7 +122,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-LightItalic.woff) format('woff'),
         url(${rootDirectory}Satoshi-LightItalic.ttf) format('truetype');
     font-weight: 300;
@@ -131,7 +132,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-Regular.woff) format('woff'),
         url(${rootDirectory}Satoshi-Regular.ttf) format('truetype');
     font-weight: 400;
@@ -141,7 +142,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-Italic.woff) format('woff'),
         url(${rootDirectory}Satoshi-Italic.ttf) format('truetype');
     font-weight: 400;
@@ -151,7 +152,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-Medium.woff) format('woff'),
         url(${rootDirectory}Satoshi-Medium.ttf) format('truetype');
     font-weight: 500;
@@ -161,7 +162,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-MediumItalic.woff) format('woff'),
         url(${rootDirectory}Satoshi-MediumItalic.ttf) format('truetype');
     font-weight: 500;
@@ -171,7 +172,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-Bold.woff) format('woff'),
         url(${rootDirectory}Satoshi-Bold.ttf) format('truetype');
     font-weight: 700;
@@ -181,7 +182,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-BoldItalic.woff) format('woff'),
         url(${rootDirectory}Satoshi-BoldItalic.ttf) format('truetype');
     font-weight: 700;
@@ -191,7 +192,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-Black.woff) format('woff'),
         url(${rootDirectory}Satoshi-Black.ttf) format('truetype');
     font-weight: 900;
@@ -201,7 +202,7 @@ const styles = `
 
 @font-face {
     font-family: 'Satoshi';
-    src: 
+    src:
         url(${rootDirectory}Satoshi-BlackItalic.woff) format('woff'),
         url(${rootDirectory}Satoshi-BlackItalic.ttf) format('truetype');
     font-weight: 900;
