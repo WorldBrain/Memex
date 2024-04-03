@@ -420,7 +420,6 @@ export const setupRpcConnection = (options: {
         initPaused: options.paused,
         sideName: options.sideName,
         role: options.role,
-        debug: true,
     })
     rpcConnection.setup()
 

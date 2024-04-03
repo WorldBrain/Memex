@@ -17,7 +17,7 @@ export class EventBasedRPCManager implements RPCManager {
     private log = (msg: string, obj?: any) => {
         if (this.deps.debug === true || globalThis['memex-rpc-debug']) {
             msg = `RPC::side=${this.deps.sideName}::` + msg
-            // console['log'](msg, obj ?? {})
+            console['log'](msg, obj ?? {})
         }
     }
 
