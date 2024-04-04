@@ -368,12 +368,12 @@ function maybeReplaceAnnotCommentImages(
     imageSupportBG: ImageSupportBackground,
 ): Promise<void>[] {
     // Should match the data URL part of a markdown string containing something like this: "![alt text](data:image/png;base64,asdafasf)"
-    const dataUrlExtractRegexp = /!\[[\w|\s|\.|\!|\-|\?|=]*\]\((data:image\/(png|jpeg);base64,[\w|\+|\/|=]+)\)/g
+    const dataUrlExtractRegexp = /!\[.*?\]\((data:image\/(?:png|jpeg|gif);base64,[\w+/=]+)\)/g
     // Most comments should exit here
     if (!dataUrlExtractRegexp.test(annotation.comment)) {
         return []
     }
-
+    dataUrlExtractRegexp.lastIndex = 0 // Reset lastIndex to 0
     const matches = annotation.comment.matchAll(dataUrlExtractRegexp)
     const dataUrlToImageId = new Map<string, string>()
     const imageUploadPromises: Promise<void>[] = []
