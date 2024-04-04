@@ -13,7 +13,7 @@ import {
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import type { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import type { ImageSupportBackground } from 'src/image-support/background'
 import type { Browser } from 'webextension-polyfill'
 
 interface IncomingDataInfo {
@@ -28,8 +28,8 @@ export const handleIncomingData = (deps: {
     pageActivityIndicatorBG: PageActivityIndicatorBackground
     persistentStorageManager: StorageManager
     storageManager: StorageManager
+    imageSupportBG: ImageSupportBackground
     pkmSyncBG: PKMSyncBackgroundModule
-    imageSupport: ImageSupportInterface
     browserAPIs: Browser
 }) => async ({
     storageType,
@@ -107,7 +107,6 @@ export const handleIncomingData = (deps: {
             updates,
             where,
             deps.storageManager,
-            deps.imageSupport,
             deps.browserAPIs,
         )
     } catch (e) {}
@@ -119,7 +118,6 @@ async function handleSyncedDataForPKMSync(
     updates,
     where,
     storageManager: StorageManager,
-    imageSupport: ImageSupportInterface,
     browserAPIs: Browser,
 ) {
     async function checkIfAnnotationInfilteredList({
@@ -221,7 +219,6 @@ async function handleSyncedDataForPKMSync(
                 await shareAnnotationWithPKM(
                     annotationData,
                     pkmSyncBG,
-                    imageSupport,
                     async (url, listNames) =>
                         await checkIfAnnotationInfilteredList({
                             url: url,
@@ -275,7 +272,6 @@ async function handleSyncedDataForPKMSync(
                 await shareAnnotationWithPKM(
                     annotationData,
                     pkmSyncBG,
-                    imageSupport,
                     async (url, listNames) =>
                         await checkIfAnnotationInfilteredList({
                             url: url,
