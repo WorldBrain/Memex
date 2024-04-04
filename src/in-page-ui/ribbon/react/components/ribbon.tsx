@@ -15,13 +15,11 @@ import type {
 import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { RibbonSubcomponentProps } from './types'
 import CollectionPicker from 'src/custom-lists/ui/CollectionPicker'
-import AnnotationCreate from 'src/annotations/components/AnnotationCreate'
 import QuickTutorial from '@worldbrain/memex-common/lib/editor/components/QuickTutorial'
 import { FeedActivityDot } from 'src/activity-indicator/ui'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import type { ListDetailsGetter } from 'src/annotations/types'
-import FeedPanel from './feed-panel'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { addUrlToBlacklist } from 'src/blacklist/utils'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
@@ -38,16 +36,14 @@ import { logoNoText } from 'src/common-ui/components/design-library/icons'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
 import { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
-import {
-    MemexTheme,
-    MemexThemeVariant,
-} from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import { TOOLTIP_WIDTH } from '../../constants'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { RGBAobjectToString } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/utils'
 import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/components/error-notification'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
+import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -1924,6 +1920,8 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     renderHorizontalRibbon() {
+        const isYoutube = isUrlYTVideo(window.location.href)
+
         if (!this.props.isExpanded) {
             return (
                 <IconContainer
@@ -1931,6 +1929,7 @@ export default class Ribbon extends Component<Props, State> {
                     // isPeeking={this.props.isExpanded}
                     // isSidebarOpen={this.props.sidebar.isSidebarOpen}
                     ribbonPosition={this.props.ribbonPosition}
+                    isYoutube={isYoutube}
                 >
                     {this.props.hasFeedActivity && (
                         <FeedActivityDotBox>
@@ -1977,6 +1976,7 @@ export default class Ribbon extends Component<Props, State> {
                         isPeeking={this.props.isExpanded}
                         isSidebarOpen={this.props.sidebar.isSidebarOpen}
                         ribbonPosition={this.props.ribbonPosition}
+                        isYoutube={isYoutube}
                     >
                         {(this.props.isExpanded ||
                             this.props.sidebar.isSidebarOpen) && (
@@ -2104,6 +2104,7 @@ export default class Ribbon extends Component<Props, State> {
     }
 
     renderVerticalRibbon() {
+        const isYoutube = isUrlYTVideo(window.location.href)
         return (
             <>
                 {this.props.bookmark.writeError && (
@@ -2124,6 +2125,7 @@ export default class Ribbon extends Component<Props, State> {
                     isPeeking={this.props.isExpanded}
                     isSidebarOpen={this.props.sidebar.isSidebarOpen}
                     ribbonPosition={this.props.ribbonPosition}
+                    isYoutube={isYoutube}
                 >
                     {(this.props.isExpanded ||
                         this.props.sidebar.isSidebarOpen) && (
@@ -2286,7 +2288,7 @@ const IconBox = styled.div`
     cursor: pointer;
 `
 
-const IconContainer = styled.div<{ ribbonPosition }>`
+const IconContainer = styled.div<{ ribbonPosition; isYoutube: boolean }>`
     display: flex;
     align-items: center;
     justify-content: flex-end;
@@ -2296,7 +2298,7 @@ const IconContainer = styled.div<{ ribbonPosition }>`
     height: 30px;
     width: fit-content;
     background: ${(props) => props.theme.colors.greyScale1}95;
-    backdrop-filter: blur(4px);
+
 
     ${(props) =>
         props.ribbonPosition === 'bottomRight' &&
@@ -2310,6 +2312,12 @@ const IconContainer = styled.div<{ ribbonPosition }>`
             position: absolute;
             top: 0px;
         `}
+    ${(props) =>
+        !props.isYoutube &&
+        css`
+            backdrop-filter: blur(4px);
+        `}
+    
 `
 
 const SupportContainer = styled.div`
@@ -2622,7 +2630,12 @@ const openAnimation = keyframes`
  100% { padding-bottom: 0px; opacity: 1 }
 `
 
-const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
+const InnerRibbon = styled.div<{
+    isPeeking
+    isSidebarOpen
+    ribbonPosition
+    isYoutube
+}>`
     /* right: -40px; */
     position: sticky;
     display: flex;
@@ -2638,7 +2651,6 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
         props.theme.variant === 'dark'
             ? props.theme.colors.black0
             : props.theme.colors.black + 'c9'};
-                    backdrop-filter: blur(30px);
     outline: 1px solid ${(props) => props.theme.colors.greyScale3};
 
 
@@ -2724,6 +2736,13 @@ const InnerRibbon = styled.div<{ isPeeking; isSidebarOpen; ribbonPosition }>`
                         display: none;
                     }
                 `}
+
+    ${(props) =>
+        !props.isYoutube &&
+        css`
+            backdrop-filter: blur(30px);
+        `}
+    
 
 `
 
