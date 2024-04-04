@@ -133,14 +133,20 @@ export default class UpgradeModal extends UIElement<
         )
     }
     renderBookmarkPowerUpsOptionsList = () => {
-        if (this.state.checkoutLoading === 'running') {
+        if (
+            this.state.checkoutLoading === 'running' ||
+            this.state.authLoadState === 'running'
+        ) {
             return (
                 <LoadingBlocker>
                     <LoadingIndicator size={40} />
-                    Subscribing...
+                    {this.state.checkoutLoading === 'running' &&
+                        'Subscribing...'}
                 </LoadingBlocker>
             )
         }
+
+        console.log('this.state.', this.state.activatedPowerUps)
         return (
             <PowerUpOptions>
                 {this.props.limitReachedNotif === 'Bookmarks' && (
@@ -172,7 +178,24 @@ export default class UpgradeModal extends UIElement<
                         Yearly
                     </RightSide>
                 </PricingSwitcher>
-                <PowerUpItem>
+                <PowerUpItem
+                    onClick={() => {
+                        if (
+                            this.state.activatedPowerUps &&
+                            this.state.activatedPowerUps.bookmarksPowerUp ===
+                                true
+                        ) {
+                            this.processEvent(
+                                'processCheckoutOpen',
+                                'bookmarksPowerUp',
+                            )
+                        }
+                    }}
+                    activated={
+                        this.state.activatedPowerUps &&
+                        this.state.activatedPowerUps.bookmarksPowerUp === false
+                    }
+                >
                     <PowerUpTitleBox>
                         <PowerUpTitle>Basic</PowerUpTitle>
                         <PowerUpSubTitle>
@@ -184,16 +207,21 @@ export default class UpgradeModal extends UIElement<
                     <PowerUpPricing>Free</PowerUpPricing>
                 </PowerUpItem>
                 <PowerUpItem
-                    onClick={() =>
-                        this.processEvent(
-                            'processCheckoutOpen',
-                            'bookmarksPowerUp',
-                        )
-                    }
+                    onClick={() => {
+                        if (
+                            this.state.activatedPowerUps &&
+                            this.state.activatedPowerUps.bookmarksPowerUp ===
+                                false
+                        ) {
+                            this.processEvent(
+                                'processCheckoutOpen',
+                                'bookmarksPowerUp',
+                            )
+                        }
+                    }}
                     activated={
                         this.state.activatedPowerUps &&
-                        this.state.activatedPowerUps['bookmarksPowerUp'] ===
-                            true
+                        this.state.activatedPowerUps.bookmarksPowerUp === true
                     }
                 >
                     <PowerUpTitleBox>

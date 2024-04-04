@@ -30,7 +30,7 @@ export interface PromptTemplatesState {
     checkoutLoading: UITaskState
     componentVariant: 'Modal' | 'PricingList'
     powerUpType: PowerUpModalVersion
-    activatedPowerUps?: PremiumPlans[]
+    activatedPowerUps?: Record<PremiumPlans, any>
     authLoadState: UITaskState
     userEmail?: string
 }

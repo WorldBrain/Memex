@@ -63,11 +63,7 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import {
-    checkStripePlan,
-    pageActionAllowed,
-    upgradePlan,
-} from 'src/util/subscriptions/storage'
+import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
