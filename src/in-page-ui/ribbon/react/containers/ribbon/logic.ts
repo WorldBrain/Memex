@@ -639,11 +639,6 @@ export class RibbonContainerLogic extends UILogic<
                     previousState,
                 )
 
-                await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
-                    true,
-                    postInitState.fullPageUrl,
-                )
-
                 const updateState = (isBookmarked: boolean) =>
                     this.emitMutation({
                         bookmark: {
@@ -681,6 +676,10 @@ export class RibbonContainerLogic extends UILogic<
                                 pageTitle: title,
                             },
                         })
+                        await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
+                            true,
+                            postInitState.fullPageUrl,
+                        )
                     }
                 } catch (err) {
                     updateState(!shouldBeBookmarked)

@@ -50,6 +50,7 @@ export async function main(): Promise<void> {
     __debugCounter = 0
 
     const rpcManager = setupRpcConnection({
+        browserAPIs: browser,
         sideName: 'background',
         role: 'background',
         paused: true,

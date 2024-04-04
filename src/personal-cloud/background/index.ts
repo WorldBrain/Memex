@@ -775,7 +775,7 @@ export class PersonalCloudBackground {
 
     _debugLog(...args: any[]) {
         if (this.debug) {
-            // console['log']('Personal Cloud -', ...args)
+            console['log']('Personal Cloud -', ...args)
         }
     }
 

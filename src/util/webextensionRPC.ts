@@ -19,9 +19,10 @@
 // myRemoteFunc(21).then(result => { ... result is 42! ... })
 
 import mapValues from 'lodash/fp/mapValues'
-import browser from 'webextension-polyfill'
+import browser, { Browser } from 'webextension-polyfill'
 import { EventEmitter } from 'events'
-import { PortBasedRPCManager, RpcSideName, RpcRole } from 'src/util/rpc/rpc'
+import { EventBasedRPCManager } from 'src/util/rpc/event-rpc-manager'
+import type { RpcSideName, RpcRole, RPCManager } from './rpc/types'
 import type { RemoteFunctionImplementations } from 'src/util/remote-functions-background'
 import type { Arguments, default as TypedEventEmitter } from 'typed-emitter'
 import type { AuthRemoteEvents } from 'src/authentication/background/types'
@@ -121,7 +122,7 @@ export function runInBackground<T extends object>(): T {
                         `runInBackground: RPC connection has not been setup.\nfn name: ${property.toString()}\nargs: ${args}\n\nIf you are calling direct from content-script code, instead pass it down from the global content-script.\n`,
                     )
                 }
-                return rpcConnection.postMessageRequestToExtension(
+                return rpcConnection.postMessageRequestToBackground(
                     property.toString(),
                     args,
                 )
@@ -142,7 +143,7 @@ export function runInTab<T extends object>(
                     tabId,
                     property.toString(),
                     args,
-                    opts?.quietConsole,
+                    opts,
                 )
         },
     })
@@ -153,7 +154,7 @@ export function runInTabViaBg<T extends object>(tabId): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
             return (...args) =>
-                rpcConnection.postMessageRequestToTabViaExtension(
+                rpcConnection.postMessageRequestToTabViaBackground(
                     tabId,
                     property.toString(),
                     args,
@@ -163,7 +164,7 @@ export function runInTabViaBg<T extends object>(tabId): T {
 }
 
 /**
- * @depreciated - Don't call this function directly. Instead use the typesafe versions `runInBackground` or `runInTab`
+ * @deprecated - Don't call this function directly. Instead use the typesafe versions `runInBackground` or `runInTab`
  */
 export function remoteFunction(
     funcName: string,
@@ -175,7 +176,7 @@ export function remoteFunction(
             rpcConnection.postMessageRequestToTab(tabId, funcName, args)
     } else {
         return (...args) =>
-            rpcConnection.postMessageRequestToExtension(funcName, args)
+            rpcConnection.postMessageRequestToBackground(funcName, args)
     }
 }
 
@@ -406,19 +407,19 @@ export function getRemoteEventEmitter<EventType extends keyof RemoteEvents>(
 }
 
 // Containing the evil globals here
-let rpcConnection: PortBasedRPCManager
+let rpcConnection: RPCManager
 export const setupRpcConnection = (options: {
     sideName: RpcSideName
     role: RpcRole
+    browserAPIs: Browser
     paused?: boolean
 }) => {
-    rpcConnection = new PortBasedRPCManager({
+    rpcConnection = new EventBasedRPCManager({
+        getRegisteredRemoteFunction: (name) => remotelyCallableFunctions[name],
+        browserAPIs: options.browserAPIs,
+        initPaused: options.paused,
         sideName: options.sideName,
         role: options.role,
-        getRegisteredRemoteFunction: (name) => remotelyCallableFunctions[name],
-        connect: browser.runtime.connect,
-        onConnect: browser.runtime.onConnect,
-        paused: options.paused,
     })
     rpcConnection.setup()
 
