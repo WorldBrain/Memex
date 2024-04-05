@@ -788,14 +788,12 @@ export async function setupBackgroundModules(
     backgroundModules.imageSupport.setupRemoteFunctions()
     setupNotificationClickListener()
 
-    // TODO mv3: migrate web req APIs
-    // await backgroundModules.pdfBg.setupRequestInterceptors()
-    await backgroundModules.analytics.setup()
+    backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     await backgroundModules.pageActivityIndicator.setup()
 
-    // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
-    await backgroundModules.auth.authService.refreshUserInfo()
+    // Ensure log-in state gotten from FB + trigger sync queue processing, but don't wait for it
+    backgroundModules.auth.authService.refreshUserInfo()
     await backgroundModules.personalCloud.setup()
 }
 
