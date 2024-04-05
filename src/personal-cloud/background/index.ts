@@ -135,9 +135,6 @@ export class PersonalCloudBackground {
     }
 
     private setupEventListeners() {
-        this.options.runtimeAPI.onStartup.addListener(async () => {
-            await this.startSync()
-        })
         this.actionQueue.events.on('statsChanged', async (stats) => {
             this._modifyStats({
                 pendingUploads: stats.pendingActionCount,
