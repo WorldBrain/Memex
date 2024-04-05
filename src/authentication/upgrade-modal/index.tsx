@@ -121,8 +121,7 @@ export default class UpgradeModal extends UIElement<
                         <PowerUpTitle>Pro</PowerUpTitle>
                         <PowerUpSubTitle>
                             Unlimited queries with Claude-3-Haiku and
-                            GPT-3.5-Turbo, <br />
-                            and GPT-4 with own key
+                            GPT-3.5-Turbo, and GPT-4 with own key
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
                     <PowerUpPricing>
@@ -180,7 +179,6 @@ export default class UpgradeModal extends UIElement<
             )
         }
 
-        console.log('this.state.', this.state.activatedPowerUps)
         return (
             <PowerUpOptions>
                 {this.props.limitReachedNotif === 'Bookmarks' && (
@@ -281,6 +279,76 @@ export default class UpgradeModal extends UIElement<
             modalToShow = this.renderAIPowerUpsOptionsList()
         }
 
+        const upgradeContent = (
+            <OverlayContainer>
+                <SideBar>
+                    <SidebarTitle>Powerups</SidebarTitle>
+                    {Powerups.map((powerUp) => (
+                        <SidebarItem
+                            onClick={() => {
+                                this.processEvent(
+                                    'changeModalType',
+                                    powerUp.id as PowerUpModalVersion,
+                                )
+                            }}
+                            selected={powerUp.id === this.state.powerUpType}
+                        >
+                            <Icon
+                                icon={powerUp.icon}
+                                heightAndWidth="18px"
+                                color="greyScale6"
+                                hoverOff
+                            />
+                            {powerUp.title}
+                        </SidebarItem>
+                    ))}
+                    <SidebarBottomArea>
+                        {this.state.authLoadState === 'running' ? (
+                            <LoadingIndicator size={20} />
+                        ) : (
+                            this.state.activatedPowerUps != null && (
+                                <PrimaryAction
+                                    label="Manage Subscription"
+                                    type="naked"
+                                    size="medium"
+                                    onClick={() => {
+                                        const isStaging =
+                                            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
+                                                'staging',
+                                            ) ||
+                                            process.env.NODE_ENV ===
+                                                'development'
+                                        window.open(
+                                            isStaging
+                                                ? `https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU?prefilled_email=${this.state.userEmail}`
+                                                : `https://billing.stripe.com/p/login/8wM015dIp6uPdb2288?prefilled_email=${this.state.userEmail}`,
+                                            '_blank',
+                                        )
+                                    }}
+                                    width="100%"
+                                />
+                            )
+                        )}
+                    </SidebarBottomArea>
+                </SideBar>
+
+                <UpgradeContainer>
+                    {modalToShow}{' '}
+                    {this.props.componentVariant !== 'AccountPage' && (
+                        <MoneyBackContainer>
+                            <Icon
+                                filePath="reload"
+                                heightAndWidth="20px"
+                                color="greyScale7"
+                                hoverOff
+                            />
+                            60-day money back guarantee
+                        </MoneyBackContainer>
+                    )}
+                </UpgradeContainer>
+            </OverlayContainer>
+        )
+
         if (this.state.componentVariant === 'Modal') {
             return (
                 <OverlayModals
@@ -289,76 +357,11 @@ export default class UpgradeModal extends UIElement<
                     blockedBackground
                     closeComponent={this.props.closeComponent}
                 >
-                    <OverlayContainer>
-                        <SideBar>
-                            <SidebarTitle>Powerups</SidebarTitle>
-                            {Powerups.map((powerUp) => (
-                                <SidebarItem
-                                    onClick={() => {
-                                        this.processEvent(
-                                            'changeModalType',
-                                            powerUp.id as PowerUpModalVersion,
-                                        )
-                                    }}
-                                    selected={
-                                        powerUp.id === this.state.powerUpType
-                                    }
-                                >
-                                    <Icon
-                                        icon={powerUp.icon}
-                                        heightAndWidth="18px"
-                                        color="greyScale6"
-                                        hoverOff
-                                    />
-                                    {powerUp.title}
-                                </SidebarItem>
-                            ))}
-                            <SidebarBottomArea>
-                                {this.state.authLoadState === 'running' ? (
-                                    <LoadingIndicator size={20} />
-                                ) : (
-                                    this.state.activatedPowerUps != null && (
-                                        <PrimaryAction
-                                            label="Manage Subscription"
-                                            type="naked"
-                                            size="medium"
-                                            onClick={() => {
-                                                const isStaging =
-                                                    process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes(
-                                                        'staging',
-                                                    ) ||
-                                                    process.env.NODE_ENV ===
-                                                        'development'
-                                                window.open(
-                                                    isStaging
-                                                        ? `https://billing.stripe.com/p/login/test_bIY036ggb10LeqYeUU?prefilled_email=${this.state.userEmail}`
-                                                        : `https://billing.stripe.com/p/login/8wM015dIp6uPdb2288?prefilled_email=${this.state.userEmail}`,
-                                                    '_blank',
-                                                )
-                                            }}
-                                            width="100%"
-                                        />
-                                    )
-                                )}
-                            </SidebarBottomArea>
-                        </SideBar>
-                        <UpgradeContainer>
-                            {modalToShow}{' '}
-                            <MoneyBackContainer>
-                                <Icon
-                                    filePath="reload"
-                                    heightAndWidth="20px"
-                                    color="greyScale7"
-                                    hoverOff
-                                />
-                                60-day money back guarantee
-                            </MoneyBackContainer>
-                        </UpgradeContainer>
-                    </OverlayContainer>
+                    <ModalContainer>{upgradeContent}</ModalContainer>
                 </OverlayModals>
             )
         } else {
-            return modalToShow
+            return upgradeContent
         }
     }
 }
@@ -376,6 +379,13 @@ const Powerups = [
     },
 ]
 
+const ModalContainer = styled.div`
+    background: ${(props) => props.theme.colors.black};
+    border-radius: 10px;
+    box-shadow: ${(props) => props.theme.borderStyles.boxShadowHoverElements};
+    width: 860px;
+`
+
 const LoadingBlocker = styled.div`
     height: 100%;
     width: 100%;
@@ -386,8 +396,6 @@ const LoadingBlocker = styled.div`
     grid-gap: 20px;
     color: ${(props) => props.theme.colors.greyScale7};
     backdrop-filter: blur(5px);
-    background: ${(props) => props.theme.colors.black};
-    width: 650px;
 `
 
 const OverlayContainer = styled.div`
@@ -397,9 +405,6 @@ const OverlayContainer = styled.div`
     align-items: flex-start;
     width: 100%;
     height: 470px;
-    background: ${(props) => props.theme.colors.black};
-    border-radius: 10px;
-    box-shadow: ${(props) => props.theme.borderStyles.boxShadowHoverElements};
     box-sizing: border-box;
 `
 
@@ -409,8 +414,9 @@ const PowerUpOptions = styled.div`
     justify-content: flex-start;
     align-items: center;
     grid-gap: 2px;
-    padding: 40px;
-    width: 650px;
+    padding: 20px;
+    max-width: 650px;
+    width: 100%;
     box-sizing: border-box;
 `
 
@@ -535,6 +541,7 @@ const UpgradeContainer = styled.div`
     align-items: flex-start;
     flex-direction: column;
     height: fill-available;
+    width: 100%;
 `
 
 const DiscountPill = styled.div`
@@ -592,7 +599,7 @@ const SideBar = styled.div`
     padding: revert !important;
     padding: 40px 30px 30px 30px !important;
     grid-gap: 5px;
-    width: 210px;
+    min-width: 210px;
     height: 100%;
     box-sizing: border-box;
     border-right: 1px solid ${(props) => props.theme.colors.greyScale3};

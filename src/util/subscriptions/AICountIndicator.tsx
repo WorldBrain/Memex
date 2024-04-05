@@ -1,8 +1,6 @@
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
-import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { PrimaryAction } from '@worldbrain/memex-common/lib/common-ui/components/PrimaryAction'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
-import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import React from 'react'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import {
@@ -26,7 +24,6 @@ export interface Props {
 
 interface State {
     currentCount: number
-    totalCount: number
     shouldShow: boolean
     showTooltip: boolean
     openAIKey: string
@@ -41,7 +38,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
     state: State = {
         currentCount: DEFAULT_COUNTER_STORAGE_KEY.cQ,
-        totalCount: DEFAULT_COUNTER_STORAGE_KEY.sQ,
         shouldShow: true,
         showTooltip: false,
         openAIKey: '',
@@ -57,15 +53,10 @@ export class AICounterIndicator extends React.Component<Props, State> {
         })
     }
 
-    private get leftOverBlocks(): number {
-        return this.state.totalCount - this.state.currentCount
-    }
-
     async componentDidMount() {
         const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
         if (result[COUNTER_STORAGE_KEY]?.sQ != null) {
             this.setState({
-                totalCount: parseInt(result[COUNTER_STORAGE_KEY].sQ),
                 currentCount: result[COUNTER_STORAGE_KEY].cQ,
             })
         }
@@ -115,7 +106,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             this.setState({
                 currentCount: changes[COUNTER_STORAGE_KEY].newValue.cQ,
-                totalCount: parseInt(changes[COUNTER_STORAGE_KEY].newValue.sQ),
             })
         }
 

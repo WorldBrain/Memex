@@ -50,8 +50,7 @@ export class InPageUIBackground {
                     browser.tabs
                         .query({ active: true, currentWindow: true })
                         .then((tabs) => {
-                            console.log('tabs11: ', tabs),
-                                sendResponse({ tabs: tabs })
+                            sendResponse({ tabs: tabs })
                         })
 
                     return true // Indicates you wish to send a response asynchronously

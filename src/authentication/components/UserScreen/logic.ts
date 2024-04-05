@@ -161,7 +161,6 @@ export default class Logic extends UILogic<State, Event> {
                 $set: 'running',
             },
         })
-        console.log('event.email', event.email)
         const subscriptionStatusInfo = await checkStripePlan(event.email)
 
         if (subscriptionStatusInfo != null) {

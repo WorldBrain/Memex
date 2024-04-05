@@ -434,8 +434,6 @@ class BackgroundScript {
         const currentBillingPeriod = billingPeriod
         const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
 
-        console.log('baselink', selectedPremiumPlans)
-
         const selectedPremiumPlansString = selectedPremiumPlans.join(',')
 
         const checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
@@ -447,7 +445,6 @@ class BackgroundScript {
                 // Execute the checkout link and print the response
                 const response = await fetch(checkoutLink)
                 const responseData = await response.text() // or response.json() if the response is JSON
-                console.log('Checkout link response:', responseData)
 
                 return JSON.parse(responseData).message
             } catch (error) {

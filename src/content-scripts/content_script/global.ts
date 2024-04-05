@@ -110,6 +110,8 @@ import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { InPageUIInterface } from 'src/in-page-ui/background/types'
+import { Storage } from 'webextension-polyfill'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -295,20 +297,14 @@ export async function main(
 
         const currentTabURL = ((await runInBackground<
             InPageUIInterface<'caller'>
-        >().getCurrentTabURL(null)) as unknown) as string
+        >().getCurrentTabURL()) as unknown) as string
 
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             const oldValues = changes[COUNTER_STORAGE_KEY]?.oldValue
             const newValues = changes[COUNTER_STORAGE_KEY]?.newValue
 
-            console.log('oldValues', oldValues)
-            console.log('newValues', newValues)
-
             const counterQueriesHaveChanged = oldValues.cQ !== newValues.cQ
             const counterSavedHaveChanged = oldValues.c !== newValues.c
-
-            console.log('counterQueriesHaveChanged', counterQueriesHaveChanged)
-            console.log('counterSavedHaveChanged', counterSavedHaveChanged)
 
             if (!counterQueriesHaveChanged && !counterSavedHaveChanged) {
                 return
@@ -325,7 +321,7 @@ export async function main(
                 limitReachedNotif = 'Bookmarks'
             }
 
-            if (isAllowed) {
+            if (!isAllowed) {
                 if (currentTabURL?.includes(window.location.href)) {
                     inPageUI.loadOnDemandInPageUI({
                         component: 'upgrade-modal',
@@ -1120,6 +1116,8 @@ export async function main(
                 upgradeModalProps: {
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
                     browserAPIs: browser,
+                    authBG: authBG,
+                    limitReachedNotif: null,
                 },
                 annotationsFunctions,
             })

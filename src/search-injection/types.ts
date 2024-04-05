@@ -1,3 +1,4 @@
+import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 import type { ErrorDisplayProps } from './error-display'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 
@@ -28,7 +29,7 @@ export interface ResultItemProps {
 export interface OnDemandInPageUIProps {
     errorDisplayProps?: ErrorDisplayProps
     powerUpModalProps?: {
-        limitReachedNotif: boolean
+        limitReachedNotif: PowerUpModalVersion
         authBG: AuthRemoteFunctionsInterface
     }
 }

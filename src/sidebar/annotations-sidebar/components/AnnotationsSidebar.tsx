@@ -111,6 +111,7 @@ import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
 import { browser } from 'webextension-polyfill-ts'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -333,7 +334,8 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     signupDate: number
     createCheckOutLink: (
         billingPeriod: 'monthly' | 'yearly',
-        planName: string,
+        selectedPremiumPlans: PremiumPlans[],
+        doNotOpen: boolean,
     ) => void
 }
 

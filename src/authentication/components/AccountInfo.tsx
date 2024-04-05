@@ -17,6 +17,9 @@ import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/se
 import QRCanvas from 'src/common-ui/components/qr-canvas'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
+import UpgradeModal from '../upgrade-modal'
+import browser from 'webextension-polyfill'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 const styles = require('./styles.css')
 
@@ -27,15 +30,21 @@ const DisplayNameBox = styled.div`
 export interface Props extends Dependencies {
     setAuthMode: (mode) => void
     getRootElement: () => HTMLElement
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     static defaultProps: Pick<
         Props,
-        'navToDashboard' | 'authBG' | 'personalCloudBG' | 'navToGuidedTutorial'
+        | 'navToDashboard'
+        | 'authBG'
+        | 'personalCloudBG'
+        | 'navToGuidedTutorial'
+        | 'bgScriptBG'
     > = {
         authBG: runInBackground(),
         personalCloudBG: runInBackground(),
+        bgScriptBG: runInBackground(),
         navToDashboard: () => {},
         navToGuidedTutorial: () => {},
     }
@@ -100,6 +109,23 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
             <FullPage>
                 {this.state.currentUser != null ? (
                     <>
+                        <SettingSection
+                            icon="feed"
+                            title={'Add PowerUps'}
+                            description="60 days money-back guarantee. 10% discount if you upgrade while in trial."
+                        >
+                            <UpgradeModal
+                                getRootElement={this.props.getRootElement}
+                                powerUpType={'Bookmarks'}
+                                browserAPIs={browser}
+                                authBG={this.props.authBG}
+                                createCheckOutLink={
+                                    this.props.bgScriptBG.createCheckoutLink
+                                }
+                                componentVariant={'AccountPage'}
+                                limitReachedNotif={null}
+                            />
+                        </SettingSection>
                         <SettingSection
                             title={'Pair Mobile Device'}
                             icon={'phone'}

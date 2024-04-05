@@ -18,7 +18,7 @@ export interface PromptTemplatesDependencies {
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<'error' | 'success'>
-    componentVariant: 'Modal' | 'PricingList'
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
     getRootElement: () => HTMLElement
     closeComponent?: () => void
     browserAPIs: Browser
@@ -28,7 +28,7 @@ export interface PromptTemplatesDependencies {
 export interface PromptTemplatesState {
     billingPeriod: 'monthly' | 'yearly'
     checkoutLoading: UITaskState
-    componentVariant: 'Modal' | 'PricingList'
+    componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
     powerUpType: PowerUpModalVersion
     activatedPowerUps?: Record<PremiumPlans, any>
     authLoadState: UITaskState

@@ -32,7 +32,6 @@ export default class PromptTemplatesLogic extends UILogic<
         const userEmail = (await this.dependencies.authBG.getCurrentUser())
             ?.email
         const activatedPowerUps = await checkStripePlan(userEmail)
-        console.log('activatedPowerUps', activatedPowerUps)
 
         this.emitMutation({
             activatedPowerUps: { $set: activatedPowerUps },
@@ -71,7 +70,9 @@ export default class PromptTemplatesLogic extends UILogic<
 
         let currentlySelected: PremiumPlans[] = Object.keys(
             previousState.activatedPowerUps,
-        ).filter((key) => previousState.activatedPowerUps[key] === true)
+        ).filter(
+            (key) => previousState.activatedPowerUps[key] === true,
+        ) as PremiumPlans[]
         const doNotOpen = currentlySelected.length > 0
 
         let newSelection: PremiumPlans[] = currentlySelected
@@ -88,7 +89,6 @@ export default class PromptTemplatesLogic extends UILogic<
             newSelection.push(event)
         }
 
-        console.log('newSelection', newSelection)
         const upgradeResponse = await this.dependencies.createCheckOutLink(
             previousState.billingPeriod,
             newSelection,
@@ -104,6 +104,11 @@ export default class PromptTemplatesLogic extends UILogic<
             const updatedPlans = await checkStripePlan(previousState.userEmail)
             this.emitMutation({
                 activatedPowerUps: { $set: updatedPlans },
+                checkoutLoading: { $set: 'success' },
+            })
+        }
+        if (doNotOpen === false) {
+            this.emitMutation({
                 checkoutLoading: { $set: 'success' },
             })
         }

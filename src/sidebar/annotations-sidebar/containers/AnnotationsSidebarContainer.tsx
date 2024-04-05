@@ -1128,12 +1128,12 @@ export class AnnotationsSidebarContainer<
                             }}
                             createCheckOutLink={(
                                 billingPeriod,
-                                upgradePlan,
+                                selectedPremiumPlans,
                             ) => {
-                                console.log('test', billingPeriod, upgradePlan)
                                 this.processEvent('createCheckOutLink', {
                                     billingPeriod,
-                                    upgradePlan,
+                                    selectedPremiumPlans,
+                                    doNotOpen: false,
                                 })
                             }}
                             showChapters={this.state.showChapters}

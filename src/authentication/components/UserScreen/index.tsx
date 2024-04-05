@@ -9,6 +9,7 @@ import Logic from './logic'
 import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/setting-section'
 import { LoadingContainer } from 'src/dashboard-refactor/styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -19,6 +20,7 @@ import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/
 export interface Props extends Dependencies {
     refreshUser?: boolean
     getRootElement: () => HTMLElement
+    bgScriptBG: RemoteBGScriptInterface
 }
 
 export default class UserScreen extends StatefulUIElement<Props, State, Event> {
@@ -124,6 +126,7 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                                 })
                             }}
                             getRootElement={this.props.getRootElement}
+                            bgScriptBG={this.props.bgScriptBG}
                         />
                     )}
                 </>

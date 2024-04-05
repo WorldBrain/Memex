@@ -30,7 +30,7 @@ export interface RemoteBGScriptInterface {
         billingPeriod: 'monthly' | 'yearly',
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
-    ) => Promise<void>
+    ) => Promise<'error' | 'success'>
 }
 
 // TODO: Fill in this type with remaining BG modules

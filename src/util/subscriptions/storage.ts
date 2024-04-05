@@ -220,7 +220,6 @@ export async function pageActionAllowed(
     onlyCheckNoUpdate?: boolean,
 ) {
     const allowed = await checkStatus('bookmarking')
-    console.log('allowed', allowed)
     if (!onlyCheckNoUpdate) {
         updatePageCounter()
     }

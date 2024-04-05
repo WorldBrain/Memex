@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { StyleSheetManager, ThemeProvider } from 'styled-components'
+import styled, { StyleSheetManager, ThemeProvider } from 'styled-components'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import {
     loadThemeVariant,
@@ -19,10 +19,10 @@ type RootProps = {
         billingPeriod: 'monthly' | 'yearly',
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
-    ) => void
+    ) => Promise<'error' | 'success'>
     browserAPIs: any
     authBG: AuthRemoteFunctionsInterface
-    limitReachedNotif: boolean
+    limitReachedNotif: PowerUpModalVersion
 }
 
 interface RootState {

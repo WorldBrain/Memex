@@ -24,10 +24,6 @@ export const main: InPageUIInjectionsMain = async ({
                     renderErrorDisplay(options.errorDisplayProps)
                 }
             } else if (component === 'upgrade-modal') {
-                console.log(
-                    'upgrade-modal',
-                    options.powerUpModalProps.authBG.getCurrentUser(),
-                )
                 renderUpgradeModal({
                     ...upgradeModalProps,
                     ...options.powerUpModalProps,
