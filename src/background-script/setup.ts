@@ -792,8 +792,6 @@ export async function setupBackgroundModules(
     await backgroundModules.jobScheduler.setup()
     await backgroundModules.pageActivityIndicator.setup()
 
-    // Ensure log-in state gotten from FB + trigger sync queue processing, but don't wait for it
-    backgroundModules.auth.authService.refreshUserInfo()
     await backgroundModules.personalCloud.setup()
 }
 
