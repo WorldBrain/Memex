@@ -341,6 +341,12 @@ export function createBackgroundModules(options: {
         activityStreamsStorage: options.serverStorage.modules.activityStreams,
     })
 
+    const imageSupport = new ImageSupportBackground({
+        backend: options.imageSupportBackend,
+        storageManager: options.storageManager,
+        generateImageId: () => generateServerId('UPLOADED_IMAGES') as string,
+    })
+
     const directLinking = new DirectLinkingBackground({
         browserAPIs: options.browserAPIs,
         storageManager,
@@ -354,13 +360,6 @@ export function createBackgroundModules(options: {
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
         },
-        imageSupport: new ImageSupportBackground({
-            backend: options.imageSupportBackend,
-            storageManager: options.storageManager,
-            generateImageId() {
-                return generateServerId('UPLOADED_IMAGES') as string
-            },
-        }),
     })
 
     const activityStreams = new ActivityStreamsBackground({
@@ -578,13 +577,7 @@ export function createBackgroundModules(options: {
             storageManager: options.storageManager,
             browserAPIs: options.browserAPIs,
             pkmSyncBG,
-            imageSupport: new ImageSupportBackground({
-                backend: options.imageSupportBackend,
-                storageManager: options.storageManager,
-                generateImageId() {
-                    return generateServerId('UPLOADED_IMAGES') as string
-                },
-            }),
+            imageSupportBG: imageSupport,
         }),
     })
 
@@ -742,13 +735,7 @@ export function createBackgroundModules(options: {
             serverStorage: options.serverStorage.modules,
             services: options.services,
         }),
-        imageSupport: new ImageSupportBackground({
-            backend: options.imageSupportBackend,
-            storageManager: options.storageManager,
-            generateImageId() {
-                return generateServerId('UPLOADED_IMAGES') as string
-            },
-        }),
+        imageSupport,
     }
 }
 

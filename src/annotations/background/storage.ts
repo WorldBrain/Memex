@@ -23,7 +23,6 @@ import {
     isPkmSyncEnabled,
     shareAnnotationWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
-import type { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 import type { Storage } from 'webextension-polyfill'
 
 export default class AnnotationStorage extends StorageModule {
@@ -40,7 +39,6 @@ export default class AnnotationStorage extends StorageModule {
             /** Please do not add new references to this. Access to be refactored to a higher level. */
             ___storageAPI: Storage.Static
             pkmSyncBG: PKMSyncBackgroundModule
-            imageSupport?: ImageSupportInterface
         },
     ) {
         super({
@@ -396,7 +394,6 @@ export default class AnnotationStorage extends StorageModule {
                 shareAnnotationWithPKM(
                     annotationData,
                     this.options.pkmSyncBG,
-                    this.options.imageSupport,
                     async (url, listNames) =>
                         await this.checkIfAnnotationInfilteredList({
                             url: url,
@@ -461,11 +458,7 @@ export default class AnnotationStorage extends StorageModule {
                     createdWhen: annotationsData[0]?.createdWhen,
                 }
 
-                shareAnnotationWithPKM(
-                    annotationData,
-                    this.options.pkmSyncBG,
-                    this.options.imageSupport,
-                )
+                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
             }
         } catch (e) {}
     }
@@ -577,11 +570,7 @@ export default class AnnotationStorage extends StorageModule {
                     pageUrl: pageDataStorage?.fullUrl ?? pageUrl,
                 }
 
-                shareAnnotationWithPKM(
-                    annotationData,
-                    this.options.pkmSyncBG,
-                    this.options.imageSupport,
-                )
+                shareAnnotationWithPKM(annotationData, this.options.pkmSyncBG)
             }
 
             const annotationData = {
@@ -683,7 +672,6 @@ export default class AnnotationStorage extends StorageModule {
                 shareAnnotationWithPKM(
                     annotationData,
                     this.options.pkmSyncBG,
-                    this.options.imageSupport,
                     async (url, listNames) =>
                         await this.checkIfAnnotationInfilteredList({
                             url: url,

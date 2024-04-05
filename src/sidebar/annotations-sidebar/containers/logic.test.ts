@@ -155,7 +155,9 @@ const setupLogicHelper = async ({
         focusEditNoteForm,
         focusCreateForm,
         copyToClipboard,
-        imageSupportBG: backgroundModules.imageSupport,
+        imageSupportBG: insertBackgroundFunctionTab(
+            backgroundModules.imageSupport.remoteFunctions,
+        ) as any,
         getRootElement: null,
     })
 

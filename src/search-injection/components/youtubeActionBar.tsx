@@ -105,7 +105,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         }
         browser.runtime.onMessage.addListener((message) => {
             if (message.type === 'URL_CHANGE') {
-                console.log('URL_CHANGE', message.url)
                 this.getYoutubeVideoDuration()
             }
         })
@@ -120,7 +119,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         if (video) {
             let duration = video.duration
 
-            console.log('duration', duration)
             this.setState({
                 videoDuration: duration,
             })
@@ -200,7 +198,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         let timestampToSend = null
 
         if (event.shiftKey) {
-            console.log('Shift key is pressed during click')
             const range = this.calculateRangeInSeconds(
                 this.state.videoDuration,
                 from,
