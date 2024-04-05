@@ -29,9 +29,7 @@ import type { GetUsersPublicDetailsResult } from '@worldbrain/memex-common/lib/u
 import { trackAnnotationCreate } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
-import type { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
 import type { AuthBackground } from 'src/authentication/background'
-import { ImageSupportBackground } from 'src/image-support/background'
 
 interface TabArg {
     tab: Tabs.Tab
@@ -61,14 +59,12 @@ export default class DirectLinkingBackground {
             preAnnotationDelete(params: {
                 annotationUrl: string
             }): Promise<void>
-            imageSupport: ImageSupportBackground
         },
     ) {
         this.socialBg = options.socialBg
         this.annotationStorage = new AnnotationStorage({
             storageManager: options.storageManager,
             pkmSyncBG: options.pkmSyncBG,
-            imageSupport: options.imageSupport,
             ___storageAPI: options.browserAPIs.storage,
         })
 

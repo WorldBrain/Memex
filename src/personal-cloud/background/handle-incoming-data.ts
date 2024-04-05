@@ -13,8 +13,9 @@ import {
     sharePageWithPKM,
 } from 'src/pkm-integrations/background/backend/utils'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
-import type { ImageSupportInterface } from '@worldbrain/memex-common/lib/image-support/types'
+import type { ImageSupportBackground } from 'src/image-support/background'
 import type { Browser } from 'webextension-polyfill'
+import type { Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 
 interface IncomingDataInfo {
     storageType: PersonalCloudClientStorageType
@@ -28,8 +29,8 @@ export const handleIncomingData = (deps: {
     pageActivityIndicatorBG: PageActivityIndicatorBackground
     persistentStorageManager: StorageManager
     storageManager: StorageManager
+    imageSupportBG: ImageSupportBackground
     pkmSyncBG: PKMSyncBackgroundModule
-    imageSupport: ImageSupportInterface
     browserAPIs: Browser
 }) => async ({
     storageType,
@@ -41,6 +42,14 @@ export const handleIncomingData = (deps: {
         storageType === PersonalCloudClientStorageType.Persistent
             ? deps.persistentStorageManager
             : deps.storageManager
+
+    if (collection === 'annotations') {
+        // TODO: do something with these promises, but don't hold up sync
+        const uploadPromises = maybeReplaceAnnotCommentImages(
+            updates as Annotation,
+            deps.imageSupportBG,
+        )
+    }
 
     // Add any newly created lists to the list suggestion cache
     if (collection === 'customLists' && updates.id != null) {
@@ -107,7 +116,6 @@ export const handleIncomingData = (deps: {
             updates,
             where,
             deps.storageManager,
-            deps.imageSupport,
             deps.browserAPIs,
         )
     } catch (e) {}
@@ -119,7 +127,6 @@ async function handleSyncedDataForPKMSync(
     updates,
     where,
     storageManager: StorageManager,
-    imageSupport: ImageSupportInterface,
     browserAPIs: Browser,
 ) {
     async function checkIfAnnotationInfilteredList({
@@ -221,7 +228,6 @@ async function handleSyncedDataForPKMSync(
                 await shareAnnotationWithPKM(
                     annotationData,
                     pkmSyncBG,
-                    imageSupport,
                     async (url, listNames) =>
                         await checkIfAnnotationInfilteredList({
                             url: url,
@@ -275,7 +281,6 @@ async function handleSyncedDataForPKMSync(
                 await shareAnnotationWithPKM(
                     annotationData,
                     pkmSyncBG,
-                    imageSupport,
                     async (url, listNames) =>
                         await checkIfAnnotationInfilteredList({
                             url: url,
@@ -354,4 +359,52 @@ async function handleSyncedDataForPKMSync(
     } catch (e) {
         console.error(e)
     }
+}
+
+// We had a bug where annotation comments contained data URLs for big images, which blows up the extension on storage ops.
+//  This makes sure they get uploaded and replaced with links.
+function maybeReplaceAnnotCommentImages(
+    annotation: Pick<Annotation, 'comment' | 'url' | 'pageUrl'>,
+    imageSupportBG: ImageSupportBackground,
+): Promise<void>[] {
+    // Should match the data URL part of a markdown string containing something like this: "![alt text](data:image/png;base64,asdafasf)"
+    const dataUrlExtractRegexp = /!\[.*?\]\((data:image\/(?:png|jpeg|gif);base64,[\w+/=]+)\)/g
+    // Most comments should exit here
+    if (!dataUrlExtractRegexp.test(annotation.comment)) {
+        return []
+    }
+    dataUrlExtractRegexp.lastIndex = 0 // Reset lastIndex to 0
+    const matches = annotation.comment.matchAll(dataUrlExtractRegexp)
+    const dataUrlToImageId = new Map<string, string>()
+    const imageUploadPromises: Promise<void>[] = []
+    // For each found data URL, upload it and generate an ID
+    for (const matchRes of matches) {
+        const dataUrl = matchRes?.[1]
+        if (!dataUrl) {
+            continue
+        }
+        const imageId = imageSupportBG.generateImageId()
+        imageUploadPromises.push(
+            imageSupportBG.uploadImage({
+                id: imageId,
+                image: dataUrl,
+                annotationUrl: annotation.url,
+                normalizedPageUrl: annotation.pageUrl,
+            }),
+        )
+        dataUrlToImageId.set(dataUrl, imageId)
+    }
+    // Replace all markdown data URL image links with HTML ones using the generated ID
+    annotation.comment = annotation.comment.replace(
+        dataUrlExtractRegexp,
+        (_, dataUrl) => {
+            if (!dataUrl) {
+                return '' // Wipe it out if this match fails
+            }
+            const imageId = dataUrlToImageId.get(dataUrl)
+            return `<img src="${imageId}" remoteid="${imageId}"/>`
+        },
+    )
+
+    return imageUploadPromises
 }
