@@ -183,13 +183,17 @@ export class PortBasedRPCManager implements RPCManager {
         }
         const port = this.getExtensionPort(name)
         const request = createRPCRequestObject(
-            { name, originSide: this.deps.sideName },
+            {
+                name,
+                originSide: this.deps.sideName,
+                recipientSide: 'background',
+            },
             payload,
         )
         return this.postMessageRequestToRPC(request, port, name)
     }
 
-    postMessageRequestToTab: RPCManager['postMessageRequestToTab'] = (
+    postMessageRequestToContentScript: RPCManager['postMessageRequestToContentScript'] = (
         tabId,
         name,
         payload,
@@ -197,7 +201,12 @@ export class PortBasedRPCManager implements RPCManager {
     ) => {
         const port = this.getTabPort(tabId, name, options?.quietConsole)
         const request = createRPCRequestObject(
-            { name, tabId, originSide: this.deps.sideName },
+            {
+                name,
+                tabId,
+                originSide: this.deps.sideName,
+                recipientSide: 'content-script-global',
+            },
             payload,
         )
         return this.postMessageRequestToRPC(request, port, name)
@@ -206,7 +215,7 @@ export class PortBasedRPCManager implements RPCManager {
     // Since only the background script maintains a connection to all the other
     // content scripts and pages. To send a message from say the popup, to a tab,
     // the message is sent via the background script.
-    postMessageRequestToTabViaBackground: RPCManager['postMessageRequestToTabViaBackground'] = (
+    postMessageRequestToCSViaBG: RPCManager['postMessageRequestToCSViaBG'] = (
         tabId,
         name,
         payload,
@@ -218,6 +227,7 @@ export class PortBasedRPCManager implements RPCManager {
                 proxy: 'background',
                 name,
                 originSide: this.deps.sideName,
+                recipientSide: 'background',
             },
             payload,
         )
@@ -312,7 +322,11 @@ export class PortBasedRPCManager implements RPCManager {
             // If the Request type was a proxy, the background shouldn't fullill this request itself
             // but pass it on to the specific tab to fullfill
             if (headers.proxy === 'background') {
-                await this.postMessageRequestToTab(headers.tabId, name, payload)
+                await this.postMessageRequestToContentScript(
+                    headers.tabId,
+                    name,
+                    payload,
+                )
             } else {
                 const f = this.deps.getRegisteredRemoteFunction(name)
 
@@ -339,6 +353,7 @@ export class PortBasedRPCManager implements RPCManager {
                                 request,
                                 payload: promiseReturn,
                                 originSide: this.deps.sideName,
+                                recipientSide: headers.originSide,
                             }),
                         )
                         this.log(
@@ -359,6 +374,7 @@ export class PortBasedRPCManager implements RPCManager {
                                     error: err.message,
                                     serializedError: serializeError(err),
                                     originSide: this.deps.sideName,
+                                    recipientSide: headers.originSide,
                                 }),
                             )
                             this.log(
