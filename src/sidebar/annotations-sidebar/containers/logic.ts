@@ -120,6 +120,7 @@ import analytics from 'src/analytics'
 import MarkdownIt from 'markdown-it'
 import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
 import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -1241,8 +1242,8 @@ export class SidebarContainerLogic extends UILogic<
             process.env.NODE_ENV === 'development'
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
 
         const normalisedYoutubeURL =
             'https://www.youtube.com/watch?v=' + videoId
@@ -1285,8 +1286,8 @@ export class SidebarContainerLogic extends UILogic<
             process.env.NODE_ENV === 'development'
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
 
         const normalisedYoutubeURL =
             'https://www.youtube.com/watch?v=' + videoId
@@ -1873,8 +1874,8 @@ export class SidebarContainerLogic extends UILogic<
         const userId = (await this.options.authBG.getCurrentUser())?.id
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
 
         await fetch(baseUrl + '/subscribe_rabbithole_waitlist', {
             method: 'POST',

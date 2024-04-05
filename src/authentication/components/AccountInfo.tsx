@@ -96,10 +96,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
 
-        const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
-
         return (
             <FullPage>
                 {this.state.currentUser != null ? (

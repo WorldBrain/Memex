@@ -8,6 +8,7 @@ import { doesUrlPointToPdf } from '@worldbrain/memex-common/lib/page-indexing/ut
 import { sleepPromise } from 'src/util/promises'
 import type { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
@@ -41,8 +42,8 @@ export class ContentScriptsBackground {
                         'staging',
                     ) || process.env.NODE_ENV === 'development'
                 const baseUrl = isStaging
-                    ? 'https://cloudflare-memex-staging.memex.workers.dev'
-                    : 'https://cloudfare-memex.memex.workers.dev'
+                    ? CLOUDFLARE_WORKER_URLS.staging
+                    : CLOUDFLARE_WORKER_URLS.production
 
                 const response = await fetch(
                     baseUrl + '/check_rabbithole_beta_status',
