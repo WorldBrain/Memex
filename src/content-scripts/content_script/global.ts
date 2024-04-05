@@ -269,24 +269,23 @@ export async function main(
         },
     })
 
-    // browser.runtime.onMessage.addListener((request, sender) => {
-    //     console.log('got msg:', request, sender)
-    //     if (request.action === 'getImageData') {
-    //         const imageUrl = request.srcUrl // URL of the image to get data for
-    //         return fetch(imageUrl)
-    //             .then((response) => response.blob())
-    //             .then((blob) => {
-    //                 return new Promise((resolve) => {
-    //                     const reader = new FileReader()
-    //                     reader.onloadend = () =>
-    //                         resolve({ imageData: reader.result })
-    //                     reader.readAsDataURL(blob) // Convert the blob to a data URL
-    //                 })
-    //             })
-    //             .catch((error) => ({ error: error.toString() }))
-    //     }
-    //     return Promise.resolve() // Return a resolved promise for non-matching actions or to avoid unhandled promise rejections
-    // })
+    browser.runtime.onMessage.addListener((request, sender) => {
+        if (request.action === 'getImageData') {
+            const imageUrl = request.srcUrl // URL of the image to get data for
+            return fetch(imageUrl)
+                .then((response) => response.blob())
+                .then((blob) => {
+                    return new Promise((resolve) => {
+                        const reader = new FileReader()
+                        reader.onloadend = () =>
+                            resolve({ imageData: reader.result })
+                        reader.readAsDataURL(blob) // Convert the blob to a data URL
+                    })
+                })
+                .catch((error) => ({ error: error.toString() }))
+        }
+        return Promise.resolve() // Return a resolved promise for non-matching actions or to avoid unhandled promise rejections
+    })
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.

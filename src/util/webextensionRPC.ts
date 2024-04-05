@@ -139,7 +139,7 @@ export function runInTab<T extends object>(
     return new Proxy<T>({} as T, {
         get(target, property): any {
             return (...args) =>
-                rpcConnection.postMessageRequestToTab(
+                rpcConnection.postMessageRequestToContentScript(
                     tabId,
                     property.toString(),
                     args,
@@ -154,7 +154,7 @@ export function runInTabViaBg<T extends object>(tabId): T {
     return new Proxy<T>({} as T, {
         get(target, property): any {
             return (...args) =>
-                rpcConnection.postMessageRequestToTabViaBackground(
+                rpcConnection.postMessageRequestToCSViaBG(
                     tabId,
                     property.toString(),
                     args,
@@ -173,7 +173,11 @@ export function remoteFunction(
     // console.log(`depreciated: remoteFunction call for: ${funcName}`)
     if (tabId) {
         return (...args) =>
-            rpcConnection.postMessageRequestToTab(tabId, funcName, args)
+            rpcConnection.postMessageRequestToContentScript(
+                tabId,
+                funcName,
+                args,
+            )
     } else {
         return (...args) =>
             rpcConnection.postMessageRequestToBackground(funcName, args)
