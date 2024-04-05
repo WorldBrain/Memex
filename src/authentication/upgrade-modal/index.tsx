@@ -70,7 +70,27 @@ export default class UpgradeModal extends UIElement<
                         Yearly
                     </RightSide>
                 </PricingSwitcher>
-                <PowerUpItem>
+                <PowerUpItem
+                    onClick={() => {
+                        if (
+                            this.state.activatedPowerUps['AIpowerup'] ===
+                                true ||
+                            this.state.activatedPowerUps['AIpowerupOwnKey'] ===
+                                true
+                        ) {
+                            this.processEvent(
+                                'processCheckoutOpen',
+                                'AIpowerupBasic',
+                            )
+                        }
+                    }}
+                    activated={
+                        this.state.activatedPowerUps &&
+                        this.state.activatedPowerUps['AIpowerup'] === false &&
+                        this.state.activatedPowerUps['AIpowerupOwnKey'] ===
+                            false
+                    }
+                >
                     <PowerUpTitleBox>
                         <PowerUpTitle>Basic</PowerUpTitle>
                         <PowerUpSubTitle>
@@ -81,9 +101,17 @@ export default class UpgradeModal extends UIElement<
                     <PowerUpPricing>Free</PowerUpPricing>
                 </PowerUpItem>
                 <PowerUpItem
-                    onClick={() =>
-                        this.processEvent('processCheckoutOpen', 'AIpowerup')
-                    }
+                    onClick={() => {
+                        if (
+                            this.state.activatedPowerUps &&
+                            this.state.activatedPowerUps['AIpowerup'] === false
+                        ) {
+                            this.processEvent(
+                                'processCheckoutOpen',
+                                'AIpowerup',
+                            )
+                        }
+                    }}
                     activated={
                         this.state.activatedPowerUps &&
                         this.state.activatedPowerUps['AIpowerup'] === true
@@ -102,12 +130,18 @@ export default class UpgradeModal extends UIElement<
                     </PowerUpPricing>
                 </PowerUpItem>
                 <PowerUpItem
-                    onClick={() =>
-                        this.processEvent(
-                            'processCheckoutOpen',
-                            'AIpowerupOwnKey',
-                        )
-                    }
+                    onClick={() => {
+                        if (
+                            this.state.activatedPowerUps &&
+                            this.state.activatedPowerUps['AIpowerupOwnKey'] ===
+                                false
+                        ) {
+                            this.processEvent(
+                                'processCheckoutOpen',
+                                'AIpowerupOwnKey',
+                            )
+                        }
+                    }}
                     activated={
                         this.state.activatedPowerUps &&
                         this.state.activatedPowerUps['AIpowerupOwnKey'] === true
@@ -187,7 +221,7 @@ export default class UpgradeModal extends UIElement<
                         ) {
                             this.processEvent(
                                 'processCheckoutOpen',
-                                'bookmarksPowerUp',
+                                'bookmarksPowerUpBasic',
                             )
                         }
                     }}

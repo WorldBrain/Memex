@@ -15,7 +15,7 @@ export interface PromptTemplatesDependencies {
     limitReachedNotif: PowerUpModalVersion
     createCheckOutLink: (
         billingPeriod: 'monthly' | 'yearly',
-        selectedPremiumPlan: PremiumPlans,
+        selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<'error' | 'success'>
     componentVariant: 'Modal' | 'PricingList'

@@ -38,6 +38,7 @@ import { checkStripePlan } from 'src/util/subscriptions/storage'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -425,19 +426,19 @@ class BackgroundScript {
 
     private createCheckoutLink: RemoteBGScriptInterface['createCheckoutLink'] = async (
         billingPeriod: 'monthly' | 'yearly',
-        powerUpPlan: string,
+        selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => {
-        console.log('dooooo', doNotOpen)
         const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
         const currentUserEmail = currentUser.email
         const currentBillingPeriod = billingPeriod
+        const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
 
-        const baseLink =
-            process.env.NODE_ENV === 'production'
-                ? 'https://cloudfare-memex.memex.workers.dev/create-checkout/'
-                : 'https://cloudflare-memex-staging.memex.workers.dev/create-checkout/'
-        const checkoutLink = `${baseLink}${currentBillingPeriod}/${powerUpPlan}?prefilled_email=${encodeURIComponent(
+        console.log('baselink', selectedPremiumPlans)
+
+        const selectedPremiumPlansString = selectedPremiumPlans.join(',')
+
+        const checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
             currentUserEmail,
         )}`
 

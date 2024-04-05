@@ -48,6 +48,7 @@ import {
     PromptData,
     ChatHistoryItem,
 } from '@worldbrain/memex-common/lib/summarization/types'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -564,7 +565,8 @@ interface SidebarEvents {
     copyPageLink: { link: string }
     createCheckOutLink: {
         billingPeriod: 'monthly' | 'yearly'
-        upgradePlan: string
+        selectedPremiumPlans: PremiumPlans[]
+        doNotOpen: boolean
     }
 
     setPageUrl: {

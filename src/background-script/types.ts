@@ -1,3 +1,4 @@
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
@@ -27,7 +28,7 @@ export interface RemoteBGScriptInterface {
     confirmBackgroundScriptLoaded: () => Promise<void>
     createCheckoutLink: (
         billingPeriod: 'monthly' | 'yearly',
-        planName: string,
+        selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<void>
 }

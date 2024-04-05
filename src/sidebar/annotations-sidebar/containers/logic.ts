@@ -1451,7 +1451,8 @@ export class SidebarContainerLogic extends UILogic<
     }) => {
         this.options.bgScriptBG.createCheckoutLink(
             event.billingPeriod,
-            event.upgradePlan,
+            event.selectedPremiumPlans,
+            event.doNotOpen,
         )
     }
 

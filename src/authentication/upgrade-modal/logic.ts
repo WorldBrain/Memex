@@ -5,6 +5,7 @@ import {
     PromptTemplatesState,
 } from './types'
 import { UIEventHandler, UILogic } from 'ui-logic-core'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 type EventHandler<
     EventName extends keyof PromptTemplatesEvent
@@ -64,18 +65,33 @@ export default class PromptTemplatesLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const selectedPremiumPlan = event
         this.emitMutation({
             checkoutLoading: { $set: 'running' },
         })
 
-        const doNotOpen = Object.values(previousState.activatedPowerUps).some(
-            (value) => value === true,
-        )
+        let currentlySelected: PremiumPlans[] = Object.keys(
+            previousState.activatedPowerUps,
+        ).filter((key) => previousState.activatedPowerUps[key] === true)
+        const doNotOpen = currentlySelected.length > 0
 
+        let newSelection: PremiumPlans[] = currentlySelected
+
+        if (event === 'AIpowerupBasic') {
+            newSelection = newSelection.filter(
+                (key) => key !== 'AIpowerup' && key !== 'AIpowerupOwnKey',
+            )
+        } else if (event === 'bookmarksPowerUpBasic') {
+            newSelection = newSelection.filter(
+                (key) => key !== 'bookmarksPowerUp',
+            )
+        } else {
+            newSelection.push(event)
+        }
+
+        console.log('newSelection', newSelection)
         const upgradeResponse = await this.dependencies.createCheckOutLink(
             previousState.billingPeriod,
-            selectedPremiumPlan,
+            newSelection,
             doNotOpen,
         )
 

@@ -10,13 +10,14 @@ import { createInPageUI } from 'src/in-page-ui/utils'
 import UpgradeModal from 'src/authentication/upgrade-modal'
 import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 type RootProps = {
     rootEl: HTMLElement
     shadowRoot: ShadowRoot
     createCheckOutLink: (
         billingPeriod: 'monthly' | 'yearly',
-        planName: string,
+        selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => void
     browserAPIs: any
