@@ -3,6 +3,7 @@ import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
 import { trackHitPaywall } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -10,8 +11,8 @@ export async function checkStripePlan(email) {
         process.env.NODE_ENV === 'development'
 
     const baseUrl = isStaging
-        ? 'https://cloudflare-memex-staging.memex.workers.dev'
-        : 'https://cloudfare-memex.memex.workers.dev'
+        ? CLOUDFLARE_WORKER_URLS.staging
+        : CLOUDFLARE_WORKER_URLS.production
     const url = `${baseUrl}` + '/stripe-subscriptions'
 
     const response = await fetch(url, {
@@ -316,8 +317,8 @@ export async function downloadMemexDesktop(getSystemArchAndOS) {
         process.env.NODE_ENV === 'development'
 
     const baseUrl = isStaging
-        ? 'https://cloudflare-memex-staging.memex.workers.dev'
-        : 'https://cloudfare-memex.memex.workers.dev'
+        ? CLOUDFLARE_WORKER_URLS.staging
+        : CLOUDFLARE_WORKER_URLS.production
 
     const response = await fetch(baseUrl + '/download_memex_desktop', {
         method: 'POST',

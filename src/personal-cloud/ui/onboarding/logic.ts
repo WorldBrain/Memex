@@ -75,14 +75,13 @@ export default class CloudOnboardingModalLogic extends UILogic<State, Event> {
     }
 
     private async attemptCloudMigration({ isMigrationPrepped }: State) {
-        await executeUITask(this, 'migrationState', async () => {
-            if (!isMigrationPrepped) {
-                await this.dependencies.personalCloudBG.runDataMigrationPreparation()
-                this.emitMutation({ isMigrationPrepped: { $set: true } })
-            }
-
-            await this.dependencies.personalCloudBG.runDataMigration()
-        })
+        // await executeUITask(this, 'migrationState', async () => {
+        //     if (!isMigrationPrepped) {
+        //         await this.dependencies.personalCloudBG.runDataMigrationPreparation()
+        //         this.emitMutation({ isMigrationPrepped: { $set: true } })
+        //     }
+        //     await this.dependencies.personalCloudBG.runDataMigration()
+        // })
     }
 
     private _goToBackupRoute = () => {
