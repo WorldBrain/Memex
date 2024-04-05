@@ -4,6 +4,7 @@ import { transformPageHTML } from '@worldbrain/memex-stemmer/lib/transform-page-
 import type { ExtractedPDFData } from '@worldbrain/memex-common/lib/page-indexing/types'
 import type TabManagementBackground from 'src/tab-management/background'
 import { runInTab } from 'src/util/webextensionRPC'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 
 export interface PageAnalysis extends Partial<ExtractedPDFData> {
     content: PageContent
@@ -77,8 +78,8 @@ const analysePage: PageAnalyzer = async (options) => {
             process.env.NODE_ENV === 'development'
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
 
         const normalisedYoutubeURL =
             'https://www.youtube.com/watch?v=' + videoId

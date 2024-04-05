@@ -37,6 +37,7 @@ import { captureException } from 'src/util/raven'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -202,8 +203,8 @@ class BackgroundScript {
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
         const url = `${baseUrl}/checkForUpdates`
 
         const response = await fetch(url, {
