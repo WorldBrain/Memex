@@ -147,6 +147,9 @@ async function main() {
             process.env.NODE_ENV === 'production' ? 'production' : 'staging',
     })
     pushMessagingClient.bgModules = backgroundModules
+    authServices.auth.events.on('loginSuccess', () => {
+        backgroundModules.personalCloud.triggerSyncContinuation()
+    })
 
     registerBackgroundModuleCollections({
         storageManager,
