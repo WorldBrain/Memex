@@ -321,6 +321,7 @@ export async function main(
                 limitReachedNotif = 'Bookmarks'
             }
 
+            console.log('isAllowed', isAllowed)
             if (!isAllowed) {
                 if (currentTabURL?.includes(window.location.href)) {
                     inPageUI.loadOnDemandInPageUI({

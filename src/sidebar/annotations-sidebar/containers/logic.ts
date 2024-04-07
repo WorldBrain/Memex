@@ -3136,19 +3136,23 @@ export class SidebarContainerLogic extends UILogic<
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
-        if (!hasAPIKey) {
-            let canQueryAI = false
-            if (previousState.isTrial) {
-                canQueryAI = true
-            } else if (await AIActionAllowed(this.options.analyticsBG)) {
-                canQueryAI = true
-            }
-            if (!canQueryAI) {
-                this.emitMutation({
-                    showUpgradeModal: { $set: true },
-                })
-                return
-            }
+        let canQueryAI = false
+        if (previousState.isTrial) {
+            canQueryAI = true
+        } else if (
+            await AIActionAllowed(
+                this.options.analyticsBG,
+                hasAPIKey ? 'AIpowerupOwnKey' : 'AIpowerup',
+            )
+        ) {
+            canQueryAI = true
+        }
+
+        if (!canQueryAI) {
+            this.emitMutation({
+                showUpgradeModal: { $set: true },
+            })
+            return
         }
 
         this.emitMutation({

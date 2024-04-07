@@ -377,6 +377,11 @@ const Powerups = [
         title: 'AI Features',
         icon: 'feed',
     },
+    {
+        id: 'lifetime',
+        title: 'Lifetime Plan',
+        icon: 'feed',
+    },
 ]
 
 const ModalContainer = styled.div`

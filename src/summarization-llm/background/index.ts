@@ -101,7 +101,11 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
-        const isAllowed = await AIActionAllowed(this.analyticsBG)
+        const isAllowed = await AIActionAllowed(
+            this.analyticsBG,
+            apiKey.length > 0 ? 'AIpowerupOwnKey' : 'AIpowerup',
+            false,
+        )
 
         if (!isAllowed) {
             return
@@ -161,7 +165,7 @@ export default class SummarizeBackground {
     getTextSummary: SummarizationInterface<
         'provider'
     >['getTextSummary'] = async ({ tab }, { text, prompt }) => {
-        const isAllowed = await AIActionAllowed(this.analyticsBG)
+        const isAllowed = await AIActionAllowed(this.analyticsBG, 'AIpowerup')
 
         if (!isAllowed) {
             return

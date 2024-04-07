@@ -9,6 +9,11 @@ export const DEFAULT_COUNTER_STORAGE_KEY = {
     m: currentMonth,
     pU: {},
 }
-export const FREE_PLAN_LIMIT = 100
+export const FREE_PLAN_LIMIT = 25
 export const PRO_PLAN_LIMIT = 300
 export const AI_SUMMARY_URLS = '@aiSummaryURLs'
+
+export const DEFAULT_POWERUP_LIMITS = {
+    bookmarksPowerUp: 25,
+    AIpowerup: 25,
+}

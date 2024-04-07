@@ -4,6 +4,7 @@ import { trackHitPaywall } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -34,7 +35,7 @@ export async function checkStripePlan(email) {
                 c: 0,
                 cQ: 0,
                 m: currentMonth,
-                pU: subscriptionStatus,
+                pU: subscriptionStatus.status,
             },
         })
     } else {
@@ -44,10 +45,12 @@ export async function checkStripePlan(email) {
                 c: c ? c : 0,
                 cQ: cQ ? cQ : 0,
                 m: m ? m : currentMonth,
-                pU: subscriptionStatus,
+                pU: subscriptionStatus.status,
             },
         })
     }
+
+    console.log('subscriptionStatus', subscriptionStatus.status)
 
     return subscriptionStatus.status
 }
@@ -100,6 +103,8 @@ export async function enforceTrialPeriod30Days(signupDate?) {
             return false
         }
     }
+    signupTimestamp =
+        new Date(signupTimestamp).getTime() - 365 * 24 * 60 * 60 * 1000 // 1 year ago
     const currentTime = new Date().getTime()
     const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000 // 30 days in seconds
 
@@ -156,7 +161,8 @@ export async function updateAICounter() {
     return
 }
 
-export async function checkStatus(feature: 'bookmarking' | 'AI') {
+export async function checkStatus(feature: PremiumPlans) {
+    console.log('checking status')
     const currentStatus = await browser.storage.local.get(COUNTER_STORAGE_KEY)
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
@@ -165,43 +171,51 @@ export async function checkStatus(feature: 'bookmarking' | 'AI') {
         return true
     }
 
-    if (currentStatus.m !== currentMonth) {
-        await browser.storage.local.set({
-            [COUNTER_STORAGE_KEY]: {
-                c: 0,
-                cQ: 0,
-                m: currentMonth,
-            },
-        })
-    }
+    // console.log('gest here')
+    // if (currentStatus.m !== currentMonth) {
+    //     await browser.storage.local.set({
+    //         [COUNTER_STORAGE_KEY]: {
+    //             c: currentStatus.c,
+    //             cQ: currentStatus.cQ,
+    //             m: currentMonth,
+    //         },
+    //     })
+    // }
 
-    if (
-        currentStatus[COUNTER_STORAGE_KEY] === undefined ||
-        currentStatus[COUNTER_STORAGE_KEY].sQ === undefined
-    ) {
-        await browser.storage.local.set({
-            [COUNTER_STORAGE_KEY]: DEFAULT_COUNTER_STORAGE_KEY,
-        })
-
-        return false
-    }
-
-    if (feature === 'bookmarking') {
+    if (feature === 'bookmarksPowerUp') {
         const hasBookmarkPowerUp =
-            currentStatus[COUNTER_STORAGE_KEY].pU.Unlimited ||
-            currentStatus[COUNTER_STORAGE_KEY].pU.bookmarksPowerUp
+            (currentStatus[COUNTER_STORAGE_KEY].pU?.Unlimited ||
+                currentStatus[COUNTER_STORAGE_KEY].pU?.bookmarksPowerUp) ??
+            false
 
         if (hasBookmarkPowerUp) {
             return true
         } else {
             const currentCounter = currentStatus[COUNTER_STORAGE_KEY].c
+            console.log('currentCounter', currentCounter)
             if (currentCounter < 25) {
                 return true
             }
         }
     }
-    if (feature === 'AI') {
-        const hasAIPowerUp = currentStatus[COUNTER_STORAGE_KEY].pU.AIpowerup
+    if (feature === 'AIpowerup') {
+        const hasAIPowerUp =
+            currentStatus[COUNTER_STORAGE_KEY].pU?.AIpowerup ?? false
+
+        if (hasAIPowerUp) {
+            return true
+        } else {
+            const currentCounter = currentStatus[COUNTER_STORAGE_KEY].cQ
+            if (currentCounter < 25) {
+                return true
+            }
+        }
+    }
+    if (feature === 'AIpowerupOwnKey') {
+        const hasAIPowerUp =
+            (currentStatus[COUNTER_STORAGE_KEY].pU.AIpowerupOwnKey ||
+                currentStatus[COUNTER_STORAGE_KEY].pU.AIpowerup) ??
+            false
 
         if (hasAIPowerUp) {
             return true
@@ -219,7 +233,7 @@ export async function pageActionAllowed(
     analyticsBG,
     onlyCheckNoUpdate?: boolean,
 ) {
-    const allowed = await checkStatus('bookmarking')
+    const allowed = await checkStatus('bookmarksPowerUp')
     if (!onlyCheckNoUpdate) {
         updatePageCounter()
     }
@@ -241,14 +255,14 @@ export async function pageActionAllowed(
 }
 export async function AIActionAllowed(
     analyticsBG,
+    feature: PremiumPlans,
     onlyCheckNoUpdate?: boolean,
 ) {
-    const allowed = await checkStatus('AI')
+    const allowed = await checkStatus(feature)
 
     if (!onlyCheckNoUpdate) {
         updateAICounter()
     }
-    return false
 
     if (allowed) {
         return true
