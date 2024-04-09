@@ -248,12 +248,6 @@ class BackgroundScript {
         })
     }
 
-    private async ___testContentScriptsTeardown(tabId: number) {
-        await runInTab<InPageUIContentScriptRemoteInterface>(
-            tabId,
-        ).teardownContentScripts()
-    }
-
     /**
      * Run all the quick and dirty migrations we have set up to run directly on Dexie.
      */
@@ -314,52 +308,48 @@ class BackgroundScript {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    private setupExtUpdateHandling() {
-        const { runtimeAPI, bgModules } = this.deps
-        runtimeAPI.onUpdateAvailable.addListener(async () => {
-            try {
-                await bgModules.tabManagement.mapTabChunks(
-                    async (tab) => {
-                        if (
-                            !bgModules.tabManagement.canTabRunContentScripts(
-                                tab,
-                            )
-                        ) {
-                            return
-                        }
-
-                        await runInTab<InPageUIContentScriptRemoteInterface>(
-                            tab.id,
-                        ).teardownContentScripts()
-                    },
-                    {
-                        onError: (err, tab) => {
-                            console.error(
-                                `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
-                                err.message,
-                            )
-                            captureException(err)
-                        },
-                    },
-                )
-            } catch (err) {
-                console.error(
-                    'Error encountered attempting to teardown content scripts for extension update:',
-                    err.message,
-                )
-                captureException(err)
-            }
-
-            // This call prompts the extension to reload, updating the scripts to the newest versions
-            runtimeAPI.reload()
-        })
-    }
-
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
         this.setupOnDemandContentScriptInjection()
         this.setupUninstallURL()
-        this.setupExtUpdateHandling()
+        this.deps.runtimeAPI.onUpdateAvailable.addListener(
+            this.prepareAndUpdateExtension,
+        )
+    }
+
+    private prepareAndUpdateExtension = async () => {
+        const { runtimeAPI, bgModules } = this.deps
+        try {
+            await bgModules.tabManagement.mapTabChunks(
+                async (tab) => {
+                    if (!bgModules.tabManagement.canTabRunContentScripts(tab)) {
+                        return
+                    }
+
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tab.id,
+                    ).teardownContentScripts()
+                },
+                {
+                    onError: (err, tab) => {
+                        console.error(
+                            `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
+                            err.message,
+                        )
+                        captureException(err)
+                    },
+                },
+            )
+        } catch (err) {
+            console.error(
+                'Error encountered attempting to teardown content scripts for extension update:',
+                err.message,
+            )
+            captureException(err)
+        }
+
+        // This call prompts the extension to reload, updating the scripts to the newest versions
+        runtimeAPI.reload()
     }
 
     private chooseTabOpenFn = (params?: OpenTabParams) =>
