@@ -118,6 +118,7 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
 import { Storage } from 'webextension-polyfill'
+import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -562,6 +563,7 @@ export async function main(
         screenshotImage?,
         imageSupport?,
         highlightColor?: HighlightColor,
+        selection?: Selection | PseudoSelection,
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
@@ -593,7 +595,7 @@ export async function main(
                         })
                     }
                 },
-                getSelection: () => document.getSelection(),
+                getSelection: selection ?? null,
                 getFullPageUrl: async () => pageInfo.getFullPageUrl(),
                 isPdf: pageInfo.isPdf,
                 shouldShare,
@@ -681,10 +683,8 @@ export async function main(
                 )
                 annotationId = results.annotationId
                 await results.createPromise
-            } else if (
-                selection &&
-                window.getSelection().toString().length > 0
-            ) {
+            } else if (selection) {
+                console.log('selectionhh', selection)
                 const results = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,
@@ -692,6 +692,7 @@ export async function main(
                     null,
                     null,
                     highlightColor,
+                    selection,
                 )
                 annotationId = results.annotationId
                 await results.createPromise
@@ -747,7 +748,7 @@ export async function main(
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
         ) => async (
-            selection: Selection,
+            selection: Selection | PseudoSelection,
             shouldShare: boolean,
             shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
@@ -798,6 +799,7 @@ export async function main(
                     screenshotGrabResult.screenshot,
                     imageSupportBG,
                     highlightColor,
+                    selection,
                 )
 
                 const annotationId = result.annotationId
@@ -827,6 +829,7 @@ export async function main(
                     null,
                     imageSupportBG,
                     highlightColor,
+                    selection,
                 )
 
                 const annotationId = result.annotationId
