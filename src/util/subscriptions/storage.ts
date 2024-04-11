@@ -106,8 +106,8 @@ export async function enforceTrialPeriod30Days(signupDate?) {
             return false
         }
     }
-    signupTimestamp =
-        new Date(signupTimestamp).getTime() - 365 * 24 * 60 * 60 * 1000 // 1 year ago
+    // signupTimestamp =
+    //     new Date(signupTimestamp).getTime() - 365 * 24 * 60 * 60 * 1000 // 1 year ago
     const currentTime = new Date().getTime()
     const thirtyDaysInMillis = 30 * 24 * 60 * 60 * 1000 // 30 days in seconds
 
@@ -165,8 +165,12 @@ export async function updateAICounter() {
 }
 
 export async function checkStatus(feature: PremiumPlans) {
-    console.log('checking status')
-    const currentStatus = await browser.storage.local.get(COUNTER_STORAGE_KEY)
+    const currentStatusStorage = await browser.storage.local.get(
+        COUNTER_STORAGE_KEY,
+    )
+
+    const currentStatus =
+        currentStatusStorage[COUNTER_STORAGE_KEY] ?? DEFAULT_COUNTER_STORAGE_KEY
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
 
@@ -174,7 +178,6 @@ export async function checkStatus(feature: PremiumPlans) {
         return true
     }
 
-    // console.log('gest here')
     // if (currentStatus.m !== currentMonth) {
     //     await browser.storage.local.set({
     //         [COUNTER_STORAGE_KEY]: {
@@ -187,14 +190,14 @@ export async function checkStatus(feature: PremiumPlans) {
 
     if (feature === 'bookmarksPowerUp') {
         const hasBookmarkPowerUp =
-            (currentStatus[COUNTER_STORAGE_KEY].pU?.Unlimited ||
-                currentStatus[COUNTER_STORAGE_KEY].pU?.bookmarksPowerUp) ??
+            (currentStatus.pU?.Unlimited ||
+                currentStatus.pU?.bookmarksPowerUp) ??
             false
 
         if (hasBookmarkPowerUp) {
             return true
         } else {
-            const currentCounter = currentStatus[COUNTER_STORAGE_KEY].c
+            const currentCounter = currentStatus.c
             console.log('currentCounter', currentCounter)
             if (currentCounter < 25) {
                 return true
@@ -208,7 +211,7 @@ export async function checkStatus(feature: PremiumPlans) {
         if (hasAIPowerUp) {
             return true
         } else {
-            const currentCounter = currentStatus[COUNTER_STORAGE_KEY].cQ
+            const currentCounter = currentStatus.cQ
             if (currentCounter < 25) {
                 return true
             }
@@ -216,14 +219,13 @@ export async function checkStatus(feature: PremiumPlans) {
     }
     if (feature === 'AIpowerupOwnKey') {
         const hasAIPowerUp =
-            (currentStatus[COUNTER_STORAGE_KEY].pU.AIpowerupOwnKey ||
-                currentStatus[COUNTER_STORAGE_KEY].pU.AIpowerup) ??
+            (currentStatus.pU.AIpowerupOwnKey || currentStatus.pU.AIpowerup) ??
             false
 
         if (hasAIPowerUp) {
             return true
         } else {
-            const currentCounter = currentStatus[COUNTER_STORAGE_KEY].cQ
+            const currentCounter = currentStatus.cQ
             if (currentCounter < 25) {
                 return true
             }
