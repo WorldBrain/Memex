@@ -53,8 +53,6 @@ export async function checkStripePlan(email) {
         })
     }
 
-    console.log('subscriptionStatus', subscriptionStatus.status)
-
     return subscriptionStatus.status
 }
 

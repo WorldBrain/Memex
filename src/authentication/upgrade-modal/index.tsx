@@ -44,6 +44,8 @@ export default class UpgradeModal extends UIElement<
             )
         }
 
+        const powerUp = Powerups.find((powerUp) => powerUp.id === 'AI')
+
         return (
             <PowerUpOptions>
                 {this.props.limitReachedNotif === 'AI' && (
@@ -96,13 +98,16 @@ export default class UpgradeModal extends UIElement<
                     }
                 >
                     <PowerUpTitleBox>
-                        <PowerUpTitle>Basic</PowerUpTitle>
+                        <PowerUpTitle>
+                            {powerUp.powerUps.basic.title}
+                        </PowerUpTitle>
                         <PowerUpSubTitle>
-                            25 queries per month with Claude-3-Haiku and
-                            GPT-3.5-Turbo
+                            {powerUp.powerUps.basic.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>Free</PowerUpPricing>
+                    <PowerUpPricing>
+                        {powerUp.powerUps.basic.pricing}
+                    </PowerUpPricing>
                 </PowerUpItem>
                 <PowerUpItem
                     onClick={() => {
@@ -122,14 +127,18 @@ export default class UpgradeModal extends UIElement<
                     }
                 >
                     <PowerUpTitleBox>
-                        <PowerUpTitle>Pro</PowerUpTitle>
+                        <PowerUpTitle>
+                            {' '}
+                            {powerUp.powerUps.pro.title}
+                        </PowerUpTitle>
                         <PowerUpSubTitle>
-                            Unlimited queries with Claude-3-Haiku and
-                            GPT-3.5-Turbo, and GPT-4 with own key
+                            {powerUp.powerUps.pro.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
                     <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly' ? '$6' : '$60'}
+                        {this.state.billingPeriod === 'monthly'
+                            ? powerUp.powerUps.pro.pricing['monthly']
+                            : powerUp.powerUps.pro.pricing['yearly']}
                     </PowerUpPricing>
                 </PowerUpItem>
                 <PowerUpItem
@@ -152,18 +161,17 @@ export default class UpgradeModal extends UIElement<
                 >
                     <PowerUpTitleBox>
                         <PowerUpTitle>
-                            Bring your own Key
+                            {powerUp.powerUps.ownKey.title}
                             <DiscountPill>60% off</DiscountPill>
                         </PowerUpTitle>
                         <PowerUpSubTitle>
-                            Unlimited queries with GPT-3.5 and GPT-4,
-                            <br /> at your own cost of the OpenAI API.
+                            {powerUp.powerUps.ownKey.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
                     <PowerUpPricing>
                         {this.state.billingPeriod === 'monthly'
-                            ? '$2.50'
-                            : '$20'}
+                            ? powerUp.powerUps.ownKey.pricing['monthly']
+                            : powerUp.powerUps.ownKey.pricing['yearly']}
                     </PowerUpPricing>
                 </PowerUpItem>
             </PowerUpOptions>
@@ -182,6 +190,8 @@ export default class UpgradeModal extends UIElement<
                 </LoadingBlocker>
             )
         }
+
+        const powerUp = Powerups.find((powerUp) => powerUp.id === 'Bookmarks')
 
         return (
             <PowerUpOptions>
@@ -233,14 +243,18 @@ export default class UpgradeModal extends UIElement<
                     }
                 >
                     <PowerUpTitleBox>
-                        <PowerUpTitle>Basic</PowerUpTitle>
+                        <PowerUpTitle>
+                            {' '}
+                            {powerUp.powerUps.basic.title}
+                        </PowerUpTitle>
                         <PowerUpSubTitle>
-                            25 uniquely new pages per month. <br /> Every page
-                            saved, annotated or added to a Space counts once,
-                            forever.
+                            {powerUp.powerUps.basic.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
-                    <PowerUpPricing>Free</PowerUpPricing>
+                    <PowerUpPricing>
+                        {' '}
+                        {powerUp.powerUps.basic.pricing}
+                    </PowerUpPricing>
                 </PowerUpItem>
                 <PowerUpItem
                     onClick={() => {
@@ -261,13 +275,18 @@ export default class UpgradeModal extends UIElement<
                     }
                 >
                     <PowerUpTitleBox>
-                        <PowerUpTitle>Pro</PowerUpTitle>
+                        <PowerUpTitle>
+                            {' '}
+                            {powerUp.powerUps.pro.title}
+                        </PowerUpTitle>
                         <PowerUpSubTitle>
-                            Unlimited saved pages, annotations and images
+                            {powerUp.powerUps.pro.subTitle}
                         </PowerUpSubTitle>
                     </PowerUpTitleBox>
                     <PowerUpPricing>
-                        {this.state.billingPeriod === 'monthly' ? '$6' : '$60'}
+                        {this.state.billingPeriod === 'monthly'
+                            ? powerUp.powerUps.pro.pricing['monthly']
+                            : powerUp.powerUps.pro.pricing['yearly']}
                     </PowerUpPricing>
                 </PowerUpItem>
             </PowerUpOptions>
@@ -432,11 +451,53 @@ const Powerups = [
         id: 'Bookmarks',
         title: 'Bookmarking',
         icon: 'heartEmpty',
+        powerUps: {
+            basic: {
+                title: 'Basic',
+                subTitle:
+                    '25 uniquely new pages per month. Every page saved, annotated or added to a Space counts once, forever.',
+                pricing: 'Free',
+            },
+            pro: {
+                title: 'Pro',
+                subTitle: 'Unlimited saved pages, annotations and images',
+                pricing: {
+                    monthly: '$4',
+                    yearly: '$40',
+                },
+            },
+        },
     },
     {
         id: 'AI',
         title: 'AI Features',
         icon: 'feed',
+        powerUps: {
+            basic: {
+                title: 'Basic',
+                subTitle:
+                    '25 queries per month with Claude-3-Haiku and GPT-3.5-Turbo',
+                pricing: 'Free',
+            },
+            pro: {
+                title: 'Pro',
+                subTitle:
+                    'Unlimited queries with Claude-3-Haiku and GPT-3.5-Turbo, and GPT-4 with own key',
+                pricing: {
+                    monthly: '$6',
+                    yearly: '$60',
+                },
+            },
+            ownKey: {
+                title: 'Bring your own Key',
+                subTitle:
+                    'Unlimited queries with GPT-3.5 and GPT-4, at your own cost of the OpenAI API.',
+                pricing: {
+                    monthly: '$2.50',
+                    yearly: '$20',
+                },
+            },
+        },
     },
     {
         id: 'lifetime',
@@ -512,11 +573,11 @@ const PowerUpItem = styled.div<{
             &::after {
                 content: 'active';
                 background-color: ${(props) => props.theme.colors.prime1};
-                border-radius: 5px;
+                border-radius: 0 5px 0 5px;
                 position: absolute;
-                bottom: -12px;
-                right: 20px;
-                height: 24px;
+                top: 0px;
+                right: 0px;
+                height: 20px;
                 font-size: 12px;
                 padding: 0 5px;
                 display: flex;
