@@ -9,6 +9,7 @@ import { migrations, MIGRATION_PREFIX } from './quick-and-dirty-migrations'
 import { generateUserId } from 'src/analytics/utils'
 import { STORAGE_KEYS } from 'src/analytics/constants'
 import insertDefaultTemplates from 'src/copy-paster/background/default-templates'
+import chrome from 'webextension-polyfill'
 import {
     OVERVIEW_URL,
     __OLD_INSTALL_TIME_KEY,
@@ -37,6 +38,7 @@ import { checkStripePlan } from 'src/util/subscriptions/storage'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -76,6 +78,7 @@ class BackgroundScript {
             openOptionsTab: this.openOptionsPage,
             openOverviewTab: this.openDashboardPage,
             openLearnMoreTab: this.openLearnMorePage,
+            createCheckoutLink: this.createCheckoutLink,
             confirmBackgroundScriptLoaded: async () => {},
         }
 
@@ -409,6 +412,53 @@ class BackgroundScript {
         await this.chooseTabOpenFn(params)({
             url: LEARN_MORE_URL,
         })
+    }
+
+    private createCheckoutLink: RemoteBGScriptInterface['createCheckoutLink'] = async (
+        billingPeriod: 'monthly' | 'yearly',
+        selectedPremiumPlans: PremiumPlans[],
+        doNotOpen: boolean,
+    ) => {
+        const currentUser = await this.deps.bgModules.auth.authService.getCurrentUser()
+        const currentUserEmail = currentUser.email
+        const currentBillingPeriod = billingPeriod
+        const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
+
+        let selectedPremiumPlansString = ''
+        let checkoutLink = ''
+
+        if (selectedPremiumPlans.includes('lifetime')) {
+            selectedPremiumPlansString = 'lifetime'
+            checkoutLink = `${baseLink}/create-checkout?billingPeriod=lifetime&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+                currentUserEmail,
+            )}`
+        } else {
+            selectedPremiumPlansString = selectedPremiumPlans.join(',')
+            checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+                currentUserEmail,
+            )}`
+        }
+
+        if (doNotOpen) {
+            try {
+                // Execute the checkout link and print the response
+                const response = await fetch(checkoutLink)
+                const responseData = await response.text() // or response.json() if the response is JSON
+
+                return JSON.parse(responseData).message
+            } catch (error) {
+                console.error('Error executing checkout link:', error)
+            }
+        } else {
+            try {
+                // Use the WebExtensions API to open the URL in a new tab
+                if (chrome.tabs && chrome.tabs.create) {
+                    chrome.tabs.create({ url: checkoutLink })
+                }
+            } catch (error) {
+                console.error('Error fetching checkout link:', error)
+            }
+        }
     }
 }
 

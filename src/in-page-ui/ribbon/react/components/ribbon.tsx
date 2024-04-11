@@ -180,7 +180,6 @@ export default class Ribbon extends Component<Props, State> {
             '.' + DEF_HIGHLIGHT_CSS_CLASS,
         )
 
-
         for (let item of (highlights as any) as HTMLElement[]) {
             const existingStyle = item.style.backgroundColor
             let backgroundColor = ''

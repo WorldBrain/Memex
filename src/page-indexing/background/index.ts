@@ -61,6 +61,7 @@ import type { BrowserSettingsStore } from 'src/util/settings'
 import { isUrlSupported } from '../utils'
 import {
     enforceTrialPeriod30Days,
+    pageActionAllowed,
     updatePageCounter,
 } from 'src/util/subscriptions/storage'
 import type { PageDataResult } from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/types'
@@ -72,6 +73,8 @@ import {
     DEFAULT_KEY,
     DEFAULT_SPACE_BETWEEN,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
+import { analytics } from 'firebase-functions/v1'
+import { analyticsBG } from 'src/util/remote-functions-background'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -791,20 +794,6 @@ export class PageIndexingBackground {
             })
         }
 
-        try {
-            const signupDate = new Date(
-                (
-                    await this.options.authBG.authService.getCurrentUser()
-                ).creationTime,
-            ).getTime()
-            const isTrial = await enforceTrialPeriod30Days(signupDate)
-
-            if (!isTrial && !props.skipUpdatePageCount) {
-                await updatePageCounter()
-            }
-        } catch (error) {
-            console.error('error in updatePageCounter', error)
-        }
         // Note that we're returning URLs as they could have changed in the case of PDFs
         return {
             fullUrl: pageData.fullUrl,

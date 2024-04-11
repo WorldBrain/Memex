@@ -81,8 +81,6 @@ import {
 import {
     AIActionAllowed,
     downloadMemexDesktop,
-    rabbitHoleBetaFeatureAllowed,
-    updateAICounter,
 } from 'src/util/subscriptions/storage'
 import {
     getListShareUrl,
@@ -825,27 +823,19 @@ export class SidebarContainerLogic extends UILogic<
             runtimeAPI,
         } = this.options
 
+        const signupDate = new Date(
+            await (await this.options.authBG.getCurrentUser())?.creationTime,
+        ).getTime()
+
+        this.emitMutation({
+            signupDate: { $set: signupDate },
+            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
+        })
+
         const userReference = await this.options.getCurrentUser()
         this.emitMutation({
             currentUserReference: { $set: userReference ?? null },
         })
-
-        this.setupRemoteEventListeners()
-        annotationsCache.events.addListener(
-            'newAnnotationsState',
-            this.cacheAnnotationsSubscription,
-        )
-        annotationsCache.events.addListener(
-            'newListsState',
-            this.cacheListsSubscription,
-        )
-        annotationsCache.events.addListener(
-            'updatedPageData',
-            this.cachePageListsSubscription,
-        )
-        // Set initial state, based on what's in the cache (assuming it already has been hydrated)
-        this.cacheAnnotationsSubscription(annotationsCache.annotations)
-        this.cacheListsSubscription(annotationsCache.lists)
 
         this.sidebar = document
             .getElementById('memex-sidebar-container')
@@ -879,6 +869,23 @@ export class SidebarContainerLogic extends UILogic<
             await this.setPageActivityState(this.fullPageUrl)
         })
 
+        this.setupRemoteEventListeners()
+        annotationsCache.events.addListener(
+            'newAnnotationsState',
+            this.cacheAnnotationsSubscription,
+        )
+        annotationsCache.events.addListener(
+            'newListsState',
+            this.cacheListsSubscription,
+        )
+        annotationsCache.events.addListener(
+            'updatedPageData',
+            this.cachePageListsSubscription,
+        )
+        // Set initial state, based on what's in the cache (assuming it already has been hydrated)
+        this.cacheAnnotationsSubscription(annotationsCache.annotations)
+        this.cacheListsSubscription(annotationsCache.lists)
+
         if (isUrlPDFViewerUrl(window.location.href, { runtimeAPI })) {
             const width = SIDEBAR_WIDTH_STORAGE_KEY
 
@@ -905,14 +912,6 @@ export class SidebarContainerLogic extends UILogic<
             hasKey: { $set: hasAPIKey },
             AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
         })
-        const signupDate = new Date(
-            await (await this.options.authBG.getCurrentUser())?.creationTime,
-        ).getTime()
-
-        this.emitMutation({
-            signupDate: { $set: signupDate },
-            isTrial: { $set: await enforceTrialPeriod30Days(signupDate) },
-        })
 
         const highlightColorJSON = await this.fetchHighlightColors()
 
@@ -933,38 +932,6 @@ export class SidebarContainerLogic extends UILogic<
         } else {
             this.emitMutation({
                 isAutoAddEnabled: { $set: isAutoAddEnabled },
-            })
-        }
-        await this.checkRabbitHoleOnboardingStage()
-    }
-
-    private checkRabbitHoleOnboardingStage = async () => {
-        const rabbitHoleBetaAccess = await rabbitHoleBetaFeatureAllowed(
-            this.options.authBG,
-            this.options.contentScriptsBG,
-        )
-
-        this.emitMutation({
-            rabbitHoleBetaFeatureAccess: { $set: rabbitHoleBetaAccess },
-        })
-
-        if (rabbitHoleBetaAccess === 'onboarded') {
-            this.emitMutation({
-                rabbitHoleBetaFeatureAccess: { $set: 'onboarded' },
-            })
-            return 'onboarded'
-        }
-
-        if (
-            rabbitHoleBetaAccess === 'granted' ||
-            rabbitHoleBetaAccess === 'grantedBcOfSubscription'
-        ) {
-            const url = await downloadMemexDesktop(
-                await this.options.pkmSyncBG.getSystemArchAndOS(),
-            )
-
-            this.emitMutation({
-                desktopAppDownloadLink: { $set: url },
             })
         }
     }
@@ -1448,15 +1415,14 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ isWidthLocked: { $set: false } })
     }
 
-    copyNoteLink: EventHandler<'copyNoteLink'> = async ({
-        event: { link },
+    createCheckOutLink: EventHandler<'createCheckOutLink'> = async ({
+        event,
     }) => {
-        this.options.analytics.trackEvent({
-            category: 'ContentSharing',
-            action: 'copyNoteLink',
-        })
-
-        await this.options.copyToClipboard(link)
+        this.options.bgScriptBG.createCheckoutLink(
+            event.billingPeriod,
+            event.selectedPremiumPlans,
+            event.doNotOpen,
+        )
     }
 
     copyPageLink: EventHandler<'copyPageLink'> = async ({
@@ -1857,44 +1823,6 @@ export class SidebarContainerLogic extends UILogic<
                 return false
             }
         }
-    }
-
-    requestRabbitHoleBetaFeatureAccess: EventHandler<
-        'requestRabbitHoleBetaFeatureAccess'
-    > = async ({ event }) => {
-        this.emitMutation({
-            rabbitHoleBetaFeatureAccess: { $set: null },
-        })
-
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
-
-        const email = (await this.options.authBG.getCurrentUser())?.email
-        const userId = (await this.options.authBG.getCurrentUser())?.id
-
-        const baseUrl = isStaging
-            ? CLOUDFLARE_WORKER_URLS.staging
-            : CLOUDFLARE_WORKER_URLS.production
-
-        await fetch(baseUrl + '/subscribe_rabbithole_waitlist', {
-            method: 'POST',
-            body: JSON.stringify({
-                email: email,
-                userId: userId,
-                reasonText: event.reasonText,
-            }),
-            headers: { 'Content-Type': 'application/json' },
-        })
-
-        const onboardingStage = await rabbitHoleBetaFeatureAllowed(
-            this.options.authBG,
-            this.options.contentScriptsBG,
-        )
-
-        this.emitMutation({
-            rabbitHoleBetaFeatureAccess: { $set: onboardingStage },
-        })
     }
 
     setListPrivacy: EventHandler<'setListPrivacy'> = async ({ event }) => {
@@ -3208,19 +3136,23 @@ export class SidebarContainerLogic extends UILogic<
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
-        if (!hasAPIKey) {
-            let canQueryAI = false
-            if (previousState.isTrial) {
-                canQueryAI = true
-            } else if (await AIActionAllowed(this.options.analyticsBG)) {
-                canQueryAI = true
-            }
-            if (!canQueryAI) {
-                this.emitMutation({
-                    showUpgradeModal: { $set: true },
-                })
-                return
-            }
+        let canQueryAI = false
+        if (previousState.isTrial) {
+            canQueryAI = true
+        } else if (
+            await AIActionAllowed(
+                this.options.analyticsBG,
+                hasAPIKey ? 'AIpowerupOwnKey' : 'AIpowerup',
+            )
+        ) {
+            canQueryAI = true
+        }
+
+        if (!canQueryAI) {
+            this.emitMutation({
+                showUpgradeModal: { $set: true },
+            })
+            return
         }
 
         this.emitMutation({
@@ -3793,12 +3725,6 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        if (event.tab !== 'ThisPage') {
-            await this.checkRabbitHoleOnboardingStage()
-            this.emitMutation({
-                selectedTextAIPreview: { $set: null },
-            })
-        }
         this.emitMutation({
             activeAITab: { $set: event.tab },
         })
@@ -3889,83 +3815,6 @@ export class SidebarContainerLogic extends UILogic<
                     )
                 }
             }
-        } else if (event.tab === 'rabbitHole') {
-            this.emitMutation({
-                suggestionsResultsLoadState: { $set: 'running' },
-            })
-            this.previousState = previousState
-            if (
-                !(
-                    previousState.rabbitHoleBetaFeatureAccess === 'onboarded' ||
-                    (await this.checkRabbitHoleOnboardingStage()) ===
-                        'onboarded'
-                )
-            ) {
-                this.emitMutation({
-                    suggestionsResultsLoadState: { $set: 'success' },
-                })
-                return
-            }
-
-            const currentPageContent =
-                document.title && document.title + document.body.innerText
-
-            const prompt = `You are given the text of a web page. Your task is to summarise it in such a way that is ideally suited for similarity comparison with other texts. This means you should retain all key entities and concepts as much as you can. Here is the text of the page:  `
-
-            // const summary = await this.options.summarizeBG.getTextSummary({
-            //     text: currentPageContent,
-            //     prompt: prompt,
-            // })
-
-            // const summarisedText = summary.choices[0].text
-
-            // add step to summmarise page and extract key information suitable for similiarity search
-
-            let results
-            results = await this.options.customListsBG.findSimilarBackground(
-                currentPageContent,
-                normalizeUrl(previousState.fullPageUrl, {
-                    skipProtocolTrim: true,
-                }),
-            )
-
-            if (results.length === 0) {
-                this.emitMutation({
-                    suggestionsResultsLoadState: { $set: 'success' },
-                })
-            }
-            if (results === 'not-connected' || results === 'not-allowed') {
-                this.emitMutation({
-                    suggestionsResultsLoadState: { $set: 'error' },
-                })
-                return
-            }
-
-            results = results.reduce(
-                (acc: SuggestionCard[], curr: SuggestionCard) => {
-                    const existing = acc.find(
-                        (item) => item.fullUrl === curr.fullUrl,
-                    )
-                    if (!existing) {
-                        return acc.concat([curr])
-                    } else if (existing.distance > curr.distance) {
-                        return acc
-                            .filter((item) => item.fullUrl !== curr.fullUrl)
-                            .concat([curr])
-                    } else {
-                        return acc
-                    }
-                },
-                [],
-            )
-
-            await this.updateSuggestionResults(results)
-
-            // Add the event listener
-            document.addEventListener(
-                'mouseup',
-                this.handleMouseUpToTriggerRabbitHole,
-            )
         }
     }
 

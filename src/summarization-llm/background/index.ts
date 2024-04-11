@@ -13,6 +13,9 @@ import {
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
 import { SidebarTab } from 'src/sidebar/annotations-sidebar/containers/types'
+import browser from 'webextension-polyfill'
+import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
+import { AIActionAllowed } from 'src/util/subscriptions/storage'
 
 export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
     startPageSummaryStream: RemoteFunction<
@@ -98,6 +101,16 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
+        const isAllowed = await AIActionAllowed(
+            this.analyticsBG,
+            apiKey.length > 0 ? 'AIpowerupOwnKey' : 'AIpowerup',
+            false,
+        )
+
+        if (!isAllowed) {
+            return
+        }
+
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
 
         if (this.options.analyticsBG) {
@@ -152,6 +165,12 @@ export default class SummarizeBackground {
     getTextSummary: SummarizationInterface<
         'provider'
     >['getTextSummary'] = async ({ tab }, { text, prompt }) => {
+        const isAllowed = await AIActionAllowed(this.analyticsBG, 'AIpowerup')
+
+        if (!isAllowed) {
+            return
+        }
+
         const summary = await this.summarizationService.summarizeText(
             text,
             prompt,
