@@ -341,6 +341,12 @@ export function createBackgroundModules(options: {
         activityStreamsStorage: options.serverStorage.modules.activityStreams,
     })
 
+    const imageSupport = new ImageSupportBackground({
+        backend: options.imageSupportBackend,
+        storageManager: options.storageManager,
+        generateImageId: () => generateServerId('UPLOADED_IMAGES') as string,
+    })
+
     const directLinking = new DirectLinkingBackground({
         browserAPIs: options.browserAPIs,
         storageManager,
@@ -354,13 +360,6 @@ export function createBackgroundModules(options: {
         preAnnotationDelete: async (params) => {
             await contentSharing.deleteAnnotationShare(params)
         },
-        imageSupport: new ImageSupportBackground({
-            backend: options.imageSupportBackend,
-            storageManager: options.storageManager,
-            generateImageId() {
-                return generateServerId('UPLOADED_IMAGES') as string
-            },
-        }),
     })
 
     const activityStreams = new ActivityStreamsBackground({
@@ -578,13 +577,7 @@ export function createBackgroundModules(options: {
             storageManager: options.storageManager,
             browserAPIs: options.browserAPIs,
             pkmSyncBG,
-            imageSupport: new ImageSupportBackground({
-                backend: options.imageSupportBackend,
-                storageManager: options.storageManager,
-                generateImageId() {
-                    return generateServerId('UPLOADED_IMAGES') as string
-                },
-            }),
+            imageSupportBG: imageSupport,
         }),
     })
 
@@ -742,13 +735,7 @@ export function createBackgroundModules(options: {
             serverStorage: options.serverStorage.modules,
             services: options.services,
         }),
-        imageSupport: new ImageSupportBackground({
-            backend: options.imageSupportBackend,
-            storageManager: options.storageManager,
-            generateImageId() {
-                return generateServerId('UPLOADED_IMAGES') as string
-            },
-        }),
+        imageSupport,
     }
 }
 
@@ -801,14 +788,10 @@ export async function setupBackgroundModules(
     backgroundModules.imageSupport.setupRemoteFunctions()
     setupNotificationClickListener()
 
-    // TODO mv3: migrate web req APIs
-    // await backgroundModules.pdfBg.setupRequestInterceptors()
-    await backgroundModules.analytics.setup()
+    backgroundModules.analytics.setup()
     await backgroundModules.jobScheduler.setup()
     await backgroundModules.pageActivityIndicator.setup()
 
-    // Ensure log-in state gotten from FB + trigger share queue processing, but don't wait for it
-    await backgroundModules.auth.authService.refreshUserInfo()
     await backgroundModules.personalCloud.setup()
 }
 

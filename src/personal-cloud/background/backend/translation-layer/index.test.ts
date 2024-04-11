@@ -60,6 +60,7 @@ import { extractTerms } from '@worldbrain/memex-common/lib/page-indexing/pipelin
 import type { ExceptionCapturer } from '@worldbrain/memex-common/lib/firebase-backend/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { SHARED_LIST_TIMESTAMP_SET_ROUTE } from '@worldbrain/memex-common/lib/page-activity-indicator/backend/constants'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 const isFBEmu = process.env.TEST_SERVER_STORAGE === 'firebase-emulator'
 
@@ -382,6 +383,7 @@ async function setup(options?: {
     for (const user of deviceUsersSet) {
         storageHooksChangeWatchers.get(user).setUp({
             getNow,
+            normalizeUrl,
             getFunctionsConfig: () => ({
                 content_sharing: {
                     cloudflare_worker_credentials: 'fake-creds',

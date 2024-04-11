@@ -255,7 +255,7 @@ export default class PageStorage extends StorageModule {
     })
 
     async createPageIfNotExists(pageData: PipelineRes): Promise<void> {
-        const normalizedUrl = normalizeUrl(pageData.url, {})
+        const normalizedUrl = normalizeUrl(pageData.url)
         const exists = await this.pageExists(normalizedUrl)
 
         if (!exists) {
@@ -357,7 +357,7 @@ export default class PageStorage extends StorageModule {
 
         if (Object.keys(updates).length) {
             await this.operation('updatePage', {
-                url: normalizeUrl(newPageData.url, {}),
+                url: normalizeUrl(newPageData.url),
                 updates,
             })
         }
@@ -368,7 +368,7 @@ export default class PageStorage extends StorageModule {
             url: string
             time: number
         }
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         const newVisits: Visit[] = []
         for (const visitTime of visitTimes) {
             newVisits.push({ url: normalizedUrl, time: visitTime })
@@ -379,7 +379,7 @@ export default class PageStorage extends StorageModule {
     }
 
     async pageExists(url: string): Promise<boolean> {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         const existingPage = await this.operation('findPageByUrl', {
             url: normalizedUrl,
         })
@@ -388,7 +388,7 @@ export default class PageStorage extends StorageModule {
     }
 
     async pageHasVisits(url: string): Promise<boolean> {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         const visitCount = await this.operation('countVisits', {
             url: normalizedUrl,
         })
@@ -396,7 +396,7 @@ export default class PageStorage extends StorageModule {
     }
 
     async addPageVisit(url: string, time: number) {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         await this.operation('createVisit', { url: normalizedUrl, time })
     }
 
@@ -409,7 +409,7 @@ export default class PageStorage extends StorageModule {
     }
 
     async getPage(url: string): Promise<PipelineRes | null> {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         return this.operation('findPageByUrl', { url: normalizedUrl })
     }
 
@@ -545,9 +545,9 @@ export default class PageStorage extends StorageModule {
     }
 
     async deletePageIfOrphaned(url: string) {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         const visitCount = await this.operation('countVisits', {
-            url: normalizeUrl,
+            url: normalizedUrl,
         })
         if (visitCount > 0) {
             return
@@ -583,7 +583,7 @@ export default class PageStorage extends StorageModule {
     async getLatestVisit(
         url: string,
     ): Promise<{ url: string; time: number } | null> {
-        const normalizedUrl = normalizeUrl(url, {})
+        const normalizedUrl = normalizeUrl(url)
         const result = await this.operation('findLatestVisitByUrl', {
             url: normalizedUrl,
         })

@@ -6,7 +6,6 @@ import type { Storage } from 'webextension-polyfill'
 export async function shareAnnotationWithPKM(
     annotationData,
     pkmSyncBG,
-    imageSupport,
     checkForFilteredSpaces?,
 ) {
     let item = {

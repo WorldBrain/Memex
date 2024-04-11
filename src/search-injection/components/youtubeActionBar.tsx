@@ -105,7 +105,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         }
         browser.runtime.onMessage.addListener((message) => {
             if (message.type === 'URL_CHANGE') {
-                console.log('URL_CHANGE', message.url)
                 this.getYoutubeVideoDuration()
             }
         })
@@ -120,7 +119,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         if (video) {
             let duration = video.duration
 
-            console.log('duration', duration)
             this.setState({
                 videoDuration: duration,
             })
@@ -200,7 +198,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         let timestampToSend = null
 
         if (event.shiftKey) {
-            console.log('Shift key is pressed during click')
             const range = this.calculateRangeInSeconds(
                 this.state.videoDuration,
                 from,
@@ -377,6 +374,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                 instaClose
             >
                 <TextFieldContainerPrompt>
+                    Use a custom prompt. Click again to apply.
                     <TextArea
                         type="text"
                         placeholder={'Add your custom prompt here'}
@@ -398,7 +396,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         width="350px"
                         autoFocus={true}
                     />
-                    Use a custom prompt. Click again to apply.
                 </TextFieldContainerPrompt>
             </PopoutBox>
         )
@@ -752,7 +749,7 @@ const TextFieldContainerPrompt = styled.div`
     align-items: center;
     justify-content: center;
     grid-gap: 10px;
-    padding: 5px 5px 10px 5px;
+    padding: 10px 5px 5px 5px;
     color: ${(props) => props.theme.colors.greyScale5};
     font-size: 14px;
     text-align: center;

@@ -208,7 +208,9 @@ export async function setupTest(
         renderUpdateNotifBanner: args.renderUpdateNotifBanner ?? (() => null),
         services: createUIServices(),
         analyticsBG: device.backgroundModules.analyticsBG,
-        imageSupportBG: device.backgroundModules.imageSupport,
+        imageSupportBG: insertBackgroundFunctionTab(
+            device.backgroundModules.imageSupport,
+        ) as any,
         bgScriptBG: device.backgroundModules.bgScript.remoteFunctions,
     })
 

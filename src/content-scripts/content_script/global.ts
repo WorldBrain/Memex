@@ -1,6 +1,9 @@
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
+import {
+    injectMemexExtDetectionEl,
+    removeMemexExtDetectionEl,
+} from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 import {
     MemexOpenLinkDetail,
     MemexRequestHandledDetail,
@@ -109,6 +112,7 @@ import type { ContentConversationsInterface } from 'src/content-conversations/ba
 import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -127,7 +131,11 @@ export async function main(
     }
     params.loadRemotely = params.loadRemotely ?? true
 
-    setupRpcConnection({ sideName: 'content-script-global', role: 'content' })
+    setupRpcConnection({
+        browserAPIs: browser,
+        sideName: 'content-script-global',
+        role: 'content',
+    })
     // TODO: potential are for improvement, setup RPC earlier or later
 
     const isPdfViewerRunning = params.getContentFingerprints != null
@@ -265,23 +273,21 @@ export async function main(
         },
     })
 
-    browser.runtime.onMessage.addListener((request: any, sender: any) => {
+    // TODO: This needs to move to an RPC call
+    browser.runtime.onMessage.addListener(((request, sender, sendResponse) => {
         if (request.action === 'getImageData') {
             const imageUrl = request.srcUrl // URL of the image to get data for
-            return fetch(imageUrl)
+            fetch(imageUrl)
                 .then((response) => response.blob())
                 .then((blob) => {
-                    return new Promise((resolve) => {
-                        const reader = new FileReader()
-                        reader.onloadend = () =>
-                            resolve({ imageData: reader.result })
-                        reader.readAsDataURL(blob) // Convert the blob to a data URL
-                    })
+                    const reader = new FileReader()
+                    reader.onloadend = () =>
+                        sendResponse({ imageData: reader.result })
+                    reader.readAsDataURL(blob) // Convert the blob to a data URL
                 })
-                .catch((error) => ({ error: error.toString() }))
         }
-        return Promise.resolve() // Return a resolved promise for non-matching actions or to avoid unhandled promise rejections
-    })
+        return true
+    }) as any)
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -1159,6 +1165,7 @@ export async function main(
             })(window.getSelection(), shouldShare, shouldCopyLink),
         removeHighlights: async () => highlightRenderer.resetHighlightsStyles(),
         teardownContentScripts: async () => {
+            removeMemexExtDetectionEl()
             await inPageUI.hideHighlights()
             await inPageUI.hideSidebar()
             await inPageUI.removeRibbon()
@@ -1378,8 +1385,8 @@ export async function main(
         const email = _currentUser?.email
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
         const url = `${baseUrl}` + '/stripe-subscriptions'
 
         const response = await fetch(url, {

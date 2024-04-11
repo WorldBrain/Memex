@@ -22,7 +22,7 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 // Include development tools if we are not building for production
 
@@ -32,7 +32,11 @@ async function main() {
     //     ? require('src/dev/redux-devtools-component').default
     //     : undefined
 
-    setupRpcConnection({ sideName: 'extension-page-options', role: 'content' })
+    setupRpcConnection({
+        browserAPIs: browser,
+        sideName: 'extension-page-options',
+        role: 'content',
+    })
 
     const store = configureStore({ ReduxDevTools })
 

@@ -40,7 +40,6 @@ import type {
 } from '@worldbrain/memex-common/lib/action-queue/types'
 import { STORAGE_VERSIONS } from 'src/storage/constants'
 import { wipePassiveData } from 'src/personal-cloud/storage/passive-data-wipe'
-import { prepareDataMigration } from 'src/personal-cloud/storage/migration-preparation'
 import type { SettingStore } from 'src/util/settings'
 import { blobToString } from 'src/util/blob-utils'
 import * as Raven from 'src/util/raven'
@@ -124,7 +123,6 @@ export class PersonalCloudBackground {
         this.remoteFunctions = {
             runDataMigration: this.waitForSync,
             isCloudSyncEnabled: this.isCloudSyncEnabled,
-            runDataMigrationPreparation: this.prepareDataMigration,
             enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
@@ -137,9 +135,6 @@ export class PersonalCloudBackground {
     }
 
     private setupEventListeners() {
-        this.options.runtimeAPI.onStartup.addListener(async () => {
-            await this.startSync()
-        })
         this.actionQueue.events.on('statsChanged', async (stats) => {
             this._modifyStats({
                 pendingUploads: stats.pendingActionCount,
@@ -158,42 +153,6 @@ export class PersonalCloudBackground {
                 pendingDownloads: pendingDownloads < 0 ? 0 : pendingDownloads,
             })
         })
-    }
-
-    private prepareDataMigration = async () => {
-        const db = this.dexie
-
-        await prepareDataMigration({
-            db,
-            chunkSize: 350,
-            resetQueue: async () => {
-                await db.table('personalCloudAction').clear()
-                await this.actionQueue.resetPendingActionCount()
-                this._modifyStats({ pendingDownloads: 0, pendingUploads: 0 })
-            },
-            queueObjs: (actionData) =>
-                this.actionQueue.scheduleManyActions(
-                    actionData.objs.map((object) => ({
-                        type: PersonalCloudActionType.PushObject,
-                        updates: [
-                            {
-                                type: PersonalCloudUpdateType.Overwrite,
-                                schemaVersion: this.currentSchemaVersion!,
-                                deviceId: this.deviceId,
-                                collection: actionData.collection,
-                                object: this.preprocessObjectForPush({
-                                    collection: actionData.collection,
-                                    object,
-                                }),
-                            },
-                        ],
-                    })),
-                    { queueInteraction: 'queue-and-return' },
-                ),
-        })
-
-        await this.enableSync()
-        await this.startSync()
     }
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
@@ -287,7 +246,10 @@ export class PersonalCloudBackground {
     async integrateContinuously() {
         const { backend, settingStore } = this.options
         try {
-            for await (const { batch, lastSeen } of backend.streamUpdates()) {
+            for await (const { batch, lastSeen } of backend.streamUpdates({
+                mode: 'continuous-invocation',
+                skipInvocationOnUserChange: true,
+            })) {
                 try {
                     await keepWorkerAlive(
                         (async () => {
@@ -775,7 +737,7 @@ export class PersonalCloudBackground {
 
     _debugLog(...args: any[]) {
         if (this.debug) {
-            // console['log']('Personal Cloud -', ...args)
+            console['log']('Personal Cloud -', ...args)
         }
     }
 

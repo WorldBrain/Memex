@@ -120,6 +120,7 @@ import analytics from 'src/analytics'
 import MarkdownIt from 'markdown-it'
 import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
 import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -1241,8 +1242,8 @@ export class SidebarContainerLogic extends UILogic<
             process.env.NODE_ENV === 'development'
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
 
         const normalisedYoutubeURL =
             'https://www.youtube.com/watch?v=' + videoId
@@ -1285,8 +1286,8 @@ export class SidebarContainerLogic extends UILogic<
             process.env.NODE_ENV === 'development'
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
 
         const normalisedYoutubeURL =
             'https://www.youtube.com/watch?v=' + videoId
@@ -1873,8 +1874,8 @@ export class SidebarContainerLogic extends UILogic<
         const userId = (await this.options.authBG.getCurrentUser())?.id
 
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
 
         await fetch(baseUrl + '/subscribe_rabbithole_waitlist', {
             method: 'POST',
@@ -3652,7 +3653,7 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     )
                 } catch (e) {}
-                await new Promise((resolve) => setTimeout(resolve, 10))
+                await new Promise((resolve) => setTimeout(resolve, 20))
             }
 
             return
@@ -3690,14 +3691,21 @@ export class SidebarContainerLogic extends UILogic<
 
         await sleepPromise(10)
         if (previousState.activeTab === 'summary') {
-            this.options.events.emit(
-                'addMediaRangeToEditor',
-                event.range.from,
-                event.range.to,
-                event.prompt,
-                () => {},
-            )
-            return
+            let executed = false
+            while (!executed) {
+                try {
+                    executed = this.options.events.emit(
+                        'addMediaRangeToEditor',
+                        event.range.from,
+                        event.range.to,
+                        event.prompt,
+                        (success) => {
+                            executed = success
+                        },
+                    )
+                } catch (e) {}
+                await new Promise((resolve) => setTimeout(resolve, 20))
+            }
         }
 
         // this.emitMutation({ activeTab: { $set: 'summary' } })

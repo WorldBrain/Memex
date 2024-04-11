@@ -2211,10 +2211,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 const nowA = Date.now()
-                                const {
-                                    link: linkA,
-                                } = await contentSharing.options.backend.createPageLink(
+                                const pageLinkParamsA = await contentSharing.options.backend.createPageLink(
                                     { fullPageUrl, now: nowA },
+                                )
+                                const linkA = getSinglePageShareUrl(
+                                    pageLinkParamsA,
                                 )
 
                                 // Shared cloud DB data
@@ -2564,10 +2565,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 // Try it once more to assert that sharedPageInfo+personalContentMetadata+personalContentLocator isn't recreated
-                                const {
-                                    link: linkB,
-                                } = await contentSharing.options.backend.createPageLink(
+                                const pageLinkParamsB = await contentSharing.options.backend.createPageLink(
                                     { fullPageUrl },
+                                )
+                                const linkB = getSinglePageShareUrl(
+                                    pageLinkParamsB,
                                 )
 
                                 // Shared cloud DB data
@@ -3091,10 +3093,11 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
 
-                                const {
-                                    link: linkA,
-                                } = await contentSharing.options.backend.createPageLink(
+                                const pageLinkParamsA = await contentSharing.options.backend.createPageLink(
                                     { now, fullPageUrl },
+                                )
+                                const linkA = getSinglePageShareUrl(
+                                    pageLinkParamsA,
                                 )
 
                                 // Shared cloud DB data
@@ -3538,13 +3541,14 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 // Try it once more to assert that sharedPageInfo+personalContentMetadata+personalContentLocator isn't recreated
-                                const {
-                                    link: linkB,
-                                } = await contentSharing.options.backend.createPageLink(
+                                const pageLinkParamsB = await contentSharing.options.backend.createPageLink(
                                     {
                                         fullPageUrl,
                                         now: now + 10,
                                     },
+                                )
+                                const linkB = getSinglePageShareUrl(
+                                    pageLinkParamsB,
                                 )
 
                                 // Shared cloud DB data
@@ -3711,9 +3715,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 expect(await setup.storageManager.collection('locators').findAllObjects({})).toEqual([])
                                 }
 
-                                const {
-                                    link: linkA,
-                                } = await contentSharing.options.backend.createPageLink(
+                                const pageLinkParamsA = await contentSharing.options.backend.createPageLink(
                                     {
                                         now,
                                         fullPageUrl: tmpPdfAccessUrl,
@@ -3726,6 +3728,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                             uploadId,
                                         },
                                     },
+                                )
+                                const linkA = getSinglePageShareUrl(
+                                    pageLinkParamsA,
                                 )
 
                                 // Shared cloud DB data
@@ -4211,9 +4216,7 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 }
 
                                 // Try it once more to assert that sharedPageInfo+personalContentMetadata+personalContentLocator isn't recreated
-                                const {
-                                    link: linkB,
-                                } = await contentSharing.options.backend.createPageLink(
+                                const pageLinkParamsB = await contentSharing.options.backend.createPageLink(
                                     {
                                         fullPageUrl: tmpPdfAccessUrl,
                                         uploadedPdfParams: {
@@ -4226,6 +4229,9 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                         },
                                         now: now + 10,
                                     },
+                                )
+                                const linkB = getSinglePageShareUrl(
+                                    pageLinkParamsB,
                                 )
 
                                 // Shared cloud DB data
@@ -9784,6 +9790,7 @@ function makeAnnotationFromWebUiTest(options: {
 
             storageHooksChangeWatcher.setUp({
                 getNow,
+                normalizeUrl,
                 fetch: fakeFetch.fetch as any,
                 captureException: async (err) => undefined, // TODO: implement
                 getFunctionsConfig: () => ({}), // TODO: implement

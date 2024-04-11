@@ -28,8 +28,8 @@ export class ImageSupportBackground {
             throw new Error(`Failed to initialize image support storage`)
         }
         this.remoteFunctions = {
-            generateImageId: remoteFunctionWithoutExtraArgs(
-                this.generateImageId,
+            generateImageId: remoteFunctionWithoutExtraArgs(async () =>
+                this.generateImageId(),
             ),
             uploadImage: remoteFunctionWithoutExtraArgs(this.uploadImage),
             getImageUrl: remoteFunctionWithoutExtraArgs(this.getImageUrl),
@@ -40,9 +40,7 @@ export class ImageSupportBackground {
         registerRemoteFunctions(this.remoteFunctions)
     }
 
-    generateImageId: ImageSupportInterface<
-        'provider'
-    >['generateImageId']['function'] = async () => {
+    generateImageId = () => {
         return this.options.generateImageId()
     }
 

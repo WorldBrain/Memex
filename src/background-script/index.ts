@@ -36,6 +36,7 @@ import { captureException } from 'src/util/raven'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
+import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -200,8 +201,8 @@ class BackgroundScript {
             process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
             process.env.NODE_ENV === 'development'
         const baseUrl = isStaging
-            ? 'https://cloudflare-memex-staging.memex.workers.dev'
-            : 'https://cloudfare-memex.memex.workers.dev'
+            ? CLOUDFLARE_WORKER_URLS.staging
+            : CLOUDFLARE_WORKER_URLS.production
         const url = `${baseUrl}/checkForUpdates`
 
         const response = await fetch(url, {
@@ -245,12 +246,6 @@ class BackgroundScript {
             syncSettingsStore: this.deps.syncSettingsStore,
             localExtSettingStore: this.deps.localExtSettingStore,
         })
-    }
-
-    private async ___testContentScriptsTeardown(tabId: number) {
-        await runInTab<InPageUIContentScriptRemoteInterface>(
-            tabId,
-        ).teardownContentScripts()
     }
 
     /**
@@ -313,52 +308,48 @@ class BackgroundScript {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    private setupExtUpdateHandling() {
-        const { runtimeAPI, bgModules } = this.deps
-        runtimeAPI.onUpdateAvailable.addListener(async () => {
-            try {
-                await bgModules.tabManagement.mapTabChunks(
-                    async (tab) => {
-                        if (
-                            !bgModules.tabManagement.canTabRunContentScripts(
-                                tab,
-                            )
-                        ) {
-                            return
-                        }
-
-                        await runInTab<InPageUIContentScriptRemoteInterface>(
-                            tab.id,
-                        ).teardownContentScripts()
-                    },
-                    {
-                        onError: (err, tab) => {
-                            console.error(
-                                `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
-                                err.message,
-                            )
-                            captureException(err)
-                        },
-                    },
-                )
-            } catch (err) {
-                console.error(
-                    'Error encountered attempting to teardown content scripts for extension update:',
-                    err.message,
-                )
-                captureException(err)
-            }
-
-            // This call prompts the extension to reload, updating the scripts to the newest versions
-            runtimeAPI.reload()
-        })
-    }
-
     setupWebExtAPIHandlers() {
         this.setupInstallHooks()
         this.setupOnDemandContentScriptInjection()
         this.setupUninstallURL()
-        this.setupExtUpdateHandling()
+        this.deps.runtimeAPI.onUpdateAvailable.addListener(
+            this.prepareAndUpdateExtension,
+        )
+    }
+
+    private prepareAndUpdateExtension = async () => {
+        const { runtimeAPI, bgModules } = this.deps
+        try {
+            await bgModules.tabManagement.mapTabChunks(
+                async (tab) => {
+                    if (!bgModules.tabManagement.canTabRunContentScripts(tab)) {
+                        return
+                    }
+
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tab.id,
+                    ).teardownContentScripts()
+                },
+                {
+                    onError: (err, tab) => {
+                        console.error(
+                            `Error encountered attempting to teardown content scripts for extension update on tab "${tab.id}" - url "${tab.url}":`,
+                            err.message,
+                        )
+                        captureException(err)
+                    },
+                },
+            )
+        } catch (err) {
+            console.error(
+                'Error encountered attempting to teardown content scripts for extension update:',
+                err.message,
+            )
+            captureException(err)
+        }
+
+        // This call prompts the extension to reload, updating the scripts to the newest versions
+        runtimeAPI.reload()
     }
 
     private chooseTabOpenFn = (params?: OpenTabParams) =>
