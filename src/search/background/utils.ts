@@ -4,8 +4,11 @@ import type { SearchParams as OldSearchParams } from '../types'
 import type {
     Page,
     Annotation,
+    Visit,
+    Bookmark,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
+import Dexie from 'dexie'
 
 export const contentTypeChecks = {
     pagesOnly: (flags: ContentTypes) =>
@@ -108,7 +111,28 @@ export const queryPagesByTerms = (storageManager: Storex) => async (
         .distinct()
         .toArray()) as Page[]
 
-    // TODO: Get latest visit/bm for each page
+    const pageUrls = pages.map((p) => p.url)
 
-    return pages.map((p) => ({ ...p, latestTimestamp: 0 }))
+    // Get latest visit/bm for each page
+    const latestTimestampByPageUrl = new Map<string, number>()
+    const trackLatestTimestamp = ({ url, time }: Visit | Bookmark) =>
+        latestTimestampByPageUrl.set(
+            url,
+            Math.max(time, latestTimestampByPageUrl.get(url) ?? 0),
+        )
+    const queryTimestamps = <T>(table: Dexie.Table): Promise<T[]> =>
+        table.where('url').anyOf(pageUrls).reverse().sortBy('time')
+
+    const [visits, bookmarks] = await Promise.all([
+        queryTimestamps<Visit>(dexie.table('visits')),
+        queryTimestamps<Bookmark>(dexie.table('bookmarks')),
+    ])
+
+    visits.forEach(trackLatestTimestamp)
+    bookmarks.forEach(trackLatestTimestamp)
+
+    return pages.map((p) => ({
+        ...p,
+        latestTimestamp: latestTimestampByPageUrl.get(p.url) ?? 0,
+    }))
 }

@@ -721,9 +721,6 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
-            const lowestTimeBound = await backgroundModules.search[
-                'calcSearchLowestTimeBound'
-            ]()
             const resultA = await termsSearch(backgroundModules, {
                 query: 'test',
                 fromWhen: 0,
@@ -748,19 +745,6 @@ describe('Unified search tests', () => {
                     },
                 ],
                 [
-                    DATA.PAGE_ID_5,
-                    {
-                        annotIds: [
-                            // None of these contain the search term
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][0].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
-                        ],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_5][0].time,
-                    },
-                ],
-                [
                     DATA.PAGE_ID_12,
                     {
                         annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
@@ -776,8 +760,22 @@ describe('Unified search tests', () => {
                             DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
                         ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_9
+                        ][1].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
                         latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_9][0].time,
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
                     },
                 ],
                 [
@@ -800,24 +798,24 @@ describe('Unified search tests', () => {
                     },
                 ],
                 [
-                    DATA.PAGE_ID_7,
-                    {
-                        annotIds: [
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
-                        ],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
-                    },
-                ],
-                [
                     DATA.PAGE_ID_6,
                     {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_5,
+                    {
+                        annotIds: [
+                            // None of these contain the search term
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][0].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_5][0].time,
                     },
                 ],
                 [
