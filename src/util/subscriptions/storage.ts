@@ -5,6 +5,9 @@ import type { AuthRemoteFunctionsInterface } from 'src/authentication/background
 import type { ContentScriptsInterface } from 'src/content-scripts/background/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -231,8 +234,18 @@ export async function checkStatus(feature: PremiumPlans) {
 
 export async function pageActionAllowed(
     analyticsBG,
+    collectionsBG: RemoteCollectionsInterface,
+    pageToCheck: string,
     onlyCheckNoUpdate?: boolean,
 ) {
+    const isAlreadySaved =
+        (await collectionsBG.findPageByUrl(normalizeUrl(pageToCheck))) !=
+            null ?? false
+
+    if (isAlreadySaved) {
+        return true
+    }
+
     const allowed = await checkStatus('bookmarksPowerUp')
     if (!onlyCheckNoUpdate) {
         updatePageCounter()

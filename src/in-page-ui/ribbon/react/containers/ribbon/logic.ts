@@ -627,7 +627,14 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
-        if (!(await pageActionAllowed(this.dependencies.analyticsBG))) {
+        const isAllowed = await pageActionAllowed(
+            this.dependencies.analyticsBG,
+            this.dependencies.customLists,
+            previousState.fullPageUrl,
+            false,
+        )
+
+        if (!isAllowed) {
             return
         }
 
@@ -819,6 +826,17 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        const isAllowed = await pageActionAllowed(
+            this.dependencies.analyticsBG,
+            this.dependencies.customLists,
+            previousState.fullPageUrl,
+            false,
+        )
+
+        if (!isAllowed) {
+            return
+        }
+
         const pageListsSet = new Set(previousState.lists.pageListIds)
         if (event.value.added != null) {
             pageListsSet.add(event.value.added)

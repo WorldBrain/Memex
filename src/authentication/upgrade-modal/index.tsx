@@ -31,11 +31,15 @@ export default class UpgradeModal extends UIElement<
     async componentWillUnmount(): Promise<void> {}
 
     renderAIPowerUpsOptionsList = () => {
-        if (this.state.checkoutLoading === 'running') {
+        if (
+            this.state.checkoutLoading === 'running' ||
+            this.state.authLoadState === 'running'
+        ) {
             return (
                 <LoadingBlocker>
                     <LoadingIndicator size={40} />
-                    Subscribing...
+                    {this.state.checkoutLoading === 'running' &&
+                        'Subscribing...'}
                 </LoadingBlocker>
             )
         }
@@ -270,13 +274,70 @@ export default class UpgradeModal extends UIElement<
         )
     }
 
+    renderLifetimePlan = () => {
+        return (
+            <PowerUpOptions>
+                <UpgradeOverlayTextContainer>
+                    <UpgradeOverlayText>
+                        A transferrable lifetime plan
+                    </UpgradeOverlayText>
+                    <LifetimePlanTermsList>
+                        <LifetimePlanTermsListItem>
+                            <Icon
+                                icon="feed"
+                                heightAndWidth="20px"
+                                color="prime1"
+                            />
+                            Includes up to $50 in subscription value per month
+                        </LifetimePlanTermsListItem>
+                        <LifetimePlanTermsListItem>
+                            <Icon
+                                icon="reload"
+                                heightAndWidth="20px"
+                                color="prime1"
+                            />
+                            Can be gifted or sold to others
+                        </LifetimePlanTermsListItem>
+                        <LifetimePlanTermsListItem>
+                            <Icon
+                                icon="clock"
+                                heightAndWidth="20px"
+                                color="prime1"
+                            />
+                            Valid until you die or up to 50 years if transferred
+                        </LifetimePlanTermsListItem>
+                    </LifetimePlanTermsList>
+                </UpgradeOverlayTextContainer>
+                <PowerUpItem
+                    onClick={() => {
+                        this.processEvent('processCheckoutOpen', 'lifetime')
+                    }}
+                    activated={
+                        this.state.activatedPowerUps &&
+                        this.state.activatedPowerUps.lifetime === true
+                    }
+                >
+                    <PowerUpTitleBox>
+                        <PowerUpTitle>Upgrade to lifetime</PowerUpTitle>
+                        <PowerUpSubTitle>
+                            Upgrade now and never pay for Memex again
+                        </PowerUpSubTitle>
+                    </PowerUpTitleBox>
+                    <PowerUpPricing>$500</PowerUpPricing>
+                </PowerUpItem>
+            </PowerUpOptions>
+        )
+    }
+
     render() {
         let modalToShow = null
 
         if (this.state.powerUpType === 'Bookmarks') {
             modalToShow = this.renderBookmarkPowerUpsOptionsList()
-        } else {
+        } else if (this.state.powerUpType === 'AI') {
             modalToShow = this.renderAIPowerUpsOptionsList()
+        } else if (this.state.powerUpType === 'lifetime') {
+            modalToShow = this.renderLifetimePlan()
         }
 
         const upgradeContent = (
@@ -380,7 +441,7 @@ const Powerups = [
     {
         id: 'lifetime',
         title: 'Lifetime Plan',
-        icon: 'feed',
+        icon: 'clock',
     },
 ]
 
@@ -401,6 +462,7 @@ const LoadingBlocker = styled.div`
     grid-gap: 20px;
     color: ${(props) => props.theme.colors.greyScale7};
     backdrop-filter: blur(5px);
+    flex: 1;
 `
 
 const OverlayContainer = styled.div`
@@ -409,7 +471,8 @@ const OverlayContainer = styled.div`
     justify-content: space-between;
     align-items: flex-start;
     width: 100%;
-    height: 470px;
+    height: fit-content;
+    min-height: 470px;
     box-sizing: border-box;
 `
 
@@ -547,6 +610,7 @@ const UpgradeContainer = styled.div`
     flex-direction: column;
     height: fill-available;
     width: 100%;
+    min-height: inherit;
 `
 
 const DiscountPill = styled.div`
@@ -575,6 +639,7 @@ const UpgradeOverlayTextContainer = styled.div`
     grid-gap: 5px;
     margin-bottom: 10px;
     margin-top: 10px;
+    width: 100%;
 `
 
 const UpgradeOverlaySubText = styled.div`
@@ -602,13 +667,14 @@ const SideBar = styled.div`
     align-items: flex-start;
     justify-content: flex-start;
     padding: revert !important;
-    padding: 40px 30px 30px 30px !important;
+    padding: 40px 20px 30px 20px !important;
     grid-gap: 5px;
     min-width: 210px;
     height: 100%;
     box-sizing: border-box;
     border-right: 1px solid ${(props) => props.theme.colors.greyScale3};
     overflow: scroll;
+    min-height: inherit;
     position: relative;
 
     &::-webkit-scrollbar {
@@ -664,4 +730,26 @@ const SidebarItem = styled.div<{
 const SidebarBottomArea = styled.div`
     position: absolute;
     bottom: 20px;
+`
+
+const LifetimePlanTermsList = styled.div`
+    display: flex;
+    justify-content: flex-start;
+    align-items: flex-start;
+    flex-direction: column;
+    grid-gap: 10px;
+    margin-bottom: 30px;
+    margin-top: 10px;
+    background: ${(props) => props.theme.colors.greyScale3};
+    border-radius: 10px;
+    padding: 20px;
+    width: 100%;
+    box-sizing: border-box;
+`
+
+const LifetimePlanTermsListItem = styled.div`
+    display: flex;
+    grid-gap: 15px;
+    align-items: center;
+    color: ${(props) => props.theme.colors.greyScale6};
 `

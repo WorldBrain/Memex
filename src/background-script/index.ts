@@ -424,11 +424,20 @@ class BackgroundScript {
         const currentBillingPeriod = billingPeriod
         const baseLink = CLOUDFLARE_WORKER_URLS[process.env.NODE_ENV]
 
-        const selectedPremiumPlansString = selectedPremiumPlans.join(',')
+        let selectedPremiumPlansString = ''
+        let checkoutLink = ''
 
-        const checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
-            currentUserEmail,
-        )}`
+        if (selectedPremiumPlans.includes('lifetime')) {
+            selectedPremiumPlansString = 'lifetime'
+            checkoutLink = `${baseLink}/create-checkout?billingPeriod=lifetime&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+                currentUserEmail,
+            )}`
+        } else {
+            selectedPremiumPlansString = selectedPremiumPlans.join(',')
+            checkoutLink = `${baseLink}/create-checkout?billingPeriod=${currentBillingPeriod}&powerUps=${selectedPremiumPlansString}&prefilled_email=${encodeURIComponent(
+                currentUserEmail,
+            )}`
+        }
 
         if (doNotOpen) {
             try {

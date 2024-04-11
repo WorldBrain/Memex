@@ -66,7 +66,10 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import { pageActionAllowed } from 'src/util/subscriptions/storage'
+import {
+    AIActionAllowed,
+    pageActionAllowed,
+} from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
@@ -316,15 +319,23 @@ export async function main(
             let isAllowed = true
             let limitReachedNotif = null
             if (counterQueriesHaveChanged) {
-                isAllowed = await pageActionAllowed('AI', true)
+                isAllowed = await AIActionAllowed(
+                    analyticsBG,
+                    'AIpowerup',
+                    true,
+                )
                 limitReachedNotif = 'AI'
             }
             if (counterSavedHaveChanged) {
-                isAllowed = await pageActionAllowed('bookmarking', true)
+                isAllowed = await pageActionAllowed(
+                    analyticsBG,
+                    collectionsBG,
+                    window.location.href,
+                    true,
+                )
                 limitReachedNotif = 'Bookmarks'
             }
 
-            console.log('isAllowed', isAllowed)
             if (!isAllowed) {
                 if (currentTabURL?.includes(window.location.href)) {
                     inPageUI.loadOnDemandInPageUI({
@@ -619,7 +630,14 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
-            if (!(await pageActionAllowed(analyticsBG))) {
+            if (
+                !(await pageActionAllowed(
+                    analyticsBG,
+                    collectionsBG,
+                    window.location.href,
+                    false,
+                ))
+            ) {
                 return
             }
             const highlightColorSettingStorage = await getHighlightColorSettings()
@@ -736,7 +754,14 @@ export async function main(
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
-            if (!(await pageActionAllowed(analyticsBG))) {
+            if (
+                !(await pageActionAllowed(
+                    analyticsBG,
+                    collectionsBG,
+                    window.location.href,
+                    false,
+                ))
+            ) {
                 return
             }
 

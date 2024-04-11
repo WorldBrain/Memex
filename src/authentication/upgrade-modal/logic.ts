@@ -64,6 +64,9 @@ export default class PromptTemplatesLogic extends UILogic<
         event,
         previousState,
     }) => {
+        if (previousState.activatedPowerUps.lifetime === true) {
+            return
+        }
         this.emitMutation({
             checkoutLoading: { $set: 'running' },
         })
@@ -74,6 +77,7 @@ export default class PromptTemplatesLogic extends UILogic<
             (key) => previousState.activatedPowerUps[key] === true,
         ) as PremiumPlans[]
         const doNotOpen = currentlySelected.length > 0
+        let billingPeriod = previousState.billingPeriod
 
         let newSelection: PremiumPlans[] = currentlySelected
 
@@ -85,12 +89,15 @@ export default class PromptTemplatesLogic extends UILogic<
             newSelection = newSelection.filter(
                 (key) => key !== 'bookmarksPowerUp',
             )
+        } else if (event === 'lifetime') {
+            newSelection = ['lifetime']
+            billingPeriod = null
         } else {
             newSelection.push(event)
         }
 
         const upgradeResponse = await this.dependencies.createCheckOutLink(
-            previousState.billingPeriod,
+            billingPeriod,
             newSelection,
             doNotOpen,
         )
