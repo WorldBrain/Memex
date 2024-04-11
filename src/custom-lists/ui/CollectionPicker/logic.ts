@@ -355,7 +355,6 @@ export default class SpacePickerLogic extends UILogic<
                             previousState.listEntries.byId[
                                 previousState.focusedListId
                             ],
-                        analyticsBG: this.dependencies.analyticsBG,
                     },
                     previousState,
                 })
@@ -699,7 +698,7 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
-        event: { entry, analyticsBG, shouldRerender, collectionsBG },
+        event: { entry, shouldRerender },
         previousState,
     }) => {
         let nextState: SpacePickerState

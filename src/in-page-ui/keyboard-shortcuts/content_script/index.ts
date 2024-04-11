@@ -6,6 +6,7 @@ import type { KeyboardShortcuts, Shortcut } from '../types'
 import type { AnnotationFunctions } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import { RpcError, runInBackground } from 'src/util/webextensionRPC'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
+import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => Promise<void>
@@ -77,7 +78,7 @@ function getShortcutHandlers({
         createSharedAnnotationAndAddToCollection: async () => {
             if (userSelectedText()) {
                 await annotationFunctions.createAnnotation(
-                    window.getSelection(),
+                    cloneSelectionAsPseudoObject(window.getSelection()),
                     true,
                     true,
                     true,
@@ -103,19 +104,22 @@ function getShortcutHandlers({
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createSharedAnnotation: () =>
             annotationFunctions.createAnnotation(
-                window.getSelection(),
+                cloneSelectionAsPseudoObject(window.getSelection()),
                 true,
                 true,
                 false,
                 null,
             ),
         createSharedHighlight: async () => {
-            annotationFunctions.createHighlight(window.getSelection(), true)
+            annotationFunctions.createHighlight(
+                cloneSelectionAsPseudoObject(window.getSelection()),
+                true,
+            )
             return
         },
         createHighlight: async () => {
             await annotationFunctions.createHighlight(
-                window.getSelection(),
+                cloneSelectionAsPseudoObject(window.getSelection()),
                 false,
             ),
                 inPageUI.hideTooltip()
@@ -142,7 +146,7 @@ function getShortcutHandlers({
         copyCurrentLink: async () => {
             if (userSelectedText()) {
                 await annotationFunctions.createHighlight(
-                    window.getSelection(),
+                    cloneSelectionAsPseudoObject(window.getSelection()),
                     null,
                     true,
                     null,

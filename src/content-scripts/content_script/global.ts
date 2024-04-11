@@ -119,6 +119,7 @@ import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sha
 import { InPageUIInterface } from 'src/in-page-ui/background/types'
 import { Storage } from 'webextension-polyfill'
 import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
+import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -563,7 +564,7 @@ export async function main(
         screenshotImage?,
         imageSupport?,
         highlightColor?: HighlightColor,
-        selection?: Selection | PseudoSelection,
+        selection?: PseudoSelection,
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
@@ -625,7 +626,7 @@ export async function main(
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (
-            selection: Selection,
+            selection: PseudoSelection,
             shouldShare: boolean,
             shouldCopyShareLink: boolean,
             drawRectangle?: boolean,
@@ -748,7 +749,7 @@ export async function main(
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
         ) => async (
-            selection: Selection | PseudoSelection,
+            selection: PseudoSelection,
             shouldShare: boolean,
             shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
@@ -1224,7 +1225,11 @@ export async function main(
             annotationsFunctions.createHighlight({
                 category: 'Highlights',
                 action: 'createFromContextMenu',
-            })(window.getSelection(), shouldShare, shouldCopyLink),
+            })(
+                cloneSelectionAsPseudoObject(window.getSelection()),
+                shouldShare,
+                shouldCopyLink,
+            ),
         removeHighlights: async () => highlightRenderer.resetHighlightsStyles(),
         teardownContentScripts: async () => {
             removeMemexExtDetectionEl()

@@ -53,9 +53,7 @@ export type SpacePickerEvent = UIEvent<{
     newEntryAllPress: { entry: string; analyticsBG: AnalyticsCoreInterface }
     resultEntryPress: {
         entry: Pick<UnifiedList, 'localId'>
-        analyticsBG: AnalyticsCoreInterface
         shouldRerender?: boolean
-        collectionsBG: RemoteCollectionsInterface
     }
     resultEntryFocus: { entry: UnifiedList; index: number }
     toggleEntryContextMenu: { listId: number }
