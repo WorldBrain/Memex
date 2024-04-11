@@ -246,7 +246,10 @@ export class PersonalCloudBackground {
     async integrateContinuously() {
         const { backend, settingStore } = this.options
         try {
-            for await (const { batch, lastSeen } of backend.streamUpdates()) {
+            for await (const { batch, lastSeen } of backend.streamUpdates({
+                mode: 'continuous-invocation',
+                skipInvocationOnUserChange: true,
+            })) {
                 try {
                     await keepWorkerAlive(
                         (async () => {

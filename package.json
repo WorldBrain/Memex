@@ -1,6 +1,6 @@
 {
     "name": "worldbrain-extension",
-    "version": "3.18.11",
+    "version": "3.18.12",
     "homepage": "https://memex.garden",
     "repository": "https://github.com/WorldBrain/Memex",
     "scripts": {
@@ -111,7 +111,6 @@
         "moment": "^2.18.1",
         "mousetrap": "^1.6.5",
         "mustache": "^4.0.1",
-        "normalize-url": "^4.3.0",
         "object-path": "^0.11.4",
         "openpgp": "^4.6.2",
         "page-metadata-parser": "^1.1.4",

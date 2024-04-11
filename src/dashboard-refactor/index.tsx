@@ -2127,13 +2127,13 @@ const MainContainer = styled.div<{
 
 const DropZoneBackground = styled.div`
     position: absolute;
-    height: fill-available;
+    height: 100vh;
     width: fill-available;
     top: 0px;
     left: 0px;
     background: ${(props) => props.theme.colors.black}60;
     backdrop-filter: blur(20px);
-    padding: 40px;
+    padding: 0 40px;
     display: flex;
     cursor: pointer;
     justify-content: center;
@@ -2147,7 +2147,7 @@ const DropZoneFrame = styled.div`
     display: flex;
     justify-content: center;
     align-items: center;
-    height: fill-available;
+    height: 90vh;
     width: fill-available;
 `
 

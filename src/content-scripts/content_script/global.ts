@@ -1,6 +1,9 @@
 import { EventEmitter } from 'events'
 import type { ContentIdentifier } from '@worldbrain/memex-common/lib/page-indexing/types'
-import { injectMemexExtDetectionEl } from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
+import {
+    injectMemexExtDetectionEl,
+    removeMemexExtDetectionEl,
+} from '@worldbrain/memex-common/lib/common-ui/utils/content-script'
 import {
     MemexOpenLinkDetail,
     MemexRequestHandledDetail,
@@ -1196,6 +1199,7 @@ export async function main(
             })(window.getSelection(), shouldShare, shouldCopyLink),
         removeHighlights: async () => highlightRenderer.resetHighlightsStyles(),
         teardownContentScripts: async () => {
+            removeMemexExtDetectionEl()
             await inPageUI.hideHighlights()
             await inPageUI.hideSidebar()
             await inPageUI.removeRibbon()

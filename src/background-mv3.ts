@@ -39,6 +39,7 @@ import { fetchPageData } from '@worldbrain/memex-common/lib/page-indexing/fetch-
 import fetchAndExtractPdfContent from '@worldbrain/memex-common/lib/page-indexing/fetch-page-data/fetch-pdf-data.browser'
 import { CloudflareImageSupportBackend } from '@worldbrain/memex-common/lib/image-support/backend'
 import { SharedListRoleID } from '@worldbrain/memex-common/lib/content-sharing/types'
+import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 
 // This is here so the correct Service Worker `self` context is available. Maybe there's a better way to set this via tsconfig.
 declare var self: ServiceWorkerGlobalScope & {
@@ -147,6 +148,9 @@ async function main() {
             process.env.NODE_ENV === 'production' ? 'production' : 'staging',
     })
     pushMessagingClient.bgModules = backgroundModules
+    authServices.auth.events.on('loginSuccess', () => {
+        backgroundModules.personalCloud.triggerSyncContinuation()
+    })
 
     registerBackgroundModuleCollections({
         storageManager,
@@ -213,6 +217,7 @@ async function main() {
     globalThis['serverStorage'] = serverStorage
     globalThis['persistentStorageManager'] = persistentStorageManager
     globalThis['setStorageLoggingEnabled'] = setStorageLoggingEnabled
+    globalThis['normalizeUrl'] = normalizeUrl
 }
 
 main().catch((err) => {
