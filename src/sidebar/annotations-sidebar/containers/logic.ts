@@ -121,6 +121,7 @@ import MarkdownIt from 'markdown-it'
 import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/annotations/replaceImgSrcWithCloudAddressBrowser'
 import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -667,8 +668,8 @@ export class SidebarContainerLogic extends UILogic<
                 unifiedListIds: annotationData?.unifiedListIds,
             })
 
-            let highlights: HTMLCollection = document.getElementsByTagName(
-                'hypothesis-highlight',
+            let highlights: NodeListOf<Element> = document.querySelectorAll(
+                '.' + DEF_HIGHLIGHT_CSS_CLASS,
             )
 
             let memexHighlights: Element[] = Array.from(
@@ -727,10 +728,9 @@ export class SidebarContainerLogic extends UILogic<
             highlightColors: { $set: JSON.stringify(newState) },
         })
 
-        let highlights: HTMLCollection = document.getElementsByTagName(
-            'hypothesis-highlight',
+        let highlights: NodeListOf<Element> = document.querySelectorAll(
+            '.' + DEF_HIGHLIGHT_CSS_CLASS,
         )
-
         for (let color of changedColors) {
             Array.from(highlights).filter((highlight) => {
                 if (
