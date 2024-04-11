@@ -494,7 +494,7 @@ const Powerups = [
                     'Unlimited queries with GPT-3.5 and GPT-4, at your own cost of the OpenAI API.',
                 pricing: {
                     monthly: '$2.50',
-                    yearly: '$20',
+                    yearly: '$25',
                 },
             },
         },
