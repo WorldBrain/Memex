@@ -3,7 +3,6 @@ import { executeUITask, loadInitial } from 'src/util/ui-logic'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
 import type { CollectionsSettings } from 'src/custom-lists/background/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { pageActionAllowed } from 'src/util/subscriptions/storage'
 import type {
     PageAnnotationsCacheEvents,
     UnifiedList,
@@ -356,7 +355,6 @@ export default class SpacePickerLogic extends UILogic<
                             previousState.listEntries.byId[
                                 previousState.focusedListId
                             ],
-                        analyticsBG: this.dependencies.analyticsBG,
                     },
                     previousState,
                 })
@@ -700,13 +698,9 @@ export default class SpacePickerLogic extends UILogic<
     }
 
     resultEntryPress: EventHandler<'resultEntryPress'> = async ({
-        event: { entry, analyticsBG, shouldRerender },
+        event: { entry, shouldRerender },
         previousState,
     }) => {
-        if (!(await pageActionAllowed(analyticsBG))) {
-            return
-        }
-
         let nextState: SpacePickerState
         const listData = __getListDataByLocalId(
             entry.localId,
@@ -775,10 +769,6 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry, analyticsBG },
         previousState,
     }) => {
-        if (!(await pageActionAllowed(analyticsBG))) {
-            return
-        }
-
         await executeUITask(this, 'spaceAddRemoveState', async () => {
             this.processingUpstreamOperation = this.dependencies.actOnAllTabs(
                 entry.localId,
@@ -894,10 +884,6 @@ export default class SpacePickerLogic extends UILogic<
         previousState,
     }) => {
         await executeUITask(this, 'spaceCreateState', async () => {
-            if (!(await pageActionAllowed(analyticsBG))) {
-                return
-            }
-
             // NOTE: This is here as the enter press event from the context menu to confirm a space rename
             //   was also bubbling up into the space menu and being interpretted as a new space confirmation.
             //   Resulting in both a new space create + existing space rename. This is a hack to prevent that.
@@ -926,10 +912,6 @@ export default class SpacePickerLogic extends UILogic<
         event: { entry, analyticsBG },
         previousState,
     }) => {
-        if (!(await pageActionAllowed(analyticsBG))) {
-            return
-        }
-
         let newSpaceId: number
         const { success } = await executeUITask(
             this,

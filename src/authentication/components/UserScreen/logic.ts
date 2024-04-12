@@ -163,23 +163,10 @@ export default class Logic extends UILogic<State, Event> {
         })
         const subscriptionStatusInfo = await checkStripePlan(event.email)
 
-        if (subscriptionStatusInfo.status === 'no-subscription') {
+        if (subscriptionStatusInfo != null) {
             this.emitMutation({
-                subscriptionStatus: { $set: 'no-subscription' },
                 subscriptionStatusLoading: {
                     $set: 'success',
-                },
-                pageLimit: {
-                    $set:
-                        subscriptionStatusInfo.pageLimit > 10000
-                            ? 'Unlimited'
-                            : subscriptionStatusInfo.pageLimit.toString(),
-                },
-                AILimit: {
-                    $set:
-                        subscriptionStatusInfo.AILimit > 10000
-                            ? 'Unlimited'
-                            : subscriptionStatusInfo.AILimit.toString(),
                 },
             })
         } else if (

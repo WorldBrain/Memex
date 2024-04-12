@@ -81,6 +81,7 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import Raven from 'raven-js'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import { pageActionAllowed } from 'src/util/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,

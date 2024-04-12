@@ -144,7 +144,8 @@ const mapDispatch: (dispatch, props: OwnProps) => DispatchProps = (
     props,
 ) => ({
     toggleBookmark: async (element: HTMLElement) => {
-        const allowed = await pageActionAllowed(analyticsBG)
+        const allowed = true
+        // await pageActionAllowed(analyticsBG)
 
         if (allowed) {
             await dispatch(acts.toggleBookmark())
