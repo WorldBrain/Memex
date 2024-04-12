@@ -69,7 +69,12 @@ export default [
         pathname: '/account-subscriptions',
         icon: 'setting',
         component: (props) => (
-            <UserScreen {...props} initiallyShowSubscriptionModal refreshUser />
+            <UserScreen
+                {...props}
+                initiallyShowSubscriptionModal
+                refreshUser
+                bgScriptBG={this.props.bgScriptBG}
+            />
         ),
         hideFromSidebar: true,
     },

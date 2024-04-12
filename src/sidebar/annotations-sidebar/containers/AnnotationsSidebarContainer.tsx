@@ -1126,6 +1126,16 @@ export class AnnotationsSidebarContainer<
                                     error: error,
                                 })
                             }}
+                            createCheckOutLink={(
+                                billingPeriod,
+                                selectedPremiumPlans,
+                            ) => {
+                                this.processEvent('createCheckOutLink', {
+                                    billingPeriod,
+                                    selectedPremiumPlans,
+                                    doNotOpen: false,
+                                })
+                            }}
                             showChapters={this.state.showChapters}
                             chapterList={this.state.chapterList}
                             chapterSummaries={this.state.chapterSummaries}

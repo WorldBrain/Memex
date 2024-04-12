@@ -44,6 +44,7 @@ import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/compon
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -175,8 +176,8 @@ export default class Ribbon extends Component<Props, State> {
             pickerColor: value,
         })
 
-        let highlights: HTMLCollection = document.getElementsByTagName(
-            'hypothesis-highlight',
+        let highlights: NodeListOf<Element> = document.querySelectorAll(
+            '.' + DEF_HIGHLIGHT_CSS_CLASS,
         )
 
         for (let item of (highlights as any) as HTMLElement[]) {
