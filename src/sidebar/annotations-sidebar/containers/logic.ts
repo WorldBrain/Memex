@@ -2824,15 +2824,14 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
-        const existingLists = new Set(previousState.commentBox.lists)
-        const listsToRemove = event.lists.filter((list) =>
-            existingLists.has(list),
+        const existingLists = [...previousState.commentBox.lists]
+
+        const listsToRemove = existingLists.filter(
+            (list) => list !== event.remove,
         )
 
         if (listsToRemove.length > 0) {
-            const updatedLists = [...existingLists].filter(
-                (list) => !listsToRemove.includes(list),
-            )
+            const updatedLists = listsToRemove
             this.emitMutation({
                 commentBox: { lists: { $set: updatedLists } },
             })
