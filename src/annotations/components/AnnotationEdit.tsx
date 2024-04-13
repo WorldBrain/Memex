@@ -193,7 +193,7 @@ class AnnotationEdit extends React.Component<Props> {
                         }
                         markdownContent={this.props.comment}
                         onKeyDown={this.handleInputKeyDown}
-                        promptPlaceholder={`Add Note. Click on ( ? ) for formatting help.`}
+                        promptPlaceholder={`Write your note. Use #hashtags or [[WikiLinks]] to add Spaces. ( ? ) for formatting help.`}
                         setEditorInstanceRef={(ref) => (this.editorRef = ref)}
                         autoFocus={this.props.isEditMode}
                         imageSupport={this.props.imageSupport}
