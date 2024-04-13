@@ -472,12 +472,13 @@ export class PKMSyncBackgroundModule {
 
     processPageTitleFormat(pageTitleFormat, pageTitle, pageCreatedWhen) {
         let finalTitle = pageTitleFormat
+        let pageTitleToUse = this.cleanFileName(pageTitle, false, false)
 
-        finalTitle = finalTitle.replace('{{{PageTitle}}}', pageTitle)
-        finalTitle = this.cleanFileName(finalTitle, false, false)
+        finalTitle = finalTitle.replace('{{{PageTitle}}}', pageTitleToUse)
 
         const datePattern = /{{{Date: "(.*?)"}}}/
         const match = finalTitle.match(datePattern)
+
         if (match) {
             const dateFormat = match[1]
             const formattedDate = moment(pageCreatedWhen).format(dateFormat)
@@ -497,7 +498,7 @@ export class PKMSyncBackgroundModule {
         const fileName = this.processPageTitleFormat(
             pageTitleFormat,
             item.data.pageTitle,
-            item.data.pageCreatedWhen,
+            item.data.pageCreatedWhen || item.data.createdWhen,
         )
 
         let [pageHeader, annotationsSection] = [null, null]
