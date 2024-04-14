@@ -83,7 +83,10 @@ class Import extends React.PureComponent<Props> {
         })
         // Check local storage for saved paths when the component mounts
 
-        const folders = await browser.storage.local.get('PKMSYNCpkmFolders')
+        const foldersStorage = await browser.storage.local.get(
+            'PKMSYNCpkmFolders',
+        )
+        const folders = foldersStorage.PKMSYNCpkmFolders
 
         if (folders) {
             this.setState({

@@ -1215,10 +1215,7 @@ export class AnnotationsSidebarContainer<
                             ) => {
                                 if (newNote) {
                                     this.processEvent('removePageNoteList', {
-                                        lists: [
-                                            ...this.state.commentBox.lists,
-                                            spaceId,
-                                        ],
+                                        remove: spaceId,
                                     })
                                 } else {
                                     this.processEvent(

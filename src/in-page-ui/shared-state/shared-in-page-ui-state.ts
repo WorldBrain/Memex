@@ -279,6 +279,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
 
         await this._setState('tooltip', true)
         maybeEmitAction()
+        return
     }
 
     async hideTooltip() {
@@ -294,6 +295,7 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             await this.removeTooltip()
         } else {
             await this.showTooltip()
+            return
         }
     }
 

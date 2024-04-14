@@ -451,7 +451,7 @@ interface SidebarEvents {
     }
     cancelNewPageNote: null
     setNewPageNoteLists: { lists: number[] }
-    removePageNoteList: { lists: number[] }
+    removePageNoteList: { remove: UnifiedList['localId'] }
 
     // List instance events
     expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }

@@ -7,6 +7,7 @@ import type { AnnotationFunctions } from '@worldbrain/memex-common/lib/in-page-u
 import { RpcError, runInBackground } from 'src/util/webextensionRPC'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
 import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import { sleepPromise } from 'src/util/promises'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => Promise<void>
@@ -125,20 +126,47 @@ function getShortcutHandlers({
                 inPageUI.hideTooltip()
         },
         createAnnotation: async () => {
-            inPageUI.events.emit('tooltipAction', {
-                annotationCacheId: null,
-                selection: window.getSelection(),
-                openForSpaces: false,
-            })
+            const isToolTipEnabled = inPageUI.componentsShown.tooltip
+
+            if (!isToolTipEnabled) {
+                await inPageUI.toggleTooltip()
+            }
+            if (userSelectedText()) {
+                let executed = false
+                while (!executed) {
+                    try {
+                        executed = inPageUI.events.emit('tooltipAction', {
+                            annotationCacheId: null,
+                            selection: window.getSelection(),
+                            openForSpaces: false,
+                        })
+                    } catch (e) {}
+                    if (!isToolTipEnabled) {
+                        await sleepPromise(200)
+                    }
+                }
+            }
             return // This ensures the function returns Promise<void>
         },
         addToCollection: async () => {
+            const isToolTipEnabled = inPageUI.componentsShown.tooltip
+            if (!isToolTipEnabled) {
+                await inPageUI.toggleTooltip()
+            }
             if (userSelectedText()) {
-                inPageUI.events.emit('tooltipAction', {
-                    annotationCacheId: null,
-                    selection: window.getSelection(),
-                    openForSpaces: true,
-                })
+                let executed = false
+                while (!executed) {
+                    try {
+                        executed = inPageUI.events.emit('tooltipAction', {
+                            annotationCacheId: null,
+                            selection: window.getSelection(),
+                            openForSpaces: true,
+                        })
+                    } catch (e) {}
+                    if (!isToolTipEnabled) {
+                        await sleepPromise(200)
+                    }
+                }
             } else {
                 await inPageUI.showRibbon({ action: 'list' })
             }
