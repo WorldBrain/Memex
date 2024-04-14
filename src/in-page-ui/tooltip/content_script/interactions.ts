@@ -137,7 +137,7 @@ export const insertTooltip = async (params: TooltipInsertDependencies) => {
             saveAnnotation: async () => {}, // Placeholder async function
             renderSpacePicker: () => null, // Placeholder function returning nullr empty object
             analyticsBG: params.analyticsBG,
-            openAnnotationEdit: (openTooltipInAnnotationEditMode) => {
+            openAnnotationEdit: async (openTooltipInAnnotationEditMode) => {
                 const handleExternalAction = (event) => {
                     openTooltipInAnnotationEditMode(
                         event.annotationCacheId,

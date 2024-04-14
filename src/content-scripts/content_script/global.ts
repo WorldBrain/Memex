@@ -685,7 +685,6 @@ export async function main(
                 annotationId = results.annotationId
                 await results.createPromise
             } else if (selection) {
-                console.log('selectionhh', selection)
                 const results = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,

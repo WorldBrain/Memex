@@ -134,6 +134,8 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
         this.setState({
             currentAnnotationLists: annotationLists,
         })
+
+        return annotationLists
     }
 
     setCurrentAnnotation = (annotationId: string) => {
