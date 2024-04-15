@@ -103,7 +103,7 @@ export default class SummarizeBackground {
     ) => {
         const isAllowed = await AIActionAllowed(
             this.analyticsBG,
-            apiKey.length > 0 ? 'AIpowerupOwnKey' : 'AIpowerup',
+            apiKey?.length > 0 ? 'AIpowerupOwnKey' : 'AIpowerup',
             false,
         )
 
