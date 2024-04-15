@@ -147,6 +147,7 @@ export async function updateAICounter() {
         await browser.storage.local.set({
             [COUNTER_STORAGE_KEY]: DEFAULT_COUNTER_STORAGE_KEY,
         })
+        return
     } else {
         const { c, cQ, m } = currentCount[COUNTER_STORAGE_KEY]
         await browser.storage.local.set({
@@ -157,9 +158,8 @@ export async function updateAICounter() {
                 pU: currentCount[COUNTER_STORAGE_KEY].pU,
             },
         })
+        return
     }
-
-    return
 }
 
 export async function checkStatus(feature: PremiumPlans) {
@@ -196,7 +196,6 @@ export async function checkStatus(feature: PremiumPlans) {
             return true
         } else {
             const currentCounter = currentStatus.c
-            console.log('currentCounter', currentCounter)
             if (currentCounter < 25) {
                 return true
             }

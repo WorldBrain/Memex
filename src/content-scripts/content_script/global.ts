@@ -311,8 +311,10 @@ export async function main(
             const oldValues = changes[COUNTER_STORAGE_KEY]?.oldValue
             const newValues = changes[COUNTER_STORAGE_KEY]?.newValue
 
-            const counterQueriesHaveChanged = oldValues.cQ !== newValues.cQ
-            const counterSavedHaveChanged = oldValues.c !== newValues.c
+            const counterQueriesHaveChanged =
+                (oldValues?.cQ ?? null) !== newValues.cQ
+            const counterSavedHaveChanged =
+                (oldValues?.c ?? null) !== newValues.c
 
             if (!counterQueriesHaveChanged && !counterSavedHaveChanged) {
                 return
