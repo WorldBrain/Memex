@@ -1,9 +1,12 @@
 import type Storex from '@worldbrain/storex'
-import type { ContentTypes, UnifiedBlankSearchResult } from './types'
+import type {
+    ContentTypes,
+    UnifiedBlankSearchResult,
+    UnifiedTermsSearchParams,
+} from './types'
 import type { SearchParams as OldSearchParams } from '../types'
 import type {
     Page,
-    Annotation,
     Visit,
     Bookmark,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
@@ -84,9 +87,9 @@ export const sortUnifiedBlankSearchResult = ({
             ),
     )
 
-export const queryAnnotationsByTerms = (storageManager: Storex) => (
-    terms: string[],
-): Promise<Annotation[]> =>
+export const queryAnnotationsByTerms = (
+    storageManager: Storex,
+): UnifiedTermsSearchParams['queryAnnotations'] => (terms, { limit, skip }) =>
     (storageManager.backend as DexieStorageBackend).dexieInstance
         .table('annotations')
         .where('_body_terms')
@@ -94,11 +97,13 @@ export const queryAnnotationsByTerms = (storageManager: Storex) => (
         .or('_comment_terms')
         .anyOf(terms)
         .distinct()
+        .offset(skip)
+        .limit(limit)
         .toArray()
 
-export const queryPagesByTerms = (storageManager: Storex) => async (
-    terms: string[],
-): Promise<Array<Page & { latestTimestamp: number }>> => {
+export const queryPagesByTerms = (
+    storageManager: Storex,
+): UnifiedTermsSearchParams['queryPages'] => async (terms, { limit, skip }) => {
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
     const pages = (await dexie
         .table('pages')
@@ -109,6 +114,8 @@ export const queryPagesByTerms = (storageManager: Storex) => async (
         .or('titleTerms')
         .anyOf(terms)
         .distinct()
+        .offset(skip)
+        .limit(limit)
         .toArray()) as Page[]
 
     const pageUrls = pages.map((p) => p.url)

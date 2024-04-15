@@ -7,6 +7,7 @@ import {
     sortUnifiedBlankSearchResult,
 } from './utils'
 import type {
+    PaginationParams,
     UnifiedBlankSearchParams,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
@@ -93,7 +94,8 @@ const blankSearch = (
 
 const termsSearch = (
     { search }: BackgroundModules,
-    params: Partial<UnifiedTermsSearchParams> & { query: string },
+    params: Partial<UnifiedTermsSearchParams> &
+        PaginationParams & { query: string },
 ) =>
     search['unifiedTermsSearch']({
         filterByDomains: [],
@@ -715,8 +717,8 @@ describe('Unified search tests', () => {
             const now = Date.now()
             const resultA = await termsSearch(backgroundModules, {
                 query: 'test',
-                fromWhen: 0,
-                untilWhen: now,
+                limit: 1000,
+                skip: 0,
             })
             expect(resultA.resultsExhausted).toBe(true)
             expect([...resultA.resultDataByPage]).toEqual([])
@@ -728,8 +730,8 @@ describe('Unified search tests', () => {
 
             const resultA = await termsSearch(backgroundModules, {
                 query: 'test',
-                fromWhen: 0,
-                untilWhen: now,
+                limit: 1000,
+                skip: 0,
             })
             expect(resultA.resultsExhausted).toBe(true)
             expect(formatResults(resultA, { skipSorting: true })).toEqual([
@@ -813,6 +815,160 @@ describe('Unified search tests', () => {
                         ],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_5][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_3,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_3][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_3][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_3][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_3][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_3][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_8,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_6,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                    },
+                ],
+            ])
+        })
+
+        it('should return most-recent highlights and their pages on unfiltered, paginated terms search', async () => {
+            const { backgroundModules } = await setupTest()
+            const now = Date.now()
+
+            const resultA = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 5,
+                skip: 0,
+            })
+            const resultB = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 5,
+                skip: 5,
+            })
+            const resultC = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 5,
+                skip: 10,
+            })
+            expect(resultA.resultsExhausted).toBe(false)
+            expect(resultB.resultsExhausted).toBe(true)
+            expect(resultC.resultsExhausted).toBe(true)
+            expect(formatResults(resultC, { skipSorting: true })).toEqual([])
+            expect(formatResults(resultA, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][0].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][9].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][8].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][7].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][6].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][5].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_4][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_9, // Doesn't contain the term, but has an annotation with it
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_9
+                        ][1].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
+                        latestPageTimestamp:
+                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url, // This one also matches, but will come in the next results batch
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_7
+                        ][0].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_11,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_1,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_5,
+                    {
+                        annotIds: [
+                            // None of these contain the search term
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][0].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_5][1].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_5][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultB, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_7, // This gets duped as it contains matches in both the result batches
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This came in the last batch
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
                     },
                 ],
                 [

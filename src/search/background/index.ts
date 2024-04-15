@@ -327,8 +327,8 @@ export default class SearchBackground {
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
 
         const [pages, annotations] = await Promise.all([
-            params.queryPages(terms),
-            params.queryAnnotations(terms),
+            params.queryPages(terms, params),
+            params.queryAnnotations(terms, params),
         ])
 
         // Add in all the annotations to the results
@@ -356,7 +356,9 @@ export default class SearchBackground {
         return {
             oldestResultTimestamp: 0,
             resultDataByPage,
-            resultsExhausted: true,
+            resultsExhausted:
+                pages.length < params.limit &&
+                annotations.length < params.limit,
         }
     }
 
@@ -381,6 +383,9 @@ export default class SearchBackground {
                 queryAnnotations: queryAnnotationsByTerms(
                     this.options.storageManager,
                 ),
+                // TODO: Fill these in
+                skip: 0,
+                limit: 10,
             })
         }
 
