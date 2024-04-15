@@ -166,12 +166,10 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             'px'
     }
 
-    getTimestampNoteContentForYoutubeNotes(includeLastFewSecs?: number) {
+    getTimestampNoteContentForYoutubeNotes() {
         let videoTimeStampForComment: string | null
 
-        const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp(
-            includeLastFewSecs ?? 0,
-        )
+        const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
         if (videoURLWithTime != null) {
             videoTimeStampForComment = `<a href="${videoURLWithTime}">${humanTimestamp}</a><span>${` `}</span>`
@@ -290,13 +288,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
     }
 
     handleAItimeStampButtonClick = async () => {
-        const includeLastFewSecs = this.state.smartNoteSeconds
-            ? parseInt(this.state.smartNoteSeconds)
-            : 60
-        await globalThis['browser'].storage.local.set({
-            ['smartNoteSecondsStorage']: includeLastFewSecs,
-        })
-
         this.setState({
             showSummarizeTooltip: false,
             showAINoteTooltip: false,
@@ -319,7 +310,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             false,
             false,
             false,
-            this.getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
+            this.getTimestampNoteContentForYoutubeNotes(),
         )
     }
 
@@ -460,10 +451,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
                                     <span>
-                                        Summary of the last X seconds with a
-                                        timestamp. <br />
-                                        Optionally: Adjust seconds into past via
-                                        the text field.
+                                        Summary of the selected video range{' '}
+                                        <br />
                                     </span>
                                 }
                                 placement="bottom"

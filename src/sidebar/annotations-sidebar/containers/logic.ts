@@ -510,31 +510,41 @@ export class SidebarContainerLogic extends UILogic<
             })
         })
 
-        this.summarisePageEvents.on('newSummaryTokenEditor', ({ token }) => {
-            let newToken = token
+        this.summarisePageEvents.on(
+            'newSummaryTokenEditor',
+            async ({ token }) => {
+                let newToken = token
 
-            if (isPageSummaryEmpty) {
-                newToken = newToken.trimStart() // Remove the first two characters
-            }
-            isPageSummaryEmpty = false
-            this.youtubeTranscriptSummary =
-                this.youtubeTranscriptSummary + newToken
-            this.emitMutation({
-                youtubeTranscriptSummaryloadState: { $set: 'success' },
-                youtubeTranscriptSummary: { $apply: (prev) => prev + newToken },
-            })
-            let handledSuccessfully = false
+                if (isPageSummaryEmpty) {
+                    newToken = newToken.trimStart() // Remove the first two characters
+                }
+                isPageSummaryEmpty = false
+                this.youtubeTranscriptSummary =
+                    this.youtubeTranscriptSummary + newToken
+                this.emitMutation({
+                    youtubeTranscriptSummaryloadState: { $set: 'success' },
+                    youtubeTranscriptSummary: {
+                        $apply: (prev) => prev + newToken,
+                    },
+                })
 
-            this.options.events.emit(
-                'triggerYoutubeTimestampSummary',
-                {
-                    text: newToken,
-                },
-                (success) => {
-                    handledSuccessfully = success
-                },
-            )
-        })
+                let executed = false
+                while (!executed) {
+                    try {
+                        executed = this.options.events.emit(
+                            'triggerYoutubeTimestampSummary',
+                            {
+                                text: newToken,
+                            },
+                            (success) => {
+                                executed = success
+                            },
+                        )
+                    } catch (e) {}
+                    await new Promise((resolve) => setTimeout(resolve, 10))
+                }
+            },
+        )
         this.summarisePageEvents.on(
             'newChapterSummaryToken',
             ({ token, chapterSummaryIndex }) => {
@@ -4506,25 +4516,23 @@ export class SidebarContainerLogic extends UILogic<
         })
         this.options.focusCreateForm()
 
-        const maxRetries = 50
-        let handledSuccessfully = false
-
-        for (let i = 0; i < maxRetries; i++) {
-            if (
-                this.options.events.emit(
+        let executed = false
+        while (!executed) {
+            try {
+                executed = this.options.events.emit(
                     'addVideoSnapshotToEditor',
                     {
                         imageData: event.imageData,
                     },
                     (success) => {
-                        handledSuccessfully = success
+                        executed = success
                     },
                 )
-            ) {
-                break
-            }
-            await sleepPromise(50) // wait for half a second before trying again
+            } catch (e) {}
+            await new Promise((resolve) => setTimeout(resolve, 20))
         }
+
+        return
     }
     saveImageAsNewNote: EventHandler<'saveImageAsNewNote'> = async ({
         previousState,
@@ -4741,9 +4749,6 @@ export class SidebarContainerLogic extends UILogic<
 
         await sleepPromise(0)
 
-        const maxRetries = 30
-        let handledSuccessfully = false
-
         const from = event.range.from
         const to = event.range.to
 
@@ -4760,23 +4765,18 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         let executed = false
-        let retries = 0
-        while (!executed && maxRetries < 50) {
-            try {
-                executed = this.options.events.emit(
-                    'triggerYoutubeTimestampSummary',
-                    {
-                        text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
-                        showLoadingSpinner: true,
-                    },
-                    (success) => {
-                        if (success) {
-                            executed = success
-                        }
-                    },
-                )
-            } catch (e) {}
-            await new Promise((resolve) => setTimeout(resolve, 10 * retries))
+        while (!executed) {
+            executed = this.options.events.emit(
+                'triggerYoutubeTimestampSummary',
+                {
+                    text: `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `,
+                    showLoadingSpinner: true,
+                },
+                (success) => {
+                    executed = success
+                },
+            )
+            await new Promise((resolve) => setTimeout(resolve, 10))
         }
 
         // for (let i = 0; i < maxRetries; i++) {

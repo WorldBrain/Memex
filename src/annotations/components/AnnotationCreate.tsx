@@ -120,15 +120,18 @@ export class AnnotationCreate extends React.Component<Props, State>
                         return
                     }
 
-                    if (text) {
-                        await sleepPromise(50)
-                        this.editor?.addYoutubeTimestampWithText(
-                            text,
-                            showLoadingSpinner,
-                        )
-                        callback(true) // signal successful processing
+                    if (this.editor && !(await this.editor.checkIfReady())) {
+                        callback(false) // signal that listener isn't ready
                     } else {
-                        callback(false) // signal failure or "not ready" due to missing data
+                        if (text) {
+                            this.editor?.addYoutubeTimestampWithText(
+                                text,
+                                showLoadingSpinner,
+                            )
+                            callback(true) // signal successful processing
+                        } else {
+                            callback(false) // signal failure or "not ready" due to missing data
+                        }
                     }
                 },
             )
@@ -140,12 +143,16 @@ export class AnnotationCreate extends React.Component<Props, State>
                         return
                     }
 
-                    if (imageData) {
-                        await sleepPromise(50)
-                        this.editor?.addVideoSnapshotToEditor(imageData)
-                        callback(true) // signal successful processing
+                    if (this.editor && !(await this.editor.checkIfReady())) {
+                        callback(false) // signal that listener isn't ready
+                        return
                     } else {
-                        callback(false) // signal failure or "not ready" due to missing data
+                        if (imageData) {
+                            this.editor?.addVideoSnapshotToEditor(imageData)
+                            callback(true) // signal successful processing
+                        } else {
+                            callback(false) // signal failure or "not ready" due to missing data
+                        }
                     }
                 },
             )
@@ -157,12 +164,17 @@ export class AnnotationCreate extends React.Component<Props, State>
                         return
                     }
 
-                    if (imageData) {
-                        await sleepPromise(50)
-                        this.editor?.addImageToEditor(imageData)
-                        callback(true) // signal successful processing
+                    if (this.editor && !(await this.editor.checkIfReady())) {
+                        callback(false) // signal that listener isn't ready
+                        return
                     } else {
-                        callback(false) // signal failure or "not ready" due to missing data
+                        if (imageData) {
+                            await sleepPromise(50)
+                            this.editor?.addImageToEditor(imageData)
+                            callback(true) // signal successful processing
+                        } else {
+                            callback(false) // signal failure or "not ready" due to missing data
+                        }
                     }
                 },
             )
