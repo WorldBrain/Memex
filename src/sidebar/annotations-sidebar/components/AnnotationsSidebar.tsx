@@ -1969,7 +1969,7 @@ export class AnnotationsSidebar extends React.Component<
                         const isAllowed = await AIActionAllowed(
                             this.props.analyticsBG,
                             this.props.hasKey ? 'AIpowerupOwnKey' : 'AIpowerup',
-                            false,
+                            true,
                         )
 
                         return isAllowed
