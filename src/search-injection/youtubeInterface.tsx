@@ -352,11 +352,9 @@ function renderYoutubeMenuButton(panel, annotationsFunctions: any, icon) {
     panel.prepend(newEntry)
 }
 
-export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
-    includeLastFewSecs,
-) {
-    const [startTimeURL] = getHTML5VideoTimestamp(includeLastFewSecs)
-    const [endTimeURL] = getHTML5VideoTimestamp(0)
+export async function getTimestampedNoteWithAIsummaryForYoutubeNotes() {
+    const [startTimeURL] = getHTML5VideoTimestamp()
+    const [endTimeURL] = getHTML5VideoTimestamp()
 
     const startTimeSecs = parseFloat(
         new URL(startTimeURL).searchParams.get('t'),
@@ -371,9 +369,7 @@ export function getTimestampNoteContentForYoutubeNotes(
 ) {
     let videoTimeStampForComment: string | null
 
-    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp(
-        includeLastFewSecs ?? 0,
-    )
+    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
     if (videoURLWithTime != null) {
         videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`

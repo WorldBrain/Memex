@@ -451,8 +451,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
                                     <span>
-                                        Summary of the selected video range{' '}
-                                        <br />
+                                        Instant note with timestamp and summary
+                                        <br /> of the selected video range
                                     </span>
                                 }
                                 placement="bottom"
