@@ -151,7 +151,7 @@ export default class SearchBackground {
     private async filterUnifiedSearchResultsByFilters(
         resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
         { filterByDomains, filterByListIds }: UnifiedSearchParams,
-    ) {
+    ): Promise<void> {
         if (
             !resultDataByPage.size ||
             (!filterByDomains.length && !filterByListIds.length)
@@ -160,6 +160,7 @@ export default class SearchBackground {
         }
 
         // 1. OR'd filter by domains is easy - we already have all the data we need
+        const pageIdsToDelete = new Set<string>()
         if (filterByDomains.length) {
             resultDataByPage.forEach((_, pageId) => {
                 const isDomainIncluded = filterByDomains.reduce(
@@ -170,10 +171,11 @@ export default class SearchBackground {
                     false,
                 )
                 if (!isDomainIncluded) {
-                    resultDataByPage.delete(pageId)
+                    pageIdsToDelete.add(pageId)
                 }
             })
         }
+        pageIdsToDelete.forEach((id) => resultDataByPage.delete(id))
         if (!resultDataByPage.size || !filterByListIds.length) {
             return
         }
@@ -258,9 +260,10 @@ export default class SearchBackground {
                 !data.annotations.length &&
                 !hasEntriesForAllFilteredLists(pageListEntriesByPageId[pageId])
             ) {
-                resultDataByPage.delete(pageId)
+                pageIdsToDelete.add(pageId)
             }
         })
+        pageIdsToDelete.forEach((id) => resultDataByPage.delete(id))
     }
 
     private async unifiedBlankSearch(
