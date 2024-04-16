@@ -104,6 +104,15 @@ export class AnnotationCreate extends React.Component<Props, State>
         isDeboucingEditor: false,
     }
 
+    // Initialize an array to act as the buffer
+    private eventBuffer: Array<{
+        text: string
+        showLoadingSpinner: boolean
+    }> = []
+
+    // Flag to indicate if the buffer is currently being processed
+    private processingBuffer = false
+
     async componentDidMount() {
         // if (this.props.autoFocus) {
         //     this.focus()
@@ -115,23 +124,20 @@ export class AnnotationCreate extends React.Component<Props, State>
             youtubeSummariseEvents.on(
                 'triggerYoutubeTimestampSummary',
                 async ({ text, showLoadingSpinner }, callback) => {
-                    if (!this.editor) {
-                        callback(false) // signal that listener isn't ready
-                        return
-                    }
+                    // Add the event to the buffer
 
-                    if (this.editor && !(await this.editor.checkIfReady())) {
-                        callback(false) // signal that listener isn't ready
+                    if (!this.editor) {
+                        callback(false)
+                    } else if (!(await this.editor.checkIfReady())) {
+                        callback(false)
                     } else {
-                        if (text) {
-                            this.editor?.addYoutubeTimestampWithText(
-                                text,
-                                showLoadingSpinner,
-                            )
-                            callback(true) // signal successful processing
-                        } else {
-                            callback(false) // signal failure or "not ready" due to missing data
-                        }
+                        this.eventBuffer.push({
+                            text,
+                            showLoadingSpinner,
+                        })
+                        callback(true)
+                        // Process the buffer if not already processing
+                        await this.processBuffer()
                     }
                 },
             )
@@ -194,6 +200,31 @@ export class AnnotationCreate extends React.Component<Props, State>
             youtubeSummariseEvents.removeAllListeners(
                 'triggerYoutubeTimestampSummary',
             )
+        }
+    }
+
+    // Method to process the buffer
+    private async processBuffer() {
+        if (!this.processingBuffer) {
+            this.processingBuffer = true
+            while (this.eventBuffer.length > 0) {
+                const { text, showLoadingSpinner } = this.eventBuffer.shift()!
+
+                if (text) {
+                    await this.editor.addYoutubeTimestampWithText(
+                        text,
+                        showLoadingSpinner,
+                    )
+
+                    console.log(text)
+                    if (text.includes(')')) {
+                        await sleepPromise(100)
+                    }
+                } else {
+                    this.processingBuffer = false
+                }
+            }
+            this.processingBuffer = false
         }
     }
 
