@@ -51,6 +51,8 @@ export function shortcutStorageToState(storage): BaseKeyboardShortcuts {
                     ? 'createSharedAnnotationAndAddToCollection'
                     : key === 'openDashboard'
                     ? 'openDashboardInNewTab'
+                    : key === 'askAI'
+                    ? 'instaSummarize'
                     : undefined,
         }
     }

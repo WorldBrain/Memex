@@ -216,7 +216,6 @@ export class AnnotationCreate extends React.Component<Props, State>
                         showLoadingSpinner,
                     )
 
-                    console.log(text)
                     if (text.includes(')')) {
                         await sleepPromise(100)
                     }

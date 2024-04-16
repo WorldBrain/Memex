@@ -3551,12 +3551,15 @@ export class SidebarContainerLogic extends UILogic<
         this.emitMutation({ activeTab: { $set: 'summary' } })
         if (event.textToProcess && event.prompt) {
             let executed = false
+            let prompt = event.prompt
+
             while (!executed) {
                 try {
                     executed = this.options.events.emit(
                         'addSelectedTextAndInstaPrompt',
                         event.textToProcess,
-                        event.prompt,
+                        prompt,
+                        event.instaExecutePrompt,
                         (success) => {
                             executed = success
                         },
@@ -3584,11 +3587,28 @@ export class SidebarContainerLogic extends UILogic<
         }
         if (!event.textToProcess) {
             let executed = false
+            let prompt = event.prompt
+
+            if (event.prompt == null) {
+                const syncsettings =
+                    (await this.syncSettings.openAI?.get(
+                        'promptSuggestions',
+                    )) ??
+                    AI_PROMPT_DEFAULTS.map((text) => ({
+                        text,
+                        isEditing: null,
+                        isFocused: false,
+                    }))
+                prompt = syncsettings[0].text
+            }
+
             while (!executed) {
                 try {
                     executed = this.options.events.emit(
                         'addPageUrlToEditor',
                         window.location.href,
+                        prompt,
+                        event.instaExecutePrompt,
                         (success) => {
                             executed = success
                         },

@@ -252,6 +252,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
                 prompt: event.prompt,
+                instaExecutePrompt: event.instaExecutePrompt,
             })
         } else if (event.action === 'add_media_range_to_ai_context') {
             await this.processEvent('setActiveSidebarTab', {

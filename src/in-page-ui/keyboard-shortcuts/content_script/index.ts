@@ -99,6 +99,17 @@ function getShortcutHandlers({
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText: window.getSelection().toString(),
+                prompt: null,
+                instaExecutePrompt: false,
+            })
+            inPageUI.hideTooltip()
+        },
+        instaSummarize: async () => {
+            inPageUI.showSidebar({
+                action: 'show_page_summary',
+                highlightedText: window.getSelection().toString(),
+                prompt: null,
+                instaExecutePrompt: true,
             })
             inPageUI.hideTooltip()
         },
@@ -182,8 +193,10 @@ function getShortcutHandlers({
                     true,
                 )
                 // Explicitly return void
+                inPageUI.hideTooltip()
                 return
             } else {
+                inPageUI.hideTooltip()
                 return inPageUI.showSidebar({
                     action: 'share_page_link',
                 })

@@ -86,7 +86,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleShowTutorial: null
         toggleFeed: null
         toggleReadingView: null
-        toggleAskAI: null
+        toggleAskAI: boolean | null
         toggleRabbitHole: null
         toggleQuickSearch: null
         toggleTheme: { themeVariant: MemexThemeVariant }
@@ -375,9 +375,13 @@ export class RibbonContainerLogic extends UILogic<
             this.setReadingWidth()
         }
     }
-    toggleAskAI: EventHandler<'toggleAskAI'> = async ({ previousState }) => {
+    toggleAskAI: EventHandler<'toggleAskAI'> = async ({
+        event,
+        previousState,
+    }) => {
         await this.dependencies.inPageUI.showSidebar({
             action: 'show_page_summary',
+            instaExecutePrompt: event,
         })
     }
     toggleRabbitHole: EventHandler<'toggleRabbitHole'> = async ({
