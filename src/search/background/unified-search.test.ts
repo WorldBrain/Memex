@@ -1175,5 +1175,99 @@ describe('Unified search tests', () => {
                 ],
             ])
         })
+
+        it('should return highlights and their pages on domain filtered, paginated terms search', async () => {
+            const { backgroundModules } = await setupTest()
+
+            // const resultA = await blankSearch(backgroundModules, {
+            //     fromWhen: 0,
+            //     untilWhen: now,
+            //     lowestTimeBound,
+            //     filterByDomains: ['test.com'],
+            // })
+            // const resultB = await blankSearch(backgroundModules, {
+            //     fromWhen: 0,
+            //     untilWhen: now,
+            //     lowestTimeBound,
+            //     filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+            // })
+            // const resultC = await blankSearch(backgroundModules, {
+            //     fromWhen: 0,
+            //     untilWhen: now,
+            //     lowestTimeBound,
+            //     filterByDomains: [
+            //         'wikipedia.org',
+            //         'en.wikipedia.org',
+            //         'test-2.com',
+            //         'en.test-2.com',
+            //         'test.com',
+            //     ],
+            // })
+
+            const resultA = await termsSearch(backgroundModules, {
+                query: 'term',
+                limit: 100,
+                skip: 0,
+                filterByDomains: ['test.com'],
+            })
+            const resultB = await termsSearch(backgroundModules, {
+                query: 'term',
+                limit: 100,
+                skip: 0,
+                filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+            })
+            // Same as prev but paginated
+            const resultC = await termsSearch(backgroundModules, {
+                query: 'term',
+                limit: 1,
+                skip: 0,
+                filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+            })
+            const resultD = await termsSearch(backgroundModules, {
+                query: 'term',
+                limit: 2,
+                skip: 1,
+                filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+            })
+
+            // Same as prev but with multiple terms, which are only in one of the results
+            const resultE = await termsSearch(backgroundModules, {
+                query: 'term phyla',
+                limit: 20,
+                skip: 0,
+                filterByDomains: ['test-2.com', 'test.com'], // Multiple values do an OR
+            })
+
+            expect(resultA.resultsExhausted).toBe(true)
+            expect(resultB.resultsExhausted).toBe(true)
+            expect(resultC.resultsExhausted).toBe(false)
+            expect(resultD.resultsExhausted).toBe(true)
+            expect(resultE.resultsExhausted).toBe(true)
+            expect(
+                formatResults(resultA, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual([DATA.PAGE_ID_10])
+            expect(
+                formatResults(resultB, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual([DATA.PAGE_ID_9, DATA.PAGE_ID_10])
+            expect(
+                formatResults(resultC, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual([DATA.PAGE_ID_9])
+            expect(
+                formatResults(resultD, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual([DATA.PAGE_ID_10])
+            expect(
+                formatResults(resultE, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual([DATA.PAGE_ID_9])
+        })
     })
 })
