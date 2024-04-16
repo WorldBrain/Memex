@@ -126,6 +126,7 @@ const generateForPages = async ({
     dataFetchers,
     ...params
 }: GeneratorInput): Promise<TemplateDoc[]> => {
+    console.log('pageData')
     const pageData = await dataFetchers.getPages(params.normalizedPageUrls)
 
     let pageTags: UrlMappedData<string[]> = {}
@@ -583,6 +584,8 @@ export default async function generateTemplateDocs(
     params: GeneratorInput,
 ): Promise<TemplateDoc[]> {
     let docs: TemplateDoc[] = []
+
+    console.log('arrives here too', params)
 
     // This condition is needed as under some contexts, notes aren't specified upfront (page copy-paster), but users can still reference a page's notes in their templates
     //  so we need to get the note URLs by looking them up using the page URLs
