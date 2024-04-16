@@ -66,7 +66,7 @@ export interface Props extends RibbonSubcomponentProps {
     hideOnMouseLeave?: boolean
     toggleFeed: () => void
     showFeed: boolean
-    toggleAskAI: () => void
+    toggleAskAI: (instaExecute: boolean) => void
     toggleRabbitHole: () => void
     toggleQuickSearch: () => void
     openPDFinViewer: () => void
@@ -1494,6 +1494,10 @@ export default class Ribbon extends Component<Props, State> {
                         <TooltipContentBox>
                             {this.getTooltipText('askAI')}
                             <div>
+                                <strong>Shift + Click</strong>to insta execute
+                                with default template
+                            </div>
+                            <div>
                                 <strong>{Ribbon.ALT_KEY} + Click</strong>for
                                 tutorials
                             </div>
@@ -1522,8 +1526,10 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.altKey) {
                                 this.props.setTutorialIdToOpen('askAI')
+                            } else if (e.shiftKey) {
+                                this.props.toggleAskAI(true)
                             } else {
-                                this.props.toggleAskAI()
+                                this.props.toggleAskAI(false)
                             }
                         }}
                         icon={'stars'}
@@ -1533,8 +1539,10 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.altKey) {
                                 this.props.setTutorialIdToOpen('askAI')
+                            } else if (e.shiftKey) {
+                                this.props.toggleAskAI(true)
                             } else {
-                                this.props.toggleAskAI()
+                                this.props.toggleAskAI(false)
                             }
                         }}
                         color={'greyScale6'}
