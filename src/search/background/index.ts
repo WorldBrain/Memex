@@ -16,6 +16,7 @@ import type {
     UnifiedBlankSearchResult,
     UnifiedBlankSearchParams,
     UnifiedTermsSearchParams,
+    PaginationParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
@@ -146,6 +147,16 @@ export default class SearchBackground {
             ...oldestTimestamps.filter(Boolean).map((t) => t.time),
         )
         return oldestTimestamp !== Infinity ? oldestTimestamp : 0
+    }
+
+    private sliceUnifiedSearchResults(
+        resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
+        { limit, skip }: PaginationParams,
+    ): UnifiedBlankSearchResult['resultDataByPage'] {
+        // NOTE: Current implementation ignores annotation count, and simply paginates by the number of pages in the results
+        return new Map(
+            [...resultDataByPage.entries()].slice(skip, skip + limit),
+        )
     }
 
     private async filterUnifiedSearchResultsByFilters(
@@ -330,8 +341,8 @@ export default class SearchBackground {
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
 
         const [pages, annotations] = await Promise.all([
-            params.queryPages(terms, params),
-            params.queryAnnotations(terms, params),
+            params.queryPages(terms),
+            params.queryAnnotations(terms),
         ])
 
         // Add in all the annotations to the results
@@ -356,12 +367,16 @@ export default class SearchBackground {
             })
         }
 
+        await this.filterUnifiedSearchResultsByFilters(resultDataByPage, params)
+        const paginatedResults = this.sliceUnifiedSearchResults(
+            resultDataByPage,
+            params,
+        )
+
         return {
             oldestResultTimestamp: 0,
-            resultDataByPage,
-            resultsExhausted:
-                pages.length < params.limit &&
-                annotations.length < params.limit,
+            resultDataByPage: paginatedResults,
+            resultsExhausted: paginatedResults.size < params.limit,
         }
     }
 

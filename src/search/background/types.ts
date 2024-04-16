@@ -206,12 +206,8 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
     PaginationParams & {
         queryPages: (
             terms: string[],
-            params: PaginationParams,
         ) => Promise<Array<Page & { latestTimestamp: number }>>
-        queryAnnotations: (
-            terms: string[],
-            params: PaginationParams,
-        ) => Promise<_Annotation[]>
+        queryAnnotations: (terms: string[]) => Promise<_Annotation[]>
     }
 
 export type UnifiedBlankSearchParams = UnifiedSearchParams & {

@@ -724,7 +724,7 @@ describe('Unified search tests', () => {
             expect([...resultA.resultDataByPage]).toEqual([])
         })
 
-        it('should return most-recent highlights and their pages on unfiltered, unbounded terms search', async () => {
+        it('should return highlights and their pages on unfiltered, unbounded terms search', async () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
@@ -849,7 +849,7 @@ describe('Unified search tests', () => {
             ])
         })
 
-        it('should return most-recent highlights and their pages on unfiltered, paginated terms search', async () => {
+        it('should return highlights and their pages on unfiltered, paginated terms search', async () => {
             const { backgroundModules } = await setupTest()
             const now = Date.now()
 
@@ -869,7 +869,7 @@ describe('Unified search tests', () => {
                 skip: 10,
             })
             expect(resultA.resultsExhausted).toBe(false)
-            expect(resultB.resultsExhausted).toBe(true)
+            expect(resultB.resultsExhausted).toBe(false)
             expect(resultC.resultsExhausted).toBe(true)
             expect(formatResults(resultC, { skipSorting: true })).toEqual([])
             expect(formatResults(resultA, { skipSorting: true })).toEqual([
@@ -917,14 +917,13 @@ describe('Unified search tests', () => {
                     DATA.PAGE_ID_7,
                     {
                         annotIds: [
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url, // This one also matches, but will come in the next results batch
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
                         ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_7
-                        ][0].lastEdited.valueOf(),
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
                     },
                 ],
                 [
@@ -935,6 +934,8 @@ describe('Unified search tests', () => {
                             DATA.VISITS[DATA.PAGE_ID_11][0].time,
                     },
                 ],
+            ])
+            expect(formatResults(resultB, { skipSorting: true })).toEqual([
                 [
                     DATA.PAGE_ID_1,
                     {
@@ -954,21 +955,6 @@ describe('Unified search tests', () => {
                         ],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_5][0].time,
-                    },
-                ],
-            ])
-            expect(formatResults(resultB, { skipSorting: true })).toEqual([
-                [
-                    DATA.PAGE_ID_7, // This gets duped as it contains matches in both the result batches
-                    {
-                        annotIds: [
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url, // This came in the last batch
-                        ],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
                     },
                 ],
                 [
