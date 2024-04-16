@@ -119,7 +119,6 @@ export default class CopyPasterBackground {
         annotationUrls,
         normalizedPageUrls,
     }) => {
-        console.log('arrives here')
         const template = await this.storage.findTemplate({ id })
         const templateDocs = await generateTemplateDocs({
             annotationUrls,

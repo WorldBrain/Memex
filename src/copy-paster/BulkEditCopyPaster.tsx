@@ -11,18 +11,11 @@ export interface Props
 
 export default class BulkEditCopyPaster extends React.PureComponent<Props> {
     private renderTemplate = async (id: number) => {
-        console.log(
-            'rendertemplate',
-            id,
-            this.props.annotationUrls ?? [],
-            this.props.normalizedPageUrls,
-        )
         const output = await this.props.copyPasterBG.renderTemplate({
             id,
             annotationUrls: this.props.annotationUrls ?? [],
             normalizedPageUrls: this.props.normalizedPageUrls,
         })
-        console.log('output', output)
         return output
     }
 
