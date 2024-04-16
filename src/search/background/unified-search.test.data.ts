@@ -253,7 +253,7 @@ export const ANNOTATIONS = {
             url: 'en.wikipedia.org/wiki/Eurasia/#1711067799676',
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
-            body: '<div>Honshu cheese</div>',
+            body: '<div>Honshu cheese test</div>',
             comment: '',
             color: 'default',
             selector: {

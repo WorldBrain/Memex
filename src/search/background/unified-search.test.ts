@@ -1,3 +1,4 @@
+import omit from 'lodash/omit'
 import type Storex from '@worldbrain/storex'
 import * as DATA from './unified-search.test.data'
 import { setupBackgroundIntegrationTest } from 'src/tests/background-integration-tests'
@@ -20,7 +21,9 @@ async function insertTestData(storageManager: Storex) {
         await storageManager.collection('customLists').createObject(doc)
     }
     for (const doc of Object.values(DATA.PAGES)) {
-        await storageManager.collection('pages').createObject(doc)
+        await storageManager
+            .collection('pages')
+            .createObject(omit(doc, 'listIds'))
         if ('listIds' in doc) {
             for (const listId of doc.listIds) {
                 await storageManager
@@ -42,7 +45,9 @@ async function insertTestData(storageManager: Storex) {
     }
     let idCounter = 0
     for (const doc of Object.values(DATA.ANNOTATIONS).flat()) {
-        await storageManager.collection('annotations').createObject(doc)
+        await storageManager
+            .collection('annotations')
+            .createObject(omit(doc, 'listIds'))
         const privacyLevel =
             'listIds' in doc
                 ? AnnotationPrivacyLevels.PROTECTED
@@ -748,7 +753,7 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_4][0].time,
@@ -886,7 +891,7 @@ describe('Unified search tests', () => {
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
                             // DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
                             DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
                         ],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_4][0].time,
@@ -984,6 +989,123 @@ describe('Unified search tests', () => {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                    },
+                ],
+            ])
+        })
+
+        it('should return highlights and their pages on list filtered, paginated terms search', async () => {
+            const { backgroundModules } = await setupTest()
+
+            const resultA = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 1,
+                skip: 0,
+                filterByListIds: [DATA.LIST_ID_1],
+            })
+            const resultB = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 1,
+                skip: 1,
+                filterByListIds: [DATA.LIST_ID_1],
+            })
+            const resultC = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 1,
+                skip: 2,
+                filterByListIds: [DATA.LIST_ID_1],
+            })
+
+            expect(resultA.resultsExhausted).toBe(false)
+            expect(resultB.resultsExhausted).toBe(false)
+            expect(resultC.resultsExhausted).toBe(true)
+            expect(formatResults(resultA, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_4][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultB, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_1,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultC, { skipSorting: true })).toEqual([])
+
+            // NOTE: Same query as above, but with a bigger pag limit
+            const resultD = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 10,
+                skip: 0,
+                filterByListIds: [DATA.LIST_ID_1],
+            })
+            expect(resultD.resultsExhausted).toBe(true)
+            // NOTE: Same results as above, but all together
+            expect(formatResults(resultD, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_4][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_1,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                    },
+                ],
+            ])
+
+            const resultF = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 10,
+                skip: 0,
+                filterByListIds: [DATA.LIST_ID_1, DATA.LIST_ID_3], // Multiple values do an AND
+            })
+            expect(resultF.resultsExhausted).toBe(true)
+            expect(formatResults(resultF, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_1,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                    },
+                ],
+            ])
+
+            const resultG = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 10,
+                skip: 0,
+                filterByListIds: [DATA.LIST_ID_2],
+            })
+            expect(resultG.resultsExhausted).toBe(true)
+            expect(formatResults(resultG)).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][8].url,
+                            // Thess ones are selectively shared to a different list to the parent page, thus get omitted (even though they match the terms)
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_4][0].time,
                     },
                 ],
             ])
