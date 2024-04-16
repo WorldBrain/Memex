@@ -271,7 +271,7 @@ export const ANNOTATIONS = {
             url: 'en.wikipedia.org/wiki/Eurasia/#1711067799679',
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
-            body: '<div>Good highlight test</div>',
+            body: '<div>Good highlight test honshu</div>',
             comment: '',
             color: 'default',
             selector: {

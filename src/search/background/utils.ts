@@ -9,6 +9,7 @@ import type {
     Page,
     Visit,
     Bookmark,
+    Annotation,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type Dexie from 'dexie'
@@ -87,34 +88,51 @@ export const sortUnifiedBlankSearchResult = ({
             ),
     )
 
+/** Given separate result sets of the same type, gets the intersection of them / ANDs them together by ID */
+const intersectResults = <T extends { url: string }>(results: T[][]): T[] =>
+    results.reduce((a, b) => {
+        const ids = new Set(b.map((r) => r.url))
+        return a.filter((r) => ids.has(r.url))
+    })
+
 export const queryAnnotationsByTerms = (
     storageManager: Storex,
-): UnifiedTermsSearchParams['queryAnnotations'] => (terms) =>
-    (storageManager.backend as DexieStorageBackend).dexieInstance
-        .table('annotations')
-        .where('_body_terms')
-        .anyOf(terms)
-        .or('_comment_terms')
-        .anyOf(terms)
-        .distinct()
-        .toArray()
+): UnifiedTermsSearchParams['queryAnnotations'] => async (terms) => {
+    const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
+    const resultsPerTerm = await Promise.all(
+        terms.map((term) =>
+            dexie
+                .table<Annotation>('annotations')
+                .where('_body_terms')
+                .startsWith(term)
+                .or('_comment_terms')
+                .startsWith(term)
+                .distinct()
+                .toArray(),
+        ),
+    )
+    return intersectResults(resultsPerTerm)
+}
 
 export const queryPagesByTerms = (
     storageManager: Storex,
 ): UnifiedTermsSearchParams['queryPages'] => async (terms) => {
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
-    const pages = (await dexie
-        .table('pages')
-        .where('terms')
-        .anyOf(terms)
-        .or('urlTerms')
-        .anyOf(terms)
-        .or('titleTerms')
-        .anyOf(terms)
-        .distinct()
-        .toArray()) as Page[]
-
-    const pageUrls = pages.map((p) => p.url)
+    const resultsPerTerm = await Promise.all(
+        terms.map((term) =>
+            dexie
+                .table<Page>('pages')
+                .where('terms')
+                .startsWith(term)
+                .or('urlTerms')
+                .startsWith(term)
+                .or('titleTerms')
+                .startsWith(term)
+                .distinct()
+                .toArray(),
+        ),
+    )
+    const pages = intersectResults(resultsPerTerm)
 
     // Get latest visit/bm for each page
     const latestTimestampByPageUrl = new Map<string, number>()
@@ -123,12 +141,16 @@ export const queryPagesByTerms = (
             url,
             Math.max(time, latestTimestampByPageUrl.get(url) ?? 0),
         )
-    const queryTimestamps = <T>(table: Dexie.Table): Promise<T[]> =>
-        table.where('url').anyOf(pageUrls).reverse().sortBy('time')
+    const queryTimestamps = <T>(table: Dexie.Table<T>): Promise<T[]> =>
+        table
+            .where('url')
+            .anyOf(pages.map((p) => p.url))
+            .reverse()
+            .sortBy('time')
 
     const [visits, bookmarks] = await Promise.all([
-        queryTimestamps<Visit>(dexie.table('visits')),
-        queryTimestamps<Bookmark>(dexie.table('bookmarks')),
+        queryTimestamps(dexie.table<Visit>('visits')),
+        queryTimestamps(dexie.table<Bookmark>('bookmarks')),
     ])
 
     visits.forEach(trackLatestTimestamp)

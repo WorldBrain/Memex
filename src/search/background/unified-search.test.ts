@@ -856,7 +856,6 @@ describe('Unified search tests', () => {
 
         it('should return highlights and their pages on unfiltered, paginated terms search', async () => {
             const { backgroundModules } = await setupTest()
-            const now = Date.now()
 
             const resultA = await termsSearch(backgroundModules, {
                 query: 'test',
@@ -992,6 +991,52 @@ describe('Unified search tests', () => {
                     },
                 ],
             ])
+
+            // Now test multi-terms search (should "AND" all terms)
+            const resultD = await termsSearch(backgroundModules, {
+                query: 'honshu',
+                limit: 10,
+                skip: 0,
+            })
+            const resultE = await termsSearch(backgroundModules, {
+                query: 'honshu test',
+                limit: 10,
+                skip: 0,
+            })
+            expect(resultD.resultsExhausted).toBe(true)
+            expect(resultE.resultsExhausted).toBe(true)
+            expect(formatResults(resultD, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][4].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+            expect(formatResults(resultE, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][4].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_4][3].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][2].lastEdited.valueOf(),
+                    },
+                ],
+            ])
         })
 
         it('should return highlights and their pages on list filtered, paginated terms search', async () => {
@@ -1065,6 +1110,26 @@ describe('Unified search tests', () => {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                    },
+                ],
+            ])
+
+            // NOTE: Same query as above, but with multiple terms (ANDed)
+            const resultE = await termsSearch(backgroundModules, {
+                query: 'test honshu',
+                limit: 10,
+                skip: 0,
+                filterByListIds: [DATA.LIST_ID_1],
+            })
+            expect(resultE.resultsExhausted).toBe(true)
+            expect(formatResults(resultE, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_4][1].url],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_4
+                        ][2].lastEdited.valueOf(),
                     },
                 ],
             ])
