@@ -7,7 +7,12 @@ import ItemBoxBottom, {
 
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import * as icons from 'src/common-ui/components/design-library/icons'
-import type { PageData, PageInteractionProps, PageResult } from '../types'
+import type {
+    PageData,
+    PageInteractionProps,
+    PageResult,
+    SearchType,
+} from '../types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import ListsSegment from 'src/common-ui/components/result-item-spaces-segment'
 import type { ListDetailsGetter } from 'src/annotations/types'
@@ -54,6 +59,7 @@ export interface Props
     renderSpacePicker: () => JSX.Element
     isNotesSidebarShown?: boolean
     isListsSidebarShown?: boolean
+    searchType: SearchType
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -1000,7 +1006,8 @@ export default class PageResultView extends PureComponent<Props> {
                             spacePickerButtonRef={this.spacePickerBarRef}
                         />
                     )}
-                    {this.props.searchQuery?.length > 0 &&
+                    {this.props.searchType !== 'notes' &&
+                        this.props.searchQuery?.length > 0 &&
                         this.props.text?.length > 0 && (
                             <ResultsMatchingTextToggleContainer
                                 showAll={this.props.showAllResults}

@@ -734,6 +734,7 @@ export default class SearchResultsContainer extends React.Component<
                             : undefined
                     }
                     filterbyList={this.props.filterByList}
+                    searchType={this.props.searchType}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
                     searchQuery={this.props.searchQuery}
                     renderSpacePicker={() => (
