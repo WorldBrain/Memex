@@ -48,12 +48,13 @@ import {
     queryPagesByTerms,
 } from './utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 
 const dayMs = 1000 * 60 * 60 * 24
 
 type UnifiedSearchLookupData = {
-    pages: Map<string, Omit<AnnotPage, 'lists' | 'annotations' | 'hasBookmark'>>
-    annotations: Map<string, Annotation>
+    pages: Map<string, Omit<AnnotPage, 'annotations' | 'hasBookmark'>>
+    annotations: Map<string, Annotation & { lists: number[] }>
 }
 
 export default class SearchBackground {
@@ -419,8 +420,6 @@ export default class SearchBackground {
                 }
                 return {
                     ...page,
-                    lists: [], // TODO: lookup lists
-                    hasBookmark: false, // TODO: lookup bookmark
                     annotations: annotations
                         .map((annot) => dataLookups.annotations.get(annot.url))
                         .filter(Boolean),
@@ -444,23 +443,49 @@ export default class SearchBackground {
         }
 
         const pageIds = [...resultDataByPage.keys()]
-        const pageData: Page[] = await this.options.storageManager
+        const pageData = await this.options.storageManager
             .collection('pages')
-            .findObjects({
+            .findObjects<Page>({
                 url: { $in: pageIds },
             })
 
         const annotIds = [
             ...resultDataByPage.values(),
         ].flatMap(({ annotations }) => annotations.map((a) => a.url))
-        const annotData: Annotation[] = await this.options.storageManager
+        const annotData = await this.options.storageManager
             .collection('annotations')
-            .findObjects({
-                url: { $in: [...annotIds] },
+            .findObjects<Annotation>({
+                url: { $in: annotIds },
             })
 
-        pageData.map((p) => lookups.pages.set(p.url, p))
-        annotData.map((a) => lookups.annotations.set(a.url, a))
+        const pageListEntries = await this.options.storageManager
+            .collection('pageListEntries')
+            .findObjects<PageListEntry>({
+                listId: { $ne: SPECIAL_LIST_IDS.INBOX },
+                pageUrl: { $in: pageIds },
+            })
+        const annotListEntries = await this.options.storageManager
+            .collection('annotListEntries')
+            .findObjects<AnnotationListEntry>({
+                listId: { $ne: SPECIAL_LIST_IDS.INBOX },
+                url: { $in: annotIds },
+            })
+        const listIdsByPage = groupBy(pageListEntries, (e) => e.pageUrl)
+        const listIdsByAnnot = groupBy(annotListEntries, (e) => e.url)
+
+        pageData.forEach((p) =>
+            lookups.pages.set(p.url, {
+                ...p,
+                lists: (listIdsByPage[p.url] ?? []).map((e) => e.listId),
+            }),
+        )
+        annotData.forEach((a) =>
+            lookups.annotations.set(a.url, {
+                ...a,
+                lists: (listIdsByAnnot[a.url] ?? []).map((e) => e.listId),
+            }),
+        )
+
         return lookups
     }
 
