@@ -80,12 +80,12 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
             }
         }
 
-        if (page.hasBookmark) {
-            await storageManager.collection('bookmarks').createObject({
-                url: page.url,
-                time: Date.now(),
-            })
-        }
+        // if (page.hasBookmark) {
+        //     await storageManager.collection('bookmarks').createObject({
+        //         url: page.url,
+        //         time: Date.now(),
+        //     })
+        // }
     }
     await logic.processEvent('setPageSearchResult', { result })
 }
@@ -116,12 +116,12 @@ export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> =
             })
         }
 
-        if (page.hasBookmark) {
-            await storageManager.collection('bookmarks').createObject({
-                url: page.url,
-                time: Date.now(),
-            })
-        }
+        // if (page.hasBookmark) {
+        //     await storageManager.collection('bookmarks').createObject({
+        //         url: page.url,
+        //         time: Date.now(),
+        //     })
+        // }
     }
     logic.processEvent('setAnnotationSearchResult', { result })
 }

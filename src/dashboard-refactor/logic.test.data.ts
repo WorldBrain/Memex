@@ -20,7 +20,7 @@ const pageDataToSearchRes = (
     url: page.normalizedUrl,
     fullUrl: page.fullUrl,
     title: page.fullTitle,
-    hasBookmark: false,
+    // hasBookmark: false,
     annotations:
         metadata?.notes?.map(({ note, metadata }) =>
             noteDataToSearchRes(note, page, metadata),

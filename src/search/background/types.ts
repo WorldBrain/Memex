@@ -13,7 +13,6 @@ export interface AnnotPage {
     fullUrl: string | null
     fullPdfUrl?: string
     title?: string
-    hasBookmark: boolean
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string
     displayTime?: number
@@ -189,7 +188,7 @@ export interface SearchInterface {
     getMatchingPageCount: SearchIndex['getMatchingPageCount']
 }
 
-export type UnifiedSearchParams = {
+export type UnifiedSearchParams = PaginationParams & {
     query: string
     fromWhen?: number
     untilWhen?: number

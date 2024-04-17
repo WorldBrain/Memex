@@ -402,9 +402,6 @@ export default class SearchBackground {
                 queryAnnotations: queryAnnotationsByTerms(
                     this.options.storageManager,
                 ),
-                // TODO: Fill these in
-                skip: 0,
-                limit: 10,
             })
         }
 
