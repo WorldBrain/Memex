@@ -12,6 +12,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import type { SearchDisplayProps } from 'src/search-injection/search-display'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import type { SyncSettingsStore } from 'src/sync-settings/util'
+import { UpgradeModalProps } from 'src/search-injection/upgrade-modal-display'
 
 export interface ContentScriptRegistry {
     registerRibbonScript(main: RibbonScriptMain): Promise<void>
@@ -54,6 +55,7 @@ export interface HighlightDependencies {
 export interface InPageUIInjectionsDependencies {
     inPageUI: SharedInPageUIInterface
     searchDisplayProps: SearchDisplayProps
+    upgradeModalProps: UpgradeModalProps
     requestSearcher: any
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<

@@ -44,6 +44,7 @@ import { ErrorNotification } from '@worldbrain/memex-common/lib/common-ui/compon
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -65,7 +66,7 @@ export interface Props extends RibbonSubcomponentProps {
     hideOnMouseLeave?: boolean
     toggleFeed: () => void
     showFeed: boolean
-    toggleAskAI: () => void
+    toggleAskAI: (instaExecute: boolean) => void
     toggleRabbitHole: () => void
     toggleQuickSearch: () => void
     openPDFinViewer: () => void
@@ -175,8 +176,8 @@ export default class Ribbon extends Component<Props, State> {
             pickerColor: value,
         })
 
-        let highlights: HTMLCollection = document.getElementsByTagName(
-            'hypothesis-highlight',
+        let highlights: NodeListOf<Element> = document.querySelectorAll(
+            '.' + DEF_HIGHLIGHT_CSS_CLASS,
         )
 
         for (let item of (highlights as any) as HTMLElement[]) {
@@ -1493,6 +1494,10 @@ export default class Ribbon extends Component<Props, State> {
                         <TooltipContentBox>
                             {this.getTooltipText('askAI')}
                             <div>
+                                <strong>Shift + Click</strong>to insta execute
+                                with default template
+                            </div>
+                            <div>
                                 <strong>{Ribbon.ALT_KEY} + Click</strong>for
                                 tutorials
                             </div>
@@ -1521,8 +1526,10 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.altKey) {
                                 this.props.setTutorialIdToOpen('askAI')
+                            } else if (e.shiftKey) {
+                                this.props.toggleAskAI(true)
                             } else {
-                                this.props.toggleAskAI()
+                                this.props.toggleAskAI(false)
                             }
                         }}
                         icon={'stars'}
@@ -1532,8 +1539,10 @@ export default class Ribbon extends Component<Props, State> {
                         onClick={(e) => {
                             if (e.altKey) {
                                 this.props.setTutorialIdToOpen('askAI')
+                            } else if (e.shiftKey) {
+                                this.props.toggleAskAI(true)
                             } else {
-                                this.props.toggleAskAI()
+                                this.props.toggleAskAI(false)
                             }
                         }}
                         color={'greyScale6'}

@@ -250,7 +250,6 @@ class SpacePicker extends StatefulUIElement<
                 onPress={() => {
                     this.processEvent('resultEntryPress', {
                         entry,
-                        analyticsBG: this.props.analyticsBG,
                     })
                 }}
                 pathText={this.getListNameByUnifiedId(entry.parentUnifiedId)}

@@ -227,7 +227,7 @@ export default class PageResultView extends PureComponent<Props> {
                     } else {
                         // Perform action for "Enter" key
                         event.stopPropagation()
-                        this.props.onTrashBtnClick(event as any)
+                        this.props.onTrashBtnClick(false)
                         break
                     }
                     // Perform action for "Backspace" key
@@ -410,7 +410,7 @@ export default class PageResultView extends PureComponent<Props> {
                         <span>
                             Remove from Inbox
                             <br />
-                            <strong>+ shift Click</strong> or{' '}
+                            <strong>+ shift + Click</strong> or{' '}
                             <strong>+ shift + Backspace</strong> to remove
                             without confirmation
                         </span>
@@ -418,7 +418,7 @@ export default class PageResultView extends PureComponent<Props> {
                         <span>
                             Remove from Space
                             <br />
-                            <strong>+ shift Click</strong> or{' '}
+                            <strong>+ shift + Click</strong> or{' '}
                             <strong>+ shift + Backspace</strong> to remove
                             without confirmation
                         </span>

@@ -66,7 +66,10 @@ import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/t
 import { isUrlPDFViewerUrl } from 'src/pdf/util'
 import { isMemexPageAPdf } from '@worldbrain/memex-common/lib/page-indexing/utils'
 import type { SummarizationInterface } from 'src/summarization-llm/background'
-import { pageActionAllowed, upgradePlan } from 'src/util/subscriptions/storage'
+import {
+    AIActionAllowed,
+    pageActionAllowed,
+} from 'src/util/subscriptions/storage'
 import { sleepPromise } from 'src/util/promises'
 import browser from 'webextension-polyfill'
 import initSentry, { captureException, setUserContext } from 'src/util/raven'
@@ -113,6 +116,10 @@ import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { InPageUIInterface } from 'src/in-page-ui/background/types'
+import { Storage } from 'webextension-polyfill'
+import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
+import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -288,6 +295,68 @@ export async function main(
         }
         return true
     }) as any)
+
+    // add listener for when a person is over the pricing limit for saved pages
+
+    const counterStorageListener = async (
+        changes: Record<string, Storage.StorageChange>,
+    ) => {
+        const COUNTER_STORAGE_KEY = '@status'
+
+        const currentTabURL = ((await runInBackground<
+            InPageUIInterface<'caller'>
+        >().getCurrentTabURL()) as unknown) as string
+
+        if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
+            const oldValues = changes[COUNTER_STORAGE_KEY]?.oldValue
+            const newValues = changes[COUNTER_STORAGE_KEY]?.newValue
+
+            const counterQueriesHaveChanged =
+                (oldValues?.cQ ?? null) !== newValues.cQ
+            const counterSavedHaveChanged =
+                (oldValues?.c ?? null) !== newValues.c
+
+            if (!counterQueriesHaveChanged && !counterSavedHaveChanged) {
+                return
+            }
+
+            let isAllowed = true
+            let limitReachedNotif = null
+            if (counterQueriesHaveChanged) {
+                isAllowed = await AIActionAllowed(
+                    analyticsBG,
+                    'AIpowerup',
+                    true,
+                )
+                limitReachedNotif = 'AI'
+            }
+            if (counterSavedHaveChanged) {
+                isAllowed = await pageActionAllowed(
+                    analyticsBG,
+                    collectionsBG,
+                    window.location.href,
+                    true,
+                )
+                limitReachedNotif = 'Bookmarks'
+            }
+
+            if (!isAllowed) {
+                if (currentTabURL?.includes(window.location.href)) {
+                    inPageUI.loadOnDemandInPageUI({
+                        component: 'upgrade-modal',
+                        options: {
+                            powerUpModalProps: {
+                                limitReachedNotif: limitReachedNotif,
+                                authBG: authBG,
+                            },
+                        },
+                    })
+                }
+            }
+        }
+    }
+
+    browser.storage.onChanged.addListener(counterStorageListener)
 
     // 3. Creates an instance of the InPageUI manager class to encapsulate
     // business logic of initialising and hide/showing components.
@@ -497,6 +566,7 @@ export async function main(
         screenshotImage?,
         imageSupport?,
         highlightColor?: HighlightColor,
+        selection?: PseudoSelection,
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
@@ -528,7 +598,7 @@ export async function main(
                         })
                     }
                 },
-                getSelection: () => document.getSelection(),
+                getSelection: selection ?? null,
                 getFullPageUrl: async () => pageInfo.getFullPageUrl(),
                 isPdf: pageInfo.isPdf,
                 shouldShare,
@@ -558,14 +628,21 @@ export async function main(
         createHighlight: (
             analyticsEvent?: AnalyticsEvent<'Highlights'>,
         ) => async (
-            selection: Selection,
+            selection: PseudoSelection,
             shouldShare: boolean,
             shouldCopyShareLink: boolean,
             drawRectangle?: boolean,
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
-            if (!(await pageActionAllowed(analyticsBG))) {
+            if (
+                !(await pageActionAllowed(
+                    analyticsBG,
+                    collectionsBG,
+                    window.location.href,
+                    false,
+                ))
+            ) {
                 return
             }
             const highlightColorSettingStorage = await getHighlightColorSettings()
@@ -609,10 +686,7 @@ export async function main(
                 )
                 annotationId = results.annotationId
                 await results.createPromise
-            } else if (
-                selection &&
-                window.getSelection().toString().length > 0
-            ) {
+            } else if (selection) {
                 const results = await saveHighlight(
                     shouldShare,
                     shouldCopyShareLink,
@@ -620,6 +694,7 @@ export async function main(
                     null,
                     null,
                     highlightColor,
+                    selection,
                 )
                 annotationId = results.annotationId
                 await results.createPromise
@@ -675,14 +750,21 @@ export async function main(
         createAnnotation: (
             analyticsEvent?: AnalyticsEvent<'Annotations'>,
         ) => async (
-            selection: Selection,
+            selection: PseudoSelection,
             shouldShare: boolean,
             shouldCopyShareLink: boolean,
             showSpacePicker?: boolean,
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
-            if (!(await pageActionAllowed(analyticsBG))) {
+            if (
+                !(await pageActionAllowed(
+                    analyticsBG,
+                    collectionsBG,
+                    window.location.href,
+                    false,
+                ))
+            ) {
                 return
             }
 
@@ -719,6 +801,7 @@ export async function main(
                     screenshotGrabResult.screenshot,
                     imageSupportBG,
                     highlightColor,
+                    selection,
                 )
 
                 const annotationId = result.annotationId
@@ -748,6 +831,7 @@ export async function main(
                     null,
                     imageSupportBG,
                     highlightColor,
+                    selection,
                 )
 
                 const annotationId = result.annotationId
@@ -773,32 +857,6 @@ export async function main(
                 })
             }
 
-            // if (selection && window.getSelection().toString().length > 0) {
-            //     const annotationId = await saveHighlight(shouldShare)
-            //     await inPageUI.showSidebar(
-            //         annotationId
-            //             ? {
-            //                   annotationCacheId: annotationId.toString(),
-            //                   action: showSpacePicker
-            //                       ? 'edit_annotation_spaces'
-            //                       : 'edit_annotation',
-            //               }
-            //             : {
-            //                   action: 'comment',
-            //                   commentText: commentText ?? '',
-            //               },
-            //     )
-            // } else {
-            //     await inPageUI.showSidebar({
-            //         action: 'youtube_timestamp',
-            //         commentText: commentText,
-            //     })
-            // }
-            // await inPageUI.showSidebar({
-            //     action: 'youtube_timestamp',
-            //     commentText: commentText,
-            // })
-
             // await inPageUI.hideTooltip()
             if (analyticsBG) {
                 // tracking highlight here too bc I determine annotations by them having content added, tracked elsewhere
@@ -813,11 +871,16 @@ export async function main(
                 }
             }
         },
-        askAI: () => (highlightedText: string, prompt: string) => {
+        askAI: () => (
+            highlightedText: string,
+            prompt: string,
+            instaExecutePrompt?: boolean,
+        ) => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText,
                 prompt,
+                instaExecutePrompt,
             })
             inPageUI.hideTooltip()
         },
@@ -1087,7 +1150,13 @@ export async function main(
                     localStorage: browser.storage.local,
                     services: createUIServices(),
                     renderUpdateNotifBanner: () => null,
-                    bgScriptBG,
+                    bgScriptBG: bgScriptBG,
+                },
+                upgradeModalProps: {
+                    createCheckOutLink: bgScriptBG.createCheckoutLink,
+                    browserAPIs: browser,
+                    authBG: authBG,
+                    limitReachedNotif: null,
                 },
                 annotationsFunctions,
             })
@@ -1162,7 +1231,11 @@ export async function main(
             annotationsFunctions.createHighlight({
                 category: 'Highlights',
                 action: 'createFromContextMenu',
-            })(window.getSelection(), shouldShare, shouldCopyLink),
+            })(
+                cloneSelectionAsPseudoObject(window.getSelection()),
+                shouldShare,
+                shouldCopyLink,
+            ),
         removeHighlights: async () => highlightRenderer.resetHighlightsStyles(),
         teardownContentScripts: async () => {
             removeMemexExtDetectionEl()
@@ -1379,35 +1452,14 @@ export async function main(
     }
 
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
-        const isStaging =
-            process.env.REACT_APP_FIREBASE_PROJECT_ID?.includes('staging') ||
-            process.env.NODE_ENV === 'development'
         const email = _currentUser?.email
 
-        const baseUrl = isStaging
-            ? CLOUDFLARE_WORKER_URLS.staging
-            : CLOUDFLARE_WORKER_URLS.production
-        const url = `${baseUrl}` + '/stripe-subscriptions'
-
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: {},
-            body: JSON.stringify({
-                email,
-            }),
-        })
-
-        const isSubscribed = await response.json()
-        const pageLimit = isSubscribed.planLimit
-        const AIlimit = isSubscribed.aiQueries
-
-        if (
-            isSubscribed.status === 'active' ||
-            isSubscribed.status === 'already-setup'
-        ) {
-            await upgradePlan(pageLimit, AIlimit)
-        }
+        await sleepPromise(3000)
+        await runInBackground<InPageUIInterface<'caller'>>().checkStripePlan(
+            email,
+        )
     }
+
     if (
         fullPageUrl === 'https://memex.garden/upgradeStaging' ||
         fullPageUrl === 'https://memex.garden/upgradeNotification' ||

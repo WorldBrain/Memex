@@ -48,6 +48,7 @@ import {
     PromptData,
     ChatHistoryItem,
 } from '@worldbrain/memex-common/lib/summarization/types'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -412,6 +413,7 @@ interface SidebarEvents {
         textToProcess?: string
         url?: string
         prompt?: string
+        instaExecutePrompt?: boolean
     }
     AddMediaRangeToAIcontext: {
         range?: { from: number; to: number }
@@ -450,7 +452,7 @@ interface SidebarEvents {
     }
     cancelNewPageNote: null
     setNewPageNoteLists: { lists: number[] }
-    removePageNoteList: { lists: number[] }
+    removePageNoteList: { remove: UnifiedList['localId'] }
 
     // List instance events
     expandListAnnotations: { unifiedListId: UnifiedList['unifiedId'] }
@@ -562,6 +564,11 @@ interface SidebarEvents {
     // Misc events
     copyNoteLink: { link: string }
     copyPageLink: { link: string }
+    createCheckOutLink: {
+        billingPeriod: 'monthly' | 'yearly'
+        selectedPremiumPlans: PremiumPlans[]
+        doNotOpen: boolean
+    }
 
     setPageUrl: {
         fullPageUrl: string

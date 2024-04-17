@@ -86,7 +86,7 @@ export type RibbonContainerEvents = UIEvent<
         toggleShowTutorial: null
         toggleFeed: null
         toggleReadingView: null
-        toggleAskAI: null
+        toggleAskAI: boolean | null
         toggleRabbitHole: null
         toggleQuickSearch: null
         toggleTheme: { themeVariant: MemexThemeVariant }
@@ -375,9 +375,13 @@ export class RibbonContainerLogic extends UILogic<
             this.setReadingWidth()
         }
     }
-    toggleAskAI: EventHandler<'toggleAskAI'> = async ({ previousState }) => {
+    toggleAskAI: EventHandler<'toggleAskAI'> = async ({
+        event,
+        previousState,
+    }) => {
         await this.dependencies.inPageUI.showSidebar({
             action: 'show_page_summary',
+            instaExecutePrompt: event,
         })
     }
     toggleRabbitHole: EventHandler<'toggleRabbitHole'> = async ({
@@ -627,7 +631,14 @@ export class RibbonContainerLogic extends UILogic<
     toggleBookmark: EventHandler<'toggleBookmark'> = async ({
         previousState,
     }) => {
-        if (!(await pageActionAllowed(this.dependencies.analyticsBG))) {
+        const isAllowed = await pageActionAllowed(
+            this.dependencies.analyticsBG,
+            this.dependencies.customLists,
+            previousState.fullPageUrl,
+            false,
+        )
+
+        if (!isAllowed) {
             return
         }
 
@@ -819,6 +830,17 @@ export class RibbonContainerLogic extends UILogic<
         previousState,
         event,
     }) => {
+        const isAllowed = await pageActionAllowed(
+            this.dependencies.analyticsBG,
+            this.dependencies.customLists,
+            previousState.fullPageUrl,
+            false,
+        )
+
+        if (!isAllowed) {
+            return
+        }
+
         const pageListsSet = new Set(previousState.lists.pageListIds)
         if (event.value.added != null) {
             pageListsSet.add(event.value.added)

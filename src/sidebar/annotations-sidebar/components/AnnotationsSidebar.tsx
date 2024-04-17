@@ -111,6 +111,8 @@ import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
 import { browser } from 'webextension-polyfill-ts'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
+import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import { AIActionAllowed } from 'src/util/subscriptions/storage'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -331,6 +333,11 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     addedKey?: () => void
     checkIfKeyValid?: (apiKey: string) => void
     signupDate: number
+    createCheckOutLink: (
+        billingPeriod: 'monthly' | 'yearly',
+        selectedPremiumPlans: PremiumPlans[],
+        doNotOpen: boolean,
+    ) => void
 }
 
 interface AnnotationsSidebarState {
@@ -1958,6 +1965,15 @@ export class AnnotationsSidebar extends React.Component<
                     createNewNoteFromAISummary={
                         this.props.createNewNoteFromAISummary
                     }
+                    isAIChatAllowed={async () => {
+                        const isAllowed = await AIActionAllowed(
+                            this.props.analyticsBG,
+                            this.props.hasKey ? 'AIpowerupOwnKey' : 'AIpowerup',
+                            true,
+                        )
+
+                        return isAllowed
+                    }}
                     getYoutubePlayer={this.props.getYoutubePlayer}
                     sidebarEvents={this.props.events}
                     aiChatStateExternal={{
@@ -1978,6 +1994,8 @@ export class AnnotationsSidebar extends React.Component<
                     renderOptionsContainer={() => this.renderOptionsContainer()}
                     counterStorageKey={COUNTER_STORAGE_KEY}
                     setAIModel={this.props.setAIModel}
+                    createCheckOutLink={this.props.createCheckOutLink}
+                    authBG={this.props.authBG}
                     renderPromptTemplates={() => {
                         return (
                             <PromptTemplatesComponent
@@ -2674,6 +2692,8 @@ export class AnnotationsSidebar extends React.Component<
                                             executed = this.props.events.emit(
                                                 'addPageUrlToEditor',
                                                 window.location.href,
+                                                null,
+                                                false,
                                                 (success) => {
                                                     executed = success
                                                 },

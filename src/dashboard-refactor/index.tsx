@@ -65,6 +65,10 @@ import {
     ColorThemeKeys,
     IconKeys,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import PageCitations from 'src/citations/PageCitations'
+import CopyPaster from 'src/copy-paster/components/CopyPaster'
+import { PageSearchCopyPaster } from 'src/copy-paster'
+import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -122,6 +126,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openSpaceInWebUI'
         | 'summarizeBG'
         | 'imageSupportBG'
+        | 'bgScriptBG'
     > = {
         analytics,
         copyToClipboard,
@@ -144,6 +149,7 @@ export class DashboardContainer extends StatefulUIElement<
         syncSettingsBG: runInBackground(),
         annotationsBG: runInBackground(),
         pdfViewerBG: runInBackground(),
+        bgScriptBG: runInBackground(),
         searchBG: runInBackground(),
         listsBG: runInBackground(),
         authBG: runInBackground(),
@@ -1969,6 +1975,19 @@ export class DashboardContainer extends StatefulUIElement<
                             this.state.bulkEditSpacesLoadingState
                         }
                         getRootElement={this.props.getRootElement}
+                        citeMenu={() => {
+                            return (
+                                <BulkEditCopyPaster
+                                    getRootElement={this.props.getRootElement}
+                                    copyPasterBG={this.props.copyPasterBG}
+                                    normalizedPageUrls={
+                                        this.state.bulkSelectedUrls
+                                    }
+                                    onClickOutside={null}
+                                    annotationUrls={null}
+                                />
+                            )
+                        }}
                         spacePicker={() => {
                             return (
                                 <SpacePicker

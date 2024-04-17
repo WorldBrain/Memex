@@ -170,11 +170,9 @@ export function injectYoutubeContextMenu(annotationsFunctions: any) {
     observer.observe(document, config)
 }
 
-export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
-    includeLastFewSecs,
-) {
-    const [startTimeURL] = getHTML5VideoTimestamp(includeLastFewSecs)
-    const [endTimeURL] = getHTML5VideoTimestamp(0)
+export async function getTimestampedNoteWithAIsummaryForYoutubeNotes() {
+    const [startTimeURL] = getHTML5VideoTimestamp()
+    const [endTimeURL] = getHTML5VideoTimestamp()
 
     const startTimeSecs = parseFloat(
         new URL(startTimeURL).searchParams.get('t'),
@@ -184,14 +182,10 @@ export async function getTimestampedNoteWithAIsummaryForYoutubeNotes(
     return [startTimeSecs, endTimeSecs]
 }
 
-export function getTimestampNoteContentForYoutubeNotes(
-    includeLastFewSecs?: number,
-) {
+export function getTimestampNoteContentForYoutubeNotes() {
     let videoTimeStampForComment: string | null
 
-    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp(
-        includeLastFewSecs ?? 0,
-    )
+    const [videoURLWithTime, humanTimestamp] = getHTML5VideoTimestamp()
 
     if (videoURLWithTime != null) {
         videoTimeStampForComment = `[${humanTimestamp}](${videoURLWithTime})`
@@ -285,7 +279,7 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
             false,
             false,
             false,
-            getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
+            getTimestampNoteContentForYoutubeNotes(),
             includeLastFewSecs,
         )
     }
@@ -478,18 +472,11 @@ export async function injectYoutubeButtonMenu(annotationsFunctions: any) {
             'secondsInPastSettingContainer',
         ) as HTMLInputElement
 
-        const includeLastFewSecs = secondsInPastField.value
-            ? parseInt(secondsInPastField.value)
-            : 60
-        await globalThis['browser'].storage.local.set({
-            ['smartNoteSecondsStorage']: includeLastFewSecs,
-        })
-
-        annotationsFunctions.createTimestampWithAISummary(includeLastFewSecs)(
+        annotationsFunctions.createTimestampWithAISummary()(
             false,
             false,
             false,
-            getTimestampNoteContentForYoutubeNotes(includeLastFewSecs),
+            getTimestampNoteContentForYoutubeNotes(),
         )
     }
     AItimeStampButton.style.borderLeft = '1px solid #24252C'

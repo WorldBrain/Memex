@@ -6,6 +6,8 @@ import type { KeyboardShortcuts, Shortcut } from '../types'
 import type { AnnotationFunctions } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import { RpcError, runInBackground } from 'src/util/webextensionRPC'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
+import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import { sleepPromise } from 'src/util/promises'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => Promise<void>
@@ -77,7 +79,7 @@ function getShortcutHandlers({
         createSharedAnnotationAndAddToCollection: async () => {
             if (userSelectedText()) {
                 await annotationFunctions.createAnnotation(
-                    window.getSelection(),
+                    cloneSelectionAsPseudoObject(window.getSelection()),
                     true,
                     true,
                     true,
@@ -97,44 +99,85 @@ function getShortcutHandlers({
             inPageUI.showSidebar({
                 action: 'show_page_summary',
                 highlightedText: window.getSelection().toString(),
+                prompt: null,
+                instaExecutePrompt: false,
+            })
+            inPageUI.hideTooltip()
+        },
+        instaSummarize: async () => {
+            inPageUI.showSidebar({
+                action: 'show_page_summary',
+                highlightedText: window.getSelection().toString(),
+                prompt: null,
+                instaExecutePrompt: true,
             })
             inPageUI.hideTooltip()
         },
         toggleHighlights: () => inPageUI.toggleHighlights(),
         createSharedAnnotation: () =>
             annotationFunctions.createAnnotation(
-                window.getSelection(),
+                cloneSelectionAsPseudoObject(window.getSelection()),
                 true,
                 true,
                 false,
                 null,
             ),
         createSharedHighlight: async () => {
-            annotationFunctions.createHighlight(window.getSelection(), true)
+            annotationFunctions.createHighlight(
+                cloneSelectionAsPseudoObject(window.getSelection()),
+                true,
+            )
             return
         },
         createHighlight: async () => {
             await annotationFunctions.createHighlight(
-                window.getSelection(),
+                cloneSelectionAsPseudoObject(window.getSelection()),
                 false,
             ),
                 inPageUI.hideTooltip()
         },
         createAnnotation: async () => {
-            inPageUI.events.emit('tooltipAction', {
-                annotationCacheId: null,
-                selection: window.getSelection(),
-                openForSpaces: false,
-            })
+            const isToolTipEnabled = inPageUI.componentsShown.tooltip
+
+            if (!isToolTipEnabled) {
+                await inPageUI.toggleTooltip()
+            }
+            if (userSelectedText()) {
+                let executed = false
+                while (!executed) {
+                    try {
+                        executed = inPageUI.events.emit('tooltipAction', {
+                            annotationCacheId: null,
+                            selection: window.getSelection(),
+                            openForSpaces: false,
+                        })
+                    } catch (e) {}
+                    if (!isToolTipEnabled) {
+                        await sleepPromise(200)
+                    }
+                }
+            }
             return // This ensures the function returns Promise<void>
         },
         addToCollection: async () => {
+            const isToolTipEnabled = inPageUI.componentsShown.tooltip
+            if (!isToolTipEnabled) {
+                await inPageUI.toggleTooltip()
+            }
             if (userSelectedText()) {
-                inPageUI.events.emit('tooltipAction', {
-                    annotationCacheId: null,
-                    selection: window.getSelection(),
-                    openForSpaces: true,
-                })
+                let executed = false
+                while (!executed) {
+                    try {
+                        executed = inPageUI.events.emit('tooltipAction', {
+                            annotationCacheId: null,
+                            selection: window.getSelection(),
+                            openForSpaces: true,
+                        })
+                    } catch (e) {}
+                    if (!isToolTipEnabled) {
+                        await sleepPromise(200)
+                    }
+                }
             } else {
                 await inPageUI.showRibbon({ action: 'list' })
             }
@@ -142,7 +185,7 @@ function getShortcutHandlers({
         copyCurrentLink: async () => {
             if (userSelectedText()) {
                 await annotationFunctions.createHighlight(
-                    window.getSelection(),
+                    cloneSelectionAsPseudoObject(window.getSelection()),
                     null,
                     true,
                     null,
@@ -150,8 +193,10 @@ function getShortcutHandlers({
                     true,
                 )
                 // Explicitly return void
+                inPageUI.hideTooltip()
                 return
             } else {
+                inPageUI.hideTooltip()
                 return inPageUI.showSidebar({
                     action: 'share_page_link',
                 })

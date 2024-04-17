@@ -34,6 +34,7 @@ import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
 import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
+import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
@@ -123,7 +124,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
 
         if (sidebarContainer && this.state.showState === 'visible') {
             if (
-                event.target.classList.contains('hypothesis-highlight') ||
+                event.target.classList.contains(DEF_HIGHLIGHT_CSS_CLASS) ||
                 this.state.readingView
             ) {
                 return
@@ -251,6 +252,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('askAIviaInPageInteractions', {
                 textToProcess: event.highlightedText,
                 prompt: event.prompt,
+                instaExecutePrompt: event.instaExecutePrompt,
             })
         } else if (event.action === 'add_media_range_to_ai_context') {
             await this.processEvent('setActiveSidebarTab', {

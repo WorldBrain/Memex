@@ -68,6 +68,7 @@ export interface SidebarActionOptions {
     imageData?: string
     prompt?: string
     range?: { from: number; to: number }
+    instaExecutePrompt?: boolean
 }
 export interface ToolTipActionOptions {
     annotationCacheId?: UnifiedAnnotation['unifiedId']
