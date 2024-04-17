@@ -103,6 +103,19 @@ export default class SummarizeBackground {
             return
         }
 
+        // this is here to not scam our users that have the full subscription and add a key only for using GPT-4.
+        let apiKeyToUse = apiKey ?? ''
+        if (apiKeyToUse?.length > 0 && AImodel === 'gpt-3') {
+            const subscriptionStorage = await browser.storage.local.get(
+                COUNTER_STORAGE_KEY,
+            )
+            const subscriptionData = subscriptionStorage[COUNTER_STORAGE_KEY]
+            const subscriptions = subscriptionData?.pU
+            if (subscriptions && subscriptions?.AIpowerup) {
+                apiKeyToUse = null
+            }
+        }
+
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
 
         if (this.options.analyticsBG) {

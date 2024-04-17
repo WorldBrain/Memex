@@ -8,7 +8,6 @@ import MyCollection from 'src/custom-lists/components/overview/sidebar/my-collec
 import CreateListForm from 'src/custom-lists/components/overview/sidebar/CreateListForm'
 import ListItem from 'src/custom-lists/components/overview/sidebar/list-item'
 import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
-import { CrowdfundingModal } from 'src/common-ui/crowdfunding'
 
 interface StateProps {
     listName: string

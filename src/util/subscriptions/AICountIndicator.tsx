@@ -222,8 +222,48 @@ export class AICounterIndicator extends React.Component<Props, State> {
             (this.state.powerUps.AIpowerup === false &&
                 this.state.powerUps.AIpowerupOwnKey === false)
 
+        if (this.state.powerUps.AIpowerupOwnKey) {
+            shouldShow = true
+        }
         if (this.state.powerUps.AIpowerup) {
             shouldShow = false
+        }
+        if (this.state.powerUps.lifetime) {
+            shouldShow = false
+        }
+
+        let scenario:
+            | 'NoTrialNoKeyNoPowerUp'
+            | 'NoTrialHasKeyNoPowerUp'
+            | 'NoTrialHasKeyHasOwnKeyPowerUp'
+            | 'InTrial' = null
+        {
+            /* Is NOT in Trial anymore, has no key and no AI powerup */
+        }
+
+        if (
+            !this.props.isTrial &&
+            (this.state.openAIKey == null ||
+                this.state.openAIKey?.length === 0) &&
+            this.state.powerUps.AIpowerup === false
+        ) {
+            scenario = 'NoTrialNoKeyNoPowerUp'
+        } else if (
+            !this.props.isTrial &&
+            this.state.openAIKey != null &&
+            !this.state.powerUps.AIpowerup &&
+            !this.state.powerUps.AIpowerupOwnKey
+        ) {
+            scenario = 'NoTrialHasKeyNoPowerUp'
+        } else if (
+            !this.props.isTrial &&
+            this.state.openAIKey != null &&
+            !this.state.powerUps.AIpowerup &&
+            this.state.powerUps.AIpowerupOwnKey
+        ) {
+            scenario = 'NoTrialHasKeyHasOwnKeyPowerUp'
+        } else if (this.props.isTrial) {
+            scenario = 'InTrial'
         }
 
         return (
@@ -231,7 +271,7 @@ export class AICounterIndicator extends React.Component<Props, State> {
                 <TitleAreaContainer>
                     <TopTitle>
                         {/* Is in Trial */}
-                        {this.props.isTrial && (
+                        {scenario === 'InTrial' && (
                             <InfoTooltipTitle>
                                 <strong>Trial</strong> ends in{' '}
                                 {this.daysRemainingToComplete30()} days.
@@ -239,26 +279,33 @@ export class AICounterIndicator extends React.Component<Props, State> {
                         )}
 
                         {/* Is NOT in Trial anymore, has no key and no AI powerup */}
-                        {!this.props.isTrial &&
-                            (this.state.openAIKey == null ||
-                                this.state.openAIKey?.length === 0) &&
-                            this.state.powerUps.AIpowerup === false && (
-                                <InfoTooltipTitle>
-                                    <strong>{this.leftOverBlocks}</strong> AI
-                                    queries left this month
-                                </InfoTooltipTitle>
-                            )}
+                        {scenario === 'NoTrialNoKeyNoPowerUp' && (
+                            <InfoTooltipTitle>
+                                <strong>
+                                    {this.leftOverBlocks < 0
+                                        ? 0
+                                        : this.leftOverBlocks}
+                                </strong>{' '}
+                                AI queries left this month
+                            </InfoTooltipTitle>
+                        )}
                         {/*Is NOT in Trial anymore, has Key and no AI ownkey powerup */}
-                        {!this.props.isTrial &&
-                            this.state.openAIKey != null &&
-                            !this.state.powerUps.AIpowerup &&
-                            !this.state.powerUps.AIpowerupOwnKey && (
-                                <InfoTooltipTitle>
-                                    You have to upgrade to use your own API key
-                                </InfoTooltipTitle>
-                            )}
-
-                        {/* Is in Trial, has no key and no AI powerup */}
+                        {scenario === 'NoTrialHasKeyNoPowerUp' && (
+                            <InfoTooltipTitle>
+                                Upgrade to use own key
+                            </InfoTooltipTitle>
+                        )}
+                        {/*Is NOT in Trial anymore, has Key and AI ownkey powerup */}
+                        {scenario === 'NoTrialHasKeyHasOwnKeyPowerUp' && (
+                            <InfoTooltipTitle>
+                                <strong>
+                                    {this.leftOverBlocks < 0
+                                        ? 0
+                                        : this.leftOverBlocks}
+                                </strong>{' '}
+                                Claude queries left this month
+                            </InfoTooltipTitle>
+                        )}
                         <PrimaryAction
                             label="Upgrade"
                             icon={'longArrowRight'}
@@ -273,6 +320,55 @@ export class AICounterIndicator extends React.Component<Props, State> {
                             iconPosition="right"
                         />
                     </TopTitle>
+                    <InfoTooltipSubTitleBox>
+                        {/* Is in Trial */}
+                        {scenario === 'InTrial' && (
+                            <InfoTooltipSubTitle>
+                                Unlimited queries.
+                                <br />
+                                <strong>After trial:</strong> 25 queries per
+                                month & 60 days money-back-guarantee
+                            </InfoTooltipSubTitle>
+                        )}
+                        {/* Is NOT in Trial anymore, has no key and no AI powerup */}
+
+                        {scenario === 'NoTrialNoKeyNoPowerUp' && (
+                            <InfoTooltipSubTitle>
+                                Resets in{' '}
+                                <strong>
+                                    {this.daysUntilNextMonth()} days.
+                                </strong>
+                            </InfoTooltipSubTitle>
+                        )}
+
+                        {/*Is NOT in Trial anymore, has Key and no AI ownkey powerup */}
+                        {scenario === 'NoTrialHasKeyNoPowerUp' && (
+                            <InfoTooltipSubTitle>
+                                <strong>
+                                    {this.leftOverBlocks < 0
+                                        ? 0
+                                        : this.leftOverBlocks}
+                                </strong>{' '}
+                                GPT-3, Claude-Haiki & Image queries left this
+                                month. Resets in{' '}
+                                <strong>
+                                    {this.daysUntilNextMonth()} days.
+                                </strong>
+                            </InfoTooltipSubTitle>
+                        )}
+
+                        {/*Is NOT in Trial anymore, has Key and AI ownkey powerup */}
+
+                        {scenario === 'NoTrialHasKeyHasOwnKeyPowerUp' && (
+                            <InfoTooltipSubTitle>
+                                Unlimited queries with GPT-3 and GPT-4 at your
+                                own cost. Claude queries reset in{' '}
+                                <strong>
+                                    {this.daysUntilNextMonth()} days.
+                                </strong>
+                            </InfoTooltipSubTitle>
+                        )}
+                    </InfoTooltipSubTitleBox>
                 </TitleAreaContainer>
             )
         )
@@ -367,18 +463,26 @@ export class AICounterIndicator extends React.Component<Props, State> {
     render() {
         return (
             <Container>
-                <PrimaryAction
-                    label="Add API Key"
-                    type="forth"
-                    size="small"
-                    padding="5px 10px"
-                    fullWidth
-                    icon="key"
-                    onClick={() =>
-                        this.setState({ showTooltip: !this.state.showTooltip })
-                    }
-                    innerRef={this.tooltipButtonRef}
-                />
+                {!this.state.showTooltip && (
+                    <PrimaryAction
+                        label={
+                            this.state.openAIKey != null
+                                ? 'Change API Key'
+                                : 'Add API Key'
+                        }
+                        type="forth"
+                        size="small"
+                        padding="5px 10px"
+                        fullWidth
+                        icon="key"
+                        onClick={() =>
+                            this.setState({
+                                showTooltip: !this.state.showTooltip,
+                            })
+                        }
+                        innerRef={this.tooltipButtonRef}
+                    />
+                )}
                 {this.renderKeyEntry()}
                 {this.renderUpgradeInfo()}
                 {this.renderUpgradeModal()}
@@ -599,11 +703,12 @@ const TitleAreaContainer = styled.div`
     display: flex;
     align-items: center;
     flex-direction: column;
-    padding: 10px 0 0 0;
     width: 100%;
     grid-gap: 5px;
     box-sizing: border-box;
     justify-content: space-between;
+    align-items: flex-start;
+    padding: 10px 5px 5px 5px;
 `
 
 const InfoTooltipSubTitleBox = styled.div`
@@ -616,14 +721,14 @@ const InfoTooltipSubTitleBox = styled.div`
     max-width: 290px;
 `
 const InfoTooltipSubTitle = styled.div`
-    color: ${(props) => props.theme.colors.greyScale5};
-    font-size: 12px;
+    color: ${(props) => props.theme.colors.greyScale6};
+    font-size: 13px;
     line-height: 18px;
-    font-weight: 400;
+    font-weight: 300;
 `
 
 const InfoTooltipTitle = styled.div`
-    font-size: 16px;
+    font-size: 15px;
     background: ${(props) => props.theme.colors.headerGradient};
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;

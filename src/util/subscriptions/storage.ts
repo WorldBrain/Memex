@@ -276,6 +276,10 @@ export async function AIActionAllowed(
     // when the user has key it should count on claude 3 requests, and not on gpt requests
     // when the user has no key it should count and check on all requests
 
+    if (AImodel === 'gpt-4' && !hasKey) {
+        return false
+    }
+
     const feature = hasKey ? 'AIpowerupOwnKey' : 'AIpowerup'
     const allowed = await checkStatus(feature)
 

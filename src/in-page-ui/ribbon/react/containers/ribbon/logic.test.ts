@@ -18,6 +18,7 @@ import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { PageAnnotationsCache } from 'src/annotations/cache'
 import { reshapeAnnotationForCache } from 'src/annotations/cache/utils'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
+import { runInBackground } from 'src/util/webextensionRPC'
 
 describe('Ribbon logic', () => {
     const it = makeSingleDeviceUILogicTestFactory()
@@ -75,6 +76,7 @@ describe('Ribbon logic', () => {
                 options.dependencies?.focusCreateForm ?? (() => undefined),
             inPageUI,
             currentTab,
+            searchBG: runInBackground(),
             highlighter,
             annotationsManager,
             bgScriptBG: backgroundModules.bgScript['remoteFunctions'],

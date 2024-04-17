@@ -193,6 +193,7 @@ export class RibbonContainerLogic extends UILogic<
             signupDate: null,
             themeVariant: null,
             showRabbitHoleButton: false,
+            showConfirmDeletion: false,
         }
     }
 
