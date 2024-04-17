@@ -20,11 +20,13 @@ export interface Dependencies {
     bulkEditSpacesLoadingState: TaskState
     removeIndividualSelection: (itemData) => Promise<void>
     spacePicker: () => JSX.Element
+    citeMenu: () => JSX.Element
 }
 
 export type Event = UIEvent<{
     showBulkEditSelectionBox: { isShown: boolean }
     promptConfirmDeleteBulkSelection: { isShown: boolean }
+    showCiteMenu: { isShown: boolean }
     showSpacePicker: { isShown: boolean }
     deleteBulkSelection: { pageId: boolean }
     selectAllPages: null
@@ -37,6 +39,7 @@ export interface State {
     itemCounter: number
     showConfirmBulkDeletion: boolean
     showSpacePicker: boolean
+    showCiteMenu: boolean
     selectAllLoadingState: TaskState
 }
 
@@ -62,6 +65,7 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         showConfirmBulkDeletion: false,
         showSpacePicker: false,
         selectAllLoadingState: 'pristine',
+        showCiteMenu: false,
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
@@ -109,6 +113,14 @@ export default class BulkEditLogic extends UILogic<State, Event> {
     > = async ({ previousState, event }) => {
         this.emitMutation({
             showConfirmBulkDeletion: { $set: event.isShown },
+        })
+    }
+    showCiteMenu: EventHandler<'showCiteMenu'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            showCiteMenu: { $set: event.isShown },
         })
     }
 

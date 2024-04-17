@@ -104,7 +104,7 @@ export async function createAnnotation({
                     selector: annotationData.selector,
                     title: annotationData.pageTitle,
                     comment: annotationData.comment
-                        .replace(/\\\[/g, '[')
+                        ?.replace(/\\\[/g, '[')
                         .replace(/\\\]/g, ']')
                         .replace(/\\\(/g, '(')
                         .replace(/\\\)/g, ')'),
@@ -218,7 +218,7 @@ export async function updateAnnotation({
                     annotationData.localId,
                     annotationData.comment
                         ? annotationData.comment
-                              .replace(/\\\[/g, '[')
+                              ?.replace(/\\\[/g, '[')
                               .replace(/\\\]/g, ']')
                               .replace(/\\\(/g, '(')
                               .replace(/\\\)/g, ')')

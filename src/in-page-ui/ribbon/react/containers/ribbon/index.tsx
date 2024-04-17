@@ -170,8 +170,8 @@ export default class RibbonContainer extends StatefulUIElement<
                         !this.state.showRemoveMenu,
                     )
                 }}
-                toggleAskAI={() => {
-                    this.processEvent('toggleAskAI', null)
+                toggleAskAI={(instaExecute: boolean) => {
+                    this.processEvent('toggleAskAI', instaExecute)
                 }}
                 toggleRabbitHole={() => {
                     this.processEvent('toggleRabbitHole', null)

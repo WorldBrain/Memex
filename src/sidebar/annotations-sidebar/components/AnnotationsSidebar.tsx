@@ -2692,6 +2692,8 @@ export class AnnotationsSidebar extends React.Component<
                                             executed = this.props.events.emit(
                                                 'addPageUrlToEditor',
                                                 window.location.href,
+                                                null,
+                                                false,
                                                 (success) => {
                                                     executed = success
                                                 },

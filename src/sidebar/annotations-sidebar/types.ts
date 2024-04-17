@@ -24,6 +24,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     addSelectedTextAndInstaPrompt: (
         selectedText: string,
         prompt: string,
+        instaExecutePrompt: boolean,
         callback,
     ) => void
     addTextToEditor: (text: string, callback) => void
@@ -33,7 +34,12 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         prompt: string,
         callback,
     ) => Promise<boolean>
-    addPageUrlToEditor?: (url: string, callback) => void
+    addPageUrlToEditor?: (
+        url: string,
+        prompt: string,
+        instaExecutePrompt: boolean,
+        callback,
+    ) => void
     setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
     // No longer used, as of the sidebar refactor
     // removeTemporaryHighlights: () => void

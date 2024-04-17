@@ -112,6 +112,29 @@ export default class BulkEditWidget extends StatefulUIElement<
             )
         }
     }
+    renderCiteMenu = () => {
+        if (this.state.showCiteMenu) {
+            return (
+                <PopoutBox
+                    targetElementRef={this.spacePickerBtnRef.current}
+                    placement={'top-end'}
+                    offsetX={10}
+                    offsetY={-10}
+                    closeComponent={(e) => {
+                        this.processEvent('showCiteMenu', {
+                            isShown: false,
+                        })
+                    }}
+                    strategy={'fixed'}
+                    width={'fit-content'}
+                    instaClose
+                    getPortalRoot={this.props.getRootElement}
+                >
+                    {this.props.citeMenu()}
+                </PopoutBox>
+            )
+        }
+    }
 
     render() {
         if (this.state.itemCounter > 0) {
@@ -137,6 +160,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                     >
                         {this.renderBulkEditSelectionBox()}
                         {this.renderSpacePicker()}
+                        {this.renderCiteMenu()}
                         <BulkEditWidgetBox>
                             {!this.state.showConfirmBulkDeletion && (
                                 <>
@@ -237,42 +261,63 @@ export default class BulkEditWidget extends StatefulUIElement<
                                     />{' '}
                                 </DeleteConfirmBox>
                             ) : (
-                                <PrimaryAction
-                                    onClick={() =>
-                                        this.processEvent(
-                                            'promptConfirmDeleteBulkSelection',
-                                            { isShown: true },
-                                        )
-                                    }
-                                    label={`Delete`}
-                                    type={'secondary'}
-                                    size={'small'}
-                                    icon={'trash'}
-                                    padding={'0px 8px 0 3px'}
-                                />
+                                <>
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'promptConfirmDeleteBulkSelection',
+                                                { isShown: true },
+                                            )
+                                        }
+                                        label={`Delete`}
+                                        type={'secondary'}
+                                        size={'small'}
+                                        icon={'trash'}
+                                        padding={'0px 8px 0 3px'}
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent('showCiteMenu', {
+                                                isShown: true,
+                                            })
+                                        }
+                                        label={'Copy'}
+                                        type={'secondary'}
+                                        size={'small'}
+                                        icon={'copy'}
+                                        padding={'0px 8px 0 3px'}
+                                        innerRef={this.spacePickerBtnRef}
+                                    />
+                                    <PrimaryAction
+                                        onClick={() =>
+                                            this.processEvent(
+                                                'showSpacePicker',
+                                                {
+                                                    isShown: true,
+                                                },
+                                            )
+                                        }
+                                        label={
+                                            this.props
+                                                .bulkEditSpacesLoadingState ===
+                                            'running' ? (
+                                                <LoadingStateButton>
+                                                    <LoadingIndicator
+                                                        size={16}
+                                                    />
+                                                </LoadingStateButton>
+                                            ) : (
+                                                'Add to Spaces'
+                                            )
+                                        }
+                                        type={'secondary'}
+                                        size={'small'}
+                                        icon={'plus'}
+                                        padding={'0px 8px 0 3px'}
+                                        innerRef={this.spacePickerBtnRef}
+                                    />
+                                </>
                             )}
-                            <PrimaryAction
-                                onClick={() =>
-                                    this.processEvent('showSpacePicker', {
-                                        isShown: true,
-                                    })
-                                }
-                                label={
-                                    this.props.bulkEditSpacesLoadingState ===
-                                    'running' ? (
-                                        <LoadingStateButton>
-                                            <LoadingIndicator size={16} />
-                                        </LoadingStateButton>
-                                    ) : (
-                                        'Add to Spaces'
-                                    )
-                                }
-                                type={'secondary'}
-                                size={'small'}
-                                icon={'plus'}
-                                padding={'0px 8px 0 3px'}
-                                innerRef={this.spacePickerBtnRef}
-                            />
                         </BulkEditWidgetBox>
                     </BulkEditWidgetContainer>
                 )

@@ -413,6 +413,7 @@ interface SidebarEvents {
         textToProcess?: string
         url?: string
         prompt?: string
+        instaExecutePrompt?: boolean
     }
     AddMediaRangeToAIcontext: {
         range?: { from: number; to: number }
