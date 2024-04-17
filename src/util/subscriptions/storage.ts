@@ -168,7 +168,9 @@ export async function checkStatus(feature: PremiumPlans) {
     )
 
     const currentStatus =
-        currentStatusStorage[COUNTER_STORAGE_KEY] ?? DEFAULT_COUNTER_STORAGE_KEY
+        currentStatusStorage[COUNTER_STORAGE_KEY] != null
+            ? currentStatusStorage[COUNTER_STORAGE_KEY]
+            : DEFAULT_COUNTER_STORAGE_KEY
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
 
@@ -202,8 +204,7 @@ export async function checkStatus(feature: PremiumPlans) {
         }
     }
     if (feature === 'AIpowerup') {
-        const hasAIPowerUp =
-            currentStatus[COUNTER_STORAGE_KEY].pU?.AIpowerup ?? false
+        const hasAIPowerUp = currentStatus.pU?.AIpowerup ?? false
 
         if (hasAIPowerUp) {
             return true
