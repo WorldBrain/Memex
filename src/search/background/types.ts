@@ -12,7 +12,7 @@ export interface AnnotPage {
     url: string
     fullUrl: string | null
     fullPdfUrl?: string
-    title?: string
+    fullTitle?: string
     hasBookmark: boolean
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string

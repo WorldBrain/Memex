@@ -151,7 +151,7 @@ const pageResultToPageData = (
     return {
         lists,
         fullUrl: pageResult.fullUrl,
-        fullTitle: pageResult.title,
+        fullTitle: pageResult.fullTitle,
         text: pageResult.text,
         normalizedUrl: pageResult.url,
         favIconURI: pageResult.favIcon,

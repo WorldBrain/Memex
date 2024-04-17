@@ -175,8 +175,8 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Pages', [
                                 searchResultsC,
                             ]) {
                                 for (const doc of results.docs) {
-                                    expect(doc.title).toBeFalsy()
-                                    delete doc.title
+                                    expect(doc.fullTitle).toBeFalsy()
+                                    delete doc.fullTitle
                                 }
                             }
 

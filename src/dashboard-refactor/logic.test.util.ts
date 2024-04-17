@@ -48,7 +48,7 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
     for (const page of result.docs) {
         await storageManager.collection('pages').createObject({
             url: page.url,
-            title: page.title,
+            title: page.fullTitle,
         })
         await storageManager.collection('visits').createObject({
             url: page.url,
@@ -107,7 +107,7 @@ export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> =
     for (const page of result.docs) {
         await storageManager.collection('pages').createObject({
             url: page.url,
-            title: page.title,
+            title: page.fullTitle,
         })
 
         for (const annot of page.annotations) {

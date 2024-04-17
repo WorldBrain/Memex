@@ -1124,6 +1124,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             ? await this.searchNotes(searchState)
                             : await this.searchPDFs(searchState)
 
+                    console.log('results', results)
                     let noResultsType: NoResultsType = null
                     if (
                         resultsExhausted &&
@@ -1243,6 +1244,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                   state.searchFilters.dateTo
                 : state.searchFilters.dateTo,
         })
+
+        console.log('result', result)
 
         this.emitMutation({
             searchResults: {

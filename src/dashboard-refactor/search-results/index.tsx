@@ -1166,6 +1166,9 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     render() {
+        console.log('searchQuery', this.props.searchQuery)
+        console.log('searchResults', this.props.searchResults)
+        console.log('searchFilters', this.props.searchFilters)
         return (
             <ResultsContainer>
                 <ResultsBox>
