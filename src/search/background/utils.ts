@@ -73,9 +73,9 @@ export const reshapePageForDisplay = (page) => ({
     annotsCount: page.annotsCount,
 })
 
-export const sortUnifiedBlankSearchResult = ({
-    resultDataByPage,
-}: UnifiedBlankSearchResult) =>
+export const sortUnifiedBlankSearchResult = (
+    resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
+) =>
     [...resultDataByPage].sort(
         ([, a], [, b]) =>
             Math.max(

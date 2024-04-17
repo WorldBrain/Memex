@@ -151,13 +151,11 @@ export default class SearchBackground {
     }
 
     private sliceUnifiedSearchResults(
-        resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
+        resultDataByPage: any[],
         { limit, skip }: PaginationParams,
     ): UnifiedBlankSearchResult['resultDataByPage'] {
         // NOTE: Current implementation ignores annotation count, and simply paginates by the number of pages in the results
-        return new Map(
-            [...resultDataByPage.entries()].slice(skip, skip + limit),
-        )
+        return new Map(resultDataByPage.slice(skip, skip + limit))
     }
 
     private async filterUnifiedSearchResultsByFilters(
@@ -369,8 +367,11 @@ export default class SearchBackground {
         }
 
         await this.filterUnifiedSearchResultsByFilters(resultDataByPage, params)
+
+        // Paginate!
+        const sortedResultPages = sortUnifiedBlankSearchResult(resultDataByPage)
         const paginatedResults = this.sliceUnifiedSearchResults(
-            resultDataByPage,
+            sortedResultPages,
             params,
         )
 
@@ -406,7 +407,9 @@ export default class SearchBackground {
         }
 
         const dataLookups = await this.lookupDataForUnifiedResults(result)
-        const sortedResultPages = sortUnifiedBlankSearchResult(result)
+        const sortedResultPages = sortUnifiedBlankSearchResult(
+            result.resultDataByPage,
+        )
         const mappedAnnotPages = sortedResultPages
             .map(([pageId, { annotations }]) => {
                 const page = dataLookups.pages.get(pageId)
