@@ -9,8 +9,19 @@ import {
 } from 'src/sync-settings/util'
 import styled, { css } from 'styled-components'
 import browser, { Storage } from 'webextension-polyfill'
-import { COUNTER_STORAGE_KEY, DEFAULT_COUNTER_STORAGE_KEY } from './constants'
+import {
+    COUNTER_STORAGE_KEY,
+    DEFAULT_COUNTER_STORAGE_KEY,
+    DEFAULT_POWERUP_LIMITS,
+} from './constants'
 import { TaskState } from 'ui-logic-core/lib/types'
+import {
+    CustomerPowerUps,
+    PowerupOptions,
+    PremiumPlans,
+} from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import UpgradeModal from 'src/authentication/upgrade-modal'
+import { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 
 export interface Props {
     syncSettingsBG: RemoteSyncSettingsInterface
@@ -20,6 +31,12 @@ export interface Props {
     getRootElement: () => HTMLElement
     checkIfKeyValid: (apiKey: string) => Promise<void>
     isKeyValid: boolean
+    createCheckOutLink: (
+        billingPeriod: 'monthly' | 'yearly',
+        selectedPremiumPlans: PremiumPlans[],
+        doNotOpen: boolean,
+    ) => Promise<'success' | 'error'>
+    authBG: AuthRemoteFunctionsInterface
 }
 
 interface State {
@@ -30,6 +47,9 @@ interface State {
     showSaveButton: boolean
     checkKeyValidLoadState: TaskState
     keyChanged: boolean
+    powerUps: CustomerPowerUps
+    totalCount: number
+    renderUpgradeModal: boolean
 }
 
 export class AICounterIndicator extends React.Component<Props, State> {
@@ -44,6 +64,15 @@ export class AICounterIndicator extends React.Component<Props, State> {
         showSaveButton: false,
         checkKeyValidLoadState: 'pristine',
         keyChanged: false,
+        powerUps: {
+            AIpowerup: false,
+            Unlimited: false,
+            AIpowerupOwnKey: false,
+            bookmarksPowerUp: false,
+            lifetime: false,
+        },
+        totalCount: 0,
+        renderUpgradeModal: false,
     }
 
     constructor(props: Props) {
@@ -55,11 +84,18 @@ export class AICounterIndicator extends React.Component<Props, State> {
 
     async componentDidMount() {
         const result = await browser.storage.local.get(COUNTER_STORAGE_KEY)
-        if (result[COUNTER_STORAGE_KEY]?.sQ != null) {
+        if (result[COUNTER_STORAGE_KEY] != null) {
             this.setState({
                 currentCount: result[COUNTER_STORAGE_KEY].cQ,
+                powerUps: result[COUNTER_STORAGE_KEY].pU,
             })
         }
+
+        const totalCount = DEFAULT_POWERUP_LIMITS.AIpowerup
+
+        this.setState({
+            totalCount: totalCount,
+        })
 
         browser.storage.onChanged.addListener(this.counterStorageListener)
         const openAIKey = await this.syncSettings.openAI.get('apiKey')
@@ -155,7 +191,94 @@ export class AICounterIndicator extends React.Component<Props, State> {
         return remainingDays
     }
 
-    renderTooltip = () => {
+    private get leftOverBlocks(): number {
+        return this.state.totalCount - this.state.currentCount
+    }
+
+    renderUpgradeModal = () => {
+        if (this.state.renderUpgradeModal) {
+            return (
+                <UpgradeModal
+                    powerUpType="AI"
+                    getRootElement={this.props.getRootElement}
+                    componentVariant="Modal"
+                    createCheckOutLink={this.props.createCheckOutLink}
+                    closeComponent={() => {
+                        this.setState({
+                            renderUpgradeModal: false,
+                        })
+                    }}
+                    browserAPIs={browser}
+                    limitReachedNotif={null}
+                    authBG={this.props.authBG}
+                />
+            )
+        }
+    }
+
+    renderUpgradeInfo = () => {
+        let shouldShow =
+            this.props.isTrial ||
+            (this.state.powerUps.AIpowerup === false &&
+                this.state.powerUps.AIpowerupOwnKey === false)
+
+        if (this.state.powerUps.AIpowerup) {
+            shouldShow = false
+        }
+
+        return (
+            shouldShow && (
+                <TitleAreaContainer>
+                    <TopTitle>
+                        {/* Is in Trial */}
+                        {this.props.isTrial && (
+                            <InfoTooltipTitle>
+                                <strong>Trial</strong> ends in{' '}
+                                {this.daysRemainingToComplete30()} days.
+                            </InfoTooltipTitle>
+                        )}
+
+                        {/* Is NOT in Trial anymore, has no key and no AI powerup */}
+                        {!this.props.isTrial &&
+                            (this.state.openAIKey == null ||
+                                this.state.openAIKey?.length === 0) &&
+                            this.state.powerUps.AIpowerup === false && (
+                                <InfoTooltipTitle>
+                                    <strong>{this.leftOverBlocks}</strong> AI
+                                    queries left this month
+                                </InfoTooltipTitle>
+                            )}
+                        {/*Is NOT in Trial anymore, has Key and no AI ownkey powerup */}
+                        {!this.props.isTrial &&
+                            this.state.openAIKey != null &&
+                            !this.state.powerUps.AIpowerup &&
+                            !this.state.powerUps.AIpowerupOwnKey && (
+                                <InfoTooltipTitle>
+                                    You have to upgrade to use your own API key
+                                </InfoTooltipTitle>
+                            )}
+
+                        {/* Is in Trial, has no key and no AI powerup */}
+                        <PrimaryAction
+                            label="Upgrade"
+                            icon={'longArrowRight'}
+                            padding="0px 5px 0 10px"
+                            onClick={() => {
+                                this.setState({
+                                    renderUpgradeModal: true,
+                                })
+                            }}
+                            size="small"
+                            type="primary"
+                            iconPosition="right"
+                        />
+                    </TopTitle>
+                </TitleAreaContainer>
+            )
+        )
+    }
+
+    renderKeyEntry = () => {
         if (this.state.showTooltip) {
             return (
                 <InfoTooltipContainer>
@@ -256,7 +379,9 @@ export class AICounterIndicator extends React.Component<Props, State> {
                     }
                     innerRef={this.tooltipButtonRef}
                 />
-                {this.renderTooltip()}
+                {this.renderKeyEntry()}
+                {this.renderUpgradeInfo()}
+                {this.renderUpgradeModal()}
             </Container>
         )
     }
@@ -275,29 +400,6 @@ const ButtonBox = styled.div`
     & > {
         position: absolute;
     }
-`
-
-const TitleAreaContainer = styled.div`
-    display: flex;
-    align-items: center;
-    padding: 20px;
-    width: 90%;
-    justify-content: space-between;
-    border-bottom: 1px solid ${(props) => props.theme.colors.greyScale3};
-`
-
-const InfoTooltipSubTitleBox = styled.div`
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    justify-content: flex-start;
-    grid-gap: 5px;
-    padding: 20px;
-`
-const InfoTooltipSubTitle = styled.div`
-    color: ${(props) => props.theme.colors.greyScale6};
-    font-size: 16px;
-    line-height: 24px;
 `
 
 const ORBox = styled.div`
@@ -426,15 +528,6 @@ const InfoTooltipTitleArea = styled.div`
     flex-direction: column;
 `
 
-const InfoTooltipTitle = styled.div`
-    font-size: 20px;
-    background: ${(props) => props.theme.colors.headerGradient};
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-    white-space: pre-wrap;
-`
-
 const InfoTooltipContentArea = styled.div`
     display: flex;
     flex-direction: column;
@@ -500,4 +593,49 @@ const ErrorBoxSubTitle = styled.div`
     align-items: center;
     font-size: 14px;
     color: ${(props) => props.theme.colors.greyScale5};
+`
+
+const TitleAreaContainer = styled.div`
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 10px 0 0 0;
+    width: 100%;
+    grid-gap: 5px;
+    box-sizing: border-box;
+    justify-content: space-between;
+`
+
+const InfoTooltipSubTitleBox = styled.div`
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: flex-start;
+    grid-gap: 5px;
+    width: 100%;
+    max-width: 290px;
+`
+const InfoTooltipSubTitle = styled.div`
+    color: ${(props) => props.theme.colors.greyScale5};
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 400;
+`
+
+const InfoTooltipTitle = styled.div`
+    font-size: 16px;
+    background: ${(props) => props.theme.colors.headerGradient};
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    white-space: pre-wrap;
+`
+
+const TopTitle = styled.div`
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    grid-gap: 15px;
+    width: 100%;
 `
