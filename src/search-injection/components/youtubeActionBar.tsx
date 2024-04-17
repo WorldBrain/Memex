@@ -562,7 +562,6 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 <BottomArea>
                                     <VideoRangeSelector
                                         onChange={(values) => {
-                                            console.log('values', values)
                                             this.setState({
                                                 fromSecondsPosition: values[0],
                                                 toSecondsPosition: values[1],

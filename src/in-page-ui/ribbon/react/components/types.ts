@@ -31,6 +31,7 @@ export interface RibbonSubcomponentProps {
     onListShare?: SpacePickerDependencies['onListShare']
     selectRibbonPositionOption: (option) => void
     hasFeedActivity: boolean
+    showConfirmDeletion: boolean
 }
 
 export interface RibbonHighlightsProps {

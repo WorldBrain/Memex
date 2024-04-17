@@ -1011,6 +1011,7 @@ export async function main(
                 customLists: collectionsBG,
                 authBG,
                 bgScriptBG,
+                searchBG: runInBackground(),
                 analyticsBG,
                 pageActivityIndicatorBG,
                 activityIndicatorBG,
