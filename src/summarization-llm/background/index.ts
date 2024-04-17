@@ -45,16 +45,6 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             activeTab?: SidebarTab
         }
     >
-    getTextSummary: RemoteFunction<
-        Role,
-        {
-            text: string
-            prompt: string
-        },
-        | { status: 'success'; choices: { text: string }[] }
-        | { status: 'prompt-too-long' }
-        | { status: 'unknown-error' }
-    >
 }
 
 export interface summarizePageBackgroundOptions {
@@ -76,7 +66,6 @@ export default class SummarizeBackground {
     constructor(public options: summarizePageBackgroundOptions) {
         this.remoteFunctions = {
             startPageSummaryStream: this.startPageSummaryStream,
-            getTextSummary: this.getTextSummary,
             isApiKeyValid: this.isApiKeyValid,
             setActiveSidebarTab: this.setActiveSidebarTab,
         }
@@ -101,10 +90,13 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
-        const isAllowed = await AIActionAllowed(
+        let isAllowed = null
+
+        isAllowed = await AIActionAllowed(
             this.analyticsBG,
-            apiKey?.length > 0 ? 'AIpowerupOwnKey' : 'AIpowerup',
-            false,
+            apiKey.length > 0,
+            true,
+            AImodel,
         )
 
         if (!isAllowed) {
@@ -162,29 +154,6 @@ export default class SummarizeBackground {
         }
     }
 
-    getTextSummary: SummarizationInterface<
-        'provider'
-    >['getTextSummary'] = async ({ tab }, { text, prompt }) => {
-        const isAllowed = await AIActionAllowed(this.analyticsBG, 'AIpowerup')
-
-        if (!isAllowed) {
-            return
-        }
-
-        const summary = await this.summarizationService.summarizeText(
-            text,
-            prompt,
-        )
-        if (this.options.analyticsBG) {
-            try {
-                await trackQueryAI(this.options.analyticsBG)
-            } catch (error) {
-                console.error(`Error tracking space create event', ${error}`)
-            }
-        }
-
-        return summary
-    }
     isApiKeyValid: SummarizationInterface<'provider'>['isApiKeyValid'] = async (
         { tab },
         { apiKey },

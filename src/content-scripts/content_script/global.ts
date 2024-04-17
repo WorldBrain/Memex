@@ -323,11 +323,7 @@ export async function main(
             let isAllowed = true
             let limitReachedNotif = null
             if (counterQueriesHaveChanged) {
-                isAllowed = await AIActionAllowed(
-                    analyticsBG,
-                    'AIpowerup',
-                    true,
-                )
+                isAllowed = await AIActionAllowed(analyticsBG, null, false)
                 limitReachedNotif = 'AI'
             }
             if (counterSavedHaveChanged) {

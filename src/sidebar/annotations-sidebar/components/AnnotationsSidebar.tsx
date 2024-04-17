@@ -1968,8 +1968,8 @@ export class AnnotationsSidebar extends React.Component<
                     isAIChatAllowed={async () => {
                         const isAllowed = await AIActionAllowed(
                             this.props.analyticsBG,
-                            this.props.hasKey ? 'AIpowerupOwnKey' : 'AIpowerup',
-                            true,
+                            this.props.hasKey,
+                            false,
                         )
 
                         return isAllowed

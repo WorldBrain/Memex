@@ -3151,7 +3151,9 @@ export class SidebarContainerLogic extends UILogic<
         } else if (
             await AIActionAllowed(
                 this.options.analyticsBG,
-                hasAPIKey ? 'AIpowerupOwnKey' : 'AIpowerup',
+                hasAPIKey,
+                false,
+                previousState.AImodel,
             )
         ) {
             canQueryAI = true
