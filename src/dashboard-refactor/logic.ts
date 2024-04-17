@@ -1085,7 +1085,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const searchID = ++this.currentSearchID
         const searchFilters: UIMutation<State['searchFilters']> = {
             skip: event.paginate
-                ? { $apply: (skip) => skip + 10 }
+                ? { $apply: (skip) => skip + PAGE_SIZE }
                 : { $set: 0 },
         }
 
@@ -1234,7 +1234,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     private searchPages = async (state: State) => {
         const isBlankSearch =
             state.searchFilters.searchQuery.trim().length === 0
-        const result = await this.options.searchBG.unifiedSearch({
+        const params = {
             query: state.searchFilters.searchQuery,
             filterByDomains: state.searchFilters.domainsIncluded,
             filterByListIds: state.searchFilters.spacesIncluded,
@@ -1243,7 +1243,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 ? state.searchResults.__oldestResultTimestamp ??
                   state.searchFilters.dateTo
                 : state.searchFilters.dateTo,
-        })
+            limit: state.searchFilters.limit,
+            skip: state.searchFilters.skip,
+        }
+        const result = await this.options.searchBG.unifiedSearch(params)
+        console.log('SEARCH - params:', params)
+        console.log('SEARCH - result:', result)
 
         console.log('result', result)
 

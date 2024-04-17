@@ -224,7 +224,6 @@ export interface PageResultsByDay {
     pages: NormalizedState<PageResult>
 }
 
-// tslint:disable-next-line
 export type NestedResults = {
     [day: number]: PageResultsByDay
 }

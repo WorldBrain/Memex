@@ -94,6 +94,8 @@ const blankSearch = (
         lowestTimeBound: 0,
         daysToSearch: 1,
         query: '',
+        limit: 10,
+        skip: 0,
         ...params,
     })
 
@@ -118,7 +120,7 @@ const formatResults = (
 ) => {
     const sortedResults = opts?.skipSorting
         ? [...result.resultDataByPage]
-        : sortUnifiedBlankSearchResult(result)
+        : sortUnifiedBlankSearchResult(result.resultDataByPage)
     return sortedResults.map(([pageId, data]) => [
         pageId,
         {

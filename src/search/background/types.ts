@@ -189,7 +189,7 @@ export interface SearchInterface {
     getMatchingPageCount: SearchIndex['getMatchingPageCount']
 }
 
-export type UnifiedSearchParams = {
+export type UnifiedSearchParams = PaginationParams & {
     query: string
     fromWhen?: number
     untilWhen?: number
