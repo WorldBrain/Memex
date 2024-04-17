@@ -198,6 +198,13 @@ export default class RibbonContainer extends StatefulUIElement<
                 setTutorialIdToOpen={(id) => {
                     this.processEvent('setTutorialId', { tutorialIdToOpen: id })
                 }}
+                deletePage={async () => {
+                    this.processEvent('deletePage', null)
+                }}
+                confirmDeletion={async (promptConfirmation: boolean) => {
+                    this.processEvent('confirmDeletion', promptConfirmation)
+                }}
+                showConfirmDeletion={this.state.showConfirmDeletion}
                 tutorialIdToOpen={this.state.tutorialIdToOpen}
                 // annotationsManager={this.props.annotationsManager}
                 highlighter={this.props.highlighter}

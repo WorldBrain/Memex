@@ -891,6 +891,15 @@ export class AnnotationsSidebarContainer<
                 this.processEvent('checkIfKeyValid', { apiKey: apiKey })
             }
             isKeyValid={this.state.isKeyValid}
+            createCheckOutLink={async (billingPeriod, selectedPremiumPlans) => {
+                this.processEvent('createCheckOutLink', {
+                    billingPeriod,
+                    selectedPremiumPlans,
+                    doNotOpen: false,
+                })
+                return 'success'
+            }}
+            authBG={this.props.authBG}
         />
     )
 

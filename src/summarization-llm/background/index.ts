@@ -45,16 +45,6 @@ export interface SummarizationInterface<Role extends 'provider' | 'caller'> {
             activeTab?: SidebarTab
         }
     >
-    getTextSummary: RemoteFunction<
-        Role,
-        {
-            text: string
-            prompt: string
-        },
-        | { status: 'success'; choices: { text: string }[] }
-        | { status: 'prompt-too-long' }
-        | { status: 'unknown-error' }
-    >
 }
 
 export interface summarizePageBackgroundOptions {
@@ -76,7 +66,6 @@ export default class SummarizeBackground {
     constructor(public options: summarizePageBackgroundOptions) {
         this.remoteFunctions = {
             startPageSummaryStream: this.startPageSummaryStream,
-            getTextSummary: this.getTextSummary,
             isApiKeyValid: this.isApiKeyValid,
             setActiveSidebarTab: this.setActiveSidebarTab,
         }
@@ -101,14 +90,30 @@ export default class SummarizeBackground {
             promptData,
         },
     ) => {
-        const isAllowed = await AIActionAllowed(
+        let isAllowed = null
+
+        isAllowed = await AIActionAllowed(
             this.analyticsBG,
-            apiKey?.length > 0 ? 'AIpowerupOwnKey' : 'AIpowerup',
-            false,
+            apiKey.length > 0,
+            true,
+            AImodel,
         )
 
         if (!isAllowed) {
             return
+        }
+
+        // this is here to not scam our users that have the full subscription and add a key only for using GPT-4.
+        let apiKeyToUse = apiKey ?? ''
+        if (apiKeyToUse?.length > 0 && AImodel === 'gpt-3') {
+            const subscriptionStorage = await browser.storage.local.get(
+                COUNTER_STORAGE_KEY,
+            )
+            const subscriptionData = subscriptionStorage[COUNTER_STORAGE_KEY]
+            const subscriptions = subscriptionData?.pU
+            if (subscriptions && subscriptions?.AIpowerup) {
+                apiKeyToUse = null
+            }
         }
 
         this.options.remoteEventEmitter.emitToTab('startSummaryStream', tab.id)
@@ -162,29 +167,6 @@ export default class SummarizeBackground {
         }
     }
 
-    getTextSummary: SummarizationInterface<
-        'provider'
-    >['getTextSummary'] = async ({ tab }, { text, prompt }) => {
-        const isAllowed = await AIActionAllowed(this.analyticsBG, 'AIpowerup')
-
-        if (!isAllowed) {
-            return
-        }
-
-        const summary = await this.summarizationService.summarizeText(
-            text,
-            prompt,
-        )
-        if (this.options.analyticsBG) {
-            try {
-                await trackQueryAI(this.options.analyticsBG)
-            } catch (error) {
-                console.error(`Error tracking space create event', ${error}`)
-            }
-        }
-
-        return summary
-    }
     isApiKeyValid: SummarizationInterface<'provider'>['isApiKeyValid'] = async (
         { tab },
         { apiKey },

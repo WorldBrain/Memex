@@ -120,6 +120,10 @@ import { InPageUIInterface } from 'src/in-page-ui/background/types'
 import { Storage } from 'webextension-polyfill'
 import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import {
+    COUNTER_STORAGE_KEY,
+    DEFAULT_COUNTER_STORAGE_KEY,
+} from 'src/util/subscriptions/constants'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -323,11 +327,7 @@ export async function main(
             let isAllowed = true
             let limitReachedNotif = null
             if (counterQueriesHaveChanged) {
-                isAllowed = await AIActionAllowed(
-                    analyticsBG,
-                    'AIpowerup',
-                    true,
-                )
+                isAllowed = await AIActionAllowed(analyticsBG, null, false)
                 limitReachedNotif = 'AI'
             }
             if (counterSavedHaveChanged) {
@@ -403,8 +403,9 @@ export async function main(
         ) => {
             annotationsFunctions.createHighlight()(
                 null,
-                false,
+                shouldShare,
                 shouldCopyShareLink,
+                drawRectangle,
             )
         },
         setUndoHistory: async (undoHistory) =>
@@ -645,6 +646,13 @@ export async function main(
             ) {
                 return
             }
+            if (
+                selection &&
+                selection.toString().length === 0 &&
+                !drawRectangle
+            ) {
+                return
+            }
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -655,10 +663,7 @@ export async function main(
             }
             let screenshotGrabResult: PdfScreenshot
             let annotationId = null
-            if (
-                isPdfViewerRunning &&
-                window.getSelection().toString().length === 0
-            ) {
+            if (isPdfViewerRunning && drawRectangle) {
                 const pdfViewer = globalThis as any
                 screenshotGrabResult = await promptPdfScreenshot(
                     document,
@@ -768,6 +773,9 @@ export async function main(
                 return
             }
 
+            if (selection == null) {
+                return
+            }
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -1011,6 +1019,7 @@ export async function main(
                 customLists: collectionsBG,
                 authBG,
                 bgScriptBG,
+                searchBG: runInBackground(),
                 analyticsBG,
                 pageActivityIndicatorBG,
                 activityIndicatorBG,
@@ -1451,36 +1460,71 @@ export async function main(
         })
     }
 
+    // Function to track when the subscription has been updated by going to our website (which the user arrives through a redirect)
     if (fullPageUrl === 'https://memex.garden/upgradeSuccessful') {
+        const h2Element = document.querySelector('h2')
+        const h3Element = document.querySelector('h3')
+
+        if (h2Element) {
+            h2Element.textContent = 'Updating Subscription'
+        }
+        if (h3Element) {
+            h3Element.textContent =
+                "Takes just a second. Please don't close this tab"
+        }
         const email = _currentUser?.email
+        if (email) {
+            let hasSubscriptionUpdated = false
+            let retries = 0
+            const maxRetries = 30
+            while (!hasSubscriptionUpdated && retries < maxRetries) {
+                const subscriptionBefore = await browser.storage.local.get(
+                    COUNTER_STORAGE_KEY,
+                )
 
-        await sleepPromise(3000)
-        await runInBackground<InPageUIInterface<'caller'>>().checkStripePlan(
-            email,
-        )
-    }
+                const subscriptionDataBefore =
+                    subscriptionBefore[COUNTER_STORAGE_KEY]
 
-    if (
-        fullPageUrl === 'https://memex.garden/upgradeStaging' ||
-        fullPageUrl === 'https://memex.garden/upgradeNotification' ||
-        fullPageUrl === 'https://memex.garden/upgrade' ||
-        fullPageUrl.startsWith('https://memex.garden/') ||
-        fullPageUrl === 'https://memex.garden/copilot' ||
-        fullPageUrl === 'https://memex.garden/hivemind'
-    ) {
-        setInterval(() => {
-            const elements = document.querySelectorAll('#UpgradeButton')
+                const subscriptionsBefore =
+                    subscriptionDataBefore?.pU ?? DEFAULT_COUNTER_STORAGE_KEY.pU
 
-            for (let element of elements) {
-                const currentHref = element.getAttribute('href')
-                if (!currentHref.includes('prefilled_email')) {
-                    element.setAttribute(
-                        'href',
-                        `${currentHref}?prefilled_email=${_currentUser.email}`,
-                    )
+                await sleepPromise(1000)
+                await runInBackground<
+                    InPageUIInterface<'caller'>
+                >().checkStripePlan(email)
+                const subscriptionAfter = await browser.storage.local.get(
+                    COUNTER_STORAGE_KEY,
+                )
+
+                const subscriptionDataAfter =
+                    subscriptionAfter[COUNTER_STORAGE_KEY]
+
+                const subscriptionsAfter =
+                    subscriptionDataAfter?.pU ?? DEFAULT_COUNTER_STORAGE_KEY.pU
+
+                let keyChanged = false
+                for (const key in subscriptionsBefore) {
+                    if (subscriptionsBefore[key] !== subscriptionsAfter[key]) {
+                        keyChanged = true
+                        break
+                    }
+                }
+                if (keyChanged) {
+                    hasSubscriptionUpdated = true
+                    if (h2Element) {
+                        h2Element.textContent =
+                            'Subscription Successfully Updated'
+                    }
+                    if (h3Element) {
+                        h3Element.textContent =
+                            "Reload the tab you've been working on to see the subscription changes take effect"
+                    }
+                    break
+                } else {
+                    retries++
                 }
             }
-        }, 200)
+        }
     }
 
     if (analyticsBG && hasActivity) {

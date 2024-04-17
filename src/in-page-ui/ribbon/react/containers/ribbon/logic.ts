@@ -70,6 +70,7 @@ export interface RibbonContainerState {
     signupDate: number
     themeVariant: MemexThemeVariant
     showRabbitHoleButton: boolean
+    showConfirmDeletion: boolean
 }
 
 export type RibbonContainerEvents = UIEvent<
@@ -87,6 +88,8 @@ export type RibbonContainerEvents = UIEvent<
         toggleFeed: null
         toggleReadingView: null
         toggleAskAI: boolean | null
+        deletePage: null
+        confirmDeletion: boolean
         toggleRabbitHole: null
         toggleQuickSearch: null
         toggleTheme: { themeVariant: MemexThemeVariant }
@@ -190,6 +193,7 @@ export class RibbonContainerLogic extends UILogic<
             signupDate: null,
             themeVariant: null,
             showRabbitHoleButton: false,
+            showConfirmDeletion: false,
         }
     }
 
@@ -374,6 +378,41 @@ export class RibbonContainerLogic extends UILogic<
         } else {
             this.setReadingWidth()
         }
+    }
+    confirmDeletion: EventHandler<'confirmDeletion'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.dependencies.setRibbonShouldAutoHide(!event)
+        this.emitMutation({
+            showConfirmDeletion: { $set: event },
+        })
+        if (!event) {
+            this.dependencies.setRibbonShouldAutoHide(true)
+        }
+    }
+    deletePage: EventHandler<'deletePage'> = async ({
+        event,
+        previousState,
+    }) => {
+        const fullURL = window.location.href
+        await this.dependencies.searchBG.delPages([normalizeUrl(fullURL)])
+
+        this.emitMutation({
+            bookmark: {
+                isBookmarked: { $set: false },
+                lastBookmarkTimestamp: {
+                    $set: null,
+                },
+            },
+        })
+
+        await this.dependencies.bookmarks.setBookmarkStatusInBrowserIcon(
+            false,
+            fullURL,
+        )
+
+        this.dependencies.setRibbonShouldAutoHide(true)
     }
     toggleAskAI: EventHandler<'toggleAskAI'> = async ({
         event,

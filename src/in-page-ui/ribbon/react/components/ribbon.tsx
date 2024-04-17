@@ -45,6 +45,8 @@ import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutor
 import { getKeyName } from '@worldbrain/memex-common/lib/utils/os-specific-key-names'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
+import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
+import DeleteConfirmModal from 'src/overview/delete-confirm-modal/components/DeleteConfirmModal'
 
 export interface Props extends RibbonSubcomponentProps {
     setRef?: (el: HTMLElement) => void
@@ -82,6 +84,8 @@ export interface Props extends RibbonSubcomponentProps {
     showRabbitHoleButton: boolean
     tutorialIdToOpen: string
     setTutorialIdToOpen: (tutorialId: string) => void
+    deletePage: () => void
+    confirmDeletion: (promptConfirmation: boolean) => void
 }
 
 interface State {
@@ -93,6 +97,7 @@ interface State {
     renderChangeLog: boolean
     updatesAvailable: boolean
     initialHighlightColor: RGBAColor
+    hoverSavedButton: boolean
 }
 
 export default class Ribbon extends Component<Props, State> {
@@ -126,6 +131,7 @@ export default class Ribbon extends Component<Props, State> {
         renderChangeLog: false,
         updatesAvailable: false,
         initialHighlightColor: null,
+        hoverSavedButton: false,
     }
 
     constructor(props: Props) {
@@ -1093,38 +1099,73 @@ export default class Ribbon extends Component<Props, State> {
             >
                 {(topRight || bottomRight) &&
                 !this.props.sidebar.isSidebarOpen ? (
-                    <PrimaryAction
-                        size={'medium'}
-                        type="tertiary"
-                        label={
-                            this.props.bookmark.isBookmarked ? (
-                                <SavedButtonBox>
-                                    Saved
-                                    {/* <DateText>{bookmarkDate}</DateText> */}
-                                </SavedButtonBox>
-                            ) : (
-                                'Save'
-                            )
-                        }
-                        fontColor={'greyScale8'}
-                        onClick={(e) => {
-                            if (e.altKey) {
-                                this.props.setTutorialIdToOpen('savePages')
-                            } else {
-                                this.props.bookmark.toggleBookmark()
-                            }
-                        }}
-                        icon={
-                            this.props.bookmark.isBookmarked
-                                ? 'heartFull'
-                                : 'heartEmpty'
-                        }
-                        iconColor={
-                            this.props.bookmark.isBookmarked
-                                ? 'prime1'
-                                : 'greyScale5'
-                        }
-                    />
+                    <>
+                        {this.state.hoverSavedButton ? (
+                            <PrimaryAction
+                                size={'medium'}
+                                type="tertiary"
+                                onMouseLeave={() => {
+                                    this.setState({
+                                        hoverSavedButton: false,
+                                    })
+                                }}
+                                width={'90px'}
+                                label={'Delete'}
+                                fontColor={'greyScale8'}
+                                onClick={(e) => {
+                                    if (this.props.bookmark.isBookmarked) {
+                                        this.props.confirmDeletion(true)
+                                    }
+                                }}
+                                icon={'removeX'}
+                                iconColor={
+                                    this.props.bookmark.isBookmarked
+                                        ? 'prime1'
+                                        : 'greyScale5'
+                                }
+                            />
+                        ) : (
+                            <PrimaryAction
+                                size={'medium'}
+                                type="tertiary"
+                                width={'90px'}
+                                onMouseEnter={() => {
+                                    if (this.props.bookmark.isBookmarked) {
+                                        this.setState({
+                                            hoverSavedButton: true,
+                                        })
+                                    }
+                                }}
+                                label={
+                                    this.props.bookmark.isBookmarked ? (
+                                        <SavedButtonBox>Saved</SavedButtonBox>
+                                    ) : (
+                                        'Save'
+                                    )
+                                }
+                                fontColor={'greyScale8'}
+                                onClick={(e) => {
+                                    if (e.altKey) {
+                                        this.props.setTutorialIdToOpen(
+                                            'savePages',
+                                        )
+                                    } else {
+                                        this.props.bookmark.toggleBookmark()
+                                    }
+                                }}
+                                icon={
+                                    this.props.bookmark.isBookmarked
+                                        ? 'heartFull'
+                                        : 'heartEmpty'
+                                }
+                                iconColor={
+                                    this.props.bookmark.isBookmarked
+                                        ? 'prime1'
+                                        : 'greyScale5'
+                                }
+                            />
+                        )}
+                    </>
                 ) : (
                     <Icon
                         onClick={(e) => {
@@ -2106,6 +2147,25 @@ export default class Ribbon extends Component<Props, State> {
                             title="Error saving note"
                             errorMessage={this.props.bookmark.writeError}
                         />
+                    )}
+                    {this.props.showConfirmDeletion && (
+                        <OverlayModals
+                            closeComponent={() => {
+                                this.props.confirmDeletion(false)
+                            }}
+                            getPortalRoot={this.props.getRootElement}
+                            blockedBackground
+                            positioning="centerCenter"
+                        >
+                            <DeleteConfirmModal
+                                isShown
+                                message="Delete page and related notes?"
+                                onClose={async () => {
+                                    this.props.confirmDeletion(false)
+                                }}
+                                deleteDocs={async () => this.props.deletePage()}
+                            />
+                        </OverlayModals>
                     )}
                 </>
             )

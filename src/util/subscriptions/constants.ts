@@ -7,7 +7,13 @@ export const DEFAULT_COUNTER_STORAGE_KEY = {
     c: 0,
     cQ: 0,
     m: currentMonth,
-    pU: {},
+    pU: {
+        AIpowerup: false,
+        Unlimited: false,
+        AIpowerupOwnKey: false,
+        bookmarksPowerUp: false,
+        lifetime: false,
+    },
 }
 export const FREE_PLAN_LIMIT = 25
 export const PRO_PLAN_LIMIT = 300
