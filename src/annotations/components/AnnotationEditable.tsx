@@ -232,7 +232,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         this.setTextAreaHeight()
 
         if (!this.props.color) {
-            const defaultHighlightSettings = this.props.highlightColorSettings.find(
+            const defaultHighlightSettings = this.props.highlightColorSettings?.find(
                 (setting) => setting.id === 'default',
             )
             if (defaultHighlightSettings?.color) {

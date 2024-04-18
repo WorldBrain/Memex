@@ -317,7 +317,6 @@ export default class SearchResultsContainer extends React.Component<
     ) => (noteId: string) => {
         const pageData = this.props.pageData.byId[pageId]
         const noteData = this.props.noteData.byId[noteId]
-
         const interactionProps = bindFunctionalProps<
             NoteInteractionAugdProps,
             NoteInteractionProps
@@ -328,7 +327,7 @@ export default class SearchResultsContainer extends React.Component<
         const cachedListIds = noteData.isShared
             ? [
                   ...new Set([
-                      ...pageData.lists.filter(
+                      ...pageData?.lists?.filter(
                           (listId) =>
                               this.props.listData.byId[listId]?.remoteId !=
                               null,
@@ -338,8 +337,7 @@ export default class SearchResultsContainer extends React.Component<
               ]
             : noteData.lists
         const localListIds = this.getLocalListIdsForCacheIds(cachedListIds)
-
-        const noteColor = this.props.highlightColorSettings.find(
+        const noteColor = this.props.highlightColorSettings?.find(
             // TODO: Figure out type mismatch here: noteData.color is an obj, while item.id is a string. Either one is not as it says, or logical bug
             (item: any) => {
                 return item.id === noteData.color
@@ -354,7 +352,7 @@ export default class SearchResultsContainer extends React.Component<
                 unifiedId={noteId}
                 tags={noteData.tags}
                 lists={localListIds}
-                color={noteColor}
+                color={noteColor ?? null}
                 body={noteData.highlight}
                 comment={noteData.comment}
                 isShared={noteData.isShared}
@@ -542,7 +540,8 @@ export default class SearchResultsContainer extends React.Component<
         day: number,
         { onShareBtnClick }: PageInteractionProps,
     ) {
-        if (!areNotesShown) {
+        const shouldShow = areNotesShown || noteIds[notesType]?.length > 0
+        if (!shouldShow) {
             return null
         }
         const { newNoteInteractionProps } = this.props
@@ -599,8 +598,9 @@ export default class SearchResultsContainer extends React.Component<
                         }
                     />
                 </PageNotesContainer>
-                <NoteResultContainer>
-                    {/* {noteIds[notesType].length > 0 && (
+                {noteIds[notesType] && noteIds[notesType]?.length > 0 && (
+                    <NoteResultContainer>
+                        {/* {noteIds[notesType].length > 0 && (
                         <SortButtonContainer>
                             <TooltipBox
                                 tooltipText="Sort Annotations"
@@ -620,21 +620,24 @@ export default class SearchResultsContainer extends React.Component<
                             {this.renderSortingMenuDropDown(normalizedUrl, day)}
                         </SortButtonContainer>
                     )} */}
-                    {noteIds[notesType]
-                        .sort((a, b) => {
-                            const noteA = this.props.noteData.byId[a]
-                            const noteB = this.props.noteData.byId[b]
-                            return noteB.displayTime - noteA.displayTime
-                        })
-                        .map((noteId, index) => {
-                            const zIndex = noteIds[notesType].length - index
-                            return this.renderNoteResult(
-                                day,
-                                normalizedUrl,
-                                zIndex,
-                            )(noteId)
-                        })}
-                </NoteResultContainer>
+                        {noteIds[notesType]
+                            .sort((a, b) => {
+                                const noteA = this.props.noteData.byId[a]
+                                const noteB = this.props.noteData.byId[b]
+                                return noteB.displayTime - noteA.displayTime
+                            })
+                            ?.map((noteId, index) => {
+                                const zIndex =
+                                    noteIds[notesType]?.length - index
+
+                                return this.renderNoteResult(
+                                    day,
+                                    normalizedUrl,
+                                    zIndex,
+                                )(noteId)
+                            })}
+                    </NoteResultContainer>
+                )}
             </PageNotesBox>
         )
     }
@@ -1168,9 +1171,6 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     render() {
-        console.log('searchQuery', this.props.searchQuery)
-        console.log('searchResults', this.props.searchResults)
-        console.log('searchFilters', this.props.searchFilters)
         return (
             <ResultsContainer>
                 <ResultsBox>
