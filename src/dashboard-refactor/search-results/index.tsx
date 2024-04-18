@@ -64,6 +64,7 @@ import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -139,9 +140,9 @@ export type Props = RootState &
         onBulkSelect: (itemData, remove) => Promise<void>
         selectedItems: string[]
         saveHighlightColor?: (noteId, colorId, color) => void
-        saveHighlightColorSettings?: (newState) => void
-        getHighlightColorSettings?: () => void
-        highlightColorSettings: string
+        saveHighlightColorSettings: (newState: HighlightColor[]) => void
+        getHighlightColorSettings: () => void
+        highlightColorSettings: HighlightColor[]
         getRootElement: () => HTMLElement
         showSpacesTab: (pageUrl) => void
         // onEditPageBtnClick: (
@@ -337,10 +338,10 @@ export default class SearchResultsContainer extends React.Component<
               ]
             : noteData.lists
         const localListIds = this.getLocalListIdsForCacheIds(cachedListIds)
-        const hasSharedLists = this.getRemoteIdsForCacheIds(cachedListIds)
 
-        const noteColor = JSON.parse(this.props.highlightColorSettings).find(
-            (item) => {
+        const noteColor = this.props.highlightColorSettings.find(
+            // TODO: Figure out type mismatch here: noteData.color is an obj, while item.id is a string. Either one is not as it says, or logical bug
+            (item: any) => {
                 return item.id === noteData.color
             },
         )?.color
