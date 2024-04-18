@@ -165,82 +165,56 @@ export default class SearchBackground {
         resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
         params: UnifiedSearchParams,
     ): Promise<void> {
+        const needToFilterByUrl =
+            params.filterByDomains.length ||
+            params.filterByPDFs ||
+            params.filterByVideos ||
+            params.filterByTweets ||
+            params.filterByEvents ||
+            params.omitPagesWithoutAnnotations
+
         if (
-            !resultDataByPage.size ||
-            (!params.filterByDomains.length &&
-                !params.filterByListIds.length &&
-                !params.filterByPDFs &&
-                !params.filterByVideos &&
-                !params.filterByTweets &&
-                !params.filterByEvents &&
-                !params.omitPagesWithoutAnnotations)
+            !needToFilterByUrl &&
+            !resultDataByPage.size &&
+            !params.filterByListIds.length
         ) {
             return
         }
-        const pageIdsToDelete = new Set<string>()
+        const pageIdsToFilterOut = new Set<string>()
 
-        if (params.omitPagesWithoutAnnotations) {
+        // Perform any specified URL filters. These are all relatively simple URL tests
+        if (needToFilterByUrl) {
             resultDataByPage.forEach(({ annotations }, pageId) => {
-                if (!annotations.length) {
-                    pageIdsToDelete.add(pageId)
-                }
-            })
-        }
+                const shouldFilterOutPage =
+                    (params.omitPagesWithoutAnnotations &&
+                        !annotations.length) ||
+                    (params.filterByEvents && !isUrlAnEventPage(pageId)) ||
+                    (params.filterByTweets && !isUrlATweet(pageId)) ||
+                    (params.filterByVideos &&
+                        !isUrlMemexSupportedVideo(pageId)) ||
+                    (params.filterByPDFs &&
+                        !isMemexPageAPdf({ url: pageId })) ||
+                    // Does an OR filter on supplied domains
+                    (params.filterByDomains.length &&
+                        !params.filterByDomains.reduce((acc, domain) => {
+                            const domainRegexp = new RegExp(
+                                `^(\\w+\\.)?${domain}`, // This allows for subdomains
+                            )
+                            return acc || domainRegexp.test(pageId)
+                        }, false))
 
-        if (params.filterByEvents) {
-            resultDataByPage.forEach((_, pageId) => {
-                if (!isUrlAnEventPage(pageId)) {
-                    pageIdsToDelete.add(pageId)
+                if (shouldFilterOutPage) {
+                    pageIdsToFilterOut.add(pageId)
                 }
             })
         }
+        pageIdsToFilterOut.forEach((id) => resultDataByPage.delete(id))
 
-        if (params.filterByTweets) {
-            resultDataByPage.forEach((_, pageId) => {
-                if (!isUrlATweet(pageId)) {
-                    pageIdsToDelete.add(pageId)
-                }
-            })
-        }
-
-        if (params.filterByVideos) {
-            resultDataByPage.forEach((_, pageId) => {
-                if (!isUrlMemexSupportedVideo(pageId)) {
-                    pageIdsToDelete.add(pageId)
-                }
-            })
-        }
-
-        if (params.filterByPDFs) {
-            resultDataByPage.forEach((_, pageId) => {
-                if (!isMemexPageAPdf({ url: pageId })) {
-                    pageIdsToDelete.add(pageId)
-                }
-            })
-        }
-
-        // 1. OR'd filter by domains is easy - we already have all the data we need
-        if (params.filterByDomains.length) {
-            resultDataByPage.forEach((_, pageId) => {
-                const isDomainIncluded = params.filterByDomains.reduce(
-                    (acc, domain) => {
-                        // This allows for subdomains
-                        const domainRegexp = new RegExp(`^(\\w+\\.)?${domain}`)
-                        return acc || domainRegexp.test(pageId)
-                    },
-                    false,
-                )
-                if (!isDomainIncluded) {
-                    pageIdsToDelete.add(pageId)
-                }
-            })
-        }
-        pageIdsToDelete.forEach((id) => resultDataByPage.delete(id))
         if (!resultDataByPage.size || !params.filterByListIds.length) {
             return
         }
 
-        // 2. AND'd filter by lists is more tricky. First need to lookup annot privacy level data to know whether they inherit parent page lists or not
+        // AND'd filter by lists is more tricky...
         const allAnnotIds: string[] = []
         const pageIdByAnnotId = new Map<string, string>()
         resultDataByPage.forEach(({ annotations: annotIds }, pageId) =>
@@ -250,6 +224,7 @@ export default class SearchBackground {
             }),
         )
 
+        // 1. Need to lookup annot privacy level data to know whether they inherit parent page lists or not
         const privacyLevels: AnnotationPrivacyLevel[] = await this.options.storageManager
             .collection('annotationPrivacyLevels')
             .findObjects({ annotation: { $in: allAnnotIds } })
@@ -277,7 +252,7 @@ export default class SearchBackground {
             )
         }
 
-        // 3. Filter down selectively-shared annotations
+        // 2. Filter down selectively-shared annotations
         const annotListEntries: AnnotationListEntry[] = await this.options.storageManager
             .collection('annotListEntries')
             .findObjects({
@@ -292,7 +267,7 @@ export default class SearchBackground {
             hasEntriesForAllFilteredLists(annotListEntriesByAnnotId[id]),
         )
 
-        // 4. Filter down auto-shared annotations
+        // 3. Filter down auto-shared annotations
         const pageListEntries: PageListEntry[] = await this.options.storageManager
             .collection('pageListEntries')
             .findObjects({
@@ -309,7 +284,7 @@ export default class SearchBackground {
             ),
         )
 
-        // 5. Apply annotation filtering to the results, and filter out any pages not in lists without remaining annotations
+        // 4. Apply annotation filtering to the results, and filter out any pages not in lists without remaining annotations
         resultDataByPage.forEach((data, pageId) => {
             data.annotations = data.annotations.filter(
                 (annot) =>
@@ -320,10 +295,10 @@ export default class SearchBackground {
                 !data.annotations.length &&
                 !hasEntriesForAllFilteredLists(pageListEntriesByPageId[pageId])
             ) {
-                pageIdsToDelete.add(pageId)
+                pageIdsToFilterOut.add(pageId)
             }
         })
-        pageIdsToDelete.forEach((id) => resultDataByPage.delete(id))
+        pageIdsToFilterOut.forEach((id) => resultDataByPage.delete(id))
     }
 
     private async unifiedBlankSearch(
