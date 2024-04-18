@@ -1537,5 +1537,86 @@ describe('Unified search tests', () => {
                 ],
             ])
         })
+
+        it('should be able to filter event pages in blank and terms search', async () => {
+            const { backgroundModules } = await setupTest()
+            const lowestTimeBound = await backgroundModules.search[
+                'calcSearchLowestTimeBound'
+            ]()
+            const now = Date.now()
+            const blankResultA = await blankSearch(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: now,
+                lowestTimeBound,
+                filterEvents: true,
+            })
+            const termsResultB = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 1000,
+                skip: 0,
+                filterEvents: true,
+            })
+            const termsResultC = await termsSearch(backgroundModules, {
+                query: 'encyclopedia',
+                limit: 1000,
+                skip: 0,
+                filterEvents: true,
+            })
+            expect(blankResultA.resultsExhausted).toBe(true)
+            expect(termsResultB.resultsExhausted).toBe(true)
+            expect(termsResultC.resultsExhausted).toBe(true)
+            expect(formatResults(blankResultA)).toEqual([
+                [
+                    DATA.PAGE_ID_8,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_3,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_3][3].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_3][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_3][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_3][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_3][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(termsResultB)).toEqual([
+                [
+                    DATA.PAGE_ID_8,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_3,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_3][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(termsResultC)).toEqual([
+                [
+                    DATA.PAGE_ID_3,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_3][1].url],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_3
+                        ][1].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+        })
     })
 })

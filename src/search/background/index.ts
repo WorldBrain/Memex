@@ -51,6 +51,7 @@ import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotation
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import { isUrlMemexSupportedVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import { isUrlATweet } from '@worldbrain/memex-common/lib/twitter-integration/utils'
+import { isUrlAnEventPage } from '@worldbrain/memex-common/lib/unified-search/utils'
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -170,11 +171,20 @@ export default class SearchBackground {
                 !params.filterByListIds.length &&
                 !params.filterPDFs &&
                 !params.filterVideos &&
-                !params.filterTweets)
+                !params.filterTweets &&
+                !params.filterEvents)
         ) {
             return
         }
         const pageIdsToDelete = new Set<string>()
+
+        if (params.filterEvents) {
+            resultDataByPage.forEach((_, pageId) => {
+                if (!isUrlAnEventPage(pageId)) {
+                    pageIdsToDelete.add(pageId)
+                }
+            })
+        }
 
         if (params.filterTweets) {
             resultDataByPage.forEach((_, pageId) => {

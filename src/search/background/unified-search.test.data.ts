@@ -1,6 +1,6 @@
 export const PAGE_ID_1 = 'en.wikipedia.org/wiki/Canopy_(biology)'
 export const PAGE_ID_2 = 'wikipedia.org/wiki/Genus'
-export const PAGE_ID_3 = 'luma.com/test-1'
+export const PAGE_ID_3 = 'lu.ma/test-1'
 export const PAGE_ID_4 = 'x.com/test_acc_1/status/12345678'
 export const PAGE_ID_5 = 'twitter.com/test_acc_2/status/12345678'
 export const PAGE_ID_6 = 'memex.cloud/ct/test-fingerprint-2.pdf'
