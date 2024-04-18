@@ -49,6 +49,7 @@ import {
 } from './utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
+import { isUrlMemexSupportedVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -166,11 +167,20 @@ export default class SearchBackground {
             !resultDataByPage.size ||
             (!params.filterByDomains.length &&
                 !params.filterByListIds.length &&
-                !params.filterPDFs)
+                !params.filterPDFs &&
+                !params.filterVideos)
         ) {
             return
         }
         const pageIdsToDelete = new Set<string>()
+
+        if (params.filterVideos) {
+            resultDataByPage.forEach((_, pageId) => {
+                if (!isUrlMemexSupportedVideo(pageId)) {
+                    pageIdsToDelete.add(pageId)
+                }
+            })
+        }
 
         if (params.filterPDFs) {
             resultDataByPage.forEach((_, pageId) => {

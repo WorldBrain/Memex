@@ -1340,5 +1340,96 @@ describe('Unified search tests', () => {
                 ],
             ])
         })
+
+        it('should be able to filter video pages in blank and terms search', async () => {
+            const { backgroundModules } = await setupTest()
+            const lowestTimeBound = await backgroundModules.search[
+                'calcSearchLowestTimeBound'
+            ]()
+            const now = Date.now()
+            const blankResultA = await blankSearch(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: now,
+                lowestTimeBound,
+                filterVideos: true,
+            })
+            const termsResultB = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 1000,
+                skip: 0,
+                filterVideos: true,
+            })
+            const termsResultC = await termsSearch(backgroundModules, {
+                query: 'today',
+                limit: 1000,
+                skip: 0,
+                filterVideos: true,
+            })
+            expect(blankResultA.resultsExhausted).toBe(true)
+            expect(termsResultB.resultsExhausted).toBe(true)
+            expect(termsResultC.resultsExhausted).toBe(true)
+            expect(formatResults(blankResultA)).toEqual([
+                [
+                    DATA.PAGE_ID_11,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(termsResultB)).toEqual([
+                [
+                    DATA.PAGE_ID_11,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(termsResultC)).toEqual([
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_7
+                        ][3].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+        })
     })
 })
