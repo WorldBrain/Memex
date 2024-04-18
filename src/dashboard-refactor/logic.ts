@@ -1111,23 +1111,58 @@ export class DashboardLogic extends UILogic<State, Events> {
                 if (searchID !== this.currentSearchID) {
                     return
                 } else {
-                    let {
+                    const isBlankSearch =
+                        searchState.searchFilters.searchQuery.trim().length ===
+                        0
+
+                    const params: UnifiedSearchParams = {
+                        query: searchState.searchFilters.searchQuery,
+                        filterByDomains:
+                            searchState.searchFilters.domainsIncluded,
+                        filterByListIds:
+                            searchState.searchFilters.spacesIncluded,
+                        fromWhen: searchState.searchFilters.dateFrom,
+                        // TODO: Set up blank search use `limit`+`skip` instead of this
+                        untilWhen: isBlankSearch
+                            ? searchState.searchResults
+                                  .__oldestResultTimestamp ??
+                              searchState.searchFilters.dateTo
+                            : searchState.searchFilters.dateTo,
+                        limit: searchState.searchFilters.limit,
+                        skip: searchState.searchFilters.skip,
+                        filterByPDFs:
+                            searchState.searchResults.searchType === 'pdf',
+                        filterByEvents:
+                            searchState.searchResults.searchType === 'events',
+                        filterByVideos:
+                            searchState.searchResults.searchType === 'videos',
+                        filterByTweets:
+                            searchState.searchResults.searchType === 'twitter',
+                        omitPagesWithoutAnnotations:
+                            searchState.searchResults.searchType === 'notes',
+                    }
+
+                    const result = await this.options.searchBG.unifiedSearch(
+                        params,
+                    )
+                    console.log('SEARCH - params:', params)
+                    console.log('SEARCH - result:', result)
+                    const {
                         noteData,
                         pageData,
                         results,
                         resultsExhausted,
                         searchTermsInvalid,
-                    } =
-                        previousState.searchResults.searchType === 'pages' ||
-                        previousState.searchResults.searchType === 'videos' ||
-                        previousState.searchResults.searchType === 'events' ||
-                        previousState.searchResults.searchType === 'twitter'
-                            ? await this.searchPages(searchState)
-                            : previousState.searchResults.searchType === 'notes'
-                            ? await this.searchNotes(searchState)
-                            : await this.searchPDFs(searchState)
+                    } = {
+                        // TODO: Remove this level of indirection
+                        ...utils.pageSearchResultToState(
+                            result,
+                            this.options.annotationsCache,
+                        ),
+                        resultsExhausted: result.resultsExhausted,
+                        searchTermsInvalid: false,
+                    }
 
-                    console.log('results', results)
                     let noResultsType: NoResultsType = null
                     if (
                         resultsExhausted &&
@@ -1232,107 +1267,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 }
             },
         )
-    }
-
-    private searchPages = async (state: State) => {
-        const isBlankSearch =
-            state.searchFilters.searchQuery.trim().length === 0
-        const params: UnifiedSearchParams = {
-            query: state.searchFilters.searchQuery,
-            filterByDomains: state.searchFilters.domainsIncluded,
-            filterByListIds: state.searchFilters.spacesIncluded,
-            fromWhen: state.searchFilters.dateFrom,
-            untilWhen: isBlankSearch
-                ? state.searchResults.__oldestResultTimestamp ??
-                  state.searchFilters.dateTo
-                : state.searchFilters.dateTo,
-            limit: state.searchFilters.limit,
-            skip: state.searchFilters.skip,
-            filterByPDFs: state.searchResults.searchType === 'pdf',
-            filterByEvents: state.searchResults.searchType === 'events',
-            filterByVideos: state.searchResults.searchType === 'videos',
-            filterByTweets: state.searchResults.searchType === 'twitter',
-            omitPagesWithoutAnnotations:
-                state.searchResults.searchType === 'notes',
-        }
-        const result = await this.options.searchBG.unifiedSearch(params)
-        console.log('SEARCH - params:', params)
-        console.log('SEARCH - result:', result)
-
-        console.log('result', result)
-
-        this.emitMutation({
-            searchResults: {
-                __oldestResultTimestamp: { $set: result.oldestResultTimestamp },
-            },
-        })
-
-        if (state.searchResults.searchType === 'events') {
-            result.docs = result.docs.filter((item) => {
-                return eventProviderUrls.some((items) =>
-                    item.fullUrl.includes(items),
-                )
-            })
-        }
-
-        return {
-            ...utils.pageSearchResultToState(
-                result,
-                this.options.annotationsCache,
-            ),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: false,
-        }
-    }
-
-    private searchPDFs = async (state: State) => {
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state, this.options.annotationsCache),
-        )
-
-        const pdfResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
-
-        result = {
-            docs: pdfResults,
-            resultsExhausted: result.resultsExhausted,
-            isBadTerm: result.isBadTerm,
-        }
-
-        return {
-            ...utils.pageSearchResultToState(
-                result,
-                this.options.annotationsCache,
-            ),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
-
-    firstLoad = true
-    private searchNotes = async (state: State) => {
-        if (this.firstLoad) {
-            state.searchFilters.limit = 2
-        } else {
-            state.searchFilters.limit = PAGE_SIZE
-        }
-        const result = await this.options.searchBG.searchAnnotations(
-            stateToSearchParams(state, this.options.annotationsCache),
-        )
-
-        if (result.resultsExhausted) {
-            this.firstLoad = true
-        } else if (!result.resultsExhausted) {
-            this.firstLoad = false
-        }
-
-        return {
-            ...utils.annotationSearchResultToState(
-                result as AnnotationsSearchResponse,
-                this.options.annotationsCache,
-            ),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
     }
 
     private async ensureLoggedIn(): Promise<boolean> {
