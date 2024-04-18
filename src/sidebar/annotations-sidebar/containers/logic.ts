@@ -120,6 +120,7 @@ import { replaceImgSrcWithRemoteIdBrowser } from '@worldbrain/memex-common/lib/a
 import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -589,51 +590,41 @@ export class SidebarContainerLogic extends UILogic<
             spaceSearchSuggestions: { $set: lists },
         })
     }
+
     getHighlightColorSettings: EventHandler<
         'getHighlightColorSettings'
     > = async ({ event, previousState }) => {
-        let highlightColorJSON
+        let highlightColors: HighlightColor[]
         if (previousState.highlightColors) {
-            highlightColorJSON = JSON.parse(previousState.highlightColors)
+            highlightColors = previousState.highlightColors
         } else {
-            const highlightColors = await this.fetchHighlightColors()
-
-            if (highlightColors) {
-                highlightColorJSON = highlightColors
-            } else {
-                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+            highlightColors = await this.fetchHighlightColors()
+            if (!highlightColors) {
+                highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
                 await this.syncSettings.highlightColors.set(
                     'highlightColors',
-                    highlightColorJSON,
+                    highlightColors,
                 )
             }
         }
 
-        this.emitMutation({
-            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
-        })
-
-        return highlightColorJSON
+        this.emitMutation({ highlightColors: { $set: highlightColors } })
     }
 
-    async fetchHighlightColors() {
-        let highlightColorJSON
-
-        const highlightColors = await this.syncSettings.highlightColors.get(
+    private async fetchHighlightColors() {
+        let highlightColors = await this.syncSettings.highlightColors.get(
             'highlightColors',
         )
 
-        if (highlightColors) {
-            highlightColorJSON = highlightColors
-        } else {
-            highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+        if (!highlightColors) {
+            highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
             await this.syncSettings.highlightColors.set(
                 'highlightColors',
-                highlightColorJSON,
+                highlightColors,
             )
         }
 
-        return highlightColorJSON
+        return highlightColors
     }
 
     saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
@@ -710,8 +701,8 @@ export class SidebarContainerLogic extends UILogic<
     saveHighlightColorSettings: EventHandler<
         'saveHighlightColorSettings'
     > = async ({ event, previousState }) => {
-        const newState = JSON.parse(event.newState)
-        const oldState = JSON.parse(previousState.highlightColors)
+        const newState = event.newState
+        const oldState = previousState.highlightColors
         await this.syncSettings.highlightColors.set('highlightColors', newState)
 
         const changedColors = newState
@@ -733,7 +724,7 @@ export class SidebarContainerLogic extends UILogic<
             .filter((item) => item != null)
 
         this.emitMutation({
-            highlightColors: { $set: JSON.stringify(newState) },
+            highlightColors: { $set: newState },
         })
 
         let highlights: NodeListOf<Element> = document.querySelectorAll(
@@ -923,11 +914,9 @@ export class SidebarContainerLogic extends UILogic<
             AImodel: { $set: selectedModel ?? 'claude-3-haiku' },
         })
 
-        const highlightColorJSON = await this.fetchHighlightColors()
+        const highlightColors = await this.fetchHighlightColors()
 
-        this.emitMutation({
-            highlightColors: { $set: JSON.stringify(highlightColorJSON) },
-        })
+        this.emitMutation({ highlightColors: { $set: highlightColors } })
 
         // Load the setting for the auto-adding of notes to spaces
         const isAutoAddEnabled = await this.syncSettings.extension.get(

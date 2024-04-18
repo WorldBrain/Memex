@@ -49,7 +49,8 @@ import type {
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface RootState {
     loadState: TaskState
@@ -68,7 +69,7 @@ export interface RootState {
     bulkDeleteLoadingState?: TaskState
     bulkSelectedUrls: string[]
     bulkEditSpacesLoadingState?: TaskState
-    highlightColors: string
+    highlightColors: HighlightColor[]
     isNoteSidebarShown: boolean
     blurEffectReset: boolean
     showFullScreen: boolean
@@ -180,7 +181,7 @@ export type DashboardModalsEvents = UIEvent<{
         color: RGBAColor | string
         unifiedId: string
     }
-    saveHighlightColorSettings: { newState: string }
+    saveHighlightColorSettings: { newState: HighlightColor[] }
     setShowDisplayNameSetupModal: { isShown: boolean }
     setShowNoteShareOnboardingModal: { isShown: boolean }
 

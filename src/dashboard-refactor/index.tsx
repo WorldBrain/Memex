@@ -881,7 +881,7 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 saveHighlightColorSettings={(newState) => {
                     this.processEvent('saveHighlightColorSettings', {
-                        newState: newState,
+                        newState,
                     })
                 }}
                 getHighlightColorSettings={() =>
