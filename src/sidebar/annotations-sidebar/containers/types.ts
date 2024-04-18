@@ -41,14 +41,14 @@ import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import type { ListPickerShowState } from 'src/dashboard-refactor/search-results/types'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
-import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
-
-import {
+import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
+import type {
     AImodels,
     PromptData,
     ChatHistoryItem,
 } from '@worldbrain/memex-common/lib/summarization/types'
-import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import type { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -146,7 +146,7 @@ export interface SidebarContainerState extends AnnotationConversationsState {
     isKeyValid: boolean
     AIsuggestions: { prompt: string; focused: boolean | null }[]
     youtubeTranscriptJSON: string
-    highlightColors: string
+    highlightColors: HighlightColor[]
     spaceSearchSuggestions?: SpaceSearchSuggestion[]
     suggestionsResults: SuggestionCard[]
     suggestionsResultsLoadState: TaskState
@@ -377,7 +377,7 @@ interface SidebarEvents {
         feedUrl: string
     }
     loadFeedSources: null
-    saveHighlightColorSettings: { newState: string }
+    saveHighlightColorSettings: { newState: HighlightColor[] }
     youtubeTranscriptJSON: null
     saveImageAsNewNote: {
         imageData: string

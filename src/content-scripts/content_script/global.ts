@@ -957,17 +957,15 @@ export async function main(
     async function getHighlightColorSettings() {
         const syncSettings = createSyncSettingsStore({ syncSettingsBG })
         const highlightColorStore = syncSettings.highlightColors
-        let highlightColorJSON
-        const highlightColors = await highlightColorStore.get('highlightColors')
+        let highlightColors = await highlightColorStore.get('highlightColors')
 
-        if (highlightColors) {
-            highlightColorJSON = highlightColors
-        } else {
-            highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
-            await highlightColorStore.set('highlightColors', highlightColorJSON)
+        if (!highlightColors) {
+            highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
+            await highlightColorStore.set('highlightColors', highlightColors)
         }
-        return highlightColorJSON
+        return highlightColors
     }
+
     async function saveHighlightColorSettings(newStateInput) {
         const syncSettings = createSyncSettingsStore({ syncSettingsBG })
         const highlightColorStore = syncSettings.highlightColors

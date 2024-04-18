@@ -572,10 +572,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
-
-            let syncSettings: SyncSettingsStore<'highlightColors'>
-
-            syncSettings = createSyncSettingsStore({
+            const syncSettings = createSyncSettingsStore<'highlightColors'>({
                 syncSettingsBG: this.options.syncSettingsBG,
             })
 
@@ -584,9 +581,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             )
 
             this.emitMutation({
-                highlightColors: {
-                    $set: JSON.stringify(highlightColorSettings),
-                },
+                highlightColors: { $set: highlightColorSettings },
             })
         })
     }
@@ -1370,41 +1365,34 @@ export class DashboardLogic extends UILogic<State, Events> {
     getHighlightColorSettings: EventHandler<
         'getHighlightColorSettings'
     > = async ({ event, previousState }) => {
-        let highlightColorJSON
-        if (previousState.highlightColors) {
-            highlightColorJSON = JSON.parse(previousState.highlightColors)
-        } else {
-            const highlightColors = await this.syncSettings.highlightColors.get(
+        let highlightColors = previousState.highlightColors
+        if (!highlightColors) {
+            highlightColors = await this.syncSettings.highlightColors.get(
                 'highlightColors',
             )
-
-            if (highlightColors) {
-                highlightColorJSON = highlightColors
-            } else {
-                highlightColorJSON = HIGHLIGHT_COLORS_DEFAULT
+            if (!highlightColors) {
+                highlightColors = [...HIGHLIGHT_COLORS_DEFAULT]
                 await this.syncSettings.highlightColors.set(
                     'highlightColors',
-                    highlightColorJSON,
+                    highlightColors,
                 )
             }
         }
 
-        this.emitMutation({
-            highlightColors: { $set: highlightColorJSON },
-        })
-
-        return highlightColorJSON
+        this.emitMutation({ highlightColors: { $set: highlightColors } })
     }
+
     saveHighlightColorSettings: EventHandler<
         'saveHighlightColorSettings'
-    > = async ({ event, previousState }) => {
-        const newState = JSON.parse(event.newState)
-        await this.syncSettings.highlightColors.set('highlightColors', newState)
+    > = async ({ event }) => {
+        await this.syncSettings.highlightColors.set(
+            'highlightColors',
+            event.newState,
+        )
 
-        this.emitMutation({
-            highlightColors: { $set: JSON.stringify(newState) },
-        })
+        this.emitMutation({ highlightColors: { $set: [...event.newState] } })
     }
+
     saveHighlightColor: EventHandler<'saveHighlightColor'> = async ({
         event,
         previousState,

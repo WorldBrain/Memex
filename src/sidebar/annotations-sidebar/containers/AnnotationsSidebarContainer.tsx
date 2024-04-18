@@ -68,6 +68,7 @@ import {
     ChatHistoryItem,
     PromptData,
 } from '@worldbrain/memex-common/lib/summarization/types'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 export interface Props extends SidebarContainerOptions {
     isLockable?: boolean
@@ -79,9 +80,9 @@ export interface Props extends SidebarContainerOptions {
     imageSupport?: ImageSupportInterface<'caller'>
     bgScriptBG?: RemoteBGScriptInterface
     saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
-    saveHighlightColorSettings?: (newState) => void
+    saveHighlightColorSettings?: (newState: HighlightColor[]) => void
     getHighlightColorSettings?: () => void
-    highlightColorSettings?: string
+    highlightColorSettings?: HighlightColor[]
     pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
     inPageMode?: boolean
