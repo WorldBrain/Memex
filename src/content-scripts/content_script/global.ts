@@ -646,6 +646,16 @@ export async function main(
             ) {
                 return
             }
+
+            if (
+                window.location.href.includes('youtube.com') &&
+                selection.toString().length === 0
+            ) {
+                await inPageUI.showSidebar({
+                    action: 'youtube_timestamp',
+                })
+            }
+
             if (
                 selection &&
                 selection.toString().length === 0 &&
@@ -773,7 +783,16 @@ export async function main(
                 return
             }
 
-            if (selection == null) {
+            if (
+                window.location.href.includes('youtube.com') &&
+                selection.toString().length === 0
+            ) {
+                await inPageUI.showSidebar({
+                    action: 'youtube_timestamp',
+                })
+            }
+
+            if (selection && selection.toString().length === 0) {
                 return
             }
             const highlightColorSettingStorage = await getHighlightColorSettings()

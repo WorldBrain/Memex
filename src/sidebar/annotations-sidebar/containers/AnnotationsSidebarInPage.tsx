@@ -307,20 +307,9 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             })
             return true
         } else if (event.action === 'youtube_timestamp') {
-            if (this.state.activeTab !== 'annotations') {
-                await this.processEvent('setActiveSidebarTab', {
-                    tab:
-                        this.state.selectedListId &&
-                        this.state.activeTab === 'spaces'
-                            ? 'spaces'
-                            : 'annotations',
-                })
-                await sleepPromise(100)
-            }
-            this.sidebarRef.current?.addYoutubeTimestampToEditor(
-                event.commentText,
-            )
-            return true
+            await this.processEvent('AddYTTimestampToEditor', {
+                commentText: event.commentText,
+            })
         } else if (event.action === 'rabbit_hole_open') {
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'rabbitHole',
@@ -333,17 +322,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             this.initLogicPromise,
             this.props.inPageUI.cacheLoadPromise,
         ])
-
-        // if (event.action === 'comment') {
-        //     await this.processEvent('setActiveSidebarTab', {
-        //         tab: this.state.selectedListId ? 'spaces' : 'annotations',
-        //     })
-        //     if (this.state.activeTab === 'annotations') {
-        //         await this.processEvent('setNewPageNoteText', {
-        //             comment: event.annotationData?.commentText ?? '',
-        //         })
-        //     }
-        // } else
         if (event.action === 'selected_list_mode_from_web_ui') {
             await this.processEvent('setSelectedListFromWebUI', {
                 sharedListId: event.sharedListId,

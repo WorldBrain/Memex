@@ -419,6 +419,9 @@ interface SidebarEvents {
         range?: { from: number; to: number }
         prompt?: string
     }
+    AddYTTimestampToEditor: {
+        commentText: string
+    }
     selectAISuggestion: { suggestion: string }
     queryAIwithPrompt: {
         prompt: string
