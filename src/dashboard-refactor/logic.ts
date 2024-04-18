@@ -61,7 +61,10 @@ import type {
     RGBAColor,
     UnifiedList,
 } from 'src/annotations/cache/types'
-import type { AnnotationsSearchResponse } from 'src/search/background/types'
+import type {
+    AnnotationsSearchResponse,
+    UnifiedSearchParams,
+} from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
@@ -1234,7 +1237,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     private searchPages = async (state: State) => {
         const isBlankSearch =
             state.searchFilters.searchQuery.trim().length === 0
-        const params = {
+        const params: UnifiedSearchParams = {
             query: state.searchFilters.searchQuery,
             filterByDomains: state.searchFilters.domainsIncluded,
             filterByListIds: state.searchFilters.spacesIncluded,
@@ -1245,6 +1248,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 : state.searchFilters.dateTo,
             limit: state.searchFilters.limit,
             skip: state.searchFilters.skip,
+            filterByPDFs: state.searchResults.searchType === 'pdf',
+            filterByEvents: state.searchResults.searchType === 'events',
+            filterByVideos: state.searchResults.searchType === 'videos',
+            filterByTweets: state.searchResults.searchType === 'twitter',
+            omitPagesWithoutAnnotations:
+                state.searchResults.searchType === 'notes',
         }
         const result = await this.options.searchBG.unifiedSearch(params)
         console.log('SEARCH - params:', params)
