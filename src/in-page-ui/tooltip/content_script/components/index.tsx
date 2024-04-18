@@ -350,6 +350,7 @@ class TooltipRoot extends React.Component<TooltipRootProps, TooltipRootState> {
                         getPortalRoot={this.props.getRootElement}
                         offsetX={12}
                         offsetY={-10}
+                        closeComponent={() => this.toggleSpacePicker(false)}
                     >
                         {CollectionsPickerElement}
                     </PopoutBox>
