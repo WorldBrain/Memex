@@ -194,6 +194,10 @@ export type UnifiedSearchParams = PaginationParams & {
     untilWhen?: number
     filterByDomains: string[]
     filterByListIds: number[]
+    filterPDFs?: boolean
+    filterVideos?: boolean
+    filterTweets?: boolean
+    filterEvents?: boolean
 }
 
 export interface PaginationParams {

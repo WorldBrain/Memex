@@ -1264,4 +1264,81 @@ describe('Unified search tests', () => {
             ).toEqual([DATA.PAGE_ID_9])
         })
     })
+
+    describe('search filter tests', () => {
+        it('should be able to filter PDF pages in blank and terms search', async () => {
+            const { backgroundModules } = await setupTest()
+            const lowestTimeBound = await backgroundModules.search[
+                'calcSearchLowestTimeBound'
+            ]()
+            const now = Date.now()
+            const blankResultA = await blankSearch(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: now,
+                lowestTimeBound,
+                filterPDFs: true,
+            })
+            const termsResultB = await termsSearch(backgroundModules, {
+                query: 'text',
+                limit: 1000,
+                skip: 0,
+                filterPDFs: true,
+            })
+            const termsResultC = await termsSearch(backgroundModules, {
+                query: 'test', // NOTE: Different term
+                limit: 1000,
+                skip: 0,
+                filterPDFs: true,
+            })
+            expect(blankResultA.resultsExhausted).toBe(true)
+            expect(termsResultB.resultsExhausted).toBe(true)
+            expect(termsResultC.resultsExhausted).toBe(true)
+            expect(formatResults(blankResultA)).toEqual([
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
+                        latestPageTimestamp:
+                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_6,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(termsResultB)).toEqual([
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(termsResultC)).toEqual([
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
+                        latestPageTimestamp:
+                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_6,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                    },
+                ],
+            ])
+        })
+    })
 })

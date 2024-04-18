@@ -160,21 +160,32 @@ export default class SearchBackground {
 
     private async filterUnifiedSearchResultsByFilters(
         resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'],
-        { filterByDomains, filterByListIds }: UnifiedSearchParams,
+        params: UnifiedSearchParams,
     ): Promise<void> {
         if (
             !resultDataByPage.size ||
-            (!filterByDomains.length && !filterByListIds.length)
+            (!params.filterByDomains.length &&
+                !params.filterByListIds.length &&
+                !params.filterPDFs)
         ) {
             return
         }
+        const pageIdsToDelete = new Set<string>()
+
+        if (params.filterPDFs) {
+            resultDataByPage.forEach((_, pageId) => {
+                if (!isMemexPageAPdf({ url: pageId })) {
+                    pageIdsToDelete.add(pageId)
+                }
+            })
+        }
 
         // 1. OR'd filter by domains is easy - we already have all the data we need
-        const pageIdsToDelete = new Set<string>()
-        if (filterByDomains.length) {
+        if (params.filterByDomains.length) {
             resultDataByPage.forEach((_, pageId) => {
-                const isDomainIncluded = filterByDomains.reduce(
+                const isDomainIncluded = params.filterByDomains.reduce(
                     (acc, domain) => {
+                        // This allows for subdomains
                         const domainRegexp = new RegExp(`^(\\w+\\.)?${domain}`)
                         return acc || domainRegexp.test(pageId)
                     },
@@ -186,7 +197,7 @@ export default class SearchBackground {
             })
         }
         pageIdsToDelete.forEach((id) => resultDataByPage.delete(id))
-        if (!resultDataByPage.size || !filterByListIds.length) {
+        if (!resultDataByPage.size || !params.filterByListIds.length) {
             return
         }
 
@@ -221,7 +232,7 @@ export default class SearchBackground {
             entries: ListEntry[] = [],
         ): boolean => {
             const listsWithEntries = entries.map((e) => e.listId)
-            return filterByListIds.reduce(
+            return params.filterByListIds.reduce(
                 (acc, listId) => acc && listsWithEntries.includes(listId),
                 true,
             )
@@ -231,7 +242,7 @@ export default class SearchBackground {
         const annotListEntries: AnnotationListEntry[] = await this.options.storageManager
             .collection('annotListEntries')
             .findObjects({
-                listId: { $in: filterByListIds },
+                listId: { $in: params.filterByListIds },
                 url: { $in: selectivelySharedAnnotIds },
             })
         const annotListEntriesByAnnotId = groupBy(
@@ -246,7 +257,7 @@ export default class SearchBackground {
         const pageListEntries: PageListEntry[] = await this.options.storageManager
             .collection('pageListEntries')
             .findObjects({
-                listId: { $in: filterByListIds },
+                listId: { $in: params.filterByListIds },
                 pageUrl: { $in: [...resultDataByPage.keys()] },
             })
         const pageListEntriesByPageId = groupBy(
