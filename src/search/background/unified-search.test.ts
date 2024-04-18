@@ -1276,19 +1276,19 @@ describe('Unified search tests', () => {
                 fromWhen: 0,
                 untilWhen: now,
                 lowestTimeBound,
-                filterPDFs: true,
+                filterByPDFs: true,
             })
             const termsResultB = await termsSearch(backgroundModules, {
                 query: 'text',
                 limit: 1000,
                 skip: 0,
-                filterPDFs: true,
+                filterByPDFs: true,
             })
             const termsResultC = await termsSearch(backgroundModules, {
                 query: 'test', // NOTE: Different term
                 limit: 1000,
                 skip: 0,
-                filterPDFs: true,
+                filterByPDFs: true,
             })
             expect(blankResultA.resultsExhausted).toBe(true)
             expect(termsResultB.resultsExhausted).toBe(true)
@@ -1351,19 +1351,19 @@ describe('Unified search tests', () => {
                 fromWhen: 0,
                 untilWhen: now,
                 lowestTimeBound,
-                filterVideos: true,
+                filterByVideos: true,
             })
             const termsResultB = await termsSearch(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
-                filterVideos: true,
+                filterByVideos: true,
             })
             const termsResultC = await termsSearch(backgroundModules, {
                 query: 'today',
                 limit: 1000,
                 skip: 0,
-                filterVideos: true,
+                filterByVideos: true,
             })
             expect(blankResultA.resultsExhausted).toBe(true)
             expect(termsResultB.resultsExhausted).toBe(true)
@@ -1442,19 +1442,19 @@ describe('Unified search tests', () => {
                 fromWhen: 0,
                 untilWhen: now,
                 lowestTimeBound,
-                filterTweets: true,
+                filterByTweets: true,
             })
             const termsResultB = await termsSearch(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
-                filterTweets: true,
+                filterByTweets: true,
             })
             const termsResultC = await termsSearch(backgroundModules, {
                 query: 'insectum',
                 limit: 1000,
                 skip: 0,
-                filterTweets: true,
+                filterByTweets: true,
             })
             expect(blankResultA.resultsExhausted).toBe(true)
             expect(termsResultB.resultsExhausted).toBe(true)
@@ -1548,19 +1548,19 @@ describe('Unified search tests', () => {
                 fromWhen: 0,
                 untilWhen: now,
                 lowestTimeBound,
-                filterEvents: true,
+                filterByEvents: true,
             })
             const termsResultB = await termsSearch(backgroundModules, {
                 query: 'test',
                 limit: 1000,
                 skip: 0,
-                filterEvents: true,
+                filterByEvents: true,
             })
             const termsResultC = await termsSearch(backgroundModules, {
                 query: 'encyclopedia',
                 limit: 1000,
                 skip: 0,
-                filterEvents: true,
+                filterByEvents: true,
             })
             expect(blankResultA.resultsExhausted).toBe(true)
             expect(termsResultB.resultsExhausted).toBe(true)
@@ -1616,6 +1616,60 @@ describe('Unified search tests', () => {
                         ][1].lastEdited.valueOf(),
                     },
                 ],
+            ])
+        })
+
+        it("should be able to filter out all pages which don't contain annotations in blank and terms search", async () => {
+            const { backgroundModules } = await setupTest()
+            const lowestTimeBound = await backgroundModules.search[
+                'calcSearchLowestTimeBound'
+            ]()
+            const now = Date.now()
+            const blankResultA = await blankSearch(backgroundModules, {
+                fromWhen: 0,
+                untilWhen: now,
+                lowestTimeBound,
+                omitPagesWithoutAnnotations: true,
+            })
+            const termsResultB = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 1000,
+                skip: 0,
+                omitPagesWithoutAnnotations: true,
+            })
+            expect(blankResultA.resultsExhausted).toBe(true)
+            expect(termsResultB.resultsExhausted).toBe(true)
+            expect(
+                formatResults(blankResultA).map(([pageId]) => pageId),
+            ).toEqual([
+                // DATA.PAGE_ID_11,
+                // DATA.PAGE_ID_8,
+                DATA.PAGE_ID_10,
+                DATA.PAGE_ID_2,
+                DATA.PAGE_ID_5,
+                DATA.PAGE_ID_12,
+                DATA.PAGE_ID_9,
+                DATA.PAGE_ID_4,
+                DATA.PAGE_ID_7,
+                // DATA.PAGE_ID_6,
+                DATA.PAGE_ID_3,
+                // DATA.PAGE_ID_1,
+            ])
+            expect(
+                formatResults(termsResultB, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual([
+                // DATA.PAGE_ID_11,
+                // DATA.PAGE_ID_8,
+                DATA.PAGE_ID_12,
+                DATA.PAGE_ID_9, // Doesn't contain the term, but has an annotation with it
+                DATA.PAGE_ID_7,
+                DATA.PAGE_ID_4,
+                // DATA.PAGE_ID_6,
+                // DATA.PAGE_ID_5, // Has annots but none contain the search term
+                // DATA.PAGE_ID_3, // Likewise
+                // DATA.PAGE_ID_1,
             ])
         })
     })

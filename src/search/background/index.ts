@@ -169,16 +169,25 @@ export default class SearchBackground {
             !resultDataByPage.size ||
             (!params.filterByDomains.length &&
                 !params.filterByListIds.length &&
-                !params.filterPDFs &&
-                !params.filterVideos &&
-                !params.filterTweets &&
-                !params.filterEvents)
+                !params.filterByPDFs &&
+                !params.filterByVideos &&
+                !params.filterByTweets &&
+                !params.filterByEvents &&
+                !params.omitPagesWithoutAnnotations)
         ) {
             return
         }
         const pageIdsToDelete = new Set<string>()
 
-        if (params.filterEvents) {
+        if (params.omitPagesWithoutAnnotations) {
+            resultDataByPage.forEach(({ annotations }, pageId) => {
+                if (!annotations.length) {
+                    pageIdsToDelete.add(pageId)
+                }
+            })
+        }
+
+        if (params.filterByEvents) {
             resultDataByPage.forEach((_, pageId) => {
                 if (!isUrlAnEventPage(pageId)) {
                     pageIdsToDelete.add(pageId)
@@ -186,7 +195,7 @@ export default class SearchBackground {
             })
         }
 
-        if (params.filterTweets) {
+        if (params.filterByTweets) {
             resultDataByPage.forEach((_, pageId) => {
                 if (!isUrlATweet(pageId)) {
                     pageIdsToDelete.add(pageId)
@@ -194,7 +203,7 @@ export default class SearchBackground {
             })
         }
 
-        if (params.filterVideos) {
+        if (params.filterByVideos) {
             resultDataByPage.forEach((_, pageId) => {
                 if (!isUrlMemexSupportedVideo(pageId)) {
                     pageIdsToDelete.add(pageId)
@@ -202,7 +211,7 @@ export default class SearchBackground {
             })
         }
 
-        if (params.filterPDFs) {
+        if (params.filterByPDFs) {
             resultDataByPage.forEach((_, pageId) => {
                 if (!isMemexPageAPdf({ url: pageId })) {
                     pageIdsToDelete.add(pageId)
