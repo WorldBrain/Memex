@@ -700,17 +700,9 @@ describe('Unified search tests', () => {
                 DATA.PAGE_ID_9,
             ])
             expect(formatResults(resultC).map(([pageId]) => pageId)).toEqual([
-                DATA.PAGE_ID_11,
-                DATA.PAGE_ID_8,
                 DATA.PAGE_ID_10,
                 DATA.PAGE_ID_2,
-                DATA.PAGE_ID_5,
-                DATA.PAGE_ID_12,
                 DATA.PAGE_ID_9,
-                DATA.PAGE_ID_4,
-                DATA.PAGE_ID_7,
-                DATA.PAGE_ID_6,
-                DATA.PAGE_ID_3,
                 DATA.PAGE_ID_1,
             ])
         })

@@ -1,15 +1,15 @@
 export const PAGE_ID_1 = 'en.wikipedia.org/wiki/Canopy_(biology)'
 export const PAGE_ID_2 = 'wikipedia.org/wiki/Genus'
-export const PAGE_ID_3 = 'en.wikipedia.org/wiki/Jaguar'
-export const PAGE_ID_4 = 'en.wikipedia.org/wiki/Eurasia'
-export const PAGE_ID_5 = 'en.wikipedia.org/wiki/Insect'
-export const PAGE_ID_6 = 'en.wikipedia.org/wiki/Tympanal_organ'
-export const PAGE_ID_7 = 'en.wikipedia.org/wiki/Tympanum_(anatomy)'
-export const PAGE_ID_8 = 'en.wikipedia.org/wiki/Taxonomy_(biology)'
+export const PAGE_ID_3 = 'luma.com/test-1'
+export const PAGE_ID_4 = 'x.com/test-1'
+export const PAGE_ID_5 = 'twitter.com/test-2'
+export const PAGE_ID_6 = 'memex.cloud/ct/test-fingerprint-2.pdf'
+export const PAGE_ID_7 = 'vimeo.com/test-1'
+export const PAGE_ID_8 = 'eventbrite.com/events/test-1'
 export const PAGE_ID_9 = 'en.test-2.com/wiki/Phylum'
 export const PAGE_ID_10 = 'test.com/wiki/Organism'
-export const PAGE_ID_11 = 'en.wikipedia.org/wiki/Afro-Eurasia'
-export const PAGE_ID_12 = 'en.wikipedia.org/wiki/Europe'
+export const PAGE_ID_11 = 'youtube.com/watch?v=test-1'
+export const PAGE_ID_12 = 'memex.cloud/ct/test-fingerprint-1.pdf'
 
 export const LIST_ID_1 = 111
 export const LIST_ID_2 = 112
@@ -59,8 +59,8 @@ export const PAGES = {
     [PAGE_ID_3]: {
         url: PAGE_ID_3,
         fullUrl: 'https://' + PAGE_ID_3,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'luma.com',
+        hostname: 'luma.com',
         fullTitle: '',
         text: 'test',
     },
@@ -68,40 +68,40 @@ export const PAGES = {
         listIds: [LIST_ID_2],
         url: PAGE_ID_4,
         fullUrl: 'https://' + PAGE_ID_4,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'x.com',
+        hostname: 'x.com',
         fullTitle: 'title',
         text: 'some nonsense test text',
     },
     [PAGE_ID_5]: {
         url: PAGE_ID_5,
         fullUrl: 'https://' + PAGE_ID_5,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'twitter.com',
+        hostname: 'twitter.com',
         fullTitle: '',
         text: 'test',
     },
     [PAGE_ID_6]: {
         url: PAGE_ID_6,
         fullUrl: 'https://' + PAGE_ID_6,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'arxiv.org',
+        hostname: 'arxiv.org',
         fullTitle: '',
         text: 'test',
     },
     [PAGE_ID_7]: {
         url: PAGE_ID_7,
         fullUrl: 'https://' + PAGE_ID_7,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'vimeo.com',
+        hostname: 'vimeo.com',
         fullTitle: '',
         text: 'test',
     },
     [PAGE_ID_8]: {
         url: PAGE_ID_8,
         fullUrl: 'https://' + PAGE_ID_8,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'eventbrite.org',
+        hostname: 'eventbrite.org',
         fullTitle: '',
         text: 'test',
     },
@@ -124,16 +124,16 @@ export const PAGES = {
     [PAGE_ID_11]: {
         url: PAGE_ID_11,
         fullUrl: 'https://' + PAGE_ID_11,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'youtube.com',
+        hostname: 'youtube.com',
         fullTitle: '',
         text: 'test',
     },
     [PAGE_ID_12]: {
         url: PAGE_ID_12,
         fullUrl: 'https://' + PAGE_ID_12,
-        domain: 'wikipedia.org',
-        hostname: 'en.wikipedia.org',
+        domain: 'cool-pdfs.org',
+        hostname: 'en.cool-pdfs.org',
         fullTitle: 'test',
         text: 'text text text',
     },
@@ -231,7 +231,7 @@ export const VISITS = {
 export const ANNOTATIONS = {
     [PAGE_ID_4]: [
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067684199',
+            url: `${PAGE_ID_4}/#1711067684199`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>division</div>',
@@ -250,7 +250,7 @@ export const ANNOTATIONS = {
         },
         {
             listIds: [LIST_ID_1],
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067799676',
+            url: `${PAGE_ID_4}/#1711067799676`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>Honshu cheese test</div>',
@@ -268,7 +268,7 @@ export const ANNOTATIONS = {
         },
         {
             listIds: [LIST_ID_3],
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067799679',
+            url: `${PAGE_ID_4}/#1711067799679`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>Good highlight test honshu</div>',
@@ -285,7 +285,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-21T06:23'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067799680',
+            url: `${PAGE_ID_4}/#1711067799680`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>Honshu</div>',
@@ -302,7 +302,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:24'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067799681',
+            url: `${PAGE_ID_4}/#1711067799681`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>Honshu</div>',
@@ -319,7 +319,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:25'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067812450',
+            url: `${PAGE_ID_4}/#1711067812450`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>Mindanao</div>',
@@ -336,7 +336,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:26'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067812452',
+            url: `${PAGE_ID_4}/#1711067812452`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>Mindanao</div>',
@@ -353,7 +353,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:27'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067904471',
+            url: `${PAGE_ID_4}/#1711067904471`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>megablock</div>',
@@ -370,7 +370,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:28'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067924596',
+            url: `${PAGE_ID_4}/#1711067924596`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>test</div>',
@@ -387,7 +387,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:29'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Eurasia/#1711067924597',
+            url: `${PAGE_ID_4}/#1711067924597`,
             pageTitle: 'Eurasia - Wikipedia',
             pageUrl: PAGE_ID_4,
             body: '<div>Pakistan</div>',
@@ -406,7 +406,7 @@ export const ANNOTATIONS = {
     ],
     [PAGE_ID_2]: [
         {
-            url: 'wikipedia.org/wiki/Genus/#1711067346089',
+            url: `${PAGE_ID_2}/#1711067346089`,
             pageTitle: 'Genus - Wikipedia',
             pageUrl: PAGE_ID_2,
             body:
@@ -425,7 +425,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-25T06:01'),
         },
         {
-            url: 'wikipedia.org/wiki/Genus/#1711333412292',
+            url: `${PAGE_ID_2}/#1711333412292`,
             pageTitle: 'Genus - Wikipedia',
             pageUrl: PAGE_ID_2,
             body:
@@ -444,7 +444,7 @@ export const ANNOTATIONS = {
             lastEdited: new Date('2024-03-25T06:02'),
         },
         {
-            url: 'wikipedia.org/wiki/Genus/#1711333405403',
+            url: `${PAGE_ID_2}/#1711333405403`,
             pageTitle: 'Genus - Wikipedia',
             pageUrl: PAGE_ID_2,
             body:
@@ -465,7 +465,8 @@ export const ANNOTATIONS = {
     ],
     [PAGE_ID_5]: [
         {
-            url: 'en.wikipedia.org/wiki/Insect/#1711068383658',
+            url: `${PAGE_ID_5}/#1711068383658`,
+
             pageTitle: 'Insect - Wikipedia',
             pageUrl: PAGE_ID_5,
             body:
@@ -484,7 +485,8 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:01'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Insect/#1711068409798',
+            url: `${PAGE_ID_5}/#1711068409798`,
+
             pageTitle: 'Insect - Wikipedia',
             pageUrl: PAGE_ID_5,
             body: '<div>and</div>',
@@ -501,7 +503,8 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-22T06:02'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Insect/#1711068426352',
+            url: `${PAGE_ID_5}/#1711068426352`,
+
             pageTitle: 'Insect - Wikipedia',
             pageUrl: PAGE_ID_5,
             body: '<div>about</div>',
@@ -520,7 +523,7 @@ export const ANNOTATIONS = {
     ],
     [PAGE_ID_3]: [
         {
-            url: 'en.wikipedia.org/wiki/Jaguar/#1711067362844',
+            url: `${PAGE_ID_3}/#1711067362844`,
             pageTitle: 'Jaguar - Wikipedia',
             pageUrl: PAGE_ID_3,
             body: '<div>directly</div>',
@@ -537,7 +540,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-21T06:11'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Jaguar/#1711067368552',
+            url: `${PAGE_ID_3}/#1711067368552`,
             pageTitle: 'Jaguar - Wikipedia',
             pageUrl: PAGE_ID_3,
             body: '<div>encyclopedia</div>',
@@ -554,7 +557,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-21T06:12'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Jaguar/#1711067387492',
+            url: `${PAGE_ID_3}/#1711067387492`,
             pageTitle: 'Jaguar - Wikipedia',
             pageUrl: PAGE_ID_3,
             body: '<div>unusual</div>',
@@ -571,7 +574,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-21T06:13'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Jaguar/#1711067399717',
+            url: `${PAGE_ID_3}/#1711067399717`,
             pageTitle: 'Jaguar - Wikipedia',
             pageUrl: PAGE_ID_3,
             body: '<div>terrains</div>',
@@ -605,7 +608,7 @@ export const ANNOTATIONS = {
             color: 'default',
             createdWhen: new Date('2024-03-25T06:11'),
             lastEdited: new Date('2024-03-25T06:11'),
-            url: 'test.com/wiki/Organism/#1711333408332',
+            url: `${PAGE_ID_10}/#1711333408332`,
         },
     ],
     [PAGE_ID_9]: [
@@ -626,7 +629,7 @@ export const ANNOTATIONS = {
             color: 'default',
             createdWhen: new Date('2024-03-23T06:21'),
             lastEdited: new Date('2024-03-23T06:21'),
-            url: 'en.test2.com/wiki/Phylum/#1711333382313',
+            url: `${PAGE_ID_9}/#1711333382313`,
         },
         {
             pageTitle: 'Phylum - test2.com',
@@ -645,7 +648,7 @@ export const ANNOTATIONS = {
             color: 'default',
             createdWhen: new Date('2024-03-23T06:22'),
             lastEdited: new Date('2024-03-23T06:22'),
-            url: 'en.test2.com/wiki/Phylum/#1711333384046',
+            url: `${PAGE_ID_9}/#1711333384046`,
         },
         {
             pageTitle: 'Phylum - test2.com',
@@ -664,12 +667,12 @@ export const ANNOTATIONS = {
             color: 'default',
             createdWhen: new Date('2024-03-23T06:23'),
             lastEdited: new Date('2024-03-23T06:23'),
-            url: 'en.test2.com/wiki/Phylum/#1711333385412',
+            url: `${PAGE_ID_9}/#1711333385412`,
         },
     ],
     [PAGE_ID_7]: [
         {
-            url: 'en.wikipedia.org/wiki/Tympanum_(anatomy)/#1711074495092',
+            url: `${PAGE_ID_7}/#1711074495092`,
             pageTitle: 'Tympanum (anatomy) - Wikipedia',
             pageUrl: PAGE_ID_7,
             body: '<div>anatomy</div>',
@@ -686,7 +689,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-23T06:01'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Tympanum_(anatomy)/#1711074524064',
+            url: `${PAGE_ID_7}/#1711074524064`,
             pageTitle: 'Tympanum (anatomy) - Wikipedia',
             pageUrl: PAGE_ID_7,
             body:
@@ -705,7 +708,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-23T06:02'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Tympanum_(anatomy)/#1711074612109',
+            url: `${PAGE_ID_7}/#1711074612109`,
             pageTitle: 'Tympanum (anatomy) - Wikipedia',
             pageUrl: PAGE_ID_7,
             body: '<div>and</div>',
@@ -722,7 +725,7 @@ export const ANNOTATIONS = {
             createdWhen: new Date('2024-03-23T06:03'),
         },
         {
-            url: 'en.wikipedia.org/wiki/Tympanum_(anatomy)/#1711179221253',
+            url: `${PAGE_ID_7}/#1711179221253`,
             pageTitle: 'Tympanum (anatomy) - Wikipedia',
             pageUrl: PAGE_ID_7,
             comment: '<div><p>test today</p></div>',
@@ -732,7 +735,7 @@ export const ANNOTATIONS = {
     ],
     [PAGE_ID_12]: [
         {
-            url: 'en.wikipedia.org/wiki/Europe/#1711179221253',
+            url: `${PAGE_ID_12}/#1711179221253`,
             pageTitle: 'Europe - Wikipedia',
             pageUrl: PAGE_ID_12,
             comment: '<div><p>test</p></div>',
