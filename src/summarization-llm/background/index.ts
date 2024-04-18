@@ -94,7 +94,7 @@ export default class SummarizeBackground {
 
         isAllowed = await AIActionAllowed(
             this.analyticsBG,
-            apiKey.length > 0,
+            apiKey?.length > 0,
             true,
             AImodel,
         )
