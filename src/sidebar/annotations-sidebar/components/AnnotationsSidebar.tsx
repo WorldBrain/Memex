@@ -426,26 +426,26 @@ export class AnnotationsSidebar extends React.Component<
         showAutoAddBulkSelection: false,
     }
 
-    async addYoutubeTimestampToEditor(commentText) {
-        let annotationCreateRef = this.annotationCreateRef.current
+    // async addYoutubeTimestampToEditor(commentText) {
+    //     let annotationCreateRef = this.annotationCreateRef.current
 
-        if (annotationCreateRef) {
-            this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
-                commentText,
-            )
-        }
-        // fix race condition of annotationCreateRef not being available yet, hacky but works
-        while (!annotationCreateRef) {
-            await sleepPromise(25)
-            annotationCreateRef = this.annotationCreateRef.current
-            if (annotationCreateRef) {
-                this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
-                    commentText,
-                )
-            }
-            await sleepPromise(25)
-        }
-    }
+    //     if (annotationCreateRef) {
+    //         this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+    //             commentText,
+    //         )
+    //     }
+    //     // fix race condition of annotationCreateRef not being available yet, hacky but works
+    //     while (!annotationCreateRef) {
+    //         await sleepPromise(25)
+    //         annotationCreateRef = this.annotationCreateRef.current
+    //         if (annotationCreateRef) {
+    //             this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+    //                 commentText,
+    //             )
+    //         }
+    //         await sleepPromise(25)
+    //     }
+    // }
 
     private maybeCreateContextBtnRef({
         unifiedId,
