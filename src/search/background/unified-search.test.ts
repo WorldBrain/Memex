@@ -743,6 +743,56 @@ describe('Unified search tests', () => {
             expect(resultA.resultsExhausted).toBe(true)
             expect(formatResults(resultA, { skipSorting: true })).toEqual([
                 [
+                    DATA.PAGE_ID_11,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_8,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
+                        latestPageTimestamp:
+                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_9, // Doesn't contain the term, but has an annotation with it
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_9
+                        ][1].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
+                    },
+                ],
+                [
                     DATA.PAGE_ID_4,
                     {
                         annotIds: [
@@ -762,53 +812,11 @@ describe('Unified search tests', () => {
                     },
                 ],
                 [
-                    DATA.PAGE_ID_9, // Doesn't contain the term, but has an annotation with it
-                    {
-                        annotIds: [
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][2].url,
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
-                        ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_9
-                        ][1].lastEdited.valueOf(),
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_12,
-                    {
-                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
-                        latestPageTimestamp:
-                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_7,
-                    {
-                        annotIds: [
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
-                        ],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_11,
+                    DATA.PAGE_ID_6,
                     {
                         annotIds: [],
                         latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_1,
-                    {
-                        annotIds: [],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
                     },
                 ],
                 [
@@ -838,19 +846,11 @@ describe('Unified search tests', () => {
                     },
                 ],
                 [
-                    DATA.PAGE_ID_8,
+                    DATA.PAGE_ID_1,
                     {
                         annotIds: [],
                         latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_6,
-                    {
-                        annotIds: [],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
                     },
                 ],
             ])
@@ -880,6 +880,58 @@ describe('Unified search tests', () => {
             expect(formatResults(resultC, { skipSorting: true })).toEqual([])
             expect(formatResults(resultA, { skipSorting: true })).toEqual([
                 [
+                    DATA.PAGE_ID_11,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_8,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_12,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
+                        latestPageTimestamp:
+                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_9, // Doesn't contain the term, but has an annotation with it
+                    {
+                        annotIds: [
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][2].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
+                        ],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_9
+                        ][1].lastEdited.valueOf(),
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_7,
+                    {
+                        annotIds: [
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
+                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
+                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
+                        ],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultB, { skipSorting: true })).toEqual([
+                [
                     DATA.PAGE_ID_4,
                     {
                         annotIds: [
@@ -899,55 +951,11 @@ describe('Unified search tests', () => {
                     },
                 ],
                 [
-                    DATA.PAGE_ID_9, // Doesn't contain the term, but has an annotation with it
-                    {
-                        annotIds: [
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][2].url,
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_9][1].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_9][0].url,
-                        ],
-                        latestPageTimestamp: DATA.ANNOTATIONS[
-                            DATA.PAGE_ID_9
-                        ][1].lastEdited.valueOf(),
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_12,
-                    {
-                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_12][0].url],
-                        latestPageTimestamp:
-                            DATA.BOOKMARKS[DATA.PAGE_ID_12][0].time,
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_7,
-                    {
-                        annotIds: [
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][3].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][2].url,
-                            // DATA.ANNOTATIONS[DATA.PAGE_ID_7][1].url,
-                            DATA.ANNOTATIONS[DATA.PAGE_ID_7][0].url,
-                        ],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_7][0].time,
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_11,
+                    DATA.PAGE_ID_6,
                     {
                         annotIds: [],
                         latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_11][0].time,
-                    },
-                ],
-            ])
-            expect(formatResults(resultB, { skipSorting: true })).toEqual([
-                [
-                    DATA.PAGE_ID_1,
-                    {
-                        annotIds: [],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
                     },
                 ],
                 [
@@ -977,19 +985,11 @@ describe('Unified search tests', () => {
                     },
                 ],
                 [
-                    DATA.PAGE_ID_8,
+                    DATA.PAGE_ID_1,
                     {
                         annotIds: [],
                         latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_8][1].time,
-                    },
-                ],
-                [
-                    DATA.PAGE_ID_6,
-                    {
-                        annotIds: [],
-                        latestPageTimestamp:
-                            DATA.VISITS[DATA.PAGE_ID_6][0].time,
+                            DATA.VISITS[DATA.PAGE_ID_1][0].time,
                     },
                 ],
             ])
@@ -1254,17 +1254,17 @@ describe('Unified search tests', () => {
                 formatResults(resultB, { skipSorting: true }).map(
                     ([pageId]) => pageId,
                 ),
-            ).toEqual([DATA.PAGE_ID_9, DATA.PAGE_ID_10])
+            ).toEqual([DATA.PAGE_ID_10, DATA.PAGE_ID_9])
             expect(
                 formatResults(resultC, { skipSorting: true }).map(
                     ([pageId]) => pageId,
                 ),
-            ).toEqual([DATA.PAGE_ID_9])
+            ).toEqual([DATA.PAGE_ID_10])
             expect(
                 formatResults(resultD, { skipSorting: true }).map(
                     ([pageId]) => pageId,
                 ),
-            ).toEqual([DATA.PAGE_ID_10])
+            ).toEqual([DATA.PAGE_ID_9])
             expect(
                 formatResults(resultE, { skipSorting: true }).map(
                     ([pageId]) => pageId,
