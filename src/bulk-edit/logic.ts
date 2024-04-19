@@ -1,13 +1,9 @@
-import { UILogic, UIEvent, UIEventHandler, UIMutation } from 'ui-logic-core'
-import { executeUITask, loadInitial } from 'src/util/ui-logic'
-import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
+import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 import type { TaskState } from 'ui-logic-core/lib/types'
-import type { ContentSharingInterface } from 'src/content-sharing/background/types'
 import { deleteBulkEdit, getBulkEditItems } from './utils'
 import { browser } from 'webextension-polyfill-ts'
-import { SearchInterface } from 'src/search/background/types'
 import { BULK_SELECT_STORAGE_KEY } from './constants'
-import { sleepPromise } from 'src/util/promises'
+import type { BulkEditItem } from './types'
 
 export interface Dependencies {
     // contentSharingBG: ContentSharingInterface
@@ -35,7 +31,7 @@ export type Event = UIEvent<{
 export interface State {
     loadState: TaskState
     showBulkEditSelectionBox: boolean
-    bulkSelectedItems: []
+    bulkSelectedItems: BulkEditItem[]
     itemCounter: number
     showConfirmBulkDeletion: boolean
     showSpacePicker: boolean

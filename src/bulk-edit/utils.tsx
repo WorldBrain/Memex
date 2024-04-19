@@ -1,5 +1,6 @@
 import { browser } from 'webextension-polyfill-ts'
 import { BULK_SELECT_STORAGE_KEY } from './constants'
+import type { BulkEditItem } from './types'
 
 // write a function that gets browser.local.storage.set and browser.local.storage.get to write to a storage entry called "bulkEdit"
 
@@ -22,7 +23,7 @@ export async function setBulkEdit(data: any, shouldRemove: boolean) {
     await browser.storage.local.set({ [BULK_SELECT_STORAGE_KEY]: dataToWrite })
 }
 
-export async function getBulkEditItems() {
+export async function getBulkEditItems(): Promise<BulkEditItem[]> {
     const data = await browser.storage.local.get(BULK_SELECT_STORAGE_KEY)
     const currentData = data[BULK_SELECT_STORAGE_KEY]
 

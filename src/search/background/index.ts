@@ -127,9 +127,6 @@ export default class SearchBackground {
             ),
 
             getMatchingPageCount: this.searchIndex.getMatchingPageCount,
-            searchAnnotations: this.searchAnnotations.bind(this),
-            searchPages: this.searchPages.bind(this),
-            searchSocial: this.searchSocial.bind(this),
         }
     }
 

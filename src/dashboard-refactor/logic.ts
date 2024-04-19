@@ -74,11 +74,11 @@ import {
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import MarkdownIt from 'markdown-it'
-
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import Raven from 'raven-js'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
+import type { UnifiedSearchResult } from 'src/search/background/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -851,63 +851,52 @@ export class DashboardLogic extends UILogic<State, Events> {
         200,
     )
 
+    // TODO: bulk edit implementation needs simplification
     selectAllCurrentItems: EventHandler<'selectAllCurrentItems'> = async ({
         previousState,
         event,
     }) => {
-        let searchPosition = 0
-        let searchFilters: UIMutation<State['searchFilters']> = {
-            skip: { $set: searchPosition },
-            limit: { $set: 100 },
-        }
-        let searchState = this.withMutation(previousState, {
-            searchFilters,
-        })
+        const pageSize = 100
+        let skip = 0
+        let nextState = previousState
+        const selectedUrls = new Set(previousState.bulkSelectedUrls)
+        const bulkEditItems = await getBulkEditItems()
+        let result: UnifiedSearchResult
 
-        let selection = []
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(searchState, this.options.annotationsCache),
-        )
-        selection.push(...result.docs)
-        while (!result.resultsExhausted) {
-            searchPosition += 100
-            searchFilters = {
-                skip: { $set: searchPosition },
-            }
-            searchState = this.withMutation(previousState, {
-                searchFilters,
+        // Page through entire set of search results with current filters, keeping track of URLs and titles
+        do {
+            nextState = this.withMutation(nextState, {
+                searchFilters: {
+                    skip: { $set: skip },
+                    limit: { $set: pageSize },
+                },
+                searchResults: {
+                    blankSearchOldestResultTimestamp: {
+                        $set:
+                            result?.oldestResultTimestamp ??
+                            nextState.searchResults
+                                .blankSearchOldestResultTimestamp,
+                    },
+                },
             })
-            result = await this.options.searchBG.searchPages(
-                stateToSearchParams(searchState, this.options.annotationsCache),
+
+            result = await this.options.searchBG.unifiedSearch(
+                stateToSearchParams(nextState, this.options.annotationsCache),
             )
-            selection.push(...result.docs)
-        }
 
-        let dataArray = await getBulkEditItems()
-        for (let item of selection) {
-            if (!dataArray.some((data) => data.url === item.url)) {
-                const data = {
-                    title: item.title,
-                    url: item.url,
+            for (const doc of result.docs) {
+                if (selectedUrls.has(doc.url)) {
+                    continue
                 }
-                dataArray.push(data)
+                bulkEditItems.push({ title: doc.fullTitle, url: doc.url })
+                selectedUrls.add(doc.url)
             }
-        }
 
-        let selectedUrls = previousState.bulkSelectedUrls
-        for (let item of selection) {
-            let selectedUrls = previousState.bulkSelectedUrls
-            for (let item of selection) {
-                if (!selectedUrls.includes(item.url)) {
-                    selectedUrls.push(item.url)
-                }
-            }
-        }
-        this.emitMutation({
-            bulkSelectedUrls: { $set: selectedUrls },
-        })
+            skip += pageSize
+        } while (!result.resultsExhausted)
 
-        await setBulkEdit(dataArray, false)
+        this.emitMutation({ bulkSelectedUrls: { $set: [...selectedUrls] } })
+        await setBulkEdit(bulkEditItems, false)
     }
 
     clearBulkSelection: EventHandler<'clearBulkSelection'> = async ({

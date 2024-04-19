@@ -168,16 +168,6 @@ export interface SearchInterface {
         params: UnifiedSearchParams & UnifiedSearchPaginationParams,
     ) => Promise<UnifiedSearchResult>
 
-    searchAnnotations: (
-        params: BackgroundSearchParams,
-    ) => Promise<StandardSearchResponse | AnnotationsSearchResponse>
-    searchPages: (
-        params: BackgroundSearchParams,
-    ) => Promise<StandardSearchResponse>
-    searchSocial: (
-        params: BackgroundSearchParams,
-    ) => Promise<StandardSearchResponse>
-
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
 
