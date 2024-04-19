@@ -38,7 +38,6 @@ import { StorageChangesManager } from 'src/util/storage-changes'
 import { AuthBackground } from 'src/authentication/background'
 import { FeaturesBeta } from 'src/features/background/feature-beta'
 import { PageIndexingBackground } from 'src/page-indexing/background'
-import { combineSearchIndex } from 'src/search/search-index'
 import { StorexHubBackground } from 'src/storex-hub/background'
 import { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import { bindMethod } from 'src/util/functions'
@@ -288,14 +287,10 @@ export function createBackgroundModules(options: {
         browserAPIs: options.browserAPIs,
         analyticsBG,
     })
-    const searchIndex = combineSearchIndex({
-        getDb: async () => storageManager,
-    })
 
     const search = new SearchBackground({
         storageManager,
         pages,
-        idx: searchIndex,
         browserAPIs: options.browserAPIs,
         bookmarks,
         analyticsBG,
@@ -437,7 +432,6 @@ export function createBackgroundModules(options: {
         contentSharing,
         contentSharingBackend,
         browserAPIs: options.browserAPIs,
-        searchIndex: search.searchIndex,
         pages,
         authServices: options.authServices,
         removeChildAnnotationsFromList: directLinking.removeChildAnnotationsFromList.bind(
@@ -638,7 +632,6 @@ export function createBackgroundModules(options: {
         syncSettings,
         backupModule: new backup.BackupBackgroundModule({
             storageManager,
-            searchIndex: search.searchIndex,
             jobScheduler: jobScheduler.scheduler,
             browserAPIs: options.browserAPIs,
             localBackupSettings: new BrowserSettingsStore(

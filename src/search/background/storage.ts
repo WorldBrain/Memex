@@ -35,7 +35,6 @@ import type { PageListEntry } from 'src/custom-lists/background/types'
 export interface SearchStorageProps {
     storageManager: Storex
     annotationsColl?: string
-    legacySearch: (params: any) => Promise<any>
 }
 
 export interface Interaction {
@@ -61,13 +60,6 @@ export default class SearchStorage extends StorageModule {
     static LIST_METADATA_LEVELS_COLL =
         CONTENT_SHARE_COLLECTION_NAMES.listMetadata
     static BMS_COLL = ANNOT_COLLECTION_NAMES.bookmark
-    private legacySearch
-
-    constructor({ storageManager, legacySearch }: SearchStorageProps) {
-        super({ storageManager })
-
-        this.legacySearch = legacySearch
-    }
 
     getConfig = (): StorageModuleConfig => ({
         operations: {
@@ -447,31 +439,6 @@ export default class SearchStorage extends StorageModule {
             return this.searchAnnotsByDay(params)
         }
         return this.searchTermsAnnots(params)
-    }
-
-    async searchPages(params: AnnotSearchParams): Promise<AnnotPage[]> {
-        const searchParams = reshapeParamsForOldSearch(params)
-
-        const { ids } = await this.legacySearch(searchParams)
-
-        if (!ids.length) {
-            return []
-        }
-
-        // Terms search requires lookup of the latest interaction times for scoring,
-        //  so it returns triples. The 3rd index is the latest time (to avoid redoing those queries).
-        const latestTimes =
-            ids[0].length === 3 ? ids.map(([, , time]) => time) : undefined
-
-        const mappedResults = await this.operation(
-            PageUrlMapperPlugin.MAP_OP_ID,
-            {
-                pageUrls: ids.map(([url]) => url),
-                upperTimeBound: params.endDate,
-                latestTimes,
-            },
-        )
-        return mappedResults
     }
 
     async searchSocial(params: SocialSearchParams) {

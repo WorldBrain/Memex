@@ -60,7 +60,6 @@ async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
         // includePostSyncProcessor: true,
     })
     const customLists = backgroundModules.customLists
-    const searchIndex = backgroundModules.search.searchIndex
 
     // NOTE: Each test starts creating lists at ID `1`
     let fakeListCount = 0
@@ -73,7 +72,6 @@ async function setupTest({ skipTestData }: { skipTestData?: boolean } = {}) {
     return {
         ...backgroundModules,
         customLists,
-        searchIndex,
         storageManager,
     }
 }
@@ -99,22 +97,6 @@ describe('Custom List Integrations', () => {
             expect(lists.length).toBe(1)
             expect(lists[0].pages.length).toBe(1)
             expect(lists[0].pages[0]).toBe(fullUrl)
-        })
-
-        test('list entry creates for non-existing pages should create page', async () => {
-            const { searchIndex, customLists } = await setupTest()
-
-            const url = 'http://www.test.com'
-
-            await customLists.insertPageToList({ id: 1, url })
-
-            const lists = await customLists.fetchListPagesByUrl({ url })
-            expect(lists.length).toBe(1)
-            expect(lists[0].pages.length).toBe(1)
-            expect(lists[0].pages[0]).toBe(url)
-
-            const newPage = await searchIndex.getPage(url)
-            expect(newPage.url).toBe(url.substring(11))
         })
 
         test('should be able to create inbox list if absent', async () => {

@@ -19,7 +19,6 @@ import type {
     UnifiedSearchPaginationParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
-import type { SearchIndex } from '../types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type BookmarksBackground from 'src/bookmarks/background'
 import {
@@ -30,7 +29,6 @@ import {
     ContentLocatorType,
     LocationSchemeType,
 } from '@worldbrain/memex-common/lib/personal-cloud/storage/types'
-import { trackSearchExecution } from '@worldbrain/memex-common/lib/analytics/events'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
 import type {
     Annotation,
@@ -62,7 +60,6 @@ type UnifiedSearchLookupData = {
 
 export default class SearchBackground {
     storage: SearchStorage
-    searchIndex: SearchIndex
     private queryBuilderFactory: () => QueryBuilder
     public remoteFunctions: SearchInterface
 
@@ -97,7 +94,6 @@ export default class SearchBackground {
     constructor(
         private options: {
             storageManager: Storex
-            idx: SearchIndex
             pages: PageIndexingBackground
             bookmarks: BookmarksBackground
             queryBuilder?: () => QueryBuilder
@@ -105,12 +101,10 @@ export default class SearchBackground {
             analyticsBG: AnalyticsCoreInterface
         },
     ) {
-        this.searchIndex = options.idx
         this.queryBuilderFactory =
             options.queryBuilder || (() => new QueryBuilder())
         this.storage = new SearchStorage({
             storageManager: options.storageManager,
-            legacySearch: this.searchIndex.fullSearch,
         })
 
         this.remoteFunctions = {
@@ -625,42 +619,29 @@ export default class SearchBackground {
     async searchPages(
         params: BackgroundSearchParams,
     ): Promise<StandardSearchResponse> {
-        let searchParams
+        throw new Error('REMOVE ME')
+        // let searchParams
 
-        if (this.options.analyticsBG) {
-            try {
-                await trackSearchExecution(this.options.analyticsBG)
-            } catch (error) {
-                console.error(
-                    `Error tracking search execution create event', ${error}`,
-                )
-            }
-        }
+        // if (this.options.analyticsBG) {
+        //     try {
+        //         await trackSearchExecution(this.options.analyticsBG)
+        //     } catch (error) {
+        //         console.error(
+        //             `Error tracking search execution create event', ${error}`,
+        //         )
+        //     }
+        // }
 
-        try {
-            searchParams = this.processSearchParams(params)
-        } catch (e) {
-            return SearchBackground.handleSearchError(e)
-        }
+        // try {
+        //     searchParams = this.processSearchParams(params)
+        // } catch (e) {
+        //     return SearchBackground.handleSearchError(e)
+        // }
 
-        let docs = await this.storage.searchPages(searchParams)
+        // let docs = await this.storage.searchPages(searchParams)
 
-        docs = await this.resolvePdfPageFullUrls(docs)
+        // docs = await this.resolvePdfPageFullUrls(docs)
 
-        return SearchBackground.shapePageResult(docs, searchParams.limit)
-    }
-
-    async searchSocial(
-        params: BackgroundSearchParams,
-    ): Promise<StandardSearchResponse> {
-        let searchParams
-        try {
-            searchParams = this.processSearchParams(params)
-        } catch (e) {
-            return SearchBackground.handleSearchError(e)
-        }
-
-        const docs = await this.storage.searchSocial(searchParams)
-        return SearchBackground.shapePageResult(docs, searchParams.limit)
+        // return SearchBackground.shapePageResult(docs, searchParams.limit)
     }
 }
