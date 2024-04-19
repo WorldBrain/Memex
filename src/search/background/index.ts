@@ -215,8 +215,8 @@ export default class SearchBackground {
         // AND'd filter by lists is more tricky...
         const allAnnotIds: string[] = []
         const pageIdByAnnotId = new Map<string, string>()
-        resultDataByPage.forEach(({ annotations: annotIds }, pageId) =>
-            annotIds.forEach((annot) => {
+        resultDataByPage.forEach(({ annotations }, pageId) =>
+            annotations.forEach((annot) => {
                 allAnnotIds.push(annot.url)
                 pageIdByAnnotId.set(annot.url, pageId)
             }),
@@ -381,9 +381,9 @@ export default class SearchBackground {
         }
 
         // Add in all the pages to the results
-        for (const { url, latestTimestamp } of pages) {
-            const annotations = resultDataByPage.get(url)?.annotations ?? []
-            resultDataByPage.set(url, {
+        for (const { id, latestTimestamp } of pages) {
+            const annotations = resultDataByPage.get(id)?.annotations ?? []
+            resultDataByPage.set(id, {
                 annotations,
                 latestPageTimestamp: latestTimestamp,
             })

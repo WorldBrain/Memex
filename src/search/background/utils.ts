@@ -89,10 +89,10 @@ export const sortUnifiedBlankSearchResult = (
     )
 
 /** Given separate result sets of the same type, gets the intersection of them / ANDs them together by ID */
-const intersectResults = <T extends { url: string }>(results: T[][]): T[] =>
+const intersectResults = (results: string[][]): string[] =>
     results.reduce((a, b) => {
-        const ids = new Set(b.map((r) => r.url))
-        return a.filter((r) => ids.has(r.url))
+        const ids = new Set(b)
+        return a.filter((id) => ids.has(id))
     })
 
 export const queryAnnotationsByTerms = (
@@ -102,16 +102,17 @@ export const queryAnnotationsByTerms = (
     const resultsPerTerm = await Promise.all(
         terms.map((term) =>
             dexie
-                .table<Annotation>('annotations')
+                .table<Annotation, string>('annotations')
                 .where('_body_terms')
                 .startsWith(term)
                 .or('_comment_terms')
                 .startsWith(term)
                 .distinct()
-                .toArray(),
+                .primaryKeys(),
         ),
     )
-    return intersectResults(resultsPerTerm)
+    const matchingIds = intersectResults(resultsPerTerm)
+    return dexie.table<Annotation>('annotations').bulkGet(matchingIds)
 }
 
 export const queryPagesByTerms = (
@@ -121,7 +122,7 @@ export const queryPagesByTerms = (
     const resultsPerTerm = await Promise.all(
         terms.map((term) =>
             dexie
-                .table<Page>('pages')
+                .table<Page, string>('pages')
                 .where('terms')
                 .startsWith(term)
                 .or('urlTerms')
@@ -129,10 +130,10 @@ export const queryPagesByTerms = (
                 .or('titleTerms')
                 .startsWith(term)
                 .distinct()
-                .toArray(),
+                .primaryKeys(),
         ),
     )
-    const pages = intersectResults(resultsPerTerm)
+    const matchingIds = intersectResults(resultsPerTerm)
 
     // Get latest visit/bm for each page
     const latestTimestampByPageUrl = new Map<string, number>()
@@ -142,11 +143,7 @@ export const queryPagesByTerms = (
             Math.max(time, latestTimestampByPageUrl.get(url) ?? 0),
         )
     const queryTimestamps = <T>(table: Dexie.Table<T>): Promise<T[]> =>
-        table
-            .where('url')
-            .anyOf(pages.map((p) => p.url))
-            .reverse()
-            .sortBy('time')
+        table.where('url').anyOf(matchingIds).reverse().sortBy('time')
 
     const [visits, bookmarks] = await Promise.all([
         queryTimestamps(dexie.table<Visit>('visits')),
@@ -156,8 +153,8 @@ export const queryPagesByTerms = (
     visits.forEach(trackLatestTimestamp)
     bookmarks.forEach(trackLatestTimestamp)
 
-    return pages.map((p) => ({
-        ...p,
-        latestTimestamp: latestTimestampByPageUrl.get(p.url) ?? 0,
+    return matchingIds.map((id) => ({
+        id,
+        latestTimestamp: latestTimestampByPageUrl.get(id) ?? 0,
     }))
 }

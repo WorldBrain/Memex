@@ -3,10 +3,7 @@ import type SearchStorage from './storage'
 import type { SearchIndex } from '../types'
 import type { Annotation } from 'src/annotations/types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
-import type {
-    Page,
-    Annotation as _Annotation,
-} from '@worldbrain/memex-common/lib/types/core-data-types/client'
+import type { Annotation as _Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 
 export interface AnnotPage {
     url: string
@@ -212,7 +209,7 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
     UnifiedSearchPaginationParams & {
         queryPages: (
             terms: string[],
-        ) => Promise<Array<Page & { latestTimestamp: number }>>
+        ) => Promise<Array<{ id: string; latestTimestamp: number }>>
         queryAnnotations: (terms: string[]) => Promise<_Annotation[]>
     }
 
