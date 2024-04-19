@@ -60,6 +60,7 @@ export interface AnnotationCreateGeneralProps {
     lists: number[]
     hoverState: NoteResultHoverState
     contextLocation?: string
+    defaultMinimized: boolean
     isRibbonCommentBox?: boolean
     getYoutubePlayer?(): YoutubePlayer
     renderSpacePicker(): JSX.Element
@@ -482,6 +483,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                             addNewSpaceViaWikiLinks={
                                 this.props.addNewSpaceViaWikiLinksNewNote
                             }
+                            defaultMinimized={this.props.defaultMinimized}
                         />
                     </EditorContainer>
                     {this.props.comment.length > 0 &&

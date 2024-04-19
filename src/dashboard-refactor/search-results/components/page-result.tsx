@@ -60,6 +60,7 @@ export interface Props
     isNotesSidebarShown?: boolean
     isListsSidebarShown?: boolean
     searchType: SearchType
+    hasNotes: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -114,6 +115,7 @@ export default class PageResultView extends PureComponent<Props> {
         confirmRemoveFromList: false,
         showVideoFullSize: false,
         tutorialId: null,
+        showFooterBar: false,
     }
 
     componentDidMount() {
@@ -743,14 +745,14 @@ export default class PageResultView extends PureComponent<Props> {
                     </TooltipContent>
                 ),
                 showKeyShortcut: this.props.isInFocus && 'D',
-                rightSideItem: this.props.noteIds[this.props.notesType]
-                    ?.length > 0 && (
-                    <NoteCounter>
-                        {this.props.noteIds[
-                            this.props.notesType
-                        ]?.length.toString()}
-                    </NoteCounter>
-                ),
+                // rightSideItem: this.props.noteIds[this.props.notesType]
+                //     ?.length > 0 && (
+                //     <NoteCounter>
+                //         {this.props.noteIds[
+                //             this.props.notesType
+                //         ]?.length.toString()}
+                //     </NoteCounter>
+                // ),
             },
         ]
     }
@@ -1023,7 +1025,14 @@ export default class PageResultView extends PureComponent<Props> {
                                 {this.renderToggleMatchesButton()}
                             </ResultsMatchingTextToggleContainer>
                         )}
-                    <FooterBar inPageMode={this.props.inPageMode}>
+                    <FooterBar
+                        inPageMode={this.props.inPageMode}
+                        shouldShow={
+                            this.props.hoverState === 'main-content' &&
+                            this.props.editTitleState == null
+                        }
+                        slimVersion={this.props.hasNotes}
+                    >
                         <ItemBoxBottom
                             // firstDivProps={{
                             //     onMouseEnter: this.props.onFooterHover,
@@ -1038,6 +1047,13 @@ export default class PageResultView extends PureComponent<Props> {
                             inPageMode={this.props.inPageMode}
                         />
                     </FooterBar>
+                    {this.props.noteIds[this.props.notesType]?.length > 0 && (
+                        <NoteCounter>
+                            {this.props.noteIds[
+                                this.props.notesType
+                            ]?.length.toString()}
+                        </NoteCounter>
+                    )}
                     {this.renderSpacePicker()}
                     {this.renderTutorialBox()}
                     {this.renderPageCitationsDropdown()}
@@ -1063,6 +1079,8 @@ const slideInFromBottom = keyframes`
 `
 
 const FooterBar = styled.div<{
+    shouldShow: boolean
+    slimVersion: boolean
     inPageMode?: boolean
 }>`
     animation: ${slideInFromBottom} 0.2s cubic-bezier(0.22, 0.61, 0.36, 1)
@@ -1070,13 +1088,30 @@ const FooterBar = styled.div<{
     bottom: 0;
     width: 100%;
     z-index: 999999;
-    border-radius: 0 0 10px 10px;
-    padding: 2px 0px 5px 0px;
+    border-radius: 0 0 12px 12px;
+    padding: 2px 0px 2px 0px;
+    background: unset;
+    backdrop-filter: unset;
+
     ${(props) =>
         props.inPageMode &&
         css`
             backdrop-filter: unset;
             background: unset;
+        `};
+    ${(props) =>
+        (props.slimVersion || true) &&
+        css`
+            display: none;
+            position: absolute;
+
+            backdrop-filter: blur(5px);
+            background: ${(props) => props.theme.colors.black0}95;
+        `};
+    ${(props) =>
+        props.shouldShow &&
+        css`
+            display: flex;
         `};
 `
 
@@ -1193,6 +1228,10 @@ const NoteCounter = styled.span`
     padding: 2px 10px;
     background: ${(props) => props.theme.colors.headerGradient};
     text-align: center;
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    z-index: 9999991; // to be above the footerbar
 `
 
 const SearchResultsHighlights = styled.div`

@@ -135,6 +135,7 @@ export interface NoteFormState {
     bodyInputValue: string
     tags: string[]
     lists: string[]
+    isShown: boolean
 }
 
 export interface NoteData {

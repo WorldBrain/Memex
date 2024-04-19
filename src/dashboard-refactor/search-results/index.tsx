@@ -562,6 +562,7 @@ export default class SearchResultsContainer extends React.Component<
                         getListDetailsById={this.props.getListDetailsById}
                         {...boundAnnotCreateProps}
                         contextLocation={'dashboard'}
+                        defaultMinimized={true}
                         renderSpacePicker={() => (
                             <CollectionPicker
                                 {...this.props.spacePickerBGProps}
@@ -737,6 +738,7 @@ export default class SearchResultsContainer extends React.Component<
                             ? interactionProps.onTagPickerBtnClick
                             : undefined
                     }
+                    hasNotes={page.noteIds['user'].length > 0}
                     filterbyList={this.props.filterByList}
                     searchType={this.props.searchType}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
