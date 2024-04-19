@@ -40,7 +40,7 @@ export default class BulkEditWidget extends StatefulUIElement<
 
     renderBulkSelectItem(item) {
         return (
-            <BulkSelectItemBox>
+            <BulkSelectItemBox key={item.url}>
                 <BulkSelectItemTitle>{item.title}</BulkSelectItemTitle>
                 <RemoveIconBox>
                     <Icon
