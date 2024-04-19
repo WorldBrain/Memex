@@ -1,5 +1,8 @@
 import type { RootState, Events } from './types'
-import type { BackgroundSearchParams } from 'src/search/background/types'
+import type {
+    UnifiedSearchPaginationParams,
+    UnifiedSearchParams,
+} from 'src/search/background/types'
 import type { PageResult } from './search-results/types'
 import {
     initNormalizedState,
@@ -40,28 +43,6 @@ export const areSearchFiltersEmpty = ({
     !searchFilters.tagsExcluded.length &&
     !searchFilters.tagsIncluded.length &&
     !searchFilters.searchQuery.length
-
-function getDomainsFilterIncludeSearchType(searchType) {
-    if (searchType === 'videos') {
-        return [
-            'youtube.com',
-            'vimeo.com',
-            'odysee.com',
-            'bitchute.com',
-            'rumble.com',
-            'crowdbunker.com',
-            'dailymotion.com',
-        ]
-    }
-
-    if (searchType === 'twitter') {
-        return ['mobile.twitter.com', 'twitter.com', 'x.com', 'mobile.x.com']
-    }
-
-    if (searchType === 'events') {
-        return eventProviderDomains
-    }
-}
 
 export const getListData = (
     listId: UnifiedList['unifiedId'],
@@ -109,14 +90,14 @@ export const stateToSearchParams = (
         searchResults,
     }: Pick<RootState, 'listsSidebar' | 'searchFilters' | 'searchResults'>,
     annotationsCache: PageAnnotationsCacheInterface,
-): BackgroundSearchParams => {
-    const lists = [...searchFilters.spacesIncluded]
+): UnifiedSearchParams & UnifiedSearchPaginationParams => {
+    const filterByListIds = [...searchFilters.spacesIncluded]
     if (
         Object.values(SPECIAL_LIST_STRING_IDS).includes(
             listsSidebar.selectedListId,
         )
     ) {
-        lists.push(parseInt(listsSidebar.selectedListId))
+        filterByListIds.push(parseInt(listsSidebar.selectedListId))
     } else if (listsSidebar.selectedListId != null) {
         const listData =
             annotationsCache.lists.byId[listsSidebar.selectedListId]
@@ -125,44 +106,28 @@ export const stateToSearchParams = (
                 `Specified list for search refers to data that does not exist locally`,
             )
         }
-        lists.push(listData.localId!)
+        filterByListIds.push(listData.localId!)
     }
 
-    // Probably Temporary: Add a domain filter for video and twitter type searches
-    const searchType = searchResults.searchType
-    const domainsFilterIncludeSearchType = getDomainsFilterIncludeSearchType(
-        searchType,
-    )
-    let domainsFilterIncluded
-    if (domainsFilterIncludeSearchType != null) {
-        if (searchFilters.domainsIncluded != null) {
-            domainsFilterIncluded = searchFilters.domainsIncluded.concat(
-                domainsFilterIncludeSearchType,
-            )
-        } else {
-            domainsFilterIncluded = domainsFilterIncludeSearchType
-        }
-    } else {
-        domainsFilterIncluded = searchFilters.domainsIncluded
-    }
-
-    // Probably Temporary: Add an additional query word for PDFs
-    let searchQuery = searchFilters.searchQuery
-    if (searchType === 'pdf') {
-        searchQuery = searchQuery.concat(' pdf')
-    }
+    // Blank search doesn't use standard skip+limit pagination. Instead it requires the caller to keep
+    //  track of the oldest timestamp and supply that as the new upper-bound on each reinvocation
+    const blankSearchUpperBound = !searchFilters.searchQuery.trim().length
+        ? searchResults.blankSearchOldestResultTimestamp
+        : null
 
     return {
-        lists,
-        endDate: searchFilters.dateTo,
-        startDate: searchFilters.dateFrom,
-        query: searchQuery,
-        domains: domainsFilterIncluded,
-        domainsExclude: searchFilters.domainsExcluded,
-        tagsInc: searchFilters.tagsIncluded,
-        tagsExc: searchFilters.tagsExcluded,
-        limit: searchFilters.limit,
         skip: searchFilters.skip,
+        limit: searchFilters.limit,
+        query: searchFilters.searchQuery,
+        filterByDomains: searchFilters.domainsIncluded,
+        filterByListIds,
+        fromWhen: searchFilters.dateFrom,
+        untilWhen: blankSearchUpperBound ?? searchFilters.dateTo,
+        filterByPDFs: searchResults.searchType === 'pdf',
+        filterByEvents: searchResults.searchType === 'events',
+        filterByVideos: searchResults.searchType === 'videos',
+        filterByTweets: searchResults.searchType === 'twitter',
+        omitPagesWithoutAnnotations: searchResults.searchType === 'notes',
     }
 }
 

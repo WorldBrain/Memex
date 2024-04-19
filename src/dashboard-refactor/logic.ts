@@ -52,7 +52,6 @@ import type { AnnotationSharingStates } from 'src/content-sharing/background/typ
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
@@ -61,10 +60,6 @@ import type {
     RGBAColor,
     UnifiedList,
 } from 'src/annotations/cache/types'
-import type {
-    UnifiedSearchPaginationParams,
-    UnifiedSearchParams,
-} from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
@@ -84,7 +79,6 @@ import { copyToClipboard } from 'src/annotations/content_script/utils'
 import Raven from 'raven-js'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
-import { pageActionAllowed } from 'src/util/subscriptions/storage'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -1111,34 +1105,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                 if (searchID !== this.currentSearchID) {
                     return
                 } else {
-                    const { searchFilters, searchResults } = this.withMutation(
+                    const searchState = this.withMutation(
                         previousState,
                         mutation,
                     )
-                    // Blank search doesn't use standard skip+limit pagination. Instead it requires the caller to keep
-                    //  track of the oldest timestamp and supply that as the new upper-bound on each reinvocation
-                    const blankSearchUpperBound = !searchFilters.searchQuery.trim()
-                        .length
-                        ? searchResults.blankSearchOldestResultTimestamp
-                        : null
-
-                    const params: UnifiedSearchParams &
-                        UnifiedSearchPaginationParams = {
-                        query: searchFilters.searchQuery,
-                        filterByDomains: searchFilters.domainsIncluded,
-                        filterByListIds: searchFilters.spacesIncluded,
-                        fromWhen: searchFilters.dateFrom,
-                        untilWhen:
-                            blankSearchUpperBound ?? searchFilters.dateTo,
-                        limit: searchFilters.limit,
-                        skip: searchFilters.skip,
-                        filterByPDFs: searchResults.searchType === 'pdf',
-                        filterByEvents: searchResults.searchType === 'events',
-                        filterByVideos: searchResults.searchType === 'videos',
-                        filterByTweets: searchResults.searchType === 'twitter',
-                        omitPagesWithoutAnnotations:
-                            searchResults.searchType === 'notes',
-                    }
+                    const params = stateToSearchParams(
+                        searchState,
+                        this.options.annotationsCache,
+                    )
                     console.log('SEARCH - params:', params)
                     const result = await this.options.searchBG.unifiedSearch(
                         params,
@@ -1157,7 +1131,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     let noResultsType: NoResultsType = null
                     if (
                         result.resultsExhausted &&
-                        searchFilters.skip === 0 &&
+                        searchState.searchFilters.skip === 0 &&
                         !pageData.allIds.length
                     ) {
                         if (
