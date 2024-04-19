@@ -240,7 +240,7 @@ export interface RootState {
     isSubscriptionBannerShown: boolean
 
     // TODO: This needs to be reset every single time the search filters change - simply used for pagination in blank search
-    __oldestResultTimestamp: number | null
+    blankSearchOldestResultTimestamp: number | null
 
     /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults

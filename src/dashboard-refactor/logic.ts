@@ -331,7 +331,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             spaceSearchSuggestions: [],
             searchResults: {
-                __oldestResultTimestamp: null,
+                blankSearchOldestResultTimestamp: null,
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,
@@ -1081,10 +1081,18 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
         const searchID = ++this.currentSearchID
-        const searchFilters: UIMutation<State['searchFilters']> = {
-            skip: event.paginate
-                ? { $apply: (skip) => skip + PAGE_SIZE }
-                : { $set: 0 },
+        // Some states should be reset if not paginating a previously run search
+        const mutation: UIMutation<State> = {
+            searchResults: {
+                blankSearchOldestResultTimestamp: {
+                    $apply: (timestamp) => (event.paginate ? timestamp : null),
+                },
+            },
+            searchFilters: {
+                skip: {
+                    $apply: (skip) => (event.paginate ? skip + PAGE_SIZE : 0),
+                },
+            },
         }
 
         await executeUITask(
@@ -1100,68 +1108,55 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
 
             async () => {
-                const searchState = this.withMutation(previousState, {
-                    searchFilters,
-                })
                 if (searchID !== this.currentSearchID) {
                     return
                 } else {
-                    const isBlankSearch =
-                        searchState.searchFilters.searchQuery.trim().length ===
-                        0
+                    const { searchFilters, searchResults } = this.withMutation(
+                        previousState,
+                        mutation,
+                    )
+                    // Blank search doesn't use standard skip+limit pagination. Instead it requires the caller to keep
+                    //  track of the oldest timestamp and supply that as the new upper-bound on each reinvocation
+                    const blankSearchUpperBound = !searchFilters.searchQuery.trim()
+                        .length
+                        ? searchResults.blankSearchOldestResultTimestamp
+                        : null
 
                     const params: UnifiedSearchParams = {
-                        query: searchState.searchFilters.searchQuery,
-                        filterByDomains:
-                            searchState.searchFilters.domainsIncluded,
-                        filterByListIds:
-                            searchState.searchFilters.spacesIncluded,
-                        fromWhen: searchState.searchFilters.dateFrom,
-                        // TODO: Set up blank search use `limit`+`skip` instead of this
-                        untilWhen: isBlankSearch
-                            ? searchState.searchResults
-                                  .__oldestResultTimestamp ??
-                              searchState.searchFilters.dateTo
-                            : searchState.searchFilters.dateTo,
-                        limit: searchState.searchFilters.limit,
-                        skip: searchState.searchFilters.skip,
-                        filterByPDFs:
-                            searchState.searchResults.searchType === 'pdf',
-                        filterByEvents:
-                            searchState.searchResults.searchType === 'events',
-                        filterByVideos:
-                            searchState.searchResults.searchType === 'videos',
-                        filterByTweets:
-                            searchState.searchResults.searchType === 'twitter',
+                        query: searchFilters.searchQuery,
+                        filterByDomains: searchFilters.domainsIncluded,
+                        filterByListIds: searchFilters.spacesIncluded,
+                        fromWhen: searchFilters.dateFrom,
+                        untilWhen:
+                            blankSearchUpperBound ?? searchFilters.dateTo,
+                        limit: searchFilters.limit,
+                        skip: searchFilters.skip,
+                        filterByPDFs: searchResults.searchType === 'pdf',
+                        filterByEvents: searchResults.searchType === 'events',
+                        filterByVideos: searchResults.searchType === 'videos',
+                        filterByTweets: searchResults.searchType === 'twitter',
                         omitPagesWithoutAnnotations:
-                            searchState.searchResults.searchType === 'notes',
+                            searchResults.searchType === 'notes',
                     }
-
+                    console.log('SEARCH - params:', params)
                     const result = await this.options.searchBG.unifiedSearch(
                         params,
                     )
-                    console.log('SEARCH - params:', params)
                     console.log('SEARCH - result:', result)
+
                     const {
                         noteData,
                         pageData,
                         results,
-                        resultsExhausted,
-                        searchTermsInvalid,
-                    } = {
-                        // TODO: Remove this level of indirection
-                        ...utils.pageSearchResultToState(
-                            result,
-                            this.options.annotationsCache,
-                        ),
-                        resultsExhausted: result.resultsExhausted,
-                        searchTermsInvalid: false,
-                    }
+                    } = utils.pageSearchResultToState(
+                        result,
+                        this.options.annotationsCache,
+                    )
 
                     let noResultsType: NoResultsType = null
                     if (
-                        resultsExhausted &&
-                        searchState.searchFilters.skip === 0 &&
+                        result.resultsExhausted &&
+                        searchFilters.skip === 0 &&
                         !pageData.allIds.length
                     ) {
                         if (
@@ -1181,9 +1176,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         ) {
                             noResultsType = 'onboarding-msg'
                         } else {
-                            noResultsType = searchTermsInvalid
-                                ? 'stop-words'
-                                : 'no-results'
+                            noResultsType = 'no-results'
                         }
                     }
 
@@ -1192,10 +1185,13 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
 
                     this.emitMutation({
-                        searchFilters,
+                        searchFilters: mutation.searchFilters,
                         searchResults: {
+                            blankSearchOldestResultTimestamp: {
+                                $set: result.oldestResultTimestamp,
+                            },
                             areResultsExhausted: {
-                                $set: resultsExhausted,
+                                $set: result.resultsExhausted,
                             },
                             searchState: { $set: 'success' },
                             searchPaginationState: { $set: 'success' },
