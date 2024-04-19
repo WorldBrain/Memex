@@ -125,8 +125,6 @@ export default class SearchBackground {
             delPagesByPattern: this.options.pages.delPagesByPattern.bind(
                 this.options.pages,
             ),
-
-            getMatchingPageCount: this.searchIndex.getMatchingPageCount,
         }
     }
 
@@ -498,6 +496,8 @@ export default class SearchBackground {
             lookups.pages.set(p.url, {
                 ...p,
                 lists: (listIdsByPage[p.url] ?? []).map((e) => e.listId),
+                displayTime:
+                    resultDataByPage.get(p.url)?.latestPageTimestamp ?? 0,
             }),
         )
         annotData.forEach((a) =>

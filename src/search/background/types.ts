@@ -1,6 +1,5 @@
 import type { User } from 'src/social-integration/types'
 import type SearchStorage from './storage'
-import type { SearchIndex } from '../types'
 import type { Annotation } from 'src/annotations/types'
 import type { PageIndexingBackground } from 'src/page-indexing/background'
 import type { Annotation as _Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
@@ -12,7 +11,7 @@ export interface AnnotPage {
     fullTitle?: string
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string
-    displayTime?: number
+    displayTime: number
     annotations: Annotation[]
     pageId?: string
     lists: number[]
@@ -174,7 +173,6 @@ export interface SearchInterface {
     delPages: PageIndexingBackground['delPages']
     delPagesByDomain: PageIndexingBackground['delPagesByDomain']
     delPagesByPattern: PageIndexingBackground['delPagesByPattern']
-    getMatchingPageCount: SearchIndex['getMatchingPageCount']
 }
 
 export type UnifiedSearchParams = {
