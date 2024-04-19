@@ -1,6 +1,5 @@
 import React from 'react'
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
-import type { BackgroundSearchParams } from 'src/search/background/types'
 import type { Template } from './types'
 
 export interface Props
