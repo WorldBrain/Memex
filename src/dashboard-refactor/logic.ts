@@ -62,7 +62,7 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import type {
-    AnnotationsSearchResponse,
+    UnifiedSearchPaginationParams,
     UnifiedSearchParams,
 } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
@@ -1122,7 +1122,8 @@ export class DashboardLogic extends UILogic<State, Events> {
                         ? searchResults.blankSearchOldestResultTimestamp
                         : null
 
-                    const params: UnifiedSearchParams = {
+                    const params: UnifiedSearchParams &
+                        UnifiedSearchPaginationParams = {
                         query: searchFilters.searchQuery,
                         filterByDomains: searchFilters.domainsIncluded,
                         filterByListIds: searchFilters.spacesIncluded,

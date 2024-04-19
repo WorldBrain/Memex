@@ -16,7 +16,7 @@ import type {
     UnifiedBlankSearchResult,
     UnifiedBlankSearchParams,
     UnifiedTermsSearchParams,
-    PaginationParams,
+    UnifiedSearchPaginationParams,
 } from './types'
 import { SearchError, BadTermError, InvalidSearchError } from './errors'
 import type { SearchIndex } from '../types'
@@ -155,7 +155,7 @@ export default class SearchBackground {
 
     private sliceUnifiedSearchResults(
         resultDataByPage: any[],
-        { limit, skip }: PaginationParams,
+        { limit, skip }: UnifiedSearchPaginationParams,
     ): UnifiedBlankSearchResult['resultDataByPage'] {
         // NOTE: Current implementation ignores annotation count, and simply paginates by the number of pages in the results
         return new Map(resultDataByPage.slice(skip, skip + limit))
@@ -185,15 +185,13 @@ export default class SearchBackground {
         // Perform any specified URL filters. These are all relatively simple URL tests
         if (needToFilterByUrl) {
             resultDataByPage.forEach(({ annotations }, pageId) => {
+                // prettier-ignore
                 const shouldFilterOutPage =
-                    (params.omitPagesWithoutAnnotations &&
-                        !annotations.length) ||
+                    (params.omitPagesWithoutAnnotations && !annotations.length) ||
                     (params.filterByEvents && !isUrlAnEventPage(pageId)) ||
                     (params.filterByTweets && !isUrlATweet(pageId)) ||
-                    (params.filterByVideos &&
-                        !isUrlMemexSupportedVideo(pageId)) ||
-                    (params.filterByPDFs &&
-                        !isMemexPageAPdf({ url: pageId })) ||
+                    (params.filterByVideos && !isUrlMemexSupportedVideo(pageId)) ||
+                    (params.filterByPDFs && !isMemexPageAPdf({ url: pageId })) ||
                     // Does an OR filter on supplied domains
                     (params.filterByDomains.length &&
                         !params.filterByDomains.reduce((acc, domain) => {
@@ -225,9 +223,11 @@ export default class SearchBackground {
         )
 
         // 1. Need to lookup annot privacy level data to know whether they inherit parent page lists or not
-        const privacyLevels: AnnotationPrivacyLevel[] = await this.options.storageManager
+        const privacyLevels = await this.options.storageManager
             .collection('annotationPrivacyLevels')
-            .findObjects({ annotation: { $in: allAnnotIds } })
+            .findObjects<AnnotationPrivacyLevel>({
+                annotation: { $in: allAnnotIds },
+            })
         const privacyLevelsByAnnotId = fromPairs(
             privacyLevels.map((p) => [p.annotation, p.privacyLevel]),
         )
@@ -253,9 +253,9 @@ export default class SearchBackground {
         }
 
         // 2. Filter down selectively-shared annotations
-        const annotListEntries: AnnotationListEntry[] = await this.options.storageManager
+        const annotListEntries = await this.options.storageManager
             .collection('annotListEntries')
-            .findObjects({
+            .findObjects<AnnotationListEntry>({
                 listId: { $in: params.filterByListIds },
                 url: { $in: selectivelySharedAnnotIds },
             })
@@ -268,9 +268,9 @@ export default class SearchBackground {
         )
 
         // 3. Filter down auto-shared annotations
-        const pageListEntries: PageListEntry[] = await this.options.storageManager
+        const pageListEntries = await this.options.storageManager
             .collection('pageListEntries')
-            .findObjects({
+            .findObjects<PageListEntry>({
                 listId: { $in: params.filterByListIds },
                 pageUrl: { $in: [...resultDataByPage.keys()] },
             })
@@ -314,15 +314,13 @@ export default class SearchBackground {
         const [annotations, visits, bookmarks] = await Promise.all([
             this.options.storageManager
                 .collection('annotations')
-                .findObjects({ lastEdited: calcQuery() }) as Promise<
-                Annotation[]
-            >,
+                .findObjects<Annotation>({ lastEdited: calcQuery() }),
             this.options.storageManager
                 .collection('visits')
-                .findObjects({ time: calcQuery() }) as Promise<Visit[]>,
+                .findObjects<Visit>({ time: calcQuery() }),
             this.options.storageManager
                 .collection('bookmarks')
-                .findObjects({ time: calcQuery() }) as Promise<Bookmark[]>,
+                .findObjects<Bookmark>({ time: calcQuery() }),
         ])
 
         // Add in all the annotations to the results
@@ -401,7 +399,7 @@ export default class SearchBackground {
         )
 
         return {
-            oldestResultTimestamp: 0,
+            oldestResultTimestamp: null,
             resultDataByPage: paginatedResults,
             resultsExhausted: paginatedResults.size < params.limit,
         }
@@ -409,6 +407,7 @@ export default class SearchBackground {
 
     unifiedSearch: SearchInterface['unifiedSearch'] = async (params) => {
         let result: UnifiedBlankSearchResult
+        // There's 2 separate search implementations depending on whether doing a terms search or not
         if (!params.query.trim().length) {
             const lowestTimeBound = await this.calcSearchLowestTimeBound()
             // Skip over days where there's no results, until we get results
@@ -435,7 +434,7 @@ export default class SearchBackground {
         const sortedResultPages = sortUnifiedBlankSearchResult(
             result.resultDataByPage,
         )
-        const mappedAnnotPages = sortedResultPages
+        const dataEnrichedAnnotPages = sortedResultPages
             .map(([pageId, { annotations }]) => {
                 const page = dataLookups.pages.get(pageId)
                 if (!page) {
@@ -453,7 +452,7 @@ export default class SearchBackground {
             .filter(Boolean)
 
         return {
-            docs: mappedAnnotPages,
+            docs: dataEnrichedAnnotPages,
             resultsExhausted: result.resultsExhausted,
             oldestResultTimestamp: result.oldestResultTimestamp,
         }

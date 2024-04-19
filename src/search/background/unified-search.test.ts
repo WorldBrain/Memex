@@ -8,7 +8,7 @@ import {
     sortUnifiedBlankSearchResult,
 } from './utils'
 import type {
-    PaginationParams,
+    UnifiedSearchPaginationParams,
     UnifiedBlankSearchParams,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
@@ -94,15 +94,13 @@ const blankSearch = (
         lowestTimeBound: 0,
         daysToSearch: 1,
         query: '',
-        limit: 10,
-        skip: 0,
         ...params,
     })
 
 const termsSearch = (
     { search }: BackgroundModules,
     params: Partial<UnifiedTermsSearchParams> &
-        PaginationParams & { query: string },
+        UnifiedSearchPaginationParams & { query: string },
 ) =>
     search['unifiedTermsSearch']({
         filterByDomains: [],

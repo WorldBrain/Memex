@@ -167,7 +167,9 @@ export interface SearchBackend {
 }
 
 export interface SearchInterface {
-    unifiedSearch: (params: UnifiedSearchParams) => Promise<UnifiedSearchResult>
+    unifiedSearch: (
+        params: UnifiedSearchParams & UnifiedSearchPaginationParams,
+    ) => Promise<UnifiedSearchResult>
 
     searchAnnotations: (
         params: BackgroundSearchParams,
@@ -188,7 +190,7 @@ export interface SearchInterface {
     getMatchingPageCount: SearchIndex['getMatchingPageCount']
 }
 
-export type UnifiedSearchParams = PaginationParams & {
+export type UnifiedSearchParams = {
     query: string
     fromWhen?: number
     untilWhen?: number
@@ -201,19 +203,25 @@ export type UnifiedSearchParams = PaginationParams & {
     omitPagesWithoutAnnotations?: boolean
 }
 
-export interface PaginationParams {
+export interface UnifiedSearchPaginationParams {
     skip: number
     limit: number
 }
 
 export type UnifiedTermsSearchParams = UnifiedSearchParams &
-    PaginationParams & {
+    UnifiedSearchPaginationParams & {
         queryPages: (
             terms: string[],
         ) => Promise<Array<Page & { latestTimestamp: number }>>
         queryAnnotations: (terms: string[]) => Promise<_Annotation[]>
     }
 
+/**
+ * Note that, unlike terms search, blank search does not use the traditional pagination params.
+ * Instead it expects the caller to keep a state of the oldest search result so far
+ * (which gets returned from blank searches) and supply that as the new upper time bound
+ * for subsequent blank search pages.
+ */
 export type UnifiedBlankSearchParams = UnifiedSearchParams & {
     daysToSearch: number
     /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
@@ -227,7 +235,7 @@ export type UnifiedSearchResult = {
 }
 
 export type UnifiedBlankSearchResult = {
-    oldestResultTimestamp: number
+    oldestResultTimestamp: number | null
     resultsExhausted: boolean
     resultDataByPage: Map<string, UnifiedBlankSearchPageResultData>
 }
