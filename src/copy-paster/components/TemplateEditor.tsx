@@ -901,11 +901,10 @@ const EditorContainer = styled.div`
     align-items: center;
     justify-self: center;
     flex-direction: column;
-    background: ${(props) => props.theme.colors.black};
 
     padding: 20px;
     border-radius: 10px;
-    box-shadow: 0px 8px 26px 4px ${(props) => props.theme.colors.black2}c2;
+
     padding: 10px 15px;
 
     * {
