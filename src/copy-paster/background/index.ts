@@ -133,6 +133,8 @@ export default class CopyPasterBackground {
         const template = await this.storage.findTemplate({ id })
         const searchResponse = await this.options.search.unifiedSearch({
             ...searchParams,
+            fromWhen: 0,
+            untilWhen: Date.now(),
             skip: 0,
             limit: 100000,
         })
@@ -175,13 +177,15 @@ export default class CopyPasterBackground {
         } else {
             const searchResponse = await this.options.search.unifiedSearch({
                 ...searchParams,
+                fromWhen: 0,
+                untilWhen: Date.now(),
                 skip: 0,
                 limit: 100000,
             })
 
-            const normalizedPageUrls = searchResponse.docs.map(
-                (page) => page.url,
-            )
+            // TODO: Improve this in search implementation - still brings everything into memory
+            const resultsPreviewSlice = searchResponse.docs.slice(0, 100)
+            const normalizedPageUrls = resultsPreviewSlice.map((p) => p.url)
 
             templateDocs = await generateTemplateDocs({
                 annotationUrls: [],
@@ -203,6 +207,8 @@ export default class CopyPasterBackground {
         const template = await this.storage.findTemplate({ id })
         const searchResponse = await this.options.search.unifiedSearch({
             ...searchParams,
+            fromWhen: 0,
+            untilWhen: Date.now(),
             skip: 0,
             limit: 100000,
         })
@@ -232,12 +238,16 @@ export default class CopyPasterBackground {
         } else {
             const searchResponse = await this.options.search.unifiedSearch({
                 ...searchParams,
+                fromWhen: 0,
+                untilWhen: Date.now(),
                 skip: 0,
                 limit: 100000,
             })
 
-            const normalizedPageUrls = searchResponse.docs.map((p) => p.url)
-            const annotationUrls = searchResponse.docs.flatMap((p) =>
+            // TODO: Improve this in search implementation - still brings everything into memory
+            const resultsPreviewSlice = searchResponse.docs.slice(0, 100)
+            const normalizedPageUrls = resultsPreviewSlice.map((p) => p.url)
+            const annotationUrls = resultsPreviewSlice.flatMap((p) =>
                 p.annotations.map((a) => a.url),
             )
 
