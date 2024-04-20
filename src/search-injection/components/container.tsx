@@ -180,7 +180,7 @@ class Container extends React.Component<Props, State> {
                     <LoadingIndicator />
                 </LoadingBox>
             )
-        } else if (this.props.searchResDocs?.length > 0) {
+        } else if (this.props.searchResDocs.length > 0) {
             const resultItems = this.props.searchResDocs.map((result, i) => (
                 <>
                     <ResultItem
@@ -197,7 +197,7 @@ class Container extends React.Component<Props, State> {
             ))
 
             return resultItems
-        } else if (this.props.searchResDocs?.length === 0) {
+        } else if (this.props.searchResDocs.length === 0) {
             return (
                 <NoResultsSection>
                     <IconBox heightAndWidth="30px" background="light">
@@ -400,7 +400,7 @@ class Container extends React.Component<Props, State> {
                 <Results
                     position={this.state.position}
                     searchEngine={this.props.searchEngine}
-                    totalCount={this.props.searchResDocs?.length}
+                    totalCount={this.props.searchResDocs.length}
                     seeMoreResults={this.seeMoreResults}
                     toggleHideResults={this.toggleHideResults}
                     hideResults={this.state.hideResults}

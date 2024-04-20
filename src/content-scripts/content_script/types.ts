@@ -56,7 +56,6 @@ export interface InPageUIInjectionsDependencies {
     inPageUI: SharedInPageUIInterface
     searchDisplayProps: SearchDisplayProps
     upgradeModalProps: UpgradeModalProps
-    requestSearcher: any
     syncSettingsBG: RemoteSyncSettingsInterface
     syncSettings: SyncSettingsStore<
         | 'extension'

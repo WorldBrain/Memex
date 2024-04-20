@@ -13,7 +13,6 @@ import {
 
 import { shouldIncludeSearchInjection } from 'src/search-injection/detection'
 import {
-    remoteFunction,
     runInBackground,
     makeRemotelyCallableType,
     setupRpcConnection,
@@ -53,7 +52,6 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { createSyncSettingsStore } from 'src/sync-settings/util'
 import { checkPageBlacklisted } from 'src/blacklist/utils'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
-import { runtime } from 'webextension-polyfill'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { hydrateCacheForPageAnnotations } from 'src/annotations/cache/utils'
@@ -115,11 +113,11 @@ import type { ContentConversationsInterface } from 'src/content-conversations/ba
 import type { InPageUIComponent } from 'src/in-page-ui/shared-state/types'
 import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
-import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
-import { InPageUIInterface } from 'src/in-page-ui/background/types'
-import { Storage } from 'webextension-polyfill'
-import { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
+import type { InPageUIInterface } from 'src/in-page-ui/background/types'
+import type { Storage } from 'webextension-polyfill'
+import type { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import type { SearchInterface } from 'src/search/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -236,6 +234,7 @@ export async function main(
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
+    const searchBG = runInBackground<SearchInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
     >()
@@ -1118,10 +1117,9 @@ export async function main(
                 inPageUI,
                 syncSettingsBG,
                 syncSettings: createSyncSettingsStore({ syncSettingsBG }),
-                requestSearcher: remoteFunction('search'),
                 searchDisplayProps: {
                     activityIndicatorBG,
-                    searchBG: runInBackground(),
+                    searchBG,
                     pdfViewerBG: runInBackground(),
                     summarizeBG,
                     analyticsBG,
@@ -1148,7 +1146,7 @@ export async function main(
                     localStorage: browser.storage.local,
                     services: createUIServices(),
                     renderUpdateNotifBanner: () => null,
-                    bgScriptBG: bgScriptBG,
+                    bgScriptBG,
                 },
                 upgradeModalProps: {
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
@@ -1533,7 +1531,7 @@ class PageInfo {
         public options?: { getContentFingerprints?: GetContentFingerprints },
     ) {
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
-            runtimeAPI: runtime,
+            runtimeAPI: browser.runtime,
         })
     }
 
@@ -1561,7 +1559,7 @@ class PageInfo {
         }
 
         this.isPdf = isUrlPDFViewerUrl(window.location.href, {
-            runtimeAPI: runtime,
+            runtimeAPI: browser.runtime,
         })
 
         this._identifier = await runInBackground<
