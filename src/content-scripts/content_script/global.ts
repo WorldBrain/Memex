@@ -26,7 +26,6 @@ import {
     resetKeyboardShortcuts,
 } from 'src/in-page-ui/keyboard-shortcuts/content_script'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import AnnotationsManager from 'src/annotations/annotations-manager'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import * as tooltipUtils from 'src/in-page-ui/tooltip/utils'
 import * as sidebarUtils from 'src/sidebar-overlay/utils'
@@ -245,7 +244,6 @@ export async function main(
     >()
     const activityIndicatorBG = runInBackground<ActivityIndicatorInterface>()
     const pdfBG = runInBackground<PDFRemoteInterface>()
-    const annotationsManager = new AnnotationsManager()
 
     // loadInitialSettings
     const syncSettings = createSyncSettingsStore({
@@ -1001,7 +999,6 @@ export async function main(
             await execute({
                 inPageUI,
                 currentUser,
-                annotationsManager,
                 highlighter: highlightRenderer,
                 annotations: annotationsBG,
                 annotationsCache,
@@ -1038,7 +1035,6 @@ export async function main(
                 annotationsCache,
                 highlightRenderer,
                 annotations: annotationsBG,
-                annotationsManager,
             })
             components.highlights?.resolve()
         },

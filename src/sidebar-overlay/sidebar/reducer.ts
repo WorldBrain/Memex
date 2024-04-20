@@ -4,7 +4,6 @@ import { combineReducers } from 'redux'
 import * as actions from './actions'
 import State, { Page } from './types'
 
-import AnnotationsManager from '../../annotations/annotations-manager'
 import {
     appendAnnotations as appendAnnotationsAction,
     setAnnotations as setAnnotationsAction,
@@ -12,7 +11,6 @@ import {
 import { Annotation } from 'src/annotations/types'
 
 export const defaultState: State = {
-    annotationsManager: null,
     isOpen: false,
     isLoading: false,
     page: {
@@ -29,11 +27,6 @@ export const defaultState: State = {
     pageType: 'page',
     isSocialPost: false,
 }
-
-const setAnnotationsManager = (
-    state: AnnotationsManager,
-    annotationsManager: AnnotationsManager,
-) => annotationsManager
 
 const setSidebarOpen = (state: boolean, isOpen: boolean) => isOpen
 
@@ -52,10 +45,6 @@ const setHoverAnnotationUrl = (state: string, hoverAnnotationUrl: string) =>
 
 const setShowCongratsMessage = (state: boolean, showCongratsMessage: boolean) =>
     showCongratsMessage
-
-const annotationsManagerReducer = createReducer<AnnotationsManager>((on) => {
-    on(actions.setAnnotationsManager, setAnnotationsManager)
-}, defaultState.annotationsManager)
 
 const isOpenReducer = createReducer<boolean>((on) => {
     on(actions.setSidebarOpen, setSidebarOpen)
@@ -108,7 +97,6 @@ const isSocialPostReducer = createReducer((on) => {
 }, defaultState.isSocialPost)
 
 const reducer = combineReducers<State>({
-    annotationsManager: annotationsManagerReducer,
     isOpen: isOpenReducer,
     isLoading: isLoadingReducer,
     page: pageReducer,
