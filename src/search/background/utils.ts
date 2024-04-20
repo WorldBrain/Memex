@@ -1,6 +1,5 @@
 import type Storex from '@worldbrain/storex'
 import type {
-    ContentTypes,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
 } from './types'
@@ -13,17 +12,6 @@ import type {
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type Dexie from 'dexie'
-
-export const contentTypeChecks = {
-    pagesOnly: (flags: ContentTypes) =>
-        flags.pages && !flags.highlights && !flags.notes,
-    annotsOnly: (flags: ContentTypes) =>
-        !flags.pages && (flags.highlights || flags.notes),
-    combined: (flags: ContentTypes) =>
-        flags.pages && (flags.highlights || flags.notes),
-    noop: (flags: ContentTypes) =>
-        !flags.pages && !flags.highlights && !flags.notes,
-}
 
 export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     lists: params.collections,

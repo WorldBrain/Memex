@@ -116,7 +116,7 @@ import type { InPageUIInterface } from 'src/in-page-ui/background/types'
 import type { Storage } from 'webextension-polyfill'
 import type { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
 import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
-import type { SearchInterface } from 'src/search/background/types'
+import type { RemoteSearchInterface } from 'src/search/background/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -233,7 +233,7 @@ export async function main(
     const contentSharingByTabsBG = runInBackground<
         RemoteContentSharingByTabsInterface<'caller'>
     >()
-    const searchBG = runInBackground<SearchInterface>()
+    const searchBG = runInBackground<RemoteSearchInterface>()
     const contentScriptsBG = runInBackground<
         ContentScriptsInterface<'caller'>
     >()

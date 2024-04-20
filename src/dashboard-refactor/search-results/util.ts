@@ -1,6 +1,5 @@
 import type {
     StandardSearchResponse,
-    AnnotationsSearchResponse,
     AnnotsByPageUrl,
     AnnotPage,
 } from 'src/search/background/types'
@@ -198,63 +197,6 @@ const annotationToNoteData = (
             isListPickerShown: false,
         },
     }
-}
-
-export const annotationSearchResultToState: SearchResultToState<AnnotationsSearchResponse> = (
-    result,
-    cache,
-) => {
-    // This case is for annots search with terms set
-    if (!result.isAnnotsSearch) {
-        return pageSearchResultToState(result, cache, { areNotesShown: true })
-    }
-
-    const pageData = initNormalizedState<PageData>()
-    const noteData = initNormalizedState<NoteData & NoteResult>()
-
-    const resultState: { [day: number]: PageResultsByDay } = {}
-    const dayEntries: [number, AnnotsByPageUrl][] = Object.entries(
-        result.annotsByDay,
-    ) as any
-
-    for (const [day, annotsByPageUrl] of dayEntries) {
-        const dayNumber = +day // Make sure to cast to `number`, as Object.entries will auto-cast it to a `string`
-        const pageResults = initNormalizedState<PageResult>()
-
-        for (const [pageUrl, annotations] of Object.entries(annotsByPageUrl)) {
-            const sortedAnnots = annotations.sort(sortByPagePosition)
-            const noteIds = sortedAnnots.map((a) => a.url)
-
-            pageResults.allIds.push(pageUrl)
-            pageResults.byId[pageUrl] = getInitialPageResultState(
-                pageUrl,
-                noteIds,
-                { areNotesShown: true },
-            )
-
-            for (const annotation of sortedAnnots) {
-                noteData.allIds.push(annotation.url)
-                noteData.byId[annotation.url] = annotationToNoteData(
-                    annotation,
-                    cache,
-                )
-            }
-        }
-
-        resultState[dayNumber] = {
-            day: dayNumber,
-            pages: pageResults,
-        }
-    }
-
-    for (const pageResult of result.docs) {
-        const id = pageResult.url
-
-        pageData.allIds.push(id)
-        pageData.byId[id] = pageResultToPageData(pageResult, cache)
-    }
-
-    return { noteData, pageData, results: resultState }
 }
 
 export const pageSearchResultToState: SearchResultToState<StandardSearchResponse> = (

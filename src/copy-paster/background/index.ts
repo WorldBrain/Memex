@@ -9,10 +9,6 @@ import { joinTemplateDocs, analyzeTemplate } from '../utils'
 import type ContentSharingBackground from 'src/content-sharing/background'
 import { getTemplateDataFetchers } from './template-data-fetchers'
 import type SearchBackground from 'src/search/background'
-import type {
-    AnnotsByPageUrl,
-    AnnotationsSearchResponse,
-} from 'src/search/background/types'
 
 export default class CopyPasterBackground {
     storage: CopyPasterStorage

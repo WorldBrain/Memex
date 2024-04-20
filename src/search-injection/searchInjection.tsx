@@ -15,12 +15,12 @@ import {
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { ResultItemProps, SearchEngineName } from './types'
 import { SyncSettingsStore } from 'src/sync-settings/util'
-import type { SearchInterface } from 'src/search/background/types'
+import type { RemoteSearchInterface } from 'src/search/background/types'
 
 interface RootProps {
     rootEl: HTMLElement
     query: string
-    requestSearcher: SearchInterface['unifiedSearch']
+    requestSearcher: RemoteSearchInterface['unifiedSearch']
     renderComponent: () => Promise<void>
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<

@@ -54,64 +54,12 @@ export interface AnnotSearchParams {
     includePageResults?: boolean
 }
 
-export interface PageSearchParams
-    extends Omit<AnnotSearchParams, 'collections'> {
-    lists?: number[]
-    contentTypes: ContentTypes
-}
-
-export interface ContentTypes {
-    pages: boolean
-    notes: boolean
-    highlights: boolean
-}
-
-export interface UrlFilters {
-    collUrlsInc?: Set<string>
-    tagUrlsInc?: Set<string>
-    domainUrlsInc?: Set<string>
-    tagUrlsExc?: Set<string>
-    domainUrlsExc?: Set<string>
-}
-
-/**
- * Types for the search functions of the background class
- */
-export interface BackgroundSearchParams {
-    query?: string
-    domains?: any[]
-    domainsExclude?: any[]
-    tagsInc?: any[]
-    tagsExc?: any[]
-    lists?: any[]
-    contentTypes?: ContentTypes
-    skip?: number
-    limit?: number
-    showOnlyBookmarks?: boolean
-    bookmarksOnly?: boolean
-
-    startDate?: number | Date
-    endDate?: number | Date
-    usersInc?: any
-    usersExc?: any
-    hashtagsInc?: any
-    hashtagsExc?: any
-    url?: string
-}
-
 /**
  * Maps day (start of day timestamp) to list of pages that have annots created/edited
  * on that day.
  */
 export interface PageUrlsByDay {
     [day: number]: AnnotsByPageUrl
-}
-
-/**
- * Maps page URLs to pages containing list of annotations created/edited on that day.
- */
-export interface PagesByUrl {
-    [pageUrl: string]: AnnotPage
 }
 
 export interface AnnotsByPageUrl {
@@ -132,47 +80,13 @@ export interface StandardSearchResponse {
     isBadTerm?: boolean
 }
 
-export interface AnnotationsSearchResponse extends StandardSearchResponse {
-    isAnnotsSearch: true
-    annotsByDay: PageUrlsByDay
-}
-
-// Todo: add proper types and refactor RPC usage in-line with 'refactoring.md'
-export interface SearchBackend {
-    addPage: any
-    addPageTerms: any
-    addBookmark: any
-    delBookmark: any
-    updateTimestampMeta: any
-    addVisit: any
-    addFavIcon: any
-    delPages: any
-    delPagesByDomain: any
-    delPagesByPattern: any
-    addTag: any
-    delTag: any
-    fetchPageTags: any
-    pageHasBookmark: any
-    getPage: any
-    grabExistingKeys: any
-    search: any
-    getMatchingPageCount: any
-    domainHasFavIcon: any
-    createPageFromTab: any
-    createPageFromUrl: any
-}
-
-export interface SearchInterface {
+export interface RemoteSearchInterface {
     unifiedSearch: (
         params: UnifiedSearchParams & UnifiedSearchPaginationParams,
     ) => Promise<UnifiedSearchResult>
-
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
-
     delPages: PageIndexingBackground['delPages']
-    delPagesByDomain: PageIndexingBackground['delPagesByDomain']
-    delPagesByPattern: PageIndexingBackground['delPagesByPattern']
 }
 
 export type UnifiedSearchParams = {

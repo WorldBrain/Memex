@@ -18,7 +18,7 @@ import type {
     Events as SyncModalEvents,
 } from './header/sync-status-menu/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import type { SearchInterface } from 'src/search/background/types'
+import type { RemoteSearchInterface } from 'src/search/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type {
@@ -102,7 +102,7 @@ export type DashboardDependencies = {
     contentShareByTabsBG: RemoteContentSharingByTabsInterface<'caller'>
     contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
-    searchBG: SearchInterface
+    searchBG: RemoteSearchInterface
     annotationsCache: PageAnnotationsCacheInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     annotationsBG: AnnotationInterface<'caller'>

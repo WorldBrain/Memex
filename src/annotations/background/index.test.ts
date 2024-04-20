@@ -195,9 +195,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                         },
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchAnnotations({
-                                    query: 'body',
-                                }),
+                                // await searchModule(setup).searchAnnotations({
+                                //     query: 'body',
+                                // }),
+                                {},
                             ).toEqual({
                                 docs: [
                                     {
@@ -277,9 +278,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                         },
                         postCheck: async ({ setup }) => {
                             expect(
-                                await searchModule(setup).searchAnnotations({
-                                    query: 'comment',
-                                }),
+                                {},
+                                // await searchModule(setup).searchAnnotations({
+                                //     query: 'comment',
+                                // }),
                             ).toEqual({
                                 docs: [
                                     {
@@ -363,10 +365,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
         'should create a page, create an annotation, edit its note, then retrieve it via a filtered search on edit time',
         () => {
-            const runFilteredTimeSearch = (setup) =>
-                searchModule(setup).searchAnnotations({
-                    startDate: DATA.ANNOT_1.createdWhen.getTime() + 1000,
-                })
+            const runFilteredTimeSearch = (setup) => ({})
+            // searchModule(setup).searchAnnotations({
+            //     startDate: DATA.ANNOT_1.createdWhen.getTime() + 1000,
+            // })
 
             return {
                 setup: testSetupFactory(),
@@ -459,10 +461,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
     backgroundIntegrationTest(
         'should create a page, create an annotation, tag it, retrieve it via a filtered search, then untag it, no longer being able to retrieve it via the same search',
         () => {
-            const runFilteredTagSearch = (setup) =>
-                searchModule(setup).searchAnnotations({
-                    tagsInc: [DATA.TAG_1],
-                })
+            const runFilteredTagSearch = (setup) => ({})
+            // searchModule(setup).searchAnnotations({
+            //     tagsInc: [DATA.TAG_1],
+            // })
 
             return {
                 setup: testSetupFactory(),
@@ -606,11 +608,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             }),
                         },
                         postCheck: async ({ setup }) => {
-                            const searchResults = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                bookmarksOnly: true,
-                            })
+                            // const searchResults = await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     bookmarksOnly: true,
+                            // }
+                            const searchResults = {}
 
                             const firstDay = Object.keys(
                                 searchResults['annotsByDay'],
@@ -1000,11 +1003,12 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             }),
                         },
                         postCheck: async ({ setup }) => {
-                            const searchResults = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                lists: [listId],
-                            })
+                            // const searchResults = await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     lists: [listId],
+                            // })
+                            const searchResults = {}
 
                             const firstDay = Object.keys(
                                 searchResults['annotsByDay'],
@@ -1181,26 +1185,30 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                             }),
                         },
                         postCheck: async ({ setup }) => {
-                            const searchResultsA = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                tagsInc: [DATA.TAG_1],
-                            })
-                            const searchResultsB = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                tagsInc: [DATA.TAG_2],
-                            })
-                            const searchResultsC = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                tagsExc: [DATA.TAG_1],
-                            })
-                            const searchResultsD = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                tagsExc: [DATA.TAG_2],
-                            })
+                            const searchResultsA = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     tagsInc: [DATA.TAG_1],
+                            // })
+                            const searchResultsB = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     tagsInc: [DATA.TAG_2],
+                            // })
+                            const searchResultsC = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     tagsExc: [DATA.TAG_1],
+                            // })
+                            const searchResultsD = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     tagsExc: [DATA.TAG_2],
+                            // })
 
                             const firstDay = Object.keys(
                                 searchResultsA['annotsByDay'],
@@ -1386,26 +1394,30 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite('Annotations', [
                                 expect.anything(),
                         },
                         postCheck: async ({ setup }) => {
-                            const searchResultsA = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                domains: [DATA.PAGE_1.url],
-                            })
-                            const searchResultsB = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                domains: [DATA.PAGE_2.url],
-                            })
-                            const searchResultsC = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                domainsExclude: [DATA.PAGE_1.url],
-                            })
-                            const searchResultsD = await searchModule(
-                                setup,
-                            ).searchAnnotations({
-                                domainsExclude: [DATA.PAGE_2.url],
-                            })
+                            const searchResultsA = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     domains: [DATA.PAGE_1.url],
+                            // })
+                            const searchResultsB = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     domains: [DATA.PAGE_2.url],
+                            // })
+                            const searchResultsC = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     domainsExclude: [DATA.PAGE_1.url],
+                            // })
+                            const searchResultsD = {}
+                            // await searchModule(
+                            //     setup,
+                            // ).searchAnnotations({
+                            //     domainsExclude: [DATA.PAGE_2.url],
+                            // })
 
                             const firstDay = Object.keys(
                                 searchResultsA['annotsByDay'],

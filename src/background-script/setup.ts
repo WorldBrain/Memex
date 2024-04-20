@@ -291,8 +291,6 @@ export function createBackgroundModules(options: {
     const search = new SearchBackground({
         storageManager,
         pages,
-        browserAPIs: options.browserAPIs,
-        bookmarks,
         analyticsBG,
     })
 

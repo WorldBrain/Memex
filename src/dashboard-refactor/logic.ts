@@ -1425,22 +1425,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
 
-    setAnnotationSearchResult: EventHandler<'setAnnotationSearchResult'> = ({
-        event,
-    }) => {
-        const state = utils.annotationSearchResultToState(
-            event.result,
-            this.options.annotationsCache,
-        )
-        this.emitMutation({
-            searchResults: {
-                results: { $set: state.results },
-                pageData: { $set: state.pageData },
-                noteData: { $set: state.noteData },
-            },
-        })
-    }
-
     setPageLists: EventHandler<'setPageLists'> = async ({
         event,
         previousState,

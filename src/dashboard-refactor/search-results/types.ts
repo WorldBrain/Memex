@@ -2,10 +2,7 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UIEvent } from 'ui-logic-core'
 
 import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
-import type {
-    AnnotationsSearchResponse,
-    StandardSearchResponse,
-} from 'src/search/background/types'
+import type { StandardSearchResponse } from 'src/search/background/types'
 import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
@@ -111,9 +108,7 @@ export type PagePickerAugdProps = {
     [Key in keyof PagePickerProps]: (pageId: string) => PagePickerProps[Key]
 }
 
-export type SearchResultToState<
-    T extends AnnotationsSearchResponse | StandardSearchResponse
-> = (
+export type SearchResultToState<T extends StandardSearchResponse> = (
     result: T,
     annotationsCache: PageAnnotationsCacheInterface,
     extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
@@ -291,7 +286,6 @@ export type Events = UIEvent<{
     setSearchCopyPasterShown: { isShown: boolean }
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }
-    setAnnotationSearchResult: { result: AnnotationsSearchResponse }
     /** NOTE: Does not mutate state */
     copyShareLink: {
         link: string

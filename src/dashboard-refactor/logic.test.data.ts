@@ -1,9 +1,5 @@
 import { PageData, NoteData } from './search-results/types'
-import {
-    StandardSearchResponse,
-    AnnotPage,
-    AnnotationsSearchResponse,
-} from 'src/search/background/types'
+import { StandardSearchResponse, AnnotPage } from 'src/search/background/types'
 import { Annotation } from 'src/annotations/types'
 
 interface TestMetadata {
@@ -185,7 +181,7 @@ export const PAGE_SEARCH_RESULT_3: StandardSearchResponse = {
     resultsExhausted: false,
 }
 
-export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
+export const ANNOT_SEARCH_RESULT_1 = {
     isAnnotsSearch: true,
     resultsExhausted: false,
     docs: [
@@ -202,7 +198,7 @@ export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
     },
 }
 
-export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
+export const ANNOT_SEARCH_RESULT_2 = {
     isAnnotsSearch: true,
     resultsExhausted: false,
     docs: [
