@@ -120,7 +120,7 @@ export default class SearchBackground {
         const oldestTimestamp = Math.min(
             ...oldestTimestamps.filter(Boolean).map((t) => t.time),
         )
-        return oldestTimestamp !== Infinity ? oldestTimestamp : 0
+        return oldestTimestamp !== Infinity ? oldestTimestamp : Date.now()
     }
 
     private sliceUnifiedSearchResults(
