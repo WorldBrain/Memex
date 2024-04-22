@@ -1,15 +1,15 @@
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 import type { TaskState } from 'ui-logic-core/lib/types'
-import { deleteBulkEdit, getBulkEditItems } from './utils'
+import { getBulkEditItems } from './utils'
 import { browser } from 'webextension-polyfill-ts'
 import { BULK_SELECT_STORAGE_KEY } from './constants'
-import type { BulkEditItem } from './types'
+import type { BulkEditCollection, BulkEditItem } from './types'
 
 export interface Dependencies {
     // contentSharingBG: ContentSharingInterface
     // spacesBG: RemoteCollectionsInterface
     // searchBG: SearchInterface
-    deleteBulkSelection: (pageId) => Promise<void>
+    deleteBulkSelection: () => Promise<void>
     selectAllPages: () => Promise<void>
     clearBulkSelection: () => Promise<void>
     bulkDeleteLoadingState: TaskState
@@ -65,8 +65,8 @@ export default class BulkEditLogic extends UILogic<State, Event> {
     })
 
     init: EventHandler<'init'> = async ({ previousState }) => {
-        const selectedItems = await getBulkEditItems()
-        const itemCounter = selectedItems.length
+        const selectedItems: BulkEditCollection = await getBulkEditItems()
+        const itemCounter = Object.keys(selectedItems).length
 
         this.emitMutation({
             bulkSelectedItems: { $set: selectedItems },
@@ -80,9 +80,19 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         const changedItems = Object.keys(changes)
         for (const item of changedItems) {
             if (item === BULK_SELECT_STORAGE_KEY) {
+                if (!changes[item].newValue) {
+                    this.emitMutation({
+                        bulkSelectedItems: { $set: null },
+                        itemCounter: { $set: null },
+                    })
+                    return
+                }
+                const selectedItems: BulkEditCollection = changes[item].newValue
+                const itemCounter = Object.keys(selectedItems).length
+
                 this.emitMutation({
-                    bulkSelectedItems: { $set: changes[item].newValue },
-                    itemCounter: { $set: changes[item].newValue?.length },
+                    bulkSelectedItems: { $set: selectedItems },
+                    itemCounter: { $set: itemCounter },
                 })
             }
         }
@@ -124,7 +134,7 @@ export default class BulkEditLogic extends UILogic<State, Event> {
         previousState,
         event,
     }) => {
-        await deleteBulkEdit(this.dependencies.deleteBulkSelection)
+        this.dependencies.deleteBulkSelection()
         this.emitMutation({
             showConfirmBulkDeletion: { $set: false },
         })

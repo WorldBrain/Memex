@@ -8,6 +8,7 @@ import type {
     NoteDataEventArgs,
     PageEventArgs,
     PageResult,
+    SelectableBlock,
 } from './search-results/types'
 import type {
     RootState as ListsSidebarState,
@@ -51,6 +52,7 @@ import type { RemoteCopyPasterInterface } from 'src/copy-paster/background/types
 import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { BulkEditCollection, BulkEditItem } from 'src/bulk-edit/types'
 
 export interface RootState {
     loadState: TaskState
@@ -67,7 +69,7 @@ export interface RootState {
     activeDay?: number
     multiSelectResults?: any[]
     bulkDeleteLoadingState?: TaskState
-    bulkSelectedUrls: string[]
+    bulkSelectedUrls: BulkEditCollection
     bulkEditSpacesLoadingState?: TaskState
     highlightColors: HighlightColor[]
     isNoteSidebarShown: boolean
@@ -75,6 +77,8 @@ export interface RootState {
     showFullScreen: boolean
     focusLockUntilMouseStart: boolean
     spaceSearchSuggestions: SpaceSearchSuggestion[]
+    selectableBlocks: SelectableBlock[]
+    focusedBlockId: number | null
 }
 
 export type Events = UIEvent<
@@ -194,7 +198,13 @@ export type DashboardModalsEvents = UIEvent<{
     selectAllCurrentItems: null
     clearBulkSelection: null
     setBulkEditSpace: { listId: number }
-    changeFocusItem: { direction?: string; pageId?: string }
+    changeFocusItem: {
+        direction?: string
+        item?: {
+            id: string
+            type: 'page' | 'note'
+        }
+    }
     setFocusLock: boolean
 
     setPrivatizeNoteConfirmArgs: DashboardModalsState['confirmPrivatizeNoteArgs']

@@ -1,4 +1,7 @@
-export interface BulkEditItem {
-    url: string
-    title?: string
+export type BulkEditItem = {
+    type: 'page' | 'note'
+}
+
+export type BulkEditCollection = {
+    [key: string]: BulkEditItem
 }

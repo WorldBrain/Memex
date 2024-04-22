@@ -92,9 +92,9 @@ export const queryAnnotationsByTerms = (
             dexie
                 .table<Annotation, string>('annotations')
                 .where('_body_terms')
-                .startsWith(term)
+                .equals(term)
                 .or('_comment_terms')
-                .startsWith(term)
+                .equals(term)
                 .distinct()
                 .primaryKeys(),
         ),
@@ -112,11 +112,11 @@ export const queryPagesByTerms = (
             dexie
                 .table<Page, string>('pages')
                 .where('terms')
-                .startsWith(term)
+                .equals(term)
                 .or('urlTerms')
-                .startsWith(term)
+                .equals(term)
                 .or('titleTerms')
-                .startsWith(term)
+                .equals(term)
                 .distinct()
                 .primaryKeys(),
         ),

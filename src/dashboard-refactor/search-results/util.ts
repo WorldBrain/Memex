@@ -67,6 +67,7 @@ export const getInitialFormState = (
     isTagPickerShown: false,
     isListPickerShown: false,
     bodyInputValue: bodyInputValue,
+    isShown: false,
 })
 
 export const areAllNotesShown = ({ results }: RootState): boolean => {
@@ -119,7 +120,6 @@ export const getInitialPageResultState = (
     noteIds: { user: noteIds, followed: [], search: [] },
     hoverState: null,
     copyLoadingState: 'pristine',
-    isInFocus: false,
     editTitleState: null,
     ...extra,
 })
@@ -158,6 +158,7 @@ const pageResultToPageData = (
         hasNotes: pageResult.annotations.length > 0,
         type: isPdf ? 'pdf' : 'page',
         fullPdfUrl: isPdf ? pageResult.fullPdfUrl! : undefined,
+        isInFocus: false,
     }
 }
 
@@ -195,6 +196,7 @@ const annotationToNoteData = (
             lists,
             isTagPickerShown: false,
             isListPickerShown: false,
+            isShown: false,
         },
     }
 }

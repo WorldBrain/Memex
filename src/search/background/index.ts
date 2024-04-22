@@ -391,6 +391,7 @@ export default class SearchBackground {
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
+            console.time('Unified search')
             result = await this.unifiedTermsSearch({
                 ...params,
                 queryPages: queryPagesByTerms(this.options.storageManager),
@@ -398,6 +399,7 @@ export default class SearchBackground {
                     this.options.storageManager,
                 ),
             })
+            console.timeEnd('Unified search')
         }
 
         const dataLookups = await this.lookupDataForUnifiedResults(result)

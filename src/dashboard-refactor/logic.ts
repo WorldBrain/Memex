@@ -26,7 +26,7 @@ import {
     getListData,
 } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import type { NoResultsType } from './search-results/types'
+import type { NoResultsType, SelectableBlock } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import {
@@ -79,6 +79,7 @@ import Raven from 'raven-js'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
 import type { UnifiedSearchResult } from 'src/search/background/types'
+import { BulkEditCollection } from 'src/bulk-edit/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -414,6 +415,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             showFullScreen: null,
             blurEffectReset: false,
             focusLockUntilMouseStart: false,
+            selectableBlocks: [],
+            focusedBlockId: 0,
         }
     }
 
@@ -526,17 +529,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
-
-            const bulkSelectedItems = await getBulkEditItems()
-
-            let selectedUrls = []
-            for (let item of bulkSelectedItems) {
-                selectedUrls.push(item.url)
-            }
-
-            this.emitMutation({
-                bulkSelectedUrls: { $set: selectedUrls },
-            })
             if (
                 spacesArray.length > 0 ||
                 selectedSpace ||
@@ -576,6 +568,19 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             this.emitMutation({
                 highlightColors: { $set: highlightColorSettings },
+            })
+
+            const bulkSelectedItems = (await getBulkEditItems()) ?? {}
+
+            for (const [url, item] of Object.entries(bulkSelectedItems)) {
+                bulkSelectedItems[url] = {
+                    type: item.type,
+                }
+                // You can modify the object here if needed
+            }
+
+            this.emitMutation({
+                bulkSelectedUrls: { $set: bulkSelectedItems },
             })
         })
     }
@@ -856,11 +861,11 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
         event,
     }) => {
-        const pageSize = 100
+        const pageSize = 10
         let skip = 0
         let nextState = previousState
-        const selectedUrls = new Set(previousState.bulkSelectedUrls)
-        const bulkEditItems = await getBulkEditItems()
+        const selectedUrls = previousState.bulkSelectedUrls
+        const bulkEditItems: BulkEditCollection = await getBulkEditItems()
         let result: UnifiedSearchResult
 
         // Page through entire set of search results with current filters, keeping track of URLs and titles
@@ -869,33 +874,58 @@ export class DashboardLogic extends UILogic<State, Events> {
                 searchFilters: {
                     skip: { $set: skip },
                     limit: { $set: pageSize },
+                    dateTo: { $set: null },
                 },
                 searchResults: {
                     blankSearchOldestResultTimestamp: {
-                        $set:
-                            result?.oldestResultTimestamp ??
-                            nextState.searchResults
-                                .blankSearchOldestResultTimestamp,
+                        $set: result?.oldestResultTimestamp ?? Date.now(),
                     },
                 },
             })
 
-            result = await this.options.searchBG.unifiedSearch(
-                stateToSearchParams(nextState, this.options.annotationsCache),
+            const params = stateToSearchParams(
+                nextState,
+                this.options.annotationsCache,
             )
 
-            for (const doc of result.docs) {
-                if (selectedUrls.has(doc.url)) {
+            result = await this.options.searchBG.unifiedSearch(params)
+
+            const { results } = utils.pageSearchResultToState(
+                result,
+                this.options.annotationsCache,
+            )
+
+            let resultsList = results[-1].pages.byId
+
+            for (let page of Object.values(resultsList)) {
+                const annotations = page.noteIds?.user ?? []
+                if (selectedUrls[page.id]) {
+                    if (annotations.length > 0) {
+                        for (let note of annotations) {
+                            bulkEditItems[note] = {
+                                type: 'note',
+                            }
+                        }
+                    }
                     continue
+                } else {
+                    bulkEditItems[page.id] = {
+                        type: 'page',
+                    }
+                    if (annotations.length > 0) {
+                        for (let note of annotations) {
+                            bulkEditItems[note] = {
+                                type: 'note',
+                            }
+                        }
+                    }
                 }
-                bulkEditItems.push({ title: doc.fullTitle, url: doc.url })
-                selectedUrls.add(doc.url)
             }
 
             skip += pageSize
         } while (!result.resultsExhausted)
 
-        this.emitMutation({ bulkSelectedUrls: { $set: [...selectedUrls] } })
+        this.emitMutation({ bulkSelectedUrls: { $set: bulkEditItems } })
         await setBulkEdit(bulkEditItems, false)
     }
 
@@ -904,7 +934,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
     }) => {
         this.emitMutation({
-            bulkSelectedUrls: { $set: [] },
+            bulkSelectedUrls: { $set: {} },
         })
         await clearBulkEditItems()
     }
@@ -921,73 +951,92 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
         event,
     }) => {
-        const previousResults =
-            previousState.searchResults.results[-1]?.pages.byId
+        const selectedBlocksArray: SelectableBlock[] =
+            previousState.selectableBlocks
 
-        if (previousResults) {
-            const focusedItemIndex = Object?.keys(previousResults)?.findIndex(
-                (key) => previousResults[key].isInFocus === true,
+        const currentFocusElementIndex = previousState.focusedBlockId
+        const currentFocusIndex = currentFocusElementIndex
+
+        let previousItem
+        let nextItem
+
+        if (currentFocusIndex !== -1) {
+            previousItem = selectedBlocksArray[currentFocusIndex]
+        }
+
+        if (event.direction === 'up') {
+            nextItem = selectedBlocksArray[currentFocusIndex - 1]
+            this.emitMutation({
+                focusedBlockId: { $set: currentFocusIndex - 1 },
+            })
+        }
+        if (event.direction === 'down') {
+            nextItem = selectedBlocksArray[currentFocusIndex + 1]
+            this.emitMutation({
+                focusedBlockId: { $set: currentFocusIndex + 1 },
+            })
+        }
+        if (event.item.id) {
+            const nextFocusItemIndex = selectedBlocksArray.findIndex(
+                (item) => item?.id === event.item.id,
             )
 
-            let previousItem = Object.values(previousResults)[focusedItemIndex]
-            let nextItem
+            nextItem = selectedBlocksArray[nextFocusItemIndex]
+            this.emitMutation({
+                focusedBlockId: { $set: nextFocusItemIndex },
+            })
+        }
 
-            nextItem = null
-
-            if (event.pageId) {
-                nextItem = { id: event.pageId }
-            }
-
-            if (event.direction === 'up') {
-                nextItem = Object.values(previousResults)[focusedItemIndex - 1]
-            }
-            if (event.direction === 'down') {
-                nextItem = Object.values(previousResults)[focusedItemIndex + 1]
-            }
-
-            if (nextItem) {
+        if (nextItem) {
+            if (nextItem.type === 'page') {
                 this.emitMutation({
                     searchResults: {
-                        results: {
-                            [-1]: {
-                                pages: {
-                                    byId: {
-                                        ...(previousItem
-                                            ? {
-                                                  [previousItem.id]: {
-                                                      isInFocus: {
-                                                          $set: false,
-                                                      },
-                                                  },
-                                              }
-                                            : {}),
-                                        [nextItem.id]: {
-                                            isInFocus: { $set: true },
-                                        },
-                                    },
+                        pageData: {
+                            byId: {
+                                [nextItem?.id]: {
+                                    isInFocus: { $set: true },
                                 },
                             },
                         },
                     },
                 })
             }
-            if (!nextItem && previousItem) {
+            if (nextItem.type === 'note') {
                 this.emitMutation({
                     searchResults: {
-                        results: {
-                            [-1]: {
-                                pages: {
-                                    byId: {
-                                        ...(previousItem
-                                            ? {
-                                                  [previousItem.id]: {
-                                                      isInFocus: {
-                                                          $set: false,
-                                                      },
-                                                  },
-                                              }
-                                            : {}),
-                                    },
+                        noteData: {
+                            byId: {
+                                [nextItem?.id]: {
+                                    isInFocus: { $set: true },
+                                },
+                            },
+                        },
+                    },
+                })
+            }
+        }
+
+        if (previousItem) {
+            if (previousItem.type === 'note') {
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [previousItem?.id]: {
+                                    isInFocus: { $set: false },
+                                },
+                            },
+                        },
+                    },
+                })
+            }
+            if (previousItem.type === 'page') {
+                this.emitMutation({
+                    searchResults: {
+                        pageData: {
+                            byId: {
+                                [previousItem?.id]: {
+                                    isInFocus: { $set: false },
                                 },
                             },
                         },
@@ -1005,44 +1054,55 @@ export class DashboardLogic extends UILogic<State, Events> {
             bulkEditSpacesLoadingState: { $set: 'running' },
         })
 
-        const selectedItems = await getBulkEditItems()
+        const selectedItems: BulkEditCollection = await getBulkEditItems()
+        const unifiedListId = this.options.annotationsCache.getListByLocalId(
+            event.listId,
+        )
 
-        for (let item of selectedItems) {
-            await this.options.listsBG.updateListForPage({
-                url: 'https://' + item.url,
-                added: event.listId,
-                skipPageIndexing: true,
-            })
-
-            try {
-                const unifiedListId = this.options.annotationsCache.getListByLocalId(
-                    event.listId,
-                )
-
+        for (let [url, item] of Object.entries(selectedItems)) {
+            if (item.type === 'page') {
+                await this.options.listsBG.updateListForPage({
+                    url: 'https://' + url,
+                    added: event.listId,
+                    skipPageIndexing: true,
+                })
                 const calcNextLists = updatePickerValues({
                     added: unifiedListId.unifiedId,
                 })
-                const nextPageListIds = calcNextLists(
-                    previousState.searchResults.pageData.byId[item.url].lists,
-                )
 
-                await this.options.annotationsCache.setPageData(
-                    item.url,
-                    nextPageListIds,
-                )
+                const newPageLists =
+                    previousState.searchResults.pageData.byId[url]?.lists ?? []
+
+                newPageLists.push(unifiedListId.unifiedId)
+                let nextPageListIds = null
+                if (newPageLists.length > 0) {
+                    nextPageListIds =
+                        calcNextLists(
+                            previousState.searchResults.pageData.byId[url]
+                                ?.lists,
+                        ) ?? []
+                }
+
+                this.options.annotationsCache.setPageData(url, nextPageListIds)
 
                 this.emitMutation({
                     searchResults: {
                         pageData: {
                             byId: {
-                                [item.url]: {
+                                [url]: {
                                     lists: { $set: nextPageListIds },
                                 },
                             },
                         },
                     },
                 })
-            } catch (e) {}
+            }
+            if (item.type === 'note') {
+                await this.processUIEvent('setNoteLists', {
+                    previousState,
+                    event: { noteId: url, added: unifiedListId.unifiedId },
+                })
+            }
         }
 
         this.emitMutation({
@@ -1102,11 +1162,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchState,
                         this.options.annotationsCache,
                     )
-                    console.log('SEARCH - params:', params)
+                    // console.log('SEARCH - params:', params)
                     const result = await this.options.searchBG.unifiedSearch(
                         params,
                     )
-                    console.log('SEARCH - result:', result)
+                    // console.log('SEARCH - result:', result)
 
                     const {
                         noteData,
@@ -1192,33 +1252,33 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     })
 
-                    // const hasPreviousResults =
-                    //     Object.keys(previousState.searchResults.results)
-                    //         .length > 0
+                    let compiledSelectableBlocks =
+                        previousState.selectableBlocks ?? []
+                    let resultsList = results[-1].pages.byId
 
-                    // if (!hasPreviousResults) {
-                    //     const firstKey = Object.keys(
-                    //         results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
-                    //     )[0]
+                    for (let page of Object.values(resultsList)) {
+                        let block: SelectableBlock = {
+                            id: page.id,
+                            type: 'page',
+                        }
 
-                    //     this.emitMutation({
-                    //         searchResults: {
-                    //             results: {
-                    //                 [PAGE_SEARCH_DUMMY_DAY]: {
-                    //                     pages: {
-                    //                         byId: {
-                    //                             [firstKey]: {
-                    //                                 isInFocus: {
-                    //                                     $set: true,
-                    //                                 },
-                    //                             },
-                    //                         },
-                    //                     },
-                    //                 },
-                    //             },
-                    //         },
-                    //     })
-                    // }
+                        compiledSelectableBlocks.push(block)
+
+                        let pageNotes = page?.noteIds?.user ?? null
+
+                        if (pageNotes.length > 0) {
+                            for (let note of pageNotes) {
+                                let noteBlock: SelectableBlock = {
+                                    id: note,
+                                    type: 'note',
+                                }
+                                compiledSelectableBlocks.push(noteBlock)
+                            }
+                        }
+                    }
+                    this.emitMutation({
+                        selectableBlocks: { $set: compiledSelectableBlocks },
+                    })
                 }
             },
         )
@@ -1629,7 +1689,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
         this.processUIEvent('changeFocusItem', {
             previousState,
-            event: { direction: 'down', pageId: event.pageId },
+            event: {
+                direction: 'down',
+                item: { id: event.pageId, type: 'page' },
+            },
         })
 
         const listData = getListData(
@@ -1804,20 +1867,28 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        let selectedUrls = previousState.bulkSelectedUrls ?? []
+        let selectedUrls: BulkEditCollection =
+            previousState.bulkSelectedUrls ?? {}
         if (event.remove) {
-            selectedUrls = selectedUrls.filter((url) => url !== event.item.url)
+            delete selectedUrls[event.item.url]
         } else {
-            if (!selectedUrls.includes(event.item.url)) {
-                selectedUrls.push(event.item.url)
+            if (selectedUrls[event.item.url] == null) {
+                selectedUrls[event.item.url] = {
+                    type: event.item.type,
+                }
             }
         }
-
         this.emitMutation({
             bulkSelectedUrls: { $set: selectedUrls },
         })
 
-        await setBulkEdit([event.item], event.remove)
+        const itemToSave = {}
+        itemToSave[event.item.url] = {
+            url: event.item.url,
+            type: event.item.type,
+        }
+
+        await setBulkEdit(itemToSave, event.remove)
     }
 
     bulkDeleteItem: EventHandler<'bulkDeleteItem'> = async ({
@@ -1832,30 +1903,41 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
             async () => {
                 try {
-                    const itemsInStorage = await getBulkEditItems()
+                    const itemsInStorage: BulkEditCollection = await getBulkEditItems()
 
-                    let itemsToProcess = []
-                    let itemsForStorage = []
+                    let pagesToDelete = []
+                    let notesToDelete = []
 
-                    for (let item of itemsInStorage) {
-                        itemsToProcess.push(item.url)
-                        itemsForStorage.push({ url: item.url })
+                    for (const [url, item] of Object.entries(itemsInStorage)) {
+                        if (item.type === 'page') {
+                            pagesToDelete.push(url)
+                        }
+                        if (item.type === 'note') {
+                            notesToDelete.push(url)
+                        }
                     }
 
                     const chunkSize = 100
-                    const numChunksItemsDelete = Math.ceil(
-                        itemsToProcess.length / chunkSize,
+                    const numChunksPagesDelete = Math.ceil(
+                        pagesToDelete.length / chunkSize,
                     )
 
-                    for (let i = 0; i < numChunksItemsDelete; i++) {
+                    for (let i = 0; i < numChunksPagesDelete; i++) {
                         const start = i * chunkSize
                         const end = start + chunkSize
-                        const chunk = itemsToProcess.slice(start, end)
-                        const chunkStorage = itemsForStorage.slice(start, end)
-
+                        const chunk = pagesToDelete.slice(start, end)
+                        // const chunkStorage = itemsForStorage.slice(start, end)
                         await this.options.searchBG.delPages(chunk)
-                        await setBulkEdit(chunkStorage, true)
+                        // await setBulkEdit(chunkStorage, true)
                     }
+                    for (let annotation of notesToDelete) {
+                        await this.options.annotationsBG.deleteAnnotation(
+                            annotation,
+                        )
+                        // await setBulkEdit(chunkStorage, true)
+                    }
+
+                    await clearBulkEditItems()
                     window.location.reload()
                 } catch (e) {
                     console.error('eerorr', e)

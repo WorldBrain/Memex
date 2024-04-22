@@ -29,11 +29,13 @@ export interface RemoteCopyPasterInterface {
         id: number
         annotationUrls: string[]
         normalizedPageUrls: string[]
+        skipNotes?: boolean
     }): Promise<string>
     renderPreview(args: {
         template: Template
         annotationUrls: string[]
         normalizedPageUrls: string[]
         templateType: string
+        skipNotes?: boolean
     }): Promise<string>
 }

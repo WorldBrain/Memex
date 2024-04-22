@@ -46,8 +46,8 @@ export interface Props
     index: number
     showPopoutsForResultBox: (index: number) => void
     selectItem: (itemData: any, remove: boolean) => void
-    isBulkSelected: boolean
     shiftSelectItem: () => void
+    isBulkSelected: boolean
     uploadedPdfLinkLoadState: TaskState
     getRootElement: () => HTMLElement
     copyLoadingState: UITaskState
@@ -61,6 +61,7 @@ export interface Props
     isListsSidebarShown?: boolean
     searchType: SearchType
     hasNotes: boolean
+    isInFocus?: boolean
 }
 
 export default class PageResultView extends PureComponent<Props> {
@@ -992,21 +993,26 @@ export default class PageResultView extends PureComponent<Props> {
                         />
                     </PageContentBox>
                     {this.displayLists.length > 0 && (
-                        <ListsSegment
-                            lists={this.displayLists}
-                            onListClick={(listId) => {
-                                this.props.filterbyList(listId)
-                            }}
-                            onEditBtnClick={this.props.onListPickerBarBtnClick}
-                            renderSpacePicker={
-                                this.props.listPickerShowStatus === 'lists-bar'
-                                    ? this.renderSpacePicker
-                                    : null
-                            }
-                            filteredbyListID={this.props.filteredbyListID}
-                            padding={'0px 20px 0px 20px'}
-                            spacePickerButtonRef={this.spacePickerBarRef}
-                        />
+                        <ListSegmentContainer>
+                            <ListsSegment
+                                lists={this.displayLists}
+                                onListClick={(listId) => {
+                                    this.props.filterbyList(listId)
+                                }}
+                                onEditBtnClick={
+                                    this.props.onListPickerBarBtnClick
+                                }
+                                renderSpacePicker={
+                                    this.props.listPickerShowStatus ===
+                                    'lists-bar'
+                                        ? this.renderSpacePicker
+                                        : null
+                                }
+                                filteredbyListID={this.props.filteredbyListID}
+                                padding={'0px 20px 0px 20px'}
+                                spacePickerButtonRef={this.spacePickerBarRef}
+                            />
+                        </ListSegmentContainer>
                     )}
                     {this.props.searchType !== 'notes' &&
                         this.props.searchQuery?.length > 0 &&
@@ -1028,7 +1034,8 @@ export default class PageResultView extends PureComponent<Props> {
                     <FooterBar
                         inPageMode={this.props.inPageMode}
                         shouldShow={
-                            this.props.hoverState === 'main-content' &&
+                            (this.props.hoverState === 'main-content' ||
+                                this.props.isInFocus) &&
                             this.props.editTitleState == null
                         }
                         slimVersion={this.props.hasNotes}
@@ -1078,13 +1085,26 @@ const slideInFromBottom = keyframes`
   }
 `
 
+const slideOutToBottom = keyframes`
+  0% {
+    transform: translateY(0);
+    opacity: 1;
+  }
+  40% {
+    transform: translateY(0%);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+`
+
 const FooterBar = styled.div<{
     shouldShow: boolean
     slimVersion: boolean
     inPageMode?: boolean
 }>`
-    animation: ${slideInFromBottom} 0.2s cubic-bezier(0.22, 0.61, 0.36, 1)
-        forwards;
     bottom: 0;
     width: 100%;
     z-index: 999999;
@@ -1103,15 +1123,19 @@ const FooterBar = styled.div<{
         (props.slimVersion || true) &&
         css`
             display: none;
-            position: absolute;
+            position: relative;
 
             backdrop-filter: blur(5px);
             background: ${(props) => props.theme.colors.black0}95;
+            animation: ${slideOutToBottom} 0.2s
+                cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
         `};
     ${(props) =>
         props.shouldShow &&
         css`
             display: flex;
+            animation: ${slideInFromBottom} 0.2s
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
         `};
 `
 
@@ -1349,4 +1373,9 @@ const TooltipContent = styled.div`
     grid-gap: 10px;
     flex-direction: row;
     justify-content: center;
+`
+
+const ListSegmentContainer = styled.div`
+    margin-bottom: 10px;
+    margin-top: -10px;
 `

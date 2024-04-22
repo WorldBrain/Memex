@@ -73,6 +73,7 @@ export default class CopyPasterBackground {
         annotationUrls,
         normalizedPageUrls,
         templateType,
+        skipNotes,
     }) => {
         let templateDocs = []
 
@@ -104,6 +105,7 @@ export default class CopyPasterBackground {
                     ...this.options,
                     previewMode: true,
                 }),
+                skipNotes: skipNotes ?? false,
             })
         }
 
@@ -114,13 +116,16 @@ export default class CopyPasterBackground {
         id,
         annotationUrls,
         normalizedPageUrls,
+        skipNotes,
     }) => {
         const template = await this.storage.findTemplate({ id })
+
         const templateDocs = await generateTemplateDocs({
             annotationUrls,
             normalizedPageUrls,
             templateAnalysis: analyzeTemplate(template),
             dataFetchers: getTemplateDataFetchers(this.options),
+            skipNotes: skipNotes ?? false,
         })
 
         return joinTemplateDocs(templateDocs, template)

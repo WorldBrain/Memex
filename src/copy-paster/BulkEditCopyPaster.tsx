@@ -14,7 +14,9 @@ export default class BulkEditCopyPaster extends React.PureComponent<Props> {
             id,
             annotationUrls: this.props.annotationUrls ?? [],
             normalizedPageUrls: this.props.normalizedPageUrls,
+            skipNotes: true,
         })
+
         return output
     }
 

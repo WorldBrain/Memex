@@ -20,6 +20,7 @@ interface GeneratorInput {
     normalizedPageUrls: string[]
     annotationUrls: string[]
     now?: number
+    skipNotes?: boolean
 }
 
 export const joinTags = (tags?: string[]): string | undefined =>
@@ -168,11 +169,12 @@ const generateForPages = async ({
     }
 
     if (
-        templateAnalysis.requirements.note ||
-        templateAnalysis.requirements.noteTags ||
-        templateAnalysis.requirements.noteSpaces ||
-        templateAnalysis.requirements.noteLink ||
-        templateAnalysis.requirements.noteCreatedAt
+        (templateAnalysis.requirements.note ||
+            templateAnalysis.requirements.noteTags ||
+            templateAnalysis.requirements.noteSpaces ||
+            templateAnalysis.requirements.noteLink ||
+            templateAnalysis.requirements.noteCreatedAt) &&
+        !params.skipNotes
     ) {
         noteUrlsForPages = await dataFetchers.getNoteIdsForPages(
             params.normalizedPageUrls,
@@ -292,10 +294,6 @@ const generateForNotes = async ({
 
     if (templateAnalysis.requirements.page) {
         pages = await dataFetchers.getPages(params.normalizedPageUrls)
-    }
-
-    if (templateAnalysis.requirements.pageTags) {
-        pageTags = await dataFetchers.getTagsForPages(params.normalizedPageUrls)
     }
 
     if (templateAnalysis.requirements.pageSpaces) {
@@ -510,7 +508,7 @@ const generateForNotes = async ({
             PageSpacesList: pageSpaces[pageUrl],
             PageLink: pageLinks[pageUrl],
             PageCreatedAt: serializeDate(pageCreatedAt[pageUrl]),
-            HasNotes: notesByPageUrl[pageUrl].length > 0,
+            HasNotes: notesByPageUrl[pageUrl]?.length > 0,
 
             PageDOI: pageMetadata[pageUrl]?.doi,
             PageMetaTitle: pageMetadata[pageUrl]?.title,
@@ -584,13 +582,39 @@ export default async function generateTemplateDocs(
 ): Promise<TemplateDoc[]> {
     let docs: TemplateDoc[] = []
 
+    let annotationUrls = params.annotationUrls
+    let normalizedPageUrls = params.normalizedPageUrls
+
     // This condition is needed as under some contexts, notes aren't specified upfront (page copy-paster), but users can still reference a page's notes in their templates
     //  so we need to get the note URLs by looking them up using the page URLs
     // TODO: Can we just have one function but fetch the note URLs in this parent scope (if needed) and pass them down?
-    if (!params.annotationUrls.length) {
-        docs = await generateForPages(params)
-    } else if (params.annotationUrls.length >= 1) {
-        docs = await generateForNotes(params)
+    if (normalizedPageUrls?.length > 0) {
+        const normalizedPageUrls = params.normalizedPageUrls.filter(
+            (pageUrl) =>
+                !annotationUrls.some((annotationUrl) =>
+                    annotationUrl.startsWith(pageUrl),
+                ),
+        )
+        params.normalizedPageUrls = normalizedPageUrls
+        const doc = await generateForPages(params)
+        docs.push(...doc)
+    }
+    if (annotationUrls?.length > 0) {
+        const normalizedPageUrls = params.normalizedPageUrls.filter((pageUrl) =>
+            annotationUrls.some((annotationUrl) =>
+                annotationUrl.startsWith(pageUrl),
+            ),
+        )
+        for (const annotationUrl of annotationUrls) {
+            const pageUrl = annotationUrl.split('/#')[0]
+            if (!normalizedPageUrls.includes(pageUrl)) {
+                normalizedPageUrls.push(pageUrl)
+            }
+        }
+
+        params.normalizedPageUrls = normalizedPageUrls
+        const doc = await generateForNotes(params)
+        docs.push(...doc)
     }
 
     return [...omitEmptyFields(docs)]

@@ -133,6 +133,13 @@ export interface NoteFormState {
     isShown: boolean
 }
 
+export interface SelectableBlock {
+    id: string
+    type: 'page' | 'note'
+    isInFocus?: boolean
+    isActivated?: boolean
+}
+
 export interface NoteData {
     url: string
     pageUrl: string
@@ -147,6 +154,7 @@ export interface NoteData {
     isShared?: boolean
     isBulkShareProtected?: boolean
     color?: RGBAColor
+    isInFocus?: boolean
 }
 
 export type PageData = Pick<
@@ -163,6 +171,7 @@ export type PageData = Pick<
     uploadedPdfLinkLoadState?: TaskState
     editTitleState?: string
     text?: string
+    isInFocus?: boolean
 }
 
 export type NoResultsType =
@@ -205,7 +214,6 @@ export interface PageResult {
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
     copyLoadingState: TaskState
-    isInFocus: boolean
     listPickerShowStatus: ListPickerShowState
     loadNotesState: TaskState
     newNoteForm: NoteFormState
@@ -338,6 +346,7 @@ export type Events = UIEvent<{
         item: {
             title: string
             url: string
+            type: 'page' | 'note'
         }
         remove?: boolean
     }

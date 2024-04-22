@@ -370,6 +370,21 @@ export default class SearchResultsContainer extends React.Component<
                 saveHighlightColorSettings={
                     this.props.saveHighlightColorSettings
                 }
+                bulkSelectAnnotation={() => {
+                    const data = {
+                        url: noteData.url,
+                        title: noteData.highlight,
+                        type: 'note',
+                    }
+
+                    this.props.onBulkSelect(
+                        data,
+                        this.props.selectedItems?.includes(noteId),
+                    )
+                }}
+                isBulkSelected={this.props.selectedItems?.includes(noteId)}
+                shiftSelectItem={() => this.shiftSelectItems(noteId)}
+                isInFocus={noteData.isInFocus}
                 getHighlightColorSettings={this.props.getHighlightColorSettings}
                 highlightColorSettings={this.props.highlightColorSettings}
                 isEditing={noteData.isEditing}
@@ -722,7 +737,7 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onMatchingTextToggleClick
                     }
                     selectItem={this.props.onBulkSelect}
-                    shiftSelectItem={() => this.shiftSelectItems(order)}
+                    shiftSelectItem={() => this.shiftSelectItems(page.id)}
                     isBulkSelected={this.props.selectedItems?.includes(
                         page.normalizedUrl,
                     )}
@@ -741,6 +756,7 @@ export default class SearchResultsContainer extends React.Component<
                     hasNotes={page.noteIds['user'].length > 0}
                     filterbyList={this.props.filterByList}
                     searchType={this.props.searchType}
+                    isInFocus={page.isInFocus}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
                     searchQuery={this.props.searchQuery}
                     renderSpacePicker={() => (
@@ -1498,7 +1514,7 @@ const ResultsExhaustedMessage = styled.div`
     display: flex;
     grid-gap: 10px;
     color: ${(props) => props.theme.colors.greyScale4};
-    padding: 10px;
+    padding: 30px 130px 130px 130px;
     white-space: nowrap;
     width: fill-available;
     justify-content: center;
