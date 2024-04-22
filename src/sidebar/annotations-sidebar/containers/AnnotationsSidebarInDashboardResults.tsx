@@ -2,9 +2,10 @@ import * as React from 'react'
 
 import { AnnotationsSidebarContainer } from './AnnotationsSidebarContainer'
 import { SidebarContainerOptions } from 'src/sidebar/annotations-sidebar/containers/logic'
-import { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { ImageSupportInterface } from 'src/image-support/background/types'
+import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/types'
+import type { ImageSupportInterface } from 'src/image-support/background/types'
 import styled from 'styled-components'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 type Props = SidebarContainerOptions & {
     refSidebar?: React.Ref<AnnotationsSidebarContainer>
@@ -16,7 +17,7 @@ type Props = SidebarContainerOptions & {
     saveHighlightColor: (color, id, unifiedId) => void
     saveHighlightColorSettings: (newState) => void
     getHighlightColorSettings: () => void
-    highlightColorSettings: string
+    highlightColorSettings: HighlightColor[]
     inPageMode?: boolean
 }
 

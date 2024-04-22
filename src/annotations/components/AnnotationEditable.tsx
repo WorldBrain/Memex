@@ -124,9 +124,9 @@ export interface AnnotationProps {
     imageSupport: ImageSupportInterface<'caller'>
     selector?: Anchor
     saveHighlightColor?: (noteId, colorId, color) => void
-    saveHighlightColorSettings?: (newState) => void
+    saveHighlightColorSettings?: (newState: HighlightColor[]) => void
     getHighlightColorSettings?: () => void
-    highlightColorSettings?: string
+    highlightColorSettings: HighlightColor[]
     color?: RGBAColor
     getRootElement: () => HTMLElement
     toggleAutoAdd: () => void
@@ -232,11 +232,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         this.setTextAreaHeight()
 
         if (!this.props.color) {
-            const highlightColorSettings: HighlightColor[] = JSON.parse(
-                this.props.highlightColorSettings,
-            )
-
-            const defaultHighlightSettings = highlightColorSettings?.find(
+            const defaultHighlightSettings = this.props.highlightColorSettings.find(
                 (setting) => setting.id === 'default',
             )
             if (defaultHighlightSettings?.color) {
@@ -276,11 +272,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             prevProps.highlightColorSettings !=
             this.props.highlightColorSettings
         ) {
-            const highlightColorSettings: HighlightColor[] = JSON.parse(
-                this.props.highlightColorSettings,
-            )
-
-            const defaultHighlightSettings = highlightColorSettings.find(
+            const defaultHighlightSettings = this.props.highlightColorSettings.find(
                 (setting) => setting.id === 'default',
             )
             if (defaultHighlightSettings?.color) {
@@ -483,9 +475,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             !this.state.showHighlightColorPicker &&
             this.props.color != null
         ) {
-            const settings = JSON.parse(this.props.highlightColorSettings)
-
-            const label = settings.find(
+            const label = this.props.highlightColorSettings.find(
                 (setting) =>
                     JSON.stringify(setting.color) ===
                     JSON.stringify(this.props.color),
