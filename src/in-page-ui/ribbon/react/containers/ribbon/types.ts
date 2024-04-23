@@ -12,7 +12,7 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { SearchInterface } from 'src/search/background/types'
+import { RemoteSearchInterface } from 'src/search/background/types'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -34,7 +34,7 @@ export interface RibbonContainerDependencies {
     annotations: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCacheInterface
     bgScriptBG: RemoteBGScriptInterface
-    searchBG: SearchInterface
+    searchBG: RemoteSearchInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
     syncSettingsBG: RemoteSyncSettingsInterface
