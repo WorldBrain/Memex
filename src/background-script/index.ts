@@ -39,6 +39,7 @@ import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analyt
 import { trackOnboardingPath } from '@worldbrain/memex-common/lib/analytics/events'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
+import checkBrowser from 'src/util/check-browser'
 
 interface Dependencies {
     localExtSettingStore: BrowserSettingsStore<LocalExtensionSettings>
@@ -93,9 +94,26 @@ class BackgroundScript {
     }
 
     private async runOnboarding() {
-        await this.deps.tabsAPI.create({
-            url: `${OVERVIEW_URL}?${ONBOARDING_QUERY_PARAMS.NEW_USER}`,
-        })
+        const browserName = checkBrowser()
+        const isFirefox = browserName === 'firefox'
+        const isChrome = browserName === 'chrome'
+
+        if (isFirefox) {
+            await this.deps.tabsAPI.create({
+                url: `${OVERVIEW_URL}?${ONBOARDING_QUERY_PARAMS.NEW_USER}`,
+            })
+        } else {
+            const env = process.env.NODE_ENV
+            let memexSocialUrl: string
+            if (env === 'production') {
+                memexSocialUrl = 'https://memex.social/'
+            } else {
+                memexSocialUrl = 'https://staging.memex.social/'
+            }
+            await this.deps.tabsAPI.create({
+                url: `${memexSocialUrl}auth`,
+            })
+        }
     }
 
     async handleInstallLogic(now = Date.now()) {
