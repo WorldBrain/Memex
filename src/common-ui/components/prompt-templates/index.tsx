@@ -310,6 +310,7 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                         onChange={(
                                                                             event,
                                                                         ) => {
+                                                                            event.stopPropagation()
                                                                             this.processEvent(
                                                                                 'setTemplateEdit',
                                                                                 {
@@ -318,6 +319,11 @@ export default class PromptTemplatesComponent extends UIElement<
                                                                                         .value,
                                                                                 },
                                                                             )
+                                                                        }}
+                                                                        onKeyUp={(
+                                                                            event,
+                                                                        ) => {
+                                                                            event.stopPropagation()
                                                                         }}
                                                                         onKeyDown={(
                                                                             event,

@@ -8,8 +8,11 @@ import {
     logPackedMessage,
 } from '@worldbrain/memex-common/lib/authentication/auth-sync'
 import type { AuthService } from '@worldbrain/memex-common/lib/authentication/types'
+import { OVERVIEW_URL } from 'src/constants'
+import { ONBOARDING_QUERY_PARAMS } from 'src/overview/onboarding/constants'
 import type { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
 import type { Runtime, Storage } from 'webextension-polyfill'
+import browser from 'webextension-polyfill'
 
 function validSender(sender: any, expectedOrigins: string[]) {
     if (!(typeof sender === 'object' && typeof sender.origin === 'string')) {
@@ -83,6 +86,7 @@ async function loginWithAppTokenHandler(
     if (messageObj.message === ExtMessage.TOKEN) {
         if (messageObj.payload) {
             await authService.loginWithToken(messageObj.payload)
+            sendResponse(packMessage(ExtMessage.TOKEN_REQUEST))
         }
     } else {
         sendResponse(packMessage(ExtMessage.TOKEN_REQUEST))
@@ -111,6 +115,40 @@ export async function listenToWebAppMessage(
                 return false
             }
             reactingToMessage = true
+
+            if (messageObj.message === ExtMessage.TRIGGER_ONBOARDING) {
+                authService.getCurrentUser().then((user) => {
+                    const isLoggedIn = !!user
+                    if (isLoggedIn) {
+                        sendResponse(packMessage(ExtMessage.TRIGGER_ONBOARDING))
+                        browser.tabs.create({
+                            url: `${OVERVIEW_URL}?${ONBOARDING_QUERY_PARAMS.NEW_USER}`,
+                        })
+                        browser.tabs.query({}).then((tabs) => {
+                            const authTab = tabs.find((tab) =>
+                                expectedOrigins.some((origin) =>
+                                    tab.url.startsWith(`${origin}/auth`),
+                                ),
+                            )
+                            if (authTab) {
+                                browser.tabs.remove(authTab.id)
+                            }
+                        })
+                        reactingToMessage = false
+                        return true
+                    }
+                })
+            }
+            if (messageObj.message === ExtMessage.EXT_IS_LOGGED_IN) {
+                authService.getCurrentUser().then((user) => {
+                    const isLoggedIn = !!user
+                    if (isLoggedIn) {
+                        sendResponse(packMessage(ExtMessage.EXT_IS_LOGGED_IN))
+                        reactingToMessage = false
+                        return true
+                    }
+                })
+            }
 
             if (messageObj.message === ExtMessage.EXT_IS_READY) {
                 sendResponse(packMessage(ExtMessage.EXT_IS_READY_RESPONSE))

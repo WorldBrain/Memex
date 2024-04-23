@@ -121,8 +121,8 @@ export class AnnotationCreate extends React.Component<Props, State>
         await this.setYoutubeKeyboardShortcut()
 
         if (this.props.sidebarEvents) {
-            const youtubeSummariseEvents = this.props.sidebarEvents
-            youtubeSummariseEvents.on(
+            const sidebarEvents = this.props.sidebarEvents
+            sidebarEvents.on(
                 'triggerYoutubeTimestampSummary',
                 async ({ text, showLoadingSpinner }, callback) => {
                     // Add the event to the buffer
@@ -142,7 +142,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     }
                 },
             )
-            youtubeSummariseEvents.on(
+            sidebarEvents.on(
                 'addVideoSnapshotToEditor',
                 async ({ imageData }, callback) => {
                     if (!this.editor) {
@@ -163,7 +163,7 @@ export class AnnotationCreate extends React.Component<Props, State>
                     }
                 },
             )
-            youtubeSummariseEvents.on(
+            sidebarEvents.on(
                 'addImageToEditor',
                 async ({ imageData }, callback) => {
                     if (!this.editor) {
@@ -181,6 +181,42 @@ export class AnnotationCreate extends React.Component<Props, State>
                             callback(true) // signal successful processing
                         } else {
                             callback(false) // signal failure or "not ready" due to missing data
+                        }
+                    }
+                },
+            )
+            sidebarEvents.on(
+                'addYouTubeTimestampToEditor',
+                async (commentText, callback) => {
+                    if (!this.editor) {
+                        callback(false) // signal that listener isn't ready
+                        return
+                    }
+
+                    if (this.editor && !(await this.editor.checkIfReady())) {
+                        callback(false) // signal that listener isn't ready
+                        return
+                    } else {
+                        if (!this.state.onEditClick) {
+                            this.setState({ onEditClick: true }, async () => {
+                                await delay(300)
+                                if (commentText) {
+                                    this.editor?.addYoutubeTimestampWithText(
+                                        commentText,
+                                    )
+                                } else {
+                                    this.editor?.addYoutubeTimestamp()
+                                }
+                            })
+                        } else {
+                            if (commentText) {
+                                this.editor?.addYoutubeTimestampWithText(
+                                    commentText,
+                                )
+                            } else {
+                                this.editor?.addYoutubeTimestamp()
+                            }
+                            callback(true) // signal successful processing
                         }
                     }
                 },
@@ -248,27 +284,27 @@ export class AnnotationCreate extends React.Component<Props, State>
         return this.displayLists.some((list) => list.isShared)
     }
 
-    addYoutubeTimestampToEditor(commentText) {
-        // This is a hack to patch over a race condition between the state update and the rendering of the Editor which is dependent on that state.
-        //  Ideally we avoid this race condition by making the editor's state controlled (vs uncontrolled) then we can
-        //  add the timestamp to the state at a higher level rather than needing to do this call chain going down deeper into the comp tree.
-        if (!this.state.onEditClick) {
-            this.setState({ onEditClick: true }, async () => {
-                await delay(300)
-                if (commentText) {
-                    this.editor?.addYoutubeTimestampWithText(commentText)
-                } else {
-                    this.editor?.addYoutubeTimestamp()
-                }
-            })
-        } else {
-            if (commentText) {
-                this.editor?.addYoutubeTimestampWithText(commentText)
-            } else {
-                this.editor?.addYoutubeTimestamp()
-            }
-        }
-    }
+    // addYoutubeTimestampToEditor(commentText) {
+    //     // This is a hack to patch over a race condition between the state update and the rendering of the Editor which is dependent on that state.
+    //     //  Ideally we avoid this race condition by making the editor's state controlled (vs uncontrolled) then we can
+    //     //  add the timestamp to the state at a higher level rather than needing to do this call chain going down deeper into the comp tree.
+    //     if (!this.state.onEditClick) {
+    //         this.setState({ onEditClick: true }, async () => {
+    //             await delay(300)
+    //             if (commentText) {
+    //                 this.editor?.addYoutubeTimestampWithText(commentText)
+    //             } else {
+    //                 this.editor?.addYoutubeTimestamp()
+    //             }
+    //         })
+    //     } else {
+    //         if (commentText) {
+    //             this.editor?.addYoutubeTimestampWithText(commentText)
+    //         } else {
+    //             this.editor?.addYoutubeTimestamp()
+    //         }
+    //     }
+    // }
 
     focus() {
         const inputLen = this.props.comment.length

@@ -3140,7 +3140,9 @@ export class SidebarContainerLogic extends UILogic<
         } else if (
             await AIActionAllowed(
                 this.options.analyticsBG,
-                hasAPIKey ? 'AIpowerupOwnKey' : 'AIpowerup',
+                hasAPIKey,
+                false,
+                previousState.AImodel,
             )
         ) {
             canQueryAI = true
@@ -3608,30 +3610,6 @@ export class SidebarContainerLogic extends UILogic<
 
             return
         }
-
-        // let prompt =
-        //     event.prompt?.length > 0
-        //         ? event.prompt
-        //         : 'Tell me the key takeaways: '
-        // let highlightedText =
-        //     event.textToProcess?.length > 0 ? event.textToProcess : null
-
-        // await this.processUIEvent('queryAIwithPrompt', {
-        //     event: {
-        //         prompt: prompt,
-        //         highlightedText: event.textToProcess,
-        //         queryMode: 'summarize',
-        //     },
-        //     previousState,
-        // })
-
-        // this.emitMutation({
-        //     pageSummary: { $set: '' },
-        //     selectedTextAIPreview: { $set: event.textToProcess },
-        //     prompt: {
-        //         $set: prompt,
-        //     },
-        // })
     }
 
     AddMediaRangeToAIcontext: EventHandler<
@@ -3657,32 +3635,27 @@ export class SidebarContainerLogic extends UILogic<
                 await new Promise((resolve) => setTimeout(resolve, 20))
             }
         }
+    }
+    AddYTTimestampToEditor: EventHandler<'AddYTTimestampToEditor'> = async ({
+        event,
+        previousState,
+    }) => {
+        this.setActiveSidebarTabEvents('annotations')
 
-        // this.emitMutation({ activeTab: { $set: 'summary' } })
-
-        // let prompt =
-        //     event.prompt?.length > 0
-        //         ? event.prompt
-        //         : 'Tell me the key takeaways: '
-        // let highlightedText =
-        //     event.textToProcess?.length > 0 ? event.textToProcess : null
-
-        // await this.processUIEvent('queryAIwithPrompt', {
-        //     event: {
-        //         prompt: prompt,
-        //         highlightedText: event.textToProcess,
-        //         queryMode: 'summarize',
-        //     },
-        //     previousState,
-        // })
-
-        // this.emitMutation({
-        //     pageSummary: { $set: '' },
-        //     selectedTextAIPreview: { $set: event.textToProcess },
-        //     prompt: {
-        //         $set: prompt,
-        //     },
-        // })
+        await sleepPromise(10)
+        let executed = false
+        while (!executed) {
+            try {
+                executed = this.options.events.emit(
+                    'addYouTubeTimestampToEditor',
+                    event.commentText,
+                    (success) => {
+                        executed = success
+                    },
+                )
+            } catch (e) {}
+            await new Promise((resolve) => setTimeout(resolve, 20))
+        }
     }
 
     private handleMouseUpToTriggerRabbitHole = (event) => {

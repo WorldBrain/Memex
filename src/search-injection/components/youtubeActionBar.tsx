@@ -4,6 +4,8 @@ import TextArea from '@worldbrain/memex-common/lib/common-ui/components/text-are
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
+import VideoRangeSelector from '@worldbrain/memex-common/lib/common-ui/components/video-range-selector'
+import getYoutubeVideoDuration from '@worldbrain/memex-common/lib/common-ui/utils/youtube-video-duration'
 import {
     constructVideoURLwithTimeStamp,
     getHTML5VideoTimestamp,
@@ -115,14 +117,10 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
     async getYoutubeVideoDuration() {
         await sleepPromise(1000)
-        let video = document.getElementsByTagName('video')[0]
-        if (video) {
-            let duration = video.duration
-
-            this.setState({
-                videoDuration: duration,
-            })
-        }
+        const duration = await getYoutubeVideoDuration(document)
+        this.setState({
+            videoDuration: duration,
+        })
     }
 
     calculateRangeInSeconds(
@@ -488,9 +486,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 getPortalRoot={this.props.getRootElement}
                                 tooltipText={
                                     <span>
-                                        Summarize this video
+                                        Summarize this video with custom prompts
                                         <br />
-                                        with custom prompts
                                     </span>
                                 }
                                 placement="bottom"
@@ -563,158 +560,14 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                         {this.state.videoDuration != null &&
                             this.state.videoDuration !== 0 && (
                                 <BottomArea>
-                                    <Range
-                                        step={0.1}
-                                        min={0}
-                                        // draggableTrack
-                                        max={100}
-                                        values={[
-                                            this.state.fromSecondsPosition,
-                                            this.state.toSecondsPosition,
-                                        ]}
-                                        onChange={(values) =>
+                                    <VideoRangeSelector
+                                        onChange={(values) => {
                                             this.setState({
                                                 fromSecondsPosition: values[0],
                                                 toSecondsPosition: values[1],
                                             })
-                                        }
-                                        renderTrack={({ props, children }) => (
-                                            <div
-                                                {...props}
-                                                style={{
-                                                    ...props.style,
-                                                    height: '24px',
-                                                    width: '100%',
-                                                    borderRadius:
-                                                        '0 0 10px 10px',
-                                                    fontSize: '12px',
-                                                    color: '#A9A9B1',
-                                                    textAlign: 'center',
-                                                    verticalAlign: 'middle',
-                                                    display: 'flex',
-                                                    alignItems: 'center',
-                                                }}
-                                            >
-                                                {children}
-                                                <InfoText>
-                                                    Select a time frame (click
-                                                    or drag)
-                                                </InfoText>
-                                            </div>
-                                        )}
-                                        renderThumb={({ props, index }) => {
-                                            const {
-                                                style,
-                                                onKeyDown,
-                                                onKeyUp,
-                                                ...divProps
-                                            } = props
-                                            return (
-                                                !isNaN(
-                                                    this.state.videoDuration,
-                                                ) && (
-                                                    <div
-                                                        {...divProps}
-                                                        style={{
-                                                            ...props.style,
-                                                            ...style,
-                                                            height: '24px',
-                                                            outline: 'none',
-                                                            width:
-                                                                'fit-content',
-                                                            borderRadius:
-                                                                '10px',
-                                                            backgroundColor:
-                                                                '#6AE394',
-                                                        }}
-                                                    >
-                                                        <div
-                                                            style={{
-                                                                position:
-                                                                    'absolute',
-                                                                ...style,
-                                                                height: '24px',
-                                                                outline: 'none',
-                                                                width:
-                                                                    'fit-content',
-                                                                color: 'white',
-                                                                fontSize:
-                                                                    '14px',
-                                                                padding:
-                                                                    '0 5px',
-                                                                display: 'flex',
-                                                                backgroundColor:
-                                                                    '#313239',
-
-                                                                alignItems:
-                                                                    'center',
-                                                                right:
-                                                                    index ===
-                                                                        1 &&
-                                                                    '5px',
-                                                                left:
-                                                                    index ===
-                                                                        0 &&
-                                                                    '5px',
-                                                                justifyContent:
-                                                                    index === 1
-                                                                        ? 'flex-end'
-                                                                        : 'flex-start',
-                                                            }}
-                                                        >
-                                                            {(() => {
-                                                                const totalSeconds =
-                                                                    (sliderValues[
-                                                                        index
-                                                                    ] /
-                                                                        100) *
-                                                                    this.state
-                                                                        .videoDuration
-                                                                const hours = Math.floor(
-                                                                    totalSeconds /
-                                                                        3600,
-                                                                )
-                                                                const minutes = Math.floor(
-                                                                    (totalSeconds %
-                                                                        3600) /
-                                                                        60,
-                                                                )
-                                                                const seconds = Math.floor(
-                                                                    totalSeconds %
-                                                                        60,
-                                                                )
-
-                                                                const paddedMinutes = minutes
-                                                                    .toString()
-                                                                    .padStart(
-                                                                        2,
-                                                                        '0',
-                                                                    )
-                                                                const paddedSeconds = seconds
-                                                                    .toString()
-                                                                    .padStart(
-                                                                        2,
-                                                                        '0',
-                                                                    )
-
-                                                                if (hours > 0) {
-                                                                    return `${hours}:${paddedMinutes}:${paddedSeconds}`
-                                                                } else {
-                                                                    return `${paddedMinutes}:${paddedSeconds}`
-                                                                }
-                                                            })()}
-                                                        </div>
-                                                        <div
-                                                            style={{
-                                                                height: '20px',
-                                                                width: '5px',
-                                                                outline: 'none',
-                                                            }}
-                                                        />
-                                                    </div>
-                                                )
-                                            )
                                         }}
+                                        videoDuration={this.state.videoDuration}
                                     />
                                 </BottomArea>
                             )}

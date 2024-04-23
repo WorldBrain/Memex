@@ -12,13 +12,14 @@ import * as icons from 'src/common-ui/components/design-library/icons'
 export interface Props extends Omit<OverlayProps, 'onClick'> {
     ignoreClickOutside?: boolean
     onClose?: any
+    rootEl?: string
 }
 
 class Modal extends PureComponent<Props> {
     render() {
         const { onClose, ignoreClickOutside, ...props } = this.props
         return (
-            <Overlay onClick={onClose} {...props}>
+            <Container onClick={onClose} {...props}>
                 {onClose && (
                     <CloseContainer>
                         <Icon
@@ -29,12 +30,21 @@ class Modal extends PureComponent<Props> {
                     </CloseContainer>
                 )}
                 <Content>{this.props.children}</Content>
-            </Overlay>
+            </Container>
         )
     }
 }
 
 export default Modal
+
+const Container = styled.div`
+    border-radius: 10px;
+    background: ${(props) => props.theme.colors.greyScale1};
+    border: 1px solid ${(props) => props.theme.colors.greyScale3};
+    padding: 20px;
+    min-width: 500px;
+    min-height: 200px;
+`
 
 export const CloseButtonImg = styled.img`
     height: 100%;

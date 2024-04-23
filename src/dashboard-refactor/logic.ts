@@ -501,7 +501,24 @@ export class DashboardLogic extends UILogic<State, Events> {
                 this.observeBlurContainer()
             }
             await this.initThemeVariant()
-            const user = await authBG.getCurrentUser()
+
+            this.emitMutation({
+                listsSidebar: { listLoadState: { $set: 'running' } },
+                loadState: { $set: 'running' },
+            })
+
+            /// Sometimes the service worker is not ready yet, causing the user to stay null, leading to downstream issues with the sync and other parts
+            const maxRetriesForUser = 20
+            let retries = 1
+            let user = await authBG.getCurrentUser()
+            while (user == null && retries < maxRetriesForUser) {
+                const waitTime = retries * 20 // increasingly more wait time20
+                await new Promise((resolve) => setTimeout(resolve, waitTime))
+                user = await authBG.getCurrentUser()
+                retries++
+            }
+            //////
+
             setSentryUserContext(user)
             this.emitMutation({
                 currentUser: { $set: user },

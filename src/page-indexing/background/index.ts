@@ -148,11 +148,12 @@ export class PageIndexingBackground {
                 }),
             ),
             waitForContentIdentifier: remoteFunctionWithExtraArgs(
-                (info, params) =>
-                    this.waitForContentIdentifier({
+                (info, params) => {
+                    return this.waitForContentIdentifier({
                         ...params,
                         tabId: params.tabId ?? info.tab?.id,
-                    }),
+                    })
+                },
             ),
             getOriginalUrlForPdfPage: remoteFunctionWithoutExtraArgs(
                 this.getOriginalUrlForPdfPage,
