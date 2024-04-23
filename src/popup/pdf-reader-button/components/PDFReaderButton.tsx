@@ -19,10 +19,7 @@ export type Props = OwnProps & StateProps & DispatchProps
 class PDFreaderButton extends PureComponent<Props> {
     render() {
         return (
-            <ButtonItem
-                disabled={!this.props.isEnabled}
-                onClick={this.props.onBtnClick}
-            >
+            <ButtonItem disabled={false} onClick={this.props.onBtnClick}>
                 <ButtonInnerContainer onClick={this.props.onBtnClick}>
                     <Icon filePath={icons.pdf} heightAndWidth="22px" hoverOff />
                     <ButtonInnerContent>
