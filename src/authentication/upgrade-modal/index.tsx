@@ -39,7 +39,7 @@ export default class UpgradeModal extends UIElement<
                 <LoadingBlocker>
                     <LoadingIndicator size={40} />
                     {this.state.checkoutLoading === 'running' &&
-                        'Subscribing...'}
+                        'Updating Subscription...'}
                 </LoadingBlocker>
             )
         }
@@ -186,7 +186,7 @@ export default class UpgradeModal extends UIElement<
                 <LoadingBlocker>
                     <LoadingIndicator size={40} />
                     {this.state.checkoutLoading === 'running' &&
-                        'Subscribing...'}
+                        'Updating Subscription...'}
                 </LoadingBlocker>
             )
         }
@@ -524,6 +524,7 @@ const LoadingBlocker = styled.div`
     color: ${(props) => props.theme.colors.greyScale7};
     backdrop-filter: blur(5px);
     flex: 1;
+    font-size: 16px;
 `
 
 const OverlayContainer = styled.div`

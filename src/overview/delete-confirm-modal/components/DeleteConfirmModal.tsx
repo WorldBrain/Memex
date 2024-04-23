@@ -8,7 +8,6 @@ import ConfirmModal, {
 export interface Props extends ConfirmModalProps {
     deleteDocs: () => Promise<void>
     submessage?: string
-    onClose: () => Promise<void>
 }
 
 class DeleteConfirmModal extends PureComponent<Props> {

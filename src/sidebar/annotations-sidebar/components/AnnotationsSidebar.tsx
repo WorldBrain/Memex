@@ -113,6 +113,7 @@ import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import { AIActionAllowed } from 'src/util/subscriptions/storage'
+import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 
 const SHOW_ISOLATED_VIEW_KEY = `show-isolated-view-notif`
 
@@ -269,9 +270,9 @@ export interface AnnotationsSidebarProps extends SidebarContainerState {
     setAIModel: (AImodel) => void
     syncSettingsBG: RemoteSyncSettingsInterface
     saveHighlightColor: (noteId, colorId, color) => void
-    saveHighlightColorSettings: (newState) => void
+    saveHighlightColorSettings: (newState: HighlightColor[]) => void
     getHighlightColorSettings: () => void
-    highlightColorSettings: string
+    highlightColorSettings: HighlightColor[]
     onGoToAnnotation?: (unifiedId) => void
     setRabbitHoleBetaFeatureAccess?: (permission) => void
     requestRabbitHoleBetaFeatureAccess?: (reasonText) => void
@@ -426,26 +427,26 @@ export class AnnotationsSidebar extends React.Component<
         showAutoAddBulkSelection: false,
     }
 
-    async addYoutubeTimestampToEditor(commentText) {
-        let annotationCreateRef = this.annotationCreateRef.current
+    // async addYoutubeTimestampToEditor(commentText) {
+    //     let annotationCreateRef = this.annotationCreateRef.current
 
-        if (annotationCreateRef) {
-            this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
-                commentText,
-            )
-        }
-        // fix race condition of annotationCreateRef not being available yet, hacky but works
-        while (!annotationCreateRef) {
-            await sleepPromise(25)
-            annotationCreateRef = this.annotationCreateRef.current
-            if (annotationCreateRef) {
-                this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
-                    commentText,
-                )
-            }
-            await sleepPromise(25)
-        }
-    }
+    //     if (annotationCreateRef) {
+    //         this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+    //             commentText,
+    //         )
+    //     }
+    //     // fix race condition of annotationCreateRef not being available yet, hacky but works
+    //     while (!annotationCreateRef) {
+    //         await sleepPromise(25)
+    //         annotationCreateRef = this.annotationCreateRef.current
+    //         if (annotationCreateRef) {
+    //             this.annotationCreateRef.current?.addYoutubeTimestampToEditor(
+    //                 commentText,
+    //             )
+    //         }
+    //         await sleepPromise(25)
+    //     }
+    // }
 
     private maybeCreateContextBtnRef({
         unifiedId,
@@ -1968,8 +1969,8 @@ export class AnnotationsSidebar extends React.Component<
                     isAIChatAllowed={async () => {
                         const isAllowed = await AIActionAllowed(
                             this.props.analyticsBG,
-                            this.props.hasKey ? 'AIpowerupOwnKey' : 'AIpowerup',
-                            true,
+                            this.props.hasKey,
+                            false,
                         )
 
                         return isAllowed

@@ -76,7 +76,11 @@ export default class PromptTemplatesLogic extends UILogic<
         ).filter(
             (key) => previousState.activatedPowerUps[key] === true,
         ) as PremiumPlans[]
-        const doNotOpen = currentlySelected.length > 0
+        let doNotOpen =
+            currentlySelected.filter(
+                (key) =>
+                    key !== 'AIpowerupBasic' && key !== 'bookmarksPowerUpBasic',
+            ).length > 0
         let billingPeriod = previousState.billingPeriod
 
         let newSelection: PremiumPlans[] = currentlySelected
@@ -89,9 +93,18 @@ export default class PromptTemplatesLogic extends UILogic<
             newSelection = newSelection.filter(
                 (key) => key !== 'bookmarksPowerUp',
             )
+        } else if (event === 'AIpowerup') {
+            newSelection = newSelection.filter(
+                (key) => key !== 'AIpowerupOwnKey',
+            )
+            newSelection.push(event)
+        } else if (event === 'AIpowerupOwnKey') {
+            newSelection = newSelection.filter((key) => key !== 'AIpowerup')
+            newSelection.push(event)
         } else if (event === 'lifetime') {
             newSelection = ['lifetime']
             billingPeriod = null
+            doNotOpen = false
         } else {
             newSelection.push(event)
         }

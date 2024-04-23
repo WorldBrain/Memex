@@ -8,6 +8,7 @@ import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availab
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 import { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
+import { AImodels } from '@worldbrain/memex-common/lib/summarization/types'
 
 export async function checkStripePlan(email) {
     const isStaging =
@@ -268,13 +269,26 @@ export async function pageActionAllowed(
 }
 export async function AIActionAllowed(
     analyticsBG,
-    feature: PremiumPlans,
-    onlyCheckNoUpdate?: boolean,
+    hasKey: boolean,
+    updateCounter?: boolean,
+    AImodel?: AImodels,
 ) {
+    // when the user has key it should count on claude 3 requests, and not on gpt requests
+    // when the user has no key it should count and check on all requests
+
+    if (AImodel === 'gpt-4' && !hasKey) {
+        return false
+    }
+
+    const feature = hasKey ? 'AIpowerupOwnKey' : 'AIpowerup'
     const allowed = await checkStatus(feature)
 
-    if (!onlyCheckNoUpdate) {
-        updateAICounter()
+    if (updateCounter) {
+        if (AImodel === 'claude-3-haiku' && hasKey) {
+            updateAICounter()
+        } else if (!hasKey) {
+            updateAICounter()
+        }
     }
 
     if (allowed) {

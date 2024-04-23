@@ -69,6 +69,7 @@ import PageCitations from 'src/citations/PageCitations'
 import CopyPaster from 'src/copy-paster/components/CopyPaster'
 import { PageSearchCopyPaster } from 'src/copy-paster'
 import BulkEditCopyPaster from 'src/copy-paster/BulkEditCopyPaster'
+import { OverlayModals } from '@worldbrain/memex-common/lib/common-ui/components/overlay-modals'
 
 export type Props = DashboardDependencies & {
     getRootElement: () => HTMLElement
@@ -880,7 +881,7 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 saveHighlightColorSettings={(newState) => {
                     this.processEvent('saveHighlightColorSettings', {
-                        newState: newState,
+                        newState,
                     })
                 }}
                 getHighlightColorSettings={() =>
@@ -1518,27 +1519,43 @@ export class DashboardContainer extends StatefulUIElement<
 
         if (modalsState.deletingNoteArgs) {
             return (
-                <DeleteConfirmModal
-                    isShown
-                    message="Delete note?"
-                    onClose={() => this.processEvent('cancelNoteDelete', null)}
-                    deleteDocs={() =>
-                        this.processEvent('confirmNoteDelete', null)
+                <OverlayModals
+                    getPortalRoot={this.props.getRootElement}
+                    closeComponent={() =>
+                        this.processEvent('cancelNoteDelete', null)
                     }
-                />
+                    blockedBackground
+                    positioning="centerCenter"
+                >
+                    <DeleteConfirmModal
+                        isShown
+                        message="Delete note?"
+                        deleteDocs={() =>
+                            this.processEvent('confirmNoteDelete', null)
+                        }
+                    />
+                </OverlayModals>
             )
         }
 
         if (modalsState.deletingPageArgs) {
             return (
-                <DeleteConfirmModal
-                    isShown
-                    message="Delete page and related notes?"
-                    onClose={() => this.processEvent('cancelPageDelete', null)}
-                    deleteDocs={() =>
-                        this.processEvent('confirmPageDelete', null)
+                <OverlayModals
+                    getPortalRoot={this.props.getRootElement}
+                    closeComponent={() =>
+                        this.processEvent('cancelPageDelete', null)
                     }
-                />
+                    blockedBackground
+                    positioning="centerCenter"
+                >
+                    <DeleteConfirmModal
+                        isShown
+                        message="Delete page and related notes?"
+                        deleteDocs={() =>
+                            this.processEvent('confirmPageDelete', null)
+                        }
+                    />
+                </OverlayModals>
             )
         }
 
@@ -1564,14 +1581,18 @@ export class DashboardContainer extends StatefulUIElement<
 
         if (modalsState.showDisplayNameSetup) {
             return (
-                <DisplayNameModal
-                    authBG={this.props.authBG}
-                    onClose={() =>
+                <OverlayModals
+                    getPortalRoot={this.props.getRootElement}
+                    closeComponent={() =>
                         this.processEvent('setShowDisplayNameSetupModal', {
                             isShown: false,
                         })
                     }
-                />
+                    blockedBackground
+                    positioning="centerCenter"
+                >
+                    <DisplayNameModal authBG={this.props.authBG} />
+                </OverlayModals>
             )
         }
 
