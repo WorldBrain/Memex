@@ -100,7 +100,7 @@ export default class Logic extends UILogic<State, Event> {
                 if (retries === maxRetries) {
                     return false
                 }
-                await delay(500)
+                await delay(50 * retries)
             }
         }
     }
@@ -180,9 +180,6 @@ export default class Logic extends UILogic<State, Event> {
 
     private async _onUserLogIn(newSignUp: boolean) {
         this.emitMutation({
-            welcomeStep: { $set: 'basicIntro' },
-        })
-        this.emitMutation({
             newSignUp: { $set: newSignUp },
             loadState: { $set: 'running' },
         })
@@ -196,64 +193,65 @@ export default class Logic extends UILogic<State, Event> {
                 await this.openLinkIfAvailable()
                 window.close()
             } else {
-                // check if user has been coming from Google or Twitter login & if they account creation was in the last 10s
-                if (!newSignUp) {
-                    const provider = await (
-                        await this.dependencies.authBG.getCurrentUser()
-                    ).provider
-                    const creationTime = await (
-                        await this.dependencies.authBG.getCurrentUser()
-                    ).creationTime
-                    this.emitMutation({
-                        welcomeStep: { $set: 'finish' },
-                    })
+                this.emitMutation({
+                    welcomeStep: { $set: 'basicIntro' },
+                })
+                // // check if user has been coming from Google or Twitter login & if they account creation was in the last 10s
+                // if (!newSignUp) {
 
-                    const now = Math.floor(Date.now() / 1000)
+                //     const provider = await (
+                //         await this.dependencies.authBG.getCurrentUser()
+                //     ).provider
+                //     const creationTime = await (
+                //         await this.dependencies.authBG.getCurrentUser()
+                //     ).creationTime
 
-                    const unixCreationTime = Math.floor(
-                        new Date(creationTime).getTime() / 1000,
-                    )
-                    if (
-                        now - unixCreationTime < 20 &&
-                        (provider === 'google.com' ||
-                            provider === 'twitter.com')
-                    ) {
-                        this.emitMutation({
-                            showOnboardingSelection: { $set: true },
-                            loadState: { $set: 'success' },
-                        })
-                    } else {
-                        this.emitMutation({
-                            showSyncNotification: { $set: true },
-                            loadState: { $set: 'success' },
-                        })
-                        this.personalCloudEvents = getRemoteEventEmitter(
-                            'personalCloud',
-                        )
-                        this.personalCloudEvents.on(
-                            'cloudStatsUpdated',
-                            async ({ stats }) => {
-                                if (
-                                    stats.pendingDownloads === 0 &&
-                                    stats.pendingUploads === 0
-                                ) {
-                                    setTimeout(() => {
-                                        if (
-                                            stats.pendingDownloads === 0 &&
-                                            stats.pendingUploads === 0
-                                        ) {
-                                            this.dependencies.navToDashboard()
-                                        }
-                                    }, 5000)
-                                }
-                            },
-                        )
-                    }
-                } else {
-                    this.emitMutation({
-                        welcomeStep: { $set: 'basicIntro' },
-                    })
-                }
+                //     const now = Math.floor(Date.now() / 1000)
+
+                //     const unixCreationTime = Math.floor(
+                //         new Date(creationTime).getTime() / 1000,
+                //     )
+                //     if (
+                //         now - unixCreationTime < 20 &&
+                //         (provider === 'google.com' ||
+                //             provider === 'twitter.com')
+                //     ) {
+                //         this.emitMutation({
+                //             showOnboardingSelection: { $set: true },
+                //             loadState: { $set: 'success' },
+                //         })
+                //     } else {
+                //         this.emitMutation({
+                //             showSyncNotification: { $set: true },
+                //             loadState: { $set: 'success' },
+                //         })
+                //         this.personalCloudEvents = getRemoteEventEmitter(
+                //             'personalCloud',
+                //         )
+                //         this.personalCloudEvents.on(
+                //             'cloudStatsUpdated',
+                //             async ({ stats }) => {
+                //                 if (
+                //                     stats.pendingDownloads === 0 &&
+                //                     stats.pendingUploads === 0
+                //                 ) {
+                //                     setTimeout(() => {
+                //                         if (
+                //                             stats.pendingDownloads === 0 &&
+                //                             stats.pendingUploads === 0
+                //                         ) {
+                //                             this.dependencies.navToDashboard()
+                //                         }
+                //                     }, 5000)
+                //                 }
+                //             },
+                //         )
+                //     }
+                // } else {
+                //     this.emitMutation({
+                //         welcomeStep: { $set: 'basicIntro' },
+                //     })
+                // }
             }
         } else {
             this.emitMutation({
