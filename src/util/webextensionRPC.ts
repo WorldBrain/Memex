@@ -329,11 +329,20 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
                       data: args[0],
                   })
               } catch (err) {
-                  console.error(
-                      `Remote event emitter "${moduleName}" failed to emit event "${String(
-                          eventName,
-                      )}":\n\tError message: "${err.message}"`,
-                  )
+                  // I think this error throws because the event is being received on the wrong script. e.g., intended for options UI but CS is open so that receives it too.
+                  // TODO: The BG spam was annoying, so ignoring these, though the actual fix will be to ignore messages on scripts they're not
+                  //  intended for (EventBasedRPCManager currently does this with originSide/recipientSide fields in sent message)
+                  if (
+                      !err.message.includes(
+                          'A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received',
+                      )
+                  ) {
+                      console.error(
+                          `Remote event emitter "${moduleName}" failed to emit event "${String(
+                              eventName,
+                          )}":\n\tError message: "${err.message}"`,
+                      )
+                  }
               }
           }
 
