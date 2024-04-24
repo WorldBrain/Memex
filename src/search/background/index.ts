@@ -433,56 +433,62 @@ export default class SearchBackground {
     private async lookupDataForUnifiedResults({
         resultDataByPage,
     }: UnifiedBlankSearchResult): Promise<UnifiedSearchLookupData> {
+        const pageIds = [...resultDataByPage.keys()]
+        const annotIds = [
+            ...resultDataByPage.values(),
+        ].flatMap(({ annotations }) => annotations.map((a) => a.url))
+
+        const [
+            pages,
+            annotations,
+            pageListEntries,
+            annotListEntries,
+        ] = await Promise.all([
+            this.options.storageManager
+                .collection('pages')
+                .findObjects<Page>({ url: { $in: pageIds } }),
+            this.options.storageManager
+                .collection('annotations')
+                .findObjects<Annotation>({
+                    url: { $in: annotIds },
+                }),
+            this.options.storageManager
+                .collection('pageListEntries')
+                .findObjects<PageListEntry>({
+                    listId: { $ne: SPECIAL_LIST_IDS.INBOX },
+                    pageUrl: { $in: pageIds },
+                }),
+            this.options.storageManager
+                .collection('annotListEntries')
+                .findObjects<AnnotationListEntry>({
+                    listId: { $ne: SPECIAL_LIST_IDS.INBOX },
+                    url: { $in: annotIds },
+                }),
+        ])
+
+        const listIdsByPage = groupBy(pageListEntries, (e) => e.pageUrl)
+        const listIdsByAnnot = groupBy(annotListEntries, (e) => e.url)
+
         const lookups: UnifiedSearchLookupData = {
             annotations: new Map(),
             pages: new Map(),
         }
-
-        const pageIds = [...resultDataByPage.keys()]
-        const pageData = await this.options.storageManager
-            .collection('pages')
-            .findObjects<Page>({
-                url: { $in: pageIds },
-            })
-
-        const annotIds = [
-            ...resultDataByPage.values(),
-        ].flatMap(({ annotations }) => annotations.map((a) => a.url))
-        const annotData = await this.options.storageManager
-            .collection('annotations')
-            .findObjects<Annotation>({
-                url: { $in: annotIds },
-            })
-
-        const pageListEntries = await this.options.storageManager
-            .collection('pageListEntries')
-            .findObjects<PageListEntry>({
-                listId: { $ne: SPECIAL_LIST_IDS.INBOX },
-                pageUrl: { $in: pageIds },
-            })
-        const annotListEntries = await this.options.storageManager
-            .collection('annotListEntries')
-            .findObjects<AnnotationListEntry>({
-                listId: { $ne: SPECIAL_LIST_IDS.INBOX },
-                url: { $in: annotIds },
-            })
-        const listIdsByPage = groupBy(pageListEntries, (e) => e.pageUrl)
-        const listIdsByAnnot = groupBy(annotListEntries, (e) => e.url)
-
-        pageData.forEach((p) =>
-            lookups.pages.set(p.url, {
-                ...p,
-                lists: (listIdsByPage[p.url] ?? []).map((e) => e.listId),
+        for (const page of pages) {
+            lookups.pages.set(page.url, {
+                ...page,
+                lists: (listIdsByPage[page.url] ?? []).map((e) => e.listId),
                 displayTime:
-                    resultDataByPage.get(p.url)?.latestPageTimestamp ?? 0,
-            }),
-        )
-        annotData.forEach((a) =>
-            lookups.annotations.set(a.url, {
-                ...a,
-                lists: (listIdsByAnnot[a.url] ?? []).map((e) => e.listId),
-            }),
-        )
+                    resultDataByPage.get(page.url)?.latestPageTimestamp ?? 0,
+            })
+        }
+        for (const annotation of annotations) {
+            lookups.annotations.set(annotation.url, {
+                ...annotation,
+                lists: (listIdsByAnnot[annotation.url] ?? []).map(
+                    (e) => e.listId,
+                ),
+            })
+        }
 
         return lookups
     }
