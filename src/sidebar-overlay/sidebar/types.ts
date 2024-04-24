@@ -3,7 +3,6 @@
  * Default export is the Sidebar's state's type declaration.
  */
 
-import AnnotationsManager from '../../annotations/annotations-manager'
 import { Annotation } from 'src/annotations/types'
 
 export interface Page {
@@ -12,10 +11,6 @@ export interface Page {
 }
 
 export default interface State {
-    /** An object that is responsible for interacting with appropriate scripts
-     * for annotations.
-     */
-    annotationsManager: AnnotationsManager
     /** Denotes whether the sidebar is open or not. */
     isOpen: boolean
     /** Denotes whether the sidebar is loading annotations or not. */

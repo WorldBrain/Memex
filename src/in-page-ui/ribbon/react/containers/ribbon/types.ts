@@ -1,8 +1,6 @@
 import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
-import type AnnotationsManager from 'src/annotations/annotations-manager'
 import type { BookmarksInterface } from 'src/bookmarks/background/types'
 import type { RemoteCollectionsInterface } from 'src/custom-lists/background/types'
-import type { RemoteTagsInterface } from 'src/tags/background/types'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { PageAnnotationsCacheInterface } from 'src/annotations/cache/types'
 import type { ContentSharingInterface } from 'src/content-sharing/background/types'
@@ -14,7 +12,7 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
 import type { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
-import { SearchInterface } from 'src/search/background/types'
+import { RemoteSearchInterface } from 'src/search/background/types'
 
 interface FlagSetterInterface {
     getState(): Promise<boolean>
@@ -25,7 +23,6 @@ export interface RibbonContainerDependencies {
     currentTab: { id?: number; url?: string }
     getFullPageUrl: () => MaybePromise<string>
     highlighter: HighlightRendererInterface
-    annotationsManager: AnnotationsManager
     setSidebarEnabled: (value: boolean) => Promise<void>
     getSidebarEnabled: () => Promise<boolean>
     bookmarks: BookmarksInterface
@@ -37,7 +34,7 @@ export interface RibbonContainerDependencies {
     annotations: AnnotationInterface<'caller'>
     annotationsCache: PageAnnotationsCacheInterface
     bgScriptBG: RemoteBGScriptInterface
-    searchBG: SearchInterface
+    searchBG: RemoteSearchInterface
     tooltip: FlagSetterInterface
     highlights: FlagSetterInterface
     syncSettingsBG: RemoteSyncSettingsInterface

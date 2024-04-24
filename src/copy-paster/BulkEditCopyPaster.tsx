@@ -1,6 +1,5 @@
 import React from 'react'
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
-import type { BackgroundSearchParams } from 'src/search/background/types'
 import type { Template } from './types'
 
 export interface Props
@@ -15,7 +14,9 @@ export default class BulkEditCopyPaster extends React.PureComponent<Props> {
             id,
             annotationUrls: this.props.annotationUrls ?? [],
             normalizedPageUrls: this.props.normalizedPageUrls,
+            skipNotes: true,
         })
+
         return output
     }
 

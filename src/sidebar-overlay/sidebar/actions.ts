@@ -3,7 +3,6 @@ import { createAction } from 'redux-act'
 import { Thunk } from '../types'
 import { Page } from './types'
 import * as selectors from './selectors'
-import AnnotationsManager from '../../annotations/annotations-manager'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import { FLOWS, STAGES } from 'src/overview/onboarding/constants'
 import {
@@ -12,11 +11,8 @@ import {
 } from 'src/overview/onboarding/utils'
 import { handleDBQuotaErrors } from 'src/util/error-handler'
 import { notifications } from 'src/util/remote-functions-background'
-import { setAnnotations } from 'src/annotations/actions'
 
-export const setAnnotationsManager = createAction<AnnotationsManager>(
-    'setAnnotationsManager',
-)
+export const setAnnotationsManager = createAction('setAnnotationsManager')
 
 export const setSidebarOpen = createAction<boolean>('setSidebarOpen')
 
@@ -88,25 +84,9 @@ export const toggleBookmark: (url: string) => Thunk = (url) => async (
     getState,
 ) => {
     const state = getState()
-    const annotationsManager = selectors.annotationsManager(state)
     const annotations = selectors.annotations(state)
     const index = annotations.findIndex((annot) => annot.url === url)
     dispatch(toggleBookmarkState(index))
-
-    try {
-        await annotationsManager.toggleBookmark(url)
-    } catch (err) {
-        dispatch(toggleBookmarkState(index))
-        handleDBQuotaErrors(
-            (error) =>
-                notifications.create({
-                    requireInteraction: false,
-                    title: 'Memex error: starring page',
-                    message: error.message,
-                }),
-            () => remoteFunction('dispatchNotification')('db_error'),
-        )(err)
-    }
 }
 
 // Only toggles UI state; no DB side-effects
@@ -117,13 +97,6 @@ export const toggleBookmarkState: (i: number) => Thunk = (i) => (
     const state = getState()
     const annotations = selectors.annotations(state)
     const annotation = annotations[i]
-    dispatch(
-        setAnnotations([
-            ...annotations.slice(0, i),
-            { ...annotation, isBookmarked: !annotation.isBookmarked },
-            ...annotations.slice(i + 1),
-        ]),
-    )
 }
 
 export const togglePageType: () => Thunk = () => (dispatch, getState) => {

@@ -110,7 +110,7 @@ export default class BookmarksBackground {
                 currentWindow: true,
                 active: true,
             })
-            tabId = activeTab.id
+            tabId = activeTab?.id
         }
 
         if (!params.skipIndexing) {

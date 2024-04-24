@@ -2,7 +2,7 @@ import createResolvable, { Resolvable } from '@josephg/resolvable'
 import type { RPCManager, RPCManagerDependencies, RPCRequest } from './types'
 import type { Runtime } from 'webextension-polyfill'
 import { createRPCRequestObject, createRPCResponseObject } from './utils'
-import { RpcError } from '../webextensionRPC'
+import { RpcError, __REMOTE_EMITTER_EVENT__ } from '../webextensionRPC'
 import { resolveTabUrl } from '../uri-utils'
 
 export class EventBasedRPCManager implements RPCManager {
@@ -107,6 +107,10 @@ export class EventBasedRPCManager implements RPCManager {
         sender: Runtime.MessageSender,
         sendResponse: (res: any) => void,
     ): true => {
+        // These are intended for remote event emitters, which are implemented separately
+        if (request[__REMOTE_EMITTER_EVENT__]) {
+            return true
+        }
         const { headers, payload, error, serializedError } = request
         const { id, name, type } = headers
 

@@ -849,7 +849,13 @@ export class DashboardContainer extends StatefulUIElement<
                     })
                 }
                 getRootElement={this.props.getRootElement}
-                selectedItems={this.state.bulkSelectedUrls}
+                selectedItems={
+                    this.state.bulkSelectedUrls != null
+                        ? Object.entries(this.state.bulkSelectedUrls)?.map(
+                              ([key, _]) => key,
+                          )
+                        : []
+                }
                 spacePickerBGProps={{
                     authBG: this.props.authBG,
                     spacesBG: this.props.listsBG,
@@ -1109,7 +1115,10 @@ export class DashboardContainer extends StatefulUIElement<
                         })
 
                         this.processEvent('changeFocusItem', {
-                            pageId: pageId,
+                            item: {
+                                id: pageId,
+                                type: 'page',
+                            },
                         })
                     },
                     onFooterHover: (day, pageId) => () =>
@@ -1140,7 +1149,10 @@ export class DashboardContainer extends StatefulUIElement<
                             return
                         }
                         this.processEvent('changeFocusItem', {
-                            pageId: null,
+                            item: {
+                                id: null,
+                                type: null,
+                            },
                         })
                     },
                     onRemoveFromListBtnClick: (day, pageId) => () => {
@@ -1974,7 +1986,7 @@ export class DashboardContainer extends StatefulUIElement<
                     {/* ))} */}
                     {this.props.renderUpdateNotifBanner()}
                     <BulkEditWidget
-                        deleteBulkSelection={(pageId) =>
+                        deleteBulkSelection={() =>
                             this.processEvent('bulkDeleteItem', null)
                         }
                         selectAllPages={() =>
@@ -2001,11 +2013,23 @@ export class DashboardContainer extends StatefulUIElement<
                                 <BulkEditCopyPaster
                                     getRootElement={this.props.getRootElement}
                                     copyPasterBG={this.props.copyPasterBG}
-                                    normalizedPageUrls={
-                                        this.state.bulkSelectedUrls
-                                    }
+                                    normalizedPageUrls={Object.entries(
+                                        this.state.bulkSelectedUrls,
+                                    )
+                                        .filter(
+                                            ([_, value]) =>
+                                                value.type === 'page',
+                                        )
+                                        .map(([key, _]) => key)}
                                     onClickOutside={null}
-                                    annotationUrls={null}
+                                    annotationUrls={Object.entries(
+                                        this.state.bulkSelectedUrls,
+                                    )
+                                        .filter(
+                                            ([_, value]) =>
+                                                value.type === 'note',
+                                        )
+                                        .map(([key, _]) => key)}
                                 />
                             )
                         }}

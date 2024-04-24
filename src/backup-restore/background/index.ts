@@ -12,7 +12,6 @@ import { BackupRestoreProcedure } from './procedures/restore'
 import { ProcedureUiCommunication } from 'src/backup-restore/background/procedures/ui-communication'
 import type NotificationBackground from 'src/notifications/background'
 import { DEFAULT_AUTH_SCOPE } from './backend/google-drive'
-import type { SearchIndex } from 'src/search'
 import * as Raven from 'src/util/raven'
 import type { BackupInterface, LocalBackupSettings } from './types'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
@@ -26,7 +25,6 @@ export * from './backend'
 
 export class BackupBackgroundModule {
     storageManager: Storex
-    searchIndex: SearchIndex
     storage: BackupStorage
     backendLocation: string
     backend: BackupBackend
@@ -52,7 +50,6 @@ export class BackupBackgroundModule {
     constructor(
         private options: {
             storageManager: Storex
-            searchIndex: SearchIndex
             createQueue?: typeof Queue
             queueOpts?: QueueOpts
             notifications: NotificationBackground
@@ -77,7 +74,6 @@ export class BackupBackgroundModule {
         this.storage = new BackupStorage({
             storageManager: options.storageManager,
         })
-        this.searchIndex = options.searchIndex
         this.changeTrackingQueue = options.createQueue(options.queueOpts)
         this.notifications = options.notifications
         this.checkAuthorizedForAutoBackup = options.checkAuthorizedForAutoBackup
@@ -282,7 +278,6 @@ export class BackupBackgroundModule {
 
         this.restoreProcedure = new BackupRestoreProcedure({
             storageManager: this.storageManager,
-            searchIndex: this.searchIndex,
             storage: this.storage,
             backend,
         })

@@ -1,9 +1,5 @@
 import { PageData, NoteData } from './search-results/types'
-import {
-    StandardSearchResponse,
-    AnnotPage,
-    AnnotationsSearchResponse,
-} from 'src/search/background/types'
+import { StandardSearchResponse, AnnotPage } from 'src/search/background/types'
 import { Annotation } from 'src/annotations/types'
 
 interface TestMetadata {
@@ -19,16 +15,14 @@ const pageDataToSearchRes = (
 ): AnnotPage => ({
     url: page.normalizedUrl,
     fullUrl: page.fullUrl,
-    title: page.fullTitle,
-    hasBookmark: false,
+    fullTitle: page.fullTitle,
+    // hasBookmark: false,
     annotations:
         metadata?.notes?.map(({ note, metadata }) =>
             noteDataToSearchRes(note, page, metadata),
         ) ?? [],
-    annotsCount: metadata?.notes?.length ?? 0,
     displayTime: page.displayTime,
     lists: metadata?.lists ?? [],
-    tags: metadata?.tags ?? [],
     text: page?.text ?? '',
 })
 
@@ -59,7 +53,6 @@ export const PAGE_1: PageData = {
     displayTime: new Date('2020-11-26T01:00').getTime(),
     hasNotes: true,
     lists: [],
-    tags: [],
     type: 'page',
 }
 
@@ -70,7 +63,6 @@ export const PAGE_2: PageData = {
     displayTime: new Date('2020-11-26T05:00').getTime(),
     hasNotes: false,
     lists: [],
-    tags: [],
     type: 'page',
 }
 
@@ -81,7 +73,6 @@ export const PAGE_3: PageData = {
     displayTime: new Date('2020-11-26T05:10').getTime(),
     hasNotes: true,
     lists: [],
-    tags: [],
     type: 'page',
 }
 
@@ -190,7 +181,7 @@ export const PAGE_SEARCH_RESULT_3: StandardSearchResponse = {
     resultsExhausted: false,
 }
 
-export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
+export const ANNOT_SEARCH_RESULT_1 = {
     isAnnotsSearch: true,
     resultsExhausted: false,
     docs: [
@@ -207,7 +198,7 @@ export const ANNOT_SEARCH_RESULT_1: AnnotationsSearchResponse = {
     },
 }
 
-export const ANNOT_SEARCH_RESULT_2: AnnotationsSearchResponse = {
+export const ANNOT_SEARCH_RESULT_2 = {
     isAnnotsSearch: true,
     resultsExhausted: false,
     docs: [

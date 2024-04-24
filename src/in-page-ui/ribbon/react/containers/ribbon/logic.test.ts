@@ -51,8 +51,6 @@ describe('Ribbon logic', () => {
             getNormalizedPageUrl: () => currentTab.normalizedUrl,
         })
 
-        const annotationsManager = {} as any
-
         let globalTooltipState = false
         let globalHighlightsState = false
         const analytics = new FakeAnalytics()
@@ -78,7 +76,6 @@ describe('Ribbon logic', () => {
             currentTab,
             searchBG: runInBackground(),
             highlighter,
-            annotationsManager,
             bgScriptBG: backgroundModules.bgScript['remoteFunctions'],
             bookmarks: backgroundModules.bookmarks.remoteFunctions,
             pageActivityIndicatorBG:

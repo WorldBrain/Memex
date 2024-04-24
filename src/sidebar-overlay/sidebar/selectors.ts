@@ -6,11 +6,6 @@ import State from './types'
 // property called `sidebar`.
 export const sidebar: (state) => State = (state) => state.sidebar
 
-export const annotationsManager = createSelector(
-    sidebar,
-    (state) => state.annotationsManager,
-)
-
 export const isOpen = createSelector(sidebar, (state) => state.isOpen)
 
 export const isLoading = createSelector(sidebar, (state) => state.isLoading)

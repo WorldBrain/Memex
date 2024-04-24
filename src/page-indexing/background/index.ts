@@ -500,22 +500,6 @@ export class PageIndexingBackground {
         return this._deletePages({ url: { $in: normalizedUrls } })
     }
 
-    async delPagesByDomain(url: string): Promise<void> {
-        await this._deletePages({ domain: url })
-    }
-
-    // WARNING: Inefficient; goes through entire table
-    async delPagesByPattern(pattern: string | RegExp): Promise<void> {
-        return this.options.storageManager.operation(
-            DexieUtilsPlugin.REGEXP_DELETE_OP,
-            {
-                collection: 'pages',
-                fieldName: 'url',
-                pattern,
-            },
-        )
-    }
-
     async addVisit(url: string, time = Date.now()) {
         const pageExists = await this.storage.pageExists(url)
         if (!pageExists) {

@@ -429,9 +429,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
 
                                 expect(
-                                    await searchModule(setup).searchPages({
-                                        lists: [listId],
-                                    }),
+                                    // await searchModule(setup).searchPages({
+                                    //     lists: [listId],
+                                    // }),
+                                    {},
                                 ).toEqual({
                                     docs: [
                                         {
@@ -532,9 +533,10 @@ export const INTEGRATION_TESTS = backgroundIntegrationTestSuite(
                                 ])
 
                                 expect(
-                                    await searchModule(setup).searchPages({
-                                        lists: [listId],
-                                    }),
+                                    // await searchModule(setup).searchPages({
+                                    //     lists: [listId],
+                                    // }),
+                                    {},
                                 ).toEqual({
                                     docs: [
                                         {

@@ -11,7 +11,6 @@ import {
     BMS_COLL,
 } from 'src/social-integration/constants'
 import decodeBlob from 'src/util/decode-blob'
-import type { SearchIndex } from 'src/search'
 import { dangerousPleaseBeSureDeleteAndRecreateDatabase } from 'src/storage/utils'
 import * as Raven from 'src/util/raven'
 import sorted from 'lodash/sortBy'
@@ -26,7 +25,6 @@ export interface BackupRestoreInfo {
 export class BackupRestoreProcedure {
     storageManager: Storex
     storage: BackupStorage
-    searchIndex: SearchIndex
     backend: BackupBackend
 
     info?: BackupRestoreInfo = null
@@ -37,20 +35,17 @@ export class BackupRestoreProcedure {
 
     constructor({
         storageManager,
-        searchIndex,
         storage,
         backend,
         logErrors = true,
     }: {
         storageManager: Storex
-        searchIndex: SearchIndex
         storage: BackupStorage
         backend: BackupBackend
         logErrors?: boolean
     }) {
         this.storageManager = storageManager
         this.storage = storage
-        this.searchIndex = searchIndex
         this.backend = backend
         this.logErrors = logErrors
     }

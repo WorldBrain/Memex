@@ -6,7 +6,7 @@ import {
     PageSearchCopyPaster,
 } from 'src/copy-paster'
 import { SearchType } from '../types'
-import { BackgroundSearchParams } from 'src/search/background/types'
+import { UnifiedSearchParams } from 'src/search/background/types'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
@@ -16,7 +16,7 @@ export interface Props {
     searchType?: SearchType
     isCopyPasterShown?: boolean
     isCopyPasterBtnShown?: boolean
-    searchParams?: BackgroundSearchParams
+    searchParams: UnifiedSearchParams
     copyPasterBG: RemoteCopyPasterInterface
     hideCopyPaster?: React.MouseEventHandler
     toggleCopyPaster?: React.MouseEventHandler

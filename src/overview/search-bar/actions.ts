@@ -15,7 +15,6 @@ import { actions as notifActs } from '../../notifications'
 import * as Raven from 'src/util/raven'
 import { auth } from 'src/util/remote-functions-background'
 import { stripTagPattern, splitInputIntoTerms } from './utils'
-import { BackgroundSearchParams } from 'src/search/background/types'
 
 const pageSearchRPC = remoteFunction('searchPages')
 const annotSearchRPC = remoteFunction('searchAnnotations')
@@ -117,24 +116,6 @@ export const search: (args?: any) => Thunk = (
 
     // Grab needed derived state for search
     const state = getState()
-    const searchParams: BackgroundSearchParams = {
-        query,
-        startDate,
-        endDate,
-        showOnlyBookmarks: filters.onlyBookmarks(state),
-        tagsInc: filters.tags(state),
-        tagsExc: filters.tagsExc(state),
-        domains: filters.domainsInc(state),
-        domainsExclude: filters.domainsExc(state),
-        limit: constants.PAGE_SIZE,
-        skip: results.resultsSkip(state),
-        lists: filters.listFilterParam(state),
-        contentTypes: filters.contentType(state),
-        usersInc: filters.usersInc(state),
-        usersExc: filters.usersExc(state),
-        hashtagsInc: filters.hashtagsInc(state),
-        hashtagsExc: filters.hashtagsExc(state),
-    }
 
     try {
         const searchRPC = results.isSocialPost(state)

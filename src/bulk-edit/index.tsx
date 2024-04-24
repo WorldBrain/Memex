@@ -40,7 +40,7 @@ export default class BulkEditWidget extends StatefulUIElement<
 
     renderBulkSelectItem(item) {
         return (
-            <BulkSelectItemBox>
+            <BulkSelectItemBox key={item.url}>
                 <BulkSelectItemTitle>{item.title}</BulkSelectItemTitle>
                 <RemoveIconBox>
                     <Icon
@@ -170,7 +170,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                                         </Counter>
                                         Selected
                                     </CounterBox>
-                                    <PrimaryAction
+                                    {/* <PrimaryAction
                                         onClick={() =>
                                             this.processEvent(
                                                 'showBulkEditSelectionBox',
@@ -186,7 +186,7 @@ export default class BulkEditWidget extends StatefulUIElement<
                                         icon={'arrowRight'}
                                         padding={'0px 8px 0 3px'}
                                         innerRef={this.bulkEditWidgetBtnRef}
-                                    />
+                                    /> */}
                                     <PrimaryAction
                                         width="120px"
                                         onClick={() => {

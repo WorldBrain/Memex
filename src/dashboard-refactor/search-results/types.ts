@@ -2,10 +2,7 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UIEvent } from 'ui-logic-core'
 
 import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
-import type {
-    AnnotationsSearchResponse,
-    StandardSearchResponse,
-} from 'src/search/background/types'
+import type { StandardSearchResponse } from 'src/search/background/types'
 import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
@@ -111,9 +108,7 @@ export type PagePickerAugdProps = {
     [Key in keyof PagePickerProps]: (pageId: string) => PagePickerProps[Key]
 }
 
-export type SearchResultToState<
-    T extends AnnotationsSearchResponse | StandardSearchResponse
-> = (
+export type SearchResultToState<T extends StandardSearchResponse> = (
     result: T,
     annotationsCache: PageAnnotationsCacheInterface,
     extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
@@ -135,6 +130,14 @@ export interface NoteFormState {
     bodyInputValue: string
     tags: string[]
     lists: string[]
+    isShown: boolean
+}
+
+export interface SelectableBlock {
+    id: string
+    type: 'page' | 'note'
+    isInFocus?: boolean
+    isActivated?: boolean
 }
 
 export interface NoteData {
@@ -151,11 +154,12 @@ export interface NoteData {
     isShared?: boolean
     isBulkShareProtected?: boolean
     color?: RGBAColor
+    isInFocus?: boolean
 }
 
 export type PageData = Pick<
     PipelineRes,
-    'fullUrl' | 'fullTitle' | 'tags' | 'favIconURI' | 'text'
+    'fullUrl' | 'fullTitle' | 'favIconURI' | 'text'
 > & {
     normalizedUrl: string
     lists: string[]
@@ -167,6 +171,7 @@ export type PageData = Pick<
     uploadedPdfLinkLoadState?: TaskState
     editTitleState?: string
     text?: string
+    isInFocus?: boolean
 }
 
 export type NoResultsType =
@@ -209,7 +214,6 @@ export interface PageResult {
     isTagPickerShown: boolean
     isCopyPasterShown: boolean
     copyLoadingState: TaskState
-    isInFocus: boolean
     listPickerShowStatus: ListPickerShowState
     loadNotesState: TaskState
     newNoteForm: NoteFormState
@@ -224,7 +228,6 @@ export interface PageResultsByDay {
     pages: NormalizedState<PageResult>
 }
 
-// tslint:disable-next-line
 export type NestedResults = {
     [day: number]: PageResultsByDay
 }
@@ -239,6 +242,9 @@ export interface RootState {
     shouldFormsAutoFocus: boolean
     isSearchCopyPasterShown: boolean
     isSubscriptionBannerShown: boolean
+
+    // TODO: This needs to be reset every single time the search filters change - simply used for pagination in blank search
+    blankSearchOldestResultTimestamp: number | null
 
     /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
@@ -288,7 +294,6 @@ export type Events = UIEvent<{
     setSearchCopyPasterShown: { isShown: boolean }
     setPageData: { pages: PageData[] }
     setPageSearchResult: { result: StandardSearchResponse }
-    setAnnotationSearchResult: { result: AnnotationsSearchResponse }
     /** NOTE: Does not mutate state */
     copyShareLink: {
         link: string
@@ -341,6 +346,7 @@ export type Events = UIEvent<{
         item: {
             title: string
             url: string
+            type: 'page' | 'note'
         }
         remove?: boolean
     }
