@@ -10,6 +10,9 @@ import SettingSection from '@worldbrain/memex-common/lib/common-ui/components/se
 import { LoadingContainer } from 'src/dashboard-refactor/styled-components'
 import LoadingIndicator from '@worldbrain/memex-common/lib/common-ui/components/loading-indicator'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
+import { LOGIN_URL } from 'src/constants'
+import checkBrowser from 'src/util/check-browser'
+import browser from 'webextension-polyfill'
 
 // interface Props {
 //     initiallyShowSubscriptionModal?: boolean
@@ -30,6 +33,29 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
 
     async componentDidMount() {
         const user = await this.props.authBG.getCurrentUser()
+
+        if (user == null) {
+            const browserName = checkBrowser()
+            const isFirefox = browserName === 'firefox'
+
+            if (isFirefox) {
+                window.location.href = LOGIN_URL
+            } else {
+                const env = process.env.NODE_ENV
+                let memexSocialUrl: string
+                if (env === 'production') {
+                    memexSocialUrl = 'https://memex.social/'
+                } else {
+                    memexSocialUrl = 'https://staging.memex.social/'
+                }
+                await browser.tabs.create({
+                    url: `${memexSocialUrl}auth`,
+                })
+            }
+
+            window.location.href = LOGIN_URL
+        }
+
         this.processEvent('getCurrentUser', { currentUser: user })
     }
 
@@ -92,8 +118,15 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        return this.state.loadState === 'running' ? (
+        return this.state.loadState === 'running' ||
+            this.state.currentUser == null ? (
             <LoadingContainer>
+                {this.state.currentUser === null && (
+                    <InfoText>
+                        Login via the page that opens or reload this page to get
+                        there again
+                    </InfoText>
+                )}
                 <LoadingIndicator size={50} />
             </LoadingContainer>
         ) : (

@@ -12,7 +12,6 @@ import { constructPDFViewerUrl, isUrlPDFViewerUrl } from 'src/pdf/util'
 import type { PageIndexingInterface } from 'src/page-indexing/background/types'
 import { getCurrentTab } from './utils'
 import type { AnalyticsCoreInterface } from '@worldbrain/memex-common/lib/analytics/types'
-import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import type { AnnotationInterface } from 'src/annotations/background/types'
 import type { AuthRemoteFunctionsInterface } from 'src/authentication/background/types'
 import { setUserContext as setSentryUserContext } from 'src/util/raven'
@@ -104,23 +103,12 @@ export default class PopupLogic extends UILogic<State, Event> {
                 currentTab.url.startsWith('about:')
             ) {
             } else {
-                let identifier
-                if (
-                    currentTab.url.startsWith('file://') ||
-                    (currentTab.url.endsWith('.pdf') &&
-                        (!currentTab.url.startsWith('chrome-extension') ||
-                            !currentTab.url.startsWith('moz-extension')))
-                ) {
-                    identifier = {
-                        fullUrl: currentTab.url,
-                        normalizedUrl: normalizeUrl(currentTab.url),
-                    }
-                } else {
-                    identifier = await pageIndexingBG.waitForContentIdentifier({
+                const identifier = await pageIndexingBG.waitForContentIdentifier(
+                    {
                         tabId: currentTab.id,
                         fullUrl: currentTab.url,
-                    })
-                }
+                    },
+                )
                 const isFileAccessAllowed = await extensionAPI.isAllowedFileSchemeAccess()
 
                 // const [isPDFReaderEnabled] = await Promise.all([

@@ -89,6 +89,11 @@ export const LoadingContainer = ({ children }) => {
         display: flex;
         align-items: center;
         justify-content: center;
+        flex-direction: column;
+        grid-gap: 20px;
+        color: ${(props) => props.theme.colors.greyScale6};
+        font-size: 20px;
+        height: 100%;
     `
     return <Container>{children}</Container>
 }

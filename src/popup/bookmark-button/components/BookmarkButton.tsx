@@ -67,7 +67,7 @@ class BookmarkButton extends PureComponent<Props> {
         return (
             <ButtonItem
                 onClick={(event) => {
-                    if (!isPageSaved) {
+                    if (!isPageSaved && !this.props.isDisabled) {
                         this.props.toggleBookmark(event.currentTarget)
                     }
                 }}

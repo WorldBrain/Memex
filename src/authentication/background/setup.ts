@@ -16,10 +16,9 @@ import {
     signInWithCustomToken,
     signInWithEmailAndPassword,
     sendPasswordResetEmail,
-    signInWithPopup,
     GoogleAuthProvider,
     TwitterAuthProvider,
-} from 'firebase/auth'
+} from 'firebase/auth/web-extension'
 import { getFunctions, httpsCallable } from 'firebase/functions'
 
 export type DevAuthState =
@@ -62,12 +61,8 @@ export function createAuthDependencies(options: {
                     sendPasswordResetEmail,
                     signInWithEmailAndPassword,
                     createUserWithEmailAndPassword,
-                    signInViaProvider: (type) => {
-                        const auth = getAuth()
-                        const provider = providerFromType(type)
-                        return signInWithPopup(auth, provider)
-                    },
-                },
+                    signInViaProvider: () => null, // We don't support this anymore as of MV3 - workaround offered via memex.social
+                } as any, // Overriding type here as newer FB SDK's web-extension variant seems to have incompat types with the non-web-ext variant, though they should work fine at runtime
             }),
             subscriptionService: new WorldbrainSubscriptionsService(
                 getFirebase(),

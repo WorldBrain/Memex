@@ -14,7 +14,7 @@ import TagsBackground from 'src/tags/background'
 import BookmarksBackground from 'src/bookmarks/background'
 import * as backup from '../backup-restore/background'
 import { PKMSyncBackgroundModule } from '../pkm-integrations/background'
-import { getAuth } from 'firebase/auth'
+import { getAuth } from 'firebase/auth/web-extension'
 import {
     getStorage,
     ref,

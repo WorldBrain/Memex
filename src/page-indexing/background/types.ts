@@ -21,8 +21,11 @@ export interface PageIndexingInterface<Role extends RemoteFunctionRole> {
     >
     waitForContentIdentifier: RemoteFunctionWithExtraArgs<
         Role,
-        WaitForContentIdentifierParams,
-        WaitForContentIdentifierReturns
+        {
+            tabId?: number
+            fullUrl: string
+        },
+        ContentIdentifier
     >
     getOriginalUrlForPdfPage: RemoteFunctionWithoutExtraArgs<
         Role,
@@ -82,12 +85,7 @@ export interface InitContentIdentifierParams {
 
 export type InitContentIdentifierReturns = ContentIdentifier
 
-export interface WaitForContentIdentifierParams {
-    tabId?: number
-    fullUrl: string
-}
-
-export type WaitForContentIdentifierReturns = ContentIdentifier
+export interface WaitForContentIdentifierParams {}
 
 export enum StoredContentType {
     HtmlBody = 'htmlBody',
