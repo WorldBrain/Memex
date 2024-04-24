@@ -49,7 +49,6 @@ import {
     PageIndexingInterface,
     InitContentIdentifierParams,
     InitContentIdentifierReturns,
-    WaitForContentIdentifierReturns,
     PagePutHandler,
 } from './types'
 import {
@@ -75,6 +74,7 @@ import {
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import { analytics } from 'firebase-functions/v1'
 import { analyticsBG } from 'src/util/remote-functions-background'
+import { getUnderlyingResourceUrl } from 'src/util/uri-utils'
 
 interface ContentInfo {
     /** Timestamp in ms of when this data was stored. */
@@ -99,9 +99,12 @@ export class PageIndexingBackground {
     remoteFunctions: PageIndexingInterface<'provider'>
 
     // See `this.getIdentifierResolvableForTabPage` for how this is used
+    // Note that this gets deleted each time the BG loads so, in MV3, often.
+    //  In that case though the init logic should have been already triggered and the identifier
+    //  persisted to local storage
     private identifiersForTabPages: {
         [tabId: number]: {
-            [fullPageUrl: string]: Resolvable<ContentIdentifier>
+            [fullPageUrl: string]: Resolvable<void>
         }
     } = {}
 
@@ -255,13 +258,11 @@ export class PageIndexingBackground {
     async initContentIdentifier(
         params: InitContentIdentifierParams,
     ): Promise<InitContentIdentifierReturns> {
-        const resolvable =
-            params.tabId &&
-            this.getIdentifierResolvableForTabPage({
-                tabId: params.tabId,
-                fullUrl: params.locator.originalLocation,
-                forceNewResolvable: true,
-            })
+        const resolvable = this.getIdentifierResolvableForTabPage({
+            tabId: params.tabId,
+            fullUrl: params.locator.originalLocation,
+            forceNewResolvable: true,
+        })
 
         const regularNormalizedUrl = normalizeUrl(
             params.locator.originalLocation,
@@ -273,7 +274,7 @@ export class PageIndexingBackground {
 
         if (!params.fingerprints.length) {
             // This is where regular, non-PDF pages leave
-            resolvable?.resolve?.(regularIdentifier)
+            resolvable?.resolve?.()
             return regularIdentifier
         }
 
@@ -384,47 +385,29 @@ export class PageIndexingBackground {
             'pageContentInfo',
             pageContentInfo,
         )
+        resolvable?.resolve?.()
         if (stored && hasNewLocators) {
             await this.storeLocators(contentInfo.primaryIdentifier)
         }
 
-        resolvable?.resolve?.(contentInfo.primaryIdentifier)
         return contentInfo.primaryIdentifier
     }
 
     waitForContentIdentifier = async (params: {
         tabId: number
         fullUrl: string
-        timeout?: number
-    }): Promise<WaitForContentIdentifierReturns> => {
-        // TODO: Try and simplify this logic. Essentially, it was easily possible to get into states where the resolvable would
-        //  never get resolved (tab where the content-script doesn't run, and thus doesn't call initContentIdentifier), so solving
-        //  that by throwing an error after a timeout.
-        const resolvable = new Promise<['resolved', ContentIdentifier]>(
-            async (resolve) => {
-                const identifier = await this.getIdentifierResolvableForTabPage(
-                    params,
-                )
-                resolve(['resolved', identifier])
-            },
+    }): Promise<ContentIdentifier> => {
+        await this.getIdentifierResolvableForTabPage(params)
+        const allContentInfo = await this.getContentInfoForPages()
+        const underlyingResourceUrl = getUnderlyingResourceUrl(params.fullUrl)
+        const normalizedUrl = normalizeUrl(underlyingResourceUrl)
+        const contentInfoForPage = allContentInfo[normalizedUrl]
+        return (
+            contentInfoForPage?.primaryIdentifier ?? {
+                fullUrl: underlyingResourceUrl,
+                normalizedUrl,
+            }
         )
-
-        const timeout = new Promise<['timeout']>((resolve) =>
-            setTimeout(() => {
-                resolve(['timeout'])
-            }, params.timeout ?? 2500),
-        )
-
-        const [result, contentIdentifier] = await Promise.race([
-            resolvable,
-            timeout,
-        ])
-        if (result === 'timeout') {
-            throw new Error(
-                `Could not resolve identifier in time for tab: ${params.tabId}, page: ${params.fullUrl}`,
-            )
-        }
-        return contentIdentifier
     }
 
     private async getContentInfoForPages(): Promise<
@@ -444,18 +427,6 @@ export class PageIndexingBackground {
             (await this.options.pageIndexingSettingsStore.get(
                 'indexedTabPages',
             )) ?? {}
-        )
-    }
-
-    async getContentFingerprints(
-        contentIdentifier: Pick<ContentIdentifier, 'normalizedUrl'>,
-    ) {
-        const contentInfo = await this.getContentInfoForPages()
-        return contentInfo[contentIdentifier.normalizedUrl]?.locators.map(
-            (locator): ContentFingerprint => ({
-                fingerprintScheme: locator.fingerprintScheme,
-                fingerprint: locator.fingerprint,
-            }),
         )
     }
 
@@ -1049,19 +1020,17 @@ export class PageIndexingBackground {
         tabId: number
         fullUrl: string
         forceNewResolvable?: boolean
-    }) {
+    }): Resolvable<void> | null {
         const resolvablesForTab =
             this.identifiersForTabPages[params.tabId] ?? {}
         this.identifiersForTabPages[params.tabId] = resolvablesForTab
 
-        const newResolvable = createResolvable<ContentIdentifier>()
         const resolvable = params.forceNewResolvable
-            ? newResolvable
-            : resolvablesForTab[params.fullUrl] ?? newResolvable
+            ? createResolvable()
+            : resolvablesForTab[params.fullUrl]
 
         resolvablesForTab[params.fullUrl] = resolvable
-
-        return resolvable
+        return resolvable ?? null
     }
 
     private _getTime(time?: number | '$now') {

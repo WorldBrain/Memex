@@ -31,7 +31,11 @@ import UserStorage from '@worldbrain/memex-common/lib/user-management/storage'
 import { User } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import { SettingStore, BrowserSettingsStore } from 'src/util/settings'
 import { LimitedBrowserStorage } from 'src/util/tests/browser-storage'
-import { getAuth, sendPasswordResetEmail, updateEmail } from 'firebase/auth'
+import {
+    getAuth,
+    sendPasswordResetEmail,
+    updateEmail,
+} from 'firebase/auth/web-extension'
 import type { FirebaseError } from 'firebase/app'
 import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthServices } from 'src/services/types'

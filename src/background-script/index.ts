@@ -96,7 +96,6 @@ class BackgroundScript {
     private async runOnboarding() {
         const browserName = checkBrowser()
         const isFirefox = browserName === 'firefox'
-        const isChrome = browserName === 'chrome'
 
         if (isFirefox) {
             await this.deps.tabsAPI.create({
