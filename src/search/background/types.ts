@@ -123,6 +123,7 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
  * for subsequent blank search pages.
  */
 export type UnifiedBlankSearchParams = UnifiedSearchParams & {
+    untilWhen: number
     daysToSearch: number
     /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
     lowestTimeBound: number

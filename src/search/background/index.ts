@@ -107,20 +107,29 @@ export default class SearchBackground {
         makeRemotelyCallable(this.remoteFunctions)
     }
 
-    private async calcSearchLowestTimeBound(): Promise<number> {
-        // Real lower bound (for blank search) would be the time of the oldest bookmark or visit, whichever is oldest
-        const oldestTimestamps = (await Promise.all(
+    private async calcSearchTimeBoundEdge(
+        edge: 'top' | 'bottom',
+    ): Promise<number> {
+        const defaultTimestamp = edge === 'bottom' ? Date.now() : 0
+
+        // Real lower/upper bound for blank search would be the time of the oldest/latest bookmark or visit
+        const edgeTimestampDocs = (await Promise.all(
             ['visits', 'bookmarks'].map((coll) =>
-                this.options.storageManager
-                    .collection(coll)
-                    .findObject({}, { order: [['time', 'asc']] }),
+                this.options.storageManager.collection(coll).findObject(
+                    {},
+                    {
+                        order: [['time', edge === 'bottom' ? 'asc' : 'desc']],
+                    },
+                ),
             ),
         )) as [Visit?, Bookmark?]
 
-        const oldestTimestamp = Math.min(
-            ...oldestTimestamps.filter(Boolean).map((t) => t.time),
-        )
-        return oldestTimestamp !== Infinity ? oldestTimestamp : Date.now()
+        const timestamps = edgeTimestampDocs.filter(Boolean).map((t) => t.time)
+        const edgeTimestamp =
+            edge === 'bottom'
+                ? Math.min(...timestamps)
+                : Math.max(...timestamps)
+        return edgeTimestamp !== Infinity ? edgeTimestamp : defaultTimestamp
     }
 
     private sliceUnifiedSearchResults(
@@ -274,23 +283,22 @@ export default class SearchBackground {
     private async unifiedBlankSearch(
         params: UnifiedBlankSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
-        let upperBound = params.untilWhen ?? Date.now()
-        let lowerBound =
+        const upperBound = params.untilWhen
+        const lowerBound =
             params.fromWhen ?? upperBound - params.daysToSearch * dayMs
-
-        const calcQuery = () => ({ $gt: lowerBound, $lt: upperBound })
+        const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
 
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
         const [annotations, visits, bookmarks] = await Promise.all([
             this.options.storageManager
                 .collection('annotations')
-                .findObjects<Annotation>({ lastEdited: calcQuery() }),
+                .findObjects<Annotation>({ lastEdited: timeBoundsQuery }),
             this.options.storageManager
                 .collection('visits')
-                .findObjects<Visit>({ time: calcQuery() }),
+                .findObjects<Visit>({ time: timeBoundsQuery }),
             this.options.storageManager
                 .collection('bookmarks')
-                .findObjects<Bookmark>({ time: calcQuery() }),
+                .findObjects<Bookmark>({ time: timeBoundsQuery }),
         ])
 
         // Add in all the annotations to the results
@@ -379,13 +387,16 @@ export default class SearchBackground {
         let result: UnifiedBlankSearchResult
         // There's 2 separate search implementations depending on whether doing a terms search or not
         if (!params.query.trim().length) {
-            const lowestTimeBound = await this.calcSearchLowestTimeBound()
+            const lowestTimeBound = await this.calcSearchTimeBoundEdge('bottom')
+            const highestTimeBound = await this.calcSearchTimeBoundEdge('top')
             // Skip over days where there's no results, until we get results
             do {
                 result = await this.unifiedBlankSearch({
                     ...params,
                     untilWhen:
-                        result?.oldestResultTimestamp ?? params.untilWhen,
+                        result?.oldestResultTimestamp ?? // allows to paginate back from prev result
+                        params.untilWhen ??
+                        highestTimeBound, // default to latest timestamp in DB, to start off search
                     daysToSearch: 1,
                     lowestTimeBound,
                 })
