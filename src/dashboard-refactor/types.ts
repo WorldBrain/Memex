@@ -87,7 +87,7 @@ export type Events = UIEvent<
         SearchFilterEvents &
         ListsSidebarEvents &
         SyncModalEvents & {
-            search: { paginate?: boolean; searchID?: number }
+            search: { paginate?: boolean } | null
             dragFile: React.DragEvent | null
             dropPdfFile: React.DragEvent
         }

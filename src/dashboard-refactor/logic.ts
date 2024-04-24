@@ -570,7 +570,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 })
             } else {
-                await this.runSearch(nextState)
+                await this.runSearch({ previousState: nextState, event: null })
             }
 
             await this.getFeedActivityStatus()
@@ -863,15 +863,8 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
-        this.runSearch(nextState)
+        this.runSearch({ previousState: nextState, event: null })
     }
-
-    private runSearch = debounce(
-        async (previousState: State, paginate?: boolean) => {
-            await this.search({ previousState, event: { paginate } })
-        },
-        200,
-    )
 
     // TODO: bulk edit implementation needs simplification
     selectAllCurrentItems: EventHandler<'selectAllCurrentItems'> = async ({
@@ -1145,12 +1138,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         const mutation: UIMutation<State> = {
             searchResults: {
                 blankSearchOldestResultTimestamp: {
-                    $apply: (timestamp) => (event.paginate ? timestamp : null),
+                    $apply: (timestamp) => (event?.paginate ? timestamp : null),
                 },
             },
             searchFilters: {
                 skip: {
-                    $apply: (skip) => (event.paginate ? skip + PAGE_SIZE : 0),
+                    $apply: (skip) => (event?.paginate ? skip + PAGE_SIZE : 0),
                 },
             },
         }
@@ -1159,7 +1152,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             this,
             (taskState) => ({
                 searchResults: {
-                    [event.paginate
+                    [event?.paginate
                         ? 'searchPaginationState'
                         : 'searchState']: {
                         $set: taskState,
@@ -1237,7 +1230,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             searchState: { $set: 'success' },
                             searchPaginationState: { $set: 'success' },
                             noResultsType: { $set: noResultsType },
-                            ...(event.paginate
+                            ...(event?.paginate
                                 ? {
                                       results: {
                                           $apply: (prev) =>
@@ -1300,6 +1293,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         )
     }
+
+    private runSearch = debounce(this.search, 200)
 
     private async ensureLoggedIn(): Promise<boolean> {
         const { authBG } = this.options
