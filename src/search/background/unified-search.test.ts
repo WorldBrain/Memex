@@ -1671,4 +1671,52 @@ describe('Unified search tests', () => {
             ])
         })
     })
+
+    describe('misc cases', () => {
+        it('terms search should still work the same with affixed spaces in query', async () => {
+            const { backgroundModules } = await setupTest()
+            const termsResultA = await termsSearch(backgroundModules, {
+                query: 'test',
+                limit: 1000,
+                skip: 0,
+            })
+            const termsResultB = await termsSearch(backgroundModules, {
+                query: ' test ',
+                limit: 1000,
+                skip: 0,
+            })
+            const termsResultC = await termsSearch(backgroundModules, {
+                query: '   test     test     ',
+                limit: 1000,
+                skip: 0,
+            })
+            const expectedPages = [
+                DATA.PAGE_ID_11,
+                DATA.PAGE_ID_8,
+                DATA.PAGE_ID_12,
+                DATA.PAGE_ID_9, // Doesn't contain the term, but has an annotation with it
+                DATA.PAGE_ID_7,
+                DATA.PAGE_ID_4,
+                DATA.PAGE_ID_6,
+                DATA.PAGE_ID_5,
+                DATA.PAGE_ID_3,
+                DATA.PAGE_ID_1,
+            ]
+            expect(
+                formatResults(termsResultA, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual(expectedPages)
+            expect(
+                formatResults(termsResultB, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual(expectedPages)
+            expect(
+                formatResults(termsResultC, { skipSorting: true }).map(
+                    ([pageId]) => pageId,
+                ),
+            ).toEqual(expectedPages)
+        })
+    })
 })
