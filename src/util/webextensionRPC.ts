@@ -284,7 +284,7 @@ export interface RemoteEventEmitter<T extends keyof RemoteEvents> {
         ...args: Arguments<RemoteEvents[T][EventName]>
     ): Promise<void>
 }
-const __REMOTE_EVENT__ = '__REMOTE_EVENT__'
+export const __REMOTE_EMITTER_EVENT__ = '__REMOTE_EVENT__'
 const __REMOTE_EVENT_TYPE__ = '__REMOTE_EVENT_TYPE__'
 const __REMOTE_EVENT_NAME__ = '__REMOTE_EVENT_NAME__'
 
@@ -294,7 +294,7 @@ export function remoteEventEmitter<ModuleName extends keyof RemoteEvents>(
     { broadcastToTabs = false, silenceBroadcastFailures = false } = {},
 ): RemoteEventEmitter<ModuleName> {
     const message = {
-        __REMOTE_EVENT__,
+        __REMOTE_EVENT__: __REMOTE_EMITTER_EVENT__,
         __REMOTE_EVENT_TYPE__: moduleName,
     }
 
@@ -382,7 +382,10 @@ function registerRemoteEventForwarder() {
 }
 
 const remoteEventForwarder = (message, _) => {
-    if (message == null || message[__REMOTE_EVENT__] !== __REMOTE_EVENT__) {
+    if (
+        message == null ||
+        message[__REMOTE_EMITTER_EVENT__] !== __REMOTE_EMITTER_EVENT__
+    ) {
         return
     }
 
