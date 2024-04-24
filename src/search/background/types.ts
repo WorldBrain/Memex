@@ -99,6 +99,7 @@ export type UnifiedSearchParams = {
     filterByVideos?: boolean
     filterByTweets?: boolean
     filterByEvents?: boolean
+    startsWithMatching?: boolean
     omitPagesWithoutAnnotations?: boolean
 }
 

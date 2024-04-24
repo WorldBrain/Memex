@@ -105,21 +105,32 @@ export const queryAnnotationsByTerms = (
 
 export const queryPagesByTerms = (
     storageManager: Storex,
+    opts?: {
+        startsWithMatching?: boolean
+    },
 ): UnifiedTermsSearchParams['queryPages'] => async (terms) => {
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
     const resultsPerTerm = await Promise.all(
-        terms.map((term) =>
-            dexie
-                .table<Page, string>('pages')
-                .where('terms')
-                .equals(term)
-                .or('urlTerms')
-                .equals(term)
-                .or('titleTerms')
-                .equals(term)
-                .distinct()
-                .primaryKeys(),
-        ),
+        terms.map((term) => {
+            const table = dexie.table<Page, string>('pages')
+            const coll = opts?.startsWithMatching
+                ? table
+                      .where('terms')
+                      .startsWith(term)
+                      .or('urlTerms')
+                      .startsWith(term)
+                      .or('titleTerms')
+                      .startsWith(term)
+                : table
+                      .where('terms')
+                      .equals(term)
+                      .or('urlTerms')
+                      .equals(term)
+                      .or('titleTerms')
+                      .equals(term)
+
+            return coll.distinct().primaryKeys()
+        }),
     )
     const matchingIds = intersectResults(resultsPerTerm)
 

@@ -394,7 +394,9 @@ export default class SearchBackground {
             console.time('Unified search')
             result = await this.unifiedTermsSearch({
                 ...params,
-                queryPages: queryPagesByTerms(this.options.storageManager),
+                queryPages: queryPagesByTerms(this.options.storageManager, {
+                    startsWithMatching: params.startsWithMatching,
+                }),
                 queryAnnotations: queryAnnotationsByTerms(
                     this.options.storageManager,
                 ),
