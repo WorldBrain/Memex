@@ -44,6 +44,7 @@ import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/l
 import { isUrlMemexSupportedVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import { isUrlATweet } from '@worldbrain/memex-common/lib/twitter-integration/utils'
 import { isUrlAnEventPage } from '@worldbrain/memex-common/lib/unified-search/utils'
+import type Dexie from 'dexie'
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -457,9 +458,11 @@ export default class SearchBackground {
             pageListEntries,
             annotListEntries,
         ] = await Promise.all([
-            this.options.storageManager
-                .collection('pages')
-                .findObjects<Page>({ url: { $in: pageIds } }),
+            // TODO: this Dexie query is here because the storex query didn't result in an indexed query happening
+            //  Need to fix the bug in storex-backend-dexie when it comes time to port this
+            (this.options.storageManager.backend['dexie'] as Dexie)
+                .table<Page>('pages')
+                .bulkGet(pageIds),
             this.options.storageManager
                 .collection('annotations')
                 .findObjects<Annotation>({
