@@ -420,7 +420,7 @@ export default class SearchBackground {
                         result?.oldestResultTimestamp ?? // allows to paginate back from prev result
                         params.untilWhen ??
                         highestTimeBound, // default to latest timestamp in DB, to start off search
-                    daysToSearch: 1,
+                    daysToSearch: 2,
                     lowestTimeBound,
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
