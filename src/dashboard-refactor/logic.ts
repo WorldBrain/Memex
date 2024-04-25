@@ -1268,8 +1268,18 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     })
 
-                    let compiledSelectableBlocks =
-                        previousState.selectableBlocks ?? []
+                    let compiledSelectableBlocks = []
+
+                    console.log(
+                        'event pageinate',
+                        event?.paginate,
+                        previousState.selectableBlocks.length,
+                    )
+
+                    if (event?.paginate) {
+                        compiledSelectableBlocks =
+                            previousState.selectableBlocks
+                    }
                     let resultsList = results[-1].pages.byId
 
                     for (let page of Object.values(resultsList)) {
