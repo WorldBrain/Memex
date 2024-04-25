@@ -1172,11 +1172,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchState,
                         this.options.annotationsCache,
                     )
-                    // console.log('SEARCH - params:', params)
                     const result = await this.options.searchBG.unifiedSearch(
                         params,
                     )
-                    // console.log('SEARCH - result:', result)
 
                     const {
                         noteData,

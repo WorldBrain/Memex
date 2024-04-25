@@ -33,6 +33,7 @@ import type {
     Page,
     PageListEntry,
     Visit,
+    FavIcon,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import {
     sortUnifiedBlankSearchResult,
@@ -45,6 +46,7 @@ import { isUrlMemexSupportedVideo } from '@worldbrain/memex-common/lib/utils/you
 import { isUrlATweet } from '@worldbrain/memex-common/lib/twitter-integration/utils'
 import { isUrlAnEventPage } from '@worldbrain/memex-common/lib/unified-search/utils'
 import type Dexie from 'dexie'
+import { blobToDataURL } from 'src/util/blob-utils'
 
 const dayMs = 1000 * 60 * 60 * 24
 
@@ -517,6 +519,20 @@ export default class SearchBackground {
             //     }),
         ])
 
+        const hostnames = [...new Set(pages.map((p) => p.hostname))]
+        const favIcons = await dexie
+            .table<FavIcon>('favIcons')
+            .bulkGet(hostnames)
+
+        const favIconDataURLs = await Promise.all(
+            favIcons.filter(Boolean).map(async (f) => ({
+                hostname: f.hostname,
+                favIconDataURL: await blobToDataURL(f.favIcon),
+            })),
+        )
+        const favIconByHostname = fromPairs(
+            favIconDataURLs.map((f) => [f.hostname, f.favIconDataURL]),
+        )
         const listIdsByPage = groupBy(pageListEntries, ([, pageUrl]) => pageUrl)
         const listIdsByAnnot = groupBy(
             annotListEntries,
@@ -535,6 +551,7 @@ export default class SearchBackground {
                 ),
                 displayTime:
                     resultDataByPage.get(page.url)?.latestPageTimestamp ?? 0,
+                favIcon: favIconByHostname[page.hostname],
             })
         }
         for (const annotation of annotations) {

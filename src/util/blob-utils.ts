@@ -1,11 +1,15 @@
 export async function blobToBuffer(blob: Blob): Promise<ArrayBuffer> {
-    return convertBlob<ArrayBuffer>(blob, (reader) =>
+    return setupFileReader<ArrayBuffer>((reader) =>
         reader.readAsArrayBuffer(blob),
     )
 }
 
+export async function blobToDataURL(blob: Blob) {
+    return setupFileReader<string>((reader) => reader.readAsDataURL(blob))
+}
+
 export async function blobToString(blob: Blob) {
-    return convertBlob<string>(blob, (reader) => reader.readAsText(blob))
+    return setupFileReader<string>((reader) => reader.readAsText(blob))
 }
 
 export async function blobToJson(blob: Blob) {
@@ -16,8 +20,7 @@ export async function bufferToBlob(buffer: ArrayBuffer): Promise<Blob> {
     return new Blob([buffer])
 }
 
-export async function convertBlob<T extends ArrayBuffer | string>(
-    blob: Blob,
+async function setupFileReader<T extends ArrayBuffer | string>(
     triggerRead: (reader: FileReader) => void,
 ) {
     const fileReader = new FileReader()
