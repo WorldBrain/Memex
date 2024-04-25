@@ -360,7 +360,11 @@ export default class SearchBackground {
     private async unifiedTermsSearch(
         params: UnifiedTermsSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
-        const terms = [...new Set(params.query.split(/\s+/).filter(Boolean))]
+        const terms = [
+            ...new Set(
+                params.query.toLocaleLowerCase().split(/\s+/).filter(Boolean),
+            ),
+        ]
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
 
         const [pages, annotations] = await Promise.all([
