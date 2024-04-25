@@ -289,7 +289,7 @@ export default class SearchBackground {
         const upperBound = params.untilWhen
         const lowerBound =
             params.fromWhen ?? upperBound - params.daysToSearch * dayMs
-        const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
+        // const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
 
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
         // TODO: these Dexie queries are here because the storex query didn't result in an indexed query happening
@@ -299,7 +299,7 @@ export default class SearchBackground {
             dexie
                 .table<Annotation>('annotations')
                 .where('lastEdited')
-                .between(lowerBound, upperBound)
+                .between(new Date(lowerBound), new Date(upperBound))
                 .toArray(),
             dexie
                 .table<Visit>('visits')
