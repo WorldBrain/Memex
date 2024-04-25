@@ -8,7 +8,6 @@ import {
 import {
     getAuthorizedFeatures,
     getAuthorizedPlans,
-    getSubscriptionStatus,
 } from 'src/authentication/background/utils'
 
 export const AuthContext = React.createContext<AuthContextInterface>({
@@ -38,7 +37,6 @@ export class AuthContextProvider extends React.Component<
                     ...user,
                     authorizedFeatures: getAuthorizedFeatures(user.claims),
                     authorizedPlans: getAuthorizedPlans(user.claims),
-                    subscriptionStatus: getSubscriptionStatus(user.claims),
                     subscriptionExpiry: user.claims.subscriptionExpiry,
                 },
             })

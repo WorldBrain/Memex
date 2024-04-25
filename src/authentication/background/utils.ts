@@ -2,22 +2,9 @@ import type {
     UserPlan,
     Claims,
     UserFeature,
-    SubscriptionStatus,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 import type { SettingStore } from 'src/util/settings'
 import type { AuthSettings } from './types'
-
-export function hasSubscribedBefore(claims: Claims): boolean {
-    return (
-        claims?.lastSubscribed != null ||
-        (claims?.subscriptions != null &&
-            Object.keys(claims.subscriptions).length > 0)
-    )
-}
-
-export function hasValidPlan(claims: Claims, plan: UserPlan): boolean {
-    return checkValidPlan(claims, plan).valid
-}
 
 export function getAuthorizedFeatures(claims: Claims): UserFeature[] {
     const features = [] as UserFeature[]
@@ -105,8 +92,4 @@ export function getSubscriptionExpirationTimestamp(
         claims?.subscriptions != null &&
         claims?.subscriptions[plan] != null
     return isPresent ? claims?.subscriptions[plan]?.expiry : null
-}
-
-export function getSubscriptionStatus(claims: Claims): SubscriptionStatus {
-    return claims?.subscriptionStatus
 }
