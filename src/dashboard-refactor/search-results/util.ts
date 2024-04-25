@@ -158,6 +158,7 @@ const pageResultToPageData = (
         hasNotes: pageResult.annotations.length > 0,
         type: isPdf ? 'pdf' : 'page',
         fullPdfUrl: isPdf ? pageResult.fullPdfUrl! : undefined,
+        totalAnnotationCount: pageResult.totalAnnotationsCount,
         isInFocus: false,
     }
 }

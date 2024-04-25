@@ -24,6 +24,7 @@ const pageDataToSearchRes = (
     displayTime: page.displayTime,
     lists: metadata?.lists ?? [],
     text: page?.text ?? '',
+    totalAnnotationsCount: 0,
 })
 
 const noteDataToSearchRes = (
@@ -54,6 +55,7 @@ export const PAGE_1: PageData = {
     hasNotes: true,
     lists: [],
     type: 'page',
+    totalAnnotationCount: 0,
 }
 
 export const PAGE_2: PageData = {
@@ -64,6 +66,7 @@ export const PAGE_2: PageData = {
     hasNotes: false,
     lists: [],
     type: 'page',
+    totalAnnotationCount: 0,
 }
 
 export const PAGE_3: PageData = {
@@ -74,6 +77,7 @@ export const PAGE_3: PageData = {
     hasNotes: true,
     lists: [],
     type: 'page',
+    totalAnnotationCount: 0,
 }
 
 export const NOTE_1: NoteData = {

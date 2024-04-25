@@ -519,6 +519,22 @@ export default class SearchBackground {
             //     }),
         ])
 
+        const annotCountsByPage = fromPairs<number>(
+            await Promise.all(
+                pages.map(
+                    async (page) =>
+                        [
+                            page.url,
+                            await dexie
+                                .table('annotations')
+                                .where('pageUrl')
+                                .equals(page.url)
+                                .count(),
+                        ] as [string, number],
+                ),
+            ),
+        )
+
         const hostnames = [...new Set(pages.map((p) => p.hostname))]
         const favIcons = await dexie
             .table<FavIcon>('favIcons')
@@ -552,6 +568,7 @@ export default class SearchBackground {
                 displayTime:
                     resultDataByPage.get(page.url)?.latestPageTimestamp ?? 0,
                 favIcon: favIconByHostname[page.hostname],
+                totalAnnotationsCount: annotCountsByPage[page.url] ?? 0,
             })
         }
         for (const annotation of annotations) {

@@ -252,10 +252,7 @@ export default class PageResultView extends PureComponent<Props> {
     private tutorialButtonRef = createRef<HTMLElement>()
 
     private get hasNotes(): boolean {
-        return (
-            this.props.hasNotes ||
-            this.props.noteIds[this.props.notesType].length > 0
-        )
+        return this.props.hasNotes || this.props.totalAnnotationCount > 0
     }
 
     private get hasLists(): boolean {
@@ -672,11 +669,12 @@ export default class PageResultView extends PureComponent<Props> {
             },
             {
                 key: 'expand-notes-btn',
+                // TODO: Simplify this conditional logic
                 ButtonText: !(
                     this.props.isNotesSidebarShown &&
                     this.props.isListsSidebarShown
                 ) ? (
-                    this.props.noteIds[this.props.notesType].length > 0 ? (
+                    this.props.totalAnnotationCount > 0 ? (
                         <NotesCounterTitle>
                             <Icon
                                 heightAndWidth="16px"
@@ -697,7 +695,7 @@ export default class PageResultView extends PureComponent<Props> {
                             Add Notes
                         </NotesCounterTitle>
                     )
-                ) : this.props.noteIds[this.props.notesType].length > 0 ? (
+                ) : this.props.totalAnnotationCount > 0 ? (
                     <NotesCounterTitle>
                         <Icon
                             heightAndWidth="16px"
@@ -715,9 +713,7 @@ export default class PageResultView extends PureComponent<Props> {
                     </NotesCounterTitle>
                 ),
                 imageColor:
-                    this.props.noteIds[this.props.notesType].length > 0
-                        ? 'prime1'
-                        : null,
+                    this.props.totalAnnotationCount > 0 ? 'prime1' : null,
 
                 onClick: (e) => {
                     if (e.altKey) {
@@ -1054,11 +1050,9 @@ export default class PageResultView extends PureComponent<Props> {
                             inPageMode={this.props.inPageMode}
                         />
                     </FooterBar>
-                    {this.props.noteIds[this.props.notesType]?.length > 0 && (
+                    {this.props.totalAnnotationCount > 0 && (
                         <NoteCounter>
-                            {this.props.noteIds[
-                                this.props.notesType
-                            ]?.length.toString()}
+                            {this.props.totalAnnotationCount}
                         </NoteCounter>
                     )}
                     {this.renderSpacePicker()}

@@ -13,6 +13,7 @@ export interface AnnotPage {
     favIcon?: string
     displayTime: number
     annotations: Annotation[]
+    totalAnnotationsCount: number
     pageId?: string
     lists: number[]
     text: string
