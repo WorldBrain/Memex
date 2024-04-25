@@ -290,17 +290,37 @@ export default class SearchBackground {
         const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
 
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
+        // TODO: these Dexie queries are here because the storex query didn't result in an indexed query happening
+        //  Need to fix the bug in storex-backend-dexie when it comes time to port this and revert them to storex queries
+        const dexie = this.options.storageManager.backend['dexie'] as Dexie
         const [annotations, visits, bookmarks] = await Promise.all([
-            this.options.storageManager
-                .collection('annotations')
-                .findObjects<Annotation>({ lastEdited: timeBoundsQuery }),
-            this.options.storageManager
-                .collection('visits')
-                .findObjects<Visit>({ time: timeBoundsQuery }),
-            this.options.storageManager
-                .collection('bookmarks')
-                .findObjects<Bookmark>({ time: timeBoundsQuery }),
+            dexie
+                .table<Annotation>('annotations')
+                .where('lastEdited')
+                .between(lowerBound, upperBound)
+                .toArray(),
+            dexie
+                .table<Visit>('visits')
+                .where('time')
+                .between(lowerBound, upperBound)
+                .toArray(),
+            dexie
+                .table<Bookmark>('bookmarks')
+                .where('time')
+                .between(lowerBound, upperBound)
+                .toArray(),
         ])
+        // const [annotations, visits, bookmarks] = await Promise.all([
+        //     this.options.storageManager
+        //         .collection('annotations')
+        //         .findObjects<Annotation>({ lastEdited: timeBoundsQuery }),
+        //     this.options.storageManager
+        //         .collection('visits')
+        //         .findObjects<Visit>({ time: timeBoundsQuery }),
+        //     this.options.storageManager
+        //         .collection('bookmarks')
+        //         .findObjects<Bookmark>({ time: timeBoundsQuery }),
+        // ])
 
         // Add in all the annotations to the results
         const annotsByPage = groupBy(annotations, (a) => a.pageUrl)
@@ -403,7 +423,6 @@ export default class SearchBackground {
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
-            console.time('Unified search')
             result = await this.unifiedTermsSearch({
                 ...params,
                 queryPages: queryPagesByTerms(this.options.storageManager, {
@@ -413,7 +432,6 @@ export default class SearchBackground {
                     this.options.storageManager,
                 ),
             })
-            console.timeEnd('Unified search')
         }
 
         const dataLookups = await this.lookupDataForUnifiedResults(result)
@@ -452,38 +470,58 @@ export default class SearchBackground {
             ...resultDataByPage.values(),
         ].flatMap(({ annotations }) => annotations.map((a) => a.url))
 
+        const dexie = this.options.storageManager.backend['dexie'] as Dexie
         const [
             pages,
             annotations,
             pageListEntries,
             annotListEntries,
         ] = await Promise.all([
-            // TODO: this Dexie query is here because the storex query didn't result in an indexed query happening
-            //  Need to fix the bug in storex-backend-dexie when it comes time to port this
-            (this.options.storageManager.backend['dexie'] as Dexie)
-                .table<Page>('pages')
-                .bulkGet(pageIds),
-            this.options.storageManager
-                .collection('annotations')
-                .findObjects<Annotation>({
-                    url: { $in: annotIds },
-                }),
-            this.options.storageManager
-                .collection('pageListEntries')
-                .findObjects<PageListEntry>({
-                    listId: { $ne: SPECIAL_LIST_IDS.INBOX },
-                    pageUrl: { $in: pageIds },
-                }),
-            this.options.storageManager
-                .collection('annotListEntries')
-                .findObjects<AnnotationListEntry>({
-                    listId: { $ne: SPECIAL_LIST_IDS.INBOX },
-                    url: { $in: annotIds },
-                }),
+            // TODO: these Dexie queries are here because the storex query didn't result in an indexed query happening
+            //  Need to fix the bug in storex-backend-dexie when it comes time to port this and revert them to storex queries
+            dexie.table<Page>('pages').bulkGet(pageIds),
+            dexie.table<Annotation>('annotations').bulkGet(annotIds),
+            dexie
+                .table<PageListEntry, [number, string]>('pageListEntries')
+                .where('pageUrl')
+                .anyOf(pageIds)
+                .filter((e) => e.listId !== SPECIAL_LIST_IDS.INBOX)
+                .primaryKeys(),
+            dexie
+                .table<AnnotationListEntry, [number, string]>(
+                    'annotListEntries',
+                )
+                .where('url')
+                .anyOf(annotIds)
+                .filter((e) => e.listId !== SPECIAL_LIST_IDS.INBOX)
+                .primaryKeys(),
+            // this.options.storageManager
+            //     .collection('pages')
+            //     .findObjects<Page>({ url: { $in: pageIds } }),
+            // this.options.storageManager
+            //     .collection('annotations')
+            //     .findObjects<Annotation>({
+            //         url: { $in: annotIds },
+            //     }),
+            // this.options.storageManager
+            //     .collection('pageListEntries')
+            //     .findObjects<PageListEntry>({
+            //         listId: { $ne: SPECIAL_LIST_IDS.INBOX },
+            //         pageUrl: { $in: pageIds },
+            //     }),
+            // this.options.storageManager
+            //     .collection('annotListEntries')
+            //     .findObjects<AnnotationListEntry>({
+            //         listId: { $ne: SPECIAL_LIST_IDS.INBOX },
+            //         url: { $in: annotIds },
+            //     }),
         ])
 
-        const listIdsByPage = groupBy(pageListEntries, (e) => e.pageUrl)
-        const listIdsByAnnot = groupBy(annotListEntries, (e) => e.url)
+        const listIdsByPage = groupBy(pageListEntries, ([, pageUrl]) => pageUrl)
+        const listIdsByAnnot = groupBy(
+            annotListEntries,
+            ([, pageUrl]) => pageUrl,
+        )
 
         const lookups: UnifiedSearchLookupData = {
             annotations: new Map(),
@@ -492,7 +530,9 @@ export default class SearchBackground {
         for (const page of pages) {
             lookups.pages.set(page.url, {
                 ...page,
-                lists: (listIdsByPage[page.url] ?? []).map((e) => e.listId),
+                lists: (listIdsByPage[page.url] ?? []).map(
+                    ([listId]) => listId,
+                ),
                 displayTime:
                     resultDataByPage.get(page.url)?.latestPageTimestamp ?? 0,
             })
@@ -501,7 +541,7 @@ export default class SearchBackground {
             lookups.annotations.set(annotation.url, {
                 ...annotation,
                 lists: (listIdsByAnnot[annotation.url] ?? []).map(
-                    (e) => e.listId,
+                    ([listId]) => listId,
                 ),
             })
         }
