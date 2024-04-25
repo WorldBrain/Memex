@@ -31,9 +31,12 @@ import type { PersonalCloudBackgroundEvents } from '../personal-cloud/background
 import type { PageSummaryBackgroundEvents } from 'src/summarization-llm/background/types'
 
 export class RpcError extends Error {
-    constructor(message: string) {
-        super(message)
+    constructor(err: Error) {
+        super(err.message)
         this.name = this.constructor.name
+        this.message = err.message
+        this.stack = err.stack
+        this.cause = err.cause
     }
 }
 

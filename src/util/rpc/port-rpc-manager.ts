@@ -285,13 +285,7 @@ export class PortBasedRPCManager implements RPCManager {
             port.postMessage(request)
             ret = await pendingRequest
         } catch (err) {
-            if (err.fromBgScript) {
-                throw new RpcError(
-                    'Error occurred in BG script: ' + err.message,
-                )
-            } else {
-                throw new RpcError(err.message)
-            }
+            throw new RpcError(err)
         }
         this.log(
             `RPC::messageRequester::to-PortName(${port.name}):: Response for [${name}]`,
