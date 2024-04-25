@@ -416,7 +416,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             blurEffectReset: false,
             focusLockUntilMouseStart: false,
             selectableBlocks: [],
-            focusedBlockId: 0,
+            focusedBlockId: -1,
         }
     }
 
@@ -964,6 +964,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         const selectedBlocksArray: SelectableBlock[] =
             previousState.selectableBlocks
 
+        console.log('selectedBlocksArray', selectedBlocksArray)
+
         const currentFocusElementIndex = previousState.focusedBlockId
         const currentFocusIndex = currentFocusElementIndex
 
@@ -986,7 +988,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 focusedBlockId: { $set: currentFocusIndex + 1 },
             })
         }
-        if (event.item.id) {
+        if (event.item?.id != null) {
             const nextFocusItemIndex = selectedBlocksArray.findIndex(
                 (item) => item?.id === event.item.id,
             )

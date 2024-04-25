@@ -178,6 +178,7 @@ export type Props = (HighlightProps | NoteProps) & AnnotationEditableEventProps
 
 export default class AnnotationEditable extends React.Component<Props, State> {
     private annotEditRef = React.createRef<AnnotationEdit>()
+    itemBoxRef = React.createRef<HTMLDivElement>() // Assuming ItemBox renders a div element
     private tutorialButtonRef = React.createRef<HTMLElement>()
     private shareMenuButtonRef = React.createRef<HTMLDivElement>()
     private copyPasterButtonRef = React.createRef<HTMLDivElement>()
@@ -288,6 +289,12 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         }
         if (prevProps.isActive && !this.props.isActive) {
             document.removeEventListener('keydown', this.handleCmdCKeyPress)
+        }
+        if (this.props.isInFocus && !prevProps.isInFocus) {
+            const itemBox = this.itemBoxRef.current
+            if (itemBox && !this.props.hoverState) {
+                itemBox.scrollIntoView({ block: 'center' })
+            }
         }
     }
 
@@ -1261,6 +1268,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             id: ANNOT_BOX_ID_PREFIX + this.props.unifiedId,
                         }}
                         hoverState={this.props.isInFocus}
+                        onRef={this.itemBoxRef}
                     >
                         {this.renderDeleteScreen(footerDeps)}
                         <AnnotationStyled>
