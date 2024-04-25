@@ -207,6 +207,7 @@ export default class ListDetails extends PureComponent<Props, State> {
                         isEditingDescription: true,
                     })
                 }}
+                defaultMinimized
             />
         )
     }

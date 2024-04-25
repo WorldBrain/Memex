@@ -1106,6 +1106,7 @@ const FooterBar = styled.div<{
     padding: 2px 0px 2px 0px;
     background: unset;
     backdrop-filter: unset;
+    margin-top: -5px;
 
     ${(props) =>
         props.inPageMode &&
@@ -1116,20 +1117,20 @@ const FooterBar = styled.div<{
     ${(props) =>
         (props.slimVersion || true) &&
         css`
-            display: none;
+            display: flex;
             position: relative;
 
             backdrop-filter: blur(5px);
             background: ${(props) => props.theme.colors.black0}95;
-            animation: ${slideOutToBottom} 0.2s
-                cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+            /* animation: ${slideOutToBottom} 0.2s
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards; */
         `};
     ${(props) =>
         props.shouldShow &&
         css`
             display: flex;
-            animation: ${slideInFromBottom} 0.2s
-                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            /* animation: ${slideInFromBottom} 0.2s
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards; */
         `};
 `
 

@@ -977,12 +977,18 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (event.direction === 'up') {
+            if (currentFocusIndex === 0) {
+                return
+            }
             nextItem = selectedBlocksArray[currentFocusIndex - 1]
             this.emitMutation({
                 focusedBlockId: { $set: currentFocusIndex - 1 },
             })
         }
         if (event.direction === 'down') {
+            if (currentFocusIndex === selectedBlocksArray.length - 1) {
+                return
+            }
             nextItem = selectedBlocksArray[currentFocusIndex + 1]
             this.emitMutation({
                 focusedBlockId: { $set: currentFocusIndex + 1 },
