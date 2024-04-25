@@ -7,10 +7,7 @@ import {
 import { DashboardLogic } from './logic'
 import { Events, RootState } from './types'
 import * as DATA from './logic.test.data'
-import {
-    StandardSearchResponse,
-    AnnotationsSearchResponse,
-} from 'src/search/background/types'
+import { StandardSearchResponse } from 'src/search/background/types'
 import { FakeAnalytics } from 'src/analytics/mock'
 import { createUIServices } from 'src/services/ui'
 import { TEST_USER } from '@worldbrain/memex-common/lib/authentication/dev'
@@ -26,9 +23,7 @@ type DataSeeder = (
     logic: TestLogicContainer<RootState, Events>,
     device: UILogicTestDevice,
 ) => Promise<void>
-type DataSeederCreator<
-    T = StandardSearchResponse | AnnotationsSearchResponse
-> = (data?: T) => DataSeeder
+type DataSeederCreator<T = StandardSearchResponse> = (data?: T) => DataSeeder
 
 export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
     result = DATA.PAGE_SEARCH_RESULT_1,
@@ -48,7 +43,7 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
     for (const page of result.docs) {
         await storageManager.collection('pages').createObject({
             url: page.url,
-            title: page.title,
+            title: page.fullTitle,
         })
         await storageManager.collection('visits').createObject({
             url: page.url,
@@ -80,17 +75,17 @@ export const setPageSearchResult: DataSeederCreator<StandardSearchResponse> = (
             }
         }
 
-        if (page.hasBookmark) {
-            await storageManager.collection('bookmarks').createObject({
-                url: page.url,
-                time: Date.now(),
-            })
-        }
+        // if (page.hasBookmark) {
+        //     await storageManager.collection('bookmarks').createObject({
+        //         url: page.url,
+        //         time: Date.now(),
+        //     })
+        // }
     }
     await logic.processEvent('setPageSearchResult', { result })
 }
 
-export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> = (
+export const setNoteSearchResult: DataSeederCreator = (
     result = DATA.ANNOT_SEARCH_RESULT_2,
 ) => async (logic, { storageManager }) => {
     for (const list of DATA.LISTS_1) {
@@ -107,7 +102,7 @@ export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> =
     for (const page of result.docs) {
         await storageManager.collection('pages').createObject({
             url: page.url,
-            title: page.title,
+            title: page.fullTitle,
         })
 
         for (const annot of page.annotations) {
@@ -116,21 +111,14 @@ export const setNoteSearchResult: DataSeederCreator<AnnotationsSearchResponse> =
             })
         }
 
-        for (const tag of page.tags) {
-            await storageManager.collection('tags').createObject({
-                name: tag,
-                url: page.url,
-            })
-        }
-
-        if (page.hasBookmark) {
-            await storageManager.collection('bookmarks').createObject({
-                url: page.url,
-                time: Date.now(),
-            })
-        }
+        // if (page.hasBookmark) {
+        //     await storageManager.collection('bookmarks').createObject({
+        //         url: page.url,
+        //         time: Date.now(),
+        //     })
+        // }
     }
-    logic.processEvent('setAnnotationSearchResult', { result })
+    // logic.processEvent('setAnnotationSearchResult', { result })
 }
 
 const defaultTestSetupDeps = {
@@ -198,7 +186,7 @@ export async function setupTest(
                     { ...fnArgs, skipPageIndexing: true },
                 ),
         },
-        searchBG: device.backgroundModules.search.remoteFunctions.search,
+        searchBG: device.backgroundModules.search.remoteFunctions,
         contentShareBG: device.backgroundModules.contentSharing.remoteFunctions,
         contentShareByTabsBG: insertBackgroundFunctionTab(
             device.backgroundModules.contentSharing.remoteFunctionsByTab,

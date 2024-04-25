@@ -510,6 +510,7 @@ export class AnnotationsSidebarContainer<
                     ),
                 })
             },
+            defaultMinimized: false,
         }
     }
 

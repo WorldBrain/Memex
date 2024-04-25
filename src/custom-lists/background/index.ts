@@ -3,7 +3,6 @@ import type { Browser } from 'webextension-polyfill'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import { isFullUrl } from '@worldbrain/memex-common/lib/url-utils/normalize/utils'
 import CustomListStorage from './storage'
-import type { SearchIndex } from 'src/search'
 import type {
     RemoteCollectionsInterface,
     CollectionsSettings,
@@ -44,7 +43,6 @@ export default class CustomListBackground {
     constructor(
         private options: {
             storageManager: Storex
-            searchIndex: SearchIndex
             analyticsBG: AnalyticsCoreInterface
             contentSharingBackend: ContentSharingBackendInterface
             contentSharing: ContentSharingBackground

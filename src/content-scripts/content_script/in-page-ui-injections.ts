@@ -10,7 +10,6 @@ import { renderUpgradeModal } from 'src/search-injection/upgrade-modal-display'
 export const main: InPageUIInjectionsMain = async ({
     inPageUI,
     annotationsFunctions,
-    requestSearcher,
     searchDisplayProps,
     upgradeModalProps,
     syncSettings,
@@ -54,7 +53,7 @@ export const main: InPageUIInjectionsMain = async ({
 
                             await handleRenderSearchInjection(
                                 query,
-                                requestSearcher,
+                                searchDisplayProps.searchBG.unifiedSearch,
                                 matched,
                                 syncSettings,
                                 () =>

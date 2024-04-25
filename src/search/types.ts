@@ -50,36 +50,6 @@ export interface VisitInteraction {
     scrollMaxPerc: number
 }
 
-export interface SearchIndex {
-    search: (params: {
-        query: string
-        showOnlyBookmarks: boolean
-        mapResultsFunc?: any
-        domains?: string[]
-        domainsExclude?: string[]
-        tags?: any[]
-        lists?: any[]
-        endDate?: number
-        startDate?: number
-        [key: string]: any
-    }) => Promise<{
-        docs: any[]
-        isBadTerm?: boolean
-        requiresMigration?: boolean
-        totalCount: number
-        resultsExhausted: boolean
-    }>
-    getMatchingPageCount: (pattern) => Promise<any>
-    fullSearch: (
-        params: SearchParams,
-    ) => Promise<{
-        ids: Array<[string, number, number]>
-        totalCount: number
-    }>
-
-    getPage: (url: string) => Promise<any>
-}
-
 export interface PageCreationProps {
     fullUrl: string
     tabId?: number

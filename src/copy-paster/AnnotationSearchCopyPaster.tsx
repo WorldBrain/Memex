@@ -1,11 +1,11 @@
 import React from 'react'
 import CopyPaster, { Props as CopyPasterProps } from './CopyPaster'
-import type { BackgroundSearchParams } from 'src/search/background/types'
+import type { UnifiedSearchParams } from 'src/search/background/types'
 import type { Template } from './types'
 
 export interface Props
     extends Omit<CopyPasterProps, 'renderTemplate' | 'renderPreview'> {
-    searchParams: BackgroundSearchParams
+    searchParams: UnifiedSearchParams
 }
 
 export default class AnnotationSearchCopyPaster extends React.PureComponent<

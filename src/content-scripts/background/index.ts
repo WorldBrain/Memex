@@ -9,6 +9,7 @@ import { sleepPromise } from 'src/util/promises'
 import type { ContentSharingClientStorage } from 'src/content-sharing/background/storage'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
+import { isUrlSupported } from 'src/page-indexing/utils'
 
 export class ContentScriptsBackground {
     remoteFunctions: ContentScriptsInterface<'provider' | 'caller'>
@@ -71,10 +72,13 @@ export class ContentScriptsBackground {
         }
 
         this.options.browserAPIs.webNavigation.onHistoryStateUpdated.addListener(
-            ({ tabId }) =>
-                runInTab<InPageUIContentScriptRemoteInterface>(
-                    tabId,
-                ).handleHistoryStateUpdate(tabId),
+            async ({ tabId, url }) => {
+                if (isUrlSupported({ fullUrl: url })) {
+                    await runInTab<InPageUIContentScriptRemoteInterface>(
+                        tabId,
+                    ).handleHistoryStateUpdate(tabId)
+                }
+            },
         )
 
         this.options.browserAPIs.tabs.onUpdated.addListener(

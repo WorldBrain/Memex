@@ -9,10 +9,6 @@ import * as DATA from '../logic.test.data'
 import * as utils from './util'
 import { ResultHoverState } from './types'
 import { PAGE_SEARCH_DUMMY_DAY } from '../constants'
-import {
-    AnnotationSharingState,
-    AnnotationSharingStates,
-} from 'src/content-sharing/background/types'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 
 describe('Dashboard search results logic', () => {

@@ -26,7 +26,7 @@ import {
     getListData,
 } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
-import type { NoResultsType } from './search-results/types'
+import type { NoResultsType, SelectableBlock } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
 import { DRAG_EL_ID } from './components/DragElement'
 import {
@@ -52,7 +52,6 @@ import type { AnnotationSharingStates } from 'src/content-sharing/background/typ
 import { getAnnotationPrivacyState } from '@worldbrain/memex-common/lib/content-sharing/utils'
 import { ACTIVITY_INDICATOR_ACTIVE_CACHE_KEY } from 'src/activity-indicator/constants'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { eventProviderUrls } from '@worldbrain/memex-common/lib/constants'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
 import { openPDFInViewer } from 'src/pdf/util'
 import { hydrateCacheForListUsage } from 'src/annotations/cache/utils'
@@ -61,7 +60,6 @@ import type {
     RGBAColor,
     UnifiedList,
 } from 'src/annotations/cache/types'
-import type { AnnotationsSearchResponse } from 'src/search/background/types'
 import { SPECIAL_LIST_STRING_IDS } from './lists-sidebar/constants'
 import { normalizeUrl } from '@worldbrain/memex-common/lib/url-utils/normalize'
 import {
@@ -76,12 +74,12 @@ import {
     pushOrderedItem,
 } from '@worldbrain/memex-common/lib/utils/item-ordering'
 import MarkdownIt from 'markdown-it'
-
 import { copyToClipboard } from 'src/annotations/content_script/utils'
 import Raven from 'raven-js'
 import analytics from 'src/analytics'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
-import { pageActionAllowed } from 'src/util/subscriptions/storage'
+import type { UnifiedSearchResult } from 'src/search/background/types'
+import { BulkEditCollection } from 'src/bulk-edit/types'
 
 type EventHandler<EventName extends keyof Events> = UIEventHandler<
     State,
@@ -328,6 +326,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
             spaceSearchSuggestions: [],
             searchResults: {
+                blankSearchOldestResultTimestamp: null,
                 results: {},
                 noResultsType: null,
                 showMobileAppAd: false,
@@ -416,6 +415,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             showFullScreen: null,
             blurEffectReset: false,
             focusLockUntilMouseStart: false,
+            selectableBlocks: [],
+            focusedBlockId: -1,
         }
     }
 
@@ -545,16 +546,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             let nextState = await this.loadAuthStates(previousState)
             nextState = await this.hydrateStateFromLocalStorage(nextState)
-            const bulkSelectedItems = await getBulkEditItems()
-
-            let selectedUrls = []
-            for (let item of bulkSelectedItems) {
-                selectedUrls.push(item.url)
-            }
-
-            this.emitMutation({
-                bulkSelectedUrls: { $set: selectedUrls },
-            })
             if (
                 spacesArray.length > 0 ||
                 selectedSpace ||
@@ -579,7 +570,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 })
             } else {
-                await this.runSearch(nextState)
+                await this.runSearch({ previousState: nextState, event: null })
             }
 
             await this.getFeedActivityStatus()
@@ -594,6 +585,19 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             this.emitMutation({
                 highlightColors: { $set: highlightColorSettings },
+            })
+
+            const bulkSelectedItems = (await getBulkEditItems()) ?? {}
+
+            for (const [url, item] of Object.entries(bulkSelectedItems)) {
+                bulkSelectedItems[url] = {
+                    type: item.type,
+                }
+                // You can modify the object here if needed
+            }
+
+            this.emitMutation({
+                bulkSelectedUrls: { $set: bulkSelectedItems },
             })
         })
     }
@@ -859,73 +863,80 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         this.emitMutation(mutation)
         const nextState = this.withMutation(previousState, mutation)
-        this.runSearch(nextState)
+        this.runSearch({ previousState: nextState, event: null })
     }
 
-    private runSearch = debounce(
-        async (previousState: State, paginate?: boolean) => {
-            await this.search({ previousState, event: { paginate } })
-        },
-        200,
-    )
-
+    // TODO: bulk edit implementation needs simplification
     selectAllCurrentItems: EventHandler<'selectAllCurrentItems'> = async ({
         previousState,
         event,
     }) => {
-        let searchPosition = 0
-        let searchFilters: UIMutation<State['searchFilters']> = {
-            skip: { $set: searchPosition },
-            limit: { $set: 100 },
-        }
-        let searchState = this.withMutation(previousState, {
-            searchFilters,
-        })
+        const pageSize = 10
+        let skip = 0
+        let nextState = previousState
+        const selectedUrls = previousState.bulkSelectedUrls
+        const bulkEditItems: BulkEditCollection = await getBulkEditItems()
+        let result: UnifiedSearchResult
 
-        let selection = []
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(searchState, this.options.annotationsCache),
-        )
-        selection.push(...result.docs)
-        while (!result.resultsExhausted) {
-            searchPosition += 100
-            searchFilters = {
-                skip: { $set: searchPosition },
-            }
-            searchState = this.withMutation(previousState, {
-                searchFilters,
+        // Page through entire set of search results with current filters, keeping track of URLs and titles
+        do {
+            nextState = this.withMutation(nextState, {
+                searchFilters: {
+                    skip: { $set: skip },
+                    limit: { $set: pageSize },
+                    dateTo: { $set: null },
+                },
+                searchResults: {
+                    blankSearchOldestResultTimestamp: {
+                        $set: result?.oldestResultTimestamp ?? Date.now(),
+                    },
+                },
             })
-            result = await this.options.searchBG.searchPages(
-                stateToSearchParams(searchState, this.options.annotationsCache),
+
+            const params = stateToSearchParams(
+                nextState,
+                this.options.annotationsCache,
             )
-            selection.push(...result.docs)
-        }
 
-        let dataArray = await getBulkEditItems()
-        for (let item of selection) {
-            if (!dataArray.some((data) => data.url === item.url)) {
-                const data = {
-                    title: item.title,
-                    url: item.url,
+            result = await this.options.searchBG.unifiedSearch(params)
+
+            const { results } = utils.pageSearchResultToState(
+                result,
+                this.options.annotationsCache,
+            )
+
+            let resultsList = results[-1].pages.byId
+
+            for (let page of Object.values(resultsList)) {
+                const annotations = page.noteIds?.user ?? []
+                if (selectedUrls[page.id]) {
+                    if (annotations.length > 0) {
+                        for (let note of annotations) {
+                            bulkEditItems[note] = {
+                                type: 'note',
+                            }
+                        }
+                    }
+                    continue
+                } else {
+                    bulkEditItems[page.id] = {
+                        type: 'page',
+                    }
+                    if (annotations.length > 0) {
+                        for (let note of annotations) {
+                            bulkEditItems[note] = {
+                                type: 'note',
+                            }
+                        }
+                    }
                 }
-                dataArray.push(data)
             }
-        }
 
-        let selectedUrls = previousState.bulkSelectedUrls
-        for (let item of selection) {
-            let selectedUrls = previousState.bulkSelectedUrls
-            for (let item of selection) {
-                if (!selectedUrls.includes(item.url)) {
-                    selectedUrls.push(item.url)
-                }
-            }
-        }
-        this.emitMutation({
-            bulkSelectedUrls: { $set: selectedUrls },
-        })
+            skip += pageSize
+        } while (!result.resultsExhausted)
 
-        await setBulkEdit(dataArray, false)
+        this.emitMutation({ bulkSelectedUrls: { $set: bulkEditItems } })
+        await setBulkEdit(bulkEditItems, false)
     }
 
     clearBulkSelection: EventHandler<'clearBulkSelection'> = async ({
@@ -933,7 +944,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
     }) => {
         this.emitMutation({
-            bulkSelectedUrls: { $set: [] },
+            bulkSelectedUrls: { $set: {} },
         })
         await clearBulkEditItems()
     }
@@ -950,73 +961,98 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
         event,
     }) => {
-        const previousResults =
-            previousState.searchResults.results[-1]?.pages.byId
+        const selectedBlocksArray: SelectableBlock[] =
+            previousState.selectableBlocks
 
-        if (previousResults) {
-            const focusedItemIndex = Object?.keys(previousResults)?.findIndex(
-                (key) => previousResults[key].isInFocus === true,
+        const currentFocusElementIndex = previousState.focusedBlockId
+        const currentFocusIndex = currentFocusElementIndex
+
+        let previousItem
+        let nextItem
+
+        if (currentFocusIndex !== -1) {
+            previousItem = selectedBlocksArray[currentFocusIndex]
+        }
+
+        if (event.direction === 'up') {
+            if (currentFocusIndex === 0) {
+                return
+            }
+            nextItem = selectedBlocksArray[currentFocusIndex - 1]
+            this.emitMutation({
+                focusedBlockId: { $set: currentFocusIndex - 1 },
+            })
+        }
+        if (event.direction === 'down') {
+            if (currentFocusIndex === selectedBlocksArray.length - 1) {
+                return
+            }
+            nextItem = selectedBlocksArray[currentFocusIndex + 1]
+            this.emitMutation({
+                focusedBlockId: { $set: currentFocusIndex + 1 },
+            })
+        }
+        if (event.item?.id != null) {
+            const nextFocusItemIndex = selectedBlocksArray.findIndex(
+                (item) => item?.id === event.item.id,
             )
 
-            let previousItem = Object.values(previousResults)[focusedItemIndex]
-            let nextItem
+            nextItem = selectedBlocksArray[nextFocusItemIndex]
+            this.emitMutation({
+                focusedBlockId: { $set: nextFocusItemIndex },
+            })
+        }
 
-            nextItem = null
-
-            if (event.pageId) {
-                nextItem = { id: event.pageId }
-            }
-
-            if (event.direction === 'up') {
-                nextItem = Object.values(previousResults)[focusedItemIndex - 1]
-            }
-            if (event.direction === 'down') {
-                nextItem = Object.values(previousResults)[focusedItemIndex + 1]
-            }
-
-            if (nextItem) {
+        if (nextItem) {
+            if (nextItem.type === 'page') {
                 this.emitMutation({
                     searchResults: {
-                        results: {
-                            [-1]: {
-                                pages: {
-                                    byId: {
-                                        ...(previousItem
-                                            ? {
-                                                  [previousItem.id]: {
-                                                      isInFocus: {
-                                                          $set: false,
-                                                      },
-                                                  },
-                                              }
-                                            : {}),
-                                        [nextItem.id]: {
-                                            isInFocus: { $set: true },
-                                        },
-                                    },
+                        pageData: {
+                            byId: {
+                                [nextItem?.id]: {
+                                    isInFocus: { $set: true },
                                 },
                             },
                         },
                     },
                 })
             }
-            if (!nextItem && previousItem) {
+            if (nextItem.type === 'note') {
                 this.emitMutation({
                     searchResults: {
-                        results: {
-                            [-1]: {
-                                pages: {
-                                    byId: {
-                                        ...(previousItem
-                                            ? {
-                                                  [previousItem.id]: {
-                                                      isInFocus: {
-                                                          $set: false,
-                                                      },
-                                                  },
-                                              }
-                                            : {}),
-                                    },
+                        noteData: {
+                            byId: {
+                                [nextItem?.id]: {
+                                    isInFocus: { $set: true },
+                                },
+                            },
+                        },
+                    },
+                })
+            }
+        }
+
+        if (previousItem) {
+            if (previousItem.type === 'note') {
+                this.emitMutation({
+                    searchResults: {
+                        noteData: {
+                            byId: {
+                                [previousItem?.id]: {
+                                    isInFocus: { $set: false },
+                                },
+                            },
+                        },
+                    },
+                })
+            }
+            if (previousItem.type === 'page') {
+                this.emitMutation({
+                    searchResults: {
+                        pageData: {
+                            byId: {
+                                [previousItem?.id]: {
+                                    isInFocus: { $set: false },
                                 },
                             },
                         },
@@ -1034,44 +1070,55 @@ export class DashboardLogic extends UILogic<State, Events> {
             bulkEditSpacesLoadingState: { $set: 'running' },
         })
 
-        const selectedItems = await getBulkEditItems()
+        const selectedItems: BulkEditCollection = await getBulkEditItems()
+        const unifiedListId = this.options.annotationsCache.getListByLocalId(
+            event.listId,
+        )
 
-        for (let item of selectedItems) {
-            await this.options.listsBG.updateListForPage({
-                url: 'https://' + item.url,
-                added: event.listId,
-                skipPageIndexing: true,
-            })
-
-            try {
-                const unifiedListId = this.options.annotationsCache.getListByLocalId(
-                    event.listId,
-                )
-
+        for (let [url, item] of Object.entries(selectedItems)) {
+            if (item.type === 'page') {
+                await this.options.listsBG.updateListForPage({
+                    url: 'https://' + url,
+                    added: event.listId,
+                    skipPageIndexing: true,
+                })
                 const calcNextLists = updatePickerValues({
                     added: unifiedListId.unifiedId,
                 })
-                const nextPageListIds = calcNextLists(
-                    previousState.searchResults.pageData.byId[item.url].lists,
-                )
 
-                await this.options.annotationsCache.setPageData(
-                    item.url,
-                    nextPageListIds,
-                )
+                const newPageLists =
+                    previousState.searchResults.pageData.byId[url]?.lists ?? []
+
+                newPageLists.push(unifiedListId.unifiedId)
+                let nextPageListIds = null
+                if (newPageLists.length > 0) {
+                    nextPageListIds =
+                        calcNextLists(
+                            previousState.searchResults.pageData.byId[url]
+                                ?.lists,
+                        ) ?? []
+                }
+
+                this.options.annotationsCache.setPageData(url, nextPageListIds)
 
                 this.emitMutation({
                     searchResults: {
                         pageData: {
                             byId: {
-                                [item.url]: {
+                                [url]: {
                                     lists: { $set: nextPageListIds },
                                 },
                             },
                         },
                     },
                 })
-            } catch (e) {}
+            }
+            if (item.type === 'note') {
+                await this.processUIEvent('setNoteLists', {
+                    previousState,
+                    event: { noteId: url, added: unifiedListId.unifiedId },
+                })
+            }
         }
 
         this.emitMutation({
@@ -1093,17 +1140,25 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* START - Misc event handlers */
     search: EventHandler<'search'> = async ({ previousState, event }) => {
         const searchID = ++this.currentSearchID
-        const searchFilters: UIMutation<State['searchFilters']> = {
-            skip: event.paginate
-                ? { $apply: (skip) => skip + 10 }
-                : { $set: 0 },
+        // Some states should be reset if not paginating a previously run search
+        const mutation: UIMutation<State> = {
+            searchResults: {
+                blankSearchOldestResultTimestamp: {
+                    $apply: (timestamp) => (event?.paginate ? timestamp : null),
+                },
+            },
+            searchFilters: {
+                skip: {
+                    $apply: (skip) => (event?.paginate ? skip + PAGE_SIZE : 0),
+                },
+            },
         }
 
         await executeUITask(
             this,
             (taskState) => ({
                 searchResults: {
-                    [event.paginate
+                    [event?.paginate
                         ? 'searchPaginationState'
                         : 'searchState']: {
                         $set: taskState,
@@ -1112,31 +1167,33 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
 
             async () => {
-                const searchState = this.withMutation(previousState, {
-                    searchFilters,
-                })
                 if (searchID !== this.currentSearchID) {
                     return
                 } else {
-                    let {
+                    const searchState = this.withMutation(
+                        previousState,
+                        mutation,
+                    )
+                    const params = stateToSearchParams(
+                        searchState,
+                        this.options.annotationsCache,
+                    )
+                    const result = await this.options.searchBG.unifiedSearch(
+                        params,
+                    )
+
+                    const {
                         noteData,
                         pageData,
                         results,
-                        resultsExhausted,
-                        searchTermsInvalid,
-                    } =
-                        previousState.searchResults.searchType === 'pages' ||
-                        previousState.searchResults.searchType === 'videos' ||
-                        previousState.searchResults.searchType === 'events' ||
-                        previousState.searchResults.searchType === 'twitter'
-                            ? await this.searchPages(searchState)
-                            : previousState.searchResults.searchType === 'notes'
-                            ? await this.searchNotes(searchState)
-                            : await this.searchPDFs(searchState)
+                    } = utils.pageSearchResultToState(
+                        result,
+                        this.options.annotationsCache,
+                    )
 
                     let noResultsType: NoResultsType = null
                     if (
-                        resultsExhausted &&
+                        result.resultsExhausted &&
                         searchState.searchFilters.skip === 0 &&
                         !pageData.allIds.length
                     ) {
@@ -1157,9 +1214,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         ) {
                             noResultsType = 'onboarding-msg'
                         } else {
-                            noResultsType = searchTermsInvalid
-                                ? 'stop-words'
-                                : 'no-results'
+                            noResultsType = 'no-results'
                         }
                     }
 
@@ -1168,15 +1223,18 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
 
                     this.emitMutation({
-                        searchFilters,
+                        searchFilters: mutation.searchFilters,
                         searchResults: {
+                            blankSearchOldestResultTimestamp: {
+                                $set: result.oldestResultTimestamp,
+                            },
                             areResultsExhausted: {
-                                $set: resultsExhausted,
+                                $set: result.resultsExhausted,
                             },
                             searchState: { $set: 'success' },
                             searchPaginationState: { $set: 'success' },
                             noResultsType: { $set: noResultsType },
-                            ...(event.paginate
+                            ...(event?.paginate
                                 ? {
                                       results: {
                                           $apply: (prev) =>
@@ -1208,110 +1266,43 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     })
 
-                    // const hasPreviousResults =
-                    //     Object.keys(previousState.searchResults.results)
-                    //         .length > 0
+                    let compiledSelectableBlocks = []
 
-                    // if (!hasPreviousResults) {
-                    //     const firstKey = Object.keys(
-                    //         results[PAGE_SEARCH_DUMMY_DAY].pages.byId,
-                    //     )[0]
+                    if (event?.paginate) {
+                        compiledSelectableBlocks =
+                            previousState.selectableBlocks
+                    }
+                    let resultsList = results[-1].pages.byId
 
-                    //     this.emitMutation({
-                    //         searchResults: {
-                    //             results: {
-                    //                 [PAGE_SEARCH_DUMMY_DAY]: {
-                    //                     pages: {
-                    //                         byId: {
-                    //                             [firstKey]: {
-                    //                                 isInFocus: {
-                    //                                     $set: true,
-                    //                                 },
-                    //                             },
-                    //                         },
-                    //                     },
-                    //                 },
-                    //             },
-                    //         },
-                    //     })
-                    // }
+                    for (let page of Object.values(resultsList)) {
+                        let block: SelectableBlock = {
+                            id: page.id,
+                            type: 'page',
+                        }
+
+                        compiledSelectableBlocks.push(block)
+
+                        let pageNotes = page?.noteIds?.user ?? null
+
+                        if (pageNotes.length > 0) {
+                            for (let note of pageNotes) {
+                                let noteBlock: SelectableBlock = {
+                                    id: note,
+                                    type: 'note',
+                                }
+                                compiledSelectableBlocks.push(noteBlock)
+                            }
+                        }
+                    }
+                    this.emitMutation({
+                        selectableBlocks: { $set: compiledSelectableBlocks },
+                    })
                 }
             },
         )
     }
 
-    private searchPages = async (state: State) => {
-        const result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state, this.options.annotationsCache),
-        )
-
-        if (state.searchResults.searchType === 'events') {
-            result.docs = result.docs.filter((item) => {
-                return eventProviderUrls.some((items) =>
-                    item.fullUrl.includes(items),
-                )
-            })
-        }
-
-        return {
-            ...utils.pageSearchResultToState(
-                result,
-                this.options.annotationsCache,
-            ),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
-
-    private searchPDFs = async (state: State) => {
-        let result = await this.options.searchBG.searchPages(
-            stateToSearchParams(state, this.options.annotationsCache),
-        )
-
-        const pdfResults = result.docs.filter((x) => x.url.endsWith('.pdf'))
-
-        result = {
-            docs: pdfResults,
-            resultsExhausted: result.resultsExhausted,
-            isBadTerm: result.isBadTerm,
-        }
-
-        return {
-            ...utils.pageSearchResultToState(
-                result,
-                this.options.annotationsCache,
-            ),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
-
-    firstLoad = true
-    private searchNotes = async (state: State) => {
-        if (this.firstLoad) {
-            state.searchFilters.limit = 2
-        } else {
-            state.searchFilters.limit = PAGE_SIZE
-        }
-        const result = await this.options.searchBG.searchAnnotations(
-            stateToSearchParams(state, this.options.annotationsCache),
-        )
-
-        if (result.resultsExhausted) {
-            this.firstLoad = true
-        } else if (!result.resultsExhausted) {
-            this.firstLoad = false
-        }
-
-        return {
-            ...utils.annotationSearchResultToState(
-                result as AnnotationsSearchResponse,
-                this.options.annotationsCache,
-            ),
-            resultsExhausted: result.resultsExhausted,
-            searchTermsInvalid: result.isBadTerm,
-        }
-    }
+    private runSearch = debounce(this.search, 200)
 
     private async ensureLoggedIn(): Promise<boolean> {
         const { authBG } = this.options
@@ -1502,22 +1493,6 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* START - search result event handlers */
     setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
         const state = utils.pageSearchResultToState(
-            event.result,
-            this.options.annotationsCache,
-        )
-        this.emitMutation({
-            searchResults: {
-                results: { $set: state.results },
-                pageData: { $set: state.pageData },
-                noteData: { $set: state.noteData },
-            },
-        })
-    }
-
-    setAnnotationSearchResult: EventHandler<'setAnnotationSearchResult'> = ({
-        event,
-    }) => {
-        const state = utils.annotationSearchResultToState(
             event.result,
             this.options.annotationsCache,
         )
@@ -1734,7 +1709,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
         this.processUIEvent('changeFocusItem', {
             previousState,
-            event: { direction: 'down', pageId: event.pageId },
+            event: {
+                direction: 'down',
+                item: { id: event.pageId, type: 'page' },
+            },
         })
 
         const listData = getListData(
@@ -1909,20 +1887,28 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        let selectedUrls = previousState.bulkSelectedUrls ?? []
+        let selectedUrls: BulkEditCollection =
+            previousState.bulkSelectedUrls ?? {}
         if (event.remove) {
-            selectedUrls = selectedUrls.filter((url) => url !== event.item.url)
+            delete selectedUrls[event.item.url]
         } else {
-            if (!selectedUrls.includes(event.item.url)) {
-                selectedUrls.push(event.item.url)
+            if (selectedUrls[event.item.url] == null) {
+                selectedUrls[event.item.url] = {
+                    type: event.item.type,
+                }
             }
         }
-
         this.emitMutation({
             bulkSelectedUrls: { $set: selectedUrls },
         })
 
-        await setBulkEdit([event.item], event.remove)
+        const itemToSave = {}
+        itemToSave[event.item.url] = {
+            url: event.item.url,
+            type: event.item.type,
+        }
+
+        await setBulkEdit(itemToSave, event.remove)
     }
 
     bulkDeleteItem: EventHandler<'bulkDeleteItem'> = async ({
@@ -1937,30 +1923,41 @@ export class DashboardLogic extends UILogic<State, Events> {
             }),
             async () => {
                 try {
-                    const itemsInStorage = await getBulkEditItems()
+                    const itemsInStorage: BulkEditCollection = await getBulkEditItems()
 
-                    let itemsToProcess = []
-                    let itemsForStorage = []
+                    let pagesToDelete = []
+                    let notesToDelete = []
 
-                    for (let item of itemsInStorage) {
-                        itemsToProcess.push(item.url)
-                        itemsForStorage.push({ url: item.url })
+                    for (const [url, item] of Object.entries(itemsInStorage)) {
+                        if (item.type === 'page') {
+                            pagesToDelete.push(url)
+                        }
+                        if (item.type === 'note') {
+                            notesToDelete.push(url)
+                        }
                     }
 
                     const chunkSize = 100
-                    const numChunksItemsDelete = Math.ceil(
-                        itemsToProcess.length / chunkSize,
+                    const numChunksPagesDelete = Math.ceil(
+                        pagesToDelete.length / chunkSize,
                     )
 
-                    for (let i = 0; i < numChunksItemsDelete; i++) {
+                    for (let i = 0; i < numChunksPagesDelete; i++) {
                         const start = i * chunkSize
                         const end = start + chunkSize
-                        const chunk = itemsToProcess.slice(start, end)
-                        const chunkStorage = itemsForStorage.slice(start, end)
-
+                        const chunk = pagesToDelete.slice(start, end)
+                        // const chunkStorage = itemsForStorage.slice(start, end)
                         await this.options.searchBG.delPages(chunk)
-                        await setBulkEdit(chunkStorage, true)
+                        // await setBulkEdit(chunkStorage, true)
                     }
+                    for (let annotation of notesToDelete) {
+                        await this.options.annotationsBG.deleteAnnotation(
+                            annotation,
+                        )
+                        // await setBulkEdit(chunkStorage, true)
+                    }
+
+                    await clearBulkEditItems()
                     window.location.reload()
                 } catch (e) {
                     console.error('eerorr', e)

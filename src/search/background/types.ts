@@ -1,25 +1,20 @@
-import { User } from 'src/social-integration/types'
-import SearchStorage from './storage'
-import { SearchIndex } from '../types'
-import { Annotation } from 'src/annotations/types'
-import { PageIndexingBackground } from 'src/page-indexing/background'
+import type { User } from 'src/social-integration/types'
+import type SearchStorage from './storage'
+import type { Annotation } from 'src/annotations/types'
+import type { PageIndexingBackground } from 'src/page-indexing/background'
+import type { Annotation as _Annotation } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 
 export interface AnnotPage {
     url: string
     fullUrl: string | null
     fullPdfUrl?: string
-    title?: string
-    hasBookmark: boolean
-    /** Object URL to the in-memory location of the assoc. screenshot. */
-    screenshot?: string
+    fullTitle?: string
     /** Object URL to the in-memory location of the assoc. fav-icon. */
     favIcon?: string
-    displayTime?: number
-    /** Total count of annots associated with this page. (regardless of search) */
-    annotsCount: number
+    displayTime: number
     annotations: Annotation[]
+    totalAnnotationsCount: number
     pageId?: string
-    tags: string[]
     lists: number[]
     text: string
 }
@@ -60,64 +55,12 @@ export interface AnnotSearchParams {
     includePageResults?: boolean
 }
 
-export interface PageSearchParams
-    extends Omit<AnnotSearchParams, 'collections'> {
-    lists?: number[]
-    contentTypes: ContentTypes
-}
-
-export interface ContentTypes {
-    pages: boolean
-    notes: boolean
-    highlights: boolean
-}
-
-export interface UrlFilters {
-    collUrlsInc?: Set<string>
-    tagUrlsInc?: Set<string>
-    domainUrlsInc?: Set<string>
-    tagUrlsExc?: Set<string>
-    domainUrlsExc?: Set<string>
-}
-
-/**
- * Types for the search functions of the background class
- */
-export interface BackgroundSearchParams {
-    query?: string
-    domains?: any[]
-    domainsExclude?: any[]
-    tagsInc?: any[]
-    tagsExc?: any[]
-    lists?: any[]
-    contentTypes?: ContentTypes
-    skip?: number
-    limit?: number
-    showOnlyBookmarks?: boolean
-    bookmarksOnly?: boolean
-
-    startDate?: number | Date
-    endDate?: number | Date
-    usersInc?: any
-    usersExc?: any
-    hashtagsInc?: any
-    hashtagsExc?: any
-    url?: string
-}
-
 /**
  * Maps day (start of day timestamp) to list of pages that have annots created/edited
  * on that day.
  */
 export interface PageUrlsByDay {
     [day: number]: AnnotsByPageUrl
-}
-
-/**
- * Maps page URLs to pages containing list of annotations created/edited on that day.
- */
-export interface PagesByUrl {
-    [pageUrl: string]: AnnotPage
 }
 
 export interface AnnotsByPageUrl {
@@ -138,53 +81,68 @@ export interface StandardSearchResponse {
     isBadTerm?: boolean
 }
 
-export interface AnnotationsSearchResponse extends StandardSearchResponse {
-    isAnnotsSearch: true
-    annotsByDay: PageUrlsByDay
-}
-
-// Todo: add proper types and refactor RPC usage in-line with 'refactoring.md'
-export interface SearchBackend {
-    addPage: any
-    addPageTerms: any
-    addBookmark: any
-    delBookmark: any
-    updateTimestampMeta: any
-    addVisit: any
-    addFavIcon: any
-    delPages: any
-    delPagesByDomain: any
-    delPagesByPattern: any
-    addTag: any
-    delTag: any
-    fetchPageTags: any
-    pageHasBookmark: any
-    getPage: any
-    grabExistingKeys: any
-    search: any
-    getMatchingPageCount: any
-    domainHasFavIcon: any
-    createPageFromTab: any
-    createPageFromUrl: any
-}
-
-export interface SearchInterface {
-    search: SearchIndex['search']
-    searchAnnotations: (
-        params: BackgroundSearchParams,
-    ) => Promise<StandardSearchResponse | AnnotationsSearchResponse>
-    searchPages: (
-        params: BackgroundSearchParams,
-    ) => Promise<StandardSearchResponse>
-    searchSocial: (
-        params: BackgroundSearchParams,
-    ) => Promise<StandardSearchResponse>
-
+export interface RemoteSearchInterface {
+    unifiedSearch: (
+        params: UnifiedSearchParams & UnifiedSearchPaginationParams,
+    ) => Promise<UnifiedSearchResult>
     suggest: SearchStorage['suggest']
     extendedSuggest: SearchStorage['suggestExtended']
-
     delPages: PageIndexingBackground['delPages']
-    delPagesByDomain: PageIndexingBackground['delPagesByDomain']
-    delPagesByPattern: PageIndexingBackground['delPagesByPattern']
-    getMatchingPageCount: SearchIndex['getMatchingPageCount']
+}
+
+export type UnifiedSearchParams = {
+    query: string
+    fromWhen?: number
+    untilWhen?: number
+    filterByDomains: string[]
+    filterByListIds: number[]
+    filterByPDFs?: boolean
+    filterByVideos?: boolean
+    filterByTweets?: boolean
+    filterByEvents?: boolean
+    startsWithMatching?: boolean
+    omitPagesWithoutAnnotations?: boolean
+}
+
+export interface UnifiedSearchPaginationParams {
+    skip: number
+    limit: number
+}
+
+export type UnifiedTermsSearchParams = UnifiedSearchParams &
+    UnifiedSearchPaginationParams & {
+        queryPages: (
+            terms: string[],
+        ) => Promise<Array<{ id: string; latestTimestamp: number }>>
+        queryAnnotations: (terms: string[]) => Promise<_Annotation[]>
+    }
+
+/**
+ * Note that, unlike terms search, blank search does not use the traditional pagination params.
+ * Instead it expects the caller to keep a state of the oldest search result so far
+ * (which gets returned from blank searches) and supply that as the new upper time bound
+ * for subsequent blank search pages.
+ */
+export type UnifiedBlankSearchParams = UnifiedSearchParams & {
+    untilWhen: number
+    daysToSearch: number
+    /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
+    lowestTimeBound: number
+}
+
+export type UnifiedSearchResult = {
+    docs: AnnotPage[]
+    resultsExhausted: boolean
+    oldestResultTimestamp: number
+}
+
+export type UnifiedBlankSearchResult = {
+    oldestResultTimestamp: number | null
+    resultsExhausted: boolean
+    resultDataByPage: Map<string, UnifiedBlankSearchPageResultData>
+}
+
+export type UnifiedBlankSearchPageResultData = {
+    latestPageTimestamp: number
+    annotations: Annotation[]
 }

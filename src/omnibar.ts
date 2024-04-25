@@ -75,22 +75,17 @@ export async function setupOmnibar(deps: OmnibarDeps) {
         const queryForOldSuggestions = latestResolvedQuery
 
         const queryFilters = extractTimeFiltersFromQuery(query)
+        const limit = 5
 
-        let searchResults
-
-        if (queryFilters.to || queryFilters.from) {
-            searchResults = await deps.bgModules.search.searchIndex.search({
-                endDate: queryFilters.to ? queryFilters.to : undefined,
-                startDate: queryFilters.from ? queryFilters.from : undefined,
-                query: queryFilters.query ? queryFilters.query : undefined,
-                limit: 5,
-            } as any)
-        } else {
-            searchResults = await deps.bgModules.search.searchIndex.search({
-                ...queryFilters,
-                limit: 5,
-            } as any)
-        }
+        const searchResults = await deps.bgModules.search.unifiedSearch({
+            untilWhen: queryFilters.to,
+            fromWhen: queryFilters.from,
+            query: queryFilters.query,
+            filterByDomains: [],
+            filterByListIds: [],
+            limit,
+            skip: 0,
+        })
 
         // A subsequent search could have already started and finished while we
         // were busy searching, so we ensure we do not overwrite its results.
@@ -101,27 +96,15 @@ export async function setupOmnibar(deps: OmnibarDeps) {
             return
         }
 
-        if (searchResults.isBadTerm === true) {
-            setOmniboxMessage(
-                'Your search terms are very vague, please try and use more unique ones',
-            )
-        } else if (searchResults.requiresMigration) {
-            setOmniboxMessage(
-                '[ACTION REQUIRED] Upgrade to new search version. Click here.',
-            )
-        } else if (searchResults.docs.length === 0) {
+        if (!searchResults.docs.length) {
             setOmniboxMessage('No results found for this query.')
-        } else if (searchResults.totalCount == null) {
+        } else if (!searchResults.resultsExhausted) {
             setOmniboxMessage('Found more results - press ENTER to view ALL .')
-        } else {
-            setOmniboxMessage(
-                `Found ${searchResults.totalCount} pages - press ENTER for ALL results`,
-            )
         }
 
-        const suggestions = searchResults.docs.map(
-            pageToSuggestion(queryFilters.from || queryFilters.to),
-        )
+        const suggestions = searchResults.docs
+            .slice(0, limit)
+            .map(pageToSuggestion(queryFilters.from || queryFilters.to))
 
         suggest(suggestions)
         latestResolvedQuery = query

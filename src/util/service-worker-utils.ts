@@ -7,6 +7,9 @@ export async function keepWorkerAlive<T>(
         runtimeAPI: Runtime.Static
     },
 ): Promise<T> {
+    if (process.env.NODE_ENV === 'test') {
+        return promise
+    }
     const keepAlive = setInterval(deps.runtimeAPI.getPlatformInfo, 25 * 1000)
     try {
         const result = await promise

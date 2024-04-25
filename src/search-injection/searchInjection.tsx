@@ -12,15 +12,15 @@ import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
-import type { SyncSettingsStoreInterface } from 'src/sync-settings/types'
 import type { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import type { ResultItemProps, SearchEngineName } from './types'
 import { SyncSettingsStore } from 'src/sync-settings/util'
+import type { RemoteSearchInterface } from 'src/search/background/types'
 
 interface RootProps {
     rootEl: HTMLElement
     query: string
-    requestSearcher: any // TODO: type this
+    requestSearcher: RemoteSearchInterface['unifiedSearch']
     renderComponent: () => Promise<void>
     searchEngine: SearchEngineName
     syncSettings: SyncSettingsStore<
@@ -37,12 +37,14 @@ interface RootProps {
 
 interface RootState {
     themeVariant?: MemexThemeVariant
-    searchResDocsProcessed?: ResultItemProps[]
+    searchResDocsProcessed: ResultItemProps[]
     query?: string
 }
 
 class Root extends React.Component<RootProps, RootState> {
-    state: RootState = {}
+    state: RootState = {
+        searchResDocsProcessed: [],
+    }
 
     async componentDidMount() {
         const { query } = this.props
@@ -54,20 +56,29 @@ class Root extends React.Component<RootProps, RootState> {
         })
     }
 
-    executeSearch = async (query) => {
-        this.setState({ searchResDocsProcessed: null })
+    private executeSearch = async (query: string) => {
         const { requestSearcher } = this.props
         const limit = 100
-        requestSearcher({ query, limit })
-            .then((searchRes) => {
-                this.setState({
-                    searchResDocsProcessed: searchRes.docs.slice(0, limit),
-                })
-            })
-            .catch((error) => console.error('Search request failed', error))
+        const searchRes = await requestSearcher({
+            query,
+            limit,
+            skip: 0,
+            filterByDomains: [],
+            filterByListIds: [],
+        })
+        this.setState({
+            searchResDocsProcessed: searchRes.docs.map((d) => ({
+                searchEngine: this.props.searchEngine,
+                displayTime: d.displayTime,
+                title: d.fullTitle ?? d.fullUrl,
+                url: d.fullUrl,
+                onLinkClick: () => null, // Gets filled in later
+                tags: [],
+            })),
+        })
     }
 
-    executeSearchDebounced = debounce(this.executeSearch, 150)
+    private executeSearchDebounced = debounce(this.executeSearch, 150)
 
     updateQuery = async (query) => {
         this.executeSearchDebounced(query)
