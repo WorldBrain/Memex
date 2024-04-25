@@ -1326,14 +1326,15 @@ const ResultsMatchingTextToggleContainer = styled.div<{
 }>`
     display: flex;
     flex-direction: column;
-margin-top: 10px;
-border-radius: 8px;
+border-radius: 0 0 8px 8px;
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;
     max-height: 150px;
     max-height: ${(props) => props.maxHeight}px;
     position: relative;
+    padding: 10px 0px;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
 
     &::-webkit-scrollbar {
         display: none;
