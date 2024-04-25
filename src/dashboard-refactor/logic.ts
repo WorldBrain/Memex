@@ -964,8 +964,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         const selectedBlocksArray: SelectableBlock[] =
             previousState.selectableBlocks
 
-        console.log('selectedBlocksArray', selectedBlocksArray)
-
         const currentFocusElementIndex = previousState.focusedBlockId
         const currentFocusIndex = currentFocusElementIndex
 
@@ -1269,12 +1267,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     })
 
                     let compiledSelectableBlocks = []
-
-                    console.log(
-                        'event pageinate',
-                        event?.paginate,
-                        previousState.selectableBlocks.length,
-                    )
 
                     if (event?.paginate) {
                         compiledSelectableBlocks =
