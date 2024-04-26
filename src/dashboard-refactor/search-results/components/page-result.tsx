@@ -53,7 +53,7 @@ export interface Props
     copyLoadingState: UITaskState
     inPageMode?: boolean
     resultsRef?: React.RefObject<HTMLDivElement>
-    searchQuery?: string
+    searchTerms?: string[]
     onMatchingTextToggleClick: React.MouseEventHandler
     renderPageCitations: () => JSX.Element
     renderSpacePicker: () => JSX.Element
@@ -117,6 +117,7 @@ export default class PageResultView extends PureComponent<Props> {
         showVideoFullSize: false,
         tutorialId: null,
         showFooterBar: false,
+        searchTermMatches: null,
     }
 
     componentDidMount() {
@@ -133,6 +134,8 @@ export default class PageResultView extends PureComponent<Props> {
         if (matchingTextContainer) {
             this.matchingTextContainerObserver.observe(matchingTextContainer)
         }
+
+        this.getMatches(this.props.text)
     }
 
     updateMatchingTextContainerHeight = async () => {
@@ -252,10 +255,7 @@ export default class PageResultView extends PureComponent<Props> {
     private tutorialButtonRef = createRef<HTMLElement>()
 
     private get hasNotes(): boolean {
-        return (
-            this.props.hasNotes ||
-            this.props.noteIds[this.props.notesType].length > 0
-        )
+        return this.props.hasNotes || this.props.totalAnnotationCount > 0
     }
 
     private get hasLists(): boolean {
@@ -672,11 +672,12 @@ export default class PageResultView extends PureComponent<Props> {
             },
             {
                 key: 'expand-notes-btn',
+                // TODO: Simplify this conditional logic
                 ButtonText: !(
                     this.props.isNotesSidebarShown &&
                     this.props.isListsSidebarShown
                 ) ? (
-                    this.props.noteIds[this.props.notesType].length > 0 ? (
+                    this.props.totalAnnotationCount > 0 ? (
                         <NotesCounterTitle>
                             <Icon
                                 heightAndWidth="16px"
@@ -697,7 +698,7 @@ export default class PageResultView extends PureComponent<Props> {
                             Add Notes
                         </NotesCounterTitle>
                     )
-                ) : this.props.noteIds[this.props.notesType].length > 0 ? (
+                ) : this.props.totalAnnotationCount > 0 ? (
                     <NotesCounterTitle>
                         <Icon
                             heightAndWidth="16px"
@@ -715,9 +716,7 @@ export default class PageResultView extends PureComponent<Props> {
                     </NotesCounterTitle>
                 ),
                 imageColor:
-                    this.props.noteIds[this.props.notesType].length > 0
-                        ? 'prime1'
-                        : null,
+                    this.props.totalAnnotationCount > 0 ? 'prime1' : null,
 
                 onClick: (e) => {
                     if (e.altKey) {
@@ -775,15 +774,27 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 
-    processPageText(text: string) {
-        const searchTerms = this.props.searchQuery
-            .split(' ')
-            .filter((term) => term.trim() !== '')
-        if (searchTerms.length === 0) {
+    getMatches = (text: string) => {
+        if (this.props.searchTerms.length === 0) {
             return
         }
-        const regex = new RegExp(`\\b(${searchTerms.join('|')})\\b`, 'gi')
+        const regex = new RegExp(
+            `\\b(${this.props.searchTerms.join('|')})\\b`,
+            'gi',
+        )
         const matches = [...text.matchAll(regex)]
+        this.setState({
+            searchTermMatches: matches || null,
+        })
+        return regex
+    }
+
+    processPageText(text: string) {
+        const matches = this.state.searchTermMatches
+        const regex = new RegExp(
+            `\\b(${this.props.searchTerms.join('|')})\\b`,
+            'gi',
+        )
 
         const chunks = matches.map((match) => {
             const index = match.index || 0
@@ -1015,8 +1026,9 @@ export default class PageResultView extends PureComponent<Props> {
                         </ListSegmentContainer>
                     )}
                     {this.props.searchType !== 'notes' &&
-                        this.props.searchQuery?.length > 0 &&
-                        this.props.text?.length > 0 && (
+                        this.props.searchTerms?.length > 0 &&
+                        this.props.text?.length > 0 &&
+                        this.state.searchTermMatches?.length > 0 && (
                             <ResultsMatchingTextToggleContainer
                                 showAll={this.props.showAllResults}
                                 id={
@@ -1054,11 +1066,9 @@ export default class PageResultView extends PureComponent<Props> {
                             inPageMode={this.props.inPageMode}
                         />
                     </FooterBar>
-                    {this.props.noteIds[this.props.notesType]?.length > 0 && (
+                    {this.props.totalAnnotationCount > 0 && (
                         <NoteCounter>
-                            {this.props.noteIds[
-                                this.props.notesType
-                            ]?.length.toString()}
+                            {this.props.totalAnnotationCount}
                         </NoteCounter>
                     )}
                     {this.renderSpacePicker()}
@@ -1112,6 +1122,7 @@ const FooterBar = styled.div<{
     padding: 2px 0px 2px 0px;
     background: unset;
     backdrop-filter: unset;
+    margin-top: -5px;
 
     ${(props) =>
         props.inPageMode &&
@@ -1122,20 +1133,20 @@ const FooterBar = styled.div<{
     ${(props) =>
         (props.slimVersion || true) &&
         css`
-            display: none;
+            display: flex;
             position: relative;
 
             backdrop-filter: blur(5px);
             background: ${(props) => props.theme.colors.black0}95;
-            animation: ${slideOutToBottom} 0.2s
-                cubic-bezier(0.22, 0.61, 0.36, 1) backwards;
+            /* animation: ${slideOutToBottom} 0.2s
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards; */
         `};
     ${(props) =>
         props.shouldShow &&
         css`
             display: flex;
-            animation: ${slideInFromBottom} 0.2s
-                cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+            /* animation: ${slideInFromBottom} 0.2s
+                cubic-bezier(0.22, 0.61, 0.36, 1) forwards; */
         `};
 `
 
@@ -1296,10 +1307,10 @@ const ResultTextStringSepararator = styled.span`
 
 const MatchingTextViewToggle = styled.div<{ showAll: boolean }>`
     position: sticky;
-    padding: 5px 15px;
+    padding: 10px 15px;
     bottom: 10px;
+    box-sizing: border-box;
     border-radius: 6px;
-    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -1331,14 +1342,15 @@ const ResultsMatchingTextToggleContainer = styled.div<{
 }>`
     display: flex;
     flex-direction: column;
-margin-top: 10px;
-border-radius: 8px;
+border-radius: 0 0 8px 8px;
     align-items: center;
     justify-content: flex-start;
     overflow: hidden;
     max-height: 150px;
     max-height: ${(props) => props.maxHeight}px;
     position: relative;
+    padding: 10px 0px;
+    border-top: 1px solid ${(props) => props.theme.colors.greyScale2};
 
     &::-webkit-scrollbar {
         display: none;

@@ -39,7 +39,7 @@ export class EventBasedRPCManager implements RPCManager {
                 ret = await this.deps.browserAPIs.runtime.sendMessage(request)
             }
         } catch (err) {
-            throw new RpcError(err.message)
+            throw new RpcError(err)
         }
         this.log(
             `messageRequester:: Got response for [${request.headers.name}]`,
@@ -179,7 +179,7 @@ export class EventBasedRPCManager implements RPCManager {
                         this.log(
                             `messageResponder:: ERRORED Function [${name}]`,
                         )
-                        throw new RpcError(err.message)
+                        throw new RpcError(err)
                     }
                 }
             } else if (type === 'RPC_RESPONSE') {

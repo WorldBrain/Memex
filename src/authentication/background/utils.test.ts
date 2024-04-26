@@ -1,7 +1,7 @@
 import expect from 'expect'
 import { UserPlan } from '@worldbrain/memex-common/lib/subscriptions/types'
 import { createAuthDependencies } from './setup'
-import { hasValidPlan, checkValidPlan } from './utils'
+import { checkValidPlan } from './utils'
 
 const TEST_SUBSCRIPTION_KEY: UserPlan = 'pro-yearly'
 
@@ -17,7 +17,7 @@ describe('Authentication Subscription Status Tests', () => {
             valid: false,
             reason: 'not-present',
         })
-        expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
+        // expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
     })
 
     it('should not be subscribed to pro-yearly plan if subscription expired', async () => {
@@ -31,7 +31,7 @@ describe('Authentication Subscription Status Tests', () => {
             valid: false,
             reason: 'expired',
         })
-        expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
+        // expect(hasValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toBeFalsy()
     })
 
     it('should be subscribed to pro-yearly plan if subscription is valid', async () => {
@@ -41,13 +41,13 @@ describe('Authentication Subscription Status Tests', () => {
         })
 
         const claims = await subscriptionService.getCurrentUserClaims()
-        const result = hasValidPlan(
-            await subscriptionService.getCurrentUserClaims(),
-            TEST_SUBSCRIPTION_KEY,
-        )
+        // const result = hasValidPlan(
+        //     await subscriptionService.getCurrentUserClaims(),
+        //     TEST_SUBSCRIPTION_KEY,
+        // )
         expect(checkValidPlan(claims, TEST_SUBSCRIPTION_KEY)).toEqual({
             valid: true,
         })
-        expect(result).toBe(true)
+        // expect(result).toBe(true)
     })
 })

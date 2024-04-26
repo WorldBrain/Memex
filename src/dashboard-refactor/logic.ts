@@ -416,7 +416,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             blurEffectReset: false,
             focusLockUntilMouseStart: false,
             selectableBlocks: [],
-            focusedBlockId: 0,
+            focusedBlockId: -1,
         }
     }
 
@@ -512,7 +512,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             let retries = 1
             let user = await authBG.getCurrentUser()
             while (user == null && retries < maxRetriesForUser) {
-                const waitTime = retries * 20 // increasingly more wait time20
+                const waitTime = retries * 20 // increasingly more wait time
                 await new Promise((resolve) => setTimeout(resolve, waitTime))
                 user = await authBG.getCurrentUser()
                 retries++
@@ -975,18 +975,24 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (event.direction === 'up') {
+            if (currentFocusIndex === 0) {
+                return
+            }
             nextItem = selectedBlocksArray[currentFocusIndex - 1]
             this.emitMutation({
                 focusedBlockId: { $set: currentFocusIndex - 1 },
             })
         }
         if (event.direction === 'down') {
+            if (currentFocusIndex === selectedBlocksArray.length - 1) {
+                return
+            }
             nextItem = selectedBlocksArray[currentFocusIndex + 1]
             this.emitMutation({
                 focusedBlockId: { $set: currentFocusIndex + 1 },
             })
         }
-        if (event.item.id) {
+        if (event.item?.id != null) {
             const nextFocusItemIndex = selectedBlocksArray.findIndex(
                 (item) => item?.id === event.item.id,
             )
@@ -1172,11 +1178,9 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchState,
                         this.options.annotationsCache,
                     )
-                    // console.log('SEARCH - params:', params)
                     const result = await this.options.searchBG.unifiedSearch(
                         params,
                     )
-                    // console.log('SEARCH - result:', result)
 
                     const {
                         noteData,
@@ -1262,8 +1266,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         },
                     })
 
-                    let compiledSelectableBlocks =
-                        previousState.selectableBlocks ?? []
+                    let compiledSelectableBlocks = []
+
+                    if (event?.paginate) {
+                        compiledSelectableBlocks =
+                            previousState.selectableBlocks
+                    }
                     let resultsList = results[-1].pages.byId
 
                     for (let page of Object.values(resultsList)) {

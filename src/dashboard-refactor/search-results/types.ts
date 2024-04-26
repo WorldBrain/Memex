@@ -164,6 +164,7 @@ export type PageData = Pick<
     normalizedUrl: string
     lists: string[]
     displayTime: number
+    totalAnnotationCount: number
     hasNotes: boolean
     type: 'pdf' | 'page'
     isShared?: boolean

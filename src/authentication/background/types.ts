@@ -26,14 +26,10 @@ export interface AuthRemoteFunctionsInterface {
     getUserByReference(reference: UserReference): Promise<User | null>
     updateUserProfile(updates: { displayName: string }): Promise<void>
 
-    hasValidPlan(plan: UserPlan): Promise<boolean>
     getAuthorizedFeatures(): Promise<UserFeature[]>
     getAuthorizedPlans(): Promise<UserPlan[]>
-    getSubscriptionStatus(): Promise<SubscriptionStatus>
-    getSubscriptionExpiry(): Promise<number | null>
     isAuthorizedForFeature(feature: UserFeature): Promise<boolean>
 
-    hasSubscribedBefore(): Promise<boolean>
     registerWithEmailPassword(
         options: EmailPasswordCredentials,
     ): Promise<{ result: RegistrationResult }>

@@ -66,6 +66,7 @@ export function createAuthDependencies(options: {
             }),
             subscriptionService: new WorldbrainSubscriptionsService(
                 getFirebase(),
+                getAuth,
                 options.redirectUrl,
             ),
         }

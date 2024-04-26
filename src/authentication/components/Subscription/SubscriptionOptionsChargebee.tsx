@@ -46,9 +46,9 @@ class SubscriptionOptionsChargebee extends React.Component<
     }
 
     async componentDidMount() {
-        this.setState({
-            subscribed: await auth.hasSubscribedBefore(),
-        })
+        // this.setState({
+        //     subscribed: await auth.hasSubscribedBefore(),
+        // })
     }
 
     openPortal = async () => {
