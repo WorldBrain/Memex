@@ -914,13 +914,6 @@ export default class PageResultView extends PureComponent<Props> {
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
-        console.log(
-            this.props.searchType !== 'notes',
-            this.props.searchQuery?.length,
-            this.props.text?.length,
-            this.state.searchTermMatches?.length > 0,
-        )
-
         return (
             <ItemBox
                 onMouseEnter={this.props.onMainContentHover}
@@ -1033,7 +1026,7 @@ export default class PageResultView extends PureComponent<Props> {
                         </ListSegmentContainer>
                     )}
                     {this.props.searchType !== 'notes' &&
-                        this.props.searchQuery?.length > 0 &&
+                        this.props.searchTerms?.length > 0 &&
                         this.props.text?.length > 0 &&
                         this.state.searchTermMatches?.length > 0 && (
                             <ResultsMatchingTextToggleContainer
