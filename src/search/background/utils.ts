@@ -78,29 +78,47 @@ export const sortUnifiedBlankSearchResult = (
 
 /** Given separate result sets of the same type, gets the intersection of them / ANDs them together by ID */
 const intersectResults = (results: string[][]): string[] =>
-    results.reduce((a, b) => {
-        const ids = new Set(b)
-        return a.filter((id) => ids.has(id))
-    })
+    !results.length
+        ? []
+        : results.reduce((a, b) => {
+              const ids = new Set(b)
+              return a.filter((id) => ids.has(id))
+          })
 
 export const queryAnnotationsByTerms = (
     storageManager: Storex,
-): UnifiedTermsSearchParams['queryAnnotations'] => async (terms) => {
+): UnifiedTermsSearchParams['queryAnnotations'] => async (
+    terms,
+    phrases = [],
+) => {
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
-    const resultsPerTerm = await Promise.all(
-        terms.map((term) =>
-            dexie
-                .table<Annotation, string>('annotations')
+    const table = dexie.table<Annotation, string>('annotations')
+    const resultsPerTerm = await Promise.all([
+        ...terms.map((term) =>
+            table
                 .where('_body_terms')
                 .equals(term)
                 .or('_comment_terms')
                 .equals(term)
-                .distinct()
                 .primaryKeys(),
         ),
-    )
+        ...phrases.map((phrase) =>
+            table
+                .filter((a) => {
+                    const inComment = a.comment
+                        ?.toLocaleLowerCase()
+                        .includes(phrase)
+                    const inHighlight =
+                        'body' in a
+                            ? a.body?.toLocaleLowerCase().includes(phrase)
+                            : false
+                    return inComment || inHighlight
+                })
+                .primaryKeys(),
+        ),
+    ])
     const matchingIds = intersectResults(resultsPerTerm)
-    return dexie.table<Annotation>('annotations').bulkGet(matchingIds)
+    return table.bulkGet(matchingIds)
 }
 
 export const queryPagesByTerms = (
@@ -108,11 +126,11 @@ export const queryPagesByTerms = (
     opts?: {
         startsWithMatching?: boolean
     },
-): UnifiedTermsSearchParams['queryPages'] => async (terms) => {
+): UnifiedTermsSearchParams['queryPages'] => async (terms, phrases = []) => {
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
-    const resultsPerTerm = await Promise.all(
-        terms.map((term) => {
-            const table = dexie.table<Page, string>('pages')
+    const table = dexie.table<Page, string>('pages')
+    const resultsPerTerm = await Promise.all([
+        ...terms.map((term) => {
             const coll = opts?.startsWithMatching
                 ? table
                       .where('terms')
@@ -131,7 +149,14 @@ export const queryPagesByTerms = (
 
             return coll.distinct().primaryKeys()
         }),
-    )
+        ...phrases.map((phrase) =>
+            table
+                .filter((page) =>
+                    page.text?.toLocaleLowerCase().includes(phrase),
+                )
+                .primaryKeys(),
+        ),
+    ])
     const matchingIds = intersectResults(resultsPerTerm)
 
     // Get latest visit/bm for each page
@@ -156,4 +181,26 @@ export const queryPagesByTerms = (
         id,
         latestTimestamp: latestTimestampByPageUrl.get(id) ?? 0,
     }))
+}
+
+export const splitQueryIntoTerms = (
+    query: string,
+): { terms: string[]; phrases: string[] } => {
+    const discreteTerms = new Set<string>()
+    const phrases = new Set<string>()
+
+    // First split by double quotes, then by spaces on non-double quoted phrases
+    const terms = query.toLocaleLowerCase().split('"').filter(Boolean)
+    for (const term of terms) {
+        const wasNotDoubleQuoted =
+            term.trim().length !== term.length || term === query
+
+        if (wasNotDoubleQuoted) {
+            const subTerms = term.split(/\s+/).filter(Boolean)
+            subTerms.forEach((subTerm) => discreteTerms.add(subTerm))
+        } else {
+            phrases.add(term)
+        }
+    }
+    return { terms: [...discreteTerms], phrases: [...phrases] }
 }

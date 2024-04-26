@@ -113,8 +113,12 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
     UnifiedSearchPaginationParams & {
         queryPages: (
             terms: string[],
+            phrases?: string[],
         ) => Promise<Array<{ id: string; latestTimestamp: number }>>
-        queryAnnotations: (terms: string[]) => Promise<_Annotation[]>
+        queryAnnotations: (
+            terms: string[],
+            phrases?: string[],
+        ) => Promise<_Annotation[]>
     }
 
 /**
