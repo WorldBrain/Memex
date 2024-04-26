@@ -53,6 +53,7 @@ export interface AnnotationEditGeneralProps {
     getRootElement: () => HTMLElement
     slimEditorActions?: boolean
     isEditMode?: boolean
+    searchTerms?: string[]
 }
 
 export interface Props
@@ -212,6 +213,7 @@ class AnnotationEdit extends React.Component<Props> {
                         addNewSpaceViaWikiLinks={
                             this.props.addNewSpaceViaWikiLinks
                         }
+                        searchTerms={this.props.searchTerms}
                     />
                 </EditorContainer>
             )

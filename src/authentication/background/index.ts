@@ -11,11 +11,8 @@ import {
     Claims,
 } from '@worldbrain/memex-common/lib/subscriptions/types'
 import {
-    hasSubscribedBefore,
-    hasValidPlan,
     getAuthorizedFeatures,
     isAuthorizedForFeature,
-    getSubscriptionStatus,
     getAuthorizedPlans,
 } from './utils'
 import { RemoteEventEmitter } from 'src/util/webextensionRPC'
@@ -87,17 +84,6 @@ export class AuthBackground {
             },
             sendPasswordResetEmailProcess: this.sendPasswordResetEmailProcess,
             changeEmailProcess: this.changeEmailProcess,
-            hasValidPlan: async (plan: UserPlan) => {
-                return hasValidPlan(
-                    await this.subscriptionService.getCurrentUserClaims(),
-                    plan,
-                )
-            },
-            getSubscriptionStatus: async () => {
-                return getSubscriptionStatus(
-                    await this.subscriptionService.getCurrentUserClaims(),
-                )
-            },
             getAuthorizedFeatures: async () => {
                 return getAuthorizedFeatures(
                     await this.subscriptionService.getCurrentUserClaims(),
@@ -108,20 +94,12 @@ export class AuthBackground {
                     await this.subscriptionService.getCurrentUserClaims(),
                 )
             },
-            getSubscriptionExpiry: async () =>
-                (await this.subscriptionService.getCurrentUserClaims())
-                    ?.subscriptionExpiry,
             isAuthorizedForFeature: async (feature: UserFeature) => {
                 return isAuthorizedForFeature({
                     claims: await this.subscriptionService.getCurrentUserClaims(),
                     settings: this.settings,
                     feature,
                 })
-            },
-            hasSubscribedBefore: async () => {
-                return hasSubscribedBefore(
-                    await this.subscriptionService.getCurrentUserClaims(),
-                )
             },
             getUserProfile: async () => {
                 const user = await this.authService.getCurrentUser()
@@ -223,7 +201,6 @@ export class AuthBackground {
             if (isDev) {
                 const claims = userWithClaims?.claims
                 const userDebug = {
-                    Status: claims?.subscriptionStatus,
                     Expiry:
                         claims?.subscriptionExpiry &&
                         new Date(

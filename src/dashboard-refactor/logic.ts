@@ -512,7 +512,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             let retries = 1
             let user = await authBG.getCurrentUser()
             while (user == null && retries < maxRetriesForUser) {
-                const waitTime = retries * 20 // increasingly more wait time20
+                const waitTime = retries * 20 // increasingly more wait time
                 await new Promise((resolve) => setTimeout(resolve, waitTime))
                 user = await authBG.getCurrentUser()
                 retries++

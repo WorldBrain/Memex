@@ -360,7 +360,11 @@ export default class SearchBackground {
     private async unifiedTermsSearch(
         params: UnifiedTermsSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
-        const terms = [...new Set(params.query.split(/\s+/).filter(Boolean))]
+        const terms = [
+            ...new Set(
+                params.query.toLocaleLowerCase().split(/\s+/).filter(Boolean),
+            ),
+        ]
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
 
         const [pages, annotations] = await Promise.all([
@@ -420,7 +424,7 @@ export default class SearchBackground {
                         result?.oldestResultTimestamp ?? // allows to paginate back from prev result
                         params.untilWhen ??
                         highestTimeBound, // default to latest timestamp in DB, to start off search
-                    daysToSearch: 1,
+                    daysToSearch: 2,
                     lowestTimeBound,
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
