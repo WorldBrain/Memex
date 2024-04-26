@@ -761,9 +761,8 @@ export default class SearchResultsContainer extends React.Component<
                     searchType={this.props.searchType}
                     isInFocus={page.isInFocus}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
-                    searchQuery={this.props.searchQuery}
                     searchTerms={this.props.searchQuery
-                        .split(' ')
+                        ?.split(' ')
                         .filter((term) => term.trim() !== '')}
                     renderSpacePicker={() => (
                         <CollectionPicker
