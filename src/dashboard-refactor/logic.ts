@@ -1302,7 +1302,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         )
     }
 
-    private runSearch = debounce(this.search, 200)
+    private runSearch = debounce(this.search, 400)
 
     private async ensureLoggedIn(): Promise<boolean> {
         const { authBG } = this.options
