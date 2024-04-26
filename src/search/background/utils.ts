@@ -1,5 +1,6 @@
 import type Storex from '@worldbrain/storex'
 import type {
+    TermsSearchOpts,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
 } from './types'
@@ -11,7 +12,7 @@ import type {
     Annotation,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import type Dexie from 'dexie'
+import type { WhereClause, default as Dexie } from 'dexie'
 
 export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     lists: params.collections,
@@ -85,23 +86,51 @@ const intersectResults = (results: string[][]): string[] =>
               return a.filter((id) => ids.has(id))
           })
 
+// Handles switching between fuzzy and exact term matching
+const queryByTerm = <T, PK>(
+    clause: WhereClause<T, PK>,
+    term: string,
+    opts: Pick<TermsSearchOpts, 'matchTermsFuzzyStartsWith'>,
+) =>
+    opts.matchTermsFuzzyStartsWith
+        ? clause.startsWith(term)
+        : clause.equals(term)
+
 export const queryAnnotationsByTerms = (
     storageManager: Storex,
+    opts: TermsSearchOpts,
 ): UnifiedTermsSearchParams['queryAnnotations'] => async (
     terms,
     phrases = [],
 ) => {
+    if (!opts.matchHighlights && !opts.matchNotes) {
+        return []
+    }
+
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
     const table = dexie.table<Annotation, string>('annotations')
     const resultsPerTerm = await Promise.all([
-        ...terms.map((term) =>
-            table
-                .where('_body_terms')
-                .equals(term)
-                .or('_comment_terms')
-                .equals(term)
-                .primaryKeys(),
-        ),
+        ...terms.map((term) => {
+            if (opts.matchHighlights && !opts.matchNotes) {
+                return queryByTerm(
+                    table.where('_body_terms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            } else if (!opts.matchHighlights && opts.matchNotes) {
+                return queryByTerm(
+                    table.where('_comment_terms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            }
+            const coll = queryByTerm(table.where('_body_terms'), term, opts)
+            return queryByTerm(
+                coll.or('_comment_terms'),
+                term,
+                opts,
+            ).primaryKeys()
+        }),
         ...phrases.map((phrase) =>
             table
                 .filter((a) => {
@@ -123,31 +152,33 @@ export const queryAnnotationsByTerms = (
 
 export const queryPagesByTerms = (
     storageManager: Storex,
-    opts?: {
-        startsWithMatching?: boolean
-    },
+    opts: TermsSearchOpts,
 ): UnifiedTermsSearchParams['queryPages'] => async (terms, phrases = []) => {
+    if (!opts.matchPageText && !opts.matchPageTitleUrl) {
+        return []
+    }
+
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
     const table = dexie.table<Page, string>('pages')
     const resultsPerTerm = await Promise.all([
         ...terms.map((term) => {
-            const coll = opts?.startsWithMatching
-                ? table
-                      .where('terms')
-                      .startsWith(term)
-                      .or('urlTerms')
-                      .startsWith(term)
-                      .or('titleTerms')
-                      .startsWith(term)
-                : table
-                      .where('terms')
-                      .equals(term)
-                      .or('urlTerms')
-                      .equals(term)
-                      .or('titleTerms')
-                      .equals(term)
-
-            return coll.distinct().primaryKeys()
+            if (opts.matchPageText && !opts.matchPageTitleUrl) {
+                return queryByTerm(
+                    table.where('terms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            } else if (!opts.matchPageText && opts.matchPageTitleUrl) {
+                const coll = queryByTerm(table.where('urlTerms'), term, opts)
+                return queryByTerm(
+                    coll.or('titleTerms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            }
+            let coll = queryByTerm(table.where('terms'), term, opts)
+            coll = queryByTerm(coll.or('urlTerms'), term, opts)
+            return queryByTerm(coll.or('titleTerms'), term, opts).primaryKeys()
         }),
         ...phrases.map((phrase) =>
             table

@@ -13,6 +13,7 @@ import type {
     UnifiedBlankSearchParams,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
+    TermsSearchOpts,
 } from './types'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -106,16 +107,28 @@ const termsSearch = (
     { search }: BackgroundModules,
     params: Partial<UnifiedTermsSearchParams> &
         UnifiedSearchPaginationParams & { query: string },
-) =>
-    search['unifiedTermsSearch']({
+) => {
+    const defaultTermsOpts: TermsSearchOpts = {
+        matchNotes: true,
+        matchPageText: true,
+        matchHighlights: true,
+        matchPageTitleUrl: true,
+    }
+    return search['unifiedTermsSearch']({
         filterByDomains: [],
         filterByListIds: [],
-        queryPages: queryPagesByTerms(search['options'].storageManager),
+        queryPages: queryPagesByTerms(search['options'].storageManager, {
+            ...defaultTermsOpts,
+            ...params,
+        }),
         queryAnnotations: queryAnnotationsByTerms(
             search['options'].storageManager,
+            { ...defaultTermsOpts, ...params },
         ),
+        ...defaultTermsOpts,
         ...params,
     })
+}
 
 const formatResults = (
     result: UnifiedBlankSearchResult,

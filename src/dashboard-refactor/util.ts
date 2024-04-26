@@ -1,5 +1,6 @@
 import type { RootState, Events } from './types'
 import type {
+    TermsSearchOpts,
     UnifiedSearchPaginationParams,
     UnifiedSearchParams,
 } from 'src/search/background/types'
@@ -115,6 +116,15 @@ export const stateToSearchParams = (
         ? searchResults.blankSearchOldestResultTimestamp
         : null
 
+    // TODO: Dynamically set these flags based on state
+    const termsSearchOpts: TermsSearchOpts = {
+        matchNotes: true,
+        matchPageText: true,
+        matchHighlights: true,
+        matchPageTitleUrl: true,
+        matchTermsFuzzyStartsWith: false,
+    }
+
     return {
         skip: searchFilters.skip,
         limit: searchFilters.limit,
@@ -128,6 +138,7 @@ export const stateToSearchParams = (
         filterByVideos: searchResults.searchType === 'videos',
         filterByTweets: searchResults.searchType === 'twitter',
         omitPagesWithoutAnnotations: searchResults.searchType === 'notes',
+        ...termsSearchOpts,
     }
 }
 

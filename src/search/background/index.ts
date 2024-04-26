@@ -428,11 +428,13 @@ export default class SearchBackground {
         } else {
             result = await this.unifiedTermsSearch({
                 ...params,
-                queryPages: queryPagesByTerms(this.options.storageManager, {
-                    startsWithMatching: params.startsWithMatching,
-                }),
+                queryPages: queryPagesByTerms(
+                    this.options.storageManager,
+                    params,
+                ),
                 queryAnnotations: queryAnnotationsByTerms(
                     this.options.storageManager,
+                    params,
                 ),
             })
         }
