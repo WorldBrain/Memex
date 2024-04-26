@@ -53,7 +53,7 @@ export interface Props
     copyLoadingState: UITaskState
     inPageMode?: boolean
     resultsRef?: React.RefObject<HTMLDivElement>
-    searchQuery?: string
+    searchTerms?: string[]
     onMatchingTextToggleClick: React.MouseEventHandler
     renderPageCitations: () => JSX.Element
     renderSpacePicker: () => JSX.Element
@@ -117,7 +117,7 @@ export default class PageResultView extends PureComponent<Props> {
         showVideoFullSize: false,
         tutorialId: null,
         showFooterBar: false,
-        hasMatches: false,
+        searchTermMatches: null,
     }
 
     componentDidMount() {
@@ -134,6 +134,8 @@ export default class PageResultView extends PureComponent<Props> {
         if (matchingTextContainer) {
             this.matchingTextContainerObserver.observe(matchingTextContainer)
         }
+
+        this.getMatches(this.props.text)
     }
 
     updateMatchingTextContainerHeight = async () => {
@@ -772,19 +774,27 @@ export default class PageResultView extends PureComponent<Props> {
         )
     }
 
-    processPageText(text: string) {
-        const searchTerms = this.props.searchQuery
-            .split(' ')
-            .filter((term) => term.trim() !== '')
-        if (searchTerms.length === 0) {
+    getMatches = (text: string) => {
+        if (this.props.searchTerms.length === 0) {
             return
         }
-        const regex = new RegExp(`\\b(${searchTerms.join('|')})\\b`, 'gi')
+        const regex = new RegExp(
+            `\\b(${this.props.searchTerms.join('|')})\\b`,
+            'gi',
+        )
         const matches = [...text.matchAll(regex)]
-
         this.setState({
-            hasMatches: matches.length > 0,
+            searchTermMatches: matches || null,
         })
+        return regex
+    }
+
+    processPageText(text: string) {
+        const matches = this.state.searchTermMatches
+        const regex = new RegExp(
+            `\\b(${this.props.searchTerms.join('|')})\\b`,
+            'gi',
+        )
 
         const chunks = matches.map((match) => {
             const index = match.index || 0
@@ -904,6 +914,13 @@ export default class PageResultView extends PureComponent<Props> {
     render() {
         const hasTitle = this.props.fullTitle && this.props.fullTitle.length > 0
 
+        console.log(
+            this.props.searchType !== 'notes',
+            this.props.searchQuery?.length,
+            this.props.text?.length,
+            this.state.searchTermMatches?.length > 0,
+        )
+
         return (
             <ItemBox
                 onMouseEnter={this.props.onMainContentHover}
@@ -1018,7 +1035,7 @@ export default class PageResultView extends PureComponent<Props> {
                     {this.props.searchType !== 'notes' &&
                         this.props.searchQuery?.length > 0 &&
                         this.props.text?.length > 0 &&
-                        this.state.hasMatches && (
+                        this.state.searchTermMatches?.length > 0 && (
                             <ResultsMatchingTextToggleContainer
                                 showAll={this.props.showAllResults}
                                 id={
@@ -1297,10 +1314,10 @@ const ResultTextStringSepararator = styled.span`
 
 const MatchingTextViewToggle = styled.div<{ showAll: boolean }>`
     position: sticky;
-    padding: 5px 15px;
+    padding: 10px 15px;
     bottom: 10px;
+    box-sizing: border-box;
     border-radius: 6px;
-    height: 50px;
     display: flex;
     align-items: center;
     justify-content: center;
