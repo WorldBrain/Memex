@@ -117,6 +117,7 @@ export default class PageResultView extends PureComponent<Props> {
         showVideoFullSize: false,
         tutorialId: null,
         showFooterBar: false,
+        hasMatches: false,
     }
 
     componentDidMount() {
@@ -781,6 +782,10 @@ export default class PageResultView extends PureComponent<Props> {
         const regex = new RegExp(`\\b(${searchTerms.join('|')})\\b`, 'gi')
         const matches = [...text.matchAll(regex)]
 
+        this.setState({
+            hasMatches: matches.length > 0,
+        })
+
         const chunks = matches.map((match) => {
             const index = match.index || 0
             let beforeIndex = index
@@ -1012,7 +1017,8 @@ export default class PageResultView extends PureComponent<Props> {
                     )}
                     {this.props.searchType !== 'notes' &&
                         this.props.searchQuery?.length > 0 &&
-                        this.props.text?.length > 0 && (
+                        this.props.text?.length > 0 &&
+                        this.state.hasMatches && (
                             <ResultsMatchingTextToggleContainer
                                 showAll={this.props.showAllResults}
                                 id={

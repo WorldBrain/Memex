@@ -367,6 +367,9 @@ export default class SearchResultsContainer extends React.Component<
                         ? new Date(noteData.displayTime)
                         : undefined
                 }
+                searchTerms={this.props.searchQuery
+                    .split(' ')
+                    .filter((term) => term.trim() !== '')}
                 saveHighlightColorSettings={
                     this.props.saveHighlightColorSettings
                 }

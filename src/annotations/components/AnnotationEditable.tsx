@@ -143,6 +143,7 @@ export interface AnnotationProps {
     ) => void
     isInFocus?: boolean
     shiftSelectItem?: () => void
+    searchTerms?: string[]
 }
 
 export interface AnnotationEditableEventProps {
@@ -471,6 +472,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                                     this.props.unifiedId,
                                 )
                             }
+                            searchTerms={this.props.searchTerms}
                         />
                     </HighlightEditContainer>
                 </HighlightSection>
@@ -787,6 +789,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                             this.props.unifiedId,
                         )
                     }
+                    searchTerms={this.props.searchTerms}
                 />
             </AnnotationEditContainer>
         )
