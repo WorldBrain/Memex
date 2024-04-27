@@ -127,6 +127,7 @@ export class PersonalCloudBackground {
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
                 wipePassiveData({ db: this.dexie, visitLimit: 20 }),
+            invokeSyncDownload: async () => this.invokeSyncDownload(),
         }
     }
 
@@ -157,7 +158,7 @@ export class PersonalCloudBackground {
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
 
-    triggerSyncContinuation() {
+    invokeSyncDownload() {
         this.options.backend.triggerSyncContinuation()
     }
 

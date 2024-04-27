@@ -149,7 +149,7 @@ async function main() {
     })
     pushMessagingClient.bgModules = backgroundModules
     authServices.auth.events.on('loginSuccess', () => {
-        backgroundModules.personalCloud.triggerSyncContinuation()
+        backgroundModules.personalCloud.invokeSyncDownload()
     })
 
     registerBackgroundModuleCollections({
