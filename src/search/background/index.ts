@@ -361,12 +361,11 @@ export default class SearchBackground {
     private async unifiedTermsSearch(
         params: UnifiedTermsSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
-        const { phrases, terms } = splitQueryIntoTerms(params.query)
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
 
         const [pages, annotations] = await Promise.all([
-            params.queryPages(terms, phrases),
-            params.queryAnnotations(terms, phrases),
+            params.queryPages(params.terms, params.phrases),
+            params.queryAnnotations(params.terms, params.phrases),
         ])
 
         // Add in all the annotations to the results
@@ -426,6 +425,21 @@ export default class SearchBackground {
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
+            const {
+                phrases,
+                terms,
+                inTitle,
+                inContent,
+                inHighlight,
+                inComment,
+            } = splitQueryIntoTerms(params.query)
+
+            params.matchPageTitleUrl = inTitle
+            params.matchPageText = inContent
+            params.matchNotes = inComment
+            params.matchHighlights = inHighlight
+            params.phrases = phrases
+            params.terms = terms
             result = await this.unifiedTermsSearch({
                 ...params,
                 queryPages: queryPagesByTerms(

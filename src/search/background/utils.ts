@@ -216,9 +216,21 @@ export const queryPagesByTerms = (
 
 export const splitQueryIntoTerms = (
     query: string,
-): { terms: string[]; phrases: string[] } => {
+): {
+    terms: string[]
+    phrases: string[]
+    inTitle: boolean
+    inContent: boolean
+    inHighlight: boolean
+    inComment: boolean
+} => {
+    console.log('arrives')
     const discreteTerms = new Set<string>()
     const phrases = new Set<string>()
+    let inTitle = true
+    let inContent = true
+    let inHighlight = true
+    let inComment = true
 
     // First split by double quotes, then by spaces on non-double quoted phrases
     const terms = query.toLocaleLowerCase().split('"').filter(Boolean)
@@ -228,10 +240,46 @@ export const splitQueryIntoTerms = (
 
         if (wasNotDoubleQuoted) {
             const subTerms = term.split(/\s+/).filter(Boolean)
-            subTerms.forEach((subTerm) => discreteTerms.add(subTerm))
+            subTerms.forEach((subTerm) => {
+                switch (subTerm) {
+                    case 'intitle':
+                        inTitle = true
+                        inContent = false
+                        inHighlight = false
+                        inComment = false
+                        break
+                    case 'incontent':
+                        inTitle = false
+                        inContent = true
+                        inHighlight = false
+                        inComment = false
+                        break
+                    case 'inhighlight':
+                        inTitle = false
+                        inContent = false
+                        inHighlight = true
+                        inComment = false
+                        break
+                    case 'incomment':
+                        inTitle = false
+                        inContent = false
+                        inHighlight = false
+                        inComment = true
+                        break
+                    default:
+                        discreteTerms.add(subTerm)
+                }
+            })
         } else {
             phrases.add(term)
         }
     }
-    return { terms: [...discreteTerms], phrases: [...phrases] }
+    return {
+        terms: [...discreteTerms],
+        phrases: [...phrases],
+        inTitle,
+        inContent,
+        inHighlight,
+        inComment,
+    }
 }
