@@ -432,6 +432,7 @@ export default class SearchBackground {
                 inContent,
                 inHighlight,
                 inComment,
+                matchTermsFuzzyStartsWith,
             } = splitQueryIntoTerms(params.query)
 
             params.matchPageTitleUrl = inTitle
@@ -440,6 +441,7 @@ export default class SearchBackground {
             params.matchHighlights = inHighlight
             params.phrases = phrases
             params.terms = terms
+            params.matchTermsFuzzyStartsWith = matchTermsFuzzyStartsWith
             result = await this.unifiedTermsSearch({
                 ...params,
                 queryPages: queryPagesByTerms(

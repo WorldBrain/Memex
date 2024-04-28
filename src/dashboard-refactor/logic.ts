@@ -509,7 +509,6 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         // Set a new timeout to wait for 8 seconds before emitting downloadStopped
         this.downloadStoppedTimeout = setTimeout(() => {
-            console.log('Set to 0')
             this.emitMutation({
                 syncMenu: {
                     pendingRemoteChangeCount: {
