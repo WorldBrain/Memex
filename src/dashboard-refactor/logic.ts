@@ -1371,6 +1371,10 @@ export class DashboardLogic extends UILogic<State, Events> {
             },
         })
     }
+    syncNow: EventHandler<'syncNow'> = ({ event }) => {
+        console.log('ari')
+        this.options.personalCloudBG.invokeSyncDownload()
+    }
 
     setShowDisplayNameSetupModal: EventHandler<
         'setShowDisplayNameSetupModal'
