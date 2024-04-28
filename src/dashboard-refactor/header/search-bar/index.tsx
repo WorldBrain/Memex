@@ -28,7 +28,7 @@ interface State {
     showTutorial: boolean
 }
 
-export default class SearchBar extends PureComponent<SearchBarProp, State> {
+export default class SearchBar extends PureComponent<SearchBarProps, State> {
     private inputRef = React.createRef<HTMLInputElement>()
 
     componentDidMount() {
