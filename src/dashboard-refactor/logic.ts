@@ -540,35 +540,46 @@ export class DashboardLogic extends UILogic<State, Events> {
         if (this.islikelyInPage) {
             return
         }
+        let updatedUrl: string
         // Get the current URL of the page
-        if (value != null) {
-            const url = this.options.location.href
 
-            let regex = new RegExp(`(${key}=)[^&]+`)
-            let match = url.match(regex)
+        const url = this.options.location.href
 
-            let updatedUrl = url
-            if (match) {
-                // update the query parameter value
-                let updatedParam = `${key}=${value}`
+        let regex = new RegExp(`(${key}=)[^&]+`)
+        let match = url.match(regex)
 
-                // replace the old query parameter with the updated one
-                updatedUrl = url.replace(match[0], updatedParam)
-            } else {
-                if (!url.includes('?')) {
-                    // add the query parameter to the URL
-                    updatedUrl = `${url}?${key}=${value}`
-                } else {
-                    // add the query parameter to the URL
-                    updatedUrl = `${url}&${key}=${value}`
-                }
-            }
-            if (process.env.NODE_ENV !== 'test') {
-                // Replace the current URL with the new one
-                this.options.location.replace(updatedUrl)
-            }
-        } else {
+        if (!match) {
+            regex = new RegExp(`(${key}=)`)
+            match = url.match(regex)
+        }
+
+        if (value === null || value?.length === 0) {
+            // updatedParam = ''
             this.removeQueryString(key)
+            return
+        }
+
+        updatedUrl = url
+        if (match) {
+            // update the query parameter value
+            let updatedParam: string
+
+            updatedParam = `${key}=${value}`
+            updatedUrl = url.replace(match[0], updatedParam)
+            // replace the old query parameter with the updated one
+        } else {
+            if (!url.includes('?')) {
+                // add the query parameter to the URL
+                updatedUrl = `${url}?${key}=${value}`
+            } else {
+                // add the query parameter to the URL
+                updatedUrl = `${url}&${key}=${value}`
+            }
+        }
+
+        if (process.env.NODE_ENV !== 'test') {
+            // Replace the current URL with the new one
+            this.options.location.replace(updatedUrl)
         }
     }
 
