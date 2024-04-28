@@ -65,6 +65,10 @@ class Root extends React.Component<RootProps, RootState> {
             skip: 0,
             filterByDomains: [],
             filterByListIds: [],
+            matchNotes: true,
+            matchPageText: true,
+            matchHighlights: true,
+            matchPageTitleUrl: true,
         })
         this.setState({
             searchResDocsProcessed: searchRes.docs.map((d) => ({

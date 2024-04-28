@@ -90,7 +90,7 @@ export interface RemoteSearchInterface {
     delPages: PageIndexingBackground['delPages']
 }
 
-export type UnifiedSearchParams = {
+export type UnifiedSearchParams = TermsSearchOpts & {
     query: string
     fromWhen?: number
     untilWhen?: number
@@ -100,8 +100,16 @@ export type UnifiedSearchParams = {
     filterByVideos?: boolean
     filterByTweets?: boolean
     filterByEvents?: boolean
-    startsWithMatching?: boolean
     omitPagesWithoutAnnotations?: boolean
+}
+
+export interface TermsSearchOpts {
+    /** Set to enable fuzzy startsWith terms matching, instead of exact match. */
+    matchTermsFuzzyStartsWith?: boolean
+    matchPageText?: boolean
+    matchPageTitleUrl?: boolean
+    matchHighlights?: boolean
+    matchNotes?: boolean
 }
 
 export interface UnifiedSearchPaginationParams {
@@ -113,8 +121,12 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
     UnifiedSearchPaginationParams & {
         queryPages: (
             terms: string[],
+            phrases?: string[],
         ) => Promise<Array<{ id: string; latestTimestamp: number }>>
-        queryAnnotations: (terms: string[]) => Promise<_Annotation[]>
+        queryAnnotations: (
+            terms: string[],
+            phrases?: string[],
+        ) => Promise<_Annotation[]>
     }
 
 /**

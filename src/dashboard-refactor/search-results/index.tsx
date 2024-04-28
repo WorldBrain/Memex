@@ -170,6 +170,7 @@ export interface State {
     showHorizontalScrollSwitch: string
     showPopoutsForResultBox: number
     tutorialId: string
+    searchTerms: string[]
 }
 
 export default class SearchResultsContainer extends React.Component<
@@ -182,9 +183,30 @@ export default class SearchResultsContainer extends React.Component<
             <LoadingIndicator />
         </Loader>
     )
+
+    state = {
+        showTutorialVideo: false,
+        tutorialState: undefined,
+        showHorizontalScrollSwitch: 'none',
+        showPopoutsForResultBox: null,
+        tutorialId: null,
+        searchTerms: [],
+    }
+
     componentDidMount() {
         this.getTutorialState()
         this.listenToContentSwitcherSizeChanges()
+        this.generateSearchTermList()
+    }
+
+    componentDidUpdate(
+        prevProps: Readonly<Props>,
+        prevState: Readonly<State>,
+        snapshot?: any,
+    ): void {
+        if (prevProps.searchQuery !== this.props.searchQuery) {
+            this.generateSearchTermList()
+        }
     }
 
     listenToContentSwitcherSizeChanges() {
@@ -249,6 +271,21 @@ export default class SearchResultsContainer extends React.Component<
         })
     }
 
+    generateSearchTermList = () => {
+        const regex = /"[^"]+"|\S+/g
+        const searchTerms =
+            this.props.searchQuery
+                .match(regex)
+                ?.map((term) =>
+                    term.startsWith('"') && term.endsWith('"')
+                        ? term.slice(1, -1)
+                        : term,
+                ) || []
+        this.setState({
+            searchTerms: searchTerms,
+        })
+    }
+
     contentSwitcherResizeLogic(topBarElement) {
         if (topBarElement.clientWidth < topBarElement.scrollWidth) {
             this.setState({
@@ -291,14 +328,6 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     sortButtonRef = React.createRef<HTMLDivElement>()
-
-    state = {
-        showTutorialVideo: false,
-        tutorialState: undefined,
-        showHorizontalScrollSwitch: 'none',
-        showPopoutsForResultBox: null,
-        tutorialId: null,
-    }
 
     private getLocalListIdsForCacheIds = (listIds: string[]): number[] =>
         listIds
@@ -367,9 +396,7 @@ export default class SearchResultsContainer extends React.Component<
                         ? new Date(noteData.displayTime)
                         : undefined
                 }
-                searchTerms={this.props.searchQuery
-                    .split(' ')
-                    .filter((term) => term.trim() !== '')}
+                searchTerms={this.state.searchTerms}
                 saveHighlightColorSettings={
                     this.props.saveHighlightColorSettings
                 }
@@ -706,6 +733,8 @@ export default class SearchResultsContainer extends React.Component<
             PagePickerProps
         >(this.props.pagePickerProps, pageId)
 
+        console.log('seahch query', this.props.searchQuery)
+
         return (
             <ResultBox
                 zIndex={
@@ -761,9 +790,7 @@ export default class SearchResultsContainer extends React.Component<
                     searchType={this.props.searchType}
                     isInFocus={page.isInFocus}
                     uploadedPdfLinkLoadState={page.uploadedPdfLinkLoadState}
-                    searchTerms={this.props.searchQuery
-                        ?.split(' ')
-                        .filter((term) => term.trim() !== '')}
+                    searchTerms={this.state.searchTerms}
                     renderSpacePicker={() => (
                         <CollectionPicker
                             {...this.props.spacePickerBGProps}
