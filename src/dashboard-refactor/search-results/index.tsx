@@ -1154,10 +1154,12 @@ export default class SearchResultsContainer extends React.Component<
             this.props.searchState !== 'pristine'
         ) {
             days.push(
-                <Waypoint
-                    key="pagination-waypoint"
-                    onEnter={() => this.props.paginateSearch()}
-                />,
+                <WayPointContainer>
+                    <Waypoint
+                        key="pagination-waypoint"
+                        onEnter={() => this.props.paginateSearch()}
+                    />
+                </WayPointContainer>,
             )
         }
 
@@ -1708,4 +1710,11 @@ const ResultsContainer = styled.div`
     }
 
     scrollbar-width: none;
+`
+
+const WayPointContainer = styled.div`
+    width: fit-content;
+    min-height: 200px;
+    min-width: 200px;
+    display: flex;
 `
