@@ -127,6 +127,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openSpaceInWebUI'
         | 'summarizeBG'
         | 'imageSupportBG'
+        | 'personalCloudBG'
         | 'bgScriptBG'
     > = {
         analytics,
@@ -144,6 +145,7 @@ export class DashboardContainer extends StatefulUIElement<
         contentShareByTabsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentScriptsBG: runInBackground(),
+        personalCloudBG: runInBackground(),
         pageIndexingBG: runInBackground(),
         contentShareBG: runInBackground(),
         copyPasterBG: runInBackground(),
@@ -582,6 +584,7 @@ export class DashboardContainer extends StatefulUIElement<
                                 }),
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
+                            syncNow: () => this.processEvent('syncNow', null),
                         }}
                         syncStatusIconState={syncStatusIconState}
                     />

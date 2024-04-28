@@ -53,6 +53,7 @@ import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import type { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
 import { BulkEditCollection, BulkEditItem } from 'src/bulk-edit/types'
+import { PersonalCloudRemoteInterface } from 'src/personal-cloud/background/types'
 
 export interface RootState {
     loadState: TaskState
@@ -107,6 +108,7 @@ export type DashboardDependencies = {
     contentConversationsBG: ContentConversationsInterface
     listsBG: RemoteCollectionsInterface
     searchBG: RemoteSearchInterface
+    personalCloudBG?: PersonalCloudRemoteInterface
     annotationsCache: PageAnnotationsCacheInterface
     contentScriptsBG: ContentScriptsInterface<'caller'>
     annotationsBG: AnnotationInterface<'caller'>
@@ -187,6 +189,7 @@ export type DashboardModalsEvents = UIEvent<{
     }
     saveHighlightColorSettings: { newState: HighlightColor[] }
     setShowDisplayNameSetupModal: { isShown: boolean }
+    syncNow: null
     setShowNoteShareOnboardingModal: { isShown: boolean }
 
     setDeletingListId: { listId: string }
