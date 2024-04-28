@@ -150,7 +150,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 syncMenu: {
                     pendingLocalChangeCount: { $set: stats.pendingUploads },
                     // TODO: re-implement pending download count
-                    pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
                 },
             })
 
@@ -165,14 +165,26 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
             }
         })
-        this.personalCloudEvents.on(
-            'downloadStarted',
-            this.toggleSyncDownloadActive,
-        )
-        this.personalCloudEvents.on(
-            'downloadStopped',
-            this.toggleSyncDownloadActive,
-        )
+
+        this.personalCloudEvents.on('downloadStarted', () => {
+            this.emitMutation({
+                syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+            })
+            this.toggleSyncDownloadActive()
+        })
+        // this.personalCloudEvents.on('downloadStopped', () => {
+        //     this.emitMutation({
+        //         syncMenu: { pendingRemoteChangeCount: { $set: 0 } },
+        //     })
+        // })
+        // this.personalCloudEvents.on(
+        //     'downloadStarted',
+        //     this.toggleSyncDownloadActive,
+        // )
+        // this.personalCloudEvents.on(
+        //     'downloadStopped',
+        //     this.toggleSyncDownloadActive,
+        // )
         this.emitMutation({
             syncMenu: {
                 pendingLocalChangeCount: {
@@ -183,95 +195,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
-    }
-
-    // NOTE: This debounce exists as sync DL documents come in 1-by-1, often with short delays between each doc, which
-    //  resulted in the status indicator constantly toggling on and off as docs came in. Leading to flickering when
-    //  many docs were queued up.
-    //  A rough test got me delays of 1-8s between docs created at roughly the same time, which is why the 8s wait was chosen.
-    private toggleSyncDownloadActive = debounce(
-        () => {
-            this.emitMutation({
-                syncMenu: {
-                    pendingRemoteChangeCount: {
-                        $apply: (prev) => (prev === 0 ? 1 : 0),
-                    },
-                },
-            })
-        },
-        8000,
-        { leading: true },
-    )
-
-    private getURLSearchParams(): URLSearchParams {
-        // Get the current URL of the page
-        const url = this.options.location.href
-
-        // Check if the URL has a query string
-        const queryStringIndex = url.indexOf('?')
-        if (queryStringIndex === -1) {
-            return new URLSearchParams() // No query string found
-        }
-
-        // Split the query string into key-value pairs
-        const queryString = url.substring(queryStringIndex + 1)
-        return new URLSearchParams(queryString)
-    }
-
-    // TODO: Update this to use the URLSearchParams API rather than string manipulation
-    private updateQueryStringParameter(key: string, value: string) {
-        if (this.islikelyInPage) {
-            return
-        }
-        // Get the current URL of the page
-        if (value != null) {
-            const url = this.options.location.href
-
-            let regex = new RegExp(`(${key}=)[^&]+`)
-            let match = url.match(regex)
-
-            let updatedUrl = url
-            if (match) {
-                // update the query parameter value
-                let updatedParam = `${key}=${value}`
-
-                // replace the old query parameter with the updated one
-                updatedUrl = url.replace(match[0], updatedParam)
-            } else {
-                if (!url.includes('?')) {
-                    // add the query parameter to the URL
-                    updatedUrl = `${url}?${key}=${value}`
-                } else {
-                    // add the query parameter to the URL
-                    updatedUrl = `${url}&${key}=${value}`
-                }
-            }
-            if (process.env.NODE_ENV !== 'test') {
-                // Replace the current URL with the new one
-                this.options.location.replace(updatedUrl)
-            }
-        } else {
-            this.removeQueryString(key)
-        }
-    }
-
-    private removeQueryString(key) {
-        // Get the current URL of the page
-        const url = this.options.location.href
-
-        // Regular expression to match the query parameter key and its value
-        const regex = new RegExp('([?&])' + key + '=([^&]*)')
-
-        // Remove the query parameter from the URL
-        const updatedUrl = url.replace(regex, (match, p1) => {
-            return p1 === '?' ? '?' : ''
-        })
-
-        // If the last character is a '?', remove it
-        const cleanUrl = updatedUrl.replace(/[?]$/, '')
-
-        // Replace the current URL with the new one
-        this.options.history.replaceState({}, '', cleanUrl)
     }
 
     getInitialState(): State {
@@ -304,7 +227,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         return {
-            currentUser: null,
+            currentUser: {
+                id: '',
+                displayName: '',
+                email: '',
+                emailVerified: false,
+            },
             loadState: 'pristine',
             mode: isDuringInstall(this.options.location)
                 ? 'onboarding'
@@ -419,48 +347,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             focusedBlockId: -1,
         }
     }
-
-    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
-        nextLists,
-    ) => {
-        this.emitMutation({
-            listsSidebar: {
-                lists: { $set: nextLists },
-                listTrees: {
-                    $apply: (prev) =>
-                        initNormalizedState({
-                            getId: (state) => state.unifiedId,
-                            seedData: normalizedStateToArray(nextLists).map(
-                                (list) => {
-                                    const prevState = prev.byId[list.unifiedId]
-                                    return {
-                                        unifiedId: list.unifiedId,
-                                        isTreeToggled:
-                                            prevState?.isTreeToggled ?? false,
-                                        isNestedListInputShown:
-                                            prevState?.isNestedListInputShown ??
-                                            false,
-                                        newNestedListValue:
-                                            prevState?.newNestedListValue ?? '',
-                                        newNestedListCreateState:
-                                            prevState?.newNestedListCreateState ??
-                                            'pristine',
-                                        hasChildren:
-                                            this.options.annotationsCache.getListsByParentId(
-                                                list.unifiedId,
-                                            ).length > 0,
-                                    }
-                                },
-                            ),
-                        }),
-                },
-            },
-        })
-    }
-
-    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
-        nextAnnotations,
-    ) => {}
 
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { annotationsCache, authBG } = this.options
@@ -607,6 +493,145 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.observer.disconnect()
         }
     }
+
+    // NOTE: This debounce exists as sync DL documents come in 1-by-1, often with short delays between each doc, which
+    //  resulted in the status indicator constantly toggling on and off as docs came in. Leading to flickering when
+    //  many docs were queued up.
+    //  A rough test got me delays of 1-8s between docs created at roughly the same time, which is why the 8s wait was chosen.
+
+    private downloadStoppedTimeout: any | null = null
+
+    private toggleSyncDownloadActive = () => {
+        // Clear any existing timeout to reset the debounce timer
+        if (this.downloadStoppedTimeout) {
+            clearTimeout(this.downloadStoppedTimeout)
+        }
+
+        // Set a new timeout to wait for 8 seconds before emitting downloadStopped
+        this.downloadStoppedTimeout = setTimeout(() => {
+            console.log('Set to 0')
+            this.emitMutation({
+                syncMenu: {
+                    pendingRemoteChangeCount: {
+                        $set: 0,
+                    },
+                },
+            })
+        }, 8000) // 8000 milliseconds = 8 seconds
+    }
+
+    private getURLSearchParams(): URLSearchParams {
+        // Get the current URL of the page
+        const url = this.options.location.href
+
+        // Check if the URL has a query string
+        const queryStringIndex = url.indexOf('?')
+        if (queryStringIndex === -1) {
+            return new URLSearchParams() // No query string found
+        }
+
+        // Split the query string into key-value pairs
+        const queryString = url.substring(queryStringIndex + 1)
+        return new URLSearchParams(queryString)
+    }
+
+    // TODO: Update this to use the URLSearchParams API rather than string manipulation
+    private updateQueryStringParameter(key: string, value: string) {
+        if (this.islikelyInPage) {
+            return
+        }
+        // Get the current URL of the page
+        if (value != null) {
+            const url = this.options.location.href
+
+            let regex = new RegExp(`(${key}=)[^&]+`)
+            let match = url.match(regex)
+
+            let updatedUrl = url
+            if (match) {
+                // update the query parameter value
+                let updatedParam = `${key}=${value}`
+
+                // replace the old query parameter with the updated one
+                updatedUrl = url.replace(match[0], updatedParam)
+            } else {
+                if (!url.includes('?')) {
+                    // add the query parameter to the URL
+                    updatedUrl = `${url}?${key}=${value}`
+                } else {
+                    // add the query parameter to the URL
+                    updatedUrl = `${url}&${key}=${value}`
+                }
+            }
+            if (process.env.NODE_ENV !== 'test') {
+                // Replace the current URL with the new one
+                this.options.location.replace(updatedUrl)
+            }
+        } else {
+            this.removeQueryString(key)
+        }
+    }
+
+    private removeQueryString(key) {
+        // Get the current URL of the page
+        const url = this.options.location.href
+
+        // Regular expression to match the query parameter key and its value
+        const regex = new RegExp('([?&])' + key + '=([^&]*)')
+
+        // Remove the query parameter from the URL
+        const updatedUrl = url.replace(regex, (match, p1) => {
+            return p1 === '?' ? '?' : ''
+        })
+
+        // If the last character is a '?', remove it
+        const cleanUrl = updatedUrl.replace(/[?]$/, '')
+
+        // Replace the current URL with the new one
+        this.options.history.replaceState({}, '', cleanUrl)
+    }
+
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
+        nextLists,
+    ) => {
+        this.emitMutation({
+            listsSidebar: {
+                lists: { $set: nextLists },
+                listTrees: {
+                    $apply: (prev) =>
+                        initNormalizedState({
+                            getId: (state) => state.unifiedId,
+                            seedData: normalizedStateToArray(nextLists).map(
+                                (list) => {
+                                    const prevState = prev.byId[list.unifiedId]
+                                    return {
+                                        unifiedId: list.unifiedId,
+                                        isTreeToggled:
+                                            prevState?.isTreeToggled ?? false,
+                                        isNestedListInputShown:
+                                            prevState?.isNestedListInputShown ??
+                                            false,
+                                        newNestedListValue:
+                                            prevState?.newNestedListValue ?? '',
+                                        newNestedListCreateState:
+                                            prevState?.newNestedListCreateState ??
+                                            'pristine',
+                                        hasChildren:
+                                            this.options.annotationsCache.getListsByParentId(
+                                                list.unifiedId,
+                                            ).length > 0,
+                                    }
+                                },
+                            ),
+                        }),
+                },
+            },
+        })
+    }
+
+    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
+        nextAnnotations,
+    ) => {}
 
     observeBlurContainer() {
         const container = document.getElementById('BlurContainer')
@@ -1372,7 +1397,9 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
     }
     syncNow: EventHandler<'syncNow'> = ({ event }) => {
-        console.log('ari')
+        this.emitMutation({
+            syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+        })
         this.options.personalCloudBG.invokeSyncDownload()
     }
 

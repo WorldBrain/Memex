@@ -342,8 +342,10 @@ const BottomRow = styled.div`
 
 const ReportProblemRow = styled.div`
     display: flex;
-    justify-content: flex-start;
+    justify-content: center;
     cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
 `
 
 const RowContainer = styled.div`
