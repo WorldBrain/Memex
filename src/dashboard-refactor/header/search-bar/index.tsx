@@ -146,13 +146,10 @@ export default class SearchBar extends PureComponent<SearchBarProp, State> {
                     </FilterButton>
                     {renderCopyPasterButton()}
                     {renderExpandButton()}
-                    {/* {this.state.showTutorial && ( */}
                     <TutorialBox
                         tutorialId="savePages"
                         getRootElement={this.props.getRootElement}
-                        // iconSize={'16'}
                     />
-                    {/* )} */}
                 </ActionButtons>
                 {!this.props.inPageMode && <Placeholder />}
             </Margin>
