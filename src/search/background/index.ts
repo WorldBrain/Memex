@@ -39,6 +39,7 @@ import {
     sortUnifiedBlankSearchResult,
     queryAnnotationsByTerms,
     queryPagesByTerms,
+    splitQueryIntoTerms,
 } from './utils'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
@@ -360,16 +361,12 @@ export default class SearchBackground {
     private async unifiedTermsSearch(
         params: UnifiedTermsSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
-        const terms = [
-            ...new Set(
-                params.query.toLocaleLowerCase().split(/\s+/).filter(Boolean),
-            ),
-        ]
+        const { phrases, terms } = splitQueryIntoTerms(params.query)
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
 
         const [pages, annotations] = await Promise.all([
-            params.queryPages(terms),
-            params.queryAnnotations(terms),
+            params.queryPages(terms, phrases),
+            params.queryAnnotations(terms, phrases),
         ])
 
         // Add in all the annotations to the results
@@ -431,11 +428,13 @@ export default class SearchBackground {
         } else {
             result = await this.unifiedTermsSearch({
                 ...params,
-                queryPages: queryPagesByTerms(this.options.storageManager, {
-                    startsWithMatching: params.startsWithMatching,
-                }),
+                queryPages: queryPagesByTerms(
+                    this.options.storageManager,
+                    params,
+                ),
                 queryAnnotations: queryAnnotationsByTerms(
                     this.options.storageManager,
+                    params,
                 ),
             })
         }

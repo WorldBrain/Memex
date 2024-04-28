@@ -6,12 +6,14 @@ import {
     queryAnnotationsByTerms,
     queryPagesByTerms,
     sortUnifiedBlankSearchResult,
+    splitQueryIntoTerms,
 } from './utils'
 import type {
     UnifiedSearchPaginationParams,
     UnifiedBlankSearchParams,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
+    TermsSearchOpts,
 } from './types'
 import type { BackgroundModules } from 'src/background-script/setup'
 import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
@@ -105,16 +107,28 @@ const termsSearch = (
     { search }: BackgroundModules,
     params: Partial<UnifiedTermsSearchParams> &
         UnifiedSearchPaginationParams & { query: string },
-) =>
-    search['unifiedTermsSearch']({
+) => {
+    const defaultTermsOpts: TermsSearchOpts = {
+        matchNotes: true,
+        matchPageText: true,
+        matchHighlights: true,
+        matchPageTitleUrl: true,
+    }
+    return search['unifiedTermsSearch']({
         filterByDomains: [],
         filterByListIds: [],
-        queryPages: queryPagesByTerms(search['options'].storageManager),
+        queryPages: queryPagesByTerms(search['options'].storageManager, {
+            ...defaultTermsOpts,
+            ...params,
+        }),
         queryAnnotations: queryAnnotationsByTerms(
             search['options'].storageManager,
+            { ...defaultTermsOpts, ...params },
         ),
+        ...defaultTermsOpts,
         ...params,
     })
+}
 
 const formatResults = (
     result: UnifiedBlankSearchResult,
@@ -688,7 +702,7 @@ describe('Unified search tests', () => {
     })
 
     describe('terms search tests', () => {
-        it('should return nothing when no data on blank search', async () => {
+        it('should return nothing when no data on terms search', async () => {
             const { backgroundModules } = await setupTest({
                 skipDataInsertion: true,
             })
@@ -1242,6 +1256,68 @@ describe('Unified search tests', () => {
                 ),
             ).toEqual([DATA.PAGE_ID_9])
         })
+
+        it('should return highlights and their pages that match double-quoted exact terms', async () => {
+            const { backgroundModules } = await setupTest()
+            const now = Date.now()
+
+            const resultA = await termsSearch(backgroundModules, {
+                query: '"some nonsense test text"',
+                limit: 1000,
+                skip: 0,
+            })
+            const resultB = await termsSearch(backgroundModules, {
+                query: '"apples, oranges"',
+                limit: 1000,
+                skip: 0,
+            })
+            const resultC = await termsSearch(backgroundModules, {
+                query: '"some nonsense test text" oranges',
+                limit: 1000,
+                skip: 0,
+            })
+            const resultD = await termsSearch(backgroundModules, {
+                query: '"monophyly and validity"',
+                limit: 1000,
+                skip: 0,
+            })
+            expect(resultA.resultsExhausted).toBe(true)
+            expect(resultB.resultsExhausted).toBe(true)
+            expect(resultC.resultsExhausted).toBe(true)
+            expect(resultC.resultsExhausted).toBe(true)
+            expect(formatResults(resultA, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_4,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_4][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultB, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_2,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.BOOKMARKS[DATA.PAGE_ID_2][0].time,
+                    },
+                ],
+            ])
+            expect(formatResults(resultC, { skipSorting: true })).toEqual([]) // No overlap
+            expect(formatResults(resultD, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_2,
+                    {
+                        annotIds: [DATA.ANNOTATIONS[DATA.PAGE_ID_2][2].url],
+                        latestPageTimestamp: DATA.ANNOTATIONS[
+                            DATA.PAGE_ID_2
+                        ][2].lastEdited.valueOf(),
+                    },
+                ],
+            ])
+        })
     })
 
     describe('search filter tests', () => {
@@ -1634,6 +1710,48 @@ describe('Unified search tests', () => {
     })
 
     describe('misc cases', () => {
+        it('query splitting should separate multiple terms and phrases surrounded by double-quotes', async () => {
+            expect(splitQueryIntoTerms('test test')).toEqual({
+                terms: ['test'],
+                phrases: [],
+            })
+            expect(splitQueryIntoTerms('"test test"')).toEqual({
+                terms: [],
+                phrases: ['test test'],
+            })
+            expect(splitQueryIntoTerms('"test test" test')).toEqual({
+                phrases: ['test test'],
+                terms: ['test'],
+            })
+            expect(splitQueryIntoTerms('cat "big dog" test')).toEqual({
+                terms: ['cat', 'test'],
+                phrases: ['big dog'],
+            })
+            expect(
+                splitQueryIntoTerms('cat "big dog" test "blue car" red car'),
+            ).toEqual({
+                terms: ['cat', 'test', 'red', 'car'],
+                phrases: ['big dog', 'blue car'],
+            })
+            expect(
+                splitQueryIntoTerms(
+                    'cat "big dog" test grab yellow "blue car" red car',
+                ),
+            ).toEqual({
+                terms: ['cat', 'test', 'grab', 'yellow', 'red', 'car'],
+                phrases: ['big dog', 'blue car'],
+            })
+            expect(
+                splitQueryIntoTerms(
+                    // You use silly syntax, you get silly results
+                    'cat"big dog" test grab yellow"blue car"red car',
+                ),
+            ).toEqual({
+                terms: ['test', 'grab', 'yellow'],
+                phrases: ['cat', 'big dog', 'blue car', 'red car'],
+            })
+        })
+
         it('terms search should still work the same with affixed spaces in query', async () => {
             const { backgroundModules } = await setupTest()
             const termsResultA = await termsSearch(backgroundModules, {

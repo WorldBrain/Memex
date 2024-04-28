@@ -220,7 +220,7 @@ export default class CustomListBackground {
 
     fetchAllLists: RemoteCollectionsInterface['fetchAllLists'] = async ({
         skip = 0,
-        limit = 2000,
+        limit = 5000,
         skipSpecialLists = false,
         includeTreeData,
         includeDescriptions,
