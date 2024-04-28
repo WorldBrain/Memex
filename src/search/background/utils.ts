@@ -1,5 +1,6 @@
 import type Storex from '@worldbrain/storex'
 import type {
+    TermsSearchOpts,
     UnifiedBlankSearchResult,
     UnifiedTermsSearchParams,
 } from './types'
@@ -11,7 +12,7 @@ import type {
     Annotation,
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
-import type Dexie from 'dexie'
+import type { WhereClause, default as Dexie } from 'dexie'
 
 export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     lists: params.collections,
@@ -78,60 +79,115 @@ export const sortUnifiedBlankSearchResult = (
 
 /** Given separate result sets of the same type, gets the intersection of them / ANDs them together by ID */
 const intersectResults = (results: string[][]): string[] =>
-    results.reduce((a, b) => {
-        const ids = new Set(b)
-        return a.filter((id) => ids.has(id))
-    })
+    !results.length
+        ? []
+        : results.reduce((a, b) => {
+              const ids = new Set(b)
+              return a.filter((id) => ids.has(id))
+          })
+
+// Handles switching between fuzzy and exact term matching
+const queryByTerm = <T, PK>(
+    clause: WhereClause<T, PK>,
+    term: string,
+    opts: Pick<TermsSearchOpts, 'matchTermsFuzzyStartsWith'>,
+) =>
+    opts.matchTermsFuzzyStartsWith
+        ? clause.startsWith(term)
+        : clause.equals(term)
 
 export const queryAnnotationsByTerms = (
     storageManager: Storex,
-): UnifiedTermsSearchParams['queryAnnotations'] => async (terms) => {
+    opts: TermsSearchOpts,
+): UnifiedTermsSearchParams['queryAnnotations'] => async (
+    terms,
+    phrases = [],
+) => {
+    if (!opts.matchHighlights && !opts.matchNotes) {
+        return []
+    }
+
     const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
-    const resultsPerTerm = await Promise.all(
-        terms.map((term) =>
-            dexie
-                .table<Annotation, string>('annotations')
-                .where('_body_terms')
-                .equals(term)
-                .or('_comment_terms')
-                .equals(term)
-                .distinct()
+    const table = dexie.table<Annotation, string>('annotations')
+    const resultsPerTerm = await Promise.all([
+        ...terms.map((term) => {
+            if (opts.matchHighlights && !opts.matchNotes) {
+                return queryByTerm(
+                    table.where('_body_terms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            } else if (!opts.matchHighlights && opts.matchNotes) {
+                return queryByTerm(
+                    table.where('_comment_terms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            }
+            const coll = queryByTerm(table.where('_body_terms'), term, opts)
+            return queryByTerm(
+                coll.or('_comment_terms'),
+                term,
+                opts,
+            ).primaryKeys()
+        }),
+        ...phrases.map((phrase) =>
+            table
+                .filter((a) => {
+                    const inComment = a.comment
+                        ?.toLocaleLowerCase()
+                        .includes(phrase)
+                    const inHighlight =
+                        'body' in a
+                            ? a.body?.toLocaleLowerCase().includes(phrase)
+                            : false
+                    return inComment || inHighlight
+                })
                 .primaryKeys(),
         ),
-    )
+    ])
     const matchingIds = intersectResults(resultsPerTerm)
-    return dexie.table<Annotation>('annotations').bulkGet(matchingIds)
+    return table.bulkGet(matchingIds)
 }
 
 export const queryPagesByTerms = (
     storageManager: Storex,
-    opts?: {
-        startsWithMatching?: boolean
-    },
-): UnifiedTermsSearchParams['queryPages'] => async (terms) => {
-    const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
-    const resultsPerTerm = await Promise.all(
-        terms.map((term) => {
-            const table = dexie.table<Page, string>('pages')
-            const coll = opts?.startsWithMatching
-                ? table
-                      .where('terms')
-                      .startsWith(term)
-                      .or('urlTerms')
-                      .startsWith(term)
-                      .or('titleTerms')
-                      .startsWith(term)
-                : table
-                      .where('terms')
-                      .equals(term)
-                      .or('urlTerms')
-                      .equals(term)
-                      .or('titleTerms')
-                      .equals(term)
+    opts: TermsSearchOpts,
+): UnifiedTermsSearchParams['queryPages'] => async (terms, phrases = []) => {
+    if (!opts.matchPageText && !opts.matchPageTitleUrl) {
+        return []
+    }
 
-            return coll.distinct().primaryKeys()
+    const dexie = (storageManager.backend as DexieStorageBackend).dexieInstance
+    const table = dexie.table<Page, string>('pages')
+    const resultsPerTerm = await Promise.all([
+        ...terms.map((term) => {
+            if (opts.matchPageText && !opts.matchPageTitleUrl) {
+                return queryByTerm(
+                    table.where('terms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            } else if (!opts.matchPageText && opts.matchPageTitleUrl) {
+                const coll = queryByTerm(table.where('urlTerms'), term, opts)
+                return queryByTerm(
+                    coll.or('titleTerms'),
+                    term,
+                    opts,
+                ).primaryKeys()
+            }
+            let coll = queryByTerm(table.where('terms'), term, opts)
+            coll = queryByTerm(coll.or('urlTerms'), term, opts)
+            return queryByTerm(coll.or('titleTerms'), term, opts).primaryKeys()
         }),
-    )
+        ...phrases.map((phrase) =>
+            table
+                .filter((page) =>
+                    page.text?.toLocaleLowerCase().includes(phrase),
+                )
+                .primaryKeys(),
+        ),
+    ])
     const matchingIds = intersectResults(resultsPerTerm)
 
     // Get latest visit/bm for each page
@@ -156,4 +212,26 @@ export const queryPagesByTerms = (
         id,
         latestTimestamp: latestTimestampByPageUrl.get(id) ?? 0,
     }))
+}
+
+export const splitQueryIntoTerms = (
+    query: string,
+): { terms: string[]; phrases: string[] } => {
+    const discreteTerms = new Set<string>()
+    const phrases = new Set<string>()
+
+    // First split by double quotes, then by spaces on non-double quoted phrases
+    const terms = query.toLocaleLowerCase().split('"').filter(Boolean)
+    for (const term of terms) {
+        const wasNotDoubleQuoted =
+            term.trim().length !== term.length || term === query
+
+        if (wasNotDoubleQuoted) {
+            const subTerms = term.split(/\s+/).filter(Boolean)
+            subTerms.forEach((subTerm) => discreteTerms.add(subTerm))
+        } else {
+            phrases.add(term)
+        }
+    }
+    return { terms: [...discreteTerms], phrases: [...phrases] }
 }
