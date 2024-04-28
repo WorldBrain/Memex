@@ -733,8 +733,6 @@ export default class SearchResultsContainer extends React.Component<
             PagePickerProps
         >(this.props.pagePickerProps, pageId)
 
-        console.log('seahch query', this.props.searchQuery)
-
         return (
             <ResultBox
                 zIndex={
