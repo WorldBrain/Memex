@@ -2683,6 +2683,7 @@ export class AnnotationsSidebar extends React.Component<
                                                 0,
                                                 duration,
                                                 '',
+                                                false,
                                                 (success) => {
                                                     if (success) {
                                                         executed = success
