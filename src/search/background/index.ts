@@ -133,7 +133,9 @@ export default class SearchBackground {
             edge === 'bottom'
                 ? Math.min(...timestamps)
                 : Math.max(...timestamps)
-        return edgeTimestamp !== Infinity ? edgeTimestamp : defaultTimestamp
+        return Math.abs(edgeTimestamp) !== Infinity
+            ? edgeTimestamp
+            : defaultTimestamp
     }
 
     private sliceUnifiedSearchResults(
@@ -289,7 +291,8 @@ export default class SearchBackground {
     ): Promise<UnifiedBlankSearchResult> {
         const upperBound = params.untilWhen
         const lowerBound =
-            params.fromWhen ?? upperBound - params.daysToSearch * dayMs
+            params.fromWhen ??
+            Math.max(upperBound - params.daysToSearch * dayMs, 0)
         // const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
 
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
