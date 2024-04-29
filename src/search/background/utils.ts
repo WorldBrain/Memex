@@ -216,22 +216,79 @@ export const queryPagesByTerms = (
 
 export const splitQueryIntoTerms = (
     query: string,
-): { terms: string[]; phrases: string[] } => {
+): {
+    terms: string[]
+    phrases: string[]
+    inTitle: boolean
+    inContent: boolean
+    inHighlight: boolean
+    inComment: boolean
+    matchTermsFuzzyStartsWith: boolean
+} => {
     const discreteTerms = new Set<string>()
     const phrases = new Set<string>()
+    let queryString = query.trim().toLocaleLowerCase()
+    let inTitle = true
+    let inContent = true
+    let inHighlight = true
+    let inComment = true
+    let matchTermsFuzzyStartsWith = false
+
+    if (queryString.includes('*')) {
+        matchTermsFuzzyStartsWith = true
+        queryString = queryString.replace(/\*/g, '')
+    }
+    const matches = query.match(/"[^"]+"/g)
+    matches?.forEach((match) => {
+        phrases.add(match.slice(1, -1))
+        queryString = queryString.replace(match, '') // Remove the matched phrase from queryString
+    })
+    queryString = queryString.replace(/\s+/g, ' ').trim()
+
+    // only add the terms to discrete terms if they are not in double quotes and are not in the list of special terms
 
     // First split by double quotes, then by spaces on non-double quoted phrases
-    const terms = query.toLocaleLowerCase().split('"').filter(Boolean)
+    const terms = queryString.split(' ').filter(Boolean)
     for (const term of terms) {
-        const wasNotDoubleQuoted =
-            term.trim().length !== term.length || term === query
-
-        if (wasNotDoubleQuoted) {
-            const subTerms = term.split(/\s+/).filter(Boolean)
-            subTerms.forEach((subTerm) => discreteTerms.add(subTerm))
-        } else {
-            phrases.add(term)
-        }
+        const subTerms = term.split(/\s+/).filter(Boolean)
+        subTerms.forEach((subTerm) => {
+            switch (subTerm) {
+                case 'intitle':
+                    inTitle = true
+                    inContent = false
+                    inHighlight = false
+                    inComment = false
+                    break
+                case 'incontent':
+                    inTitle = false
+                    inContent = true
+                    inHighlight = false
+                    inComment = false
+                    break
+                case 'inhighlight':
+                    inTitle = false
+                    inContent = false
+                    inHighlight = true
+                    inComment = false
+                    break
+                case 'incomment':
+                    inTitle = false
+                    inContent = false
+                    inHighlight = false
+                    inComment = true
+                    break
+                default:
+                    discreteTerms.add(subTerm)
+            }
+        })
     }
-    return { terms: [...discreteTerms], phrases: [...phrases] }
+    return {
+        terms: [...discreteTerms],
+        phrases: [...phrases],
+        inTitle,
+        inContent,
+        inHighlight,
+        inComment,
+        matchTermsFuzzyStartsWith,
+    }
 }

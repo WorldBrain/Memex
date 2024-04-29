@@ -42,7 +42,7 @@ interface State {
 
 export default class PageCitations extends React.PureComponent<Props, State> {
     state: State = {
-        optionSelected: 'CopyToClipboard',
+        optionSelected: 'ShareViaLink',
         linkLoadingState: 'pristine',
     }
 
@@ -120,19 +120,6 @@ export default class PageCitations extends React.PureComponent<Props, State> {
                 <PageCitationTopBar>
                     <ButtonContainer>
                         <PrimaryAction
-                            label={'Custom Copy/Paste'}
-                            onClick={this.switchOption}
-                            type={'menuBar'}
-                            size={'small'}
-                            active={
-                                this.state.optionSelected === 'CopyToClipboard'
-                            }
-                            fontColor="greyScale6"
-                            icon={'copy'}
-                        />
-                    </ButtonContainer>
-                    <ButtonContainer>
-                        <PrimaryAction
                             label={'Via Links'}
                             onClick={this.switchOption}
                             type={'menuBar'}
@@ -161,6 +148,19 @@ export default class PageCitations extends React.PureComponent<Props, State> {
                                 </TooltipBox>
                             </LoadingBox>
                         )}
+                    </ButtonContainer>
+                    <ButtonContainer>
+                        <PrimaryAction
+                            label={'Custom Copy/Paste'}
+                            onClick={this.switchOption}
+                            type={'menuBar'}
+                            size={'small'}
+                            active={
+                                this.state.optionSelected === 'CopyToClipboard'
+                            }
+                            fontColor="greyScale6"
+                            icon={'copy'}
+                        />
                     </ButtonContainer>
                 </PageCitationTopBar>
                 {this.state.optionSelected === 'CopyToClipboard' ? (

@@ -65,6 +65,7 @@ export interface SyncStatusMenuProps extends RootState {
     syncStatusIconState?: any
     getRootElement: () => HTMLElement
     onToggleDisplayState?: () => void
+    syncNow: () => void
 }
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
@@ -239,21 +240,31 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 </RowContainer>
                 <Separator />
                 <BottomRow>
-                    <HelpTextBlock> Report sync problems:</HelpTextBlock>
-                    <HelpTextBlockLink
-                        target="_blank"
-                        href="https://memex.featurebase.app/"
-                    >
-                        {' '}
-                        Forum
-                    </HelpTextBlockLink>
-                    <HelpTextBlockLink
-                        target="_blank"
-                        href="mailto:support@memex.garden"
-                    >
-                        {' '}
-                        Email
-                    </HelpTextBlockLink>
+                    <PrimaryAction
+                        label="Sync Now"
+                        onClick={this.props.syncNow}
+                        size={'medium'}
+                        icon={'reload'}
+                        fullWidth
+                        type={'primary'}
+                    />
+                    <ReportProblemRow>
+                        <HelpTextBlock> Report sync problems:</HelpTextBlock>
+                        <HelpTextBlockLink
+                            target="_blank"
+                            href="https://memex.featurebase.app/"
+                        >
+                            {' '}
+                            Forum
+                        </HelpTextBlockLink>
+                        <HelpTextBlockLink
+                            target="_blank"
+                            href="mailto:support@memex.garden"
+                        >
+                            {' '}
+                            Email
+                        </HelpTextBlockLink>
+                    </ReportProblemRow>
                 </BottomRow>
             </Container>
         )
@@ -324,7 +335,17 @@ const BottomRow = styled.div`
     padding: 15px 10px 15px 20px;
     display: flex;
     justify-content: flex-start;
+    flex-direction: column;
+    grid-gap: 10px;
     cursor: pointer;
+`
+
+const ReportProblemRow = styled.div`
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
 `
 
 const RowContainer = styled.div`

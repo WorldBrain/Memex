@@ -4847,27 +4847,6 @@ const NewAnnotationSection = styled.section`
     margin-top: 5px;
 `
 
-const SuggestionsSectionStyled = styled.div`
-    font-family: 'Satoshi', sans-serif;
-    font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
-        'liga' off;
-    color: ${(props) => props.theme.colors.white};
-    display: flex;
-    flex-direction: column;
-    justify-content: flex-start;
-    align-items: flex-start;
-    height: fill-available;
-    flex: 1;
-    z-index: 19;
-    overflow: hidden;
-    width: 100%;
-
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
-`
 const AnnotationSectionScrollContainer = styled.div`
     font-family: 'Satoshi', sans-serif;
     font-feature-settings: 'pnum' on, 'lnum' on, 'case' on, 'ss03' on, 'ss04' on,
@@ -4878,16 +4857,35 @@ const AnnotationSectionScrollContainer = styled.div`
     justify-content: flex-start;
     align-items: flex-start;
     height: fill-available;
-    flex: 1;
-    overflow: scroll;
+    overflow-y: scroll;
     width: fill-available;
     width: -moz-available;
     height: fit-content;
 
-    scrollbar-width: none;
+    ::-webkit-scrollbar {
+        background: transparent;
+        width: 8px;
+    }
 
-    &::-webkit-scrollbar {
-        display: none;
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 2px 0px 2px 0px;
+        width: 8px;
+        padding: 1px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: ${(props) => props.theme.colors.greyScale2};
+        border-radius: 10px;
+        width: 4px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: ${(props) => props.theme.colors.greyScale3};
+        cursor: pointer;
     }
 `
 const AnnotationsSectionStyled = styled.div`
