@@ -113,6 +113,7 @@ export interface AnnotationProps {
     ) => JSX.Element
     renderShareMenuForAnnotation?: (
         unifiedId: UnifiedAnnotation['unifiedId'],
+        closePicker: () => void,
     ) => JSX.Element
     getYoutubePlayer?(): YoutubePlayer
     pageUrl?: string
@@ -1001,12 +1002,6 @@ export default class AnnotationEditable extends React.Component<Props, State> {
         let confirmBtn: JSX.Element
         let cancelBtnHandler: React.MouseEventHandler
 
-        const shareIconData = getShareButtonData(
-            isShared,
-            isBulkShareProtected,
-            this.hasSharedLists,
-        )
-
         if (
             (!isEditing && !isEditingHighlight && !isDeleting) ||
             footerDeps == null
@@ -1178,7 +1173,14 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                 width={'310px'}
                 getPortalRoot={this.props.getRootElement}
             >
-                {this.props.renderShareMenuForAnnotation(this.props.unifiedId)}
+                {this.props.renderShareMenuForAnnotation(
+                    this.props.unifiedId,
+                    () => {
+                        this.setState({
+                            showShareMenu: false,
+                        })
+                    },
+                )}
             </PopoutBox>
         )
     }
