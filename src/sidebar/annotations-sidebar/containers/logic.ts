@@ -2505,7 +2505,7 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         this.emitMutation({
-            commentBox: { $set: INIT_FORM_STATE },
+            commentBox: { $set: { ...INIT_FORM_STATE } },
             showCommentBox: { $set: false },
         })
 
@@ -2630,7 +2630,15 @@ export class SidebarContainerLogic extends UILogic<
                 await savePromise
             } catch (err) {
                 this.options.annotationsCache.removeAnnotation(cachedAnnotation)
-                this.emitMutation({ noteWriteError: { $set: err.message } })
+                this.emitMutation({
+                    noteWriteError: { $set: err.message },
+                    // TODO: Editor also needs to be manually updated with these state changes
+                    showCommentBox: { $set: true },
+                    commentBox: {
+                        commentText: { $set: commentBox.commentText },
+                        lists: { $set: commentBox.lists },
+                    },
+                })
                 throw err
             }
         })
