@@ -385,6 +385,9 @@ interface SidebarEvents {
     saveImageAsNewNote: {
         imageData: string
     }
+    addImageToChat: {
+        imageData: string
+    }
     createYoutubeTimestampWithScreenshot: {
         imageData: string
     }

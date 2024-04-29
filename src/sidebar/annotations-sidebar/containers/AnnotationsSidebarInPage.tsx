@@ -288,6 +288,17 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 imageData: event.imageData,
             })
             return true
+        } else if (event.action === 'analyse_image_with_ai') {
+            if (this.state.activeTab !== 'summary') {
+                await this.processEvent('setActiveSidebarTab', {
+                    tab: 'summary',
+                })
+            }
+
+            await this.processEvent('addImageToChat', {
+                imageData: event.imageData,
+            })
+            return true
         } else if (event.action === 'youtube_timestamp') {
             await this.processEvent('AddYTTimestampToEditor', {
                 commentText: event.commentText,
