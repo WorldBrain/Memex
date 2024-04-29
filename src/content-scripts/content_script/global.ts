@@ -281,22 +281,6 @@ export async function main(
         },
     })
 
-    // TODO: This needs to move to an RPC call
-    browser.runtime.onMessage.addListener(((request, sender, sendResponse) => {
-        if (request.action === 'getImageData') {
-            const imageUrl = request.srcUrl // URL of the image to get data for
-            fetch(imageUrl)
-                .then((response) => response.blob())
-                .then((blob) => {
-                    const reader = new FileReader()
-                    reader.onloadend = () =>
-                        sendResponse({ imageData: reader.result })
-                    reader.readAsDataURL(blob) // Convert the blob to a data URL
-                })
-        }
-        return true
-    }) as any)
-
     // add listener for when a person is over the pricing limit for saved pages
 
     const counterStorageListener = async (
@@ -956,7 +940,7 @@ export async function main(
         saveImageAsNewNote: async (imageData: string) => {
             inPageUI.showSidebar({
                 action: 'save_image_as_new_note',
-                imageData: imageData['imageData'],
+                imageData,
             })
         },
     }

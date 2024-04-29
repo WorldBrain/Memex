@@ -716,6 +716,7 @@ export function createBackgroundModules(options: {
             tabsAPI: options.browserAPIs.tabs,
             contextMenuAPI: options.browserAPIs.contextMenus,
             browserAPIs: options.browserAPIs,
+            fetch: options.fetch,
         }),
         copyPaster,
         activityStreams,

@@ -302,7 +302,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 await sleepPromise(100)
             }
 
-            this.processEvent('saveImageAsNewNote', {
+            await this.processEvent('saveImageAsNewNote', {
                 imageData: event.imageData,
             })
             return true
