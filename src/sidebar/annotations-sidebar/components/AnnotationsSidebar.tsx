@@ -3575,7 +3575,7 @@ const ResultsBodyBox = styled.div`
     flex-direction: column;
     width: 100%;
     height: 100%;
-    overflow: scroll;
+    overflow: auto;
     position: relative;
     justify-content: flex-start;
 
@@ -4676,7 +4676,7 @@ const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     z-index: ${(props) => 999 - props.zIndex};
     width: fill-available;
     width: -moz-available;
-    overflow: scroll;
+    overflow: auto;
 
     &::-webkit-scrollbar {
         display: none;
@@ -4857,7 +4857,7 @@ const AnnotationSectionScrollContainer = styled.div`
     justify-content: flex-start;
     align-items: flex-start;
     height: fill-available;
-    overflow-y: scroll;
+    overflow-y: auto;
     width: fill-available;
     width: -moz-available;
     height: fit-content;

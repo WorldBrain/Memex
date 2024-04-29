@@ -421,6 +421,7 @@ interface SidebarEvents {
     AddMediaRangeToAIcontext: {
         range?: { from: number; to: number }
         prompt?: string
+        instaExecutePrompt: boolean
     }
     AddYTTimestampToEditor: {
         commentText: string

@@ -243,6 +243,7 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
             await this.processEvent('AddMediaRangeToAIcontext', {
                 range: event.range,
                 prompt: event.prompt,
+                instaExecutePrompt: event.instaExecutePrompt,
             })
         } else if (
             event.action === 'create_youtube_timestamp_with_AI_summary'
@@ -281,7 +282,6 @@ export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
                 await this.processEvent('setActiveSidebarTab', {
                     tab: 'annotations',
                 })
-                await sleepPromise(100)
             }
 
             await this.processEvent('saveImageAsNewNote', {

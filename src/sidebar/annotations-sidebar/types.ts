@@ -33,6 +33,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         from: number,
         to: number,
         prompt: string,
+        instaExecutePrompt: boolean,
         callback,
     ) => Promise<boolean>
     addPageUrlToEditor?: (

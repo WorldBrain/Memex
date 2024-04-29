@@ -895,11 +895,13 @@ export async function main(
         askAIwithMediaRange: () => (
             range: { from: number; to: number },
             prompt: string,
+            instaExecutePrompt?: boolean,
         ) => {
             inPageUI.showSidebar({
                 action: 'add_media_range_to_ai_context',
                 range,
                 prompt,
+                instaExecutePrompt: instaExecutePrompt ?? false,
             })
         },
         createTimestampWithAISummary: async (
