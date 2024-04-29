@@ -21,7 +21,7 @@ interface RootProps {
     mount: InPageUIRootMount
     dependencies: Omit<
         AnnotationsSidebarDependencies,
-        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme' | 'bgScriptBG'
+        'sidebarContext' | 'theme'
     >
 }
 interface RootState {
@@ -82,7 +82,7 @@ export function setupInPageSidebarUI(
     mount: InPageUIRootMount,
     dependencies: Omit<
         AnnotationsSidebarDependencies,
-        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme' | 'bgScriptBG'
+        'sidebarContext' | 'theme'
     >,
 ) {
     ReactDOM.render(

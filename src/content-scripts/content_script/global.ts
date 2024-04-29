@@ -1052,6 +1052,8 @@ export async function main(
         },
         async registerSidebarScript(execute) {
             await execute({
+                runtimeAPI: browser.runtime,
+                storageAPI: browser.storage,
                 events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
@@ -1078,7 +1080,7 @@ export async function main(
                 analytics,
                 copyToClipboard,
                 getFullPageUrl: pageInfo.getFullPageUrl,
-                copyPaster,
+                copyPasterBG: copyPaster,
                 subscription,
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),

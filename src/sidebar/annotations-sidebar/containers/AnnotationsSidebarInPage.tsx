@@ -3,7 +3,6 @@ import styled, { css } from 'styled-components'
 import ReactDOM from 'react-dom'
 
 import { resolvablePromise } from 'src/util/resolvable'
-import { theme } from 'src/common-ui/components/design-library/theme'
 import type { HighlightRendererInterface } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/types'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
@@ -28,37 +27,20 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import { ANNOT_BOX_ID_PREFIX } from '../constants'
-import browser from 'webextension-polyfill'
 import { sleepPromise } from 'src/util/promises'
-import type { ImageSupportInterface } from 'src/image-support/background/types'
-import type { RemoteBGScriptInterface } from 'src/background-script/types'
-import { PKMSyncBackgroundModule } from 'src/pkm-integrations/background'
-import { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 
 export interface Props extends ContainerProps {
     events: AnnotationsSidebarInPageEventEmitter
     inPageUI: SharedInPageUIInterface
     highlighter: HighlightRendererInterface
-    imageSupport?: ImageSupportInterface<'caller'>
-    bgScriptBG?: RemoteBGScriptInterface
-    pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
 }
 
 export class AnnotationsSidebarInPage extends AnnotationsSidebarContainer<
     Props
 > {
-    static defaultProps: Pick<
-        Props,
-        | 'isLockable'
-        | 'sidebarContext'
-        | 'runtimeAPI'
-        | 'storageAPI'
-        | 'bgScriptBG'
-    > = {
-        runtimeAPI: browser.runtime,
-        storageAPI: browser.storage,
+    static defaultProps: Pick<Props, 'isLockable' | 'sidebarContext'> = {
         sidebarContext: 'in-page',
         isLockable: true,
     }

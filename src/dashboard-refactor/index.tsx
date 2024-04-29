@@ -1888,7 +1888,7 @@ export class DashboardContainer extends StatefulUIElement<
                             authBG={this.props.authBG}
                             copyToClipboard={this.props.copyToClipboard}
                             refSidebar={this.notesSidebarRef}
-                            copyPaster={this.props.copyPasterBG}
+                            copyPasterBG={this.props.copyPasterBG}
                             customListsBG={this.props.listsBG}
                             analyticsBG={this.props.analyticsBG}
                             annotationsBG={this.props.annotationsBG}

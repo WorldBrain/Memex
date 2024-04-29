@@ -101,7 +101,6 @@ import { sleepPromise } from 'src/util/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
-import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
@@ -134,12 +133,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     setDisplayNameModalShown?: (isShown: boolean) => void
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
-    imageSupport?: ImageSupportInterface<'caller'>
-    bgScriptBG?: RemoteBGScriptInterface
-    spacesBG?: SpacePickerDependencies['spacesBG']
-    pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
-    copyPasterBG: RemoteCopyPasterInterface
 }
 
 type EventHandler<
