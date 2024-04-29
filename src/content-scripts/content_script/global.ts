@@ -1145,6 +1145,7 @@ export async function main(
                     imageSupportBG,
                     copyPasterBG,
                     syncSettingsBG,
+                    personalCloudBG: runInBackground(),
                     analytics,
                     document,
                     location,
