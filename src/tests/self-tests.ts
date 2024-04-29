@@ -1,4 +1,4 @@
-import type { Storage } from 'webextension-polyfill-ts'
+import type { Storage } from 'webextension-polyfill'
 import type StorageManager from '@worldbrain/storex'
 import type { BackgroundModules } from 'src/background-script/setup'
 import type { ServerStorage } from 'src/storage/types'

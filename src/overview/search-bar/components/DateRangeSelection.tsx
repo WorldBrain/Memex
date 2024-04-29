@@ -8,7 +8,7 @@ import { DATE_PICKER_DATE_FORMAT as FORMAT } from 'src/dashboard-refactor/consta
 import DatePickerInput from './datepicker-input'
 import styled from 'styled-components'
 import { formatTimestamp } from '@worldbrain/memex-common/lib/utils/date-time'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 export interface DateRangeSelectionProps {
     env?: 'inpage' | 'overview'

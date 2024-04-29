@@ -108,7 +108,7 @@ import {
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
 import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'

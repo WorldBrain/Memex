@@ -6,7 +6,7 @@ import {
 } from '@worldbrain/memex-common/lib/main-ui/classes/logic'
 import type { Dependencies, State, Event } from './types'
 import delay from 'src/util/delay'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import {
     TypedRemoteEventEmitter,
     getRemoteEventEmitter,

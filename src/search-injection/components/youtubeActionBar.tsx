@@ -18,7 +18,7 @@ import styled from 'styled-components'
 import { Range } from 'react-range'
 import { runInTab } from 'src/util/webextensionRPC'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 interface Props {
     runtime: any

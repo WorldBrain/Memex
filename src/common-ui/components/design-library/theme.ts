@@ -4,7 +4,7 @@ import type {
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import { THEME } from '@worldbrain/memex-common/lib/common-ui/styles/theme'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 export const theme = (options: { variant: MemexThemeVariant }) =>
     THEME({ icons, variant: options.variant })

@@ -1,4 +1,3 @@
-import { browser } from 'webextension-polyfill-ts'
 import * as Global from './global'
 import { runInBackground } from 'src/util/webextensionRPC'
 import { ContentScriptsInterface } from '../background/types'
