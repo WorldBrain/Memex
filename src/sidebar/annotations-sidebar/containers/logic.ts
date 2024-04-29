@@ -3557,7 +3557,6 @@ export class SidebarContainerLogic extends UILogic<
             let executed = false
             let retries = 0
             const maxRetries = 100
-            console.log('event', event)
             while (!executed && retries < maxRetries) {
                 try {
                     executed = this.options.events.emit(
@@ -4581,7 +4580,6 @@ export class SidebarContainerLogic extends UILogic<
         let retries = 0
         const maxRetries = 100
         while (!executed && retries < maxRetries) {
-            console.log('trrrrrr')
             executed = this.options.events.emit(
                 'addImageToChat',
                 {
@@ -4589,7 +4587,6 @@ export class SidebarContainerLogic extends UILogic<
                 },
                 (success) => {
                     executed = success
-                    console.log('has been executed', success)
                 },
             )
             retries++

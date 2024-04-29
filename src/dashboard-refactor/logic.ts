@@ -462,7 +462,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
             if (user) {
-                console.log('user', user)
                 this.processUIEvent('syncNow', { previousState, event: null })
             }
             const syncSettings = createSyncSettingsStore<'highlightColors'>({

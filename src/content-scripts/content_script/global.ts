@@ -946,7 +946,6 @@ export async function main(
             })
         },
         analyseImageAsWithAI: async (imageData: string) => {
-            console.log('working', imageData)
             inPageUI.showSidebar({
                 action: 'analyse_image_with_ai',
                 imageData,
