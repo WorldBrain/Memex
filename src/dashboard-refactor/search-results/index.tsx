@@ -1395,6 +1395,7 @@ const SearchTypeSwitchContainer = styled.div`
     position: relative;
     width: fill-available;
     padding-right: 30px;
+    overflow: hidden;
 `
 
 const MobileAdContainer = styled.div`
