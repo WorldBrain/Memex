@@ -585,6 +585,7 @@ export class DashboardContainer extends StatefulUIElement<
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
                             syncNow: () => this.processEvent('syncNow', null),
+                            browserAPIs: browser,
                         }}
                         syncStatusIconState={syncStatusIconState}
                     />
