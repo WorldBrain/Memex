@@ -3457,10 +3457,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                       ]
                     : [...existing.lists]
 
-                const bodyToSave = await processCommentForImageUpload(
+                const bodyToSave = processCommentForImageUpload(
                     editNoteForm.bodyInputValue ?? existing.highlight ?? null,
                 )
-                const commentToSave = await processCommentForImageUpload(
+                const commentToSave = processCommentForImageUpload(
                     editNoteForm.inputValue ?? existing.comment,
                 )
 
@@ -4942,14 +4942,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             source: 'updateSelectedListDescription',
         })
 
-        let processedDescription = (
-            await processCommentForImageUpload(
-                event.description,
-                null,
-                null,
-                this.options.imageSupportBG,
-                false,
-            )
+        const processedDescription = processCommentForImageUpload(
+            event.description,
+            null,
+            null,
+            this.options.imageSupportBG,
+            false,
         ).toString()
 
         this.options.annotationsCache.updateList({

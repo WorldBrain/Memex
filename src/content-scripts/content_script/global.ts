@@ -495,7 +495,7 @@ export async function main(
             })
 
             const createPromise = (async () => {
-                const bodyForSaving = await processCommentForImageUpload(
+                const bodyForSaving = processCommentForImageUpload(
                     data.body,
                     data.fullPageUrl,
                     localId,

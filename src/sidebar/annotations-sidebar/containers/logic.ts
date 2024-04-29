@@ -2150,14 +2150,12 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event }) => {
         let annotation = event.annotation
 
-        let newComment = (
-            await processCommentForImageUpload(
-                event.comment,
-                annotation.normalizedPageUrl,
-                annotation.localId,
-                this.options.imageSupportBG,
-                true,
-            )
+        const newComment = processCommentForImageUpload(
+            event.comment,
+            annotation.normalizedPageUrl,
+            annotation.localId,
+            this.options.imageSupportBG,
+            true,
         ).toString()
 
         this.emitMutation({
@@ -2311,7 +2309,7 @@ export class SidebarContainerLogic extends UILogic<
         const hasCoreAnnotChanged = comment !== annotationData.comment
 
         await executeUITask(this, 'noteEditState', async () => {
-            let commentForSaving = await processCommentForImageUpload(
+            const commentForSaving = processCommentForImageUpload(
                 comment,
                 annotationData.normalizedPageUrl,
                 annotationData.localId,
@@ -2499,7 +2497,7 @@ export class SidebarContainerLogic extends UILogic<
 
         // this checks for all images in the comment that have not been uploaded yet, uploads them and gives back an updated version of the html code.
         // however the original comment is put in cache
-        const commentForSaving = await processCommentForImageUpload(
+        const commentForSaving = processCommentForImageUpload(
             originalCommentForCache,
             normalizeUrl(fullPageUrl),
             annotationId,
