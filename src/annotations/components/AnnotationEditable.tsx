@@ -1174,7 +1174,7 @@ export default class AnnotationEditable extends React.Component<Props, State> {
                         showShareMenu: false,
                     })
                 }}
-                offsetX={100}
+                offsetX={10}
                 width={'310px'}
                 getPortalRoot={this.props.getRootElement}
             >
