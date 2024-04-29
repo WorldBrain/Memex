@@ -45,7 +45,7 @@ export class InPageUIBackground {
     setupTabsAPIMessages() {
         browser.runtime.onMessage.addListener(
             // @ts-ignore: Temporarily ignore type error until type definitions are updated or corrected.
-            (message, sender, sendResponse) => {
+            (message, sender, sendResponse: any) => {
                 if (message.action === 'queryTabs') {
                     browser.tabs
                         .query({ active: true, currentWindow: true })
