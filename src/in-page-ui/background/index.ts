@@ -5,7 +5,6 @@ import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
 // import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { OVERVIEW_URL } from 'src/constants'
-import browser from 'webextension-polyfill'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
 import { blobToDataURL } from 'src/util/blob-utils'
 
@@ -37,28 +36,10 @@ export class InPageUIBackground {
         }
 
         this.setupContextMenuEntries()
-        this.setupTabsAPIMessages()
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable(this.remoteFunctions)
-    }
-
-    setupTabsAPIMessages() {
-        browser.runtime.onMessage.addListener(
-            // @ts-ignore: Temporarily ignore type error until type definitions are updated or corrected.
-            (message, sender, sendResponse: any) => {
-                if (message.action === 'queryTabs') {
-                    browser.tabs
-                        .query({ active: true, currentWindow: true })
-                        .then((tabs) => {
-                            sendResponse({ tabs: tabs })
-                        })
-
-                    return true // Indicates you wish to send a response asynchronously
-                }
-            },
-        )
     }
 
     private async getHighlightContextMenuTitle(): Promise<string> {
