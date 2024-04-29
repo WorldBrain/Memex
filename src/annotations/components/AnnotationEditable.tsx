@@ -292,17 +292,86 @@ export default class AnnotationEditable extends React.Component<Props, State> {
             document.removeEventListener('keydown', this.handleCmdCKeyPress)
         }
         if (this.props.isInFocus && !prevProps.isInFocus) {
+            this.setupKeyListener()
             const itemBox = this.itemBoxRef.current
             if (itemBox && !this.props.hoverState) {
                 itemBox.scrollIntoView({ block: 'center' })
             }
+        } else if (!this.props.isInFocus && prevProps.isInFocus) {
+            this.removeKeyListener()
         }
+    }
+
+    setupKeyListener = () => {
+        document.addEventListener('keydown', this.handleKeyDown)
+    }
+
+    removeKeyListener = () => {
+        document.removeEventListener('keydown', this.handleKeyDown)
     }
 
     private handleCmdCKeyPress = (event: KeyboardEvent) => {
         if (event.key === 'c' && (event.metaKey || event.ctrlKey)) {
             this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
             this.setState({ showCopyPaster: false })
+        }
+    }
+
+    handleKeyDown = (event: KeyboardEvent) => {
+        if (!this.props.isInFocus) return
+        if (document.getElementById('popout-boxes') != null) {
+            return
+        } else {
+            switch (event.key) {
+                case 's':
+                    // Perform action for "s" key
+                    this.props.onShareMenuToggle?.()
+                    this.setState({
+                        showShareMenu: true,
+                    })
+                    break
+                case 'c':
+                    // Perform action for "c" key
+                    if (event.shiftKey) {
+                        this.props.annotationFooterDependencies.onCopyPasterDefaultExecute()
+                        this.setState({ showCopyPaster: false })
+                    } else {
+                        this.props.onCopyPasterToggle?.()
+                        this.setState({ showCopyPaster: true })
+                    }
+                    break
+                case 'Enter':
+                    if (!this.props.isEditing) {
+                        if (event.shiftKey && this.props.shiftSelectItem) {
+                            this.props.shiftSelectItem()
+                            event.preventDefault()
+                            event.stopPropagation()
+                        } else {
+                            this.props.bulkSelectAnnotation()
+                            event.preventDefault()
+                            event.stopPropagation()
+                        }
+                    }
+                    break
+                case 'Backspace':
+                    if (event.shiftKey) {
+                        event.stopPropagation()
+                        // Perform action for "shift+Enter" key
+                        // this.props.onRemoveFromListBtnClick(event as any)
+                    } else {
+                        // Perform action for "Enter" key
+                        const {
+                            annotationFooterDependencies: footerDeps,
+                        } = this.props
+                        event.stopPropagation()
+                        footerDeps.onDeleteIconClick(event as any)
+                        break
+                    }
+                    // Perform action for "Backspace" key
+                    break
+                default:
+                    break
+            }
         }
     }
 
