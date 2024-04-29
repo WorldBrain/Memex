@@ -65,6 +65,7 @@ import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 import { SpaceSearchSuggestion } from '@worldbrain/memex-common/lib/editor'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { splitQueryIntoTerms } from 'src/search/background/utils'
 
 const timestampToString = (timestamp: number) =>
     timestamp === -1 ? undefined : formatDayGroupTime(timestamp)
@@ -272,15 +273,8 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     generateSearchTermList = () => {
-        const regex = /"[^"]+"|\S+/g
-        const searchTerms =
-            this.props.searchQuery
-                .match(regex)
-                ?.map((term) =>
-                    term.startsWith('"') && term.endsWith('"')
-                        ? term.slice(1, -1)
-                        : term,
-                ) || []
+        const { terms, phrases } = splitQueryIntoTerms(this.props.searchQuery)
+        const searchTerms = [...terms, ...phrases]
         this.setState({
             searchTerms: searchTerms,
         })
