@@ -17,7 +17,6 @@ import {
 import { TaskState } from 'ui-logic-core/lib/types'
 import {
     CustomerPowerUps,
-    PowerupOptions,
     PremiumPlans,
 } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import UpgradeModal from 'src/authentication/upgrade-modal'
@@ -208,7 +207,6 @@ export class AICounterIndicator extends React.Component<Props, State> {
                             renderUpgradeModal: false,
                         })
                     }}
-                    browserAPIs={browser}
                     limitReachedNotif={null}
                     authBG={this.props.authBG}
                 />

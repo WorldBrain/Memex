@@ -46,6 +46,7 @@ export default class Logic extends UILogic<State, Event> {
         systemSelectMenuState: false,
         generateTokenDisplay: null,
         copyToClipBoardState: 'pristine',
+        isStagingEnv: process.env.NODE_ENV === 'development',
     })
 
     async init() {

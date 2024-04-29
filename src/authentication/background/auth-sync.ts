@@ -45,7 +45,7 @@ function addListener(
 ) {
     runtimeAPI.onMessageExternal.addListener(
         //@ts-ignore next-line
-        (message, sender, runtimeSendResponse) => {
+        (message, sender, runtimeSendResponse: any) => {
             const messageObj = getMessage(message, sender, expectedOrigins)
             if (!messageObj) {
                 return

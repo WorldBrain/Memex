@@ -281,22 +281,6 @@ export async function main(
         },
     })
 
-    // TODO: This needs to move to an RPC call
-    browser.runtime.onMessage.addListener(((request, sender, sendResponse) => {
-        if (request.action === 'getImageData') {
-            const imageUrl = request.srcUrl // URL of the image to get data for
-            fetch(imageUrl)
-                .then((response) => response.blob())
-                .then((blob) => {
-                    const reader = new FileReader()
-                    reader.onloadend = () =>
-                        sendResponse({ imageData: reader.result })
-                    reader.readAsDataURL(blob) // Convert the blob to a data URL
-                })
-        }
-        return true
-    }) as any)
-
     // add listener for when a person is over the pricing limit for saved pages
 
     const counterStorageListener = async (
@@ -911,11 +895,13 @@ export async function main(
         askAIwithMediaRange: () => (
             range: { from: number; to: number },
             prompt: string,
+            instaExecutePrompt?: boolean,
         ) => {
             inPageUI.showSidebar({
                 action: 'add_media_range_to_ai_context',
                 range,
                 prompt,
+                instaExecutePrompt: instaExecutePrompt ?? false,
             })
         },
         createTimestampWithAISummary: async (
@@ -956,7 +942,7 @@ export async function main(
         saveImageAsNewNote: async (imageData: string) => {
             inPageUI.showSidebar({
                 action: 'save_image_as_new_note',
-                imageData: imageData['imageData'],
+                imageData,
             })
         },
     }
@@ -1068,6 +1054,8 @@ export async function main(
         },
         async registerSidebarScript(execute) {
             await execute({
+                runtimeAPI: browser.runtime,
+                storageAPI: browser.storage,
                 events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
@@ -1094,7 +1082,7 @@ export async function main(
                 analytics,
                 copyToClipboard,
                 getFullPageUrl: pageInfo.getFullPageUrl,
-                copyPaster,
+                copyPasterBG: copyPaster,
                 subscription,
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
@@ -1159,6 +1147,7 @@ export async function main(
                     imageSupportBG,
                     copyPasterBG,
                     syncSettingsBG,
+                    personalCloudBG: runInBackground(),
                     analytics,
                     document,
                     location,
@@ -1174,7 +1163,6 @@ export async function main(
                 },
                 upgradeModalProps: {
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
-                    browserAPIs: browser,
                     authBG: authBG,
                     limitReachedNotif: null,
                 },

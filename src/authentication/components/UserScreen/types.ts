@@ -37,6 +37,7 @@ export interface State {
     generateTokenDisplay: string
     systemSelectMenuState: boolean
     copyToClipBoardState: UITaskState
+    isStagingEnv: boolean
 }
 
 export type Event = UIEvent<{

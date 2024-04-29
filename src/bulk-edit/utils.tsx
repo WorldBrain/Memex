@@ -1,4 +1,4 @@
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { BULK_SELECT_STORAGE_KEY } from './constants'
 import type { BulkEditCollection, BulkEditItem } from './types'
 

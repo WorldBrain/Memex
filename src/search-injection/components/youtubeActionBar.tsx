@@ -18,7 +18,7 @@ import styled from 'styled-components'
 import { Range } from 'react-range'
 import { runInTab } from 'src/util/webextensionRPC'
 import { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 interface Props {
     runtime: any
@@ -252,7 +252,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
         return [humanTimestamp, videoURLWithTime]
     }
 
-    handleSummarizeButtonClick = async () => {
+    handleSummarizeButtonClick = async (event) => {
         // Logic for summarize button click
         if (
             (await this.props.syncSettings?.openAI?.get(
@@ -281,7 +281,8 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
 
         this.props.annotationsFunctions.askAIwithMediaRange()(
             rangeInSeconds,
-            this.state.summarizePrompt,
+            null,
+            event.shiftKey,
         )
     }
 
@@ -493,15 +494,13 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                 placement="bottom"
                             >
                                 <YTPMenuItem
-                                    onMouseDown={() =>
-                                        this.setState({
-                                            showSummarizeTooltip: true,
-                                        })
-                                    }
-                                    onMouseUp={() => {
-                                        if (!this.state.showSummarizeTooltip) {
-                                            this.handleSummarizeButtonClick()
-                                        }
+                                    // onMouseDown={() =>
+                                    //     this.setState({
+                                    //         showSummarizeTooltip: true,
+                                    //     })
+                                    // }
+                                    onClick={(event) => {
+                                        this.handleSummarizeButtonClick(event)
                                     }}
                                     ref={this.summarizeButtonRef}
                                 >
@@ -516,11 +515,11 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
                                     <YTPMenuItemLabel>
                                         Summarize Video
                                     </YTPMenuItemLabel>
-                                    {this.state.showSummarizeTooltip
+                                    {/* {this.state.showSummarizeTooltip
                                         ? this.renderPromptTooltip(
                                               'summarizeVideo',
                                           )
-                                        : null}
+                                        : null} */}
                                 </YTPMenuItem>
                             </TooltipBox>
                             <TooltipBox

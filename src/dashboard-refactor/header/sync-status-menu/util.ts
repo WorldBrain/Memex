@@ -4,6 +4,10 @@ export const deriveStatusIconColor = ({
     currentUser,
     syncMenu: { pendingLocalChangeCount, pendingRemoteChangeCount },
 }: RootState): 'green' | 'red' | 'yellow' => {
+    if (currentUser?.email.length === 0) {
+        return 'yellow'
+    }
+
     if (currentUser == null) {
         return 'red'
     }

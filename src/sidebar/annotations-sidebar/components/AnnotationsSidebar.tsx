@@ -108,7 +108,7 @@ import {
 import { RemoteSyncSettingsInterface } from 'src/sync-settings/background/types'
 import PromptTemplatesComponent from 'src/common-ui/components/prompt-templates/index'
 import { COUNTER_STORAGE_KEY } from 'src/util/subscriptions/constants'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 import debounce from 'lodash/debounce'
 import { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
@@ -3575,7 +3575,7 @@ const ResultsBodyBox = styled.div`
     flex-direction: column;
     width: 100%;
     height: 100%;
-    overflow: scroll;
+    overflow: auto;
     position: relative;
     justify-content: flex-start;
 
@@ -4676,7 +4676,7 @@ const FollowedNotesContainer = styled.div<{ zIndex: number }>`
     z-index: ${(props) => 999 - props.zIndex};
     width: fill-available;
     width: -moz-available;
-    overflow: scroll;
+    overflow: auto;
 
     &::-webkit-scrollbar {
         display: none;
@@ -4857,7 +4857,7 @@ const AnnotationSectionScrollContainer = styled.div`
     justify-content: flex-start;
     align-items: flex-start;
     height: fill-available;
-    overflow-y: scroll;
+    overflow-y: auto;
     width: fill-available;
     width: -moz-available;
     height: fit-content;

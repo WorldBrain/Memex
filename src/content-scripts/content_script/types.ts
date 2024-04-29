@@ -24,7 +24,7 @@ export interface ContentScriptRegistry {
 export type SidebarScriptMain = (
     dependencies: Omit<
         SidebarContainerDependencies,
-        'pageUrl' | 'sidebarContext' | 'runtimeAPI' | 'storageAPI' | 'theme'
+        'pageUrl' | 'sidebarContext' | 'theme'
     > & {
         getFullPageUrl: () => MaybePromise<string>
     },

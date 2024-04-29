@@ -10,7 +10,7 @@ import RibbonHolder from './containers/ribbon-holder'
 import type { RibbonHolderDependencies } from './containers/ribbon-holder/logic'
 import type { InPageUIRootMount } from 'src/in-page-ui/types'
 import { MemexThemeVariant } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 interface RootProps {
     mount: InPageUIRootMount

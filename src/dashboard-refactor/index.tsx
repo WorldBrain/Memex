@@ -585,6 +585,7 @@ export class DashboardContainer extends StatefulUIElement<
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
                             syncNow: () => this.processEvent('syncNow', null),
+                            browserAPIs: browser,
                         }}
                         syncStatusIconState={syncStatusIconState}
                     />
@@ -1888,7 +1889,7 @@ export class DashboardContainer extends StatefulUIElement<
                             authBG={this.props.authBG}
                             copyToClipboard={this.props.copyToClipboard}
                             refSidebar={this.notesSidebarRef}
-                            copyPaster={this.props.copyPasterBG}
+                            copyPasterBG={this.props.copyPasterBG}
                             customListsBG={this.props.listsBG}
                             analyticsBG={this.props.analyticsBG}
                             annotationsBG={this.props.annotationsBG}

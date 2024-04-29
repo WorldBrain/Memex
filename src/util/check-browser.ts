@@ -1,5 +1,3 @@
-import browser from 'webextension-polyfill'
-
 export type BrowserName = 'chrome' | 'firefox' | 'brave'
 
 /**

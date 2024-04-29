@@ -97,11 +97,10 @@ import {
     SpacePickerEvent,
 } from 'src/custom-lists/ui/CollectionPicker/types'
 import { validateSpaceName } from '@worldbrain/memex-common/lib/utils/space-name-validation'
-import { sleepPromise } from 'src/util/promises'
+import { sleepPromise } from '@worldbrain/memex-common/lib/common-ui/utils/promises'
 import { ImageSupportInterface } from 'src/image-support/background/types'
 import sanitizeHTMLhelper from '@worldbrain/memex-common/lib/utils/sanitize-html-helper'
 import { processCommentForImageUpload } from '@worldbrain/memex-common/lib/annotations/processCommentForImageUpload'
-import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import { marked } from 'marked'
 import { constructVideoURLwithTimeStamp } from '@worldbrain/memex-common/lib/editor/utils'
 import { HIGHLIGHT_COLORS_DEFAULT } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/constants'
@@ -134,12 +133,7 @@ export type SidebarLogicOptions = SidebarContainerOptions & {
     setDisplayNameModalShown?: (isShown: boolean) => void
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
-    imageSupport?: ImageSupportInterface<'caller'>
-    bgScriptBG?: RemoteBGScriptInterface
-    spacesBG?: SpacePickerDependencies['spacesBG']
-    pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
-    copyPasterBG: RemoteCopyPasterInterface
 }
 
 type EventHandler<
@@ -3550,7 +3544,9 @@ export class SidebarContainerLogic extends UILogic<
             let executed = false
             let prompt = event.prompt
 
-            while (!executed) {
+            let retries = 0
+            const maxRetries = 100
+            while (!executed && retries < maxRetries) {
                 try {
                     executed = this.options.events.emit(
                         'addSelectedTextAndInstaPrompt',
@@ -3562,13 +3558,16 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     )
                 } catch (e) {}
-                await new Promise((resolve) => setTimeout(resolve, 10))
+                retries++
+                await sleepPromise(20)
             }
             return
         }
         if (event.textToProcess) {
             let executed = false
-            while (!executed) {
+            let retries = 0
+            const maxRetries = 100
+            while (!executed && retries < maxRetries) {
                 try {
                     executed = this.options.events.emit(
                         'addSelectedTextToAIquery',
@@ -3578,7 +3577,8 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     )
                 } catch (e) {}
-                await new Promise((resolve) => setTimeout(resolve, 10))
+                retries++
+                await sleepPromise(20)
             }
             return
         }
@@ -3599,7 +3599,9 @@ export class SidebarContainerLogic extends UILogic<
                 prompt = syncsettings[0].text
             }
 
-            while (!executed) {
+            let retries = 0
+            const maxRetries = 100
+            while (!executed && retries < maxRetries) {
                 try {
                     executed = this.options.events.emit(
                         'addPageUrlToEditor',
@@ -3611,7 +3613,8 @@ export class SidebarContainerLogic extends UILogic<
                         },
                     )
                 } catch (e) {}
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                retries++
+                await sleepPromise(20)
             }
 
             return
@@ -3624,21 +3627,39 @@ export class SidebarContainerLogic extends UILogic<
         this.setActiveSidebarTabEvents('summary')
 
         await sleepPromise(10)
+
+        let prompt
+
+        if (event.prompt == null) {
+            const syncsettings =
+                (await this.syncSettings.openAI?.get('promptSuggestions')) ??
+                AI_PROMPT_DEFAULTS.map((text) => ({
+                    text,
+                    isEditing: null,
+                    isFocused: false,
+                }))
+            prompt = syncsettings[0].text
+        }
+
         if (previousState.activeTab === 'summary') {
             let executed = false
-            while (!executed) {
+            let retries = 0
+            const maxRetries = 100
+            while (!executed && retries < maxRetries) {
                 try {
                     executed = this.options.events.emit(
                         'addMediaRangeToEditor',
                         event.range.from,
                         event.range.to,
-                        event.prompt,
+                        prompt,
+                        event.instaExecutePrompt,
                         (success) => {
                             executed = success
                         },
                     )
                 } catch (e) {}
-                await new Promise((resolve) => setTimeout(resolve, 20))
+                retries++
+                await sleepPromise(20)
             }
         }
     }
@@ -3650,7 +3671,9 @@ export class SidebarContainerLogic extends UILogic<
 
         await sleepPromise(10)
         let executed = false
-        while (!executed) {
+        let retries = 0
+        const maxRetries = 100
+        while (!executed && retries < maxRetries) {
             try {
                 executed = this.options.events.emit(
                     'addYouTubeTimestampToEditor',
@@ -3660,7 +3683,8 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 )
             } catch (e) {}
-            await new Promise((resolve) => setTimeout(resolve, 20))
+            retries++
+            await sleepPromise(20)
         }
     }
 
@@ -4505,7 +4529,9 @@ export class SidebarContainerLogic extends UILogic<
         this.options.focusCreateForm()
 
         let executed = false
-        while (!executed) {
+        let retries = 0
+        const maxRetries = 100
+        while (!executed && retries < maxRetries) {
             try {
                 executed = this.options.events.emit(
                     'addVideoSnapshotToEditor',
@@ -4517,7 +4543,9 @@ export class SidebarContainerLogic extends UILogic<
                     },
                 )
             } catch (e) {}
-            await new Promise((resolve) => setTimeout(resolve, 20))
+
+            retries++
+            await sleepPromise(20)
         }
 
         return
@@ -4531,25 +4559,22 @@ export class SidebarContainerLogic extends UILogic<
             activeTab: { $set: 'annotations' },
         })
         this.options.focusCreateForm()
-
-        const maxRetries = 50
-        let handledSuccessfully = false
-
-        for (let i = 0; i < maxRetries; i++) {
-            if (
-                this.options.events.emit(
-                    'addImageToEditor',
-                    {
-                        imageData: event.imageData,
-                    },
-                    (success) => {
-                        handledSuccessfully = success
-                    },
-                )
-            ) {
-                break
-            }
-            await sleepPromise(50) // wait for half a second before trying again
+        let executed = false
+        let retries = 0
+        const maxRetries = 100
+        while (!executed && retries < maxRetries) {
+            this.options.events.emit(
+                'addImageToEditor',
+                {
+                    imageData: event.imageData,
+                },
+                (success) => {
+                    console.log('emitting', success)
+                    executed = success
+                },
+            )
+            retries++
+            await sleepPromise(20)
         }
     }
 
@@ -4753,7 +4778,9 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         let executed = false
-        while (!executed) {
+        let retries = 0
+        const maxRetries = 100
+        while (!executed && retries < maxRetries) {
             executed = this.options.events.emit(
                 'triggerYoutubeTimestampSummary',
                 {
@@ -4764,7 +4791,8 @@ export class SidebarContainerLogic extends UILogic<
                     executed = success
                 },
             )
-            await new Promise((resolve) => setTimeout(resolve, 10))
+            retries++
+            await sleepPromise(20)
         }
 
         // for (let i = 0; i < maxRetries; i++) {
