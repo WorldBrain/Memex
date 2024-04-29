@@ -96,8 +96,9 @@ class BackgroundScript {
     private async runOnboarding() {
         const browserName = checkBrowser()
         const isFirefox = browserName === 'firefox'
+        const isStaging = process.env.NODE_ENV === 'development'
 
-        if (isFirefox) {
+        if (isFirefox || isStaging) {
             await this.deps.tabsAPI.create({
                 url: `${OVERVIEW_URL}?${ONBOARDING_QUERY_PARAMS.NEW_USER}`,
             })

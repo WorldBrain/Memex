@@ -38,7 +38,9 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
             const browserName = checkBrowser()
             const isFirefox = browserName === 'firefox'
 
-            if (isFirefox) {
+            const isStaging = process.env.NODE_ENV === 'development'
+
+            if (isFirefox || isStaging) {
                 window.location.href = LOGIN_URL
             } else {
                 const env = process.env.NODE_ENV
@@ -118,8 +120,9 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
     }
 
     render() {
-        return this.state.loadState === 'running' ||
-            this.state.currentUser == null ? (
+        return (this.state.loadState === 'running' ||
+            this.state.currentUser == null) &&
+            !this.state.isStagingEnv ? (
             <LoadingContainer>
                 {this.state.currentUser === null && (
                     <InfoText>
