@@ -20,7 +20,6 @@ type RootProps = {
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<'error' | 'success'>
-    browserAPIs: any
     authBG: AuthRemoteFunctionsInterface
     limitReachedNotif: PowerUpModalVersion
 }
@@ -64,7 +63,6 @@ class Root extends React.PureComponent<RootProps, RootState> {
                     <UpgradeModal
                         getRootElement={() => this.props.rootEl}
                         powerUpType={this.state.upgradeModalType}
-                        browserAPIs={this.props.browserAPIs}
                         authBG={this.props.authBG}
                         createCheckOutLink={this.props.createCheckOutLink}
                         componentVariant="Modal"

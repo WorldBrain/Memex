@@ -1160,7 +1160,6 @@ export async function main(
                 },
                 upgradeModalProps: {
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
-                    browserAPIs: browser,
                     authBG: authBG,
                     limitReachedNotif: null,
                 },

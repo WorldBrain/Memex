@@ -3,11 +3,7 @@ import {
     UIEvent,
     UISignal,
 } from '../../../external/@worldbrain/memex-common/ts/main-ui/classes/logic'
-import {
-    PowerupOptions,
-    PremiumPlans,
-} from '../../../external/@worldbrain/memex-common/ts/subscriptions/availablePowerups'
-import { Browser } from 'webextension-polyfill'
+import { PremiumPlans } from '../../../external/@worldbrain/memex-common/ts/subscriptions/availablePowerups'
 import { AuthRemoteFunctionsInterface } from '../background/types'
 
 export interface PromptTemplatesDependencies {
@@ -21,7 +17,6 @@ export interface PromptTemplatesDependencies {
     componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
     getRootElement: () => HTMLElement
     closeComponent?: () => void
-    browserAPIs: Browser
     authBG: AuthRemoteFunctionsInterface
 }
 
