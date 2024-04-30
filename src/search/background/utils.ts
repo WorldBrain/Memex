@@ -241,7 +241,7 @@ export const splitQueryIntoTerms = (
     const matches = query.match(/"[^"]+"/g)
     matches?.forEach((match) => {
         phrases.add(match.slice(1, -1))
-        queryString = queryString.replace(match, '') // Remove the matched phrase from queryString
+        queryString = queryString.replace(match, ' ') // Remove the matched phrase from queryString
     })
     queryString = queryString.replace(/\s+/g, ' ').trim()
 
