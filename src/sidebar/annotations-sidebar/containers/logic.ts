@@ -3540,29 +3540,19 @@ export class SidebarContainerLogic extends UILogic<
     > = async ({ event, previousState }) => {
         this.setActiveSidebarTabEvents('summary')
         this.emitMutation({ activeTab: { $set: 'summary' } })
-        if (event.textToProcess && event.prompt) {
-            let executed = false
-            let prompt = event.prompt
+        let prompt = event.prompt
 
-            let retries = 0
-            const maxRetries = 100
-            while (!executed && retries < maxRetries) {
-                try {
-                    executed = this.options.events.emit(
-                        'addSelectedTextAndInstaPrompt',
-                        event.textToProcess,
-                        prompt,
-                        event.instaExecutePrompt,
-                        (success) => {
-                            executed = success
-                        },
-                    )
-                } catch (e) {}
-                retries++
-                await sleepPromise(20)
-            }
-            return
+        if (event.prompt == null) {
+            const syncsettings =
+                (await this.syncSettings.openAI?.get('promptSuggestions')) ??
+                AI_PROMPT_DEFAULTS.map((text) => ({
+                    text,
+                    isEditing: null,
+                    isFocused: false,
+                }))
+            prompt = syncsettings[0].text
         }
+
         if (event.textToProcess) {
             let executed = false
             let retries = 0
@@ -3572,6 +3562,8 @@ export class SidebarContainerLogic extends UILogic<
                     executed = this.options.events.emit(
                         'addSelectedTextToAIquery',
                         event.textToProcess,
+                        prompt,
+                        event.instaExecutePrompt,
                         (success) => {
                             executed = success
                         },
@@ -4563,13 +4555,37 @@ export class SidebarContainerLogic extends UILogic<
         let retries = 0
         const maxRetries = 100
         while (!executed && retries < maxRetries) {
-            this.options.events.emit(
+            executed = this.options.events.emit(
                 'addImageToEditor',
                 {
                     imageData: event.imageData,
                 },
                 (success) => {
-                    console.log('emitting', success)
+                    executed = success
+                },
+            )
+            retries++
+            await sleepPromise(20)
+        }
+    }
+    addImageToChat: EventHandler<'addImageToChat'> = async ({
+        previousState,
+        event,
+    }) => {
+        this.emitMutation({
+            loadState: { $set: 'success' },
+        })
+        this.options.focusCreateForm()
+        let executed = false
+        let retries = 0
+        const maxRetries = 100
+        while (!executed && retries < maxRetries) {
+            executed = this.options.events.emit(
+                'addImageToChat',
+                {
+                    imageData: event.imageData,
+                },
+                (success) => {
                     executed = success
                 },
             )

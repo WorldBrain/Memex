@@ -12,6 +12,8 @@ export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
 export const CONTEXT_MENU_HIGHLIGHT_ID =
     CONTEXT_MENU_ID_PREFIX + 'createHighlight'
 export const CONTEXT_MENU_SAVE_IMAGE_ID = CONTEXT_MENU_ID_PREFIX + 'saveImage'
+export const CONTEXT_MENU_ANALYSE_IMAGE_ID =
+    CONTEXT_MENU_ID_PREFIX + 'analyseImage'
 
 export interface Props {
     tabsAPI: Tabs.Static
@@ -79,11 +81,23 @@ export class InPageUIBackground {
                     const imageDataUrl = await blobToDataURL(imageBlob)
                     await this.saveImageAsNewNote(tab.id, imageDataUrl)
                 }
+                if (menuItemId === CONTEXT_MENU_ANALYSE_IMAGE_ID && srcUrl) {
+                    const imageBlob = await this.options
+                        .fetch(srcUrl)
+                        .then((res) => res.blob())
+                    const imageDataUrl = await blobToDataURL(imageBlob)
+                    await this.analyseImageAsWithAI(tab.id, imageDataUrl)
+                }
             },
         )
         this.options.contextMenuAPI.create({
             id: CONTEXT_MENU_SAVE_IMAGE_ID,
             title: 'Save with Memex',
+            contexts: ['image'],
+        })
+        this.options.contextMenuAPI.create({
+            id: CONTEXT_MENU_ANALYSE_IMAGE_ID,
+            title: 'Analyse with AI',
             contexts: ['image'],
         })
     }
@@ -133,4 +147,9 @@ export class InPageUIBackground {
         runInTab<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).saveImageAsNewNote(imageData)
+
+    private analyseImageAsWithAI = (tabId: number, imageData: string) =>
+        runInTab<InPageUIContentScriptRemoteInterface>(
+            tabId,
+        ).analyseImageAsWithAI(imageData)
 }

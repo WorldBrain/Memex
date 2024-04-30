@@ -477,7 +477,7 @@ export default class SearchResultsContainer extends React.Component<
                         analyticsBG={this.props.spacePickerBGProps.analyticsBG}
                     />
                 )}
-                renderShareMenuForAnnotation={() => (
+                renderShareMenuForAnnotation={(noteId, closePicker) => (
                     <SingleNoteShareMenu
                         getRemoteListIdForLocalId={(localListId) =>
                             this.props.listData[localListId]?.remoteId ?? null
@@ -511,6 +511,7 @@ export default class SearchResultsContainer extends React.Component<
                                     deleted: listId,
                                     selected: [],
                                 }),
+                            closePicker: closePicker,
                         }}
                         getRootElement={this.props.getRootElement}
                     />
@@ -1394,6 +1395,7 @@ const SearchTypeSwitchContainer = styled.div`
     position: relative;
     width: fill-available;
     padding-right: 30px;
+    overflow: hidden;
 `
 
 const MobileAdContainer = styled.div`

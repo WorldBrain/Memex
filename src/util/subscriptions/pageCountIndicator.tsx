@@ -5,7 +5,7 @@ import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/to
 import React from 'react'
 import styled, { css } from 'styled-components'
 import browser from 'webextension-polyfill'
-import { COUNTER_STORAGE_KEY } from './constants'
+import { COUNTER_STORAGE_KEY, FREE_PLAN_LIMIT } from './constants'
 
 interface Props {
     ribbonPosition: 'topRight' | 'bottomRight' | 'centerRight'
@@ -27,13 +27,10 @@ export class BlockCounterIndicator extends React.Component<Props> {
 
     async componentDidMount() {
         await browser.storage.local.get(COUNTER_STORAGE_KEY).then((result) => {
-            if (
-                result[COUNTER_STORAGE_KEY].s != null &&
-                result[COUNTER_STORAGE_KEY].s < 10000
-            ) {
+            if (!result[COUNTER_STORAGE_KEY].bookmarkPowerUp) {
                 this.setState({
                     shouldShow: true,
-                    totalCount: parseInt(result[COUNTER_STORAGE_KEY].s),
+                    totalCount: FREE_PLAN_LIMIT,
                     currentCount: result[COUNTER_STORAGE_KEY].c,
                 })
                 browser.storage.onChanged.addListener((changes) =>

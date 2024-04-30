@@ -945,6 +945,12 @@ export async function main(
                 imageData,
             })
         },
+        analyseImageAsWithAI: async (imageData: string) => {
+            inPageUI.showSidebar({
+                action: 'analyse_image_with_ai',
+                imageData,
+            })
+        },
     }
 
     async function captureScreenshotFromHTMLVideo(screenshotTarget) {
@@ -1235,6 +1241,8 @@ export async function main(
         },
         saveImageAsNewNote: (imageData) =>
             annotationsFunctions.saveImageAsNewNote(imageData),
+        analyseImageAsWithAI: (imageData) =>
+            annotationsFunctions.analyseImageAsWithAI(imageData),
         createHighlight: (shouldShare, shouldCopyLink) =>
             annotationsFunctions.createHighlight({
                 category: 'Highlights',

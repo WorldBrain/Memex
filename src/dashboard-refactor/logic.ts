@@ -462,7 +462,6 @@ export class DashboardLogic extends UILogic<State, Events> {
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
             if (user) {
-                console.log('user', user)
                 this.processUIEvent('syncNow', { previousState, event: null })
             }
             const syncSettings = createSyncSettingsStore<'highlightColors'>({
@@ -1014,8 +1013,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (event.direction === 'up') {
-            if (currentFocusIndex === 0) {
+            if (currentFocusIndex === -1) {
+                const searchBarElement = document.getElementById('search-bar')
+                if (searchBarElement) {
+                    searchBarElement.focus()
+                }
                 return
+            }
+            const searchBarElement = document.getElementById('search-bar')
+            if (searchBarElement) {
+                searchBarElement.blur()
             }
             nextItem = selectedBlocksArray[currentFocusIndex - 1]
             this.emitMutation({
@@ -1023,6 +1030,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
         if (event.direction === 'down') {
+            const searchBarElement = document.getElementById('search-bar')
+            if (searchBarElement) {
+                searchBarElement.blur()
+            }
+
             if (currentFocusIndex === selectedBlocksArray.length - 1) {
                 return
             }
