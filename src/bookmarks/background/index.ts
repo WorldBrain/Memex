@@ -10,7 +10,6 @@ import { PageIndexingBackground } from 'src/page-indexing/background'
 import pick from 'lodash/pick'
 import { Analytics } from 'src/analytics/types'
 import checkBrowser from '../../util/check-browser'
-import browser from 'webextension-polyfill'
 import { getLocalStorage, setLocalStorage } from 'src/util/storage'
 import {
     trackAnnotationCreate,
@@ -27,10 +26,11 @@ export default class BookmarksBackground {
     constructor(
         private options: {
             storageManager: Storex
+            manifestVersion: '2' | '3'
             pages: PageIndexingBackground
             browserAPIs: Pick<
                 Browser,
-                'bookmarks' | 'tabs' | 'storage' | 'action'
+                'bookmarks' | 'tabs' | 'storage' | 'action' | 'browserAction'
             >
             analytics: Analytics
             analyticsBG: AnalyticsCoreInterface
@@ -220,19 +220,15 @@ export default class BookmarksBackground {
     }
 
     private async setBookmarkStatus(isSet: boolean, tabId: number) {
+        const webExtAPI =
+            this.options.manifestVersion === '2'
+                ? this.options.browserAPIs.browserAction
+                : this.options.browserAPIs.action
         if (isSet) {
-            await this.options.browserAPIs.action.setBadgeText({
-                text: '❤️',
-                tabId,
-            })
-            await this.options.browserAPIs.action.setBadgeBackgroundColor({
-                color: 'white',
-            })
+            await webExtAPI.setBadgeText({ text: '❤️', tabId })
+            await webExtAPI.setBadgeBackgroundColor({ color: 'white' })
         } else {
-            await this.options.browserAPIs.action.setBadgeText({
-                text: '',
-                tabId,
-            })
+            await webExtAPI.setBadgeText({ text: '', tabId })
         }
     }
 
