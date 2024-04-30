@@ -74,9 +74,9 @@ export class ContentScriptsBackground {
         this.options.browserAPIs.webNavigation.onHistoryStateUpdated.addListener(
             async ({ tabId, url }) => {
                 if (isUrlSupported({ fullUrl: url })) {
-                    await runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).handleHistoryStateUpdate(tabId)
+                    await runInTab<InPageUIContentScriptRemoteInterface>(tabId)
+                        .handleHistoryStateUpdate(tabId)
+                        .catch((error) => {}) // Swallow this error as it seems arise in uninteresting situations, creating a lot of noise in sentry
                 }
             },
         )
@@ -84,9 +84,9 @@ export class ContentScriptsBackground {
         this.options.browserAPIs.tabs.onUpdated.addListener(
             (tabId, changeInfo) => {
                 if (changeInfo?.url?.includes('mail.google.com/mail')) {
-                    runInTab<InPageUIContentScriptRemoteInterface>(
-                        tabId,
-                    ).handleHistoryStateUpdate(tabId)
+                    runInTab<InPageUIContentScriptRemoteInterface>(tabId)
+                        .handleHistoryStateUpdate(tabId)
+                        .catch((error) => {}) // Swallow this error as it seems arise in uninteresting situations, creating a lot of noise in sentry
                 }
                 if (isUrlYTVideo(changeInfo?.url)) {
                     this.options.browserAPIs.tabs.sendMessage(tabId, {

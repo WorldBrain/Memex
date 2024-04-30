@@ -4890,9 +4890,8 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         this.renderOwnHighlights(previousState)
-
-        this.emitMutation({})
     }
+
     changeFetchLocalHTML: EventHandler<'changeFetchLocalHTML'> = async ({
         event,
         previousState,
