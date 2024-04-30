@@ -84,7 +84,7 @@ export class PortBasedRPCManager implements RPCManager {
             this.ports.set(portId, port)
             port.onMessage.addListener(this.messageResponder)
         } catch (err) {
-            throw new RpcError(err.message)
+            throw new RpcError(err)
         }
     }
 
@@ -375,7 +375,7 @@ export class PortBasedRPCManager implements RPCManager {
                                 `RPC::messageResponder::PortName(${port.name}):: ERRORED Function [${name}]`,
                             )
                         }
-                        throw new RpcError(err.message)
+                        throw new RpcError(err)
                     })
             }
         }
