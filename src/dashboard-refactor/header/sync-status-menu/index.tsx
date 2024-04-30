@@ -241,15 +241,18 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                         </SectionCircle>
                     </Row> */}
                 </RowContainer>
+                <Separator />
                 <BottomRow>
-                    <PrimaryAction
-                        label="Sync Now"
-                        onClick={this.props.syncNow}
-                        size={'medium'}
-                        icon={'reload'}
-                        fullWidth
-                        type={'primary'}
-                    />
+                    {this.props.syncStatusIconState !== 'yellow' && (
+                        <PrimaryAction
+                            label="Sync Now"
+                            onClick={this.props.syncNow}
+                            size={'medium'}
+                            icon={'reload'}
+                            fullWidth
+                            type={'primary'}
+                        />
+                    )}
                     <ReportProblemRow>
                         <HelpTextBlock> Report sync problems:</HelpTextBlock>
                         <HelpTextBlockLink
@@ -278,7 +281,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                             Falls back to sync ever 60min
                             <br />
                             1. Go to{' '}
-                            <HelpTextBlockLink
+                            <BraveBlockInfoLink
                                 onClick={() =>
                                     this.props.browserAPIs.tabs.create({
                                         url: 'brave://settings/privacy',
@@ -286,7 +289,7 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                                 }
                             >
                                 brave://settings/privacy{' '}
-                            </HelpTextBlockLink>
+                            </BraveBlockInfoLink>
                             <br />
                             2. enable "Use Google services for push messaging"
                             <br />
@@ -449,6 +452,18 @@ const BraveBlockInfo = styled.span<{
         color: ${(props) => props.theme.colors.warning};
     }
 `
+
+const BraveBlockInfoLink = styled.a<{
+    bold?: boolean
+}>`
+    font-size: inherit;
+    font-size: 13px;
+    display: contents;
+    align-items: center;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: ${(props) => props.theme.colors.prime1};
+`
 const HelpTextBlock = styled.span<{
     bold?: boolean
     wrap?: boolean
@@ -466,9 +481,9 @@ const HelpTextBlock = styled.span<{
 const HelpTextBlockLink = styled.a<{
     bold?: boolean
 }>`
-    height: 18px;
     font-size: inherit;
-    display: contents;
+    font-size: 13px;
+    display: flex;
     align-items: center;
     padding-left: 5px;
     padding-right: 5px;
