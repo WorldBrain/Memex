@@ -1904,6 +1904,7 @@ export class DashboardContainer extends StatefulUIElement<
                             pageActivityIndicatorBG={
                                 this.props.pageActivityIndicatorBG
                             }
+                            runtimeAPI={this.props.runtimeAPI}
                             summarizeBG={this.props.summarizeBG}
                             contentConversationsBG={
                                 this.props.contentConversationsBG
