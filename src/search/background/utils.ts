@@ -13,6 +13,7 @@ import type {
 } from '@worldbrain/memex-common/lib/types/core-data-types/client'
 import type { DexieStorageBackend } from '@worldbrain/storex-backend-dexie'
 import type { WhereClause, default as Dexie } from 'dexie'
+import { processCJKCharacters } from '@worldbrain/memex-stemmer/lib/transform-page-text'
 
 export const reshapeParamsForOldSearch = (params): OldSearchParams => ({
     lists: params.collections,
@@ -245,7 +246,9 @@ export const splitQueryIntoTerms = (
     })
     queryString = queryString.replace(/\s+/g, ' ').trim()
 
-    // only add the terms to discrete terms if they are not in double quotes and are not in the list of special terms
+    // Also process out chinese characters
+
+    queryString = processCJKCharacters(queryString)
 
     // First split by double quotes, then by spaces on non-double quoted phrases
     const terms = queryString.split(' ').filter(Boolean)
