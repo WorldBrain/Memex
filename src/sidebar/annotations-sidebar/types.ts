@@ -19,10 +19,10 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     ) => void
     triggerListenerRestart: () => void
     addImageToEditor: (args: { imageData: string }, callback) => void
+    addImageToChat: (args: { imageData: string }, callback) => void
     addYouTubeTimestampToEditor: (commentText: string, callback) => void
     addVideoSnapshotToEditor: (args: { imageData: string }, callback) => void
-    addSelectedTextToAIquery: (selectedText: string, callback) => void
-    addSelectedTextAndInstaPrompt: (
+    addSelectedTextToAIquery: (
         selectedText: string,
         prompt: string,
         instaExecutePrompt: boolean,
@@ -33,6 +33,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         from: number,
         to: number,
         prompt: string,
+        instaExecutePrompt: boolean,
         callback,
     ) => Promise<boolean>
     addPageUrlToEditor?: (

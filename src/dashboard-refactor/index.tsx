@@ -127,6 +127,7 @@ export class DashboardContainer extends StatefulUIElement<
         | 'openSpaceInWebUI'
         | 'summarizeBG'
         | 'imageSupportBG'
+        | 'personalCloudBG'
         | 'bgScriptBG'
     > = {
         analytics,
@@ -144,6 +145,7 @@ export class DashboardContainer extends StatefulUIElement<
         contentShareByTabsBG: runInBackground(),
         activityIndicatorBG: runInBackground(),
         contentScriptsBG: runInBackground(),
+        personalCloudBG: runInBackground(),
         pageIndexingBG: runInBackground(),
         contentShareBG: runInBackground(),
         copyPasterBG: runInBackground(),
@@ -582,6 +584,8 @@ export class DashboardContainer extends StatefulUIElement<
                                 }),
                             onToggleDisplayState: () => {},
                             getRootElement: this.props.getRootElement,
+                            syncNow: () => this.processEvent('syncNow', null),
+                            browserAPIs: browser,
                         }}
                         syncStatusIconState={syncStatusIconState}
                     />
@@ -1885,7 +1889,7 @@ export class DashboardContainer extends StatefulUIElement<
                             authBG={this.props.authBG}
                             copyToClipboard={this.props.copyToClipboard}
                             refSidebar={this.notesSidebarRef}
-                            copyPaster={this.props.copyPasterBG}
+                            copyPasterBG={this.props.copyPasterBG}
                             customListsBG={this.props.listsBG}
                             analyticsBG={this.props.analyticsBG}
                             annotationsBG={this.props.annotationsBG}
@@ -1900,6 +1904,7 @@ export class DashboardContainer extends StatefulUIElement<
                             pageActivityIndicatorBG={
                                 this.props.pageActivityIndicatorBG
                             }
+                            runtimeAPI={this.props.runtimeAPI}
                             summarizeBG={this.props.summarizeBG}
                             contentConversationsBG={
                                 this.props.contentConversationsBG
@@ -2132,11 +2137,31 @@ const Container = styled.div<{
     /* min-width: fit-content; */
     overflow: hidden;
 
-    &::-webkit-scrollbar {
-        display: none;
+    ::-webkit-scrollbar {
+        background: transparent;
+        width: 8px;
     }
 
-    scrollbar-width: none;
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 2px 0px 2px 0px;
+        width: 8px;
+        padding: 1px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: ${(props) => props.theme.colors.greyScale2};
+        border-radius: 10px;
+        width: 4px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: ${(props) => props.theme.colors.greyScale3};
+        cursor: pointer;
+    }
 
     & * {
         font-family: 'Satoshi', sans-serif;

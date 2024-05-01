@@ -194,7 +194,8 @@ const Container = styled.div<{
     z-index: ${(props) => (props.isHovering ? 2147483647 : 0)};
     width: fit-content;
     /* max-width: calc(${(props) => props.spaceSidebarWidth} - 34px); */
-    width: calc(${(props) => props.spaceSidebarWidth} - 0px)
+    width: calc(${(props) => props.spaceSidebarWidth} - 0px);
+    padding: 0 7px 0 0px;
 `
 
 const Name = styled.div`

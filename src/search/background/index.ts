@@ -133,7 +133,9 @@ export default class SearchBackground {
             edge === 'bottom'
                 ? Math.min(...timestamps)
                 : Math.max(...timestamps)
-        return edgeTimestamp !== Infinity ? edgeTimestamp : defaultTimestamp
+        return Math.abs(edgeTimestamp) !== Infinity
+            ? edgeTimestamp
+            : defaultTimestamp
     }
 
     private sliceUnifiedSearchResults(
@@ -289,7 +291,8 @@ export default class SearchBackground {
     ): Promise<UnifiedBlankSearchResult> {
         const upperBound = params.untilWhen
         const lowerBound =
-            params.fromWhen ?? upperBound - params.daysToSearch * dayMs
+            params.fromWhen ??
+            Math.max(upperBound - params.daysToSearch * dayMs, 0)
         // const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
 
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
@@ -361,12 +364,11 @@ export default class SearchBackground {
     private async unifiedTermsSearch(
         params: UnifiedTermsSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
-        const { phrases, terms } = splitQueryIntoTerms(params.query)
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
 
         const [pages, annotations] = await Promise.all([
-            params.queryPages(terms, phrases),
-            params.queryAnnotations(terms, phrases),
+            params.queryPages(params.terms, params.phrases),
+            params.queryAnnotations(params.terms, params.phrases),
         ])
 
         // Add in all the annotations to the results
@@ -426,6 +428,23 @@ export default class SearchBackground {
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
         } else {
+            const {
+                phrases,
+                terms,
+                inTitle,
+                inContent,
+                inHighlight,
+                inComment,
+                matchTermsFuzzyStartsWith,
+            } = splitQueryIntoTerms(params.query)
+
+            params.matchPageTitleUrl = inTitle
+            params.matchPageText = inContent
+            params.matchNotes = inComment
+            params.matchHighlights = inHighlight
+            params.phrases = phrases
+            params.terms = terms
+            params.matchTermsFuzzyStartsWith = matchTermsFuzzyStartsWith
             result = await this.unifiedTermsSearch({
                 ...params,
                 queryPages: queryPagesByTerms(

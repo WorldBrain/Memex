@@ -7,6 +7,7 @@ import { fonts } from '../../styles'
 import * as icons from 'src/common-ui/components/design-library/icons'
 import Icon from '@worldbrain/memex-common/lib/common-ui/components/icon'
 import { TooltipBox } from '@worldbrain/memex-common/lib/common-ui/components/tooltip-box'
+import TutorialBox from '@worldbrain/memex-common/lib/common-ui/components/tutorial-box'
 
 export interface SearchBarProps {
     placeholder?: string
@@ -23,11 +24,19 @@ export interface SearchBarProps {
     isNotesSidebarShown?: boolean
 }
 
-export default class SearchBar extends PureComponent<SearchBarProps> {
+interface State {
+    showTutorial: boolean
+}
+
+export default class SearchBar extends PureComponent<SearchBarProps, State> {
     private inputRef = React.createRef<HTMLInputElement>()
 
     componentDidMount() {
         this.inputRef.current.focus()
+    }
+
+    state: State = {
+        showTutorial: false,
     }
 
     handleChange: React.ChangeEventHandler = (evt) => {
@@ -85,7 +94,7 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                             ref={this.inputRef}
                             placeholder={
                                 this.props.placeholder ??
-                                'Search your saved pages and notes'
+                                'Search what you saved. Try "exact matches" and wordstarts*'
                             }
                             value={searchQuery}
                             id={'search-bar'}
@@ -137,6 +146,10 @@ export default class SearchBar extends PureComponent<SearchBarProps> {
                     </FilterButton>
                     {renderCopyPasterButton()}
                     {renderExpandButton()}
+                    <TutorialBox
+                        tutorialId="savePages"
+                        getRootElement={this.props.getRootElement}
+                    />
                 </ActionButtons>
                 {!this.props.inPageMode && <Placeholder />}
             </Margin>

@@ -34,6 +34,7 @@ export interface InPageUIContentScriptRemoteInterface {
         shouldCopyLink: boolean,
     ): Promise<void>
     saveImageAsNewNote(imageData: string): Promise<void>
+    analyseImageAsWithAI(imageData: string): Promise<void>
 
     teardownContentScripts(): Promise<void>
     handleHistoryStateUpdate(tabId: number): Promise<void>

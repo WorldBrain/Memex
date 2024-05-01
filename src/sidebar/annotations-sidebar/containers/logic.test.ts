@@ -108,7 +108,9 @@ const setupLogicHelper = async ({
         analyticsBG: backgroundModules.analyticsBG,
         authBG: backgroundModules.auth.remoteFunctions,
         subscription: backgroundModules.auth.subscriptionService,
-        copyPaster: backgroundModules.copyPaster.remoteFunctions,
+        copyPasterBG: backgroundModules.copyPaster.remoteFunctions,
+        bgScriptBG: backgroundModules.bgScript.remoteFunctions,
+        pkmSyncBG: backgroundModules.pkmSyncBG.remoteFunctions,
         summarizeBG: insertBackgroundFunctionTab(
             backgroundModules.summarizeBG.remoteFunctions,
         ) as any,
@@ -117,7 +119,6 @@ const setupLogicHelper = async ({
         contentSharingByTabsBG: insertBackgroundFunctionTab(
             backgroundModules.contentSharing.remoteFunctionsByTab,
         ) as any,
-        copyPasterBG: backgroundModules.copyPaster.remoteFunctions,
         pageActivityIndicatorBG:
             backgroundModules.pageActivityIndicator.remoteFunctions,
         contentScriptsBG: insertBackgroundFunctionTab(

@@ -79,7 +79,10 @@ import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highl
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import {
+    Anchor,
+    AnnotationPrivacyLevels,
+} from '@worldbrain/memex-common/lib/annotations/types'
 import type { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import {
     trackAnnotationCreate,
@@ -115,12 +118,16 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
 import type { Storage } from 'webextension-polyfill'
 import type { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
-import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import {
+    cloneSelectionAsPseudoObject,
+    getSelectionHtml,
+} from '@worldbrain/memex-common/lib/annotations/utils'
 import {
     COUNTER_STORAGE_KEY,
     DEFAULT_COUNTER_STORAGE_KEY,
 } from 'src/util/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
+import * as anchoring from '@worldbrain/memex-common/lib/annotations'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -280,22 +287,6 @@ export async function main(
             pageActivityIndicator: pageActivityIndicatorBG,
         },
     })
-
-    // TODO: This needs to move to an RPC call
-    browser.runtime.onMessage.addListener(((request, sender, sendResponse) => {
-        if (request.action === 'getImageData') {
-            const imageUrl = request.srcUrl // URL of the image to get data for
-            fetch(imageUrl)
-                .then((response) => response.blob())
-                .then((blob) => {
-                    const reader = new FileReader()
-                    reader.onloadend = () =>
-                        sendResponse({ imageData: reader.result })
-                    reader.readAsDataURL(blob) // Convert the blob to a data URL
-                })
-        }
-        return true
-    }) as any)
 
     // add listener for when a person is over the pricing limit for saved pages
 
@@ -495,7 +486,7 @@ export async function main(
             })
 
             const createPromise = (async () => {
-                const bodyForSaving = await processCommentForImageUpload(
+                const bodyForSaving = processCommentForImageUpload(
                     data.body,
                     data.fullPageUrl,
                     localId,
@@ -565,6 +556,7 @@ export async function main(
         imageSupport?,
         highlightColor?: HighlightColor,
         selection?: PseudoSelection,
+        anchor?: Anchor,
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
@@ -605,6 +597,7 @@ export async function main(
                 screenshotImage,
                 imageSupport,
                 highlightColor,
+                anchor,
             })
             const annotationId = result.annotationId
             const createPromise = result.createPromise.catch(handleError)
@@ -633,6 +626,21 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
+            const selectionEmpty = !selection?.toString().length
+            if (selectionEmpty && !drawRectangle) {
+                return
+            }
+
+            let anchor: Anchor
+            const quote = getSelectionHtml(selection)
+            const descriptor = await anchoring.selectionToDescriptor({
+                _document: this.document,
+                _window: this.window,
+                isPdf: this.pdfViewer != null,
+                selection,
+            })
+            anchor = { quote, descriptor }
+
             if (
                 !(await pageActionAllowed(
                     analyticsBG,
@@ -646,20 +654,13 @@ export async function main(
 
             if (
                 window.location.href.includes('youtube.com') &&
-                selection.toString().length === 0
+                selectionEmpty
             ) {
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
                 })
             }
 
-            if (
-                selection &&
-                selection.toString().length === 0 &&
-                !drawRectangle
-            ) {
-                return
-            }
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -695,6 +696,8 @@ export async function main(
                     screenshotGrabResult.screenshot,
                     imageSupportBG,
                     highlightColor,
+                    selection,
+                    anchor,
                 )
                 annotationId = results.annotationId
                 await results.createPromise
@@ -707,6 +710,7 @@ export async function main(
                     null,
                     highlightColor,
                     selection,
+                    anchor,
                 )
                 annotationId = results.annotationId
                 await results.createPromise
@@ -769,6 +773,21 @@ export async function main(
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
+            const selectionEmpty = !selection?.toString().length
+            if (selectionEmpty) {
+                return
+            }
+
+            let anchor: Anchor
+            const quote = getSelectionHtml(selection)
+            const descriptor = await anchoring.selectionToDescriptor({
+                _document: this.document,
+                _window: this.window,
+                isPdf: this.pdfViewer != null,
+                selection,
+            })
+            anchor = { quote, descriptor }
+
             if (
                 !(await pageActionAllowed(
                     analyticsBG,
@@ -789,9 +808,6 @@ export async function main(
                 })
             }
 
-            if (selection && selection.toString().length === 0) {
-                return
-            }
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -826,6 +842,7 @@ export async function main(
                     imageSupportBG,
                     highlightColor,
                     selection,
+                    anchor,
                 )
 
                 const annotationId = result.annotationId
@@ -856,6 +873,7 @@ export async function main(
                     imageSupportBG,
                     highlightColor,
                     selection,
+                    anchor,
                 )
 
                 const annotationId = result.annotationId
@@ -911,11 +929,13 @@ export async function main(
         askAIwithMediaRange: () => (
             range: { from: number; to: number },
             prompt: string,
+            instaExecutePrompt?: boolean,
         ) => {
             inPageUI.showSidebar({
                 action: 'add_media_range_to_ai_context',
                 range,
                 prompt,
+                instaExecutePrompt: instaExecutePrompt ?? false,
             })
         },
         createTimestampWithAISummary: async (
@@ -956,7 +976,13 @@ export async function main(
         saveImageAsNewNote: async (imageData: string) => {
             inPageUI.showSidebar({
                 action: 'save_image_as_new_note',
-                imageData: imageData['imageData'],
+                imageData,
+            })
+        },
+        analyseImageAsWithAI: async (imageData: string) => {
+            inPageUI.showSidebar({
+                action: 'analyse_image_with_ai',
+                imageData,
             })
         },
     }
@@ -1068,6 +1094,8 @@ export async function main(
         },
         async registerSidebarScript(execute) {
             await execute({
+                runtimeAPI: browser.runtime,
+                storageAPI: browser.storage,
                 events: sidebarEvents,
                 initialState: inPageUI.componentsShown.sidebar
                     ? 'visible'
@@ -1094,7 +1122,7 @@ export async function main(
                 analytics,
                 copyToClipboard,
                 getFullPageUrl: pageInfo.getFullPageUrl,
-                copyPaster,
+                copyPasterBG: copyPaster,
                 subscription,
                 contentScriptsBG: runInBackground(),
                 imageSupport: runInBackground(),
@@ -1159,6 +1187,7 @@ export async function main(
                     imageSupportBG,
                     copyPasterBG,
                     syncSettingsBG,
+                    personalCloudBG: runInBackground(),
                     analytics,
                     document,
                     location,
@@ -1174,7 +1203,6 @@ export async function main(
                 },
                 upgradeModalProps: {
                     createCheckOutLink: bgScriptBG.createCheckoutLink,
-                    browserAPIs: browser,
                     authBG: authBG,
                     limitReachedNotif: null,
                 },
@@ -1247,6 +1275,8 @@ export async function main(
         },
         saveImageAsNewNote: (imageData) =>
             annotationsFunctions.saveImageAsNewNote(imageData),
+        analyseImageAsWithAI: (imageData) =>
+            annotationsFunctions.analyseImageAsWithAI(imageData),
         createHighlight: (shouldShare, shouldCopyLink) =>
             annotationsFunctions.createHighlight({
                 category: 'Highlights',

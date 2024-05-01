@@ -1,5 +1,4 @@
 import * as React from 'react'
-import browser from 'webextension-polyfill'
 import styled, { ThemeProvider, css } from 'styled-components'
 import { createGlobalStyle } from 'styled-components'
 
@@ -60,9 +59,7 @@ import { AICounterIndicator } from 'src/util/subscriptions/AICountIndicator'
 import SpaceContextMenu from 'src/custom-lists/ui/space-context-menu'
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import { TOOLTIP_WIDTH } from 'src/in-page-ui/ribbon/constants'
-import type { RemoteBGScriptInterface } from 'src/background-script/types'
 import SpaceEditMenuContainer from 'src/custom-lists/ui/space-edit-menu'
-import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 import PageCitations from 'src/citations/PageCitations'
 import {
     ChatHistoryItem,
@@ -78,12 +75,10 @@ export interface Props extends SidebarContainerOptions {
     youtubeService?: YoutubeService
     getYoutubePlayer?(): YoutubePlayer
     imageSupport?: ImageSupportInterface<'caller'>
-    bgScriptBG?: RemoteBGScriptInterface
     saveHighlightColor?: (noteId, color: RGBAColor | string, unifiedId) => void
     saveHighlightColorSettings?: (newState: HighlightColor[]) => void
     getHighlightColorSettings?: () => void
     highlightColorSettings?: HighlightColor[]
-    pkmSyncBG?: PkmSyncInterface
     getRootElement: () => HTMLElement
     inPageMode?: boolean
 }
@@ -96,11 +91,6 @@ export class AnnotationsSidebarContainer<
         [instanceId: string]: AnnotationInstanceRefs
     } = {}
 
-    static defaultProps: Pick<Props, 'runtimeAPI' | 'storageAPI'> = {
-        runtimeAPI: browser.runtime,
-        storageAPI: browser.storage,
-    }
-
     constructor(props: P) {
         super(
             props,
@@ -108,7 +98,7 @@ export class AnnotationsSidebarContainer<
                 ...props,
                 analytics,
                 copyToClipboard,
-                copyPasterBG: props.copyPaster,
+                copyPasterBG: props.copyPasterBG,
                 focusCreateForm: () => {
                     ;(this.sidebarRef
                         ?.current as AnnotationsSidebarComponent)?.focusCreateForm()
@@ -632,7 +622,7 @@ export class AnnotationsSidebarContainer<
                 <PageCitations
                     annotationUrls={[annotation.localId]}
                     copyPasterProps={{
-                        copyPasterBG: this.props.copyPaster,
+                        copyPasterBG: this.props.copyPasterBG,
                         getRootElement: this.props.getRootElement,
                     }}
                     pageLinkProps={{
@@ -1458,7 +1448,7 @@ export class AnnotationsSidebarContainer<
                             normalizedPageUrl={normalizeUrl(
                                 this.state.fullPageUrl,
                             )}
-                            copyPaster={this.props.copyPaster}
+                            copyPaster={this.props.copyPasterBG}
                             contentSharing={this.props.contentSharingBG}
                             annotationsShareAll={this.props.annotationsBG}
                             copyPageLink={(link) => {

@@ -21,7 +21,7 @@ import {
     loadThemeVariant,
     theme,
 } from 'src/common-ui/components/design-library/theme'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 interface RootState extends DashboardResultsState {
     themeVariant?: MemexThemeVariant

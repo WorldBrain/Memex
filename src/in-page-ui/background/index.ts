@@ -5,18 +5,21 @@ import { InPageUIInterface } from './types'
 import { InPageUIContentScriptRemoteInterface } from '../content_script/types'
 // import { getKeyboardShortcutsState } from 'src/in-page-ui/keyboard-shortcuts/content_script/detection'
 import { OVERVIEW_URL } from 'src/constants'
-import browser from 'webextension-polyfill'
 import { checkStripePlan } from 'src/util/subscriptions/storage'
+import { blobToDataURL } from 'src/util/blob-utils'
 
 export const CONTEXT_MENU_ID_PREFIX = '@memexContextMenu:'
 export const CONTEXT_MENU_HIGHLIGHT_ID =
     CONTEXT_MENU_ID_PREFIX + 'createHighlight'
 export const CONTEXT_MENU_SAVE_IMAGE_ID = CONTEXT_MENU_ID_PREFIX + 'saveImage'
+export const CONTEXT_MENU_ANALYSE_IMAGE_ID =
+    CONTEXT_MENU_ID_PREFIX + 'analyseImage'
 
 export interface Props {
     tabsAPI: Tabs.Static
     contextMenuAPI: ContextMenus.Static
     browserAPIs: Browser
+    fetch: typeof fetch
 }
 
 export class InPageUIBackground {
@@ -35,28 +38,10 @@ export class InPageUIBackground {
         }
 
         this.setupContextMenuEntries()
-        this.setupTabsAPIMessages()
     }
 
     setupRemoteFunctions() {
         makeRemotelyCallable(this.remoteFunctions)
-    }
-
-    setupTabsAPIMessages() {
-        browser.runtime.onMessage.addListener(
-            // @ts-ignore: Temporarily ignore type error until type definitions are updated or corrected.
-            (message, sender, sendResponse) => {
-                if (message.action === 'queryTabs') {
-                    browser.tabs
-                        .query({ active: true, currentWindow: true })
-                        .then((tabs) => {
-                            sendResponse({ tabs: tabs })
-                        })
-
-                    return true // Indicates you wish to send a response asynchronously
-                }
-            },
-        )
     }
 
     private async getHighlightContextMenuTitle(): Promise<string> {
@@ -85,9 +70,23 @@ export class InPageUIBackground {
         })
 
         this.options.contextMenuAPI.onClicked.addListener(
-            ({ menuItemId }, tab) => {
+            async ({ menuItemId, srcUrl }, tab) => {
                 if (menuItemId === CONTEXT_MENU_HIGHLIGHT_ID) {
                     return this.createHighlightInTab(tab.id)
+                }
+                if (menuItemId === CONTEXT_MENU_SAVE_IMAGE_ID && srcUrl) {
+                    const imageBlob = await this.options
+                        .fetch(srcUrl)
+                        .then((res) => res.blob())
+                    const imageDataUrl = await blobToDataURL(imageBlob)
+                    await this.saveImageAsNewNote(tab.id, imageDataUrl)
+                }
+                if (menuItemId === CONTEXT_MENU_ANALYSE_IMAGE_ID && srcUrl) {
+                    const imageBlob = await this.options
+                        .fetch(srcUrl)
+                        .then((res) => res.blob())
+                    const imageDataUrl = await blobToDataURL(imageBlob)
+                    await this.analyseImageAsWithAI(tab.id, imageDataUrl)
                 }
             },
         )
@@ -96,24 +95,11 @@ export class InPageUIBackground {
             title: 'Save with Memex',
             contexts: ['image'],
         })
-
-        this.options.contextMenuAPI.onClicked.addListener(
-            async ({ menuItemId, srcUrl }, tab) => {
-                if (menuItemId === CONTEXT_MENU_SAVE_IMAGE_ID && tab.id) {
-                    // Send a message to the content script to get the image data
-                    const imageData = await this.options.tabsAPI.sendMessage(
-                        tab.id,
-                        {
-                            action: 'getImageData',
-                            srcUrl: srcUrl,
-                        },
-                    )
-                    if (imageData) {
-                        this.saveImageAsNewNote(tab.id, imageData)
-                    }
-                }
-            },
-        )
+        this.options.contextMenuAPI.create({
+            id: CONTEXT_MENU_ANALYSE_IMAGE_ID,
+            title: 'Analyse with AI',
+            contexts: ['image'],
+        })
     }
 
     async updateContextMenuEntries() {
@@ -156,8 +142,14 @@ export class InPageUIBackground {
             false,
             null,
         )
+
     private saveImageAsNewNote = (tabId: number, imageData: string) =>
         runInTab<InPageUIContentScriptRemoteInterface>(
             tabId,
         ).saveImageAsNewNote(imageData)
+
+    private analyseImageAsWithAI = (tabId: number, imageData: string) =>
+        runInTab<InPageUIContentScriptRemoteInterface>(
+            tabId,
+        ).analyseImageAsWithAI(imageData)
 }

@@ -1,7 +1,7 @@
 import React, { ChangeEventHandler } from 'react'
 import styled, { css } from 'styled-components'
 import type { KeyEvent } from 'src/common-ui/GenericPicker/types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 
 const search = browser.runtime.getURL('/img/search.svg')

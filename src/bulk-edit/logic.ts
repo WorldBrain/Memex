@@ -1,7 +1,7 @@
 import { UILogic, UIEvent, UIEventHandler } from 'ui-logic-core'
 import type { TaskState } from 'ui-logic-core/lib/types'
 import { getBulkEditItems } from './utils'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { BULK_SELECT_STORAGE_KEY } from './constants'
 import type { BulkEditCollection, BulkEditItem } from './types'
 

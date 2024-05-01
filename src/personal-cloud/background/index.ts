@@ -51,6 +51,7 @@ import type { JobScheduler } from 'src/job-scheduler/background/job-scheduler'
 import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/types'
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import { keepWorkerAlive } from 'src/util/service-worker-utils'
+import checkBrowser from 'src/util/check-browser'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -123,6 +124,7 @@ export class PersonalCloudBackground {
         this.remoteFunctions = {
             runDataMigration: this.waitForSync,
             isCloudSyncEnabled: this.isCloudSyncEnabled,
+            invokeSyncDownload: this.invokeSyncDownload,
             enableCloudSyncForNewInstall: this.enableSyncForNewInstall,
             isPassiveDataRemovalNeeded: this.isPassiveDataRemovalNeeded,
             runPassiveDataClean: () =>
@@ -157,7 +159,7 @@ export class PersonalCloudBackground {
 
     private isCloudSyncEnabled = () => this.options.settingStore.get('isSetUp')
 
-    triggerSyncContinuation() {
+    invokeSyncDownload = async () => {
         this.options.backend.triggerSyncContinuation()
     }
 
@@ -174,6 +176,13 @@ export class PersonalCloudBackground {
         })
 
         await this.startSync()
+
+        if (checkBrowser() !== 'firefox') {
+            await this.options.jobScheduler.scheduleJobHourly({
+                name: 'personal-cloud-periodic-sync-download',
+                job: this.invokeSyncDownload,
+            })
+        }
     }
 
     private async observeAuthChanges() {

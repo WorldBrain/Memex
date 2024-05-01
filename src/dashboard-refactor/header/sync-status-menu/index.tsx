@@ -12,6 +12,8 @@ import {
     diffTimestamp,
     formatTimestamp,
 } from '@worldbrain/memex-common/lib/utils/date-time'
+import checkBrowser from 'src/util/check-browser'
+import { Browser } from 'webextension-polyfill'
 
 export const timeSinceNowToString = (date: Date | null): string => {
     if (date === null) {
@@ -65,6 +67,8 @@ export interface SyncStatusMenuProps extends RootState {
     syncStatusIconState?: any
     getRootElement: () => HTMLElement
     onToggleDisplayState?: () => void
+    syncNow: () => void
+    browserAPIs: Browser
 }
 
 class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
@@ -239,22 +243,60 @@ class SyncStatusMenu extends PureComponent<SyncStatusMenuProps> {
                 </RowContainer>
                 <Separator />
                 <BottomRow>
-                    <HelpTextBlock> Report sync problems:</HelpTextBlock>
-                    <HelpTextBlockLink
-                        target="_blank"
-                        href="https://memex.featurebase.app/"
-                    >
-                        {' '}
-                        Forum
-                    </HelpTextBlockLink>
-                    <HelpTextBlockLink
-                        target="_blank"
-                        href="mailto:support@memex.garden"
-                    >
-                        {' '}
-                        Email
-                    </HelpTextBlockLink>
+                    {this.props.syncStatusIconState !== 'yellow' && (
+                        <PrimaryAction
+                            label="Sync Now"
+                            onClick={this.props.syncNow}
+                            size={'medium'}
+                            icon={'reload'}
+                            fullWidth
+                            type={'primary'}
+                        />
+                    )}
+                    <ReportProblemRow>
+                        <HelpTextBlock> Report sync problems:</HelpTextBlock>
+                        <HelpTextBlockLink
+                            target="_blank"
+                            href="https://memex.featurebase.app/"
+                        >
+                            {' '}
+                            Forum
+                        </HelpTextBlockLink>
+                        <HelpTextBlockLink
+                            target="_blank"
+                            href="mailto:support@memex.garden"
+                        >
+                            {' '}
+                            Email
+                        </HelpTextBlockLink>
+                    </ReportProblemRow>
                 </BottomRow>
+                {checkBrowser() === 'brave' && (
+                    <>
+                        <Separator />
+                        <BraveBlockInfo>
+                            <strong>
+                                (Near)-live-sync disabled by default on Brave
+                            </strong>
+                            Falls back to sync ever 60min
+                            <br />
+                            1. Go to{' '}
+                            <BraveBlockInfoLink
+                                onClick={() =>
+                                    this.props.browserAPIs.tabs.create({
+                                        url: 'brave://settings/privacy',
+                                    })
+                                }
+                            >
+                                brave://settings/privacy{' '}
+                            </BraveBlockInfoLink>
+                            <br />
+                            2. enable "Use Google services for push messaging"
+                            <br />
+                            3. Create new sync update on other devices
+                        </BraveBlockInfo>
+                    </>
+                )}
             </Container>
         )
     }
@@ -276,7 +318,7 @@ const ExternalLink = styled.a`
 `
 
 const Container = styled.div`
-    width: 300px;
+    width: 350px;
 `
 
 const Separator = styled.div`
@@ -321,10 +363,20 @@ const Row = styled(Margin)`
 `
 
 const BottomRow = styled.div`
-    padding: 15px 10px 15px 20px;
+    padding: 15px 10px 15px 15px;
     display: flex;
     justify-content: flex-start;
+    flex-direction: column;
+    grid-gap: 10px;
     cursor: pointer;
+`
+
+const ReportProblemRow = styled.div`
+    display: flex;
+    justify-content: center;
+    cursor: pointer;
+    width: 100%;
+    box-sizing: border-box;
 `
 
 const RowContainer = styled.div`
@@ -381,28 +433,60 @@ const InfoText = styled.div`
     white-space: nowrap;
 `
 
-const HelpTextBlock = styled.span<{
+const BraveBlockInfo = styled.span<{
+    bold?: boolean
+    wrap?: boolean
+}>`
+    font-weight: 400;
+    font-size: 14px;
+    padding: 15px;
+    line-height: 20x;
+    display: flex;
+    grid-gap: 5px;
+    align-items: flex-start;
+    text-decoration: none;
+    flex-direction: column;
+
+    color: ${(props) => props.theme.colors.greyScale6};
+    strong {
+        color: ${(props) => props.theme.colors.warning};
+    }
+`
+
+const BraveBlockInfoLink = styled.a<{
     bold?: boolean
 }>`
-    height: 18px;
+    font-size: inherit;
+    font-size: 13px;
+    display: contents;
+    align-items: center;
+    padding-left: 5px;
+    padding-right: 5px;
+    color: ${(props) => props.theme.colors.prime1};
+`
+const HelpTextBlock = styled.span<{
+    bold?: boolean
+    wrap?: boolean
+}>`
     font-weight: 300;
-    font-size: 12px;
+    font-size: 13px;
     line-height: 15px;
     display: flex;
     align-items: center;
     color: ${(props) => props.theme.colors.greyScale5};
     text-decoration: none;
-    white-space: nowrap;
+    white-space: ${(props) => (props.wrap ? 'wrap' : 'nowrap')};
 `
 
 const HelpTextBlockLink = styled.a<{
     bold?: boolean
 }>`
-    height: 18px;
-    font-size: 12px;
+    font-size: inherit;
+    font-size: 13px;
     display: flex;
     align-items: center;
     padding-left: 5px;
+    padding-right: 5px;
     color: ${(props) => props.theme.colors.prime1};
 `
 

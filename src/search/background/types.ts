@@ -92,6 +92,8 @@ export interface RemoteSearchInterface {
 
 export type UnifiedSearchParams = TermsSearchOpts & {
     query: string
+    terms?: string[]
+    phrases?: string[]
     fromWhen?: number
     untilWhen?: number
     filterByDomains: string[]

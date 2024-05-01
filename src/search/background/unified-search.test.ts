@@ -114,6 +114,25 @@ const termsSearch = (
         matchHighlights: true,
         matchPageTitleUrl: true,
     }
+
+    const {
+        phrases,
+        terms,
+        inTitle,
+        inContent,
+        inHighlight,
+        inComment,
+        matchTermsFuzzyStartsWith,
+    } = splitQueryIntoTerms(params.query)
+
+    params.matchPageTitleUrl = inTitle
+    params.matchPageText = inContent
+    params.matchNotes = inComment
+    params.matchHighlights = inHighlight
+    params.phrases = phrases
+    params.terms = terms
+    params.matchTermsFuzzyStartsWith = matchTermsFuzzyStartsWith
+
     return search['unifiedTermsSearch']({
         filterByDomains: [],
         filterByListIds: [],
@@ -183,6 +202,14 @@ describe('Unified search tests', () => {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
                     },
                 ],
                 [
@@ -354,6 +381,14 @@ describe('Unified search tests', () => {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
                     },
                 ],
                 [
@@ -836,6 +871,27 @@ describe('Unified search tests', () => {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                    },
+                ],
+            ])
+        })
+        it('should return the right page when searching for chinese characters', async () => {
+            const { backgroundModules } = await setupTest()
+            const now = Date.now()
+
+            const resultA = await termsSearch(backgroundModules, {
+                query: '微软第三财季营收',
+                limit: 1000,
+                skip: 0,
+            })
+            expect(resultA.resultsExhausted).toBe(true)
+            expect(formatResults(resultA, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
                     },
                 ],
             ])
@@ -1714,24 +1770,49 @@ describe('Unified search tests', () => {
             expect(splitQueryIntoTerms('test test')).toEqual({
                 terms: ['test'],
                 phrases: [],
+                inComment: true,
+                inContent: true,
+                inHighlight: true,
+                inTitle: true,
+                matchTermsFuzzyStartsWith: false,
             })
             expect(splitQueryIntoTerms('"test test"')).toEqual({
                 terms: [],
                 phrases: ['test test'],
+                inComment: true,
+                inContent: true,
+                inHighlight: true,
+                inTitle: true,
+                matchTermsFuzzyStartsWith: false,
             })
             expect(splitQueryIntoTerms('"test test" test')).toEqual({
                 phrases: ['test test'],
                 terms: ['test'],
+                inComment: true,
+                inContent: true,
+                inHighlight: true,
+                inTitle: true,
+                matchTermsFuzzyStartsWith: false,
             })
             expect(splitQueryIntoTerms('cat "big dog" test')).toEqual({
                 terms: ['cat', 'test'],
                 phrases: ['big dog'],
+                inComment: true,
+                inContent: true,
+                inHighlight: true,
+                inTitle: true,
+                matchTermsFuzzyStartsWith: false,
             })
             expect(
                 splitQueryIntoTerms('cat "big dog" test "blue car" red car'),
             ).toEqual({
                 terms: ['cat', 'test', 'red', 'car'],
                 phrases: ['big dog', 'blue car'],
+                inComment: true,
+                inContent: true,
+                inHighlight: true,
+                inTitle: true,
+                matchTermsFuzzyStartsWith: false,
             })
             expect(
                 splitQueryIntoTerms(
@@ -1740,6 +1821,11 @@ describe('Unified search tests', () => {
             ).toEqual({
                 terms: ['cat', 'test', 'grab', 'yellow', 'red', 'car'],
                 phrases: ['big dog', 'blue car'],
+                inComment: true,
+                inContent: true,
+                inHighlight: true,
+                inTitle: true,
+                matchTermsFuzzyStartsWith: false,
             })
             expect(
                 splitQueryIntoTerms(
@@ -1747,8 +1833,13 @@ describe('Unified search tests', () => {
                     'cat"big dog" test grab yellow"blue car"red car',
                 ),
             ).toEqual({
-                terms: ['test', 'grab', 'yellow'],
-                phrases: ['cat', 'big dog', 'blue car', 'red car'],
+                terms: ['cat', 'test', 'grab', 'yellow', 'red', 'car'],
+                phrases: ['big dog', 'blue car'],
+                inComment: true,
+                inContent: true,
+                inHighlight: true,
+                inTitle: true,
+                matchTermsFuzzyStartsWith: false,
             })
         })
 

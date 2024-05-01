@@ -150,7 +150,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 syncMenu: {
                     pendingLocalChangeCount: { $set: stats.pendingUploads },
                     // TODO: re-implement pending download count
-                    pendingRemoteChangeCount: { $set: stats.pendingDownloads },
+                    // pendingRemoteChangeCount: { $set: stats.pendingDownloads },
                 },
             })
 
@@ -165,14 +165,26 @@ export class DashboardLogic extends UILogic<State, Events> {
                 })
             }
         })
-        this.personalCloudEvents.on(
-            'downloadStarted',
-            this.toggleSyncDownloadActive,
-        )
-        this.personalCloudEvents.on(
-            'downloadStopped',
-            this.toggleSyncDownloadActive,
-        )
+
+        this.personalCloudEvents.on('downloadStarted', () => {
+            this.emitMutation({
+                syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+            })
+            this.toggleSyncDownloadActive()
+        })
+        // this.personalCloudEvents.on('downloadStopped', () => {
+        //     this.emitMutation({
+        //         syncMenu: { pendingRemoteChangeCount: { $set: 0 } },
+        //     })
+        // })
+        // this.personalCloudEvents.on(
+        //     'downloadStarted',
+        //     this.toggleSyncDownloadActive,
+        // )
+        // this.personalCloudEvents.on(
+        //     'downloadStopped',
+        //     this.toggleSyncDownloadActive,
+        // )
         this.emitMutation({
             syncMenu: {
                 pendingLocalChangeCount: {
@@ -183,95 +195,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                 },
             },
         })
-    }
-
-    // NOTE: This debounce exists as sync DL documents come in 1-by-1, often with short delays between each doc, which
-    //  resulted in the status indicator constantly toggling on and off as docs came in. Leading to flickering when
-    //  many docs were queued up.
-    //  A rough test got me delays of 1-8s between docs created at roughly the same time, which is why the 8s wait was chosen.
-    private toggleSyncDownloadActive = debounce(
-        () => {
-            this.emitMutation({
-                syncMenu: {
-                    pendingRemoteChangeCount: {
-                        $apply: (prev) => (prev === 0 ? 1 : 0),
-                    },
-                },
-            })
-        },
-        8000,
-        { leading: true },
-    )
-
-    private getURLSearchParams(): URLSearchParams {
-        // Get the current URL of the page
-        const url = this.options.location.href
-
-        // Check if the URL has a query string
-        const queryStringIndex = url.indexOf('?')
-        if (queryStringIndex === -1) {
-            return new URLSearchParams() // No query string found
-        }
-
-        // Split the query string into key-value pairs
-        const queryString = url.substring(queryStringIndex + 1)
-        return new URLSearchParams(queryString)
-    }
-
-    // TODO: Update this to use the URLSearchParams API rather than string manipulation
-    private updateQueryStringParameter(key: string, value: string) {
-        if (this.islikelyInPage) {
-            return
-        }
-        // Get the current URL of the page
-        if (value != null) {
-            const url = this.options.location.href
-
-            let regex = new RegExp(`(${key}=)[^&]+`)
-            let match = url.match(regex)
-
-            let updatedUrl = url
-            if (match) {
-                // update the query parameter value
-                let updatedParam = `${key}=${value}`
-
-                // replace the old query parameter with the updated one
-                updatedUrl = url.replace(match[0], updatedParam)
-            } else {
-                if (!url.includes('?')) {
-                    // add the query parameter to the URL
-                    updatedUrl = `${url}?${key}=${value}`
-                } else {
-                    // add the query parameter to the URL
-                    updatedUrl = `${url}&${key}=${value}`
-                }
-            }
-            if (process.env.NODE_ENV !== 'test') {
-                // Replace the current URL with the new one
-                this.options.location.replace(updatedUrl)
-            }
-        } else {
-            this.removeQueryString(key)
-        }
-    }
-
-    private removeQueryString(key) {
-        // Get the current URL of the page
-        const url = this.options.location.href
-
-        // Regular expression to match the query parameter key and its value
-        const regex = new RegExp('([?&])' + key + '=([^&]*)')
-
-        // Remove the query parameter from the URL
-        const updatedUrl = url.replace(regex, (match, p1) => {
-            return p1 === '?' ? '?' : ''
-        })
-
-        // If the last character is a '?', remove it
-        const cleanUrl = updatedUrl.replace(/[?]$/, '')
-
-        // Replace the current URL with the new one
-        this.options.history.replaceState({}, '', cleanUrl)
     }
 
     getInitialState(): State {
@@ -304,7 +227,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         return {
-            currentUser: null,
+            currentUser: {
+                id: '',
+                displayName: '',
+                email: '',
+                emailVerified: false,
+            },
             loadState: 'pristine',
             mode: isDuringInstall(this.options.location)
                 ? 'onboarding'
@@ -420,48 +348,6 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
     }
 
-    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
-        nextLists,
-    ) => {
-        this.emitMutation({
-            listsSidebar: {
-                lists: { $set: nextLists },
-                listTrees: {
-                    $apply: (prev) =>
-                        initNormalizedState({
-                            getId: (state) => state.unifiedId,
-                            seedData: normalizedStateToArray(nextLists).map(
-                                (list) => {
-                                    const prevState = prev.byId[list.unifiedId]
-                                    return {
-                                        unifiedId: list.unifiedId,
-                                        isTreeToggled:
-                                            prevState?.isTreeToggled ?? false,
-                                        isNestedListInputShown:
-                                            prevState?.isNestedListInputShown ??
-                                            false,
-                                        newNestedListValue:
-                                            prevState?.newNestedListValue ?? '',
-                                        newNestedListCreateState:
-                                            prevState?.newNestedListCreateState ??
-                                            'pristine',
-                                        hasChildren:
-                                            this.options.annotationsCache.getListsByParentId(
-                                                list.unifiedId,
-                                            ).length > 0,
-                                    }
-                                },
-                            ),
-                        }),
-                },
-            },
-        })
-    }
-
-    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
-        nextAnnotations,
-    ) => {}
-
     init: EventHandler<'init'> = async ({ previousState }) => {
         const { annotationsCache, authBG } = this.options
         this.setupRemoteEventListeners()
@@ -575,6 +461,9 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             await this.getFeedActivityStatus()
             await this.getInboxUnreadCount()
+            if (user) {
+                this.processUIEvent('syncNow', { previousState, event: null })
+            }
             const syncSettings = createSyncSettingsStore<'highlightColors'>({
                 syncSettingsBG: this.options.syncSettingsBG,
             })
@@ -607,6 +496,155 @@ export class DashboardLogic extends UILogic<State, Events> {
             this.observer.disconnect()
         }
     }
+
+    // NOTE: This debounce exists as sync DL documents come in 1-by-1, often with short delays between each doc, which
+    //  resulted in the status indicator constantly toggling on and off as docs came in. Leading to flickering when
+    //  many docs were queued up.
+    //  A rough test got me delays of 1-8s between docs created at roughly the same time, which is why the 8s wait was chosen.
+
+    private downloadStoppedTimeout: any | null = null
+
+    private toggleSyncDownloadActive = () => {
+        // Clear any existing timeout to reset the debounce timer
+        if (this.downloadStoppedTimeout) {
+            clearTimeout(this.downloadStoppedTimeout)
+        }
+
+        // Set a new timeout to wait for 8 seconds before emitting downloadStopped
+        this.downloadStoppedTimeout = setTimeout(() => {
+            this.emitMutation({
+                syncMenu: {
+                    pendingRemoteChangeCount: {
+                        $set: 0,
+                    },
+                },
+            })
+        }, 8000) // 8000 milliseconds = 8 seconds
+    }
+
+    private getURLSearchParams(): URLSearchParams {
+        // Get the current URL of the page
+        const url = this.options.location.href
+
+        // Check if the URL has a query string
+        const queryStringIndex = url.indexOf('?')
+        if (queryStringIndex === -1) {
+            return new URLSearchParams() // No query string found
+        }
+
+        // Split the query string into key-value pairs
+        const queryString = url.substring(queryStringIndex + 1)
+        return new URLSearchParams(queryString)
+    }
+
+    // TODO: Update this to use the URLSearchParams API rather than string manipulation
+    private updateQueryStringParameter(key: string, value: string) {
+        if (this.islikelyInPage) {
+            return
+        }
+        let updatedUrl: string
+        // Get the current URL of the page
+
+        const url = this.options.location.href
+
+        let regex = new RegExp(`(${key}=)[^&]+`)
+        let match = url.match(regex)
+
+        if (!match) {
+            regex = new RegExp(`(${key}=)`)
+            match = url.match(regex)
+        }
+
+        if (value === null || value?.length === 0) {
+            // updatedParam = ''
+            this.removeQueryString(key)
+            return
+        }
+
+        updatedUrl = url
+        if (match) {
+            // update the query parameter value
+            let updatedParam: string
+
+            updatedParam = `${key}=${value}`
+            updatedUrl = url.replace(match[0], updatedParam)
+            // replace the old query parameter with the updated one
+        } else {
+            if (!url.includes('?')) {
+                // add the query parameter to the URL
+                updatedUrl = `${url}?${key}=${value}`
+            } else {
+                // add the query parameter to the URL
+                updatedUrl = `${url}&${key}=${value}`
+            }
+        }
+
+        if (process.env.NODE_ENV !== 'test') {
+            // Replace the current URL with the new one
+            this.options.location.replace(updatedUrl)
+        }
+    }
+
+    private removeQueryString(key) {
+        // Get the current URL of the page
+        const url = this.options.location.href
+
+        // Regular expression to match the query parameter key and its value
+        const regex = new RegExp('([?&])' + key + '=([^&]*)')
+
+        // Remove the query parameter from the URL
+        const updatedUrl = url.replace(regex, (match, p1) => {
+            return p1 === '?' ? '?' : ''
+        })
+
+        // If the last character is a '?', remove it
+        const cleanUrl = updatedUrl.replace(/[?]$/, '')
+
+        // Replace the current URL with the new one
+        this.options.history.replaceState({}, '', cleanUrl)
+    }
+
+    private cacheListsSubscription: PageAnnotationsCacheEvents['newListsState'] = (
+        nextLists,
+    ) => {
+        this.emitMutation({
+            listsSidebar: {
+                lists: { $set: nextLists },
+                listTrees: {
+                    $apply: (prev) =>
+                        initNormalizedState({
+                            getId: (state) => state.unifiedId,
+                            seedData: normalizedStateToArray(nextLists).map(
+                                (list) => {
+                                    const prevState = prev.byId[list.unifiedId]
+                                    return {
+                                        unifiedId: list.unifiedId,
+                                        isTreeToggled:
+                                            prevState?.isTreeToggled ?? false,
+                                        isNestedListInputShown:
+                                            prevState?.isNestedListInputShown ??
+                                            false,
+                                        newNestedListValue:
+                                            prevState?.newNestedListValue ?? '',
+                                        newNestedListCreateState:
+                                            prevState?.newNestedListCreateState ??
+                                            'pristine',
+                                        hasChildren:
+                                            this.options.annotationsCache.getListsByParentId(
+                                                list.unifiedId,
+                                            ).length > 0,
+                                    }
+                                },
+                            ),
+                        }),
+                },
+            },
+        })
+    }
+
+    private cacheAnnotationsSubscription: PageAnnotationsCacheEvents['newAnnotationsState'] = (
+        nextAnnotations,
+    ) => {}
 
     observeBlurContainer() {
         const container = document.getElementById('BlurContainer')
@@ -975,8 +1013,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         if (event.direction === 'up') {
-            if (currentFocusIndex === 0) {
+            if (currentFocusIndex === -1) {
+                const searchBarElement = document.getElementById('search-bar')
+                if (searchBarElement) {
+                    searchBarElement.focus()
+                }
                 return
+            }
+            const searchBarElement = document.getElementById('search-bar')
+            if (searchBarElement) {
+                searchBarElement.blur()
             }
             nextItem = selectedBlocksArray[currentFocusIndex - 1]
             this.emitMutation({
@@ -984,6 +1030,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             })
         }
         if (event.direction === 'down') {
+            const searchBarElement = document.getElementById('search-bar')
+            if (searchBarElement) {
+                searchBarElement.blur()
+            }
+
             if (currentFocusIndex === selectedBlocksArray.length - 1) {
                 return
             }
@@ -1370,6 +1421,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                 showLogin: { $set: event.isShown },
             },
         })
+    }
+    syncNow: EventHandler<'syncNow'> = ({ event }) => {
+        this.emitMutation({
+            syncMenu: { pendingRemoteChangeCount: { $set: 1 } },
+        })
+        this.options.personalCloudBG.invokeSyncDownload()
     }
 
     setShowDisplayNameSetupModal: EventHandler<
@@ -3416,10 +3473,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                       ]
                     : [...existing.lists]
 
-                const bodyToSave = await processCommentForImageUpload(
+                const bodyToSave = processCommentForImageUpload(
                     editNoteForm.bodyInputValue ?? existing.highlight ?? null,
                 )
-                const commentToSave = await processCommentForImageUpload(
+                const commentToSave = processCommentForImageUpload(
                     editNoteForm.inputValue ?? existing.comment,
                 )
 
@@ -4901,14 +4958,12 @@ export class DashboardLogic extends UILogic<State, Events> {
             source: 'updateSelectedListDescription',
         })
 
-        let processedDescription = (
-            await processCommentForImageUpload(
-                event.description,
-                null,
-                null,
-                this.options.imageSupportBG,
-                false,
-            )
+        const processedDescription = processCommentForImageUpload(
+            event.description,
+            null,
+            null,
+            this.options.imageSupportBG,
+            false,
         ).toString()
 
         this.options.annotationsCache.updateList({

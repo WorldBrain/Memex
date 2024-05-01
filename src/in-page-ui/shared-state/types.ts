@@ -35,6 +35,7 @@ export type InPageUISidebarAction =
     | 'cite_page'
     | 'share_page_link'
     | 'add_media_range_to_ai_context'
+    | 'analyse_image_with_ai'
 
 export type InPageUIRibbonAction = 'comment' | 'tag' | 'list' | 'bookmark'
 export type InPageUIComponent = ContentScriptComponent

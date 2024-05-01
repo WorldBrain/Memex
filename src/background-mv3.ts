@@ -58,10 +58,11 @@ async function main() {
     })
 
     const firebase = getFirebase()
+    const fbMessaging = getMessaging()
 
     // Set up incoming FCM handling logic (`onBackgroundMessage` wraps the SW `push` event)
     const pushMessagingClient = new PushMessagingClient()
-    onBackgroundMessage(getMessaging(), (message) => {
+    onBackgroundMessage(fbMessaging, (message) => {
         const payload = message.data as PushMessagePayload
         if (payload == null) {
             return
@@ -134,7 +135,7 @@ async function main() {
             return result.data as Promise<Returns>
         },
         getFCMRegistrationToken: () =>
-            getToken(getMessaging(), {
+            getToken(fbMessaging, {
                 vapidKey: process.env.FCM_VAPID_KEY,
                 serviceWorkerRegistration: self.registration,
             }),
@@ -149,7 +150,7 @@ async function main() {
     })
     pushMessagingClient.bgModules = backgroundModules
     authServices.auth.events.on('loginSuccess', () => {
-        backgroundModules.personalCloud.triggerSyncContinuation()
+        backgroundModules.personalCloud.invokeSyncDownload()
     })
 
     registerBackgroundModuleCollections({

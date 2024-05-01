@@ -1067,7 +1067,17 @@ export default class PageResultView extends PureComponent<Props> {
                         />
                     </FooterBar>
                     {this.props.totalAnnotationCount > 0 && (
-                        <NoteCounter>
+                        <NoteCounter
+                            onClick={(e) => {
+                                if (e.altKey) {
+                                    this.setState({
+                                        tutorialId: 'annotatePages',
+                                    })
+                                } else {
+                                    this.props.onNotesBtnClick(e)
+                                }
+                            }}
+                        >
                             {this.props.totalAnnotationCount}
                         </NoteCounter>
                     )}
@@ -1265,7 +1275,8 @@ const NoteCounter = styled.span`
     text-align: center;
     position: absolute;
     right: 10px;
-    bottom: 10px;
+    bottom: 8px;
+    cursor: pointer;
     z-index: 9999991; // to be above the footerbar
 `
 

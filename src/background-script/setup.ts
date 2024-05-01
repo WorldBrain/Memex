@@ -284,8 +284,9 @@ export function createBackgroundModules(options: {
         storageManager,
         pages,
         analytics,
-        browserAPIs: options.browserAPIs,
         analyticsBG,
+        browserAPIs: options.browserAPIs,
+        manifestVersion: options.manifestVersion,
     })
 
     const search = new SearchBackground({
@@ -716,6 +717,7 @@ export function createBackgroundModules(options: {
             tabsAPI: options.browserAPIs.tabs,
             contextMenuAPI: options.browserAPIs.contextMenus,
             browserAPIs: options.browserAPIs,
+            fetch: options.fetch,
         }),
         copyPaster,
         activityStreams,

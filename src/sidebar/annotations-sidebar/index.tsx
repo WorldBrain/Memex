@@ -15,13 +15,13 @@ import {
     MemexTheme,
     MemexThemeVariant,
 } from '@worldbrain/memex-common/lib/common-ui/styles/types'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 
 interface RootProps {
     mount: InPageUIRootMount
     dependencies: Omit<
         AnnotationsSidebarDependencies,
-        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme' | 'bgScriptBG'
+        'sidebarContext' | 'theme'
     >
 }
 interface RootState {
@@ -40,24 +40,22 @@ class Root extends React.Component<RootProps, RootState> {
         }
         this.setState({ themeVariant, theme: theme({ variant: themeVariant }) })
 
-        await browser.storage.onChanged.addListener(
-            async (changes, areaName) => {
-                if (areaName !== 'local') {
-                    return
-                }
+        browser.storage.onChanged.addListener(async (changes, areaName) => {
+            if (areaName !== 'local') {
+                return
+            }
 
-                if (changes.themeVariant) {
-                    const { themeVariant } = await browser.storage.local.get(
-                        'themeVariant',
-                    )
+            if (changes.themeVariant) {
+                const { themeVariant } = await browser.storage.local.get(
+                    'themeVariant',
+                )
 
-                    this.setState({
-                        themeVariant,
-                        theme: theme({ variant: themeVariant }),
-                    })
-                }
-            },
-        )
+                this.setState({
+                    themeVariant,
+                    theme: theme({ variant: themeVariant }),
+                })
+            }
+        })
     }
 
     render() {
@@ -84,7 +82,7 @@ export function setupInPageSidebarUI(
     mount: InPageUIRootMount,
     dependencies: Omit<
         AnnotationsSidebarDependencies,
-        'sidebarContext' | 'storageAPI' | 'runtimeAPI' | 'theme' | 'bgScriptBG'
+        'sidebarContext' | 'theme'
     >,
 ) {
     ReactDOM.render(

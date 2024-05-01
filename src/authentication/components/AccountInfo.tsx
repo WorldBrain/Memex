@@ -18,7 +18,6 @@ import QRCanvas from 'src/common-ui/components/qr-canvas'
 import { PopoutBox } from '@worldbrain/memex-common/lib/common-ui/components/popout-box'
 import TextField from '@worldbrain/memex-common/lib/common-ui/components/text-field'
 import UpgradeModal from '../upgrade-modal'
-import browser from 'webextension-polyfill'
 import { RemoteBGScriptInterface } from 'src/background-script/types'
 
 const styles = require('./styles.css')
@@ -117,7 +116,6 @@ export default class UserScreen extends StatefulUIElement<Props, State, Event> {
                             <UpgradeModal
                                 getRootElement={this.props.getRootElement}
                                 powerUpType={'Bookmarks'}
-                                browserAPIs={browser}
                                 authBG={this.props.authBG}
                                 createCheckOutLink={
                                     this.props.bgScriptBG.createCheckoutLink

@@ -1,5 +1,5 @@
 import React, { Component } from 'react'
-import { browser } from 'webextension-polyfill-ts'
+import browser from 'webextension-polyfill'
 import { remoteFunction } from 'src/util/webextensionRPC'
 import analytics from 'src/analytics'
 import { default as Overview } from './panes/overview'

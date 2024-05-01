@@ -1,5 +1,5 @@
 import { IGNORE_CLICK_OUTSIDE_CLASS } from '../constants'
-import { ContentScriptRegistry, SidebarScriptMain } from './types'
+import type { ContentScriptRegistry, SidebarScriptMain } from './types'
 import {
     createInPageUI,
     unmountInPageUI,

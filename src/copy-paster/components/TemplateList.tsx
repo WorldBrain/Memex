@@ -76,14 +76,34 @@ const ContentBlock = styled.div`
     padding: 5px 10px 10px 10px;
     max-height: 300px;
     max-width: 340px;
-    overflow: scroll;
+    overflow-y: scroll;
     display: flex;
     flex-direction: column;
 
-    scrollbar-width: none;
+    ::-webkit-scrollbar {
+        background: transparent;
+        width: 8px;
+    }
 
-    &::-webkit-scrollbar {
-        display: none;
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 2px 0px 2px 0px;
+        width: 8px;
+        padding: 1px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: ${(props) => props.theme.colors.greyScale2};
+        border-radius: 10px;
+        width: 4px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: ${(props) => props.theme.colors.greyScale3};
+        cursor: pointer;
     }
 `
 

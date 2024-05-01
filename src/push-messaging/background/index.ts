@@ -23,7 +23,7 @@ export default class PushMessagingClient {
                 'incomingChangesPending',
                 { changeCountDelta: 1 },
             )
-            this.bgModules.personalCloud.triggerSyncContinuation()
+            this.bgModules.personalCloud.invokeSyncDownload()
         }
         // This is the setup for the old FCM-based implementation for page activity indicator
         // } else if (payload.type === 'createPageListEntry') {

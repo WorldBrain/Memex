@@ -28,7 +28,6 @@ import type {
     RGBAColor,
     UnifiedAnnotation,
     UnifiedList,
-    UnifiedListForCache,
 } from 'src/annotations/cache/types'
 import type { UserReference } from '@worldbrain/memex-common/lib/web-interface/types/users'
 import type { RemotePageActivityIndicatorInterface } from 'src/page-activity-indicator/background/types'
@@ -49,6 +48,8 @@ import type {
 } from '@worldbrain/memex-common/lib/summarization/types'
 import type { PremiumPlans } from '@worldbrain/memex-common/lib/subscriptions/availablePowerups'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import type { RemoteBGScriptInterface } from 'src/background-script/types'
+import type { PkmSyncInterface } from 'src/pkm-integrations/background/types'
 
 export interface SidebarContainerDependencies {
     elements?: {
@@ -81,6 +82,8 @@ export interface SidebarContainerDependencies {
     contentScriptsBG: ContentScriptsInterface<'caller'>
     pageIndexingBG: PageIndexingInterface<'caller'>
     authBG: AuthRemoteFunctionsInterface
+    bgScriptBG: RemoteBGScriptInterface
+    pkmSyncBG: PkmSyncInterface
     subscription: SubscriptionsService
     theme: MemexTheme & Partial<SidebarTheme>
 
@@ -88,7 +91,7 @@ export interface SidebarContainerDependencies {
     // search: SearchInterface
     // bookmarks: BookmarksInterface
     analytics: Analytics
-    copyPaster: RemoteCopyPasterInterface
+    copyPasterBG: RemoteCopyPasterInterface
     youtubePlayer?: YoutubePlayer
     youtubeService?: YoutubeService
     hasFeedActivity?: boolean
@@ -382,6 +385,9 @@ interface SidebarEvents {
     saveImageAsNewNote: {
         imageData: string
     }
+    addImageToChat: {
+        imageData: string
+    }
     createYoutubeTimestampWithScreenshot: {
         imageData: string
     }
@@ -418,6 +424,7 @@ interface SidebarEvents {
     AddMediaRangeToAIcontext: {
         range?: { from: number; to: number }
         prompt?: string
+        instaExecutePrompt: boolean
     }
     AddYTTimestampToEditor: {
         commentText: string

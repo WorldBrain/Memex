@@ -642,13 +642,34 @@ const Container = styled.div<{
     display: flex;
     justify-content: center;
     height: fill-available;
-    overflow: scroll;
+    overflow-y: auto;
+    overflow-x: hidden;
 
-    &::-webkit-scrollbar {
-        display: none;
+    ::-webkit-scrollbar {
+        background: transparent;
+        width: 8px;
     }
 
-    scrollbar-width: none;
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 2px 0px 2px 0px;
+        width: 8px;
+        padding: 1px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: ${(props) => props.theme.colors.greyScale2};
+        border-radius: 10px;
+        width: 4px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: ${(props) => props.theme.colors.greyScale3};
+        cursor: pointer;
+    }
 
     ${(props) =>
         props.inPageMode &&
@@ -666,17 +687,35 @@ const Separator = styled.div`
 `
 
 const SidebarInnerContent = styled.div`
-    overflow-y: scroll;
-    overflow-x: hidden;
     height: fill-available;
     width: fill-available;
     padding-bottom: 100px;
 
-    &::-webkit-scrollbar {
-        display: none;
+    ::-webkit-scrollbar {
+        background: transparent;
+        width: 8px;
     }
 
-    scrollbar-width: none;
+    /* Track */
+    ::-webkit-scrollbar-track {
+        background: transparent;
+        margin: 2px 0px 2px 0px;
+        width: 8px;
+        padding: 1px;
+    }
+
+    /* Handle */
+    ::-webkit-scrollbar-thumb {
+        background: ${(props) => props.theme.colors.greyScale2};
+        border-radius: 10px;
+        width: 4px;
+    }
+
+    /* Handle on hover */
+    ::-webkit-scrollbar-thumb:hover {
+        background: ${(props) => props.theme.colors.greyScale3};
+        cursor: pointer;
+    }
 `
 
 const NoCollectionsMessage = styled.div`

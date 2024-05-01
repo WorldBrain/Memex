@@ -46,7 +46,7 @@ describe('Push messaging client tests', () => {
         })
         let hasSyncBeenTriggered = false
 
-        backgroundModules.personalCloud.triggerSyncContinuation = () => {
+        backgroundModules.personalCloud.invokeSyncDownload = async () => {
             hasSyncBeenTriggered = true
         }
 

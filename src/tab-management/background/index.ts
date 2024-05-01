@@ -12,6 +12,7 @@ import { captureException } from 'src/util/raven'
 import type { InPageUIContentScriptRemoteInterface } from 'src/in-page-ui/content_script/types'
 import { isBrowserPageTab, isExtensionTab } from '../utils'
 import type { RawPageContent } from '@worldbrain/memex-common/lib/page-indexing/content-extraction/types'
+import { isUrlSupported } from 'src/page-indexing/utils'
 
 const SCROLL_UPDATE_FN = 'updateScrollState'
 const CONTENT_SCRIPTS = ['/lib/browser-polyfill.js', '/content_script.js']
@@ -142,6 +143,7 @@ export default class TabManagementBackground {
 
         return !(
             url == null ||
+            !isUrlSupported({ fullUrl: url }) ||
             isExtensionTab({ url }) ||
             isBrowserPageTab({ url }) ||
             !isLoggable({ url })

@@ -211,8 +211,9 @@ export class AuthBackground {
                 console['info'](`User changed:`, userDebug)
             }
 
-            await this.options.remoteEmitter.emit('onLoadingUser', false)
-            await this.options.remoteEmitter.emit(
+            // TODO: Find out why these sometimes won't resolve/get stuck
+            this.options.remoteEmitter.emit('onLoadingUser', false)
+            this.options.remoteEmitter.emit(
                 'onAuthStateChanged',
                 userWithClaims,
             )
