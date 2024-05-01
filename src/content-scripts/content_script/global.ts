@@ -79,7 +79,10 @@ import { HighlightRenderer } from '@worldbrain/memex-common/lib/in-page-ui/highl
 import type { AutoPk } from '@worldbrain/memex-common/lib/storage/types'
 import checkBrowser from 'src/util/check-browser'
 import { getTelegramUserDisplayName } from '@worldbrain/memex-common/lib/telegram/utils'
-import { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
+import {
+    Anchor,
+    AnnotationPrivacyLevels,
+} from '@worldbrain/memex-common/lib/annotations/types'
 import type { RGBAColor, UnifiedList } from 'src/annotations/cache/types'
 import {
     trackAnnotationCreate,
@@ -115,12 +118,16 @@ import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/comp
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
 import type { Storage } from 'webextension-polyfill'
 import type { PseudoSelection } from '@worldbrain/memex-common/lib/in-page-ui/types'
-import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
+import {
+    cloneSelectionAsPseudoObject,
+    getSelectionHtml,
+} from '@worldbrain/memex-common/lib/annotations/utils'
 import {
     COUNTER_STORAGE_KEY,
     DEFAULT_COUNTER_STORAGE_KEY,
 } from 'src/util/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
+import * as anchoring from '@worldbrain/memex-common/lib/annotations'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -549,6 +556,7 @@ export async function main(
         imageSupport?,
         highlightColor?: HighlightColor,
         selection?: PseudoSelection,
+        anchor?: Anchor,
     ): Promise<{ annotationId: AutoPk; createPromise: Promise<void> }> {
         const handleError = async (err: Error) => {
             captureException(err)
@@ -589,6 +597,7 @@ export async function main(
                 screenshotImage,
                 imageSupport,
                 highlightColor,
+                anchor,
             })
             const annotationId = result.annotationId
             const createPromise = result.createPromise.catch(handleError)
@@ -617,6 +626,21 @@ export async function main(
             highlightColorSetting?: HighlightColor,
             preventHideTooltip?: boolean,
         ) => {
+            const selectionEmpty = !selection?.toString().length
+            if (selectionEmpty && !drawRectangle) {
+                return
+            }
+
+            let anchor: Anchor
+            const quote = getSelectionHtml(selection)
+            const descriptor = await anchoring.selectionToDescriptor({
+                _document: this.document,
+                _window: this.window,
+                isPdf: this.pdfViewer != null,
+                selection,
+            })
+            anchor = { quote, descriptor }
+
             if (
                 !(await pageActionAllowed(
                     analyticsBG,
@@ -630,20 +654,13 @@ export async function main(
 
             if (
                 window.location.href.includes('youtube.com') &&
-                selection.toString().length === 0
+                selectionEmpty
             ) {
                 await inPageUI.showSidebar({
                     action: 'youtube_timestamp',
                 })
             }
 
-            if (
-                selection &&
-                selection.toString().length === 0 &&
-                !drawRectangle
-            ) {
-                return
-            }
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -679,6 +696,8 @@ export async function main(
                     screenshotGrabResult.screenshot,
                     imageSupportBG,
                     highlightColor,
+                    selection,
+                    anchor,
                 )
                 annotationId = results.annotationId
                 await results.createPromise
@@ -691,6 +710,7 @@ export async function main(
                     null,
                     highlightColor,
                     selection,
+                    anchor,
                 )
                 annotationId = results.annotationId
                 await results.createPromise
@@ -753,6 +773,21 @@ export async function main(
             commentText?: string,
             highlightColorSetting?: HighlightColor,
         ) => {
+            const selectionEmpty = !selection?.toString().length
+            if (selectionEmpty) {
+                return
+            }
+
+            let anchor: Anchor
+            const quote = getSelectionHtml(selection)
+            const descriptor = await anchoring.selectionToDescriptor({
+                _document: this.document,
+                _window: this.window,
+                isPdf: this.pdfViewer != null,
+                selection,
+            })
+            anchor = { quote, descriptor }
+
             if (
                 !(await pageActionAllowed(
                     analyticsBG,
@@ -773,9 +808,6 @@ export async function main(
                 })
             }
 
-            if (selection && selection.toString().length === 0) {
-                return
-            }
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -810,6 +842,7 @@ export async function main(
                     imageSupportBG,
                     highlightColor,
                     selection,
+                    anchor,
                 )
 
                 const annotationId = result.annotationId
@@ -840,6 +873,7 @@ export async function main(
                     imageSupportBG,
                     highlightColor,
                     selection,
+                    anchor,
                 )
 
                 const annotationId = result.annotationId
