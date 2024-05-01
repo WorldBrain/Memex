@@ -708,25 +708,26 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     private renderPageResult = (
-        pageId: string,
+        pageResultId: string,
         day: number,
         index: number,
         order: number,
     ) => {
+        const pageResult = this.props.results[day].pages.byId[pageResultId]
         const page = {
-            ...this.props.pageData.byId[pageId],
-            ...this.props.results[day].pages.byId[pageId],
+            ...this.props.pageData.byId[pageResult.id],
+            ...pageResult,
         }
 
         const interactionProps = bindFunctionalProps<
             PageInteractionAugdProps,
             PageInteractionProps
-        >(this.props.pageInteractionProps, day, pageId)
+        >(this.props.pageInteractionProps, day, pageResultId)
 
         const pickerProps = bindFunctionalProps<
             PagePickerAugdProps,
             PagePickerProps
-        >(this.props.pagePickerProps, pageId)
+        >(this.props.pagePickerProps, pageResult.id)
 
         return (
             <ResultBox
@@ -738,7 +739,7 @@ export default class SearchResultsContainer extends React.Component<
                         : index
                 }
                 bottom="10px"
-                key={day.toString() + pageId}
+                key={day.toString() + pageResultId}
                 order={order}
             >
                 <PageResult
@@ -778,7 +779,7 @@ export default class SearchResultsContainer extends React.Component<
                             ? interactionProps.onTagPickerBtnClick
                             : undefined
                     }
-                    hasNotes={page.noteIds['user'].length > 0}
+                    hasNotes={page.totalAnnotationCount > 0}
                     filterbyList={this.props.filterByList}
                     searchType={this.props.searchType}
                     isInFocus={page.isInFocus}

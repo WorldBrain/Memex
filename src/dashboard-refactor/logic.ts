@@ -940,13 +940,14 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             const { results } = utils.pageSearchResultToState(
                 result,
+                params,
                 this.options.annotationsCache,
             )
 
-            let resultsList = results[-1].pages.byId
+            const resultsList = results[-1].pages.byId
 
-            for (let page of Object.values(resultsList)) {
-                const annotations = page.noteIds?.user ?? []
+            for (const page of Object.values(resultsList)) {
+                const annotations = page.noteIds.user ?? []
                 if (selectedUrls[page.id]) {
                     if (annotations.length > 0) {
                         for (let note of annotations) {
@@ -1239,6 +1240,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         results,
                     } = utils.pageSearchResultToState(
                         result,
+                        params,
                         this.options.annotationsCache,
                     )
 
@@ -1323,21 +1325,20 @@ export class DashboardLogic extends UILogic<State, Events> {
                         compiledSelectableBlocks =
                             previousState.selectableBlocks
                     }
-                    let resultsList = results[-1].pages.byId
+                    const resultsList = results[-1].pages.byId
 
-                    for (let page of Object.values(resultsList)) {
-                        let block: SelectableBlock = {
+                    for (const page of Object.values(resultsList)) {
+                        const block: SelectableBlock = {
                             id: page.id,
                             type: 'page',
                         }
 
                         compiledSelectableBlocks.push(block)
-
-                        let pageNotes = page?.noteIds?.user ?? null
+                        const pageNotes = page.noteIds.user ?? null
 
                         if (pageNotes.length > 0) {
-                            for (let note of pageNotes) {
-                                let noteBlock: SelectableBlock = {
+                            for (const note of pageNotes) {
+                                const noteBlock: SelectableBlock = {
                                     id: note,
                                     type: 'note',
                                 }
@@ -1548,9 +1549,11 @@ export class DashboardLogic extends UILogic<State, Events> {
     /* END - modal event handlers */
 
     /* START - search result event handlers */
+    // TODO: Remove this event
     setPageSearchResult: EventHandler<'setPageSearchResult'> = ({ event }) => {
         const state = utils.pageSearchResultToState(
             event.result,
+            { skip: 0, limit: 10 },
             this.options.annotationsCache,
         )
         this.emitMutation({

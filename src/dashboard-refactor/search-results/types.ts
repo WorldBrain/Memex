@@ -2,7 +2,10 @@ import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UIEvent } from 'ui-logic-core'
 
 import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
-import type { StandardSearchResponse } from 'src/search/background/types'
+import type {
+    StandardSearchResponse,
+    UnifiedSearchPaginationParams,
+} from 'src/search/background/types'
 import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
@@ -110,8 +113,8 @@ export type PagePickerAugdProps = {
 
 export type SearchResultToState<T extends StandardSearchResponse> = (
     result: T,
+    params: UnifiedSearchPaginationParams,
     annotationsCache: PageAnnotationsCacheInterface,
-    extraPageResultState?: Pick<PageResult, 'areNotesShown'>,
 ) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 
 export type SearchType =
