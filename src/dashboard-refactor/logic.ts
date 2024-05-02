@@ -19,12 +19,7 @@ import {
     MISSING_PDF_QUERY_PARAM,
 } from 'src/dashboard-refactor/constants'
 import { STORAGE_KEYS as CLOUD_STORAGE_KEYS } from 'src/personal-cloud/constants'
-import {
-    updatePickerValues,
-    stateToSearchParams,
-    flattenNestedResults,
-    getListData,
-} from './util'
+import { updatePickerValues, stateToSearchParams, getListData } from './util'
 import { SPECIAL_LIST_IDS } from '@worldbrain/memex-common/lib/storage/modules/lists/constants'
 import type { NoResultsType, SelectableBlock } from './search-results/types'
 import { filterListsByQuery } from './lists-sidebar/util'
@@ -256,6 +251,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             searchResults: {
                 blankSearchOldestResultTimestamp: null,
                 results: {},
+                pageIdToResultIds: {},
                 noResultsType: null,
                 showMobileAppAd: false,
                 shouldShowTagsUIs: false,
@@ -948,7 +944,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
             for (const page of Object.values(resultsList)) {
                 const annotations = page.noteIds.user ?? []
-                if (selectedUrls[page.id]) {
+                if (selectedUrls[page.pageId]) {
                     if (annotations.length > 0) {
                         for (let note of annotations) {
                             bulkEditItems[note] = {
@@ -958,7 +954,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     }
                     continue
                 } else {
-                    bulkEditItems[page.id] = {
+                    bulkEditItems[page.pageId] = {
                         type: 'page',
                     }
                     if (annotations.length > 0) {
@@ -1238,6 +1234,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         noteData,
                         pageData,
                         results,
+                        pageIdToResultIds,
                     } = utils.pageSearchResultToState(
                         result,
                         params,
@@ -1310,11 +1307,17 @@ export class DashboardLogic extends UILogic<State, Events> {
                                                   noteData,
                                               ),
                                       },
+                                      pageIdToResultIds: {
+                                          $merge: pageIdToResultIds,
+                                      },
                                   }
                                 : {
                                       results: { $set: results },
                                       pageData: { $set: pageData },
                                       noteData: { $set: noteData },
+                                      pageIdToResultIds: {
+                                          $set: pageIdToResultIds,
+                                      },
                                   }),
                         },
                     })
@@ -1329,7 +1332,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
                     for (const page of Object.values(resultsList)) {
                         const block: SelectableBlock = {
-                            id: page.id,
+                            id: page.pageId,
                             type: 'page',
                         }
 
@@ -1582,13 +1585,35 @@ export class DashboardLogic extends UILogic<State, Events> {
         > = {}
         const calcNextLists = updatePickerValues(event)
 
+        const pageResult =
+            previousState.searchResults.results[-1].pages.byId[
+                event.pageResultId
+            ]
+        const pageData =
+            previousState.searchResults.pageData.byId[pageResult.pageId]
+
         // If we're removing a shared list, we also need to make sure it gets removed from children annots
         if (removingSharedList) {
-            const childrenNoteIds = flattenNestedResults(previousState).byId[
-                event.id
-            ].noteIds.user
+            const dependentNoteIds: string[] = []
+            const pageResultIds =
+                previousState.searchResults.pageIdToResultIds[pageResult.pageId]
 
-            for (const noteId of childrenNoteIds) {
+            for (const pageResultId of pageResultIds) {
+                const noteIdsForPage =
+                    previousState.searchResults.results[-1].pages.byId[
+                        pageResultId
+                    ].noteIds.user
+
+                dependentNoteIds.push(
+                    ...noteIdsForPage.filter(
+                        (noteId) =>
+                            previousState.searchResults.noteData.byId[noteId]
+                                .isBulkShareProtected,
+                    ),
+                )
+            }
+
+            for (const noteId of dependentNoteIds) {
                 noteDataMutation[noteId] = {
                     lists: { $apply: calcNextLists },
                 }
@@ -1596,10 +1621,10 @@ export class DashboardLogic extends UILogic<State, Events> {
         }
 
         const nextPageListIds = calcNextLists(
-            previousState.searchResults.pageData.byId[event.id].lists,
+            previousState.searchResults.pageData.byId[pageResult.pageId].lists,
         )
         this.options.annotationsCache.setPageData(
-            normalizeUrl(event.fullPageUrl),
+            pageResult.pageId,
             nextPageListIds,
         )
         this.emitMutation({
@@ -1607,7 +1632,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                 noteData: { byId: noteDataMutation },
                 pageData: {
                     byId: {
-                        [event.id]: {
+                        [pageResult.pageId]: {
                             lists: { $set: nextPageListIds },
                         },
                     },
@@ -1616,7 +1641,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         })
 
         await this.options.listsBG.updateListForPage({
-            url: event.fullPageUrl,
+            url: pageData.fullUrl,
             added: event.added && listData.localId,
             deleted: event.deleted && listData.localId,
             skipPageIndexing: true,

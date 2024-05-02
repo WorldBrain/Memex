@@ -1,11 +1,7 @@
 import type { TaskState } from 'ui-logic-core/lib/types'
 import type { UIEvent } from 'ui-logic-core'
-
 import type { AnnotationsSorter } from 'src/sidebar/annotations-sidebar/sorting'
-import type {
-    StandardSearchResponse,
-    UnifiedSearchPaginationParams,
-} from 'src/search/background/types'
+import type { StandardSearchResponse } from 'src/search/background/types'
 import type { PipelineRes } from 'src/search'
 import type { PickerUpdateHandler } from 'src/common-ui/GenericPicker/types'
 import type { Anchor } from 'src/highlighting/types'
@@ -16,10 +12,7 @@ import type {
     AnnotationSharingStates,
 } from 'src/content-sharing/background/types'
 import type { AnnotationPrivacyLevels } from '@worldbrain/memex-common/lib/annotations/types'
-import type {
-    PageAnnotationsCacheInterface,
-    RGBAColor,
-} from 'src/annotations/cache/types'
+import type { RGBAColor } from 'src/annotations/cache/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
@@ -110,12 +103,6 @@ export interface PagePickerProps {
 export type PagePickerAugdProps = {
     [Key in keyof PagePickerProps]: (pageId: string) => PagePickerProps[Key]
 }
-
-export type SearchResultToState<T extends StandardSearchResponse> = (
-    result: T,
-    params: UnifiedSearchPaginationParams,
-    annotationsCache: PageAnnotationsCacheInterface,
-) => Pick<RootState, 'results' | 'noteData' | 'pageData'>
 
 export type SearchType =
     | 'pages'
@@ -210,7 +197,7 @@ export interface NoteResult {
 }
 
 export interface PageResult {
-    id: string
+    pageId: string
     notesType: NotesType
     areNotesShown: boolean
     activePage: boolean
@@ -253,6 +240,8 @@ export interface RootState {
     /** Holds page data specific to each page occurrence on a specific day. */
     results: NestedResults
     areResultsExhausted: boolean
+
+    pageIdToResultIds: { [pageId: string]: string[] }
 
     // Display data lookups
     /** Holds page data shared with all page occurrences on any day. */
@@ -310,8 +299,7 @@ export type Events = UIEvent<{
 
     // Page data state mutations (*shared with all* occurences of the page in different days)
     setPageLists: {
-        id: string
-        fullPageUrl: string
+        pageResultId: string
         added?: string
         deleted?: string
         skipPageIndexing?: boolean

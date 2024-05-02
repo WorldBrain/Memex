@@ -1203,11 +1203,9 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                 }}
                 pagePickerProps={{
-                    onListPickerUpdate: (pageId) => (args) =>
+                    onListPickerUpdate: (pageResultId) => (args) =>
                         this.processEvent('setPageLists', {
-                            id: pageId,
-                            fullPageUrl:
-                                searchResults.pageData.byId[pageId].fullUrl,
+                            pageResultId: pageResultId,
                             ...this.localListPickerArgIdsToCached(args),
                         }),
                 }}

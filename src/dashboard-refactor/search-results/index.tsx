@@ -715,7 +715,7 @@ export default class SearchResultsContainer extends React.Component<
     ) => {
         const pageResult = this.props.results[day].pages.byId[pageResultId]
         const page = {
-            ...this.props.pageData.byId[pageResult.id],
+            ...this.props.pageData.byId[pageResult.pageId],
             ...pageResult,
         }
 
@@ -727,7 +727,7 @@ export default class SearchResultsContainer extends React.Component<
         const pickerProps = bindFunctionalProps<
             PagePickerAugdProps,
             PagePickerProps
-        >(this.props.pagePickerProps, pageResult.id)
+        >(this.props.pagePickerProps, pageResultId)
 
         return (
             <ResultBox
@@ -763,7 +763,7 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onMatchingTextToggleClick
                     }
                     selectItem={this.props.onBulkSelect}
-                    shiftSelectItem={() => this.shiftSelectItems(page.id)}
+                    shiftSelectItem={() => this.shiftSelectItems(page.pageId)}
                     isBulkSelected={this.props.selectedItems?.includes(
                         page.normalizedUrl,
                     )}

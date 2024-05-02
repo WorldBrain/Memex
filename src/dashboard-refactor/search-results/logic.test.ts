@@ -177,14 +177,12 @@ describe('Dashboard search results logic', () => {
             expect(annotationsCache.pageListIds.get(pageId)).toEqual(undefined)
 
             await searchResults.processEvent('setPageLists', {
-                id: pageId,
-                fullPageUrl: 'https://' + pageId,
+                pageResultId: pageId,
                 added: listAData.unifiedId,
                 skipPageIndexing: true,
             })
             await searchResults.processEvent('setPageLists', {
-                id: pageId,
-                fullPageUrl: 'https://' + pageId,
+                pageResultId: pageId,
                 added: listBData.unifiedId,
                 skipPageIndexing: true,
             })
@@ -197,8 +195,7 @@ describe('Dashboard search results logic', () => {
             )
 
             await searchResults.processEvent('setPageLists', {
-                id: pageId,
-                fullPageUrl: 'https://' + pageId,
+                pageResultId: pageId,
                 deleted: listAData.unifiedId,
                 skipPageIndexing: true,
             })
@@ -211,8 +208,7 @@ describe('Dashboard search results logic', () => {
             )
 
             await searchResults.processEvent('setPageLists', {
-                id: pageId,
-                fullPageUrl: 'https://' + pageId,
+                pageResultId: pageId,
                 added: listCData.unifiedId,
                 skipPageIndexing: true,
             })
@@ -393,8 +389,7 @@ describe('Dashboard search results logic', () => {
             )
 
             await searchResults.processEvent('setPageLists', {
-                id: pageId,
-                fullPageUrl: 'https://' + pageId,
+                pageResultId: pageId,
                 added: listData.unifiedId,
                 skipPageIndexing: true,
             })
@@ -1342,8 +1337,7 @@ describe('Dashboard search results logic', () => {
                     const pageId = DATA.PAGE_1.normalizedUrl
 
                     await searchResults.processEvent('setPageLists', {
-                        id: pageId,
-                        fullPageUrl: 'https://' + pageId,
+                        pageResultId: pageId,
                         added: listDataA.unifiedId,
                         skipPageIndexing: true,
                     })
@@ -2656,8 +2650,7 @@ describe('Dashboard search results logic', () => {
                     added: listDataC.unifiedId,
                 })
                 await searchResults.processEvent('setPageLists', {
-                    id: pageIdA,
-                    fullPageUrl: DATA.PAGE_1.fullUrl,
+                    pageResultId: pageIdA,
                     added: listDataC.unifiedId, // This list is private, so manually adding it to the page here
                 })
 
@@ -2700,8 +2693,7 @@ describe('Dashboard search results logic', () => {
                 )
 
                 await searchResults.processEvent('setPageLists', {
-                    id: pageIdA,
-                    fullPageUrl: DATA.PAGE_1.fullUrl,
+                    pageResultId: pageIdA,
                     deleted: listDataC.unifiedId,
                 })
 
@@ -2742,8 +2734,7 @@ describe('Dashboard search results logic', () => {
                 )
 
                 await searchResults.processEvent('setPageLists', {
-                    id: pageIdA,
-                    fullPageUrl: DATA.PAGE_1.fullUrl,
+                    pageResultId: pageIdA,
                     deleted: listDataA.unifiedId,
                 })
 

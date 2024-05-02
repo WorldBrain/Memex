@@ -1,14 +1,12 @@
 import type {
     StandardSearchResponse,
-    AnnotsByPageUrl,
     AnnotPage,
+    UnifiedSearchPaginationParams,
 } from 'src/search/background/types'
 import type {
     PageData,
     PageResult,
-    PageResultsByDay,
     NoteData,
-    SearchResultToState,
     NoteResult,
     NoteFormState,
     RootState,
@@ -103,10 +101,10 @@ export const bindFunctionalProps = <
 }
 
 export const getInitialPageResultState = (
-    id: string,
+    pageId: string,
     noteIds: string[] = [],
 ): PageResult => ({
-    id,
+    pageId,
     notesType: 'user',
     activePage: undefined,
     areNotesShown: false,
@@ -205,18 +203,24 @@ export const formPageSearchResultId = (
     resultsPage: number,
 ): string => `${resultsPage}-${pageId}`
 
-export const pageSearchResultToState: SearchResultToState<StandardSearchResponse> = (
-    result,
-    params,
-    cache,
-) => {
+export const pageSearchResultToState = (
+    result: StandardSearchResponse,
+    params: UnifiedSearchPaginationParams,
+    cache: PageAnnotationsCacheInterface,
+): Pick<
+    RootState,
+    'results' | 'noteData' | 'pageData' | 'pageIdToResultIds'
+> => {
     const pageData = initNormalizedState<PageData>()
     const noteData = initNormalizedState<NoteData & NoteResult>()
     const pageResults = initNormalizedState<PageResult>()
+    const pageIdToResultIds: RootState['pageIdToResultIds'] = {}
 
     for (const pageResult of result.docs) {
         const pageId = pageResult.url
         const resultId = formPageSearchResultId(pageId, params.skip)
+        const existingResultIds = pageIdToResultIds[pageId] ?? []
+        pageIdToResultIds[pageId] = [...existingResultIds, resultId]
 
         const sortedAnnots = pageResult.annotations.sort(sortByPagePosition)
         const noteIds = sortedAnnots.map((a) => a.url)
@@ -239,6 +243,7 @@ export const pageSearchResultToState: SearchResultToState<StandardSearchResponse
     return {
         noteData,
         pageData,
+        pageIdToResultIds,
         results: {
             [PAGE_SEARCH_DUMMY_DAY]: {
                 day: PAGE_SEARCH_DUMMY_DAY,
