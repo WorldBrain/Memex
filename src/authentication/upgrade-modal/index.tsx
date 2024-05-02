@@ -735,7 +735,7 @@ const SideBar = styled.div`
     height: 100%;
     box-sizing: border-box;
     border-right: 1px solid ${(props) => props.theme.colors.greyScale3};
-    overflow: scroll;
+    overflow-y: scroll;
     min-height: inherit;
     position: relative;
 
