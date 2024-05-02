@@ -42,7 +42,9 @@ export const setUserContext = (
 
 export const context = (cb: () => Promise<void> | Promise<boolean> | void) =>
     raven.context(cb)
-export const captureException = (error: Error | ErrorEvent | string) =>
-    raven.captureException(error)
+export const captureException = (
+    error: Error | ErrorEvent | string,
+    context?: any,
+) => raven.captureException(error, context)
 export const captureBreadcrumb = (details: any) =>
     raven.captureBreadcrumb(details)
