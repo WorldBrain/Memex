@@ -304,9 +304,13 @@ export async function main(
             const newValues = changes[COUNTER_STORAGE_KEY]?.newValue
 
             const counterQueriesHaveChanged =
-                (oldValues?.cQ ?? null) !== newValues.cQ
+                oldValues.cQ != null &&
+                newValues.cQ != null &&
+                oldValues?.cQ !== newValues.cQ
             const counterSavedHaveChanged =
-                (oldValues?.c ?? null) !== newValues.c
+                oldValues.c != null &&
+                newValues.c != null &&
+                oldValues.c !== newValues.c
 
             if (!counterQueriesHaveChanged && !counterSavedHaveChanged) {
                 return
@@ -652,15 +656,6 @@ export async function main(
                 return
             }
 
-            if (
-                window.location.href.includes('youtube.com') &&
-                selectionEmpty
-            ) {
-                await inPageUI.showSidebar({
-                    action: 'youtube_timestamp',
-                })
-            }
-
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -799,15 +794,6 @@ export async function main(
                 return
             }
 
-            if (
-                window.location.href.includes('youtube.com') &&
-                selection.toString().length === 0
-            ) {
-                await inPageUI.showSidebar({
-                    action: 'youtube_timestamp',
-                })
-            }
-
             const highlightColorSettingStorage = await getHighlightColorSettings()
             const highlightColor =
                 highlightColorSetting ?? highlightColorSettingStorage[0]
@@ -936,6 +922,11 @@ export async function main(
                 range,
                 prompt,
                 instaExecutePrompt: instaExecutePrompt ?? false,
+            })
+        },
+        createYoutubeTimestamp: async () => {
+            await inPageUI.showSidebar({
+                action: 'youtube_timestamp',
             })
         },
         createTimestampWithAISummary: async (
@@ -1354,6 +1345,8 @@ export async function main(
         askAI: annotationsFunctions.askAI(),
         getHighlightColorsSettings: getHighlightColorSettings,
         saveHighlightColorsSettings: saveHighlightColorSettings,
+        createYoutubeTimestamp: () =>
+            annotationsFunctions.createYoutubeTimestamp(),
     })
 
     // 9. Check for page activity status
