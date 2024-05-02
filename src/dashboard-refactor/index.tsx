@@ -1008,16 +1008,19 @@ export class DashboardContainer extends StatefulUIElement<
                 }}
                 spaceSearchSuggestions={this.state.spaceSearchSuggestions}
                 pageInteractionProps={{
-                    onClick: (day, pageId) => async (event) =>
+                    onClick: (day, pageResultId) => async (event) =>
                         this.processEvent('clickPageResult', {
                             day,
-                            pageId,
+                            pageId: pageResultId,
                             synthEvent: event,
                         }),
-                    onMatchingTextToggleClick: (day, pageId) => async () =>
+                    onMatchingTextToggleClick: (
+                        day,
+                        pageResultId,
+                    ) => async () =>
                         this.processEvent('onMatchingTextToggleClick', {
                             day,
-                            pageId,
+                            pageId: pageResultId,
                         }),
                     onNotesBtnClick: (day, pageResultId) => (e) => {
                         // TODO: Multiple processEvent calls should never happen from a single user action. Needs to be unified
@@ -1054,11 +1057,14 @@ export class DashboardContainer extends StatefulUIElement<
                             this.props.inPageMode ? 200 : 0,
                         )
                     },
-                    onAIResultBtnClick: (day, pageId) => () => {
+                    onAIResultBtnClick: (day, pageResultId) => async () => {
                         this.processEvent('toggleNoteSidebarOn', null)
-                        const pageData = searchResults.pageData.byId[pageId]
+                        const pageResult =
+                            searchResults.results[-1].pages.byId[pageResultId]
+                        const pageData =
+                            searchResults.pageData.byId[pageResult.pageId]
 
-                        this.notesSidebarRef.current.toggleAIShowForPageId(
+                        await this.notesSidebarRef.current.toggleAIShowForPageId(
                             pageData.fullUrl,
                         )
                     },
