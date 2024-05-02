@@ -120,6 +120,7 @@ import { PromptData } from '@worldbrain/memex-common/lib/summarization/types'
 import { CLOUDFLARE_WORKER_URLS } from '@worldbrain/memex-common/lib/content-sharing/storage/constants'
 import { DEF_HIGHLIGHT_CSS_CLASS } from '@worldbrain/memex-common/lib/in-page-ui/highlighting/constants'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { convertLinksInAIResponse } from '@worldbrain/memex-common/lib/ai-chat'
 const md = new MarkdownIt()
 
 export type SidebarContainerOptions = SidebarContainerDependencies & {
@@ -484,20 +485,56 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
+    bracketsAreBalanced = (buffer: string) => {
+        const stack = []
+        const linkRegex = /\[(.*?)\]\((.*?)\)/g // Regex to find markdown links
+
+        let match
+        while ((match = linkRegex.exec(buffer)) !== null) {
+            buffer = buffer.replace(
+                match[0],
+                `<a href="${match[2]}">${match[1]}</a>`,
+            )
+        }
+
+        for (let char of buffer) {
+            if (char === '[' || char === '(') {
+                stack.push(char)
+            } else if (
+                (char === ']' && stack.pop() !== '[') ||
+                (char === ')' && stack.pop() !== '(')
+            ) {
+                return false // Mismatched bracket
+            }
+        }
+
+        return stack.length === 0 // True if all brackets are closed
+    }
+
+    isPageSummaryEmpty = true
+    tokenBuffer: string
+    tokenBufferEditor: string
     private setupRemoteEventListeners() {
         this.summarisePageEvents = getRemoteEventEmitter('pageSummary')
 
-        let isPageSummaryEmpty = true
         this.summarisePageEvents.on('newSummaryToken', ({ token }) => {
             let newToken = token
-            if (isPageSummaryEmpty) {
+            if (this.isPageSummaryEmpty) {
+                this.tokenBuffer = ''
                 newToken = newToken.trimStart() // Remove the first two characters
             }
-            isPageSummaryEmpty = false
-            this.emitMutation({
-                loadState: { $set: 'success' },
-                pageSummary: { $apply: (prev) => prev + newToken },
-            })
+            this.isPageSummaryEmpty = false
+
+            // Buffer to accumulate tokens until all brackets are closed
+            this.tokenBuffer = (this.tokenBuffer || '') + newToken
+            // Check if the buffer has balanced brackets and all markdown links are closed
+            if (this.bracketsAreBalanced(this.tokenBuffer)) {
+                this.emitMutation({
+                    loadState: { $set: 'success' },
+                    pageSummary: { $apply: (prev) => prev + this.tokenBuffer },
+                })
+                this.tokenBuffer = '' // Clear the buffer after processing
+            }
         })
         this.summarisePageEvents.on('startSummaryStream', () => {
             this.emitMutation({
@@ -509,34 +546,41 @@ export class SidebarContainerLogic extends UILogic<
             'newSummaryTokenEditor',
             async ({ token }) => {
                 let newToken = token
-
-                if (isPageSummaryEmpty) {
+                let firstToken = false
+                if (this.isPageSummaryEmpty && !this.tokenBufferEditor) {
+                    this.tokenBufferEditor = ''
+                    firstToken = true
                     newToken = newToken.trimStart() // Remove the first two characters
                 }
-                isPageSummaryEmpty = false
-                this.youtubeTranscriptSummary =
-                    this.youtubeTranscriptSummary + newToken
-                this.emitMutation({
-                    youtubeTranscriptSummaryloadState: { $set: 'success' },
-                    youtubeTranscriptSummary: {
-                        $apply: (prev) => prev + newToken,
-                    },
-                })
+                this.isPageSummaryEmpty = false
 
-                let executed = false
-                while (!executed) {
-                    try {
+                // Buffer to accumulate tokens until all brackets are closed
+                this.tokenBufferEditor =
+                    (this.tokenBufferEditor || '') + newToken
+
+                // Check if the buffer has balanced brackets and all markdown links are closed
+                if (this.bracketsAreBalanced(this.tokenBufferEditor)) {
+                    let executed = false
+                    let retries = 0
+                    const maxRetries = 100
+
+                    while (!executed && retries < maxRetries) {
                         executed = this.options.events.emit(
                             'triggerYoutubeTimestampSummary',
                             {
-                                text: newToken,
+                                text: convertLinksInAIResponse(
+                                    this.tokenBufferEditor,
+                                    true,
+                                ),
                             },
                             (success) => {
                                 executed = success
                             },
                         )
-                    } catch (e) {}
-                    await new Promise((resolve) => setTimeout(resolve, 10))
+                        retries++
+                        await sleepPromise(20)
+                    }
+                    this.tokenBuffer = '' // Clear the buffer after processing
                 }
             },
         )
@@ -3131,6 +3175,9 @@ export class SidebarContainerLogic extends UILogic<
         event,
         previousState,
     }) => {
+        // resetting the buffers
+        this.isPageSummaryEmpty = true
+        this.tokenBuffer = ''
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
         const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
 
@@ -4793,9 +4840,20 @@ export class SidebarContainerLogic extends UILogic<
             to,
         )
 
+        // reset the editor state
+        this.emitMutation({
+            annotationCreateEditorState: { $set: '' },
+        })
+        this.isPageSummaryEmpty = true
+        this.tokenBufferEditor = ''
+
+        const initialText = `[${humanTimestampStart}](${videoURLWithTimeStart}) to [${humanTimestampEnd}](${videoURLWithTimeEnd}) `
+        this.tokenBufferEditor = initialText
+
         let executed = false
         let retries = 0
         const maxRetries = 100
+
         while (!executed && retries < maxRetries) {
             executed = this.options.events.emit(
                 'triggerYoutubeTimestampSummary',
@@ -4844,7 +4902,9 @@ export class SidebarContainerLogic extends UILogic<
                     ],
                 },
             },
-            userPrompt: event.prompt,
+            userPrompt:
+                prompt +
+                'Do not repeate the prompt and keep your summary abstract to the content.',
             model: previousState.AImodel ?? 'claude-3-haiku',
         }
 
