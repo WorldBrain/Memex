@@ -4841,9 +4841,6 @@ export class SidebarContainerLogic extends UILogic<
         )
 
         // reset the editor state
-        this.emitMutation({
-            annotationCreateEditorState: { $set: '' },
-        })
         this.isPageSummaryEmpty = true
         this.tokenBufferEditor = ''
 
@@ -4904,7 +4901,7 @@ export class SidebarContainerLogic extends UILogic<
             },
             userPrompt:
                 prompt +
-                'Do not repeate the prompt and keep your summary abstract to the content.',
+                '. Do not mention the prompt in any shape or form, just provide a concise answer',
             model: previousState.AImodel ?? 'claude-3-haiku',
         }
 
