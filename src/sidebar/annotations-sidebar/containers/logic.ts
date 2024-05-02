@@ -3179,28 +3179,6 @@ export class SidebarContainerLogic extends UILogic<
         this.isPageSummaryEmpty = true
         this.tokenBuffer = ''
         const openAIKey = (await this.syncSettings.openAI.get('apiKey'))?.trim()
-        const hasAPIKey = openAIKey && openAIKey?.trim().startsWith('sk-')
-
-        // let canQueryAI = false
-        // if (previousState.isTrial) {
-        //     canQueryAI = true
-        // } else if (
-        //     await AIActionAllowed(
-        //         this.options.analyticsBG,
-        //         hasAPIKey,
-        //         false,
-        //         previousState.AImodel,
-        //     )
-        // ) {
-        //     canQueryAI = true
-        // }
-
-        // if (!canQueryAI) {
-        //     this.emitMutation({
-        //         showUpgradeModal: { $set: true },
-        //     })
-        //     return
-        // }
 
         this.emitMutation({
             loadState: {
