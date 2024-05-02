@@ -950,13 +950,13 @@ export class DashboardContainer extends StatefulUIElement<
                 onPageNotesSortSelection={(day, pageId) => (sortingFn) =>
                     this.processEvent('setPageNotesSort', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         sortingFn,
                     })}
                 onPageNotesTypeSelection={(day, pageId) => (noteType) =>
                     this.processEvent('setPageNotesType', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         noteType,
                     })}
                 onShowAllNotesClick={() =>
@@ -1011,7 +1011,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onClick: (day, pageResultId) => async (event) =>
                         this.processEvent('clickPageResult', {
                             day,
-                            pageId: pageResultId,
+                            pageResultId: pageResultId,
                             synthEvent: event,
                         }),
                     onMatchingTextToggleClick: (
@@ -1020,7 +1020,7 @@ export class DashboardContainer extends StatefulUIElement<
                     ) => async () =>
                         this.processEvent('onMatchingTextToggleClick', {
                             day,
-                            pageId: pageResultId,
+                            pageResultId: pageResultId,
                         }),
                     onNotesBtnClick: (day, pageResultId) => (e) => {
                         // TODO: Multiple processEvent calls should never happen from a single user action. Needs to be unified
@@ -1039,7 +1039,7 @@ export class DashboardContainer extends StatefulUIElement<
                         if (e.shiftKey) {
                             this.processEvent('setPageNotesShown', {
                                 day,
-                                pageId: pageResultId,
+                                pageResultId: pageResultId,
                                 areShown: !searchResults.results[day].pages
                                     .byId[pageResultId].areNotesShown,
                             })
@@ -1071,19 +1071,19 @@ export class DashboardContainer extends StatefulUIElement<
                     onListPickerFooterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             show: 'footer',
                         }),
                     onListPickerBarBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             show: 'lists-bar',
                         }),
                     onCopyPasterBtnClick: (day, pageId) => (event) =>
                         this.processEvent('setPageCopyPasterShown', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             isShown: !searchResults.results[day].pages.byId[
                                 pageId
                             ].isCopyPasterShown,
@@ -1092,7 +1092,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onCopyPasterDefaultExecute: (day, pageId) => (event) =>
                         this.processEvent('setCopyPasterDefaultExecute', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             isShown: !searchResults.results[day].pages.byId[
                                 pageId
                             ].isCopyPasterShown,
@@ -1101,13 +1101,13 @@ export class DashboardContainer extends StatefulUIElement<
                     onTrashBtnClick: (day, pageId) => (instaDelete) =>
                         this.processEvent('setDeletingPageArgs', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             instaDelete,
                         }),
                     onShareBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageShareMenuShown', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             isShown: !searchResults.results[day].pages.byId[
                                 pageId
                             ].isShareMenuShown,
@@ -1118,7 +1118,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         this.processEvent('setPageHover', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             hover: 'main-content',
                         })
 
@@ -1132,25 +1132,25 @@ export class DashboardContainer extends StatefulUIElement<
                     onFooterHover: (day, pageId) => () =>
                         this.processEvent('setPageHover', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             hover: 'footer',
                         }),
                     onTagsHover: (day, pageId) => () =>
                         this.processEvent('setPageHover', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             hover: 'tags',
                         }),
                     onListsHover: (day, pageId) => () =>
                         this.processEvent('setPageHover', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             hover: 'lists',
                         }),
                     onUnhover: (day, pageId) => () => {
                         this.processEvent('setPageHover', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             hover: null,
                         })
                         if (this.state.focusLockUntilMouseStart) {
@@ -1166,21 +1166,24 @@ export class DashboardContainer extends StatefulUIElement<
                     onRemoveFromListBtnClick: (day, pageId) => () => {
                         this.processEvent('removePageFromList', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                         })
                     },
                     onPageDrag: (day, pageId) => (e) =>
                         this.processEvent('dragPage', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             dataTransfer: e.dataTransfer,
                         }),
                     onPageDrop: (day, pageId) => () =>
-                        this.processEvent('dropPage', { day, pageId }),
+                        this.processEvent('dropPage', {
+                            day,
+                            pageResultId: pageId,
+                        }),
                     updatePageNotesShareInfo: (day, pageId) => (shareStates) =>
                         this.processEvent('updatePageNotesShareInfo', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             shareStates,
                         }),
                     onEditTitleSave: (day, pageId) => (
@@ -1219,12 +1222,12 @@ export class DashboardContainer extends StatefulUIElement<
                     onCancel: (day, pageId) => () =>
                         this.processEvent('cancelPageNewNote', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                         }),
                     onCommentChange: (day, pageId) => (value) =>
                         this.processEvent('setPageNewNoteCommentValue', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             value,
                         }),
                     addPageToList: (day, pageId) => (listId) => {
@@ -1238,7 +1241,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         return this.processEvent('setPageNewNoteLists', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             lists: [
                                 ...this.state.searchResults.results[day].pages
                                     .byId[pageId].newNoteForm.lists,
@@ -1257,7 +1260,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         return this.processEvent('setPageNewNoteLists', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             lists: this.state.searchResults?.results[
                                 day
                             ].pages.byId[pageId].newNoteForm.lists.filter(
@@ -1268,7 +1271,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onSave: (day, pageId) => (shouldShare, isProtected) =>
                         this.processEvent('savePageNewNote', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             isProtected,
                             shouldShare,
                             fullPageUrl:
@@ -1297,7 +1300,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         this.processEvent('setPageNewNoteLists', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             lists: [
                                 ...this.state.searchResults.results[day].pages
                                     .byId[pageId].newNoteForm.lists,
@@ -1318,7 +1321,7 @@ export class DashboardContainer extends StatefulUIElement<
                         }
                         this.processEvent('setPageNewNoteLists', {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             lists: this.state.searchResults.results[
                                 day
                             ].pages.byId[pageId].newNoteForm.lists.filter(
@@ -1414,7 +1417,7 @@ export class DashboardContainer extends StatefulUIElement<
                     onTrashBtnClick: (noteId, day, pageId) => (instaDelete) =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,
-                            pageId,
+                            pageResultId: pageId,
                             day,
                         }),
                     onCommentChange: (noteId) => (event) => {

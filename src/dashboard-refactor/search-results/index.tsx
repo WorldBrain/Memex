@@ -576,6 +576,7 @@ export default class SearchResultsContainer extends React.Component<
             notesType,
             isShared,
             noteIds,
+            pageResultId,
         }: PageResultData & PageData,
         day: number,
         { onShareBtnClick }: PageInteractionProps,
@@ -589,7 +590,7 @@ export default class SearchResultsContainer extends React.Component<
         const boundAnnotCreateProps = bindFunctionalProps<
             typeof newNoteInteractionProps,
             NewNoteInteractionProps
-        >(newNoteInteractionProps, day, normalizedUrl)
+        >(newNoteInteractionProps, day, pageResultId)
         const lists = this.getLocalListIdsForCacheIds(newNoteForm.lists)
 
         return (

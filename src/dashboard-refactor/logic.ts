@@ -1654,7 +1654,8 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         if (event.instaDelete) {
             const pageLists =
-                previousState.searchResults.pageData.byId[event.pageId].lists
+                previousState.searchResults.pageData.byId[event.pageResultId]
+                    .lists
             const isPageInInbox = pageLists.some(
                 (listId) =>
                     this.options.annotationsCache.lists.byId[listId].localId ===
@@ -1678,10 +1679,10 @@ export class DashboardLogic extends UILogic<State, Events> {
                         State['searchResults']
                     > = {
                         pageData: {
-                            byId: { $unset: [event.pageId] },
+                            byId: { $unset: [event.pageResultId] },
                             allIds: {
                                 $set: previousState.searchResults.pageData.allIds.filter(
-                                    (id) => id !== event.pageId,
+                                    (id) => id !== event.pageResultId,
                                 ),
                             },
                         },
@@ -1691,12 +1692,12 @@ export class DashboardLogic extends UILogic<State, Events> {
                         resultsMutation.results = {
                             [event.day]: {
                                 pages: {
-                                    byId: { $unset: [event.pageId] },
+                                    byId: { $unset: [event.pageResultId] },
                                     allIds: {
                                         $set: previousState.searchResults.results[
                                             event.day
                                         ].pages.allIds.filter(
-                                            (id) => id !== event.pageId,
+                                            (id) => id !== event.pageResultId,
                                         ),
                                     },
                                 },
@@ -1705,14 +1706,14 @@ export class DashboardLogic extends UILogic<State, Events> {
                     } else {
                         resultsMutation.results = removeAllResultOccurrencesOfPage(
                             previousState.searchResults.results,
-                            event.pageId,
+                            event.pageResultId,
                         )
                     }
 
                     this.emitMutation({
                         searchResults: resultsMutation,
                     })
-                    await this.options.searchBG.delPages([event.pageId])
+                    await this.options.searchBG.delPages([event.pageResultId])
                 },
             )
         } else {
@@ -1796,7 +1797,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             previousState,
             event: {
                 direction: 'down',
-                item: { id: event.pageId, type: 'page' },
+                item: { id: event.pageResultId, type: 'page' },
             },
         })
 
@@ -1806,11 +1807,11 @@ export class DashboardLogic extends UILogic<State, Events> {
             { mustBeLocal: true, source: 'removePageFromList' },
         )
         const filterOutPage = (ids: string[]) =>
-            ids.filter((id) => id !== event.pageId)
+            ids.filter((id) => id !== event.pageResultId)
 
         const mutation: UIMutation<State['searchResults']> = {
             pageData: {
-                byId: { $unset: [event.pageId] },
+                byId: { $unset: [event.pageResultId] },
                 allIds: {
                     $set: filterOutPage(
                         previousState.searchResults.pageData.allIds,
@@ -1823,7 +1824,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             mutation.results = {
                 [PAGE_SEARCH_DUMMY_DAY]: {
                     pages: {
-                        byId: { $unset: [event.pageId] },
+                        byId: { $unset: [event.pageResultId] },
                         allIds: {
                             $set: filterOutPage(
                                 previousState.searchResults.results[
@@ -1837,7 +1838,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         } else {
             mutation.results = removeAllResultOccurrencesOfPage(
                 previousState.searchResults.results,
-                event.pageId,
+                event.pageResultId,
             )
         }
         this.emitMutation({
@@ -1852,7 +1853,7 @@ export class DashboardLogic extends UILogic<State, Events> {
 
         await this.options.listsBG.removePageFromList({
             id: listData.localId,
-            url: event.pageId,
+            url: event.pageResultId,
         })
     }
 
@@ -1906,7 +1907,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             throw new Error('No page ID is set for deletion')
         }
 
-        const { pageId, day } = modals.deletingPageArgs
+        const { pageResultId: pageId, day } = modals.deletingPageArgs
 
         const pageLists = pageData.byId[pageId].lists
         const isPageInInbox = pageLists.some(
@@ -2179,7 +2180,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     copyLoadingState: {
                                         $set: 'running',
                                     },
@@ -2194,12 +2195,12 @@ export class DashboardLogic extends UILogic<State, Events> {
         let templateCopyResult
         if (
             !previousState.searchResults.results[event.day]?.pages.byId[
-                event.pageId
+                event.pageResultId
             ].isCopyPasterShown
         ) {
             templateCopyResult = await this.handleDefaultTemplateCopy(
                 [null],
-                [event.pageId],
+                [event.pageResultId],
             )
         }
 
@@ -2210,7 +2211,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         [event.day]: {
                             pages: {
                                 byId: {
-                                    [event.pageId]: {
+                                    [event.pageResultId]: {
                                         copyLoadingState: {
                                             $set: 'success',
                                         },
@@ -2229,7 +2230,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             [event.day]: {
                                 pages: {
                                     byId: {
-                                        [event.pageId]: {
+                                        [event.pageResultId]: {
                                             copyLoadingState: {
                                                 $set: 'pristine',
                                             },
@@ -2253,7 +2254,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     isCopyPasterShown: { $set: event.isShown },
                                 },
                             },
@@ -2273,7 +2274,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     listPickerShowStatus: {
                                         $apply: (prev) =>
                                             prev === event.show
@@ -2298,7 +2299,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     isTagPickerShown: { $set: event.isShown },
                                 },
                             },
@@ -2326,7 +2327,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     isShareMenuShown: { $set: event.isShown },
                                 },
                             },
@@ -2389,7 +2390,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     areNotesShown: { $set: event.areShown },
                                 },
                             },
@@ -2405,7 +2406,8 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const { searchResults } = previousState
-        const page = searchResults.results[event.day]?.pages.byId[event.pageId]
+        const page =
+            searchResults.results[event.day]?.pages.byId[event.pageResultId]
 
         const sortedNoteIds = page.noteIds[page.notesType].sort((a, b) =>
             event.sortingFn(
@@ -2420,7 +2422,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     noteIds: {
                                         [page.notesType]: {
                                             $set: sortedNoteIds,
@@ -2442,7 +2444,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     notesType: { $set: event.noteType },
                                 },
                             },
@@ -2456,10 +2458,10 @@ export class DashboardLogic extends UILogic<State, Events> {
     setPageHover: EventHandler<'setPageHover'> = ({ event, previousState }) => {
         if (
             previousState.searchResults.results[event.day]?.pages.byId[
-                event.pageId
+                event.pageResultId
             ].isCopyPasterShown ||
             previousState.searchResults.results[event.day]?.pages.byId[
-                event.pageId
+                event.pageResultId
             ].listPickerShowStatus !== 'hide'
         ) {
             return
@@ -2471,7 +2473,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     hoverState: { $set: event.hover },
                                 },
                             },
@@ -2491,7 +2493,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     newNoteForm: {
                                         isTagPickerShown: {
                                             $set: event.isShown,
@@ -2512,7 +2514,7 @@ export class DashboardLogic extends UILogic<State, Events> {
     }) => {
         const existingLists =
             previousState.searchResults.results[event.day].pages.byId[
-                event.pageId
+                event.pageResultId
             ].newNoteForm.lists
         const uniqueLists = event.lists.filter(
             (list) => !existingLists.includes(list),
@@ -2524,7 +2526,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     newNoteForm: {
                                         lists: { $set: uniqueLists },
                                     },
@@ -2546,7 +2548,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     newNoteForm: {
                                         inputValue: { $set: event.value },
                                     },
@@ -2566,7 +2568,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                     [event.day]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     newNoteForm: {
                                         $set: utils.getInitialFormState(),
                                     },
@@ -2619,7 +2621,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         this.processUIEvent('setPageNewNoteLists', {
             event: {
                 day: event.day,
-                pageId: event.pageId,
+                pageResultId: event.pageId,
                 lists: listsToAdd,
             },
             previousState,
@@ -2655,7 +2657,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         const { annotationsBG, contentShareBG } = this.options
         const formState =
             previousState.searchResults.results[event.day].pages.byId[
-                event.pageId
+                event.pageResultId
             ].newNoteForm
         const listsToAdd = formState.lists.map((listId) =>
             getListData(listId, previousState, {
@@ -2716,7 +2718,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                                         comment: formState.inputValue,
                                         tags: formState.tags,
                                         lists: formState.lists ?? [],
-                                        pageUrl: event.pageId,
+                                        pageUrl: event.pageResultId,
                                         isShared:
                                             shouldSetAsAutoAdded ||
                                             event.shouldShare,
@@ -2732,7 +2734,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             [event.day]: {
                                 pages: {
                                     byId: {
-                                        [event.pageId]: {
+                                        [event.pageResultId]: {
                                             newNoteForm: {
                                                 $set: utils.getInitialFormState(),
                                             },
@@ -2875,15 +2877,16 @@ export class DashboardLogic extends UILogic<State, Events> {
         'onMatchingTextToggleClick'
     > = async ({ event, previousState }) => {
         const previousValue =
-            previousState.searchResults.results[-1].pages.byId[event.pageId]
-                ?.showAllResults
+            previousState.searchResults.results[-1].pages.byId[
+                event.pageResultId
+            ]?.showAllResults
         this.emitMutation({
             searchResults: {
                 results: {
                     [-1]: {
                         pages: {
                             byId: {
-                                [event.pageId]: {
+                                [event.pageResultId]: {
                                     showAllResults: { $set: !previousValue },
                                 },
                             },
@@ -2909,7 +2912,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             throw new Error('No note ID is set for deletion')
         }
 
-        const { noteId, pageId, day } = modals.deletingNoteArgs
+        const { noteId, pageResultId: pageId, day } = modals.deletingNoteArgs
         const pageResult = searchResults.results[day].pages.byId[pageId]
         const pageResultNoteIds = pageResult.noteIds[
             pageResult.notesType
@@ -4272,13 +4275,14 @@ export class DashboardLogic extends UILogic<State, Events> {
             listsSidebar: {
                 someListIsDragging: { $set: true },
             },
-            searchResults: { draggedPageId: { $set: event.pageId } },
+            searchResults: { draggedPageId: { $set: event.pageResultId } },
         })
         const crt = this.options.document.getElementById(DRAG_EL_ID)
         crt.style.display = 'block'
         event.dataTransfer.setDragImage(crt, 0, 0)
 
-        const page = previousState.searchResults.pageData.byId[event.pageId]
+        const page =
+            previousState.searchResults.pageData.byId[event.pageResultId]
         const action: DragToListAction<'page'> = {
             type: 'page',
             fullPageUrl: page.fullUrl,
@@ -4702,7 +4706,7 @@ export class DashboardLogic extends UILogic<State, Events> {
         previousState,
     }) => {
         const pageData =
-            previousState?.searchResults?.pageData?.byId[event.pageId]
+            previousState?.searchResults?.pageData?.byId[event.pageResultId]
 
         if (!pageData) {
             return
@@ -4731,7 +4735,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         searchResults: {
                             pageData: {
                                 byId: {
-                                    [event.pageId]: {
+                                    [event.pageResultId]: {
                                         uploadedPdfLinkLoadState: {
                                             $set: taskState,
                                         },

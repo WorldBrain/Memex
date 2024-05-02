@@ -102,9 +102,11 @@ export const bindFunctionalProps = <
 
 export const getInitialPageResultState = (
     pageId: string,
+    pageResultId: string,
     noteIds: string[] = [],
 ): PageResult => ({
     pageId,
+    pageResultId,
     notesType: 'user',
     activePage: undefined,
     areNotesShown: false,
@@ -226,7 +228,11 @@ export const pageSearchResultToState = (
         const noteIds = sortedAnnots.map((a) => a.url)
 
         pageData.byId[pageId] = pageResultToPageData(pageResult, cache)
-        pageResults.byId[resultId] = getInitialPageResultState(pageId, noteIds)
+        pageResults.byId[resultId] = getInitialPageResultState(
+            pageId,
+            resultId,
+            noteIds,
+        )
 
         pageData.allIds.push(pageId)
         pageResults.allIds.push(resultId)

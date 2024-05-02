@@ -197,6 +197,7 @@ export interface NoteResult {
 
 export interface PageResult {
     pageId: string
+    pageResultId: string
     notesType: NotesType
     areNotesShown: boolean
     activePage: boolean
@@ -266,7 +267,7 @@ export interface RootState {
 }
 
 export interface PageEventArgs {
-    pageId: string
+    pageResultId: string
     day: number
 }
 

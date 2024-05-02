@@ -250,7 +250,7 @@ describe('Dashboard search results logic', () => {
             )
 
             await searchResults.processEvent('setDeletingPageArgs', {
-                pageId,
+                pageResultId: pageId,
                 day: PAGE_SEARCH_DUMMY_DAY,
                 instaDelete: false,
             })
@@ -322,7 +322,7 @@ describe('Dashboard search results logic', () => {
             ).toEqual(true)
 
             await searchResults.processEvent('setDeletingPageArgs', {
-                pageId,
+                pageResultId: pageId,
                 day: PAGE_SEARCH_DUMMY_DAY,
                 instaDelete: true,
             })
@@ -405,7 +405,7 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('removePageFromList', {
                 day: PAGE_SEARCH_DUMMY_DAY,
-                pageId,
+                pageResultId: pageId,
             })
 
             expect(
@@ -438,7 +438,7 @@ describe('Dashboard search results logic', () => {
             )
 
             await searchResults.processEvent('dragPage', {
-                pageId: page.normalizedUrl,
+                pageResultId: page.normalizedUrl,
                 day: PAGE_SEARCH_DUMMY_DAY,
                 dataTransfer,
             })
@@ -453,7 +453,7 @@ describe('Dashboard search results logic', () => {
             )
 
             await searchResults.processEvent('dropPage', {
-                pageId: page.normalizedUrl,
+                pageResultId: page.normalizedUrl,
                 day: PAGE_SEARCH_DUMMY_DAY,
             })
 
@@ -487,7 +487,7 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
-                pageId,
+                pageResultId: pageId,
                 shareStates: makeNewShareStates(notesById, {
                     isShared: false,
                 }),
@@ -505,7 +505,7 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
-                pageId,
+                pageResultId: pageId,
                 shareStates: makeNewShareStates(notesById, {
                     isShared: true,
                 }),
@@ -524,7 +524,7 @@ describe('Dashboard search results logic', () => {
 
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
-                pageId,
+                pageResultId: pageId,
                 shareStates: makeNewShareStates(notesById, {
                     isShared: false,
                     isBulkShareProtected: true,
@@ -545,7 +545,7 @@ describe('Dashboard search results logic', () => {
             // NOTE: Now that they're all protected, the next call shouldn't change anything
             await searchResults.processEvent('updatePageNotesShareInfo', {
                 day,
-                pageId,
+                pageResultId: pageId,
                 shareStates: makeNewShareStates(notesById, {
                     isShared: false,
                     isBulkShareProtected: false,
@@ -714,7 +714,7 @@ describe('Dashboard search results logic', () => {
                 ).toBe(false)
                 await searchResults.processEvent('setPageTagPickerShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     isShown: true,
                 })
                 expect(
@@ -724,7 +724,7 @@ describe('Dashboard search results logic', () => {
                 ).toBe(true)
                 await searchResults.processEvent('setPageTagPickerShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     isShown: false,
                 })
                 expect(
@@ -750,7 +750,7 @@ describe('Dashboard search results logic', () => {
                 ).toBe('hide')
                 await searchResults.processEvent('setPageListPickerShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     show: 'footer',
                 })
                 expect(
@@ -760,7 +760,7 @@ describe('Dashboard search results logic', () => {
                 ).toBe('footer')
                 await searchResults.processEvent('setPageListPickerShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     show: 'lists-bar',
                 })
                 expect(
@@ -770,7 +770,7 @@ describe('Dashboard search results logic', () => {
                 ).toBe('lists-bar')
                 await searchResults.processEvent('setPageListPickerShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     show: 'lists-bar',
                 })
                 expect(
@@ -797,7 +797,7 @@ describe('Dashboard search results logic', () => {
                 ).toBe(false)
                 await searchResults.processEvent('setPageShareMenuShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     isShown: true,
                 })
                 expect(
@@ -807,7 +807,7 @@ describe('Dashboard search results logic', () => {
                 ).toBe(true)
                 await searchResults.processEvent('setPageShareMenuShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     isShown: false,
                 })
                 expect(
@@ -834,7 +834,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(false)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     areShown: true,
                 })
                 expect(
@@ -847,7 +847,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual(true)
                 await searchResults.processEvent('setPageNotesShown', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     areShown: false,
                 })
                 expect(
@@ -871,10 +871,10 @@ describe('Dashboard search results logic', () => {
                     searchResults.state.searchResults.results[day].pages.byId[
                         pageId
                     ].notesType,
-                ).toEqual(utils.getInitialPageResultState('').notesType)
+                ).toEqual(utils.getInitialPageResultState('', '').notesType)
                 await searchResults.processEvent('setPageNotesType', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     noteType: 'followed',
                 })
                 expect(
@@ -884,7 +884,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('followed')
                 await searchResults.processEvent('setPageNotesType', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     noteType: 'search',
                 })
                 expect(
@@ -894,7 +894,7 @@ describe('Dashboard search results logic', () => {
                 ).toEqual('search')
                 await searchResults.processEvent('setPageNotesType', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     noteType: 'user',
                 })
                 expect(
@@ -928,7 +928,7 @@ describe('Dashboard search results logic', () => {
                 for (const hover of states) {
                     await searchResults.processEvent('setPageHover', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         hover,
                     })
                     expect(
@@ -955,7 +955,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setPageNewNoteCommentValue', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     value: 'followed',
                 })
                 expect(
@@ -966,7 +966,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setPageNewNoteCommentValue', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     value: 'search',
                 })
                 expect(
@@ -977,7 +977,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setPageNewNoteCommentValue', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     value: 'user',
                 })
                 expect(
@@ -1006,7 +1006,7 @@ describe('Dashboard search results logic', () => {
                     'setPageNewNoteTagPickerShown',
                     {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         isShown: true,
                     },
                 )
@@ -1020,7 +1020,7 @@ describe('Dashboard search results logic', () => {
                     'setPageNewNoteTagPickerShown',
                     {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         isShown: false,
                     },
                 )
@@ -1050,7 +1050,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setPageNewNoteCommentValue', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     value: newNoteComment,
                 })
 
@@ -1062,7 +1062,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('cancelPageNewNote', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                 })
 
                 expect(
@@ -1089,7 +1089,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setPageNewNoteCommentValue', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     value: newNoteComment,
                 })
 
@@ -1106,7 +1106,7 @@ describe('Dashboard search results logic', () => {
                     'savePageNewNote',
                     {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         fullPageUrl: 'https://' + pageId,
                         shouldShare: false,
                     },
@@ -1177,7 +1177,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('savePageNewNote', {
                     day,
-                    pageId,
+                    pageResultId: pageId,
                     fullPageUrl: 'https://' + pageId,
                     shouldShare: true,
                 })
@@ -1204,7 +1204,7 @@ describe('Dashboard search results logic', () => {
                     ).toBe(true)
                     await searchResults.processEvent('setPageNotesShown', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         areShown: false,
                     })
                     expect(
@@ -1216,7 +1216,7 @@ describe('Dashboard search results logic', () => {
                     ).toBe(false)
                     await searchResults.processEvent('setPageNotesShown', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         areShown: true,
                     })
                     expect(
@@ -1238,10 +1238,10 @@ describe('Dashboard search results logic', () => {
                     expect(
                         searchResults.state.searchResults.results[day].pages
                             .byId[pageId].notesType,
-                    ).toEqual(utils.getInitialPageResultState('').notesType)
+                    ).toEqual(utils.getInitialPageResultState('', '').notesType)
                     await searchResults.processEvent('setPageNotesType', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         noteType: 'followed',
                     })
                     expect(
@@ -1250,7 +1250,7 @@ describe('Dashboard search results logic', () => {
                     ).toEqual('followed')
                     await searchResults.processEvent('setPageNotesType', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         noteType: 'search',
                     })
                     expect(
@@ -1259,7 +1259,7 @@ describe('Dashboard search results logic', () => {
                     ).toEqual('search')
                     await searchResults.processEvent('setPageNotesType', {
                         day,
-                        pageId,
+                        pageResultId: pageId,
                         noteType: 'user',
                     })
                     expect(
@@ -1285,7 +1285,7 @@ describe('Dashboard search results logic', () => {
                         'setPageNewNoteCommentValue',
                         {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             value: 'followed',
                         },
                     )
@@ -1297,7 +1297,7 @@ describe('Dashboard search results logic', () => {
                         'setPageNewNoteCommentValue',
                         {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             value: 'search',
                         },
                     )
@@ -1309,7 +1309,7 @@ describe('Dashboard search results logic', () => {
                         'setPageNewNoteCommentValue',
                         {
                             day,
-                            pageId,
+                            pageResultId: pageId,
                             value: 'user',
                         },
                     )
@@ -1361,7 +1361,7 @@ describe('Dashboard search results logic', () => {
 
                     await searchResults.processEvent('removePageFromList', {
                         day: DATA.DAY_1,
-                        pageId,
+                        pageResultId: pageId,
                     })
 
                     expect(
@@ -1424,7 +1424,7 @@ describe('Dashboard search results logic', () => {
                     ).toEqual(true)
 
                     await searchResults.processEvent('setDeletingPageArgs', {
-                        pageId,
+                        pageResultId: pageId,
                         day: DATA.DAY_1,
                         instaDelete: false,
                     })
@@ -3822,7 +3822,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
-                    pageId: DATA.PAGE_1.normalizedUrl,
+                    pageResultId: DATA.PAGE_1.normalizedUrl,
                     day: PAGE_SEARCH_DUMMY_DAY,
                 })
                 expect(searchResults.state.modals.deletingNoteArgs).toEqual({
@@ -3891,7 +3891,7 @@ describe('Dashboard search results logic', () => {
 
                 await searchResults.processEvent('setDeletingNoteArgs', {
                     noteId,
-                    pageId: DATA.PAGE_1.normalizedUrl,
+                    pageResultId: DATA.PAGE_1.normalizedUrl,
                     day: PAGE_SEARCH_DUMMY_DAY,
                 })
                 expect(searchResults.state.modals.deletingNoteArgs).toEqual({
