@@ -1062,14 +1062,6 @@ export class DashboardContainer extends StatefulUIElement<
                             pageData.fullUrl,
                         )
                     },
-                    onTagPickerBtnClick: (day, pageId) => () =>
-                        this.processEvent('setPageTagPickerShown', {
-                            day,
-                            pageId,
-                            isShown: !searchResults.results[day].pages.byId[
-                                pageId
-                            ].isTagPickerShown,
-                        }),
                     onListPickerFooterBtnClick: (day, pageId) => () =>
                         this.processEvent('setPageListPickerShown', {
                             day,
@@ -1359,12 +1351,6 @@ export class DashboardContainer extends StatefulUIElement<
                     },
                     onGoToHighlightClick: (noteId) => () =>
                         this.processEvent('goToHighlightInNewTab', { noteId }),
-                    onTagPickerBtnClick: (noteId) => () =>
-                        this.processEvent('setNoteTagPickerShown', {
-                            noteId,
-                            isShown: !searchResults.noteData.byId[noteId]
-                                .isTagPickerShown,
-                        }),
                     onListPickerBarBtnClick: (noteId) => () =>
                         this.processEvent('setNoteListPickerShown', {
                             noteId,

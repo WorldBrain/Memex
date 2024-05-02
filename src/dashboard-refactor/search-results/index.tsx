@@ -774,11 +774,6 @@ export default class SearchResultsContainer extends React.Component<
                     {...pickerProps}
                     {...page}
                     lists={this.getLocalListIdsForCacheIds(page.lists)}
-                    onTagPickerBtnClick={
-                        this.props.shouldShowTagsUIs
-                            ? interactionProps.onTagPickerBtnClick
-                            : undefined
-                    }
                     hasNotes={page.totalAnnotationCount > 0}
                     filterbyList={this.props.filterByList}
                     searchType={this.props.searchType}

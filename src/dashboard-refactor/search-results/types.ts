@@ -16,7 +16,6 @@ import type { RGBAColor } from 'src/annotations/cache/types'
 
 export interface CommonInteractionProps {
     onCopyPasterBtnClick: React.MouseEventHandler
-    onTagPickerBtnClick?: React.MouseEventHandler
     onListPickerBarBtnClick: React.MouseEventHandler
     onListPickerFooterBtnClick: React.MouseEventHandler
     onShareBtnClick: React.MouseEventHandler
