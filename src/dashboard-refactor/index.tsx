@@ -1019,25 +1019,31 @@ export class DashboardContainer extends StatefulUIElement<
                             day,
                             pageId,
                         }),
-                    onNotesBtnClick: (day, pageId) => (e) => {
+                    onNotesBtnClick: (day, pageResultId) => (e) => {
+                        // TODO: Multiple processEvent calls should never happen from a single user action. Needs to be unified
+                        //  These are also running concurrently, potentially introducing race conditions
                         this.processEvent('toggleNoteSidebarOn', null)
-                        const pageData = searchResults.pageData.byId[pageId]
+                        const pageResult =
+                            searchResults.results[-1].pages.byId[pageResultId]
+                        const pageData =
+                            searchResults.pageData.byId[pageResult.pageId]
                         this.processEvent('setActivePage', {
                             activeDay: day,
-                            activePageID: pageId,
+                            activePageID: pageResult.pageId,
                             activePage: true,
                         })
 
                         if (e.shiftKey) {
                             this.processEvent('setPageNotesShown', {
                                 day,
-                                pageId,
+                                pageId: pageResultId,
                                 areShown: !searchResults.results[day].pages
-                                    .byId[pageId].areNotesShown,
+                                    .byId[pageResultId].areNotesShown,
                             })
                             return
                         }
 
+                        // TODO: Explain why a setTimeout is needed here
                         setTimeout(
                             () => {
                                 this.notesSidebarRef.current.toggleSidebarShowForPageId(

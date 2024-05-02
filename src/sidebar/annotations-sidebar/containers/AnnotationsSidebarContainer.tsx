@@ -143,6 +143,7 @@ export class AnnotationsSidebarContainer<
         }
     }
 
+    // TODO: Multiple processEvent calls should never happen from a single user action. Needs to be unified
     async toggleSidebarShowForPageId(fullPageUrl: string, spaceId?: string) {
         const newURL = fullPageUrl
         const previousURL = this.state?.fullPageUrl ?? null

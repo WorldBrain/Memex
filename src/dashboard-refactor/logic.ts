@@ -2341,30 +2341,17 @@ export class DashboardLogic extends UILogic<State, Events> {
         event,
         previousState,
     }) => {
-        if (event.activePageID == null && event.activeDay == null) {
+        if (event.activePageID == null || event.activeDay == null) {
             this.emitMutation({
                 activeDay: { $set: undefined },
                 activePageID: { $set: undefined },
-                searchResults: {
-                    results: {
-                        [previousState.activeDay]: {
-                            pages: {
-                                byId: {
-                                    [previousState.activePageID]: {
-                                        activePage: {
-                                            $set: false,
-                                        },
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
             })
             return
         }
 
         this.emitMutation({
+            activeDay: { $set: event.activeDay },
+            activePageID: { $set: event.activePageID },
             searchResults: {
                 results: {
                     [event.activeDay]: {
@@ -2391,8 +2378,6 @@ export class DashboardLogic extends UILogic<State, Events> {
                     },
                 },
             },
-            activeDay: { $set: event.activeDay },
-            activePageID: { $set: event.activePageID },
         })
     }
 
@@ -2885,6 +2870,7 @@ export class DashboardLogic extends UILogic<State, Events> {
             isNoteSidebarShown: { $set: true },
         })
     }
+
     onMatchingTextToggleClick: EventHandler<
         'onMatchingTextToggleClick'
     > = async ({ event, previousState }) => {
