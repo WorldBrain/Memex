@@ -105,11 +105,6 @@ function getShortcutHandlers({
             })
             inPageUI.hideTooltip()
         },
-        createYoutubeTimestamp: async () => {
-            await inPageUI.showSidebar({
-                action: 'youtube_timestamp',
-            })
-        },
         instaSummarize: async () => {
             inPageUI.showSidebar({
                 action: 'show_page_summary',
