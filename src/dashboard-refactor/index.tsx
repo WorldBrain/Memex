@@ -1268,15 +1268,22 @@ export class DashboardContainer extends StatefulUIElement<
                             ),
                         })
                     },
-                    onSave: (day, pageId) => (shouldShare, isProtected) =>
-                        this.processEvent('savePageNewNote', {
+                    onSave: (day, pageResultId) => async (
+                        shouldShare,
+                        isProtected,
+                    ) => {
+                        const pageResult =
+                            searchResults.results[-1].pages.byId[pageResultId]
+                        await this.processEvent('savePageNewNote', {
                             day,
-                            pageResultId: pageId,
+                            pageResultId: pageResultId,
                             isProtected,
                             shouldShare,
                             fullPageUrl:
-                                searchResults.pageData.byId[pageId].fullUrl,
-                        }),
+                                searchResults.pageData.byId[pageResult.pageId]
+                                    .fullUrl,
+                        })
+                    },
                     addNewSpaceViaWikiLinksNewNote: (day, pageId) => (
                         spaceName: string,
                     ) => {
