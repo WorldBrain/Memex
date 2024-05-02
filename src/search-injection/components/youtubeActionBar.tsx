@@ -228,13 +228,7 @@ export default class YoutubeButtonMenu extends React.Component<Props, State> {
             }
         }
         // Logic for annotate button click
-        this.props.annotationsFunctions.createAnnotation()(
-            false,
-            false,
-            false,
-            false,
-            timestampToSend,
-        )
+        this.props.annotationsFunctions.createYoutubeTimestamp()
     }
 
     createAhref = (videoURLWithTime, humanTimestamp) => {
