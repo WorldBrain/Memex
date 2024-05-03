@@ -441,11 +441,15 @@ export default class TemplateEditor extends PureComponent<
                             }
                             e.stopPropagation()
                         }}
-                        onChange={(e) =>
+                        onKeyUp={(e) => {
+                            e.stopPropagation()
+                        }}
+                        onChange={(e) => {
+                            e.stopPropagation()
                             this.props.onTitleChange(
                                 (e.target as HTMLInputElement).value,
                             )
-                        }
+                        }}
                         height="30px"
                         width="fill-available"
                         background="greyScale3"
@@ -537,6 +541,7 @@ export default class TemplateEditor extends PureComponent<
                                 value={template?.code ?? ''}
                                 placeholder="Write or drag & drop the placeholders here"
                                 onChange={(e) => {
+                                    e.stopPropagation()
                                     this.props.onCodeChange(e.target.value)
                                 }}
                                 onDragOver={(event) => {
@@ -544,7 +549,11 @@ export default class TemplateEditor extends PureComponent<
                                     const target = event.target as HTMLTextAreaElement
                                     target.selectionStart = target.selectionEnd
                                 }}
+                                onKeyUp={(e) => {
+                                    e.stopPropagation()
+                                }}
                                 onKeyDown={(e) => {
+                                    e.stopPropagation()
                                     if (e.key === 'Tab') {
                                         e.preventDefault()
                                         const start = (e.target as HTMLTextAreaElement)
@@ -589,7 +598,6 @@ export default class TemplateEditor extends PureComponent<
                                     } else if (e.key === 'Escape') {
                                         this.props.onClickCancel()
                                     }
-                                    e.stopPropagation()
                                 }}
                             />
                         </EditorBox>
