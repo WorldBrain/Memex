@@ -27,7 +27,7 @@ export class BlockCounterIndicator extends React.Component<Props> {
 
     async componentDidMount() {
         await browser.storage.local.get(COUNTER_STORAGE_KEY).then((result) => {
-            if (!result[COUNTER_STORAGE_KEY].bookmarkPowerUp) {
+            if (!result[COUNTER_STORAGE_KEY].pU.bookmarksPowerUp) {
                 this.setState({
                     shouldShow: true,
                     totalCount: FREE_PLAN_LIMIT,
