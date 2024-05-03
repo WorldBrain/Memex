@@ -335,15 +335,15 @@ export default class SearchResultsContainer extends React.Component<
 
     private renderNoteResult = (
         day: number,
-        pageId: string,
+        pageResultId: string,
         zIndex: number,
     ) => (noteId: string) => {
-        const pageData = this.props.pageData.byId[pageId]
+        const pageData = this.props.pageData.byId[pageResultId]
         const noteData = this.props.noteData.byId[noteId]
         const interactionProps = bindFunctionalProps<
             NoteInteractionAugdProps,
             NoteInteractionProps
-        >(this.props.noteInteractionProps, noteId, day, pageId)
+        >(this.props.noteInteractionProps, noteId, day, pageResultId)
 
         const dummyEvent = {} as any
 
@@ -473,7 +473,7 @@ export default class SearchResultsContainer extends React.Component<
                                 },
                             })
                         }
-                        normalizedPageUrlToFilterPageLinksBy={pageId}
+                        normalizedPageUrlToFilterPageLinksBy={pageResultId}
                         analyticsBG={this.props.spacePickerBGProps.analyticsBG}
                     />
                 )}
@@ -495,7 +495,7 @@ export default class SearchResultsContainer extends React.Component<
                         postShareHook={interactionProps.updateShareInfo}
                         spacePickerProps={{
                             ...this.props.spacePickerBGProps,
-                            normalizedPageUrlToFilterPageLinksBy: pageId,
+                            normalizedPageUrlToFilterPageLinksBy: pageResultId,
                             annotationsCache: this.props.annotationsCache,
                             initialSelectedListIds: () => localListIds,
                             selectEntry: (listId, options) =>
@@ -674,7 +674,7 @@ export default class SearchResultsContainer extends React.Component<
 
                                 return this.renderNoteResult(
                                     day,
-                                    normalizedUrl,
+                                    pageResultId,
                                     zIndex,
                                 )(noteId)
                             })}

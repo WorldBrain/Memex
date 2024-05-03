@@ -1421,10 +1421,12 @@ export class DashboardContainer extends StatefulUIElement<
                             },
                         )
                     },
-                    onTrashBtnClick: (noteId, day, pageId) => (instaDelete) =>
+                    onTrashBtnClick: (noteId, day, pageResultId) => (
+                        instaDelete,
+                    ) =>
                         this.processEvent('setDeletingNoteArgs', {
                             noteId,
-                            pageResultId: pageId,
+                            pageResultId,
                             day,
                         }),
                     onCommentChange: (noteId) => (event) => {
