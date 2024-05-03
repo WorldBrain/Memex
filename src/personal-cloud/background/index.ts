@@ -52,6 +52,7 @@ import type { AuthChange } from '@worldbrain/memex-common/lib/authentication/typ
 import { LIST_TREE_OPERATION_ALIASES } from '@worldbrain/memex-common/lib/content-sharing/storage/list-tree-middleware'
 import { keepWorkerAlive } from 'src/util/service-worker-utils'
 import checkBrowser from 'src/util/check-browser'
+import { COLLECTION_NAMES as PAGE_COLLS } from '@worldbrain/memex-common/lib/storage/modules/pages/constants'
 
 export interface PersonalCloudBackgroundOptions {
     backend: PersonalCloudBackend
@@ -603,10 +604,20 @@ export class PersonalCloudBackground {
             const {
                 clientInstructions,
             } = await this.options.backend.pushUpdates(
-                action.updates.map((update) => ({
-                    ...update,
-                    deviceId: update.deviceId ?? this.deviceId,
-                })),
+                action.updates.map((update) => {
+                    // This covers a bug where we'd store NaN in one of the pageMetadata coll values, which would cause a JSON serialization error on sending to FB
+                    if (
+                        update.type === PersonalCloudUpdateType.Overwrite &&
+                        update.collection === PAGE_COLLS.pageMetadata &&
+                        isNaN(update.object['releaseDate'])
+                    ) {
+                        update.object['releaseDate'] = undefined
+                    }
+                    return {
+                        ...update,
+                        deviceId: update.deviceId ?? this.deviceId,
+                    }
+                }),
             )
             if (clientInstructions.length) {
                 await this.actionQueue.scheduleAction(

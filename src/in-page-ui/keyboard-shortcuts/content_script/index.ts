@@ -8,6 +8,7 @@ import { RpcError, runInBackground } from 'src/util/webextensionRPC'
 import type { InPageUIInterface } from 'src/in-page-ui/background/types'
 import { cloneSelectionAsPseudoObject } from '@worldbrain/memex-common/lib/annotations/utils'
 import { sleepPromise } from 'src/util/promises'
+import { isUrlYTVideo } from '@worldbrain/memex-common/lib/utils/youtube-url'
 
 type HandleInterface = {
     [key in keyof KeyboardShortcuts]: () => Promise<void>
@@ -130,11 +131,18 @@ function getShortcutHandlers({
             return
         },
         createHighlight: async () => {
-            await annotationFunctions.createHighlight(
-                cloneSelectionAsPseudoObject(window.getSelection()),
-                false,
-            ),
-                inPageUI.hideTooltip()
+            const isYouTube = isUrlYTVideo(window.location.href)
+
+            if (isYouTube) {
+                await annotationFunctions.createYoutubeTimestamp()
+            } else {
+                await annotationFunctions.createHighlight(
+                    cloneSelectionAsPseudoObject(window.getSelection()),
+                    false,
+                )
+            }
+
+            inPageUI.hideTooltip()
         },
         createAnnotation: async () => {
             const isToolTipEnabled = inPageUI.componentsShown.tooltip

@@ -733,7 +733,7 @@ export class PageIndexingBackground {
                 ? new Date(pageData.pageMetadata.publishedTime).valueOf()
                 : undefined
             await this.storage.updatePageMetadata({
-                releaseDate,
+                releaseDate: !isNaN(releaseDate) ? releaseDate : undefined,
                 normalizedPageUrl: pageData.url,
                 accessDate: this._getTime(props.visitTime),
                 title: pageData.pageMetadata.title,

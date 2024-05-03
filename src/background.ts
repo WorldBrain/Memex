@@ -128,8 +128,18 @@ export async function main(): Promise<void> {
         persistentStorageManager,
         callFirebaseFunction: async <Returns>(name: string, ...args: any[]) => {
             const callable = firebase.functions().httpsCallable(name)
-            const result = await callable(...args)
-            return result.data as Promise<Returns>
+            try {
+                const result = await callable(...args)
+                return result.data as Promise<Returns>
+            } catch (err) {
+                captureException(err, {
+                    extra: {
+                        name,
+                        ...args,
+                    },
+                })
+                throw err
+            }
         },
         setupSyncTriggerListener: initFirestoreSyncTriggerListener(firebase),
         imageSupportBackend: new CloudflareImageSupportBackend({

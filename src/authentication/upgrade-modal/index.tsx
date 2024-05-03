@@ -717,6 +717,7 @@ const MoneyBackContainer = styled.div`
     padding: 20px 40px;
     border-top: 1px solid ${(props) => props.theme.colors.greyScale3};
     color: ${(props) => props.theme.colors.greyScale7};
+    font-size: 16px;
     justify-content: center;
     display: flex;
     align-items: center;
@@ -735,7 +736,7 @@ const SideBar = styled.div`
     height: 100%;
     box-sizing: border-box;
     border-right: 1px solid ${(props) => props.theme.colors.greyScale3};
-    overflow: scroll;
+    overflow-y: scroll;
     min-height: inherit;
     position: relative;
 
