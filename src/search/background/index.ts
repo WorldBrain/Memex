@@ -303,17 +303,17 @@ export default class SearchBackground {
             dexie
                 .table<Annotation>('annotations')
                 .where('lastEdited')
-                .between(new Date(lowerBound), new Date(upperBound))
+                .between(new Date(lowerBound), new Date(upperBound), true, true)
                 .toArray(),
             dexie
                 .table<Visit>('visits')
                 .where('time')
-                .between(lowerBound, upperBound)
+                .between(lowerBound, upperBound, true, true)
                 .toArray(),
             dexie
                 .table<Bookmark>('bookmarks')
                 .where('time')
-                .between(lowerBound, upperBound)
+                .between(lowerBound, upperBound, true, true)
                 .toArray(),
         ])
         // const [annotations, visits, bookmarks] = await Promise.all([
