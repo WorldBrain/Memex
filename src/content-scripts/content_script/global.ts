@@ -549,7 +549,6 @@ export async function main(
 
     sidebarEvents.on('showPowerUpModal', async ({ limitReachedNotif }) => {
         if (currentTabURL?.includes(window.location.href)) {
-            console.log('limit reached, showing modal', limitReachedNotif)
             inPageUI.loadOnDemandInPageUI({
                 component: 'upgrade-modal',
                 options: {

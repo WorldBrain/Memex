@@ -164,8 +164,6 @@ async function resetOnNewMonth(currentStatusStorage) {
     const currentDate = new Date(Date.now())
     const currentMonth = currentDate.getMonth()
     const monthInStorage = currentStatusStorage[COUNTER_STORAGE_KEY].m
-    console.log('currentMonth', currentMonth)
-    console.log('monthInStorage', monthInStorage)
 
     let updatedStatus = {
         c: currentStatusStorage[COUNTER_STORAGE_KEY].c,

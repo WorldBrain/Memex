@@ -6,6 +6,8 @@ import type { MemexTheme } from '@worldbrain/memex-common/lib/common-ui/styles/t
 import type { ImageSupportInterface } from 'src/image-support/background/types'
 import styled from 'styled-components'
 import type { HighlightColor } from '@worldbrain/memex-common/lib/common-ui/components/highlightColorPicker/types'
+import { AnnotationsSidebarInPageEventEmitter } from '../types'
+import { EventEmitter } from 'events'
 
 type Props = SidebarContainerOptions & {
     refSidebar?: React.Ref<AnnotationsSidebarContainer>
@@ -24,6 +26,7 @@ type Props = SidebarContainerOptions & {
 export class AnnotationsSidebarInDashboardResults extends React.Component<
     Props
 > {
+    sidebarEvents: AnnotationsSidebarInPageEventEmitter
     static defaultProps: Partial<Props> = {
         showGoToAnnotationBtn: true,
         sidebarContext: 'dashboard',
@@ -37,16 +40,19 @@ export class AnnotationsSidebarInDashboardResults extends React.Component<
                 topOffsetPx: 60,
             },
         })
+        this.sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
     }
 
     render() {
         const { refSidebar, ...props } = this.props
+
         return (
             <SlideInWrapper id="memex-annotations-sidebar">
                 <AnnotationsSidebarContainer
                     {...props}
                     theme={props.theme}
                     ref={refSidebar}
+                    events={this.sidebarEvents}
                 />
             </SlideInWrapper>
         )
