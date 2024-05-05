@@ -58,6 +58,16 @@ export default class UpgradeModal extends UIElement<
                         </UpgradeOverlaySubText>
                     </UpgradeOverlayTextContainer>
                 )}
+                {this.props.limitReachedNotif === 'AIownKey' && (
+                    <UpgradeOverlayTextContainer>
+                        <UpgradeOverlayText>
+                            Upgrade to use GPT-4 and your own key
+                        </UpgradeOverlayText>
+                        <UpgradeOverlaySubText>
+                            Add "Bring your own key" powerup to continue
+                        </UpgradeOverlaySubText>
+                    </UpgradeOverlayTextContainer>
+                )}
                 <PricingSwitcher>
                     <LeftSide
                         selected={this.state.billingPeriod === 'monthly'}
@@ -353,7 +363,10 @@ export default class UpgradeModal extends UIElement<
 
         if (this.state.powerUpType === 'Bookmarks') {
             modalToShow = this.renderBookmarkPowerUpsOptionsList()
-        } else if (this.state.powerUpType === 'AI') {
+        } else if (
+            this.state.powerUpType === 'AI' ||
+            this.state.powerUpType === 'AIownKey'
+        ) {
             modalToShow = this.renderAIPowerUpsOptionsList()
         } else if (this.state.powerUpType === 'lifetime') {
             modalToShow = this.renderLifetimePlan()

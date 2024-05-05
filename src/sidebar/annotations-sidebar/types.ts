@@ -4,6 +4,7 @@ import type {
     UnifiedList,
 } from 'src/annotations/cache/types'
 import { SidebarTab } from './containers/types'
+import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 
 export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
     setSelectedList: (unifiedListId: UnifiedList['unifiedId']) => void
@@ -43,6 +44,7 @@ export type AnnotationsSidebarInPageEventEmitter = TypedEventEmitter<{
         callback,
     ) => void
     setActiveSidebarTab: (args: { activeTab: SidebarTab }) => void
+    showPowerUpModal: (args: { limitReachedNotif: PowerUpModalVersion }) => void
     // No longer used, as of the sidebar refactor
     // removeTemporaryHighlights: () => void
     // removeAnnotationHighlight: (args: { url: string }) => void
