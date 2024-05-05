@@ -160,11 +160,35 @@ export async function updateAICounter() {
     }
 }
 
+async function resetOnNewMonth(currentStatusStorage) {
+    const currentDate = new Date(Date.now())
+    const currentMonth = currentDate.getMonth()
+    const monthInStorage = currentStatusStorage[COUNTER_STORAGE_KEY].m
+    console.log('currentMonth', currentMonth)
+    console.log('monthInStorage', monthInStorage)
+
+    let updatedStatus = {
+        c: currentStatusStorage[COUNTER_STORAGE_KEY].c,
+        cQ: currentStatusStorage[COUNTER_STORAGE_KEY].cQ,
+        m: currentMonth,
+        pU: currentStatusStorage[COUNTER_STORAGE_KEY].pU,
+    }
+
+    if (monthInStorage !== currentMonth) {
+        updatedStatus.c = 0
+        updatedStatus.cQ = 0
+        await browser.storage.local.set({
+            [COUNTER_STORAGE_KEY]: updatedStatus,
+        })
+    }
+    return updatedStatus
+}
+
 export async function checkStatus(feature: PremiumPlans) {
-    const currentStatusStorage = await browser.storage.local.get(
+    let currentStatusStorage = await browser.storage.local.get(
         COUNTER_STORAGE_KEY,
     )
-
+    currentStatusStorage = await resetOnNewMonth(currentStatusStorage)
     const currentStatus =
         currentStatusStorage[COUNTER_STORAGE_KEY] != null
             ? currentStatusStorage[COUNTER_STORAGE_KEY]

@@ -128,6 +128,7 @@ import {
 } from 'src/util/subscriptions/constants'
 import type { RemoteSearchInterface } from 'src/search/background/types'
 import * as anchoring from '@worldbrain/memex-common/lib/annotations'
+import { PowerUpModalVersion } from 'src/authentication/upgrade-modal/types'
 
 // Content Scripts are separate bundles of javascript code that can be loaded
 // on demand by the browser, as needed. This main function manages the initialisation
@@ -289,15 +290,14 @@ export async function main(
     })
 
     // add listener for when a person is over the pricing limit for saved pages
+    const currentTabURL = ((await runInBackground<
+        InPageUIInterface<'caller'>
+    >().getCurrentTabURL()) as unknown) as string
 
     const counterStorageListener = async (
         changes: Record<string, Storage.StorageChange>,
     ) => {
         const COUNTER_STORAGE_KEY = '@status'
-
-        const currentTabURL = ((await runInBackground<
-            InPageUIInterface<'caller'>
-        >().getCurrentTabURL()) as unknown) as string
 
         if (changes[COUNTER_STORAGE_KEY]?.newValue != null) {
             const oldValues = changes[COUNTER_STORAGE_KEY]?.oldValue
@@ -546,6 +546,21 @@ export async function main(
     })
 
     const sidebarEvents = new EventEmitter() as AnnotationsSidebarInPageEventEmitter
+
+    sidebarEvents.on('showPowerUpModal', async ({ limitReachedNotif }) => {
+        if (currentTabURL?.includes(window.location.href)) {
+            console.log('limit reached, showing modal', limitReachedNotif)
+            inPageUI.loadOnDemandInPageUI({
+                component: 'upgrade-modal',
+                options: {
+                    powerUpModalProps: {
+                        limitReachedNotif: limitReachedNotif,
+                        authBG: authBG,
+                    },
+                },
+            })
+        }
+    })
 
     const isSidebarEnabled =
         (await sidebarUtils.getSidebarState()) &&
