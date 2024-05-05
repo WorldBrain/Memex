@@ -3622,7 +3622,7 @@ export class SidebarContainerLogic extends UILogic<
                 try {
                     executed = this.options.events.emit(
                         'addPageUrlToEditor',
-                        window.location.href,
+                        event.url ?? window.location.href,
                         prompt,
                         event.instaExecutePrompt,
                         (success) => {

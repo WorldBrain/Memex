@@ -188,13 +188,17 @@ export class AnnotationsSidebarContainer<
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'summary',
             })
-            await this.processEvent('askAIviaInPageInteractions', null)
+            await this.processEvent('askAIviaInPageInteractions', {
+                url: newURL,
+            })
         }
         if (newURL === previousURL) {
             await this.processEvent('setActiveSidebarTab', {
                 tab: 'summary',
             })
-            await this.processEvent('askAIviaInPageInteractions', null)
+            await this.processEvent('askAIviaInPageInteractions', {
+                url: newURL,
+            })
         }
     }
 
