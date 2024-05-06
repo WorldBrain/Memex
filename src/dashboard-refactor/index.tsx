@@ -905,7 +905,7 @@ export class DashboardContainer extends StatefulUIElement<
                         isShown: !searchResults.isSortMenuShown,
                     })
                 }
-                searchResults={searchResults.pageData}
+                searchResults={searchResults.pageData} // TODO: Why is this being passed down multiple times?
                 searchFilters={searchFilters}
                 searchQuery={searchFilters.searchQuery}
                 isDisplayed={searchFilters.searchFiltersOpen}

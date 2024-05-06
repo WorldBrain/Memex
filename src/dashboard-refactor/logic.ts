@@ -1916,19 +1916,17 @@ export class DashboardLogic extends UILogic<State, Events> {
     }
 
     confirmPageDelete: EventHandler<'confirmPageDelete'> = async ({
-        previousState: {
-            searchResults: { pageData, results },
-            modals,
-        },
+        previousState: { searchResults, modals },
     }) => {
         if (!modals.deletingPageArgs) {
             throw new Error('No page ID is set for deletion')
         }
 
-        const { pageResultId: pageId, day } = modals.deletingPageArgs
+        const { pageResultId, day } = modals.deletingPageArgs
 
-        const pageLists = pageData.byId[pageId].lists
-        const isPageInInbox = pageLists.some(
+        const pageResult = searchResults.results[-1].pages.byId[pageResultId]
+        const pageData = searchResults.pageData.byId[pageResult.pageId]
+        const isPageInInbox = pageData.lists.some(
             (listId) =>
                 this.options.annotationsCache.lists.byId[listId].localId ===
                 SPECIAL_LIST_IDS.INBOX,
@@ -1949,31 +1947,39 @@ export class DashboardLogic extends UILogic<State, Events> {
             async () => {
                 const resultsMutation: UIMutation<State['searchResults']> = {
                     pageData: {
-                        byId: { $unset: [pageId] },
+                        byId: { $unset: [pageResult.pageId] },
                         allIds: {
-                            $set: pageData.allIds.filter((id) => id !== pageId),
+                            $set: searchResults.pageData.allIds.filter(
+                                (id) => id !== pageResult.pageId,
+                            ),
                         },
                     },
                 }
+
+                const pageResultIds =
+                    searchResults.pageIdToResultIds[pageResult.pageId]
 
                 if (day === PAGE_SEARCH_DUMMY_DAY) {
                     resultsMutation.results = {
                         [day]: {
                             pages: {
-                                byId: { $unset: [pageId] },
+                                byId: { $unset: pageResultIds },
                                 allIds: {
-                                    $set: results[day].pages.allIds.filter(
-                                        (id) => id !== pageId,
+                                    $set: searchResults.results[
+                                        day
+                                    ].pages.allIds.filter(
+                                        (id) => !pageResultIds.includes(id),
                                     ),
                                 },
                             },
                         },
                     }
-                } else {
-                    resultsMutation.results = removeAllResultOccurrencesOfPage(
-                        results,
-                        pageId,
-                    )
+                    // TODO: Add support for other pages if we add them back in
+                    // } else {
+                    //     resultsMutation.results = removeAllResultOccurrencesOfPage(
+                    //         results,
+                    //         pageId,
+                    //     )
                 }
 
                 this.emitMutation({
@@ -1982,7 +1988,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                         deletingPageArgs: { $set: undefined },
                     },
                 })
-                await this.options.searchBG.delPages([pageId])
+                await this.options.searchBG.delPages([pageResult.pageId])
             },
         )
     }
@@ -2930,8 +2936,8 @@ export class DashboardLogic extends UILogic<State, Events> {
             throw new Error('No note ID is set for deletion')
         }
 
-        const { noteId, pageResultId: pageId, day } = modals.deletingNoteArgs
-        const pageResult = searchResults.results[day].pages.byId[pageId]
+        const { noteId, pageResultId, day } = modals.deletingNoteArgs
+        const pageResult = searchResults.results[day].pages.byId[pageResultId]
         const pageResultNoteIds = pageResult.noteIds[
             pageResult.notesType
         ].filter((id) => id !== noteId)
@@ -2956,7 +2962,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             [day]: {
                                 pages: {
                                     byId: {
-                                        [pageId]: {
+                                        [pageResultId]: {
                                             noteIds: {
                                                 [pageResult.notesType]: {
                                                     $set: pageResultNoteIds,
