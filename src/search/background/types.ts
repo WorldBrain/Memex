@@ -137,12 +137,12 @@ export type UnifiedTermsSearchParams = UnifiedSearchParams &
  * (which gets returned from blank searches) and supply that as the new upper time bound
  * for subsequent blank search pages.
  */
-export type UnifiedBlankSearchParams = UnifiedSearchParams & {
-    untilWhen: number
-    daysToSearch: number
-    /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
-    lowestTimeBound: number
-}
+export type UnifiedBlankSearchParams = UnifiedSearchParams &
+    Pick<UnifiedSearchPaginationParams, 'limit'> & {
+        untilWhen: number
+        /** The time of the oldest visit/bookmark/annotation to determine results exhausted or not. */
+        lowestTimeBound: number
+    }
 
 export type UnifiedSearchResult = {
     docs: AnnotPage[]

@@ -96,10 +96,10 @@ const blankSearch = async (
         filterByDomains: [],
         filterByListIds: [],
         lowestTimeBound: lowestTimeBound ?? 0,
-        daysToSearch: 1,
         query: '',
         untilWhen: params.untilWhen ?? highestTimeBound,
         ...params,
+        limit: 10,
     })
 }
 
@@ -191,7 +191,6 @@ describe('Unified search tests', () => {
             const resultA = await blankSearch(backgroundModules, {
                 fromWhen: 0,
                 untilWhen: now,
-                daysToSearch: 1,
                 lowestTimeBound,
             })
             expect(resultA.resultsExhausted).toBe(true)
@@ -341,31 +340,31 @@ describe('Unified search tests', () => {
             const { backgroundModules } = await setupTest()
             const resultA = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-25T20:00').valueOf(), // This is calculated based on the test data times
-                daysToSearch: 1,
+                // daysToSearch: 1,
             })
             const resultB = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-24T20:00').valueOf(),
-                daysToSearch: 1,
+                // daysToSearch: 1,
             })
             const resultC = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-23T20:00').valueOf(),
-                daysToSearch: 1,
+                // daysToSearch: 1,
             })
             const resultD = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-22T20:00').valueOf(),
-                daysToSearch: 1,
+                // daysToSearch: 1,
             })
             const resultE = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-21T20:00').valueOf(),
-                daysToSearch: 1,
+                // daysToSearch: 1,
             })
             const resultF = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-20T20:00').valueOf(),
-                daysToSearch: 1,
+                // daysToSearch: 1,
             })
             const resultG = await blankSearch(backgroundModules, {
                 untilWhen: new Date('2024-03-19T20:00').valueOf(),
-                daysToSearch: 30, // We're really skipping ahead here as we know there's no data until about a month back
+                // daysToSearch: 30, // We're really skipping ahead here as we know there's no data until about a month back
             })
             expect(resultA.resultsExhausted).toBe(false)
             expect(resultB.resultsExhausted).toBe(false)

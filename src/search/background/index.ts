@@ -304,30 +304,37 @@ export default class SearchBackground {
         params: UnifiedBlankSearchParams,
     ): Promise<UnifiedBlankSearchResult> {
         const upperBound = params.untilWhen
-        const lowerBound =
-            params.fromWhen ??
-            Math.max(upperBound - params.daysToSearch * dayMs, 0)
+        // const lowerBound =
+        //     params.fromWhen ??
+        //     Math.max(upperBound - params.daysToSearch * dayMs, 0)
+
         // const timeBoundsQuery = { $gt: lowerBound, $lt: upperBound }
 
         const resultDataByPage: UnifiedBlankSearchResult['resultDataByPage'] = new Map()
         // TODO: these Dexie queries are here because the storex query didn't result in an indexed query happening
         //  Need to fix the bug in storex-backend-dexie when it comes time to port this and revert them to storex queries
         const dexie = this.options.storageManager.backend['dexie'] as Dexie
-        const [annotations, visits, bookmarks] = await Promise.all([
+        let [annotations, visits, bookmarks] = await Promise.all([
             dexie
                 .table<Annotation>('annotations')
                 .where('lastEdited')
-                .between(new Date(lowerBound), new Date(upperBound), true, true)
+                .below(new Date(upperBound))
+                .reverse()
+                .limit(params.limit)
                 .toArray(),
             dexie
                 .table<Visit>('visits')
-                .where('time')
-                .between(lowerBound, upperBound, true, true)
+                .where('[time+url]')
+                .below([upperBound])
+                .reverse()
+                .limit(params.limit)
                 .toArray(),
             dexie
                 .table<Bookmark>('bookmarks')
                 .where('time')
-                .between(lowerBound, upperBound, true, true)
+                .below(upperBound)
+                .reverse()
+                .limit(params.limit)
                 .toArray(),
         ])
         // const [annotations, visits, bookmarks] = await Promise.all([
@@ -341,6 +348,22 @@ export default class SearchBackground {
         //         .collection('bookmarks')
         //         .findObjects<Bookmark>({ time: timeBoundsQuery }),
         // ])
+
+        // Work with only the latest N results for this results page, discarding rest
+        const inScopeResults = [...annotations, ...visits, ...bookmarks]
+            // TODO: pick one of the latest visit of bookmark, else each bookmark's also going to show up in results via the visit
+            .sort((a, b) => {
+                const timeA =
+                    'lastEdited' in a ? a.lastEdited.valueOf() : a.time
+                const timeB =
+                    'lastEdited' in b ? b.lastEdited.valueOf() : b.time
+                return timeB - timeA
+            })
+            .slice(0, params.limit)
+        const onlyInScope = (doc: any) => inScopeResults.includes(doc)
+        annotations = annotations.filter(onlyInScope)
+        bookmarks = bookmarks.filter(onlyInScope)
+        visits = visits.filter(onlyInScope)
 
         // Add in all the annotations to the results
         const annotsByPage = groupBy(annotations, (a) => a.pageUrl)
@@ -368,6 +391,13 @@ export default class SearchBackground {
         }
 
         await this.filterUnifiedSearchResultsByFilters(resultDataByPage, params)
+
+        const oldestResult = inScopeResults[inScopeResults.length - 1]
+        const lowerBound =
+            'lastEdited' in oldestResult
+                ? oldestResult.lastEdited.valueOf()
+                : oldestResult.time
+
         return {
             resultDataByPage,
             resultsExhausted: lowerBound <= params.lowestTimeBound,
@@ -425,9 +455,11 @@ export default class SearchBackground {
 
     unifiedSearch: RemoteSearchInterface['unifiedSearch'] = async (params) => {
         let result: UnifiedBlankSearchResult
+        const lowestTimeBound = await this.calcSearchTimeBoundEdge('bottom')
+        const isTermsSearch = params.query.trim().length
         // There's 2 separate search implementations depending on whether doing a terms search or not
-        if (!params.query.trim().length) {
-            const lowestTimeBound = await this.calcSearchTimeBoundEdge('bottom')
+        if (!isTermsSearch) {
+            // TODO: Only do this on the first search page
             const highestTimeBound = await this.calcSearchTimeBoundEdge('top')
             // Skip over days where there's no results, until we get results
             do {
@@ -436,8 +468,7 @@ export default class SearchBackground {
                     untilWhen:
                         result?.oldestResultTimestamp ?? // allows to paginate back from prev result
                         params.untilWhen ??
-                        highestTimeBound, // default to latest timestamp in DB, to start off search
-                    daysToSearch: 2,
+                        highestTimeBound + 1, // default to latest timestamp in DB, to start off search
                     lowestTimeBound,
                 })
             } while (!result.resultsExhausted && !result.resultDataByPage.size)
@@ -493,10 +524,16 @@ export default class SearchBackground {
             })
             .filter(Boolean)
 
+        const oldestResult =
+            dataEnrichedAnnotPages[dataEnrichedAnnotPages.length - 1]
+        const lowerBound = oldestResult.displayTime
+
         return {
             docs: dataEnrichedAnnotPages,
-            resultsExhausted: result.resultsExhausted,
-            oldestResultTimestamp: result.oldestResultTimestamp,
+            resultsExhausted: isTermsSearch
+                ? result.resultDataByPage.size < params.limit
+                : lowerBound <= lowestTimeBound,
+            oldestResultTimestamp: lowerBound,
         }
     }
 
