@@ -1272,6 +1272,29 @@ export class DashboardLogic extends UILogic<State, Events> {
                         return
                     }
 
+                    // Merge page ID -> result IDs indices, if we're paginating
+                    let nextPageIdToResultIds: State['searchResults']['pageIdToResultIds'] = {}
+                    if (event?.paginate) {
+                        const allPageIds = new Set([
+                            ...Object.keys(pageIdToResultIds),
+                            ...Object.keys(
+                                previousState.searchResults.pageIdToResultIds,
+                            ),
+                        ])
+                        for (const pageId of allPageIds) {
+                            const next = pageIdToResultIds[pageId] ?? []
+                            const prev =
+                                previousState.searchResults.pageIdToResultIds[
+                                    pageId
+                                ] ?? []
+                            nextPageIdToResultIds[pageId] = [
+                                ...new Set([...prev, ...next]),
+                            ]
+                        }
+                    } else {
+                        nextPageIdToResultIds = pageIdToResultIds
+                    }
+
                     this.emitMutation({
                         searchFilters: mutation.searchFilters,
                         searchResults: {
@@ -1284,6 +1307,7 @@ export class DashboardLogic extends UILogic<State, Events> {
                             searchState: { $set: 'success' },
                             searchPaginationState: { $set: 'success' },
                             noResultsType: { $set: noResultsType },
+                            pageIdToResultIds: { $set: nextPageIdToResultIds },
                             ...(event?.paginate
                                 ? {
                                       results: {
@@ -1307,17 +1331,11 @@ export class DashboardLogic extends UILogic<State, Events> {
                                                   noteData,
                                               ),
                                       },
-                                      pageIdToResultIds: {
-                                          $merge: pageIdToResultIds,
-                                      },
                                   }
                                 : {
                                       results: { $set: results },
                                       pageData: { $set: pageData },
                                       noteData: { $set: noteData },
-                                      pageIdToResultIds: {
-                                          $set: pageIdToResultIds,
-                                      },
                                   }),
                         },
                     })
