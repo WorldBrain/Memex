@@ -485,32 +485,54 @@ export class SidebarContainerLogic extends UILogic<
         })
     }
 
-    bracketsAreBalanced = (buffer: string) => {
-        const stack = []
-        const linkRegex = /\[(.*?)\]\((.*?)\)/g // Regex to find markdown links
+    // const linkRegex = /\[(.*?)\]\((.*?)\)/g // Regex to find markdown links
 
-        let match
-        while ((match = linkRegex.exec(buffer)) !== null) {
-            buffer = buffer.replace(
-                match[0],
-                `<a href="${match[2]}">${match[1]}</a>`,
-            )
-        }
+    // let match
+    // while ((match = linkRegex.exec(buffer)) !== null) {
+    //     buffer = buffer.replace(
+    //         match[0],
+    //         `<a href="${match[2]}">${match[1]}</a>`,
+    //     )
+    // }
+    bracketsAreBalanced = (buffer: string) => {
+        let stack = []
 
         for (let char of buffer) {
-            if (char === '[' || char === '(') {
+            if (char === '[') {
+                stack.push(char)
+            } else if (stack.includes('[') && char !== ']') {
+                stack.push(char)
+            } else if (stack.includes('[') && char === ']') {
                 stack.push(char)
             } else if (
-                (char === ']' && stack.pop() !== '[') ||
-                (char === ')' && stack.pop() !== '(')
+                stack.includes('[') &&
+                stack.includes(']') &&
+                char === '('
             ) {
-                return false // Mismatched bracket
+                stack.push(char)
+            } else if (
+                stack.includes('[') &&
+                stack.includes(']') &&
+                stack.includes('(') &&
+                char !== ')'
+            ) {
+                stack.push(char)
+            } else if (
+                stack.includes('[') &&
+                stack.includes(']') &&
+                stack.includes('(') &&
+                char === ')'
+            ) {
+                stack = []
             }
         }
 
-        return stack.length === 0 // True if all brackets are closed
+        return (
+            stack.length === 0 ||
+            stack.length > 150 ||
+            stack.length === buffer.length
+        ) // True if all brackets are closed
     }
-
     isPageSummaryEmpty = true
     tokenBuffer: string
     tokenBufferEditor: string
@@ -3622,7 +3644,7 @@ export class SidebarContainerLogic extends UILogic<
                 try {
                     executed = this.options.events.emit(
                         'addPageUrlToEditor',
-                        window.location.href,
+                        event.url ?? window.location.href,
                         prompt,
                         event.instaExecutePrompt,
                         (success) => {

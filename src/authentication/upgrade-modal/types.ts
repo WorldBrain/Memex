@@ -36,6 +36,6 @@ export type PromptTemplatesEvent = UIEvent<{
     toggleBillingPeriod: 'monthly' | 'yearly'
 }>
 
-export type PowerUpModalVersion = 'Bookmarks' | 'AI'
+export type PowerUpModalVersion = 'Bookmarks' | 'AI' | 'AIownKey' | 'lifetime'
 
 export type PromptTemplatesSignal = UISignal<{ type: 'nothing-yet' }>
