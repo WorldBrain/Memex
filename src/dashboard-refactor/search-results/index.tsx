@@ -338,7 +338,8 @@ export default class SearchResultsContainer extends React.Component<
         pageResultId: string,
         zIndex: number,
     ) => (noteId: string) => {
-        const pageData = this.props.pageData.byId[pageResultId]
+        const pageResult = this.props.results[-1].pages.byId[pageResultId]
+        const pageData = this.props.pageData.byId[pageResult.pageId]
         const noteData = this.props.noteData.byId[noteId]
         const interactionProps = bindFunctionalProps<
             NoteInteractionAugdProps,
@@ -350,10 +351,9 @@ export default class SearchResultsContainer extends React.Component<
         const cachedListIds = noteData.isShared
             ? [
                   ...new Set([
-                      ...pageData?.lists?.filter(
+                      ...pageData.lists.filter(
                           (listId) =>
-                              this.props.listData.byId[listId]?.remoteId !=
-                              null,
+                              this.props.listData.byId[listId].remoteId != null,
                       ),
                       ...noteData.lists,
                   ]),
