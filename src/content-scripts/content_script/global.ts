@@ -938,9 +938,10 @@ export async function main(
                 instaExecutePrompt: instaExecutePrompt ?? false,
             })
         },
-        createYoutubeTimestamp: async () => {
+        createYoutubeTimestamp: async (commentText: string) => {
             await inPageUI.showSidebar({
                 action: 'youtube_timestamp',
+                commentText,
             })
         },
         createTimestampWithAISummary: async (
@@ -1359,8 +1360,7 @@ export async function main(
         askAI: annotationsFunctions.askAI(),
         getHighlightColorsSettings: getHighlightColorSettings,
         saveHighlightColorsSettings: saveHighlightColorSettings,
-        createYoutubeTimestamp: () =>
-            annotationsFunctions.createYoutubeTimestamp(),
+        createYoutubeTimestamp: annotationsFunctions.createYoutubeTimestamp,
     })
 
     // 9. Check for page activity status
