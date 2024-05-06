@@ -116,19 +116,33 @@ export default class SearchBackground {
     ): Promise<number> {
         const defaultTimestamp = edge === 'bottom' ? Date.now() : 0
 
-        // Real lower/upper bound for blank search would be the time of the oldest/latest bookmark or visit
-        const edgeTimestampDocs = (await Promise.all(
-            ['visits', 'bookmarks'].map((coll) =>
-                this.options.storageManager.collection(coll).findObject(
-                    {},
-                    {
-                        order: [['time', edge === 'bottom' ? 'asc' : 'desc']],
-                    },
-                ),
-            ),
-        )) as [Visit?, Bookmark?]
+        const storex = this.options.storageManager
 
-        const timestamps = edgeTimestampDocs.filter(Boolean).map((t) => t.time)
+        // Real lower/upper bound for blank search would be the time of the oldest/latest bookmark or visit
+        const edgeTimestampDocs = await Promise.all([
+            storex.collection('visits').findObject<Visit>(
+                {},
+                {
+                    order: [['time', edge === 'bottom' ? 'asc' : 'desc']],
+                },
+            ),
+            storex.collection('bookmarks').findObject<Bookmark>(
+                {},
+                {
+                    order: [['time', edge === 'bottom' ? 'asc' : 'desc']],
+                },
+            ),
+            storex.collection('annotations').findObject<Annotation>(
+                {},
+                {
+                    order: [['lastEdited', edge === 'bottom' ? 'asc' : 'desc']],
+                },
+            ),
+        ])
+
+        const timestamps = edgeTimestampDocs
+            .filter(Boolean)
+            .map((doc) => ('time' in doc ? doc.time : doc.lastEdited.valueOf()))
         const edgeTimestamp =
             edge === 'bottom'
                 ? Math.min(...timestamps)
@@ -303,17 +317,17 @@ export default class SearchBackground {
             dexie
                 .table<Annotation>('annotations')
                 .where('lastEdited')
-                .between(new Date(lowerBound), new Date(upperBound))
+                .between(new Date(lowerBound), new Date(upperBound), true, true)
                 .toArray(),
             dexie
                 .table<Visit>('visits')
                 .where('time')
-                .between(lowerBound, upperBound)
+                .between(lowerBound, upperBound, true, true)
                 .toArray(),
             dexie
                 .table<Bookmark>('bookmarks')
                 .where('time')
-                .between(lowerBound, upperBound)
+                .between(lowerBound, upperBound, true, true)
                 .toArray(),
         ])
         // const [annotations, visits, bookmarks] = await Promise.all([

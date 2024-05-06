@@ -205,6 +205,14 @@ describe('Unified search tests', () => {
                     },
                 ],
                 [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
+                    },
+                ],
+                [
                     DATA.PAGE_ID_8,
                     {
                         annotIds: [],
@@ -373,6 +381,14 @@ describe('Unified search tests', () => {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_11][0].time,
+                    },
+                ],
+                [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
                     },
                 ],
                 [
@@ -855,6 +871,27 @@ describe('Unified search tests', () => {
                         annotIds: [],
                         latestPageTimestamp:
                             DATA.VISITS[DATA.PAGE_ID_1][0].time,
+                    },
+                ],
+            ])
+        })
+        it('should return the right page when searching for chinese characters', async () => {
+            const { backgroundModules } = await setupTest()
+            const now = Date.now()
+
+            const resultA = await termsSearch(backgroundModules, {
+                query: '微软第三财季营收',
+                limit: 1000,
+                skip: 0,
+            })
+            expect(resultA.resultsExhausted).toBe(true)
+            expect(formatResults(resultA, { skipSorting: true })).toEqual([
+                [
+                    DATA.PAGE_ID_13,
+                    {
+                        annotIds: [],
+                        latestPageTimestamp:
+                            DATA.VISITS[DATA.PAGE_ID_13][0].time,
                     },
                 ],
             ])

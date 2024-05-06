@@ -160,36 +160,47 @@ export async function updateAICounter() {
     }
 }
 
+async function resetOnNewMonth(currentStatusStorage) {
+    const currentDate = new Date(Date.now())
+    const currentMonth = currentDate.getMonth()
+    const monthInStorage = currentStatusStorage[COUNTER_STORAGE_KEY].m
+
+    let updatedStatus = {
+        c: currentStatusStorage[COUNTER_STORAGE_KEY].c,
+        cQ: currentStatusStorage[COUNTER_STORAGE_KEY].cQ,
+        m: currentMonth,
+        pU: currentStatusStorage[COUNTER_STORAGE_KEY].pU,
+    }
+
+    if (monthInStorage !== currentMonth) {
+        updatedStatus.c = 0
+        updatedStatus.cQ = 0
+        await browser.storage.local.set({
+            [COUNTER_STORAGE_KEY]: updatedStatus,
+        })
+    }
+    return updatedStatus
+}
+
 export async function checkStatus(feature: PremiumPlans) {
-    const currentStatusStorage = await browser.storage.local.get(
+    let currentStatusStorage = await browser.storage.local.get(
         COUNTER_STORAGE_KEY,
     )
-
+    currentStatusStorage = await resetOnNewMonth(currentStatusStorage)
     const currentStatus =
         currentStatusStorage[COUNTER_STORAGE_KEY] != null
             ? currentStatusStorage[COUNTER_STORAGE_KEY]
             : DEFAULT_COUNTER_STORAGE_KEY
-    const currentDate = new Date(Date.now())
-    const currentMonth = currentDate.getMonth()
 
     if ((await enforceTrialPeriod30Days()) === true) {
         return true
     }
 
-    // if (currentStatus.m !== currentMonth) {
-    //     await browser.storage.local.set({
-    //         [COUNTER_STORAGE_KEY]: {
-    //             c: currentStatus.c,
-    //             cQ: currentStatus.cQ,
-    //             m: currentMonth,
-    //         },
-    //     })
-    // }
-
     if (feature === 'bookmarksPowerUp') {
         const hasBookmarkPowerUp =
             (currentStatus.pU?.Unlimited ||
-                currentStatus.pU?.bookmarksPowerUp) ??
+                currentStatus.pU?.bookmarksPowerUp ||
+                currentStatus.pU?.lifetime) ??
             false
 
         if (hasBookmarkPowerUp) {
@@ -199,10 +210,12 @@ export async function checkStatus(feature: PremiumPlans) {
             if (currentCounter < 25) {
                 return true
             }
+            return false
         }
     }
     if (feature === 'AIpowerup') {
-        const hasAIPowerUp = currentStatus.pU?.AIpowerup ?? false
+        const hasAIPowerUp =
+            (currentStatus.pU?.AIpowerup || currentStatus.pU?.lifetime) ?? false
 
         if (hasAIPowerUp) {
             return true
@@ -211,11 +224,14 @@ export async function checkStatus(feature: PremiumPlans) {
             if (currentCounter < 25) {
                 return true
             }
+            return false
         }
     }
     if (feature === 'AIpowerupOwnKey') {
         const hasAIPowerUp =
-            (currentStatus.pU.AIpowerupOwnKey || currentStatus.pU.AIpowerup) ??
+            (currentStatus.pU.AIpowerupOwnKey ||
+                currentStatus.pU.AIpowerup ||
+                currentStatus.pU?.lifetime) ??
             false
 
         if (hasAIPowerUp) {
@@ -225,9 +241,10 @@ export async function checkStatus(feature: PremiumPlans) {
             if (currentCounter < 25) {
                 return true
             }
+            return false
         }
     }
-    return false
+    return true
 }
 
 export async function pageActionAllowed(

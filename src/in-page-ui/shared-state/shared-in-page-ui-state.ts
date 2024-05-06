@@ -151,11 +151,10 @@ export class SharedInPageUIState implements SharedInPageUIInterface {
             return
         }
 
+        await this._setState('sidebar', true)
         if (!this.componentsShown.ribbon) {
             await this.showRibbon()
         }
-
-        await this._setState('sidebar', true)
         maybeEmitAction()
     }
 
