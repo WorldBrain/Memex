@@ -335,25 +335,25 @@ export default class SearchResultsContainer extends React.Component<
 
     private renderNoteResult = (
         day: number,
-        pageId: string,
+        pageResultId: string,
         zIndex: number,
     ) => (noteId: string) => {
-        const pageData = this.props.pageData.byId[pageId]
+        const pageResult = this.props.results[-1].pages.byId[pageResultId]
+        const pageData = this.props.pageData.byId[pageResult.pageId]
         const noteData = this.props.noteData.byId[noteId]
         const interactionProps = bindFunctionalProps<
             NoteInteractionAugdProps,
             NoteInteractionProps
-        >(this.props.noteInteractionProps, noteId, day, pageId)
+        >(this.props.noteInteractionProps, noteId, day, pageResultId)
 
         const dummyEvent = {} as any
 
         const cachedListIds = noteData.isShared
             ? [
                   ...new Set([
-                      ...pageData?.lists?.filter(
+                      ...pageData.lists.filter(
                           (listId) =>
-                              this.props.listData.byId[listId]?.remoteId !=
-                              null,
+                              this.props.listData.byId[listId].remoteId != null,
                       ),
                       ...noteData.lists,
                   ]),
@@ -473,7 +473,7 @@ export default class SearchResultsContainer extends React.Component<
                                 },
                             })
                         }
-                        normalizedPageUrlToFilterPageLinksBy={pageId}
+                        normalizedPageUrlToFilterPageLinksBy={pageResultId}
                         analyticsBG={this.props.spacePickerBGProps.analyticsBG}
                     />
                 )}
@@ -495,7 +495,7 @@ export default class SearchResultsContainer extends React.Component<
                         postShareHook={interactionProps.updateShareInfo}
                         spacePickerProps={{
                             ...this.props.spacePickerBGProps,
-                            normalizedPageUrlToFilterPageLinksBy: pageId,
+                            normalizedPageUrlToFilterPageLinksBy: pageResultId,
                             annotationsCache: this.props.annotationsCache,
                             initialSelectedListIds: () => localListIds,
                             selectEntry: (listId, options) =>
@@ -576,6 +576,7 @@ export default class SearchResultsContainer extends React.Component<
             notesType,
             isShared,
             noteIds,
+            pageResultId,
         }: PageResultData & PageData,
         day: number,
         { onShareBtnClick }: PageInteractionProps,
@@ -589,7 +590,7 @@ export default class SearchResultsContainer extends React.Component<
         const boundAnnotCreateProps = bindFunctionalProps<
             typeof newNoteInteractionProps,
             NewNoteInteractionProps
-        >(newNoteInteractionProps, day, normalizedUrl)
+        >(newNoteInteractionProps, day, pageResultId)
         const lists = this.getLocalListIdsForCacheIds(newNoteForm.lists)
 
         return (
@@ -673,7 +674,7 @@ export default class SearchResultsContainer extends React.Component<
 
                                 return this.renderNoteResult(
                                     day,
-                                    normalizedUrl,
+                                    pageResultId,
                                     zIndex,
                                 )(noteId)
                             })}
@@ -708,25 +709,26 @@ export default class SearchResultsContainer extends React.Component<
     }
 
     private renderPageResult = (
-        pageId: string,
+        pageResultId: string,
         day: number,
         index: number,
         order: number,
     ) => {
+        const pageResult = this.props.results[day].pages.byId[pageResultId]
         const page = {
-            ...this.props.pageData.byId[pageId],
-            ...this.props.results[day].pages.byId[pageId],
+            ...this.props.pageData.byId[pageResult.pageId],
+            ...pageResult,
         }
 
         const interactionProps = bindFunctionalProps<
             PageInteractionAugdProps,
             PageInteractionProps
-        >(this.props.pageInteractionProps, day, pageId)
+        >(this.props.pageInteractionProps, day, pageResultId)
 
         const pickerProps = bindFunctionalProps<
             PagePickerAugdProps,
             PagePickerProps
-        >(this.props.pagePickerProps, pageId)
+        >(this.props.pagePickerProps, pageResultId)
 
         return (
             <ResultBox
@@ -738,7 +740,7 @@ export default class SearchResultsContainer extends React.Component<
                         : index
                 }
                 bottom="10px"
-                key={day.toString() + pageId}
+                key={day.toString() + pageResultId}
                 order={order}
             >
                 <PageResult
@@ -762,7 +764,7 @@ export default class SearchResultsContainer extends React.Component<
                         interactionProps.onMatchingTextToggleClick
                     }
                     selectItem={this.props.onBulkSelect}
-                    shiftSelectItem={() => this.shiftSelectItems(page.id)}
+                    shiftSelectItem={() => this.shiftSelectItems(page.pageId)}
                     isBulkSelected={this.props.selectedItems?.includes(
                         page.normalizedUrl,
                     )}
@@ -773,12 +775,7 @@ export default class SearchResultsContainer extends React.Component<
                     {...pickerProps}
                     {...page}
                     lists={this.getLocalListIdsForCacheIds(page.lists)}
-                    onTagPickerBtnClick={
-                        this.props.shouldShowTagsUIs
-                            ? interactionProps.onTagPickerBtnClick
-                            : undefined
-                    }
-                    hasNotes={page.noteIds['user'].length > 0}
+                    hasNotes={page.totalAnnotationCount > 0}
                     filterbyList={this.props.filterByList}
                     searchType={this.props.searchType}
                     isInFocus={page.isInFocus}
