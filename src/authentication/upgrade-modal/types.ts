@@ -8,14 +8,14 @@ import { AuthRemoteFunctionsInterface } from '../background/types'
 
 export interface PromptTemplatesDependencies {
     powerUpType: PowerUpModalVersion
-    limitReachedNotif: PowerUpModalVersion
+    limitReachedNotif?: PowerUpModalVersion
     createCheckOutLink: (
         billingPeriod: 'monthly' | 'yearly',
         selectedPremiumPlans: PremiumPlans[],
         doNotOpen: boolean,
     ) => Promise<'error' | 'success'>
     componentVariant: 'Modal' | 'PricingList' | 'AccountPage'
-    getRootElement: () => HTMLElement
+    getRootElement?: () => HTMLElement
     closeComponent?: () => void
     authBG: AuthRemoteFunctionsInterface
 }
