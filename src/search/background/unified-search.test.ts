@@ -27,6 +27,15 @@ async function insertTestData(storageManager: Storex) {
         await storageManager
             .collection('pages')
             .createObject(omit(doc, 'listIds'))
+
+        const [latestTimestamp] = [
+            ...(DATA.VISITS[doc.url] ?? []),
+            ...(DATA.BOOKMARKS[doc.url] ?? []),
+        ]
+            .filter(Boolean)
+            .map((a) => a.time as number)
+            .sort((a, b) => b - a)
+
         if ('listIds' in doc) {
             for (const listId of doc.listIds) {
                 await storageManager
@@ -35,7 +44,7 @@ async function insertTestData(storageManager: Storex) {
                         listId,
                         pageUrl: doc.url,
                         fullUrl: doc.fullUrl,
-                        createdAt: new Date(),
+                        createdAt: new Date(latestTimestamp),
                     })
             }
         }
@@ -72,7 +81,7 @@ async function insertTestData(storageManager: Storex) {
                     .createObject({
                         listId,
                         url: doc.url,
-                        createdAt: new Date(),
+                        createdAt: new Date(doc.createdWhen),
                     })
             }
         }
